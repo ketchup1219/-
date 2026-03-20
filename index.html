@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>草抜きサバイバル - Time Limit -</title>
+    <style>
+        /* 基本設定 */
+        body { 
+            text-align: center; font-family: sans-serif; 
+            background-color: #1a1a1a; color: white; 
+            margin: 0; overflow: hidden; 
+            touch-action: none; 
+            user-select: none;
+        }
+        .title-banner { background-color: #2d5a27; padding: 10px 0; border-bottom: 3px solid #ffd700; }
+        .header-info { 
+            background: #333; padding: 10px; 
+            display: flex; justify-content: space-around; 
+            font-size: 18px; font-weight: bold; 
+        }
+        
+        /* タイマーの色変化 */
+        #timer { color: #4ade80; transition: color 0.3s; }
+        .low-time { color: #ff5252 !important; animation: blink 0.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* ゲーム画面 */
+        #game-field { 
+            position: relative; width: 95vw; height: 60vh; 
+            background-color: #3e5c36; margin: 10px auto; 
+            border: 4px solid #2d5a27; border-radius: 15px;
+            overflow: hidden;
+            background-image: radial-gradient(#4a6741 10%, transparent 10%);
+            background-size: 20px 20px;
+        }
+
+        /* 🌿 草のデザイン */
+        .grass { 
+            position: absolute; width: 60px; height: 60px; 
+            background: linear-gradient(135deg, #7cfc00 0%, #2d5a27 100%);
+            clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%);
+            z-index: 2; pointer-events: auto;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            animation: sway 3s ease-in-out infinite alternate;
+        }
+        @keyframes sway {
+            from { transform: rotate(-5deg); }
+            to { transform: rotate(5deg); }
+        }
+
+        /* 🥚 たまご（爆弾） */
+        .egg { 
+            position: absolute; width: 45px; height: 55px; 
+            background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0 40%, #bbb);
+            border-radius: 50% / 65% 65% 35% 35%; 
+            z-index: 3; box-shadow: 2px 4px 6px rgba(0,0,0,0.4);
+            pointer-events: auto;
+        }
+        .egg.mimic {
+            background: radial-gradient(circle at 30% 30%, #a4c639, #6a8c24 50%, #2d5a27);
+        }
+
+        /* スコア表示 */
+        #scoreboard {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 80%;
+            background: rgba(0, 0, 0, 0.95); border: 4px solid #ffd700;
+            border-radius: 20px; padding: 20px; z-index: 100;
+        }
+        .res-title { color: #ff5252; font-size: 28px; font-weight: bold; }
+        .btn-retry { 
+            background: #ffd700; color: #1a1a1a; border: none; padding: 15px 30px; 
+            font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 20px;
+        }
+
+        /* 爆発 */
+        .explosion {
+            position: absolute; width: 100px; height: 100px;
+            background: radial-gradient(circle, #ff0, #f00, transparent);
+            border-radius: 50%; animation: explode-ani 0.5s ease-out forwards; z-index: 10;
+        }
+        @keyframes explode-ani { 0% { transform: scale(0.1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
+        
+        .shake { animation: shake-ani 0.2s 3; }
+        @keyframes shake-ani { 0% { transform: translate(0,0); } 50% { transform: translate(5px, 5px); } 100% { transform: translate(0,0); } }
+    </style>
+</head>
+<body>
+
+    <div class="title-banner">
+        <h1 style="margin:0; font-size: 22px;">草抜きサバイバル</h1>
+    </div>
+
+    <div class="header-info">
+        <div>スコア: <span id="score">0</span></div>
+        <div>タイム: <span id="timer">30.0</span>s</div>
+        <div>レベル: <span id="level">1</span></div>
+    </div>
+
+    <div id="game-field"></div>
+
+    <div id="scoreboard">
+        <div class="res-title" id="game-over-msg">GAME OVER</div>
+        <p>スコア: <span id="final-score">0</span></p>
+        <button class="btn-retry" id="retry-btn">もう一度</button>
+    </div>
+
+    <script>
+        const field = document.getElementById('game-field');
+        const scoreDisp = document.getElementById('score');
+        const levelDisp = document.getElementById('level');
+        const timerDisp = document.getElementById('timer');
+        const scoreboard = document.getElementById('scoreboard');
+        const retryBtn = document.getElementById('retry-btn');
+        const gameOverMsg = document.getElementById('game-over-msg');
+
+        let score = 0;
+        let level = 1;
+        let timeLeft = 30.0;
+        let isGameOver = false;
+        let gameTimer = null;
+
+        // タイマー開始関数
+        function startTimer() {
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                if (isGameOver) return;
+                
+                timeLeft -= 0.1;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    endGame("TIME UP!");
+                }
+                
+                // UI更新
+                timerDisp.innerText = timeLeft.toFixed(1);
+                if (timeLeft <= 5) {
+                    timerDisp.classList.add('low-time');
+                } else {
+                    timerDisp.classList.remove('low-time');
+                }
+            }, 100);
+        }
+
+        function spawn() {
+            if (isGameOver) return;
+            field.innerHTML = '';
+            let grassCount = 8 + (level * 2);
+            let eggCount = Math.min(level, 10);
+
+            for (let i = 0; i < grassCount + eggCount; i++) {
+                const isEgg = i >= grassCount;
+                createItem(isEgg ? 'egg' : 'grass');
+            }
+        }
+
+        function createItem(type) {
+            const item = document.createElement('div');
+            item.className = type;
+            
+            const x = Math.random() * (field.clientWidth - 60);
+            const y = Math.random() * (field.clientHeight - 60);
+            item.style.left = `${x}px`;
+            item.style.top = `${y}px`;
+
+            if (type === 'grass') {
+                const rot = Math.random() * 360;
+                item.style.transform = `rotate(${rot}deg)`;
+            } else if (level >= 3) {
+                item.classList.add('mimic');
+            }
+
+            item.onpointerdown = (e) => {
+                e.preventDefault();
+                if (isGameOver) return;
+
+                if (type === 'grass') {
+                    score += 10;
+                    scoreDisp.innerText = score;
+                    item.remove();
+                    if (field.getElementsByClassName('grass').length === 0) {
+                        level++;
+                        levelDisp.innerText = level;
+                        // レベルアップで5秒回復（最大40秒まで）
+                        timeLeft = Math.min(timeLeft + 5, 40);
+                        spawn();
+                    }
+                } else {
+                    explode(x, y);
+                }
+            };
+
+            field.appendChild(item);
+        }
+
+        function explode(x, y) {
+            const exp = document.createElement('div');
+            exp.className = 'explosion';
+            exp.style.left = x + 'px';
+            exp.style.top = y + 'px';
+            field.appendChild(exp);
+            document.body.classList.add('shake');
+            endGame("BOOM!");
+        }
+
+        function endGame(msg) {
+            isGameOver = true;
+            clearInterval(gameTimer);
+            gameOverMsg.innerText = msg;
+            
+            setTimeout(() => {
+                document.getElementById('final-score').innerText = score;
+                scoreboard.style.display = 'block';
+            }, 500);
+        }
+
+        retryBtn.onclick = () => {
+            score = 0;
+            level = 1;
+            timeLeft = 30.0;
+            isGameOver = false;
+            scoreDisp.innerText = "0";
+            levelDisp.innerText = "1";
+            timerDisp.innerText = "30.0";
+            scoreboard.style.display = 'none';
+            document.body.classList.remove('shake');
+            timerDisp.classList.remove('low-time');
+            spawn();
+            startTimer();
+        };
+
+        // 初期起動
+        spawn();
+        startTimer();
+    </script>
+</body>
+</html>
