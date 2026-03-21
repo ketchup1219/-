@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - huh? Edition -</title>
+    <title>草抜きサバイバル - SLOT Edition -</title>
     <style>
-        /* 既存のスタイルを継承 */
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #1a1a1a; color: white; 
@@ -19,46 +18,70 @@
             position: relative; width: 95vw; height: 50vh; 
             background-color: #3e5c36; margin: 10px auto; 
             border: 4px solid #2d5a27; border-radius: 15px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- huh? 文字のスタイル --- */
+        /* --- スロット & スタート画面 --- */
+        #start-overlay {
+            position: absolute; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 300;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        #slot-machine {
+            display: flex; gap: 15px; justify-content: center; 
+            margin: 20px 0; background: #444; padding: 20px; 
+            border: 6px solid #ffd700; border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        .reel {
+            width: 70px; height: 90px; background: #fff; color: #1a1a1a; 
+            font-size: 50px; line-height: 90px; border-radius: 10px; 
+            overflow: hidden; border: 3px solid #222;
+            transition: background-color 0.3s;
+        }
+
+        .btn-start {
+            padding: 20px 40px; font-size: 24px; font-weight: bold;
+            background: #ffd700; color: #1a1a1a; border: none;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #b8860b;
+        }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8860b; }
+        .btn-start:disabled { background: #555; box-shadow: 0 6px 0 #333; color: #888; }
+
+        #gacha-result {
+            margin-top: 15px; font-size: 20px; color: #00d2ff; min-height: 30px;
+            font-weight: bold; text-shadow: 0 0 10px #00d2ff;
+        }
+
+        /* --- エフェクト演出 --- */
         #huh-text {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 120px; font-weight: 900; color: #fff;
-            text-shadow: 0 0 20px rgba(0,0,0,0.8), 5px 5px 0px #ff0080;
-            z-index: 150; pointer-events: none; opacity: 0;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            font-size: 120px; font-weight: 900; color: #fff; z-index: 150; pointer-events: none; opacity: 0;
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 20px #000, 5px 5px 0px #ff0080;
         }
-        #huh-text.show {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            animation: shake 0.1s infinite;
-        }
-        @keyframes shake {
-            0% { margin-left: 0px; } 50% { margin-left: 5px; } 100% { margin-left: -5px; }
-        }
+        #huh-text.show { transform: translate(-50%, -50%) scale(1); opacity: 1; animation: shake 0.1s infinite; }
+        @keyframes shake { 0% { margin-left: 0px; } 50% { margin-left: 5px; } 100% { margin-left: -5px; } }
+
+        /* アイテム */
+        .grass { position: absolute; width: 60px; height: 60px; background: linear-gradient(135deg, #7cfc00 0%, #2d5a27 100%); clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); z-index: 2; }
+        .grass.golden { background: linear-gradient(135deg, #fff700 0%, #ff8c00 100%); box-shadow: 0 0 15px #ffd700; }
+        .egg { position: absolute; width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0 40%, #bbb); border-radius: 50% / 65% 65% 35% 35%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4); z-index: 3; }
+        .egg.mimic { background: radial-gradient(circle at 30% 30%, #a4c639, #6a8c24 50%, #2d5a27); }
 
         /* 必殺技UI */
         .skill-container { width: 90%; margin: 10px auto; display: flex; align-items: center; gap: 10px; }
         #skill-bar-bg { flex-grow: 1; height: 25px; background: #333; border-radius: 15px; border: 2px solid #555; overflow: hidden; }
-        #skill-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); transition: width 0.1s linear; }
+        #skill-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); }
         #skill-btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: bold; background: #444; color: #777; }
-        #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; cursor: pointer; box-shadow: 0 0 20px #ff0080; animation: ready-pulse 0.8s infinite; }
-        @keyframes ready-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; box-shadow: 0 0 20px #ff0080; animation: ready-pulse 0.8s infinite; }
 
-        /* アイテム */
-        .grass { position: absolute; width: 60px; height: 60px; background: linear-gradient(135deg, #7cfc00 0%, #2d5a27 100%); clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); z-index: 2; }
-        .egg { position: absolute; width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0 40%, #bbb); border-radius: 50% / 65% 65% 35% 35%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4); z-index: 3; }
-        .egg.mimic { background: radial-gradient(circle at 30% 30%, #a4c639, #6a8c24 50%, #2d5a27); }
-
-        /* 演出 */
+        #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 20px; z-index: 400; }
         .ultimate-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; opacity: 0; pointer-events: none; }
         .ultimate-flash.active { animation: flash-ani 0.6s ease-out; }
         @keyframes flash-ani { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
         .grass.blow-away { transform: translateY(-400px) rotate(720deg) scale(0) !important; opacity: 0; transition: 0.8s ease-in; }
-        
-        #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 20px; z-index: 200; }
     </style>
 </head>
 <body>
@@ -71,10 +94,23 @@
 
     <div class="skill-container">
         <div id="skill-bar-bg"><div id="skill-bar-fill"></div></div>
-        <button id="skill-btn">CHARGE</button>
+        <button id="skill-btn">WAIT...</button>
     </div>
 
     <div id="game-field">
+        <div id="start-overlay">
+            <h1 style="color:#7cfc00; margin-bottom:10px;">草抜きサバイバル</h1>
+            
+            <div id="slot-machine">
+                <div class="reel" id="reel1">?</div>
+                <div class="reel" id="reel2">?</div>
+                <div class="reel" id="reel3">?</div>
+            </div>
+
+            <div id="gacha-result">ボーナスを当てて開始！</div>
+            <button class="btn-start" id="start-btn">SPIN & START</button>
+        </div>
+
         <div id="huh-text">huh?</div>
         <div id="ultimate-flash" class="ultimate-flash"></div>
     </div>
@@ -82,7 +118,7 @@
     <div id="scoreboard">
         <h2 id="game-over-msg">GAME OVER</h2>
         <p>SCORE: <span id="final-score">0</span></p>
-        <button onclick="location.reload()" style="padding:10px 20px; background:#ffd700; border:none; font-weight:bold; border-radius:20px;">RETRY</button>
+        <button onclick="location.reload()" style="padding:15px 30px; background:#ffd700; border:none; font-weight:bold; border-radius:30px; cursor:pointer;">TITLE</button>
     </div>
 
     <script>
@@ -92,21 +128,70 @@
         const levelDisp = document.getElementById('level');
         const skillFill = document.getElementById('skill-bar-fill');
         const skillBtn = document.getElementById('skill-btn');
-        const flash = document.getElementById('ultimate-flash');
-        const huhText = document.getElementById('huh-text');
+        const startBtn = document.getElementById('start-btn');
+        const gachaResultDisp = document.getElementById('gacha-result');
+        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
 
         let score = 0, level = 1, timeLeft = 30.0, skillCharge = 0;
-        let isGameOver = false, gameTimer = null;
+        let isGameOver = true, gameTimer = null;
         let movingEggs = [];
-        const SKILL_MAX_TIME = 30;
+        let scoreMultiplier = 1;
+        let chargeSpeedBonus = 1;
 
+        const icons = ["✨", "⏰", "⚡️"];
+
+        // --- スタート & スロット処理 ---
+        startBtn.onclick = async () => {
+            startBtn.disabled = true;
+            gachaResultDisp.innerText = "抽選中...";
+            
+            const spinDurations = [1200, 1800, 2400];
+            const rand = Math.random();
+            let resultIdx = rand < 0.33 ? 0 : (rand < 0.66 ? 1 : 2);
+
+            reels.forEach((reel, i) => {
+                const interval = setInterval(() => {
+                    reel.innerText = icons[Math.floor(Math.random() * icons.length)];
+                }, 80);
+
+                setTimeout(() => {
+                    clearInterval(interval);
+                    reel.innerText = icons[resultIdx];
+                    reel.style.backgroundColor = "#ffd700";
+                    if (i === 2) finalizeSlot(resultIdx);
+                }, spinDurations[i]);
+            });
+        };
+
+        function finalizeSlot(idx) {
+            if (idx === 0) {
+                gachaResultDisp.innerText = "✨ GOLDEN WEED (Score x2) ✨";
+                scoreMultiplier = 2;
+            } else if (idx === 1) {
+                gachaResultDisp.innerText = "⏰ TIME BONUS (+15s) ⏰";
+                timeLeft = 45.0;
+                timerDisp.innerText = "45.0";
+            } else {
+                gachaResultDisp.innerText = "⚡️ FAST CHARGE (x1.5) ⚡️";
+                chargeSpeedBonus = 1.5;
+            }
+
+            setTimeout(() => {
+                isGameOver = false;
+                document.getElementById('start-overlay').style.display = 'none';
+                spawn();
+                startTimer();
+            }, 1200);
+        }
+
+        // --- ゲームメインロジック ---
         function startTimer() {
             if (gameTimer) clearInterval(gameTimer);
             gameTimer = setInterval(() => {
                 if (isGameOver) return;
                 timeLeft -= 0.1;
                 if (skillCharge < 100) {
-                    skillCharge += (100 / (SKILL_MAX_TIME * 10));
+                    skillCharge += (100 / (30 * 10)) * chargeSpeedBonus;
                     updateSkillUI();
                 }
                 if (timeLeft <= 0) endGame("TIME UP!");
@@ -135,31 +220,28 @@
             requestAnimationFrame(updatePhysics);
         }
 
-        // --- 必殺技発動 ---
         skillBtn.onclick = () => {
             if (skillCharge < 100 || isGameOver) return;
             skillCharge = 0; updateSkillUI();
-
-            // 1. "huh?" 表示 & フラッシュ
-            huhText.classList.add('show');
-            flash.classList.add('active');
-
+            document.getElementById('huh-text').classList.add('show');
+            document.getElementById('ultimate-flash').classList.add('active');
+            
             const grasses = Array.from(field.getElementsByClassName('grass'));
             grasses.forEach((g, i) => {
                 setTimeout(() => {
                     if(!isGameOver) {
                         g.classList.add('blow-away');
-                        score += 10; scoreDisp.innerText = score;
+                        score += 10 * scoreMultiplier;
+                        scoreDisp.innerText = score;
                     }
                 }, i * 15);
             });
 
-            // 2. 文字とエフェクトを消去
             setTimeout(() => {
-                huhText.classList.remove('show');
-                flash.classList.remove('active');
+                document.getElementById('huh-text').classList.remove('show');
+                document.getElementById('ultimate-flash').classList.remove('active');
                 if(!isGameOver) nextLevel();
-            }, 1200); // 演出が終わるくらいの時間
+            }, 1200);
         };
 
         function spawn() {
@@ -175,6 +257,8 @@
         function createItem(type) {
             const item = document.createElement('div');
             item.className = type;
+            if (type === 'grass' && scoreMultiplier === 2) item.classList.add('golden');
+            
             const x = Math.random() * (field.clientWidth - 50);
             const y = Math.random() * (field.clientHeight - 50);
             item.style.left = `${x}px`; item.style.top = `${y}px`;
@@ -183,12 +267,13 @@
                 item.style.transform = `rotate(${Math.random() * 360}deg)`;
                 item.onpointerdown = (e) => {
                     e.preventDefault(); item.remove();
-                    score += 10; scoreDisp.innerText = score;
+                    score += 10 * scoreMultiplier;
+                    scoreDisp.innerText = score;
                     if (field.getElementsByClassName('grass').length === 0) nextLevel();
                 };
             } else {
                 if (level >= 3) item.classList.add('mimic');
-                item.onpointerdown = (e) => { e.preventDefault(); endGame("BOOM!"); };
+                item.onpointerdown = (e) => { e.preventDefault(); explode(); };
                 if (level >= 10) {
                     const speed = 1.5 + (level * 0.05);
                     movingEggs.push({ el: item, x: x, y: y, vx: (Math.random() - 0.5) * speed, vy: (Math.random() - 0.5) * speed });
@@ -199,9 +284,11 @@
 
         function nextLevel() {
             level++; levelDisp.innerText = level;
-            timeLeft = Math.min(timeLeft + 5, 40);
+            timeLeft = Math.min(timeLeft + 5, 50);
             spawn();
         }
+
+        function explode() { document.body.style.filter = "invert(1)"; endGame("BOOM!"); }
 
         function endGame(msg) {
             isGameOver = true; clearInterval(gameTimer);
@@ -209,8 +296,6 @@
             document.getElementById('final-score').innerText = score;
             document.getElementById('scoreboard').style.display = 'block';
         }
-
-        spawn(); startTimer();
     </script>
 </body>
 </html>
