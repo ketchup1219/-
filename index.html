@@ -3,91 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - SLOT Edition -</title>
+    <title>草抜きサバイバル - SAVED -</title>
     <style>
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #1a1a1a; color: white; 
             margin: 0; overflow: hidden; touch-action: none; user-select: none;
         }
-        .header-info { 
-            background: #222; padding: 10px; display: flex; justify-content: space-around; 
-            font-size: 18px; border-bottom: 2px solid #444;
-        }
+        .header-info { background: #222; padding: 10px; display: flex; justify-content: space-around; font-size: 18px; border-bottom: 2px solid #444; }
         #game-field { 
-            position: relative; width: 95vw; height: 50vh; 
-            background-color: #3e5c36; margin: 10px auto; 
-            border: 4px solid #2d5a27; border-radius: 15px; overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
+            position: relative; width: 95vw; height: 50vh; background-color: #3e5c36; margin: 10px auto; 
+            border: 4px solid #2d5a27; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s;
         }
 
-        /* --- スロット & スタート画面 --- */
-        #start-overlay {
-            position: absolute; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 300;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        #slot-machine {
-            display: flex; gap: 15px; justify-content: center; 
-            margin: 20px 0; background: #444; padding: 20px; 
-            border: 6px solid #ffd700; border-radius: 20px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-        .reel {
-            width: 70px; height: 90px; background: #fff; color: #1a1a1a; 
-            font-size: 50px; line-height: 90px; border-radius: 10px; 
-            overflow: hidden; border: 3px solid #222;
-            transition: background-color 0.3s;
-        }
+        /* --- スタート画面 --- */
+        #start-overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #slot-machine { display: flex; gap: 10px; margin: 15px 0; background: #333; padding: 15px; border: 4px solid #ffd700; border-radius: 15px; }
+        .reel { width: 60px; height: 80px; background: #fff; color: #1a1a1a; font-size: 40px; line-height: 80px; border-radius: 8px; border: 2px solid #000; }
 
-        .btn-start {
-            padding: 20px 40px; font-size: 24px; font-weight: bold;
-            background: #ffd700; color: #1a1a1a; border: none;
-            border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #b8860b;
-        }
-        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8860b; }
-        .btn-start:disabled { background: #555; box-shadow: 0 6px 0 #333; color: #888; }
+        .controls-row { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .btn-start { padding: 15px 35px; font-size: 22px; font-weight: bold; background: #ffd700; color: #1a1a1a; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #b8860b; }
+        .btn-gacha { width: 70px; height: 70px; font-size: 30px; background: #ff4500; color: white; border: 4px solid #fff; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 0 #8b0000; position: relative; }
+        .gacha-cost { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ff4500; font-weight: bold; width: 100px; }
+        #collection-btn { width: 55px; height: 55px; font-size: 26px; background: #00d2ff; color: white; border: 3px solid #fff; border-radius: 50%; cursor: pointer; }
 
-        #gacha-result {
-            margin-top: 15px; font-size: 20px; color: #00d2ff; min-height: 30px;
-            font-weight: bold; text-shadow: 0 0 10px #00d2ff;
-        }
+        /* --- モーダル --- */
+        #collection-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-height: 75%; background: #222; border: 4px solid #ffd700; border-radius: 20px; z-index: 500; padding: 20px; overflow-y: auto; }
+        .tab-menu { display: flex; gap: 5px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; background: #444; color: white; border: none; border-radius: 5px; }
+        .tab-btn.active { background: #ffd700; color: #000; }
+        .item-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .item-card { padding: 12px; border-radius: 10px; font-size: 13px; cursor: pointer; border: 2px solid #555; background: #333; opacity: 0.4; }
+        .item-card.unlocked { opacity: 1; border-color: #ffd700; }
+        .item-card.selected { background: #555; box-shadow: 0 0 10px #ffd700; }
 
-        /* --- エフェクト演出 --- */
-        #huh-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 120px; font-weight: 900; color: #fff; z-index: 150; pointer-events: none; opacity: 0;
-            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 0 20px #000, 5px 5px 0px #ff0080;
-        }
-        #huh-text.show { transform: translate(-50%, -50%) scale(1); opacity: 1; animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { margin-left: 0px; } 50% { margin-left: 5px; } 100% { margin-left: -5px; } }
+        /* --- 演出 --- */
+        #skill-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 80px; font-weight: 900; color: #fff; z-index: 150; pointer-events: none; opacity: 0; transition: 0.3s; }
+        #skill-text.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .ultimate-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; opacity: 0; pointer-events: none; }
+        .ultimate-flash.active { animation: flash-ani 0.6s ease-out; }
+        @keyframes flash-ani { 0% { opacity: 0; } 30% { opacity: 0.8; } 100% { opacity: 0; } }
 
-        /* アイテム */
-        .grass { position: absolute; width: 60px; height: 60px; background: linear-gradient(135deg, #7cfc00 0%, #2d5a27 100%); clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); z-index: 2; }
-        .grass.golden { background: linear-gradient(135deg, #fff700 0%, #ff8c00 100%); box-shadow: 0 0 15px #ffd700; }
-        .egg { position: absolute; width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0 40%, #bbb); border-radius: 50% / 65% 65% 35% 35%; box-shadow: 2px 4px 6px rgba(0,0,0,0.4); z-index: 3; }
-        .egg.mimic { background: radial-gradient(circle at 30% 30%, #a4c639, #6a8c24 50%, #2d5a27); }
-
-        /* 必殺技UI */
+        .grass { position: absolute; width: 60px; height: 60px; clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); z-index: 2; transition: transform 0.8s, opacity 0.8s; }
+        .egg { position: absolute; width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #ffffff, #bbb); border-radius: 50% / 65% 65% 35% 35%; z-index: 3; }
         .skill-container { width: 90%; margin: 10px auto; display: flex; align-items: center; gap: 10px; }
-        #skill-bar-bg { flex-grow: 1; height: 25px; background: #333; border-radius: 15px; border: 2px solid #555; overflow: hidden; }
+        #skill-bar-bg { flex-grow: 1; height: 25px; background: #333; border-radius: 15px; overflow: hidden; border: 2px solid #555; }
         #skill-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); }
         #skill-btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: bold; background: #444; color: #777; }
-        #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; box-shadow: 0 0 20px #ff0080; animation: ready-pulse 0.8s infinite; }
-
-        #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 20px; z-index: 400; }
-        .ultimate-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; opacity: 0; pointer-events: none; }
-        .ultimate-flash.active { animation: flash-ani 0.6s ease-out; }
-        @keyframes flash-ani { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
-        .grass.blow-away { transform: translateY(-400px) rotate(720deg) scale(0) !important; opacity: 0; transition: 0.8s ease-in; }
+        #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; }
+        
+        #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 25px; z-index: 600; }
     </style>
 </head>
 <body>
 
     <div class="header-info">
-        <div>SCORE: <span id="score">0</span></div>
+        <div>所持金: <span id="score">2000</span>円</div>
         <div>TIME: <span id="timer">30.0</span></div>
         <div>LV: <span id="level">1</span></div>
     </div>
@@ -99,203 +71,240 @@
 
     <div id="game-field">
         <div id="start-overlay">
-            <h1 style="color:#7cfc00; margin-bottom:10px;">草抜きサバイバル</h1>
-            
+            <h1 style="color:#7cfc00; margin:0; font-size:26px;">草抜きサバイバル</h1>
             <div id="slot-machine">
                 <div class="reel" id="reel1">?</div>
                 <div class="reel" id="reel2">?</div>
                 <div class="reel" id="reel3">?</div>
             </div>
-
-            <div id="gacha-result">ボーナスを当てて開始！</div>
-            <button class="btn-start" id="start-btn">SPIN & START</button>
+            <div id="gacha-result">1回 1000円でガチャ！</div>
+            <div class="controls-row">
+                <button id="collection-btn">🖼️</button>
+                <button class="btn-start" id="start-btn">START</button>
+                <div style="position:relative">
+                    <button id="gacha-btn" class="btn-gacha">🎁</button>
+                    <div class="gacha-cost">COST: 1000YEN</div>
+                </div>
+            </div>
+            <button onclick="resetSave()" style="margin-top:20px; background:none; border:none; color:#555; font-size:10px;">データを全消去する</button>
         </div>
-
-        <div id="huh-text">huh?</div>
+        <div id="skill-text">huh?</div>
         <div id="ultimate-flash" class="ultimate-flash"></div>
     </div>
 
+    <div id="collection-modal">
+        <div class="tab-menu">
+            <button class="tab-btn active" id="tab-bg-btn">背景</button>
+            <button class="tab-btn" id="tab-skill-btn">必殺技</button>
+        </div>
+        <div id="item-list" class="item-grid"></div>
+        <button onclick="document.getElementById('collection-modal').style.display='none'" style="margin-top:20px; width:100%; padding:12px;">閉じる</button>
+    </div>
+
     <div id="scoreboard">
-        <h2 id="game-over-msg">GAME OVER</h2>
-        <p>SCORE: <span id="final-score">0</span></p>
-        <button onclick="location.reload()" style="padding:15px 30px; background:#ffd700; border:none; font-weight:bold; border-radius:30px; cursor:pointer;">TITLE</button>
+        <h2>GAME OVER</h2>
+        <p>最終利益: <span id="final-score">0</span>円</p>
+        <button id="back-to-title" style="padding:15px 40px; background:#ffd700; border:none; border-radius:30px; cursor:pointer;">TITLE</button>
     </div>
 
     <script>
-        const field = document.getElementById('game-field');
-        const scoreDisp = document.getElementById('score');
-        const timerDisp = document.getElementById('timer');
-        const levelDisp = document.getElementById('level');
-        const skillFill = document.getElementById('skill-bar-fill');
-        const skillBtn = document.getElementById('skill-btn');
-        const startBtn = document.getElementById('start-btn');
-        const gachaResultDisp = document.getElementById('gacha-result');
-        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+        // --- 基本変数 ---
+        let score = 2000, level = 1, timeLeft = 30.0, skillCharge = 0, isGameOver = true;
+        let scoreMultiplier = 1, chargeSpeedBonus = 1, currentTab = 'bg', gameTimer = null;
+        const GACHA_COST = 1000;
 
-        let score = 0, level = 1, timeLeft = 30.0, skillCharge = 0;
-        let isGameOver = true, gameTimer = null;
-        let movingEggs = [];
-        let scoreMultiplier = 1;
-        let chargeSpeedBonus = 1;
+        const bgThemes = [
+            { id: 0, name: "デフォルト", bg: "#3e5c36", border: "#2d5a27", grass: "linear-gradient(135deg, #7cfc00, #2d5a27)", unlocked: true },
+            { id: 1, name: "深夜の森", bg: "#001a00", border: "#00FF00", grass: "linear-gradient(135deg, #006400, #000000)", unlocked: false },
+            { id: 2, name: "サイバー", bg: "#000033", border: "#00d2ff", grass: "linear-gradient(135deg, #00ffff, #0000ff)", unlocked: false },
+            { id: 3, name: "火山地帯", bg: "#4b0000", border: "#ff4500", grass: "linear-gradient(135deg, #ff4500, #4b0000)", unlocked: false }
+        ];
+        let selectedBg = bgThemes[0];
 
-        const icons = ["✨", "⏰", "⚡️"];
+        const skillTypes = [
+            { id: 0, name: "Huh?", text: "huh?", flash: "white", ani: "up", unlocked: true },
+            { id: 1, name: "爆風", text: "BOOM!", flash: "orange", ani: "out", unlocked: false },
+            { id: 2, name: "超速", text: "SPEED!", flash: "cyan", ani: "right", unlocked: false },
+            { id: 3, name: "神の怒り", text: "JUDGE", flash: "gold", ani: "scale", unlocked: false }
+        ];
+        let selectedSkill = skillTypes[0];
 
-        // --- スタート & スロット処理 ---
-        startBtn.onclick = async () => {
-            startBtn.disabled = true;
-            gachaResultDisp.innerText = "抽選中...";
-            
-            const spinDurations = [1200, 1800, 2400];
+        // --- セーブ＆ロード機能 ---
+        function saveGame() {
+            const data = {
+                score: score,
+                unlockedBgs: bgThemes.map(b => b.unlocked),
+                unlockedSkills: skillTypes.map(s => s.unlocked)
+            };
+            localStorage.setItem('kusanuki_save', JSON.stringify(data));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('kusanuki_save');
+            if (saved) {
+                const data = JSON.parse(saved);
+                score = data.score;
+                data.unlockedBgs.forEach((u, i) => bgThemes[i].unlocked = u);
+                data.unlockedSkills.forEach((u, i) => skillTypes[i].unlocked = u);
+                updateUI();
+            }
+        }
+
+        function resetSave() {
+            if(confirm("データを全て消去しますか？")) {
+                localStorage.removeItem('kusanuki_save');
+                location.reload();
+            }
+        }
+
+        // --- ガチャ ---
+        document.getElementById('gacha-btn').onclick = () => {
+            if (score < GACHA_COST) { gachaResultDisp.innerText="お金が足りません！"; return; }
+            score -= GACHA_COST;
             const rand = Math.random();
-            let resultIdx = rand < 0.33 ? 0 : (rand < 0.66 ? 1 : 2);
+            if (rand < 0.25) {
+                const targets = bgThemes.filter(b => !b.unlocked);
+                if (targets.length > 0) {
+                    const item = targets[Math.floor(Math.random() * targets.length)];
+                    item.unlocked = true; gachaResultDisp.innerText = `🎁 背景：${item.name}`;
+                } else { score += 1500; gachaResultDisp.innerText = "💰 1500円還元！"; }
+            } else if (rand < 0.50) {
+                const targets = skillTypes.filter(s => !s.unlocked);
+                if (targets.length > 0) {
+                    const item = targets[Math.floor(Math.random() * targets.length)];
+                    item.unlocked = true; gachaResultDisp.innerText = `🔥 必殺技：${item.name}`;
+                } else { score += 2000; gachaResultDisp.innerText = "💰 2000円還元！"; }
+            } else if (rand < 0.8) {
+                const win = Math.floor(Math.random() * 1500) + 500;
+                score += win; gachaResultDisp.innerText = `💰 当たり：${win}円！`;
+            } else { timeLeft += 10; gachaResultDisp.innerText = "⏰ +10秒！"; }
+            saveGame(); updateUI();
+        };
 
-            reels.forEach((reel, i) => {
-                const interval = setInterval(() => {
-                    reel.innerText = icons[Math.floor(Math.random() * icons.length)];
-                }, 80);
+        // --- タイトルに戻る（リロードせずに戻る） ---
+        document.getElementById('back-to-title').onclick = () => {
+            isGameOver = true;
+            clearInterval(gameTimer);
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('start-overlay').style.display = 'flex';
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('gacha-btn').disabled = false;
+            level = 1; timeLeft = 30.0; skillCharge = 0;
+            updateUI(); updateSkillUI();
+            document.querySelectorAll('.grass, .egg').forEach(n => n.remove());
+        };
 
-                setTimeout(() => {
-                    clearInterval(interval);
-                    reel.innerText = icons[resultIdx];
-                    reel.style.backgroundColor = "#ffd700";
-                    if (i === 2) finalizeSlot(resultIdx);
-                }, spinDurations[i]);
+        // --- 以降、基本ロジック ---
+        const scoreDisp = document.getElementById('score'), timerDisp = document.getElementById('timer');
+        const field = document.getElementById('game-field'), gachaResultDisp = document.getElementById('gacha-result');
+
+        document.getElementById('start-btn').onclick = () => {
+            document.getElementById('start-btn').disabled = true;
+            const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+            reels.forEach((r, i) => {
+                let c = 0; const inv = setInterval(() => r.innerText = ["✨", "⏰", "⚡️"][c++ % 3], 80);
+                setTimeout(() => { 
+                    clearInterval(inv); r.innerText = "✨"; r.style.background = "#ffd700";
+                    if (i === 2) { 
+                        scoreMultiplier = 2;
+                        setTimeout(() => { document.getElementById('start-overlay').style.display='none'; isGameOver=false; spawn(); startTimer(); }, 800);
+                    }
+                }, 1000 + i*500);
             });
         };
 
-        function finalizeSlot(idx) {
-            if (idx === 0) {
-                gachaResultDisp.innerText = "✨ GOLDEN WEED (Score x2) ✨";
-                scoreMultiplier = 2;
-            } else if (idx === 1) {
-                gachaResultDisp.innerText = "⏰ TIME BONUS (+15s) ⏰";
-                timeLeft = 45.0;
-                timerDisp.innerText = "45.0";
-            } else {
-                gachaResultDisp.innerText = "⚡️ FAST CHARGE (x1.5) ⚡️";
-                chargeSpeedBonus = 1.5;
-            }
-
-            setTimeout(() => {
-                isGameOver = false;
-                document.getElementById('start-overlay').style.display = 'none';
-                spawn();
-                startTimer();
-            }, 1200);
-        }
-
-        // --- ゲームメインロジック ---
         function startTimer() {
-            if (gameTimer) clearInterval(gameTimer);
             gameTimer = setInterval(() => {
                 if (isGameOver) return;
-                timeLeft -= 0.1;
-                if (skillCharge < 100) {
-                    skillCharge += (100 / (30 * 10)) * chargeSpeedBonus;
-                    updateSkillUI();
-                }
+                timeLeft -= 0.1; updateUI();
+                if (skillCharge < 100) { skillCharge += 0.3 * chargeSpeedBonus; updateSkillUI(); }
                 if (timeLeft <= 0) endGame("TIME UP!");
-                timerDisp.innerText = timeLeft.toFixed(1);
             }, 100);
             updatePhysics();
         }
 
-        function updateSkillUI() {
-            skillFill.style.width = `${Math.min(skillCharge, 100)}%`;
-            if (skillCharge >= 100) {
-                skillBtn.classList.add('ready'); skillBtn.innerText = "BURST!!";
-            } else {
-                skillBtn.classList.remove('ready'); skillBtn.innerText = "WAIT...";
-            }
+        function updateUI() { scoreDisp.innerText = score; timerDisp.innerText = Math.max(0, timeLeft).toFixed(1); document.getElementById('level').innerText = level; }
+        function updateSkillUI() { 
+            document.getElementById('skill-bar-fill').style.width = `${Math.min(skillCharge, 100)}%`; 
+            const btn = document.getElementById('skill-btn');
+            if(skillCharge >= 100) { btn.classList.add('ready'); btn.innerText = selectedSkill.name; }
+            else { btn.classList.remove('ready'); btn.innerText = "WAIT..."; }
         }
 
-        function updatePhysics() {
-            if (isGameOver) return;
-            movingEggs.forEach(eggData => {
-                eggData.x += eggData.vx; eggData.y += eggData.vy;
-                if (eggData.x <= 0 || eggData.x >= field.clientWidth - 40) eggData.vx *= -1;
-                if (eggData.y <= 0 || eggData.y >= field.clientHeight - 50) eggData.vy *= -1;
-                eggData.el.style.left = `${eggData.x}px`; eggData.el.style.top = `${eggData.y}px`;
-            });
-            requestAnimationFrame(updatePhysics);
-        }
-
-        skillBtn.onclick = () => {
+        document.getElementById('skill-btn').onclick = () => {
             if (skillCharge < 100 || isGameOver) return;
             skillCharge = 0; updateSkillUI();
-            document.getElementById('huh-text').classList.add('show');
-            document.getElementById('ultimate-flash').classList.add('active');
-            
+            const txt = document.getElementById('skill-text');
+            const flash = document.getElementById('ultimate-flash');
+            txt.innerText = selectedSkill.text; txt.classList.add('show');
+            flash.style.backgroundColor = selectedSkill.flash; flash.classList.add('active');
             const grasses = Array.from(field.getElementsByClassName('grass'));
             grasses.forEach((g, i) => {
                 setTimeout(() => {
-                    if(!isGameOver) {
-                        g.classList.add('blow-away');
-                        score += 10 * scoreMultiplier;
-                        scoreDisp.innerText = score;
-                    }
-                }, i * 15);
+                    if (isGameOver) return;
+                    g.style.transform = "translateY(-600px) scale(0)"; g.style.opacity = "0";
+                    score += 50 * scoreMultiplier; updateUI(); saveGame();
+                }, i * 20);
             });
-
-            setTimeout(() => {
-                document.getElementById('huh-text').classList.remove('show');
-                document.getElementById('ultimate-flash').classList.remove('active');
-                if(!isGameOver) nextLevel();
-            }, 1200);
+            setTimeout(() => { txt.classList.remove('show'); flash.classList.remove('active'); if(!isGameOver) nextLevel(); }, 1500);
         };
 
+        let movingEggs = [];
         function spawn() {
-            if (isGameOver) return;
-            field.querySelectorAll('.grass, .egg').forEach(i => i.remove());
+            field.querySelectorAll('.grass, .egg').forEach(n => n.remove());
             movingEggs = [];
-            const grassCount = 10 + (level * 2);
-            const eggCount = Math.min(1 + Math.floor(level / 2), 20);
-            for (let i = 0; i < grassCount; i++) createItem('grass');
-            for (let i = 0; i < eggCount; i++) createItem('egg');
+            for (let i = 0; i < 10 + level*2; i++) createItem('grass');
+            for (let i = 0; i < Math.min(1 + Math.floor(level/2), 15); i++) createItem('egg');
         }
 
         function createItem(type) {
             const item = document.createElement('div');
             item.className = type;
-            if (type === 'grass' && scoreMultiplier === 2) item.classList.add('golden');
-            
-            const x = Math.random() * (field.clientWidth - 50);
-            const y = Math.random() * (field.clientHeight - 50);
+            const x = Math.random() * (field.clientWidth - 50), y = Math.random() * (field.clientHeight - 50);
             item.style.left = `${x}px`; item.style.top = `${y}px`;
-
             if (type === 'grass') {
-                item.style.transform = `rotate(${Math.random() * 360}deg)`;
-                item.onpointerdown = (e) => {
-                    e.preventDefault(); item.remove();
-                    score += 10 * scoreMultiplier;
-                    scoreDisp.innerText = score;
-                    if (field.getElementsByClassName('grass').length === 0) nextLevel();
-                };
+                item.style.background = selectedBg.grass;
+                item.onpointerdown = (e) => { e.preventDefault(); item.remove(); score += 10 * scoreMultiplier; updateUI(); saveGame(); if (field.getElementsByClassName('grass').length === 0) nextLevel(); };
             } else {
-                if (level >= 3) item.classList.add('mimic');
                 item.onpointerdown = (e) => { e.preventDefault(); explode(); };
-                if (level >= 10) {
-                    const speed = 1.5 + (level * 0.05);
-                    movingEggs.push({ el: item, x: x, y: y, vx: (Math.random() - 0.5) * speed, vy: (Math.random() - 0.5) * speed });
-                }
+                if (level >= 8) { const s = 1.5 + level*0.1; movingEggs.push({ el: item, x, y, vx: (Math.random()-0.5)*s, vy: (Math.random()-0.5)*s }); }
             }
             field.appendChild(item);
         }
 
-        function nextLevel() {
-            level++; levelDisp.innerText = level;
-            timeLeft = Math.min(timeLeft + 5, 50);
-            spawn();
+        function updatePhysics() {
+            if (isGameOver) return;
+            movingEggs.forEach(e => {
+                e.x += e.vx; e.y += e.vy;
+                if (e.x <= 0 || e.x >= field.clientWidth - 40) e.vx *= -1;
+                if (e.y <= 0 || e.y >= field.clientHeight - 50) e.vy *= -1;
+                e.el.style.left = `${e.x}px`; e.el.style.top = `${e.y}px`;
+            });
+            requestAnimationFrame(updatePhysics);
         }
 
+        function nextLevel() { level++; updateUI(); timeLeft = Math.min(timeLeft + 5, 60); spawn(); }
         function explode() { document.body.style.filter = "invert(1)"; endGame("BOOM!"); }
+        function endGame(msg) { isGameOver = true; clearInterval(gameTimer); saveGame(); document.getElementById('final-score').innerText = score; document.getElementById('scoreboard').style.display = 'block'; }
 
-        function endGame(msg) {
-            isGameOver = true; clearInterval(gameTimer);
-            document.getElementById('game-over-msg').innerText = msg;
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('scoreboard').style.display = 'block';
+        function applyBg(theme) { field.style.backgroundColor = theme.bg; field.style.borderColor = theme.border; }
+        function updateList() {
+            const list = document.getElementById('item-list'); list.innerHTML = "";
+            const items = currentTab === 'bg' ? bgThemes : skillTypes;
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `item-card ${item.unlocked ? 'unlocked' : ''} ${(currentTab==='bg'?selectedBg:selectedSkill).id === item.id ? 'selected' : ''}`;
+                card.innerText = item.unlocked ? item.name : "???";
+                if (item.unlocked) card.onclick = () => { if(currentTab==='bg'){selectedBg=item;applyBg(item);}else{selectedSkill=item;} updateList(); };
+                list.appendChild(card);
+            });
         }
+        document.getElementById('tab-bg-btn').onclick = () => { currentTab='bg'; updateList(); };
+        document.getElementById('tab-skill-btn').onclick = () => { currentTab='skill'; updateList(); };
+        document.getElementById('collection-btn').onclick = () => { document.getElementById('collection-modal').style.display='block'; updateList(); };
+
+        // 起動時にロード
+        loadGame();
     </script>
 </body>
 </html>
