@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - 覚醒の刻 -</title>
+    <title>草抜きサバイバル - 富豪編 -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; }
         body { 
@@ -54,7 +54,6 @@
             100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
 
-        /* ガチャ演出用アニメーション */
         @keyframes gacha-shake {
             0% { transform: scale(1) rotate(0); }
             25% { transform: scale(1.1) rotate(-5deg); }
@@ -102,11 +101,7 @@
         .grass::after { transform: rotate(35deg); right: 10px; }
         .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 2; pointer-events: none; }
         
-        .egg { 
-            width: 70px; height: 70px; font-size: 50px; background: transparent; 
-            filter: drop-shadow(0 0 5px rgba(255,0,0,0.5));
-            transition: left 0.8s linear, top 0.8s linear, transform 0.2s;
-        }
+        .egg { width: 70px; height: 70px; font-size: 50px; background: transparent; transition: left 0.8s linear, top 0.8s linear, transform 0.2s; }
 
         .pop-text { position: absolute; color: var(--gold); font-size: 20px; font-weight: bold; pointer-events: none; animation: pop-up 0.5s ease-out forwards; z-index: 100; }
         @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
@@ -179,6 +174,7 @@
     <script>
         let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char', armor = false;
         let feverPoints = 0, isFever = false, feverTimer = null;
+        let comboCount = 0, comboTimer = null;
 
         const items = [
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ27s短縮/卵無効' },
@@ -209,11 +205,11 @@
         function saveGame() {
             const data = { money, ownedIds: items.filter(i => i.owned).map(i => i.id),
                 equippedIds: { char: equipped.char?.id, bg: equipped.bg?.id, skill: equipped.skill?.id } };
-            localStorage.setItem('kusaSurvivalData_vFinal', JSON.stringify(data));
+            localStorage.setItem('kusaSurvivalData_vMoneyBoost', JSON.stringify(data));
         }
 
         function loadGame() {
-            const raw = localStorage.getItem('kusaSurvivalData_vFinal');
+            const raw = localStorage.getItem('kusaSurvivalData_vMoneyBoost');
             if(!raw) { updateUI(); return; }
             const data = JSON.parse(raw);
             money = data.money;
@@ -231,11 +227,6 @@
             const target = document.getElementById(id);
             if(target) target.style.display = 'flex';
             if(id === 'col-screen') renderCol();
-            if(id === 'gacha-screen') {
-                document.getElementById('gacha-box').innerText = "🎁";
-                document.getElementById('gacha-msg').innerText = "";
-                document.getElementById('gacha-btns').style.pointerEvents = "auto";
-            }
         }
 
         function setTab(tab) { currentTab = tab; renderCol(); }
@@ -244,61 +235,23 @@
             const cost = 1000 * times;
             if (money < cost) return alert("お金不足！");
             money -= cost; updateUI();
-            
             const boxEl = document.getElementById('gacha-box');
             const msgEl = document.getElementById('gacha-msg');
-            const btns = document.getElementById('gacha-btns');
-            const backBtn = document.getElementById('gacha-back-btn');
-            
-            btns.style.pointerEvents = "none";
-            backBtn.style.visibility = "hidden";
-            msgEl.innerText = "抽選中...";
             boxEl.innerText = "📦";
             boxEl.classList.add('gacha-anim');
-            
             let results = [];
-            let counts = { SSR: 0, SR: 0, R: 0 };
             for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
                 let target;
-                if (r < 2) { 
-                    const pool = items.filter(i => i.rarity === 'SSR');
-                    target = pool[Math.floor(Math.random() * pool.length)]; counts.SSR++; 
-                }
-                else if (r < 15) { 
-                    const pool = items.filter(i => i.rarity === 'SR');
-                    target = pool[Math.floor(Math.random() * pool.length)]; counts.SR++;
-                } else {
-                    const pool = items.filter(i => i.rarity === 'R');
-                    target = pool[Math.floor(Math.random() * pool.length)]; counts.R++;
-                }
+                if (r < 2) target = items.filter(i => i.rarity === 'SSR')[0];
+                else if (r < 15) target = items.filter(i => i.rarity === 'SR')[Math.floor(Math.random()*4)];
+                else target = items.filter(i => i.rarity === 'R')[Math.floor(Math.random()*4)];
                 target.owned = true; results.push(target);
             }
-
-            await new Promise(r => setTimeout(r, 1200));
-            
+            await new Promise(r => setTimeout(r, 800));
             boxEl.classList.remove('gacha-anim');
-            v([50, 50, 200]);
-            const flash = document.getElementById('flash');
-            flash.style.opacity = counts.SSR > 0 ? "1" : "0.5";
-            setTimeout(() => flash.style.opacity = "0", 200);
-
-            boxEl.classList.add('reveal-anim');
-            if (times === 1) {
-                boxEl.innerText = results[0].icon || '🔥';
-                msgEl.innerHTML = `<span style="font-size:20px; color:${results[0].rarity==='SSR'?'#ff00ff':'gold'};">${results[0].rarity}</span><br>${results[0].name}`;
-            } else {
-                boxEl.innerText = counts.SSR > 0 ? "💎" : "🎊";
-                msgEl.innerHTML = `<div style="font-size:12px;"><span style="color:#ff00ff; text-shadow:0 0 5px;">SSR:${counts.SSR}</span> <span style="color:orange;">SR:${counts.SR}</span> R:${counts.R}</div>
-                                   <div style="font-size:10px; color:#ccc; margin-top:5px;">${results.slice(-3).map(r=>r.name).join(', ')} など獲得</div>`;
-            }
-            
-            setTimeout(() => {
-                boxEl.classList.remove('reveal-anim');
-                btns.style.pointerEvents = "auto";
-                backBtn.style.visibility = "visible";
-            }, 500);
-
+            boxEl.innerText = times === 1 ? (results[0].icon || '✨') : "🎊";
+            msgEl.innerText = times === 1 ? results[0].name : "たくさん手に入れた！";
             saveGame();
         }
 
@@ -308,47 +261,29 @@
             items.filter(i => i.type === currentTab).forEach(item => {
                 const div = document.createElement('div');
                 div.className = `col-item ${item.owned ? 'owned' : 'locked'}`;
-                const displayName = item.owned ? (item.icon || '🔥') + ' ' + item.name : '❓ ' + item.name;
                 const isEq = equipped[item.type] === item;
-                div.innerHTML = `<div style="text-align:left; flex-grow:1; cursor:pointer;" onclick="showDetail('${item.id}')">
-                    <div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${displayName}</div></div>
-                    <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '装備中' : (item.owned ? '装備' : '未所持')}</button>`;
+                div.innerHTML = `<div style="text-align:left;">
+                    <div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${item.owned ? (item.icon || '') + item.name : '？？？'}</div></div>
+                    <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '装備中' : '装備'}</button>`;
                 list.appendChild(div);
             });
         }
 
-        function showDetail(id) {
-            const item = items.find(i => i.id === id);
-            alert(`【${item.rarity}】${item.name}\n\n効果: ${item.info || '見た目が変わります'}`);
-        }
-
         function equip(id, shouldSave = true) {
             const item = items.find(i => i.id === id);
-            if(!item) return;
             equipped[item.type] = item;
-            if(item.type === 'char') {
-                document.getElementById('tsum-icon').innerText = item.icon;
-                document.getElementById('passive-info').innerText = "効果: " + item.info;
-            }
+            if(item.type === 'char') document.getElementById('tsum-icon').innerText = item.icon;
             if(item.type === 'bg') document.getElementById('game-field').style.background = item.val;
             if(item.type === 'skill') document.getElementById('skill-display-name').innerText = item.name;
-            if(shouldSave) { renderCol(); v(20); saveGame(); }
+            if(shouldSave) { renderCol(); saveGame(); }
         }
 
         function startGame() {
-            isPlaying = true; timeLeft = 30.0; level = 1; skillCount = 0; feverPoints = 0; isFever = false;
-            armor = (equipped.char?.id === 'c3');
+            isPlaying = true; timeLeft = 30.0; level = 1; skillCount = 0; feverPoints = 0;
             openLayer('none'); spawn(); moveEggs();
             const timer = setInterval(() => {
                 if(!isPlaying) return clearInterval(timer);
-                if (!isFever) {
-                    let dec = (equipped.char?.id === 'c2') ? 0.08 : 0.1;
-                    timeLeft -= dec;
-                }
-                document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
-                let reduction = (equipped.char?.id === 'c1') ? 27 : (equipped.char?.id === 'c8' ? 10 : 0);
-                let autoCharge = 100 / (Math.max(1, 30 - reduction) * 10);
-                skillCount = Math.min(100, skillCount + autoCharge);
+                if (!isFever) timeLeft -= 0.1;
                 updateUI();
                 if(timeLeft <= 0) endGame();
             }, 100);
@@ -356,183 +291,94 @@
 
         function handleGrassClick(item) {
             if (!isPlaying || item.getAttribute('data-plucked') === "true") return;
-            v(15); 
-            item.setAttribute('data-plucked', "true");
+            v(15); item.setAttribute('data-plucked', "true");
             
-            const rect = item.getBoundingClientRect();
-            const fRect = document.getElementById('game-field').getBoundingClientRect();
-            const x = rect.left - fRect.left + rect.width / 2, y = rect.top - fRect.top + rect.height / 2;
+            // コンボ処理
+            comboCount++;
+            clearTimeout(comboTimer);
+            comboTimer = setTimeout(() => { comboCount = 0; }, 800);
 
-            const pop = document.createElement('div'); pop.className = 'pop-text'; pop.innerText = "ズバッ！";
-            pop.style.left = x + "px"; pop.style.top = y + "px";
-            document.getElementById('game-field').appendChild(pop);
-            setTimeout(() => pop.remove(), 500);
-
-            let m = (equipped.char?.id === 'c1') ? 100 : 10;
+            // ★ 稼ぎやすさアップ: 基本給を20円に、コンボボーナスを追加
+            let m = 20 + (comboCount * 2); 
+            if (equipped.char?.id === 'c1') m *= 10;
             if (equipped.char?.id === 'c9') m += 50;
-            if (equipped.char?.id === 'c11' && Math.random() < 0.2) m *= 5;
-            if (equipped.char?.id === 'c5') m += 5;
-            if (isFever) m *= 3;
-            // 必殺技「連撃」用フラグ
-            if (window.skillRengekiTimer) m *= 3;
+            if (isFever) m *= 5; // フィーバー中もより稼げるように
 
             money += m;
+            feverPoints = Math.min(100, feverPoints + 4);
+            if (feverPoints >= 100 && !isFever) startFever();
             
-            if (!isFever) {
-                feverPoints = Math.min(100, feverPoints + 5);
-                if (feverPoints >= 100) startFever();
-            }
             updateUI();
-
-            item.style.transform = "scale(1.5) rotate(20deg)"; 
-            item.style.opacity = "0";
-            setTimeout(() => { item.style.display = "none"; }, 150);
+            item.style.transform = "scale(1.5) rotate(20deg)"; item.style.opacity = "0";
             
-            if (equipped.char?.id === 'c4' && Math.random() < 0.2) {
-                const next = document.querySelector('.grass:not([data-plucked="true"])');
-                if(next) setTimeout(()=>handleGrassClick(next), 50);
-            }
-
             const remaining = document.querySelectorAll('.grass:not([data-plucked="true"])');
             if (remaining.length === 0) {
-                level++;
-                let add = (equipped.char?.id === 'c10') ? 15.0 : 5.0;
-                if (equipped.char?.id === 'c12') add += 5.0;
-                timeLeft += add; v([100, 50, 100]);
-                const lt = document.getElementById('lvl-up-text');
-                lt.classList.remove('lvl-anim'); void lt.offsetWidth; lt.classList.add('lvl-anim');
-                setTimeout(() => { if(isPlaying) spawn(); }, 400);
+                level++; timeLeft += 5.0; spawn();
             }
         }
 
         function startFever() {
-            isFever = true; v([50, 50, 150]);
-            document.body.classList.add('is-fever');
+            isFever = true; document.body.classList.add('is-fever');
             document.getElementById('game-field').classList.add('fever-bg');
-            const ft = document.getElementById('fever-text');
-            ft.classList.remove('lvl-anim'); void ft.offsetWidth; ft.classList.add('lvl-anim');
-            document.getElementById('flash').style.opacity = "0.6";
-            setTimeout(() => document.getElementById('flash').style.opacity = "0", 200);
-            let duration = 5000;
-            let start = Date.now();
+            let duration = 5000; let start = Date.now();
             feverTimer = setInterval(() => {
-                let elapsed = Date.now() - start;
-                feverPoints = 100 - (elapsed / duration * 100);
+                feverPoints = 100 - ((Date.now() - start) / duration * 100);
                 if (feverPoints <= 0) stopFever();
                 updateUI();
             }, 50);
         }
 
-        function stopFever() {
-            isFever = false; feverPoints = 0; clearInterval(feverTimer);
-            document.body.classList.remove('is-fever');
-            document.getElementById('game-field').classList.remove('fever-bg');
-            updateUI();
-        }
+        function stopFever() { isFever = false; clearInterval(feverTimer); document.body.classList.remove('is-fever'); document.getElementById('game-field').classList.remove('fever-bg'); }
 
         function spawn() {
             const field = document.getElementById('game-field');
             field.querySelectorAll('.item').forEach(i => i.remove());
-            let base = 12 + Math.floor(level * 1.5);
-            if (equipped.char?.id === 'c12') base = Math.floor(base * 0.6);
-            const total = Math.min(60, base);
-            const eggCount = Math.max(3, Math.floor(total * 0.25));
-            let list = [];
-            for (let i = 0; i < eggCount; i++) list.push(true);
-            for (let i = 0; i < total - eggCount; i++) list.push(false);
-            list.sort(() => Math.random() - 0.5);
-            list.forEach(isEgg => {
+            const total = Math.min(60, 12 + Math.floor(level * 1.5));
+            for (let i = 0; i < total; i++) {
+                const isEgg = Math.random() < 0.2;
                 const item = document.createElement('div');
                 item.className = 'item ' + (isEgg ? 'egg' : 'grass');
-                if (!isEgg) { 
-                    const c = document.createElement('div'); 
-                    c.className = 'grass-center'; 
-                    item.appendChild(c); 
-                } else { 
-                    item.innerText = "🥚"; 
-                }
-                item.style.left = Math.random() * (field.clientWidth - 80) + "px";
-                item.style.top = Math.random() * (field.clientHeight - 80) + "px";
-                item.onpointerdown = (e) => {
-                    if (!isPlaying) return;
-                    if (isEgg) {
-                        if (window.skillSanctuary) { item.style.transform="scale(0)"; return; }
-                        if (equipped.char?.id === 'c13') { money += 100; updateUI(); item.style.transform="scale(0)"; return; }
-                        if (equipped.char?.id === 'c7' || equipped.char?.id === 'c1') return;
-                        if (armor) { armor = false; item.style.transform = "scale(0)"; v([50,50]); return; }
-                        endGame();
-                    } else handleGrassClick(item);
-                };
+                if (!isEgg) { const c = document.createElement('div'); c.className = 'grass-center'; item.appendChild(c); }
+                else item.innerText = "🥚";
+                item.style.left = Math.random() * (field.clientWidth - 70) + "px";
+                item.style.top = Math.random() * (field.clientHeight - 70) + "px";
+                item.onpointerdown = () => { if(isEgg) endGame(); else handleGrassClick(item); };
                 field.appendChild(item);
-            });
+            }
         }
 
         function moveEggs() {
             if (!isPlaying) return;
-            const eggs = document.querySelectorAll('.egg');
-            const interval = Math.max(600, 1500 - (level * 100));
-            eggs.forEach(egg => {
-                egg.style.left = Math.random() * (document.getElementById('game-field').clientWidth - 80) + "px";
-                egg.style.top = Math.random() * (document.getElementById('game-field').clientHeight - 80) + "px";
+            document.querySelectorAll('.egg').forEach(egg => {
+                egg.style.left = Math.random() * (document.getElementById('game-field').clientWidth - 70) + "px";
+                egg.style.top = Math.random() * (document.getElementById('game-field').clientHeight - 70) + "px";
             });
-            setTimeout(moveEggs, interval);
+            setTimeout(moveEggs, 1200);
         }
 
         function triggerSkill() {
             if(skillCount < 100 || !isPlaying) return;
-            skillCount = 0; v([50, 150]);
+            skillCount = 0; v(100);
             const sid = equipped.skill.id;
-            
-            // エフェクト表示
-            const et = document.getElementById('skill-effect-text');
-            et.innerText = equipped.skill.name;
-            et.classList.remove('huh-anim'); void et.offsetWidth; et.classList.add('huh-anim');
-            document.getElementById('flash').style.opacity = "0.4";
-            setTimeout(() => document.getElementById('flash').style.opacity = "0", 300);
-
             if(sid === 's_huh') {
-                document.querySelectorAll('.grass:not([data-plucked="true"])').forEach((g, i) => {
-                    setTimeout(() => { if(isPlaying) handleGrassClick(g); }, i * 30);
-                });
-            } else if(sid === 's2') { 
-                timeLeft += 10; 
-            } else if(sid === 's3') {
-                startFever();
-            } else if(sid === 's4') {
-                document.querySelectorAll('.egg').forEach(e => {
-                    e.classList.remove('egg'); e.classList.add('grass'); e.innerText = "";
-                    const c = document.createElement('div'); c.className = 'grass-center'; e.appendChild(c);
-                    e.onpointerdown = () => handleGrassClick(e);
-                });
-            } else if(sid === 's5') {
-                money = Math.floor(money * 1.1);
-            } else if(sid === 's6') {
-                window.skillRengekiTimer = true;
-                setTimeout(() => window.skillRengekiTimer = false, 5000);
-            } else if(sid === 's7') {
-                level += 3; spawn();
-            } else if(sid === 's8') {
-                window.skillSanctuary = true;
-                setTimeout(() => window.skillSanctuary = false, 15000);
-            }
+                document.querySelectorAll('.grass:not([data-plucked="true"])').forEach(g => handleGrassClick(g));
+            } else if(sid === 's2') timeLeft += 10;
+            else if(sid === 's3') startFever();
+            else if(sid === 's5') money = Math.floor(money * 1.2); // 1.2倍に強化
         }
 
         function updateUI() {
-            document.getElementById('m-val').innerText = money;
+            document.getElementById('m-val').innerText = Math.floor(money);
+            document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('l-val').innerText = level;
+            if(isPlaying) skillCount = Math.min(100, skillCount + 0.5);
             document.getElementById('skill-fill').style.width = skillCount + "%";
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
         }
 
-        function giveUp() { if (isPlaying && confirm("リタイアしますか？")) endGame(); }
-        function endGame() { 
-            isPlaying = false; 
-            if(feverTimer) clearInterval(feverTimer);
-            document.getElementById('res-money').innerText = money; 
-            openLayer('end-screen'); 
-            saveGame(); 
-        }
+        function giveUp() { endGame(); }
+        function endGame() { isPlaying = false; openLayer('end-screen'); document.getElementById('res-money').innerText = money; saveGame(); }
         function closeEndScreen() { openLayer('start-screen'); }
     </script>
 </body>
