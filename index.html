@@ -43,17 +43,6 @@
             100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
         }
 
-        #skill-effect-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 80px; color: var(--gold); text-shadow: 0 0 20px red; z-index: 1000; pointer-events: none;
-        }
-        .huh-anim { animation: huh-surge 0.6s ease-out; }
-        @keyframes huh-surge {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
-        }
-
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
         .tab-btn.active { background: var(--blue); }
@@ -78,23 +67,23 @@
         #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
         #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #f80); transition: 0.1s; }
 
-        .item { position: absolute; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.1s; }
+        .item { position: absolute; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .grass { width: 75px; height: 75px; }
         .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; }
         .grass::before { transform: rotate(-35deg); left: 10px; }
         .grass::after { transform: rotate(35deg); right: 10px; }
         .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 2; pointer-events: none; }
         
-        .egg { width: 70px; height: 70px; font-size: 50px; background: transparent; transition: left 0.8s linear, top 0.8s linear, transform 0.2s; }
+        .egg { width: 70px; height: 70px; font-size: 50px; background: transparent; }
 
-        .pop-text { position: absolute; color: var(--gold); font-size: 20px; font-weight: bold; pointer-events: none; animation: pop-up 0.5s ease-out forwards; z-index: 100; }
-        @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
+        .pop-text { position: absolute; color: var(--gold); font-size: 24px; font-weight: bold; pointer-events: none; animation: pop-up 0.5s ease-out forwards; z-index: 100; text-shadow: 0 0 5px black; }
+        @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-70px) scale(1.5); opacity: 0; } }
         
-        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
+        .gacha-anim { animation: shake 0.5s infinite; }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } 100% { transform: rotate(0deg); } }
     </style>
 </head>
 <body onload="loadGame()">
-    <div id="flash"></div>
     <div class="header">
         <button onclick="giveUp()" style="background:#444; color:white; border:none; border-radius:5px; padding:2px 8px; font-size:10px;">リタイア</button>
         <div>💰 <span id="m-val">0</span></div>
@@ -104,7 +93,6 @@
     </div>
 
     <div id="game-field">
-        <div id="skill-effect-text">huh</div>
         <div id="lvl-up-text">LEVEL UP!</div>
         <div id="fever-text">FEVER!</div>
         
@@ -120,7 +108,7 @@
 
         <div id="gacha-screen" class="overlay" style="display:none;">
             <div id="gacha-box" style="font-size:80px; min-height:100px; display:flex; align-items:center; justify-content:center;">🎁</div>
-            <div id="gacha-msg" style="margin:10px; height:60px; color:gold; font-size:14px; line-height:1.2;"></div>
+            <div id="gacha-msg" style="margin:10px; height:60px; color:gold; font-size:14px; line-height:1.2;">ガチャを回して強くなれ！</div>
             <div id="gacha-btns" style="display: flex; flex-direction: column; gap: 8px; width: 200px;">
                 <button class="btn btn-gacha" onclick="runGacha(1)">1回 (1,000円)</button>
                 <button class="btn btn-gacha" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
@@ -142,7 +130,7 @@
 
         <div id="end-screen" class="overlay" style="display:none">
             <h2 style="color:red; font-size:40px;">GAME OVER</h2>
-            <p>獲得金額: <span id="res-money">0</span>円</p>
+            <p>最終金額: <span id="res-money">0</span>円</p>
             <button class="btn btn-start" onclick="closeEndScreen()" style="width:180px;">TITLE</button>
         </div>
     </div>
@@ -156,54 +144,39 @@
     </div>
 
     <script>
-        let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char', armor = false;
+        let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char';
         let feverPoints = 0, isFever = false, feverTimer = null;
 
         const items = [
-            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ27s短縮/卵無効' },
+            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ爆速/卵無効' },
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '草がすべて金になる(+50円)' },
             { id: 'c10', type: 'char', name: '時計ぜん', icon: '⏰', owned: false, rarity: 'SR', info: 'レベルアップ時、時間+15秒' },
-            { id: 'c2', type: 'char', name: '宇宙ぜん', icon: '👽', owned: false, rarity: 'SR', info: '時間減少10%緩和' },
-            { id: 'c3', type: 'char', name: '騎士ぜん', icon: '⚔️', owned: false, rarity: 'SR', info: '爆弾を1度耐える' },
-            { id: 'c4', type: 'char', name: '悪魔ぜん', icon: '😈', owned: false, rarity: 'SR', info: '周囲を巻き込む' },
-            { id: 'c11', type: 'char', name: 'ｷﾞｬﾝﾌﾞﾗｰぜん', icon: '🎰', owned: false, rarity: 'R', info: '20%の確率で獲得金5倍' },
-            { id: 'c12', type: 'char', name: 'のんびりぜん', icon: '💤', owned: false, rarity: 'R', info: '草減少/時間回復UP' },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'R', info: '卵を抜くとお金(100円)' },
-            { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'R', info: '爆弾が無効' },
-            { id: 'c5', type: 'char', name: 'パンダぜん', icon: '🐼', owned: false, rarity: 'R', info: '金+5円' },
-            { id: 'c8', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'R', info: 'チャージ10s短縮' },
-            { id: 'b1', type: 'bg', name: '次元の狭間', val: 'radial-gradient(circle, #400, #000)', owned: false, rarity: 'SSR' },
-            { id: 's_huh', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '画面内の草をすべて抜く' },
-            { id: 's2', type: 'skill', name: '時間停止', owned: false, rarity: 'SR', info: '制限時間を10秒増やす' },
-            { id: 's3', type: 'skill', name: 'ﾌｨｰﾊﾞｰ突入', owned: false, rarity: 'SSR', info: '強制的にフィーバーを開始する' },
-            { id: 's4', type: 'skill', name: '黄金化', owned: false, rarity: 'SR', info: '画面上の卵をすべて草に変える' },
-            { id: 's5', type: 'skill', name: '一攫千金', owned: false, rarity: 'R', info: '現在のお金が10%増える' },
-            { id: 's6', type: 'skill', name: '連撃', owned: false, rarity: 'R', info: '5秒間、抜いた時の金額が3倍' },
-            { id: 's7', type: 'skill', name: '次元斬', owned: false, rarity: 'SSR', info: '一気に3レベル分進める' },
-            { id: 's8', type: 'skill', name: '聖域', owned: false, rarity: 'SR', info: '15秒間、卵をタップしても死なない' }
+            { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'R', info: '爆弾(卵)が無効' },
+            { id: 's_huh', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '全画面の草を抜く' },
+            { id: 's3', type: 'skill', name: 'ﾌｨｰﾊﾞｰ突入', owned: false, rarity: 'SSR', info: '強制フィーバー' }
         ];
 
         let equipped = { char: null, bg: null, skill: items.find(i => i.id === 's_huh') };
 
+        function v(ms=20) { if(navigator.vibrate) navigator.vibrate(ms); }
+
         function saveGame() {
             const data = { money, ownedIds: items.filter(i => i.owned).map(i => i.id),
                 equippedIds: { char: equipped.char?.id, bg: equipped.bg?.id, skill: equipped.skill?.id } };
-            localStorage.setItem('kusaSurvivalData_v100Yen', JSON.stringify(data));
+            localStorage.setItem('kusaSurvivalData_vFinal', JSON.stringify(data));
         }
 
         function loadGame() {
-            const raw = localStorage.getItem('kusaSurvivalData_v100Yen');
+            const raw = localStorage.getItem('kusaSurvivalData_vFinal');
             if(!raw) { updateUI(); return; }
             const data = JSON.parse(raw);
             money = data.money;
             data.ownedIds.forEach(id => { const item = items.find(i => i.id === id); if(item) item.owned = true; });
             if(data.equippedIds.char) equip(data.equippedIds.char, false);
-            if(data.equippedIds.bg) equip(data.equippedIds.bg, false);
             if(data.equippedIds.skill) equip(data.equippedIds.skill, false);
             updateUI();
         }
-
-        function v(ms=20) { if(navigator.vibrate) navigator.vibrate(ms); }
 
         function openLayer(id) {
             document.querySelectorAll('.overlay').forEach(l => l.style.display = 'none');
@@ -219,17 +192,21 @@
             if (money < cost) return alert("お金不足！");
             money -= cost; updateUI();
             const boxEl = document.getElementById('gacha-box');
+            const msgEl = document.getElementById('gacha-msg');
             boxEl.classList.add('gacha-anim');
+            msgEl.innerText = "ガチャを回しています...";
             await new Promise(r => setTimeout(r, 800));
             boxEl.classList.remove('gacha-anim');
+            
+            let results = [];
             for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
-                let target;
-                if (r < 2) target = items.filter(i => i.rarity === 'SSR')[0];
-                else if (r < 15) target = items.filter(i => i.rarity === 'SR')[Math.floor(Math.random()*4)];
-                else target = items.filter(i => i.rarity === 'R')[Math.floor(Math.random()*4)];
-                if(target) target.owned = true;
+                let pool = r < 2 ? items.filter(i=>i.rarity==='SSR') : r < 15 ? items.filter(i=>i.rarity==='SR') : items.filter(i=>i.rarity==='R');
+                let target = pool[Math.floor(Math.random()*pool.length)] || items[0];
+                target.owned = true;
+                results.push(`[${target.rarity}] ${target.name}`);
             }
+            msgEl.innerText = times === 1 ? `獲得：${results[0]}` : `${times}連完了！`;
             saveGame(); renderCol();
         }
 
@@ -240,8 +217,7 @@
                 const div = document.createElement('div');
                 div.className = `col-item ${item.owned ? 'owned' : 'locked'}`;
                 const isEq = equipped[item.type] === item;
-                div.innerHTML = `<div style="text-align:left;">
-                    <div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${item.owned ? (item.icon || '') + item.name : '？？？'}</div></div>
+                div.innerHTML = `<div style="text-align:left;"><div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${item.owned ? (item.icon || '') + item.name : '？？？'}</div></div>
                     <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '装備中' : '装備'}</button>`;
                 list.appendChild(div);
             });
@@ -251,7 +227,6 @@
             const item = items.find(i => i.id === id);
             equipped[item.type] = item;
             if(item.type === 'char') document.getElementById('tsum-icon').innerText = item.icon;
-            if(item.type === 'bg') document.getElementById('game-field').style.background = item.val;
             if(item.type === 'skill') document.getElementById('skill-display-name').innerText = item.name;
             if(shouldSave) { renderCol(); saveGame(); }
         }
@@ -269,37 +244,42 @@
 
         function handleGrassClick(item) {
             if (!isPlaying || item.getAttribute('data-plucked') === "true") return;
-            v(15); item.setAttribute('data-plucked', "true");
+            v(10); setTimeout(() => v(5), 30);
+            item.setAttribute('data-plucked', "true");
+            item.style.pointerEvents = "none";
 
-            // ★ 草一本抜くと100円！
-            let m = 100; 
-            if (isFever) m *= 3; // フィーバー中はさらに3倍
+            let m = 100; if (isFever) m *= 3; money += m;
+            
+            const pop = document.createElement('div');
+            pop.className = 'pop-text'; pop.innerText = `+${m}`;
+            pop.style.left = item.style.left; pop.style.top = item.style.top;
+            document.getElementById('game-field').appendChild(pop);
+            setTimeout(() => pop.remove(), 500);
 
-            money += m;
+            skillCount = Math.min(100, skillCount + 2.5);
             feverPoints = Math.min(100, feverPoints + 5);
             if (feverPoints >= 100 && !isFever) startFever();
             
             updateUI();
-            item.style.transform = "scale(1.5) rotate(20deg)"; item.style.opacity = "0";
+            const angle = (Math.random() - 0.5) * 40;
+            item.style.transition = "all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28)";
+            item.style.transform = `translateY(-100px) rotate(${angle}deg) scale(0)`;
+            item.style.opacity = "0";
             
-            const remaining = document.querySelectorAll('.grass:not([data-plucked="true"])');
-            if (remaining.length === 0) {
-                level++; timeLeft += 5.0; spawn();
+            if (document.querySelectorAll('.grass:not([data-plucked="true"])').length === 0) {
+                level++; timeLeft += 5.0; setTimeout(spawn, 300);
             }
         }
 
-        function startFever() {
-            isFever = true; document.body.classList.add('is-fever');
-            document.getElementById('game-field').classList.add('fever-bg');
-            let duration = 5000; let start = Date.now();
-            feverTimer = setInterval(() => {
-                feverPoints = 100 - ((Date.now() - start) / duration * 100);
-                if (feverPoints <= 0) stopFever();
-                updateUI();
-            }, 50);
+        function handleEggClick(item) {
+            if (!isPlaying || item.style.opacity === "0") return;
+            const charId = equipped.char ? equipped.char.id : null;
+            if (charId === 'c7' || charId === 'c1') return;
+            if (charId === 'c13') {
+                v(15); money += 100; item.style.opacity = "0"; updateUI(); return;
+            }
+            endGame();
         }
-
-        function stopFever() { isFever = false; clearInterval(feverTimer); document.body.classList.remove('is-fever'); document.getElementById('game-field').classList.remove('fever-bg'); }
 
         function spawn() {
             const field = document.getElementById('game-field');
@@ -313,36 +293,47 @@
                 else item.innerText = "🥚";
                 item.style.left = Math.random() * (field.clientWidth - 70) + "px";
                 item.style.top = Math.random() * (field.clientHeight - 70) + "px";
-                item.onpointerdown = () => { if(isEgg) endGame(); else handleGrassClick(item); };
+                item.onpointerdown = () => { if(isEgg) handleEggClick(item); else handleGrassClick(item); };
                 field.appendChild(item);
             }
         }
 
         function moveEggs() {
             if (!isPlaying) return;
+            const field = document.getElementById('game-field');
             document.querySelectorAll('.egg').forEach(egg => {
-                egg.style.left = Math.random() * (document.getElementById('game-field').clientWidth - 70) + "px";
-                egg.style.top = Math.random() * (document.getElementById('game-field').clientHeight - 70) + "px";
+                if (egg.style.opacity === "0") return;
+                egg.style.transition = "left 1.2s linear, top 1.2s linear, transform 0.2s, opacity 0.2s";
+                egg.style.left = Math.random() * (field.clientWidth - 70) + "px";
+                egg.style.top = Math.random() * (field.clientHeight - 70) + "px";
             });
             setTimeout(moveEggs, 1200);
         }
 
+        function startFever() {
+            isFever = true; document.body.classList.add('is-fever');
+            document.getElementById('game-field').classList.add('fever-bg');
+            let duration = 5000, start = Date.now();
+            feverTimer = setInterval(() => {
+                feverPoints = 100 - ((Date.now() - start) / duration * 100);
+                if (feverPoints <= 0) stopFever();
+                updateUI();
+            }, 50);
+        }
+
+        function stopFever() { isFever = false; clearInterval(feverTimer); document.body.classList.remove('is-fever'); document.getElementById('game-field').classList.remove('fever-bg'); }
+
         function triggerSkill() {
             if(skillCount < 100 || !isPlaying) return;
             skillCount = 0; v(100);
-            const sid = equipped.skill.id;
-            if(sid === 's_huh') {
-                document.querySelectorAll('.grass:not([data-plucked="true"])').forEach(g => handleGrassClick(g));
-            } else if(sid === 's2') timeLeft += 10;
-            else if(sid === 's3') startFever();
-            else if(sid === 's5') money = Math.floor(money * 1.1);
+            if(equipped.skill.id === 's_huh') document.querySelectorAll('.grass:not([data-plucked="true"])').forEach(g => handleGrassClick(g));
+            else if(equipped.skill.id === 's3') startFever();
         }
 
         function updateUI() {
             document.getElementById('m-val').innerText = Math.floor(money);
             document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('l-val').innerText = level;
-            if(isPlaying) skillCount = Math.min(100, skillCount + 0.5);
             document.getElementById('skill-fill').style.width = skillCount + "%";
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
