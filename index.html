@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - ガチャ結果視認性向上版 -</title>
+    <title>草抜きサバイバル - 卵可動版 -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; }
         body { 
@@ -28,7 +28,6 @@
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* ガチャ結果の視認性アップ */
         #gacha-result-display {
             width: 85%; height: 140px; overflow-y: auto;
             background: #111; border: 1px solid #444; border-radius: 10px;
@@ -41,6 +40,20 @@
         .res-line.SSR { background: #443300; border: 1px solid var(--gold); color: var(--gold); animation: glow 1s infinite alternate; }
         .res-line.SR { color: #ff00ff; }
         @keyframes glow { from { box-shadow: 0 0 2px var(--gold); } to { box-shadow: 0 0 10px var(--gold); } }
+
+        /* ガチャ演出用追加スタイル */
+        #gacha-cutin {
+            position: absolute; width: 100%; height: 100%;
+            display: none; align-items: center; justify-content: center;
+            z-index: 600; font-size: 80px; pointer-events: none;
+            background: rgba(255,255,255,0); transition: background 0.5s;
+        }
+        .cutin-anim { animation: cutin-zoom 0.8s ease-out forwards; }
+        @keyframes cutin-zoom {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
 
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
@@ -57,8 +70,11 @@
         .btn-gacha { background: #ff4500; color: white; }
         .btn-col { background: var(--blue); color: white; }
 
-        .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up 0.6s forwards; z-index: 100; text-shadow: 0 0 10px black; }
-        @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translateY(-20px) scale(1.5); } 100% { transform: translateY(-120px) scale(2); opacity: 0; } }
+        .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
+        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
+
+        .particle { position: absolute; width: 8px; height: 8px; background: var(--grass-light); pointer-events: none; z-index: 90; border-radius: 2px; }
+        @keyframes scatter { to { transform: translate(var(--dx), var(--dy)) rotate(360deg); opacity: 0; } }
 
         .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
         #tsum-icon { width: 70px; height: 70px; border: 4px solid #444; border-radius: 50%; font-size: 35px; display: flex; align-items: center; justify-content: center; background: #222; transition: 0.2s; }
@@ -66,15 +82,32 @@
         #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
         #skill-fill { width: 0%; height: 100%; background: #f00; transition: 0.1s; }
 
-        .item { position: absolute; z-index: 10; cursor: pointer; }
+        .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
+        
+        .plucking { animation: pluck-anim 0.2s ease-out forwards; pointer-events: none; }
+        @keyframes pluck-anim { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); } 100% { transform: scale(0); opacity: 0; } }
+
         .grass { width: 75px; height: 75px; }
         .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; }
         .grass::before { transform: rotate(-35deg); left: 10px; }
         .grass::after { transform: rotate(35deg); right: 10px; }
         .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; }
         
-        .egg { width: 70px; height: 70px; font-size: 50px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 5px white); }
+        /* 卵のスタイルと揺れアニメーション */
+        .egg { 
+            width: 70px; height: 70px; font-size: 50px; 
+            display: flex; align-items: center; justify-content: center; 
+            filter: drop-shadow(0 0 5px white); 
+            animation: egg-shake 0.5s ease-in-out infinite alternate;
+        }
+        @keyframes egg-shake {
+            0% { transform: rotate(-10deg) scale(0.9); }
+            100% { transform: rotate(10deg) scale(1.1); }
+        }
+
         .gacha-anim { animation: shake 0.1s infinite; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-5deg); } 75% { transform: translateX(5px) rotate(5deg); } }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
 </head>
 <body onload="loadGame()">
@@ -86,9 +119,11 @@
     </div>
 
     <div id="game-field">
+        <div id="gacha-cutin"></div>
+
         <div id="start-screen" class="overlay">
             <h1 style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
-            <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">卵に触れたら即終了...</p>
+            <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">START</button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
@@ -97,15 +132,15 @@
         </div>
 
         <div id="gacha-screen" class="overlay" style="display:none;">
-            <div id="gacha-box" style="font-size:40px; filter: drop-shadow(0 0 10px white);">🎁</div>
+            <div id="gacha-box" style="font-size:40px; filter: drop-shadow(0 0 10px white); transition: 0.3s;">🎁</div>
             <div id="gacha-result-display"></div>
             <div id="gacha-msg" style="margin:5px; color:gold; min-height:20px; font-size:12px;">SSRを狙え！</div>
             <div style="display:flex; flex-direction:column; gap:5px; width: 220px;">
-                <button class="btn btn-gacha" onclick="runGacha(1)">1回 (1,000円)</button>
-                <button class="btn btn-gacha" onclick="runGacha(10)" style="background:#ff8c00;">10連 (10,000円)</button>
-                <button class="btn btn-gacha" onclick="runGacha(100)" style="background:#800080;">100連 (100,000円)</button>
+                <button class="btn btn-gacha" id="g1-btn" onclick="runGacha(1)">1回 (1,000円)</button>
+                <button class="btn btn-gacha" id="g10-btn" onclick="runGacha(10)" style="background:#ff8c00;">10連 (10,000円)</button>
+                <button class="btn btn-gacha" id="g100-btn" onclick="runGacha(100)" style="background:#800080;">100連 (100,000円)</button>
             </div>
-            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
+            <button class="btn" id="g-back-btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
 
         <div id="col-screen" class="overlay" style="display:none;">
@@ -140,7 +175,6 @@
         let feverPoints = 0, isFever = false, isSkillActive = false;
 
         const items = [
-            // キャラクター 20体
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
@@ -161,12 +195,10 @@
             { id: 'c18', type: 'char', name: '兵士ぜん', icon: '🎖️', owned: false, rarity: 'BASIC', info: '金1.5倍', rate: 1.5 },
             { id: 'c19', type: 'char', name: '学生ぜん', icon: '🎒', owned: false, rarity: 'BASIC', info: '金1.4倍', rate: 1.4 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
-            // 背景
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
             { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
             { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
             { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: false, rarity: 'SSR', info: '灼熱の地' },
-            // 必殺技
             { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
             { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
             { id: 's3', type: 'skill', name: '吸引', owned: false, rarity: 'SR', info: '画面の草を一括回収' },
@@ -192,7 +224,6 @@
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
-                document.getElementById('gacha-result-display').innerHTML = '';
             }
         }
 
@@ -222,84 +253,162 @@
         async function runGacha(times) {
             const cost = 1000 * times;
             if(money < cost) return alert("お金が足りません！");
-            money -= cost; updateUI();
             
+            // ボタン無効化
+            const btns = ['g1-btn', 'g10-btn', 'g100-btn', 'g-back-btn'].map(id => document.getElementById(id));
+            btns.forEach(b => b.disabled = true);
+            
+            money -= cost; updateUI();
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; 
             const box = document.getElementById('gacha-box');
-            box.classList.add('gacha-anim');
-            await new Promise(r => setTimeout(r, 600));
-            box.classList.remove('gacha-anim');
+            const cutin = document.getElementById('gacha-cutin');
+            const screen = document.getElementById('gacha-screen');
             
+            // 抽選
+            let results = [];
+            let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
                 let pick;
-                if(r < 5) pick = items.filter(it => it.rarity === 'SSR')[Math.floor(Math.random()*8)];
-                else if(r < 20) pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random()*6)];
-                else if(r < 50) pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random()*8)];
-                else pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random()*8)];
-                
+                if(r < 5) { pick = items.filter(it => it.rarity === 'SSR')[Math.floor(Math.random()*items.filter(it => it.rarity === 'SSR').length)]; maxRarity = 'SSR'; }
+                else if(r < 20) { pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random()*items.filter(it => it.rarity === 'SR').length)]; if(maxRarity!=='SSR') maxRarity='SR'; }
+                else if(r < 50) { pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random()*items.filter(it => it.rarity === 'R').length)]; if(maxRarity==='BASIC') maxRarity='R'; }
+                else pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random()*items.filter(it => it.rarity === 'BASIC').length)];
+                results.push(pick);
+            }
+
+            // 演出：箱の震え
+            box.classList.add('gacha-anim');
+            await new Promise(r => setTimeout(r, 800));
+            box.classList.remove('gacha-anim');
+
+            // 演出：最高レア度に応じたカットイン
+            cutin.style.display = 'flex';
+            cutin.innerText = maxRarity === 'SSR' ? '🌈SSR!!' : (maxRarity === 'SR' ? '✨SR!' : '🎁');
+            cutin.style.color = maxRarity === 'SSR' ? 'gold' : (maxRarity === 'SR' ? '#ff00ff' : 'white');
+            cutin.classList.add('cutin-anim');
+            screen.style.background = maxRarity === 'SSR' ? 'rgba(50,40,0,0.95)' : 'rgba(0,0,0,0.95)';
+            
+            await new Promise(r => setTimeout(r, 800));
+            cutin.classList.remove('cutin-anim');
+            cutin.style.display = 'none';
+
+            // 結果表示
+            results.forEach(pick => {
                 if(pick) {
                     pick.owned = true;
                     const line = document.createElement('div');
                     line.className = `res-line ${pick.rarity}`;
-                    line.innerHTML = `<span>${pick.icon} ${pick.name}</span> <span>[${pick.rarity}]</span>`;
+                    line.innerHTML = `<span>${pick.icon || ''} ${pick.name}</span> <span>[${pick.rarity}]</span>`;
                     display.appendChild(line);
                 }
-            }
-            display.scrollTop = 0; // 最新を一番上に
+            });
+
+            display.scrollTop = display.scrollHeight;
             document.getElementById('gacha-msg').innerText = `${times}連完了！`;
+            btns.forEach(b => b.disabled = false);
             saveGame(); updateUI();
         }
 
         function spawn() {
             if(!isPlaying) return;
             const field = document.getElementById('game-field');
+            
+            // 草の生成
             for(let i=0; i<9; i++) {
                 const g = document.createElement('div');
                 g.className = 'item grass';
                 g.style.left = Math.random() * 85 + "%";
                 g.style.top = Math.random() * 80 + "%";
                 g.innerHTML = '<div class="grass-center"></div>';
-                g.onclick = () => pluck(g, 50);
+                g.onclick = function() {
+                    this.onclick = null;
+                    pluck(this, 50);
+                };
                 field.appendChild(g);
             }
+
+            // 卵の生成と移動ロジック
             const egg = document.createElement('div');
             egg.className = 'item egg';
             egg.innerText = '🥚';
-            egg.style.left = Math.random() * 85 + "%";
-            egg.style.top = Math.random() * 80 + "%";
+            
+            let posX = Math.random() * 80;
+            let posY = Math.random() * 75;
+            let velX = (Math.random() - 0.5) * 2.5; 
+            let velY = (Math.random() - 0.5) * 2.5; 
+
+            egg.style.left = posX + "%";
+            egg.style.top = posY + "%";
+
+            const moveEgg = setInterval(() => {
+                if (!isPlaying || !egg.parentNode) {
+                    clearInterval(moveEgg);
+                    return;
+                }
+                posX += velX;
+                posY += velY;
+                if (posX <= 0 || posX >= 85) velX *= -1;
+                if (posY <= 0 || posY >= 80) velY *= -1;
+                egg.style.left = posX + "%";
+                egg.style.top = posY + "%";
+            }, 30);
+
             egg.onclick = () => {
                 const charId = equipped.char.id;
                 if(charId === 'c1' || charId === 'c7') {
                     popText(egg.style.left, egg.style.top, "GUARD!");
-                    egg.remove();
+                    clearInterval(moveEgg); egg.remove();
                 } else if(charId === 'c13') {
                     money += 100;
                     popText(egg.style.left, egg.style.top, "+100");
-                    egg.remove();
+                    clearInterval(moveEgg); egg.remove();
                     updateUI();
                 } else {
+                    clearInterval(moveEgg);
                     endGame("卵を抜いてしまった！");
                 }
             };
             field.appendChild(egg);
         }
 
+        function createParticles(x, y) {
+            const field = document.getElementById('game-field');
+            for(let i=0; i<6; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = x; p.style.top = y;
+                const dx = (Math.random() - 0.5) * 200 + "px";
+                const dy = (Math.random() - 0.5) * 200 + "px";
+                p.style.setProperty('--dx', dx);
+                p.style.setProperty('--dy', dy);
+                p.style.animation = "scatter 0.4s ease-out forwards";
+                field.appendChild(p);
+                setTimeout(() => p.remove(), 400);
+            }
+        }
+
         function pluck(el, base) {
+            if(el.classList.contains('plucking')) return;
             let gain = Math.floor(base * equipped.char.rate * (isFever ? 3 : 1));
             money += gain; feverPoints = Math.min(100, feverPoints + 7);
             if(feverPoints >= 100 && !isFever) startFever();
+            createParticles(el.style.left, el.style.top);
             popText(el.style.left, el.style.top, `+${gain}`);
-            el.remove(); updateUI();
-            if(document.querySelectorAll('.grass').length === 0) spawn();
+            el.classList.add('plucking');
+            setTimeout(() => {
+                el.remove();
+                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) spawn();
+            }, 200);
+            updateUI();
         }
 
         function popText(x, y, txt, color="var(--gold)") {
             const p = document.createElement('div');
             p.className = 'pop-text'; p.innerText = txt; p.style.left = x; p.style.top = y; p.style.color = color;
             document.getElementById('game-field').appendChild(p);
-            setTimeout(() => p.remove(), 600);
+            setTimeout(() => p.remove(), 500);
         }
 
         function triggerSkill() {
@@ -308,12 +417,12 @@
             const sid = equipped.skill.id;
             if(sid === 's1') {
                 const interval = setInterval(() => {
-                    const targets = document.querySelectorAll('.grass');
+                    const targets = document.querySelectorAll('.grass:not(.plucking)');
                     if(targets.length > 0) pluck(targets[0], 50);
-                }, 200);
+                }, 150);
                 setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 3000);
             } else if(sid === 's2') { startFever(); isSkillActive = false;
-            } else if(sid === 's3') { document.querySelectorAll('.grass').forEach(g => pluck(g, 50)); isSkillActive = false;
+            } else if(sid === 's3') { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); isSkillActive = false;
             } else if(sid === 's4') {
                 document.getElementById('game-field').style.filter = "grayscale(1)";
                 const timerBackup = timeLeft;
