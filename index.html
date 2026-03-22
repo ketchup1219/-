@@ -194,8 +194,14 @@
             { id: 'c5', type: 'char', name: 'パンダぜん', icon: '🐼', owned: false, rarity: 'R', info: '金+5円' },
             { id: 'c8', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'R', info: 'チャージ10s短縮' },
             { id: 'b1', type: 'bg', name: '次元の狭間', val: 'radial-gradient(circle, #400, #000)', owned: false, rarity: 'SSR' },
-            { id: 's_huh', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC' },
-            { id: 's2', type: 'skill', name: '時間停止', owned: false, rarity: 'SR' }
+            { id: 's_huh', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '画面内の草をすべて抜く' },
+            { id: 's2', type: 'skill', name: '時間停止', owned: false, rarity: 'SR', info: '制限時間を10秒増やす' },
+            { id: 's3', type: 'skill', name: 'ﾌｨｰﾊﾞｰ突入', owned: false, rarity: 'SSR', info: '強制的にフィーバーを開始する' },
+            { id: 's4', type: 'skill', name: '黄金化', owned: false, rarity: 'SR', info: '画面上の卵をすべて草に変える' },
+            { id: 's5', type: 'skill', name: '一攫千金', owned: false, rarity: 'R', info: '現在のお金が10%増える' },
+            { id: 's6', type: 'skill', name: '連撃', owned: false, rarity: 'R', info: '5秒間、抜いた時の金額が3倍' },
+            { id: 's7', type: 'skill', name: '次元斬', owned: false, rarity: 'SSR', info: '一気に3レベル分進める' },
+            { id: 's8', type: 'skill', name: '聖域', owned: false, rarity: 'SR', info: '15秒間、卵をタップしても死なない' }
         ];
 
         let equipped = { char: null, bg: null, skill: items.find(i => i.id === 's_huh') };
@@ -239,7 +245,6 @@
             if (money < cost) return alert("お金不足！");
             money -= cost; updateUI();
             
-            // 演出開始
             const boxEl = document.getElementById('gacha-box');
             const msgEl = document.getElementById('gacha-msg');
             const btns = document.getElementById('gacha-btns');
@@ -251,39 +256,36 @@
             boxEl.innerText = "📦";
             boxEl.classList.add('gacha-anim');
             
-            // 抽選ロジック
             let results = [];
             let counts = { SSR: 0, SR: 0, R: 0 };
             for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
                 let target;
-                if (r < 0.1) { target = items.find(i => i.id === 'c1'); counts.SSR++; }
-                else if (r < 1.1) { target = items.find(i => i.id === 'c7'); counts.R++; }
-                else if (r < 6.1) { target = items.find(i => i.id === 'b1'); counts.SSR++; }
-                else if (r < 26.1) { 
+                if (r < 2) { 
+                    const pool = items.filter(i => i.rarity === 'SSR');
+                    target = pool[Math.floor(Math.random() * pool.length)]; counts.SSR++; 
+                }
+                else if (r < 15) { 
                     const pool = items.filter(i => i.rarity === 'SR');
                     target = pool[Math.floor(Math.random() * pool.length)]; counts.SR++;
                 } else {
-                    const pool = items.filter(i => i.rarity === 'R' && i.id !== 'c7');
+                    const pool = items.filter(i => i.rarity === 'R');
                     target = pool[Math.floor(Math.random() * pool.length)]; counts.R++;
                 }
                 target.owned = true; results.push(target);
             }
 
-            // 溜め時間
             await new Promise(r => setTimeout(r, 1200));
             
-            // 爆発演出
             boxEl.classList.remove('gacha-anim');
             v([50, 50, 200]);
             const flash = document.getElementById('flash');
             flash.style.opacity = counts.SSR > 0 ? "1" : "0.5";
             setTimeout(() => flash.style.opacity = "0", 200);
 
-            // 結果表示
             boxEl.classList.add('reveal-anim');
             if (times === 1) {
-                boxEl.innerText = results[0].icon || '🖼️';
+                boxEl.innerText = results[0].icon || '🔥';
                 msgEl.innerHTML = `<span style="font-size:20px; color:${results[0].rarity==='SSR'?'#ff00ff':'gold'};">${results[0].rarity}</span><br>${results[0].name}`;
             } else {
                 boxEl.innerText = counts.SSR > 0 ? "💎" : "🎊";
@@ -306,7 +308,7 @@
             items.filter(i => i.type === currentTab).forEach(item => {
                 const div = document.createElement('div');
                 div.className = `col-item ${item.owned ? 'owned' : 'locked'}`;
-                const displayName = item.owned ? (item.icon || '') + ' ' + item.name : '❓ ' + item.name;
+                const displayName = item.owned ? (item.icon || '🔥') + ' ' + item.name : '❓ ' + item.name;
                 const isEq = equipped[item.type] === item;
                 div.innerHTML = `<div style="text-align:left; flex-grow:1; cursor:pointer;" onclick="showDetail('${item.id}')">
                     <div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${displayName}</div></div>
@@ -371,6 +373,9 @@
             if (equipped.char?.id === 'c11' && Math.random() < 0.2) m *= 5;
             if (equipped.char?.id === 'c5') m += 5;
             if (isFever) m *= 3;
+            // 必殺技「連撃」用フラグ
+            if (window.skillRengekiTimer) m *= 3;
+
             money += m;
             
             if (!isFever) {
@@ -451,6 +456,7 @@
                 item.onpointerdown = (e) => {
                     if (!isPlaying) return;
                     if (isEgg) {
+                        if (window.skillSanctuary) { item.style.transform="scale(0)"; return; }
                         if (equipped.char?.id === 'c13') { money += 100; updateUI(); item.style.transform="scale(0)"; return; }
                         if (equipped.char?.id === 'c7' || equipped.char?.id === 'c1') return;
                         if (armor) { armor = false; item.style.transform = "scale(0)"; v([50,50]); return; }
@@ -475,15 +481,40 @@
         function triggerSkill() {
             if(skillCount < 100 || !isPlaying) return;
             skillCount = 0; v([50, 150]);
-            if(equipped.skill.id === 's_huh') {
-                const et = document.getElementById('skill-effect-text');
-                et.classList.remove('huh-anim'); void et.offsetWidth; et.classList.add('huh-anim');
-                document.getElementById('flash').style.opacity = "0.4";
-                setTimeout(() => document.getElementById('flash').style.opacity = "0", 300);
+            const sid = equipped.skill.id;
+            
+            // エフェクト表示
+            const et = document.getElementById('skill-effect-text');
+            et.innerText = equipped.skill.name;
+            et.classList.remove('huh-anim'); void et.offsetWidth; et.classList.add('huh-anim');
+            document.getElementById('flash').style.opacity = "0.4";
+            setTimeout(() => document.getElementById('flash').style.opacity = "0", 300);
+
+            if(sid === 's_huh') {
                 document.querySelectorAll('.grass:not([data-plucked="true"])').forEach((g, i) => {
                     setTimeout(() => { if(isPlaying) handleGrassClick(g); }, i * 30);
                 });
-            } else if(equipped.skill.id === 's2') { timeLeft += 10; }
+            } else if(sid === 's2') { 
+                timeLeft += 10; 
+            } else if(sid === 's3') {
+                startFever();
+            } else if(sid === 's4') {
+                document.querySelectorAll('.egg').forEach(e => {
+                    e.classList.remove('egg'); e.classList.add('grass'); e.innerText = "";
+                    const c = document.createElement('div'); c.className = 'grass-center'; e.appendChild(c);
+                    e.onpointerdown = () => handleGrassClick(e);
+                });
+            } else if(sid === 's5') {
+                money = Math.floor(money * 1.1);
+            } else if(sid === 's6') {
+                window.skillRengekiTimer = true;
+                setTimeout(() => window.skillRengekiTimer = false, 5000);
+            } else if(sid === 's7') {
+                level += 3; spawn();
+            } else if(sid === 's8') {
+                window.skillSanctuary = true;
+                setTimeout(() => window.skillSanctuary = false, 15000);
+            }
         }
 
         function updateUI() {
