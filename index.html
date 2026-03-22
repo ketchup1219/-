@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル -極-</title>
+    <title>草抜きサバイバル -確定卵-</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass: #7cfc00; --blue: #00d2ff; }
         body { 
@@ -218,12 +218,20 @@
         function spawn() {
             const field = document.getElementById('game-field');
             field.querySelectorAll('.item').forEach(i => i.remove());
-            // レベルが上がるとアイテム数と卵の比率が微増
+            
             const totalItems = 12 + level * 2;
-            for(let i=0; i < totalItems; i++) {
+            // 卵の数を確定（最低3つ、レベルに応じて微増）
+            const eggCount = Math.floor(totalItems * 0.3); 
+            const grassCount = totalItems - eggCount;
+
+            // アイテム配列を作成してシャッフル
+            let spawnList = [];
+            for(let i=0; i<eggCount; i++) spawnList.push(true);
+            for(let i=0; i<grassCount; i++) spawnList.push(false);
+            spawnList.sort(() => Math.random() - 0.5);
+
+            spawnList.forEach(isEgg => {
                 const item = document.createElement('div');
-                const isEgg = Math.random() < 0.25; // 約25%の確率で卵が出る
-                
                 item.className = 'item ' + (isEgg ? 'egg' : 'grass');
                 if(isEgg) item.innerText = "🥚";
                 
@@ -234,9 +242,9 @@
                     if(!isPlaying || item.style.transform === "scale(0)") return;
                     
                     if(isEgg) {
-                        if(equipped.char?.id === 'c7') return; // 幽霊ぜんは卵をスルー
+                        if(equipped.char?.id === 'c7') return; 
                         if(armor) { 
-                            armor = false; // 騎士ぜんのガード消費
+                            armor = false;
                             item.style.transform = "scale(0)";
                             v([50, 50]);
                             return; 
@@ -262,7 +270,7 @@
                     if(field.querySelectorAll('.grass').length <= 1) { level++; spawn(); }
                 };
                 field.appendChild(item);
-            }
+            });
         }
 
         function triggerSkill() {
