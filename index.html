@@ -3,76 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - THE ULTIMATE KAKUSEI -</title>
+    <title>草抜きサバイバル - マイツム：覚醒ぜん -</title>
     <style>
-        :root { --main-red: #ff0000; --grass-green: #7cfc00; }
+        :root { --kakusei-red: #ff0033; --grass-green: #7cfc00; }
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #000; color: white; 
             margin: 0; overflow: hidden; touch-action: none; user-select: none;
         }
+
         /* ヘッダー情報 */
         .header-info { 
             background: #111; padding: 10px; display: flex; justify-content: space-around; 
-            font-size: 18px; border-bottom: 3px solid var(--main-red);
+            font-size: 18px; border-bottom: 3px solid var(--kakusei-red);
         }
+
+        /* マイツムアイコン表示 */
+        #my-tsum-icon {
+            position: absolute; left: 15px; top: 55px; width: 60px; height: 60px;
+            background: linear-gradient(45deg, #ff0000, #440000);
+            border: 3px solid gold; border-radius: 50%;
+            font-size: 30px; line-height: 60px; z-index: 100;
+            box-shadow: 0 0 15px var(--kakusei-red);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
         /* ゲームフィールド */
         #game-field { 
-            position: relative; width: 95vw; height: 65vh; 
+            position: relative; width: 95vw; height: 60vh; 
             background: radial-gradient(circle, #222, #000); margin: 10px auto; 
             border: 4px solid #444; border-radius: 15px; overflow: hidden;
-            box-shadow: 0 0 20px rgba(255,0,0,0.2);
-        }
-        /* スキルゲージ */
-        #skill-bar-bg { width: 90%; height: 12px; background: #333; margin: 10px auto; border-radius: 10px; border: 1px solid #555; }
-        #skill-bar-fill { width: 0%; height: 100%; background: var(--main-red); box-shadow: 0 0 10px var(--main-red); transition: width 0.2s; }
-
-        /* 最強・覚醒ぜんのアニメーション */
-        @keyframes saikyo-glow {
-            0% { filter: drop-shadow(0 0 8px #f0f) brightness(1); transform: scale(1.1); }
-            50% { filter: drop-shadow(0 0 20px #f00) brightness(1.8); transform: scale(1.3); }
-            100% { filter: drop-shadow(0 0 8px #f0f) brightness(1); transform: scale(1.1); }
-        }
-        .kakusei-saikyo { 
-            animation: saikyo-glow 0.15s infinite; 
-            background: linear-gradient(45deg, #ff0000, #440000) !important;
-            z-index: 50 !important;
         }
 
-        /* アイテム基本設定（当たり判定拡大） */
+        /* スキルボタン（覚醒ぜん専用） */
+        .skill-container { width: 90%; margin: 10px auto; display: flex; align-items: center; gap: 10px; }
+        #skill-bar-bg { flex-grow: 1; height: 25px; background: #333; border-radius: 15px; overflow: hidden; border: 2px solid #555; }
+        #skill-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ff0000, #ff8c00); box-shadow: 0 0 10px #f00; transition: width 0.2s; }
+        #skill-btn { 
+            padding: 10px 20px; border-radius: 25px; border: none; font-weight: bold; 
+            background: #444; color: #888; transition: 0.3s; min-width: 100px; font-size: 16px;
+        }
+        #skill-btn.ready { 
+            background: linear-gradient(#ff0000, #ff8c00); color: white; 
+            box-shadow: 0 0 20px #ff0000; cursor: pointer; animation: flash-btn 0.5s infinite;
+        }
+        @keyframes flash-btn { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        /* アイテム設定 */
         .item { 
             position: absolute; width: 45px; height: 45px; z-index: 10; 
             transition: transform 0.1s; box-sizing: content-box; 
-            border: 18px solid transparent; /* 指での操作を助ける透明な当たり判定 */
-            background-clip: padding-box; touch-action: none;
+            border: 20px solid transparent; background-clip: padding-box; touch-action: none;
         }
         .grass { background: var(--grass-green); clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); }
-        .egg { display: flex; align-items: center; justify-content: center; font-size: 38px; border: none; filter: drop-shadow(0 0 8px red); }
+        .egg { display: flex; align-items: center; justify-content: center; font-size: 35px; border: none; filter: drop-shadow(0 0 8px red); }
 
-        /* オーバーレイ表示 */
-        .overlay { 
-            position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.92); 
-            z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        }
-        .btn-main { 
-            padding: 18px 45px; font-size: 24px; background: var(--main-red); color: white; 
-            border: none; border-radius: 50px; cursor: pointer; font-weight: bold; 
-            box-shadow: 0 0 25px var(--main-red); transition: 0.2s;
-        }
-        .btn-main:active { transform: scale(0.9); }
+        /* オーバーレイ */
+        .overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-main { padding: 15px 40px; font-size: 22px; background: var(--kakusei-red); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 0 20px #f00; }
 
-        #flash-effect { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
-        #msg-popup { 
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); 
-            font-size: 60px; font-weight: bold; color: white; text-shadow: 0 0 20px red; 
-            z-index: 500; pointer-events: none; opacity: 0; transition: 0.3s;
-        }
+        #ultimate-flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
     </style>
 </head>
 <body>
 
-    <div id="flash-effect"></div>
-    <div id="msg-popup">Huh?</div>
+    <div id="ultimate-flash"></div>
+    <div id="my-tsum-icon">🔥</div>
 
     <div class="header-info">
         <div>💰 <span id="score">0</span></div>
@@ -80,38 +77,39 @@
         <div>LV <span id="level">1</span></div>
     </div>
 
-    <div id="skill-bar-bg"><div id="skill-bar-fill"></div></div>
+    <div class="skill-container">
+        <div id="skill-bar-bg"><div id="skill-bar-fill"></div></div>
+        <button id="skill-btn">CHARGE...</button>
+    </div>
 
     <div id="game-field">
         <div id="start-overlay" class="overlay">
-            <h1 style="color:var(--main-red); text-shadow: 0 0 15px #f00; margin-bottom: 5px;">最強・覚醒ぜん</h1>
-            <p style="font-size: 14px; margin-bottom: 25px;">【5%の覚醒】を抜き、全滅させろ。<br>たまごに触れたら即終了。</p>
+            <h1 style="color:var(--kakusei-red); text-shadow: 0 0 10px #f00;">マイツム：覚醒ぜん</h1>
+            <p>スキル：画面上の草を全消し！<br><span style="color:#ff4444;">※たまご（地雷）に注意</span></p>
             <button class="btn-main" onclick="resetGame()">START</button>
         </div>
 
         <div id="score-overlay" class="overlay" style="display: none;">
-            <h2 id="over-reason" style="color:red; font-size: 32px; margin:0;">GAME OVER</h2>
-            <p style="font-size:22px;">最終利益: <span id="final-score">0</span>円</p>
+            <h2 id="over-reason" style="color:red;">GAME OVER</h2>
+            <p>利益: <span id="final-score">0</span>円</p>
             <button class="btn-main" onclick="resetGame()">RETRY</button>
         </div>
     </div>
 
     <script>
-        let score = 0, level = 1, timeLeft = 30.0, skill = 0;
+        let score = 0, level = 1, timeLeft = 30.0, skillCharge = 0;
         let isGameOver = true, timerInterval = null;
 
-        function v(pattern=15) { if(navigator.vibrate) navigator.vibrate(pattern); }
+        function v(ms=15) { if(navigator.vibrate) navigator.vibrate(ms); }
 
         function resetGame() {
-            score = 0; level = 1; timeLeft = 30.0; skill = 0;
+            score = 0; level = 1; timeLeft = 30.0; skillCharge = 0;
             isGameOver = false;
             document.getElementById('start-overlay').style.display = 'none';
             document.getElementById('score-overlay').style.display = 'none';
-            // アイテムクリア
             [...document.querySelectorAll('.item')].forEach(i => i.remove());
             updateUI();
             spawn();
-            // タイマー開始
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 if(isGameOver) return;
@@ -125,48 +123,39 @@
             document.getElementById('score').innerText = Math.floor(score);
             document.getElementById('timer').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('level').innerText = level;
-            document.getElementById('skill-bar-fill').style.width = Math.min(100, skill) + "%";
+            document.getElementById('skill-bar-fill').style.width = Math.min(100, skillCharge) + "%";
+            
+            const sbtn = document.getElementById('skill-btn');
+            if(skillCharge >= 100) {
+                sbtn.classList.add('ready'); sbtn.innerText = "覚醒発動！";
+            } else {
+                sbtn.classList.remove('ready'); sbtn.innerText = "CHARGE...";
+            }
         }
 
         function createItem() {
             const f = document.getElementById('game-field');
             const item = document.createElement('div');
-            const rand = Math.random();
+            const isEgg = Math.random() < 0.25;
             
-            let type = "grass";
-            if (rand < 0.22) { type = "egg"; } // 22%で地雷
-            else if (rand < 0.27) { type = "saikyo"; } // 22%〜27%の間（5%）で最強覚醒
-            
-            item.className = "item " + (type === "saikyo" ? "grass kakusei-saikyo" : type);
-            if(type === "egg") item.innerText = "🥚";
+            item.className = isEgg ? 'item egg' : 'item grass';
+            if(isEgg) item.innerText = "🥚";
 
-            // 配置（端に寄りすぎないよう調整）
-            item.style.left = Math.random() * (f.clientWidth - 75) + "px";
-            item.style.top = Math.random() * (f.clientHeight - 75) + "px";
+            item.style.left = Math.random() * (f.clientWidth - 70) + "px";
+            item.style.top = Math.random() * (f.clientHeight - 70) + "px";
 
-            // 収穫・接触イベント
             const harvest = (e) => {
                 if(isGameOver) return;
                 e.preventDefault();
-                
-                if(type === "egg") {
-                    v([100, 50, 100]);
-                    endGame("たまごが爆発した！");
-                    return;
-                }
-
+                if(isEgg) { v([100, 50, 100]); endGame("たまごが爆発！"); return; }
                 if(item.style.transform === "scale(0)") return;
 
-                if(type === "saikyo") {
-                    triggerSaikyoSkill();
-                } else {
-                    v(15);
-                    score += 10;
-                    skill += 4;
-                    item.style.transform = "scale(0)";
-                    setTimeout(() => { if(item.parentNode) item.remove(); }, 100);
-                    checkNextLevel();
-                }
+                v();
+                score += 10;
+                skillCharge += 5; // マイツムパワーで溜まりやすく
+                item.style.transform = "scale(0)";
+                setTimeout(() => { if(item.parentNode) item.remove(); }, 100);
+                if(f.querySelectorAll('.grass').length === 0) { level++; spawn(); }
                 updateUI();
             };
 
@@ -175,57 +164,37 @@
             f.appendChild(item);
         }
 
-        // 最強能力：全消し
-        function triggerSaikyoSkill() {
-            v([60, 40, 60, 40, 150]);
-            
-            const flash = document.getElementById('flash-effect');
-            const popup = document.getElementById('msg-popup');
-            
-            flash.style.opacity = "0.7";
-            popup.innerText = "覚醒！";
-            popup.style.opacity = "1";
-            popup.style.transform = "translate(-50%, -50%) scale(1.5)";
+        function spawn() { for(let i=0; i < (8 + level * 2); i++) createItem(); }
 
-            setTimeout(() => {
-                flash.style.opacity = "0";
-                popup.style.opacity = "0";
-                popup.style.transform = "translate(-50%, -50%) scale(1)";
-            }, 400);
+        // マイツムスキル：最強覚醒
+        document.getElementById('skill-btn').onclick = () => {
+            if(skillCharge < 100 || isGameOver) return;
+            skillCharge = 0;
+            v([50, 30, 100]);
+            
+            // 覚醒フラッシュ演出
+            const flash = document.getElementById('ultimate-flash');
+            flash.style.opacity = "0.8";
+            setTimeout(() => flash.style.opacity = "0", 300);
 
-            const allGrass = document.querySelectorAll('.grass');
-            allGrass.forEach((g, index) => {
+            // 画面上の全「草」を破壊
+            const grasses = document.querySelectorAll('.grass');
+            grasses.forEach((g, i) => {
                 setTimeout(() => {
                     if(g.parentNode) {
-                        g.style.transform = "scale(0) rotate(180deg)";
-                        score += 40;
+                        g.style.transform = "scale(0) rotate(360deg)";
+                        score += 30; // スキルボーナス
                         setTimeout(() => g.remove(), 100);
-                        if(index === allGrass.length - 1) checkNextLevel();
+                        if(i === grasses.length - 1) { level++; spawn(); }
                     }
-                }, index * 15);
+                }, i * 20);
             });
-            score += 1000;
-            skill = 100;
-        }
-
-        function checkNextLevel() {
-            const f = document.getElementById('game-field');
-            if(f.querySelectorAll('.grass').length === 0) {
-                level++;
-                spawn();
-            }
-        }
-
-        function spawn() {
-            // レベルが上がるとアイテム密度アップ
-            const count = Math.min(40, 10 + level * 2);
-            for(let i=0; i < count; i++) createItem(); 
-        }
+            updateUI();
+        };
 
         function endGame(msg) { 
             isGameOver = true;
             clearInterval(timerInterval);
-            v([200, 100, 200]);
             document.getElementById('score-overlay').style.display = 'flex'; 
             document.getElementById('over-reason').innerText = msg;
             document.getElementById('final-score').innerText = score; 
