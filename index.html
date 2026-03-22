@@ -254,7 +254,6 @@
             const cost = 1000 * times;
             if(money < cost) return alert("お金が足りません！");
             
-            // ボタン無効化
             const btns = ['g1-btn', 'g10-btn', 'g100-btn', 'g-back-btn'].map(id => document.getElementById(id));
             btns.forEach(b => b.disabled = true);
             
@@ -265,7 +264,6 @@
             const cutin = document.getElementById('gacha-cutin');
             const screen = document.getElementById('gacha-screen');
             
-            // 抽選
             let results = [];
             let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
@@ -278,12 +276,10 @@
                 results.push(pick);
             }
 
-            // 演出：箱の震え
             box.classList.add('gacha-anim');
             await new Promise(r => setTimeout(r, 800));
             box.classList.remove('gacha-anim');
 
-            // 演出：最高レア度に応じたカットイン
             cutin.style.display = 'flex';
             cutin.innerText = maxRarity === 'SSR' ? '🌈SSR!!' : (maxRarity === 'SR' ? '✨SR!' : '🎁');
             cutin.style.color = maxRarity === 'SSR' ? 'gold' : (maxRarity === 'SR' ? '#ff00ff' : 'white');
@@ -294,7 +290,6 @@
             cutin.classList.remove('cutin-anim');
             cutin.style.display = 'none';
 
-            // 結果表示
             results.forEach(pick => {
                 if(pick) {
                     pick.owned = true;
@@ -315,7 +310,6 @@
             if(!isPlaying) return;
             const field = document.getElementById('game-field');
             
-            // 草の生成
             for(let i=0; i<9; i++) {
                 const g = document.createElement('div');
                 g.className = 'item grass';
@@ -329,7 +323,6 @@
                 field.appendChild(g);
             }
 
-            // 卵の生成と移動ロジック
             const egg = document.createElement('div');
             egg.className = 'item egg';
             egg.innerText = '🥚';
@@ -445,7 +438,8 @@
             spawn();
             const mainLoop = setInterval(() => {
                 if(!isFever) timeLeft -= 0.1;
-                if(!isSkillActive) skillCount = Math.min(100, skillCount + 1.5);
+                // 30秒で100%になるように調整 (0.1秒ごとに加算されるため、100 / 300)
+                if(!isSkillActive) skillCount = Math.min(100, skillCount + (100 / 300));
                 updateUI();
                 if(timeLeft <= 0 || !isPlaying) { clearInterval(mainLoop); if(timeLeft <= 0) endGame("タイムアップ！"); }
             }, 100);
