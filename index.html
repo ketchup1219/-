@@ -54,6 +54,23 @@
             100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
 
+        /* ガチャ演出用アニメーション */
+        @keyframes gacha-shake {
+            0% { transform: scale(1) rotate(0); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        .gacha-anim { animation: gacha-shake 0.1s infinite; filter: drop-shadow(0 0 20px var(--gold)); }
+        
+        @keyframes gacha-reveal {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .reveal-anim { animation: gacha-reveal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
         .tab-btn.active { background: var(--blue); }
@@ -123,14 +140,14 @@
         </div>
 
         <div id="gacha-screen" class="overlay" style="display:none;">
-            <div id="gacha-box" style="font-size:70px; min-height:80px;">🎁</div>
+            <div id="gacha-box" style="font-size:80px; min-height:100px; display:flex; align-items:center; justify-content:center;">🎁</div>
             <div id="gacha-msg" style="margin:10px; height:60px; color:gold; font-size:14px; line-height:1.2;"></div>
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 200px;">
+            <div id="gacha-btns" style="display: flex; flex-direction: column; gap: 8px; width: 200px;">
                 <button class="btn btn-gacha" id="g-btn1" onclick="runGacha(1)">1回 (1,000円)</button>
                 <button class="btn btn-gacha" id="g-btn10" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
                 <button class="btn btn-gacha" id="g-btn100" onclick="runGacha(100)" style="background:#800080;">100連 (10万円)</button>
             </div>
-            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444; width:100px;">戻る</button>
+            <button class="btn" id="gacha-back-btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444; width:100px;">戻る</button>
         </div>
 
         <div id="col-screen" class="overlay" style="display:none;">
@@ -208,14 +225,33 @@
             const target = document.getElementById(id);
             if(target) target.style.display = 'flex';
             if(id === 'col-screen') renderCol();
+            if(id === 'gacha-screen') {
+                document.getElementById('gacha-box').innerText = "🎁";
+                document.getElementById('gacha-msg').innerText = "";
+                document.getElementById('gacha-btns').style.pointerEvents = "auto";
+            }
         }
 
         function setTab(tab) { currentTab = tab; renderCol(); }
 
-        function runGacha(times) {
+        async function runGacha(times) {
             const cost = 1000 * times;
             if (money < cost) return alert("お金不足！");
             money -= cost; updateUI();
+            
+            // 演出開始
+            const boxEl = document.getElementById('gacha-box');
+            const msgEl = document.getElementById('gacha-msg');
+            const btns = document.getElementById('gacha-btns');
+            const backBtn = document.getElementById('gacha-back-btn');
+            
+            btns.style.pointerEvents = "none";
+            backBtn.style.visibility = "hidden";
+            msgEl.innerText = "抽選中...";
+            boxEl.innerText = "📦";
+            boxEl.classList.add('gacha-anim');
+            
+            // 抽選ロジック
             let results = [];
             let counts = { SSR: 0, SR: 0, R: 0 };
             for (let i = 0; i < times; i++) {
@@ -233,16 +269,34 @@
                 }
                 target.owned = true; results.push(target);
             }
-            const msgEl = document.getElementById('gacha-msg');
-            const boxEl = document.getElementById('gacha-box');
+
+            // 溜め時間
+            await new Promise(r => setTimeout(r, 1200));
+            
+            // 爆発演出
+            boxEl.classList.remove('gacha-anim');
+            v([50, 50, 200]);
+            const flash = document.getElementById('flash');
+            flash.style.opacity = counts.SSR > 0 ? "1" : "0.5";
+            setTimeout(() => flash.style.opacity = "0", 200);
+
+            // 結果表示
+            boxEl.classList.add('reveal-anim');
             if (times === 1) {
                 boxEl.innerText = results[0].icon || '🖼️';
-                msgEl.innerHTML = `${results[0].rarity}<br>${results[0].name}`;
+                msgEl.innerHTML = `<span style="font-size:20px; color:${results[0].rarity==='SSR'?'#ff00ff':'gold'};">${results[0].rarity}</span><br>${results[0].name}`;
             } else {
-                boxEl.innerText = "🎊";
-                msgEl.innerHTML = `<div style="font-size:12px;"><span style="color:red;">SSR:${counts.SSR}</span> <span style="color:orange;">SR:${counts.SR}</span> R:${counts.R}</div>
-                                   <div style="font-size:10px; color:#ccc;">${results.slice(-3).map(r=>r.name).join(', ')}獲得</div>`;
+                boxEl.innerText = counts.SSR > 0 ? "💎" : "🎊";
+                msgEl.innerHTML = `<div style="font-size:12px;"><span style="color:#ff00ff; text-shadow:0 0 5px;">SSR:${counts.SSR}</span> <span style="color:orange;">SR:${counts.SR}</span> R:${counts.R}</div>
+                                   <div style="font-size:10px; color:#ccc; margin-top:5px;">${results.slice(-3).map(r=>r.name).join(', ')} など獲得</div>`;
             }
+            
+            setTimeout(() => {
+                boxEl.classList.remove('reveal-anim');
+                btns.style.pointerEvents = "auto";
+                backBtn.style.visibility = "visible";
+            }, 500);
+
             saveGame();
         }
 
@@ -327,7 +381,6 @@
 
             item.style.transform = "scale(1.5) rotate(20deg)"; 
             item.style.opacity = "0";
-            // 修正: 抜いた後にクリックを邪魔しないように消去
             setTimeout(() => { item.style.display = "none"; }, 150);
             
             if (equipped.char?.id === 'c4' && Math.random() < 0.2) {
