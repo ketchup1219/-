@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - 富豪編 -</title>
+    <title>草抜きサバイバル - 百円無双 -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; }
         body { 
@@ -53,22 +53,6 @@
             50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
-
-        @keyframes gacha-shake {
-            0% { transform: scale(1) rotate(0); }
-            25% { transform: scale(1.1) rotate(-5deg); }
-            50% { transform: scale(1.2) rotate(5deg); }
-            75% { transform: scale(1.1) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0); }
-        }
-        .gacha-anim { animation: gacha-shake 0.1s infinite; filter: drop-shadow(0 0 20px var(--gold)); }
-        
-        @keyframes gacha-reveal {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.5); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .reveal-anim { animation: gacha-reveal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
@@ -138,11 +122,11 @@
             <div id="gacha-box" style="font-size:80px; min-height:100px; display:flex; align-items:center; justify-content:center;">🎁</div>
             <div id="gacha-msg" style="margin:10px; height:60px; color:gold; font-size:14px; line-height:1.2;"></div>
             <div id="gacha-btns" style="display: flex; flex-direction: column; gap: 8px; width: 200px;">
-                <button class="btn btn-gacha" id="g-btn1" onclick="runGacha(1)">1回 (1,000円)</button>
-                <button class="btn btn-gacha" id="g-btn10" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
-                <button class="btn btn-gacha" id="g-btn100" onclick="runGacha(100)" style="background:#800080;">100連 (10万円)</button>
+                <button class="btn btn-gacha" onclick="runGacha(1)">1回 (1,000円)</button>
+                <button class="btn btn-gacha" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
+                <button class="btn btn-gacha" onclick="runGacha(100)" style="background:#800080;">100連 (10万円)</button>
             </div>
-            <button class="btn" id="gacha-back-btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444; width:100px;">戻る</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444; width:100px;">戻る</button>
         </div>
 
         <div id="col-screen" class="overlay" style="display:none;">
@@ -174,7 +158,6 @@
     <script>
         let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char', armor = false;
         let feverPoints = 0, isFever = false, feverTimer = null;
-        let comboCount = 0, comboTimer = null;
 
         const items = [
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ27s短縮/卵無効' },
@@ -205,11 +188,11 @@
         function saveGame() {
             const data = { money, ownedIds: items.filter(i => i.owned).map(i => i.id),
                 equippedIds: { char: equipped.char?.id, bg: equipped.bg?.id, skill: equipped.skill?.id } };
-            localStorage.setItem('kusaSurvivalData_vMoneyBoost', JSON.stringify(data));
+            localStorage.setItem('kusaSurvivalData_v100Yen', JSON.stringify(data));
         }
 
         function loadGame() {
-            const raw = localStorage.getItem('kusaSurvivalData_vMoneyBoost');
+            const raw = localStorage.getItem('kusaSurvivalData_v100Yen');
             if(!raw) { updateUI(); return; }
             const data = JSON.parse(raw);
             money = data.money;
@@ -236,23 +219,18 @@
             if (money < cost) return alert("お金不足！");
             money -= cost; updateUI();
             const boxEl = document.getElementById('gacha-box');
-            const msgEl = document.getElementById('gacha-msg');
-            boxEl.innerText = "📦";
             boxEl.classList.add('gacha-anim');
-            let results = [];
+            await new Promise(r => setTimeout(r, 800));
+            boxEl.classList.remove('gacha-anim');
             for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
                 let target;
                 if (r < 2) target = items.filter(i => i.rarity === 'SSR')[0];
                 else if (r < 15) target = items.filter(i => i.rarity === 'SR')[Math.floor(Math.random()*4)];
                 else target = items.filter(i => i.rarity === 'R')[Math.floor(Math.random()*4)];
-                target.owned = true; results.push(target);
+                if(target) target.owned = true;
             }
-            await new Promise(r => setTimeout(r, 800));
-            boxEl.classList.remove('gacha-anim');
-            boxEl.innerText = times === 1 ? (results[0].icon || '✨') : "🎊";
-            msgEl.innerText = times === 1 ? results[0].name : "たくさん手に入れた！";
-            saveGame();
+            saveGame(); renderCol();
         }
 
         function renderCol() {
@@ -292,20 +270,13 @@
         function handleGrassClick(item) {
             if (!isPlaying || item.getAttribute('data-plucked') === "true") return;
             v(15); item.setAttribute('data-plucked', "true");
-            
-            // コンボ処理
-            comboCount++;
-            clearTimeout(comboTimer);
-            comboTimer = setTimeout(() => { comboCount = 0; }, 800);
 
-            // ★ 稼ぎやすさアップ: 基本給を20円に、コンボボーナスを追加
-            let m = 20 + (comboCount * 2); 
-            if (equipped.char?.id === 'c1') m *= 10;
-            if (equipped.char?.id === 'c9') m += 50;
-            if (isFever) m *= 5; // フィーバー中もより稼げるように
+            // ★ 草一本抜くと100円！
+            let m = 100; 
+            if (isFever) m *= 3; // フィーバー中はさらに3倍
 
             money += m;
-            feverPoints = Math.min(100, feverPoints + 4);
+            feverPoints = Math.min(100, feverPoints + 5);
             if (feverPoints >= 100 && !isFever) startFever();
             
             updateUI();
@@ -364,7 +335,7 @@
                 document.querySelectorAll('.grass:not([data-plucked="true"])').forEach(g => handleGrassClick(g));
             } else if(sid === 's2') timeLeft += 10;
             else if(sid === 's3') startFever();
-            else if(sid === 's5') money = Math.floor(money * 1.2); // 1.2倍に強化
+            else if(sid === 's5') money = Math.floor(money * 1.1);
         }
 
         function updateUI() {
