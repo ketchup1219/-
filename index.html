@@ -12,7 +12,7 @@
             margin: 0; overflow: hidden; touch-action: none; user-select: none;
         }
 
-        .header { background: #111; padding: 10px; display: flex; justify-content: space-around; border-bottom: 2px solid #333; font-size: 14px; }
+        .header { background: #111; padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; }
         #game-field { 
             position: relative; width: 95vw; height: 55vh; 
             background: #1a2a1a; margin: 10px auto; 
@@ -48,9 +48,9 @@
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
         .tab-btn.active { background: var(--blue); }
         .col-list { width: 90%; height: 50%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #444; }
-        .col-item { background: #222; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
+        .col-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
         .col-item.owned { border-left-color: var(--gold); }
-        .col-item.locked { opacity: 0.2; }
+        .col-item.locked { opacity: 0.6; }
         .equip-btn { padding: 6px 12px; border-radius: 15px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
         .equipped { background: var(--grass-light) !important; color: #000; }
 
@@ -66,26 +66,27 @@
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
 
         #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
-        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #f80); transition: 0.2s; }
+        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #f80); transition: 0.1s; }
 
-        /* アイテムデザイン設定 */
+        /* アイテムデザイン */
         .item { position: absolute; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.1s; }
-        
-        /* 草：タップしやすく調整 */
         .grass { width: 75px; height: 75px; }
         .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; }
         .grass::before { transform: rotate(-35deg); left: 10px; }
         .grass::after { transform: rotate(35deg); right: 10px; }
         .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 2; }
         
-        /* たまご（爆弾）：サイズを大幅アップ */
         .egg { 
-            width: 70px; 
-            height: 70px; 
-            font-size: 50px; 
-            background: transparent; 
+            width: 70px; height: 70px; font-size: 50px; background: transparent; 
             filter: drop-shadow(0 0 5px rgba(255,0,0,0.5));
+            transition: left 0.8s linear, top 0.8s linear, transform 0.2s;
         }
+
+        /* 爽快エフェクト */
+        .pop-text { position: absolute; color: var(--gold); font-size: 20px; font-weight: bold; pointer-events: none; animation: pop-up 0.5s ease-out forwards; z-index: 100; }
+        .particle { position: absolute; width: 6px; height: 6px; background: var(--grass-light); border-radius: 50%; pointer-events: none; animation: particle-fly 0.4s ease-out forwards; z-index: 99; }
+        @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
+        @keyframes particle-fly { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
         
         #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
     </style>
@@ -93,6 +94,7 @@
 <body onload="loadGame()">
     <div id="flash"></div>
     <div class="header">
+        <button onclick="giveUp()" style="background:#444; color:white; border:none; border-radius:5px; padding:2px 8px; font-size:10px;">リタイア</button>
         <div>💰 <span id="m-val">0</span></div>
         <div>⏳ <span id="t-val">30.0</span></div>
         <div>LV <span id="l-val">1</span></div>
@@ -113,10 +115,14 @@
         </div>
 
         <div id="gacha-screen" class="overlay" style="display:none;">
-            <div id="gacha-box" style="font-size:70px;">🎁</div>
-            <div id="gacha-msg" style="margin:10px; height:50px; color:gold;"></div>
-            <button class="btn btn-gacha" id="g-btn" onclick="runGacha()" style="width:180px;">1000円で引く</button>
-            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444;">戻る</button>
+            <div id="gacha-box" style="font-size:70px; min-height:80px;">🎁</div>
+            <div id="gacha-msg" style="margin:10px; height:60px; color:gold; font-size:14px; line-height:1.2;"></div>
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 200px;">
+                <button class="btn btn-gacha" id="g-btn1" onclick="runGacha(1)">1回 (1,000円)</button>
+                <button class="btn btn-gacha" id="g-btn10" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
+                <button class="btn btn-gacha" id="g-btn100" onclick="runGacha(100)" style="background:#800080;">100連 (10万円)</button>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:#444; width:100px;">戻る</button>
         </div>
 
         <div id="col-screen" class="overlay" style="display:none;">
@@ -149,13 +155,18 @@
         let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char', armor = false;
 
         const items = [
-            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金3倍/ゲージ2倍' },
+            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ27s短縮/卵無効' },
+            { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '草がすべて金になる(+50円)' },
+            { id: 'c10', type: 'char', name: '時計ぜん', icon: '⏰', owned: false, rarity: 'SR', info: 'レベルアップ時、時間+15秒' },
             { id: 'c2', type: 'char', name: '宇宙ぜん', icon: '👽', owned: false, rarity: 'SR', info: '時間減少10%緩和' },
             { id: 'c3', type: 'char', name: '騎士ぜん', icon: '⚔️', owned: false, rarity: 'SR', info: '爆弾を1度耐える' },
             { id: 'c4', type: 'char', name: '悪魔ぜん', icon: '😈', owned: false, rarity: 'SR', info: '周囲を巻き込む' },
-            { id: 'c5', type: 'char', name: 'パンダぜん', icon: '🐼', owned: false, rarity: 'R', info: '金+5円' },
+            { id: 'c11', type: 'char', name: 'ｷﾞｬﾝﾌﾞﾗｰぜん', icon: '🎰', owned: false, rarity: 'R', info: '20%の確率で獲得金5倍' },
+            { id: 'c12', type: 'char', name: 'のんびりぜん', icon: '💤', owned: false, rarity: 'R', info: '草減少/時間回復UP' },
+            { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'R', info: '卵を抜くとお金(100円)' },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'R', info: '爆弾が無効' },
-            { id: 'c8', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'R', info: 'スキル上昇UP' },
+            { id: 'c5', type: 'char', name: 'パンダぜん', icon: '🐼', owned: false, rarity: 'R', info: '金+5円' },
+            { id: 'c8', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'R', info: 'チャージ10s短縮' },
             { id: 'b1', type: 'bg', name: '次元の狭間', val: 'radial-gradient(circle, #400, #000)', owned: false, rarity: 'SSR' },
             { id: 's_huh', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC' },
             { id: 's2', type: 'skill', name: '時間停止', owned: false, rarity: 'SR' }
@@ -164,27 +175,17 @@
         let equipped = { char: null, bg: null, skill: items.find(i => i.id === 's_huh') };
 
         function saveGame() {
-            const data = {
-                money: money,
-                ownedIds: items.filter(i => i.owned).map(i => i.id),
-                equippedIds: {
-                    char: equipped.char ? equipped.char.id : null,
-                    bg: equipped.bg ? equipped.bg.id : null,
-                    skill: equipped.skill ? equipped.skill.id : 's_huh'
-                }
-            };
-            localStorage.setItem('kusaSurvivalData_v2', JSON.stringify(data));
+            const data = { money, ownedIds: items.filter(i => i.owned).map(i => i.id),
+                equippedIds: { char: equipped.char?.id, bg: equipped.bg?.id, skill: equipped.skill?.id } };
+            localStorage.setItem('kusaSurvivalData_vFinal', JSON.stringify(data));
         }
 
         function loadGame() {
-            const raw = localStorage.getItem('kusaSurvivalData_v2');
+            const raw = localStorage.getItem('kusaSurvivalData_vFinal');
             if(!raw) { updateUI(); return; }
             const data = JSON.parse(raw);
             money = data.money;
-            data.ownedIds.forEach(id => {
-                const item = items.find(i => i.id === id);
-                if(item) item.owned = true;
-            });
+            data.ownedIds.forEach(id => { const item = items.find(i => i.id === id); if(item) item.owned = true; });
             if(data.equippedIds.char) equip(data.equippedIds.char, false);
             if(data.equippedIds.bg) equip(data.equippedIds.bg, false);
             if(data.equippedIds.skill) equip(data.equippedIds.skill, false);
@@ -200,34 +201,42 @@
             if(id === 'col-screen') renderCol();
         }
 
-        function setTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.id === 'tab-'+tab));
-            renderCol();
-        }
+        function setTab(tab) { currentTab = tab; renderCol(); }
 
-        function runGacha() {
-            if(money < 1000) return alert("お金不足！");
-            money -= 1000; updateUI();
-            const gBtn = document.getElementById('g-btn');
-            gBtn.disabled = true;
-            v([30, 30]);
+        function runGacha(times) {
+            const cost = 1000 * times;
+            if (money < cost) return alert("お金不足！");
+            money -= cost; updateUI();
+            let results = [];
+            let counts = { SSR: 0, SR: 0, R: 0 };
 
-            setTimeout(() => {
-                gBtn.disabled = false;
+            for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
                 let target;
-                if (r < 5) target = items.find(i => i.id === 'c1'); 
-                else if (r < 15) target = items.find(i => i.id === 'b1');
-                else {
-                    const pool = items.filter(i => i.id !== 's_huh' && i.rarity !== 'SSR');
-                    target = pool[Math.floor(Math.random() * pool.length)];
+                if (r < 0.1) { target = items.find(i => i.id === 'c1'); counts.SSR++; }
+                else if (r < 1.1) { target = items.find(i => i.id === 'c7'); counts.R++; }
+                else if (r < 6.1) { target = items.find(i => i.id === 'b1'); counts.SSR++; }
+                else if (r < 26.1) { 
+                    const pool = items.filter(i => i.rarity === 'SR');
+                    target = pool[Math.floor(Math.random() * pool.length)]; counts.SR++;
+                } else {
+                    const pool = items.filter(i => i.rarity === 'R' && i.id !== 'c7');
+                    target = pool[Math.floor(Math.random() * pool.length)]; counts.R++;
                 }
-                target.owned = true;
-                document.getElementById('gacha-box').innerText = target.icon || '🖼️';
-                document.getElementById('gacha-msg').innerHTML = `${target.rarity}<br>${target.name}`;
-                saveGame();
-            }, 800);
+                target.owned = true; results.push(target);
+            }
+
+            const msgEl = document.getElementById('gacha-msg');
+            const boxEl = document.getElementById('gacha-box');
+            if (times === 1) {
+                boxEl.innerText = results[0].icon || '🖼️';
+                msgEl.innerHTML = `${results[0].rarity}<br>${results[0].name}`;
+            } else {
+                boxEl.innerText = "🎊";
+                msgEl.innerHTML = `<div style="font-size:12px;"><span style="color:red;">SSR:${counts.SSR}</span> <span style="color:orange;">SR:${counts.SR}</span> R:${counts.R}</div>
+                                   <div style="font-size:10px; color:#ccc;">${results.slice(-3).map(r=>r.name).join(', ')}獲得</div>`;
+            }
+            saveGame();
         }
 
         function renderCol() {
@@ -236,12 +245,18 @@
             items.filter(i => i.type === currentTab).forEach(item => {
                 const div = document.createElement('div');
                 div.className = `col-item ${item.owned ? 'owned' : 'locked'}`;
+                const displayName = item.owned ? (item.icon || '') + ' ' + item.name : '❓ ' + item.name;
                 const isEq = equipped[item.type] === item;
-                div.innerHTML = `<span>${item.owned ? (item.icon || '') + ' ' + item.name : '？？？'}</span>
-                    <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>
-                    ${isEq ? '装備中' : (item.owned ? '装備' : '未所持')}</button>`;
+                div.innerHTML = `<div style="text-align:left; flex-grow:1; cursor:pointer;" onclick="showDetail('${item.id}')">
+                    <div style="font-size:10px; color:var(--gold);">${item.rarity}</div><div>${displayName}</div></div>
+                    <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '装備中' : (item.owned ? '装備' : '未所持')}</button>`;
                 list.appendChild(div);
             });
+        }
+
+        function showDetail(id) {
+            const item = items.find(i => i.id === id);
+            alert(`【${item.rarity}】${item.name}\n\n効果: ${item.info || '見た目が変わります'}`);
         }
 
         function equip(id, shouldSave = true) {
@@ -260,43 +275,55 @@
         function startGame() {
             isPlaying = true; timeLeft = 30.0; level = 1; skillCount = 0; 
             armor = (equipped.char?.id === 'c3');
-            openLayer('none'); 
-            spawn();
+            openLayer('none'); spawn(); moveEggs();
             const timer = setInterval(() => {
                 if(!isPlaying) return clearInterval(timer);
                 let dec = (equipped.char?.id === 'c2') ? 0.08 : 0.1;
                 timeLeft -= dec;
                 document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
+
+                // チャージ計算
+                let reduction = (equipped.char?.id === 'c1') ? 27 : (equipped.char?.id === 'c8' ? 10 : 0);
+                let autoCharge = 100 / (Math.max(1, 30 - reduction) * 10);
+                skillCount = Math.min(100, skillCount + autoCharge);
+                updateUI();
                 if(timeLeft <= 0) endGame();
             }, 100);
         }
 
         function handleGrassClick(item) {
             if (!isPlaying || item.getAttribute('data-plucked') === "true") return;
-            v();
-            item.setAttribute('data-plucked', "true");
-            item.style.transform = "scale(0) translateY(-30px)";
-            item.style.opacity = "0";
-            item.style.pointerEvents = "none";
+            v(15); item.setAttribute('data-plucked', "true");
+            
+            const rect = item.getBoundingClientRect();
+            const fRect = document.getElementById('game-field').getBoundingClientRect();
+            const x = rect.left - fRect.left + rect.width / 2, y = rect.top - fRect.top + rect.height / 2;
 
-            let m = (equipped.char?.id === 'c1') ? 30 : 10;
+            // エフェクト生成
+            const pop = document.createElement('div'); pop.className = 'pop-text'; pop.innerText = "ズバッ！";
+            pop.style.left = x + "px"; pop.style.top = y + "px";
+            document.getElementById('game-field').appendChild(pop);
+            setTimeout(() => pop.remove(), 500);
+
+            let m = (equipped.char?.id === 'c1') ? 100 : 10;
+            if (equipped.char?.id === 'c9') m += 50;
+            if (equipped.char?.id === 'c11' && Math.random() < 0.2) m *= 5;
             if (equipped.char?.id === 'c5') m += 5;
-            money += m;
+            money += m; updateUI();
 
-            let s = (equipped.char?.id === 'c1') ? 16 : (equipped.char?.id === 'c8' ? 12 : 8);
-            skillCount = Math.min(100, skillCount + s);
-            updateUI();
-
+            item.style.transform = "scale(1.5) rotate(20deg)"; item.style.opacity = "0";
+            
             if (equipped.char?.id === 'c4' && Math.random() < 0.2) {
                 const next = document.querySelector('.grass:not([data-plucked="true"])');
-                if(next) handleGrassClick(next);
+                if(next) setTimeout(()=>handleGrassClick(next), 50);
             }
 
             const remaining = document.querySelectorAll('.grass:not([data-plucked="true"])');
             if (remaining.length === 0) {
                 level++;
-                timeLeft += 5.0;
-                v([100, 50, 100]);
+                let add = (equipped.char?.id === 'c10') ? 15.0 : 5.0;
+                if (equipped.char?.id === 'c12') add += 5.0;
+                timeLeft += add; v([100, 50, 100]);
                 const lt = document.getElementById('lvl-up-text');
                 lt.classList.remove('lvl-anim'); void lt.offsetWidth; lt.classList.add('lvl-anim');
                 setTimeout(() => { if(isPlaying) spawn(); }, 400);
@@ -306,57 +333,57 @@
         function spawn() {
             const field = document.getElementById('game-field');
             field.querySelectorAll('.item').forEach(i => i.remove());
-            const total = Math.min(60, 12 + Math.floor(level * 1.5));
+            let base = 12 + Math.floor(level * 1.5);
+            if (equipped.char?.id === 'c12') base = Math.floor(base * 0.6);
+            const total = Math.min(60, base);
             const eggCount = Math.max(3, Math.floor(total * 0.25));
-            const grassCount = total - eggCount;
-            let spawnList = [];
-            for (let i = 0; i < eggCount; i++) spawnList.push(true);
-            for (let i = 0; i < grassCount; i++) spawnList.push(false);
-            spawnList.sort(() => Math.random() - 0.5);
-            spawnList.forEach(isEgg => {
+            let list = [];
+            for (let i = 0; i < eggCount; i++) list.push(true);
+            for (let i = 0; i < total - eggCount; i++) list.push(false);
+            list.sort(() => Math.random() - 0.5);
+            list.forEach(isEgg => {
                 const item = document.createElement('div');
                 item.className = 'item ' + (isEgg ? 'egg' : 'grass');
-                if (!isEgg) {
-                    const center = document.createElement('div');
-                    center.className = 'grass-center';
-                    item.appendChild(center);
-                } else {
-                    item.innerText = "🥚";
-                }
-                
-                // 配置計算：たまごが大きい(70px)ので余白を多めに(90px)確保
-                const margin = isEgg ? 90 : 80;
-                item.style.left = Math.random() * (field.clientWidth - margin) + "px";
-                item.style.top = Math.random() * (field.clientHeight - margin) + "px";
-                
+                if (!isEgg) { const c = document.createElement('div'); c.className = 'grass-center'; item.appendChild(c); }
+                else { item.innerText = "🥚"; }
+                item.style.left = Math.random() * (field.clientWidth - 80) + "px";
+                item.style.top = Math.random() * (field.clientHeight - 80) + "px";
                 item.onpointerdown = (e) => {
-                    e.preventDefault();
                     if (!isPlaying) return;
                     if (isEgg) {
-                        if (equipped.char?.id === 'c7') return;
-                        if (armor) { armor = false; item.style.transform = "scale(0)"; v([50, 50]); return; }
-                        return endGame();
-                    } else { handleGrassClick(item); }
+                        if (equipped.char?.id === 'c13') { money += 100; updateUI(); item.style.transform="scale(0)"; return; }
+                        if (equipped.char?.id === 'c7' || equipped.char?.id === 'c1') return;
+                        if (armor) { armor = false; item.style.transform = "scale(0)"; v([50,50]); return; }
+                        endGame();
+                    } else handleGrassClick(item);
                 };
                 field.appendChild(item);
             });
         }
 
+        function moveEggs() {
+            if (!isPlaying) return;
+            const eggs = document.querySelectorAll('.egg');
+            const interval = Math.max(600, 1500 - (level * 100));
+            eggs.forEach(egg => {
+                egg.style.left = Math.random() * (document.getElementById('game-field').clientWidth - 80) + "px";
+                egg.style.top = Math.random() * (document.getElementById('game-field').clientHeight - 80) + "px";
+            });
+            setTimeout(moveEggs, interval);
+        }
+
         function triggerSkill() {
-            if(!equipped.skill || skillCount < 100 || !isPlaying) return;
-            skillCount = 0; updateUI(); v([50, 150]);
+            if(skillCount < 100 || !isPlaying) return;
+            skillCount = 0; v([50, 150]);
             if(equipped.skill.id === 's_huh') {
                 const et = document.getElementById('skill-effect-text');
                 et.classList.remove('huh-anim'); void et.offsetWidth; et.classList.add('huh-anim');
                 document.getElementById('flash').style.opacity = "0.4";
                 setTimeout(() => document.getElementById('flash').style.opacity = "0", 300);
-                const grasses = Array.from(document.querySelectorAll('.grass:not([data-plucked="true"])'));
-                grasses.forEach((g, i) => {
+                document.querySelectorAll('.grass:not([data-plucked="true"])').forEach((g, i) => {
                     setTimeout(() => { if(isPlaying) handleGrassClick(g); }, i * 30);
                 });
-            } else if(equipped.skill.id === 's2') {
-                timeLeft += 10; updateUI();
-            }
+            } else if(equipped.skill.id === 's2') { timeLeft += 10; }
         }
 
         function updateUI() {
@@ -366,17 +393,9 @@
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
         }
 
-        function endGame() { 
-            isPlaying = false; 
-            document.getElementById('res-money').innerText = money; 
-            openLayer('end-screen');
-            saveGame();
-        }
-
-        function closeEndScreen() {
-            openLayer('start-screen');
-            if(equipped.bg) document.getElementById('game-field').style.background = equipped.bg.val;
-        }
+        function giveUp() { if (isPlaying && confirm("リタイアしますか？")) endGame(); }
+        function endGame() { isPlaying = false; document.getElementById('res-money').innerText = money; openLayer('end-screen'); saveGame(); }
+        function closeEndScreen() { openLayer('start-screen'); }
     </script>
 </body>
 </html>
