@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - 卵可動版 -</title>
+    <title>草抜きサバイバル - 全抜きボーナス版 -</title>
     <style>
-        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; }
+        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; }
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #000; color: white; 
@@ -41,7 +41,6 @@
         .res-line.SR { color: #ff00ff; }
         @keyframes glow { from { box-shadow: 0 0 2px var(--gold); } to { box-shadow: 0 0 10px var(--gold); } }
 
-        /* ガチャ演出用追加スタイル */
         #gacha-cutin {
             position: absolute; width: 100%; height: 100%;
             display: none; align-items: center; justify-content: center;
@@ -83,7 +82,6 @@
         #skill-fill { width: 0%; height: 100%; background: #f00; transition: 0.1s; }
 
         .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
-        
         .plucking { animation: pluck-anim 0.2s ease-out forwards; pointer-events: none; }
         @keyframes pluck-anim { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); } 100% { transform: scale(0); opacity: 0; } }
 
@@ -93,7 +91,6 @@
         .grass::after { transform: rotate(35deg); right: 10px; }
         .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; }
         
-        /* 卵のスタイルと揺れアニメーション */
         .egg { 
             width: 70px; height: 70px; font-size: 50px; 
             display: flex; align-items: center; justify-content: center; 
@@ -114,7 +111,7 @@
     <div class="header">
         <button onclick="giveUp()" style="background:#444; color:white; border:none; padding:5px; font-size:10px; border-radius:3px;">リタイア</button>
         <div>💰 <span id="m-val">0</span></div>
-        <div>⏳ <span id="t-val">30.0</span></div>
+        <div style="font-size: 18px; font-weight: bold; color: #ffcc00;">⏳ <span id="t-val">30.0</span></div>
         <div id="fever-container"><div id="fever-fill"></div></div>
     </div>
 
@@ -123,6 +120,7 @@
 
         <div id="start-screen" class="overlay">
             <h1 style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
+            <p style="color:var(--bonus-color); font-size:12px; margin: 5px 0;">草を全抜きしてタイム＋5秒！</p>
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">START</button>
@@ -210,7 +208,7 @@
 
         function updateUI() {
             document.getElementById('m-val').innerText = Math.floor(money).toLocaleString();
-            document.getElementById('t-val').innerText = timeLeft.toFixed(1);
+            document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.getElementById('skill-fill').style.width = skillCount + "%";
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
@@ -390,9 +388,17 @@
             createParticles(el.style.left, el.style.top);
             popText(el.style.left, el.style.top, `+${gain}`);
             el.classList.add('plucking');
+            
             setTimeout(() => {
                 el.remove();
-                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) spawn();
+                // 残りの草があるかチェック
+                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) {
+                    // 全抜きボーナス！
+                    timeLeft += 5.0; 
+                    popText("40%", "45%", "ALL CLEAR! +5.0s", "var(--bonus-color)");
+                    // 次の波をスポーン
+                    spawn();
+                }
             }, 200);
             updateUI();
         }
@@ -438,7 +444,6 @@
             spawn();
             const mainLoop = setInterval(() => {
                 if(!isFever) timeLeft -= 0.1;
-                // 30秒で100%になるように調整 (0.1秒ごとに加算されるため、100 / 300)
                 if(!isSkillActive) skillCount = Math.min(100, skillCount + (100 / 300));
                 updateUI();
                 if(timeLeft <= 0 || !isPlaying) { clearInterval(mainLoop); if(timeLeft <= 0) endGame("タイムアップ！"); }
