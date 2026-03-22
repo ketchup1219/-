@@ -12,7 +12,6 @@
         }
         .header-info { background: #222; padding: 10px; display: flex; justify-content: space-around; font-size: 16px; border-bottom: 2px solid #444; position: relative; }
         
-        /* マイツム表示 */
         #current-tsum-display { 
             position: absolute; left: 10px; top: 50px; width: 50px; height: 50px; 
             background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 50%; 
@@ -21,7 +20,7 @@
         }
 
         #game-field { 
-            position: relative; width: 95vw; height: 50vh; 
+            position: relative; width: 95vw; height: 60vh; 
             background: linear-gradient(180deg, #3e5c36, #2d5a27); margin: 10px auto; 
             border: 4px solid #2d5a27; border-radius: 15px; overflow: hidden;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.5); transition: all 0.5s;
@@ -48,6 +47,15 @@
         #skill-btn { padding: 8px 15px; border-radius: 20px; border: none; font-weight: bold; background: #444; color: #777; transition: 0.3s; }
         #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; box-shadow: 0 0 10px #ff0080; cursor: pointer; }
 
+        /* 草（ターゲット）の設定：当たり判定を広げる */
+        .grass { 
+            position: absolute; width: 45px; height: 45px; 
+            z-index: 10; transition: transform 0.1s; cursor: pointer;
+            box-sizing: content-box; border: 12px solid transparent; /* 指での誤操作防止の余白 */
+            background-clip: padding-box;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
         /* モーダル */
         #collection-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-height: 80%; background: #222; border: 4px solid #ffd700; border-radius: 20px; z-index: 500; padding: 15px; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,1); }
         .tab-menu { display: flex; gap: 4px; margin-bottom: 12px; }
@@ -58,7 +66,6 @@
         .item-card.unlocked { opacity: 1; border-color: #ffd700; }
         .item-card.selected { background: #555; box-shadow: 0 0 15px #ffd700; border-width: 3px; border-color: #fff; }
 
-        .grass { position: absolute; width: 55px; height: 55px; clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); z-index: 5; transition: transform 0.1s; cursor: pointer; }
         #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 25px; z-index: 600; }
     </style>
 </head>
@@ -85,7 +92,7 @@
                 <div class="reel" id="reel2">?</div>
                 <div class="reel" id="reel3">?</div>
             </div>
-            <div id="gacha-result" style="color: #ffd700; margin-bottom: 10px; font-size: 14px; height: 1.2em;">マイツムをセットしよう！</div>
+            <div id="gacha-result" style="color: #ffd700; margin-bottom: 10px; font-size: 14px; height: 1.2em;">なぞって草を抜こう！</div>
             <div class="controls-row" style="display:flex; gap:15px; align-items:center;">
                 <button id="collection-btn" style="font-size:26px; background:#00d2ff; border:none; border-radius:50%; width:55px; height:55px; color:white; cursor:pointer;">🖼️</button>
                 <button class="btn-start" id="start-btn">START</button>
@@ -115,16 +122,16 @@
     </div>
 
     <script>
-        // --- 1. 基本データ設定 ---
+        // --- 基本データ ---
         let score = 2000, level = 1, timeLeft = 30.0, skillCharge = 0, feverGauge = 0;
         let isGameOver = true, isFever = false, currentTab = 'bg';
         const GACHA_COST = 1000;
 
         const bgThemes = [
             { id: 0, name: "草原", bg: "linear-gradient(180deg, #3e5c36, #2d5a27)", border: "#1e3d1a", grass: "#7cfc00", unlocked: true },
-            { id: 1, name: "夜森", bg: "radial-gradient(circle, #001a00, #000)", border: "#00FF00", grass: "#00ff00", unlocked: false },
+            { id: 1, name: "夜森", bg: "radial-gradient(circle, #001a00, #000)", border: "#00FF00", grass: "#adff2f", unlocked: false },
             { id: 2, name: "電脳", bg: "#000", border: "#00d2ff", grass: "#00ffff", unlocked: false },
-            { id: 3, name: "地獄", bg: "#220000", border: "#ff4500", grass: "#ff4500", unlocked: false }
+            { id: 3, name: "地獄", bg: "#220000", border: "#ff4500", grass: "#ffa500", unlocked: false }
         ];
         let selectedBg = bgThemes[0];
 
@@ -144,7 +151,10 @@
         ];
         let selectedTsum = myTsums[0];
 
-        // --- 2. セーブ・ロード ---
+        // --- 便利機能：振動 ---
+        function v() { if(navigator.vibrate) navigator.vibrate(15); }
+
+        // --- セーブ・ロード ---
         function saveGame() {
             const data = {
                 score, timeLeft,
@@ -171,39 +181,39 @@
             }
         }
 
-        // --- 3. ガチャ機能 ---
+        // --- ガチャ ---
         document.getElementById('gacha-btn').onclick = () => {
             if (score < GACHA_COST) { document.getElementById('gacha-result').innerText="お金不足！"; return; }
-            score -= GACHA_COST;
+            score -= GACHA_COST; v();
             const rand = Math.random();
             let msg = "";
 
-            if (rand < 0.35) { // マイツム 35%
+            if (rand < 0.35) {
                 const targets = myTsums.filter(t => !t.unlocked && t.id !== 99);
                 if (targets.length > 0) {
                     const t = targets[Math.floor(Math.random() * targets.length)];
                     t.unlocked = true; msg = `🦊 マイツム：${t.name}！`;
                 } else { score += 500; msg = "💰 500円還元！"; }
-            } else if (rand < 0.65) { // 背景 30%
+            } else if (rand < 0.65) {
                 const targets = bgThemes.filter(b => !b.unlocked);
                 if (targets.length > 0) {
                     const b = targets[Math.floor(Math.random() * targets.length)];
                     b.unlocked = true; msg = `🎁 背景：${b.name}！`;
                 } else { score += 400; msg = "💰 400円還元！"; }
-            } else if (rand < 0.85) { // スキル 20%
+            } else if (rand < 0.85) {
                 const targets = skillTypes.filter(s => !s.unlocked);
                 if (targets.length > 0) {
                     const s = targets[Math.floor(Math.random() * targets.length)];
                     s.unlocked = true; msg = `🔥 スキル：${s.name}！`;
                 } else { score += 600; msg = "💰 600円還元！"; }
-            } else { // タイム 15%
+            } else {
                 timeLeft += 10; msg = "⏰ TIME +10秒！";
             }
             document.getElementById('gacha-result').innerText = msg;
             saveGame(); updateUI();
         };
 
-        // --- 4. コレクション・マイツム切り替え ---
+        // --- コレクション ---
         function updateList() {
             const list = document.getElementById('item-list');
             list.innerHTML = "";
@@ -215,15 +225,14 @@
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = `item-card ${item.unlocked ? 'unlocked' : ''} ${currentSelected.id === item.id ? 'selected' : ''}`;
-                
                 if (currentTab === 'tsum' && item.unlocked) {
                     card.innerHTML = `<div style="font-size:22px;">${item.icon} ${item.name}</div><div style="font-size:10px;color:#ffd700;margin-top:5px;">能力: ${item.ability}</div>`;
                 } else {
                     card.innerText = item.unlocked ? item.name : "???";
                 }
-
                 if (item.unlocked) {
                     card.onclick = () => {
+                        v();
                         if (currentTab === 'bg') { selectedBg = item; applyBg(item); }
                         else if (currentTab === 'skill') { selectedSkill = item; }
                         else { 
@@ -241,9 +250,9 @@
         document.getElementById('tab-skill-btn').onclick = () => { currentTab = 'skill'; updateList(); setActiveTab('tab-skill-btn'); };
         document.getElementById('tab-tsum-btn').onclick = () => { currentTab = 'tsum'; updateList(); setActiveTab('tab-tsum-btn'); };
         function setActiveTab(id) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === id)); }
-        document.getElementById('collection-btn').onclick = () => { document.getElementById('collection-modal').style.display='block'; updateList(); };
+        document.getElementById('collection-btn').onclick = () => { v(); document.getElementById('collection-modal').style.display='block'; updateList(); };
 
-        // --- 5. ゲームロジック ---
+        // --- ゲームメインロジック ---
         function applyBg(t) { 
             const f = document.getElementById('game-field');
             f.style.background = t.bg; f.style.borderColor = t.border;
@@ -259,12 +268,10 @@
             const timer = setInterval(() => {
                 if (isGameOver) { clearInterval(timer); return; }
                 if (!isFever) {
-                    // タイム能力反映
                     let dec = (selectedTsum.id === 2) ? 0.08 : 0.1;
                     timeLeft -= dec;
                 }
                 if (skillCharge < 100) {
-                    // スター能力反映
                     let inc = (selectedTsum.id === 1) ? 0.8 : 0.4;
                     skillCharge += inc;
                     document.getElementById('skill-bar-fill').style.width = skillCharge + "%";
@@ -282,16 +289,22 @@
             const f = document.getElementById('game-field');
             const item = document.createElement('div');
             item.className = type;
-            item.style.left = Math.random() * (f.clientWidth - 60) + "px";
-            item.style.top = Math.random() * (f.clientHeight - 60) + "px";
+            // 画面端ギリギリに置かないように調整
+            item.style.left = Math.random() * (f.clientWidth - 70) + 10 + "px";
+            item.style.top = Math.random() * (f.clientHeight - 70) + 10 + "px";
+            
             if(type === 'grass') {
                 item.style.background = selectedBg.grass;
-                item.onpointerdown = (e) => {
+                item.style.clipPath = "polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%)";
+
+                const harvest = (e) => {
                     e.preventDefault();
-                    // 気持ちいい演出
-                    for(let i=0; i<6; i++) createParticle(e.clientX, e.clientY);
+                    if(item.style.transform === "scale(0)") return;
                     
-                    // 能力・フィーバー倍率反映
+                    v(); // 抜いた感触
+                    const touch = e.touches ? e.touches[0] : e;
+                    for(let i=0; i<6; i++) createParticle(touch.clientX, touch.clientY);
+                    
                     let coinMult = (selectedTsum.id === 0) ? 1.5 : 1.0;
                     let feverMult = isFever ? 3.0 : 1.0;
                     score += 10 * coinMult * feverMult;
@@ -305,6 +318,10 @@
                     if(f.querySelectorAll('.grass').length <= 1) nextLevel();
                     updateUI();
                 };
+
+                // なぞり・タップ両対応
+                item.onpointerdown = harvest;
+                item.onpointerenter = (e) => { if(e.buttons > 0) harvest(e); };
             }
             f.appendChild(item);
         }
@@ -325,10 +342,10 @@
         }
 
         function startFever() {
+            if(isFever) return;
             isFever = true; feverGauge = 100;
             document.body.classList.add('fever-active');
             document.getElementById('fever-notice').style.display = 'block';
-            // ぜん(覚醒)能力反映
             let time = (selectedTsum.id === 3) ? 12000 : 8000;
             setTimeout(() => {
                 isFever = false; feverGauge = 0;
@@ -338,12 +355,16 @@
         }
 
         function nextLevel() { level++; spawn(); }
-        function spawn() { for(let i=0; i<10+level*2; i++) createItem('grass'); }
+        function spawn() { 
+            const f = document.getElementById('game-field');
+            for(let i=0; i<10+level*2; i++) createItem('grass'); 
+        }
         function endGame() { isGameOver = true; document.getElementById('scoreboard').style.display = 'block'; document.getElementById('final-score').innerText = Math.floor(score); saveGame(); }
 
-        // --- 6. スロット & 開始 ---
+        // --- スロット & 開始 ---
         document.getElementById('start-btn').onclick = () => {
             if(timeLeft <= 0) { alert("ガチャでTIMEを回復してください！"); return; }
+            v();
             document.getElementById('start-btn').disabled = true;
             const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
             const marks = ["✨", "⏰", "⚡️"];
@@ -360,6 +381,7 @@
                         if(results[0] === results[1] && results[1] === results[2]) {
                             if(results[0]==="✨") score+=2000; else if(results[0]==="⏰") timeLeft+=15; else level+=2;
                             document.getElementById('gacha-result').innerText = "スロット的中！";
+                            v(); v();
                         }
                         setTimeout(() => {
                             document.getElementById('start-overlay').style.display = 'none';
@@ -370,13 +392,15 @@
             });
         };
 
+        // スキル発動
         document.getElementById('skill-btn').onclick = () => {
             if(!document.getElementById('skill-btn').classList.contains('ready') || isGameOver) return;
             skillCharge = 0;
             document.getElementById('skill-bar-fill').style.width = "0%";
             document.getElementById('skill-btn').classList.remove('ready');
             document.getElementById('skill-btn').innerText = "WAIT...";
-            
+            v(); v();
+
             const flash = document.getElementById('ultimate-flash');
             flash.style.backgroundColor = selectedSkill.flash;
             flash.style.opacity = "0.8";
@@ -397,10 +421,7 @@
         };
 
         document.getElementById('back-to-title').onclick = () => location.reload();
-        document.getElementById('current-tsum-display').onclick = () => {
-            alert(`${selectedTsum.name}\n能力: ${selectedTsum.ability}`);
-        };
-
+        
         loadGame();
         applyBg(selectedBg);
     </script>
