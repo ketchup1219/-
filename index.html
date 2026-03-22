@@ -5,27 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>草抜きサバイバル - 覚醒の刻 -</title>
     <style>
-        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; }
+        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; }
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #000; color: white; 
             margin: 0; overflow: hidden; touch-action: none; user-select: none;
         }
 
-        .header { background: #111; padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; }
+        .header { background: #111; padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; position: relative; }
+        
+        #fever-container { position: absolute; bottom: -5px; left: 0; width: 100%; height: 6px; background: #222; }
+        #fever-fill { width: 0%; height: 100%; background: var(--fever-pink); transition: width 0.2s; box-shadow: 0 0 10px var(--fever-pink); }
+        .is-fever #fever-fill { background: white; animation: fever-blink 0.2s infinite; }
+        @keyframes fever-blink { from { opacity: 1; } to { opacity: 0.5; } }
+
         #game-field { 
             position: relative; width: 95vw; height: 55vh; 
             background: #1a2a1a; margin: 10px auto; 
             border: 3px solid #333; border-radius: 20px; overflow: hidden;
             transition: 0.5s;
         }
+        #game-field.fever-bg { background: radial-gradient(circle, #440044, #000) !important; border-color: var(--fever-pink); }
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        #lvl-up-text {
+        #lvl-up-text, #fever-text {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 50px; color: var(--blue); text-shadow: 0 0 15px white; z-index: 1001; pointer-events: none; opacity: 0;
+            font-size: 50px; z-index: 1001; pointer-events: none; opacity: 0;
         }
+        #lvl-up-text { color: var(--blue); text-shadow: 0 0 15px white; }
+        #fever-text { color: var(--fever-pink); text-shadow: 0 0 20px white; font-size: 70px; }
+        
         .lvl-anim { animation: lvl-surge 0.8s ease-out; }
         @keyframes lvl-surge {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
@@ -68,13 +78,12 @@
         #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
         #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #f80); transition: 0.1s; }
 
-        /* アイテムデザイン */
         .item { position: absolute; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.1s; }
         .grass { width: 75px; height: 75px; }
-        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; }
+        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; }
         .grass::before { transform: rotate(-35deg); left: 10px; }
         .grass::after { transform: rotate(35deg); right: 10px; }
-        .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 2; }
+        .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 2; pointer-events: none; }
         
         .egg { 
             width: 70px; height: 70px; font-size: 50px; background: transparent; 
@@ -82,11 +91,8 @@
             transition: left 0.8s linear, top 0.8s linear, transform 0.2s;
         }
 
-        /* 爽快エフェクト */
         .pop-text { position: absolute; color: var(--gold); font-size: 20px; font-weight: bold; pointer-events: none; animation: pop-up 0.5s ease-out forwards; z-index: 100; }
-        .particle { position: absolute; width: 6px; height: 6px; background: var(--grass-light); border-radius: 50%; pointer-events: none; animation: particle-fly 0.4s ease-out forwards; z-index: 99; }
         @keyframes pop-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
-        @keyframes particle-fly { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
         
         #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
     </style>
@@ -98,11 +104,13 @@
         <div>💰 <span id="m-val">0</span></div>
         <div>⏳ <span id="t-val">30.0</span></div>
         <div>LV <span id="l-val">1</span></div>
+        <div id="fever-container"><div id="fever-fill"></div></div>
     </div>
 
     <div id="game-field">
         <div id="skill-effect-text">huh</div>
         <div id="lvl-up-text">LEVEL UP!</div>
+        <div id="fever-text">FEVER!</div>
         
         <div id="start-screen" class="overlay">
             <h1 style="margin:0">草抜きサバイバル</h1>
@@ -153,6 +161,7 @@
 
     <script>
         let money = 2000, level = 1, timeLeft = 30.0, skillCount = 0, isPlaying = false, currentTab = 'char', armor = false;
+        let feverPoints = 0, isFever = false, feverTimer = null;
 
         const items = [
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/チャージ27s短縮/卵無効' },
@@ -209,7 +218,6 @@
             money -= cost; updateUI();
             let results = [];
             let counts = { SSR: 0, SR: 0, R: 0 };
-
             for (let i = 0; i < times; i++) {
                 const r = Math.random() * 100;
                 let target;
@@ -225,7 +233,6 @@
                 }
                 target.owned = true; results.push(target);
             }
-
             const msgEl = document.getElementById('gacha-msg');
             const boxEl = document.getElementById('gacha-box');
             if (times === 1) {
@@ -273,16 +280,16 @@
         }
 
         function startGame() {
-            isPlaying = true; timeLeft = 30.0; level = 1; skillCount = 0; 
+            isPlaying = true; timeLeft = 30.0; level = 1; skillCount = 0; feverPoints = 0; isFever = false;
             armor = (equipped.char?.id === 'c3');
             openLayer('none'); spawn(); moveEggs();
             const timer = setInterval(() => {
                 if(!isPlaying) return clearInterval(timer);
-                let dec = (equipped.char?.id === 'c2') ? 0.08 : 0.1;
-                timeLeft -= dec;
+                if (!isFever) {
+                    let dec = (equipped.char?.id === 'c2') ? 0.08 : 0.1;
+                    timeLeft -= dec;
+                }
                 document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
-
-                // チャージ計算
                 let reduction = (equipped.char?.id === 'c1') ? 27 : (equipped.char?.id === 'c8' ? 10 : 0);
                 let autoCharge = 100 / (Math.max(1, 30 - reduction) * 10);
                 skillCount = Math.min(100, skillCount + autoCharge);
@@ -293,13 +300,13 @@
 
         function handleGrassClick(item) {
             if (!isPlaying || item.getAttribute('data-plucked') === "true") return;
-            v(15); item.setAttribute('data-plucked', "true");
+            v(15); 
+            item.setAttribute('data-plucked', "true");
             
             const rect = item.getBoundingClientRect();
             const fRect = document.getElementById('game-field').getBoundingClientRect();
             const x = rect.left - fRect.left + rect.width / 2, y = rect.top - fRect.top + rect.height / 2;
 
-            // エフェクト生成
             const pop = document.createElement('div'); pop.className = 'pop-text'; pop.innerText = "ズバッ！";
             pop.style.left = x + "px"; pop.style.top = y + "px";
             document.getElementById('game-field').appendChild(pop);
@@ -309,9 +316,19 @@
             if (equipped.char?.id === 'c9') m += 50;
             if (equipped.char?.id === 'c11' && Math.random() < 0.2) m *= 5;
             if (equipped.char?.id === 'c5') m += 5;
-            money += m; updateUI();
+            if (isFever) m *= 3;
+            money += m;
+            
+            if (!isFever) {
+                feverPoints = Math.min(100, feverPoints + 5);
+                if (feverPoints >= 100) startFever();
+            }
+            updateUI();
 
-            item.style.transform = "scale(1.5) rotate(20deg)"; item.style.opacity = "0";
+            item.style.transform = "scale(1.5) rotate(20deg)"; 
+            item.style.opacity = "0";
+            // 修正: 抜いた後にクリックを邪魔しないように消去
+            setTimeout(() => { item.style.display = "none"; }, 150);
             
             if (equipped.char?.id === 'c4' && Math.random() < 0.2) {
                 const next = document.querySelector('.grass:not([data-plucked="true"])');
@@ -330,6 +347,31 @@
             }
         }
 
+        function startFever() {
+            isFever = true; v([50, 50, 150]);
+            document.body.classList.add('is-fever');
+            document.getElementById('game-field').classList.add('fever-bg');
+            const ft = document.getElementById('fever-text');
+            ft.classList.remove('lvl-anim'); void ft.offsetWidth; ft.classList.add('lvl-anim');
+            document.getElementById('flash').style.opacity = "0.6";
+            setTimeout(() => document.getElementById('flash').style.opacity = "0", 200);
+            let duration = 5000;
+            let start = Date.now();
+            feverTimer = setInterval(() => {
+                let elapsed = Date.now() - start;
+                feverPoints = 100 - (elapsed / duration * 100);
+                if (feverPoints <= 0) stopFever();
+                updateUI();
+            }, 50);
+        }
+
+        function stopFever() {
+            isFever = false; feverPoints = 0; clearInterval(feverTimer);
+            document.body.classList.remove('is-fever');
+            document.getElementById('game-field').classList.remove('fever-bg');
+            updateUI();
+        }
+
         function spawn() {
             const field = document.getElementById('game-field');
             field.querySelectorAll('.item').forEach(i => i.remove());
@@ -344,8 +386,13 @@
             list.forEach(isEgg => {
                 const item = document.createElement('div');
                 item.className = 'item ' + (isEgg ? 'egg' : 'grass');
-                if (!isEgg) { const c = document.createElement('div'); c.className = 'grass-center'; item.appendChild(c); }
-                else { item.innerText = "🥚"; }
+                if (!isEgg) { 
+                    const c = document.createElement('div'); 
+                    c.className = 'grass-center'; 
+                    item.appendChild(c); 
+                } else { 
+                    item.innerText = "🥚"; 
+                }
                 item.style.left = Math.random() * (field.clientWidth - 80) + "px";
                 item.style.top = Math.random() * (field.clientHeight - 80) + "px";
                 item.onpointerdown = (e) => {
@@ -390,11 +437,18 @@
             document.getElementById('m-val').innerText = money;
             document.getElementById('l-val').innerText = level;
             document.getElementById('skill-fill').style.width = skillCount + "%";
+            document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
         }
 
         function giveUp() { if (isPlaying && confirm("リタイアしますか？")) endGame(); }
-        function endGame() { isPlaying = false; document.getElementById('res-money').innerText = money; openLayer('end-screen'); saveGame(); }
+        function endGame() { 
+            isPlaying = false; 
+            if(feverTimer) clearInterval(feverTimer);
+            document.getElementById('res-money').innerText = money; 
+            openLayer('end-screen'); 
+            saveGame(); 
+        }
         function closeEndScreen() { openLayer('start-screen'); }
     </script>
 </body>
