@@ -3,161 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - ULTIMATE TSUM -</title>
+    <title>草抜きサバイバル - THE ULTIMATE KAKUSEI -</title>
     <style>
+        :root { --main-red: #ff0000; --grass-green: #7cfc00; }
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
-            background-color: #1a1a1a; color: white; 
+            background-color: #000; color: white; 
             margin: 0; overflow: hidden; touch-action: none; user-select: none;
         }
-        .header-info { background: #222; padding: 10px; display: flex; justify-content: space-around; font-size: 16px; border-bottom: 2px solid #444; position: relative; }
-        
-        #current-tsum-display { 
-            position: absolute; left: 10px; top: 50px; width: 50px; height: 50px; 
-            background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 50%; 
-            font-size: 30px; line-height: 50px; z-index: 100; cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        /* ヘッダー情報 */
+        .header-info { 
+            background: #111; padding: 10px; display: flex; justify-content: space-around; 
+            font-size: 18px; border-bottom: 3px solid var(--main-red);
         }
-
+        /* ゲームフィールド */
         #game-field { 
-            position: relative; width: 95vw; height: 60vh; 
-            background: linear-gradient(180deg, #3e5c36, #2d5a27); margin: 10px auto; 
-            border: 4px solid #2d5a27; border-radius: 15px; overflow: hidden;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5); transition: all 0.5s;
+            position: relative; width: 95vw; height: 65vh; 
+            background: radial-gradient(circle, #222, #000); margin: 10px auto; 
+            border: 4px solid #444; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255,0,0,0.2);
+        }
+        /* スキルゲージ */
+        #skill-bar-bg { width: 90%; height: 12px; background: #333; margin: 10px auto; border-radius: 10px; border: 1px solid #555; }
+        #skill-bar-fill { width: 0%; height: 100%; background: var(--main-red); box-shadow: 0 0 10px var(--main-red); transition: width 0.2s; }
+
+        /* 最強・覚醒ぜんのアニメーション */
+        @keyframes saikyo-glow {
+            0% { filter: drop-shadow(0 0 8px #f0f) brightness(1); transform: scale(1.1); }
+            50% { filter: drop-shadow(0 0 20px #f00) brightness(1.8); transform: scale(1.3); }
+            100% { filter: drop-shadow(0 0 8px #f0f) brightness(1); transform: scale(1.1); }
+        }
+        .kakusei-saikyo { 
+            animation: saikyo-glow 0.15s infinite; 
+            background: linear-gradient(45deg, #ff0000, #440000) !important;
+            z-index: 50 !important;
         }
 
-        .fever-active #game-field { animation: fever-bg 0.5s infinite linear; border-color: #fff; }
-        @keyframes fever-bg { 0% { filter: hue-rotate(0deg) brightness(1.2); } 50% { filter: hue-rotate(180deg) brightness(1.8); } 100% { filter: hue-rotate(360deg) brightness(1.2); } }
-        #fever-notice { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 36px; color: #fff; text-shadow: 0 0 15px #ff00ff; z-index: 200; display: none; font-weight: bold; }
-
-        #start-overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #slot-machine { display: flex; gap: 8px; margin: 10px 0; background: #333; padding: 10px; border: 3px solid #ffd700; border-radius: 12px; }
-        .reel { width: 50px; height: 70px; background: #fff; color: #1a1a1a; font-size: 35px; line-height: 70px; border-radius: 5px; }
-
-        .btn-start { padding: 12px 30px; font-size: 20px; background: #ffd700; color: #1a1a1a; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #b8860b; }
-        .btn-gacha { width: 65px; height: 65px; font-size: 28px; background: #ff4500; border: 3px solid #fff; border-radius: 50%; cursor: pointer; position: relative; box-shadow: 0 4px 0 #8b0000; }
-        
-        .skill-container { width: 90%; margin: 8px auto; display: flex; align-items: center; gap: 10px; }
-        #skill-bar-bg { flex-grow: 1; height: 20px; background: #333; border-radius: 10px; overflow: hidden; border: 2px solid #555; }
-        #skill-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); transition: width 0.1s; }
-        #skill-btn { padding: 8px 15px; border-radius: 20px; border: none; font-weight: bold; background: #444; color: #777; transition: 0.3s; min-width: 80px; }
-        #skill-btn.ready { background: linear-gradient(#ff0080, #ff8c00); color: white; box-shadow: 0 0 10px #ff0080; cursor: pointer; }
-
-        /* 草・たまごの共通スタイル */
+        /* アイテム基本設定（当たり判定拡大） */
         .item { 
-            position: absolute; width: 45px; height: 45px; 
-            z-index: 10; transition: transform 0.1s; cursor: pointer;
-            box-sizing: content-box; border: 12px solid transparent; 
+            position: absolute; width: 45px; height: 45px; z-index: 10; 
+            transition: transform 0.1s; box-sizing: content-box; 
+            border: 18px solid transparent; /* 指での操作を助ける透明な当たり判定 */
             background-clip: padding-box; touch-action: none;
         }
-        .grass { background: #7cfc00; clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); }
-        .egg { display: flex; align-items: center; justify-content: center; font-size: 35px; border: none; width: 50px; height: 50px; }
+        .grass { background: var(--grass-green); clip-path: polygon(50% 100%, 20% 80%, 0% 40%, 30% 60%, 50% 0%, 70% 60%, 100% 40%, 80% 80%); }
+        .egg { display: flex; align-items: center; justify-content: center; font-size: 38px; border: none; filter: drop-shadow(0 0 8px red); }
 
-        #collection-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-height: 80%; background: #222; border: 4px solid #ffd700; border-radius: 20px; z-index: 500; padding: 15px; overflow-y: auto; }
-        #scoreboard { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.95); border: 4px solid #ffd700; border-radius: 20px; padding: 25px; z-index: 600; }
+        /* オーバーレイ表示 */
+        .overlay { 
+            position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.92); 
+            z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .btn-main { 
+            padding: 18px 45px; font-size: 24px; background: var(--main-red); color: white; 
+            border: none; border-radius: 50px; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 0 25px var(--main-red); transition: 0.2s;
+        }
+        .btn-main:active { transform: scale(0.9); }
+
+        #flash-effect { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; pointer-events: none; opacity: 0; z-index: 1000; }
+        #msg-popup { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 60px; font-weight: bold; color: white; text-shadow: 0 0 20px red; 
+            z-index: 500; pointer-events: none; opacity: 0; transition: 0.3s;
+        }
     </style>
 </head>
 <body>
 
+    <div id="flash-effect"></div>
+    <div id="msg-popup">Huh?</div>
+
     <div class="header-info">
-        <div>💰 <span id="score">2000</span></div>
+        <div>💰 <span id="score">0</span></div>
         <div>⏳ <span id="timer">30.0</span></div>
         <div>LV <span id="level">1</span></div>
-        <div id="current-tsum-display">👤</div>
     </div>
 
-    <div class="skill-container">
-        <div id="skill-bar-bg"><div id="skill-bar-fill"></div></div>
-        <button id="skill-btn">WAIT...</button>
-    </div>
+    <div id="skill-bar-bg"><div id="skill-bar-fill"></div></div>
 
     <div id="game-field">
-        <div id="fever-notice">FEVER TIME!!</div>
-        <div id="start-overlay">
-            <h1 style="color:#7cfc00; margin:0; font-size:24px;">草抜きサバイバル</h1>
-            <div id="slot-machine">
-                <div class="reel" id="reel1">?</div><div class="reel" id="reel2">?</div><div class="reel" id="reel3">?</div>
-            </div>
-            <div id="gacha-result" style="color: #ffd700; margin-bottom: 10px; font-size: 14px;">たまごはボーナス！</div>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <button id="collection-btn" style="font-size:26px; background:#00d2ff; border:none; border-radius:50%; width:55px; height:55px;">🖼️</button>
-                <button class="btn-start" id="start-btn">START</button>
-                <div style="position:relative">
-                    <button id="gacha-btn" class="btn-gacha">🎁</button>
-                    <div style="position:absolute; bottom:-20px; left:50%; transform:translateX(-50%); font-size:10px; color:#ff4500;">1000円</div>
-                </div>
-            </div>
+        <div id="start-overlay" class="overlay">
+            <h1 style="color:var(--main-red); text-shadow: 0 0 15px #f00; margin-bottom: 5px;">最強・覚醒ぜん</h1>
+            <p style="font-size: 14px; margin-bottom: 25px;">【5%の覚醒】を抜き、全滅させろ。<br>たまごに触れたら即終了。</p>
+            <button class="btn-main" onclick="resetGame()">START</button>
         </div>
-        <div id="ultimate-flash" style="position:absolute; width:100%; height:100%; pointer-events:none; z-index:100; opacity:0; transition:0.3s;"></div>
-    </div>
 
-    <div id="collection-modal">
-        <div id="item-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
-        <button onclick="document.getElementById('collection-modal').style.display='none'" style="margin-top:15px; width:100%; padding:10px;">閉じる</button>
-    </div>
-
-    <div id="scoreboard">
-        <h2 style="color:red;">GAME OVER</h2>
-        <p>最終利益: <span id="final-score">0</span>円</p>
-        <button id="back-to-title" style="padding:10px 30px; background:#ffd700; border:none; border-radius:20px;">TITLE</button>
+        <div id="score-overlay" class="overlay" style="display: none;">
+            <h2 id="over-reason" style="color:red; font-size: 32px; margin:0;">GAME OVER</h2>
+            <p style="font-size:22px;">最終利益: <span id="final-score">0</span>円</p>
+            <button class="btn-main" onclick="resetGame()">RETRY</button>
+        </div>
     </div>
 
     <script>
-        let score = 2000, level = 1, timeLeft = 30.0, skillCharge = 0, feverGauge = 0;
-        let isGameOver = true, isFever = false;
+        let score = 0, level = 1, timeLeft = 30.0, skill = 0;
+        let isGameOver = true, timerInterval = null;
 
-        const skillTypes = [{ id: 0, name: "Huh?", flash: "white", unlocked: true }, { id: 1, name: "爆風", flash: "orange", unlocked: false }, { id: 2, name: "神罰", flash: "gold", unlocked: false }];
-        let selectedSkill = skillTypes[0];
-        const myTsums = [{ id: 0, name: "ぜん", icon: "🌱", ability: "コイン1.5倍", unlocked: true }];
-        let selectedTsum = myTsums[0];
+        function v(pattern=15) { if(navigator.vibrate) navigator.vibrate(pattern); }
 
-        function v() { if(navigator.vibrate) navigator.vibrate(15); }
+        function resetGame() {
+            score = 0; level = 1; timeLeft = 30.0; skill = 0;
+            isGameOver = false;
+            document.getElementById('start-overlay').style.display = 'none';
+            document.getElementById('score-overlay').style.display = 'none';
+            // アイテムクリア
+            [...document.querySelectorAll('.item')].forEach(i => i.remove());
+            updateUI();
+            spawn();
+            // タイマー開始
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(isGameOver) return;
+                timeLeft -= 0.1;
+                updateUI();
+                if(timeLeft <= 0) endGame("時間切れ！");
+            }, 100);
+        }
 
         function updateUI() {
             document.getElementById('score').innerText = Math.floor(score);
             document.getElementById('timer').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('level').innerText = level;
-            document.getElementById('skill-bar-fill').style.width = Math.min(100, skillCharge) + "%";
-            if(skillCharge >= 100) {
-                const sbtn = document.getElementById('skill-btn');
-                sbtn.classList.add('ready'); sbtn.innerText = selectedSkill.name;
-            }
+            document.getElementById('skill-bar-fill').style.width = Math.min(100, skill) + "%";
         }
 
         function createItem() {
             const f = document.getElementById('game-field');
             const item = document.createElement('div');
+            const rand = Math.random();
             
-            // 20%の確率でたまご
-            const isEgg = Math.random() < 0.2;
-            item.className = isEgg ? 'item egg' : 'item grass';
-            if(isEgg) item.innerText = "🥚";
+            let type = "grass";
+            if (rand < 0.22) { type = "egg"; } // 22%で地雷
+            else if (rand < 0.27) { type = "saikyo"; } // 22%〜27%の間（5%）で最強覚醒
+            
+            item.className = "item " + (type === "saikyo" ? "grass kakusei-saikyo" : type);
+            if(type === "egg") item.innerText = "🥚";
 
-            item.style.left = Math.random() * (f.clientWidth - 60) + 10 + "px";
-            item.style.top = Math.random() * (f.clientHeight - 60) + 10 + "px";
+            // 配置（端に寄りすぎないよう調整）
+            item.style.left = Math.random() * (f.clientWidth - 75) + "px";
+            item.style.top = Math.random() * (f.clientHeight - 75) + "px";
 
+            // 収穫・接触イベント
             const harvest = (e) => {
+                if(isGameOver) return;
                 e.preventDefault();
-                if(item.style.transform === "scale(0)") return;
-                v();
                 
-                // スコア計算
-                let basePoints = isEgg ? 50 : 10;
-                let coinMult = (selectedTsum.id === 0) ? 1.5 : 1.0;
-                let feverMult = isFever ? 3.0 : 1.0;
-                score += basePoints * coinMult * feverMult;
-
-                // ゲージ増加
-                skillCharge += isEgg ? 15 : 2; 
-
-                if(!isFever) {
-                    feverGauge += isEgg ? 20 : 4;
-                    if(feverGauge >= 100) startFever();
+                if(type === "egg") {
+                    v([100, 50, 100]);
+                    endGame("たまごが爆発した！");
+                    return;
                 }
 
-                item.style.transform = "scale(0)";
-                setTimeout(() => item.remove(), 100);
-                if(f.querySelectorAll('.item').length <= 1) nextLevel();
+                if(item.style.transform === "scale(0)") return;
+
+                if(type === "saikyo") {
+                    triggerSaikyoSkill();
+                } else {
+                    v(15);
+                    score += 10;
+                    skill += 4;
+                    item.style.transform = "scale(0)";
+                    setTimeout(() => { if(item.parentNode) item.remove(); }, 100);
+                    checkNextLevel();
+                }
                 updateUI();
             };
 
@@ -166,75 +175,61 @@
             f.appendChild(item);
         }
 
-        function startFever() {
-            if(isFever) return;
-            isFever = true; feverGauge = 100;
-            document.body.classList.add('fever-active');
-            document.getElementById('fever-notice').style.display = 'block';
-            setTimeout(() => {
-                isFever = false; feverGauge = 0;
-                document.body.classList.remove('fever-active');
-                document.getElementById('fever-notice').style.display = 'none';
-            }, 8000);
-        }
-
-        function nextLevel() { level++; spawn(); }
-        function spawn() { for(let i=0; i<10+level*2; i++) createItem(); }
-
-        document.getElementById('start-btn').onclick = () => {
-            document.getElementById('start-overlay').style.display = 'none';
-            isGameOver = false; level = 1; score = 2000; timeLeft = 30.0;
-            spawn(); startTimer();
-        };
-
-        function startTimer() {
-            const timer = setInterval(() => {
-                if (isGameOver) { clearInterval(timer); return; }
-                if (!isFever) timeLeft -= 0.1;
-                updateUI();
-                if (timeLeft <= 0) endGame();
-            }, 100);
-        }
-
-        function endGame() { isGameOver = true; document.getElementById('scoreboard').style.display = 'block'; document.getElementById('final-score').innerText = Math.floor(score); }
-
-        // スキル発動（Huh?演出）
-        document.getElementById('skill-btn').onclick = () => {
-            if(!document.getElementById('skill-btn').classList.contains('ready') || isGameOver) return;
-            skillCharge = 0;
-            const sbtn = document.getElementById('skill-btn');
-            sbtn.classList.remove('ready'); sbtn.innerText = "WAIT...";
+        // 最強能力：全消し
+        function triggerSaikyoSkill() {
+            v([60, 40, 60, 40, 150]);
             
-            const flash = document.getElementById('ultimate-flash');
-            flash.style.backgroundColor = selectedSkill.flash;
-            flash.style.opacity = "0.8";
+            const flash = document.getElementById('flash-effect');
+            const popup = document.getElementById('msg-popup');
+            
+            flash.style.opacity = "0.7";
+            popup.innerText = "覚醒！";
+            popup.style.opacity = "1";
+            popup.style.transform = "translate(-50%, -50%) scale(1.5)";
 
-            // Huh?文字の作成
-            const msg = document.createElement('div');
-            msg.innerText = selectedSkill.name;
-            msg.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); font-size:80px; color:white; font-weight:bold; z-index:1000; transition:0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49); text-shadow:0 0 20px black;`;
-            document.getElementById('game-field').appendChild(msg);
-
-            setTimeout(() => { msg.style.transform = "translate(-50%,-50%) scale(1.2)"; }, 10);
-
-            const items = document.querySelectorAll('.item');
-            items.forEach(g => {
-                g.style.transform = "scale(2) rotate(360deg)";
-                g.style.opacity = "0";
-                setTimeout(() => g.remove(), 200);
-                score += 20;
-            });
-
-            setTimeout(() => { 
+            setTimeout(() => {
                 flash.style.opacity = "0";
-                msg.remove();
-                if(!isGameOver) nextLevel();
-                updateUI();
-            }, 800);
-        };
+                popup.style.opacity = "0";
+                popup.style.transform = "translate(-50%, -50%) scale(1)";
+            }, 400);
 
-        document.getElementById('back-to-title').onclick = () => location.reload();
-        updateUI();
+            const allGrass = document.querySelectorAll('.grass');
+            allGrass.forEach((g, index) => {
+                setTimeout(() => {
+                    if(g.parentNode) {
+                        g.style.transform = "scale(0) rotate(180deg)";
+                        score += 40;
+                        setTimeout(() => g.remove(), 100);
+                        if(index === allGrass.length - 1) checkNextLevel();
+                    }
+                }, index * 15);
+            });
+            score += 1000;
+            skill = 100;
+        }
+
+        function checkNextLevel() {
+            const f = document.getElementById('game-field');
+            if(f.querySelectorAll('.grass').length === 0) {
+                level++;
+                spawn();
+            }
+        }
+
+        function spawn() {
+            // レベルが上がるとアイテム密度アップ
+            const count = Math.min(40, 10 + level * 2);
+            for(let i=0; i < count; i++) createItem(); 
+        }
+
+        function endGame(msg) { 
+            isGameOver = true;
+            clearInterval(timerInterval);
+            v([200, 100, 200]);
+            document.getElementById('score-overlay').style.display = 'flex'; 
+            document.getElementById('over-reason').innerText = msg;
+            document.getElementById('final-score').innerText = score; 
+        }
     </script>
 </body>
 </html>
