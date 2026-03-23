@@ -48,7 +48,7 @@
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
         .tab-btn.active { background: var(--blue); }
-        .col-list { width: 90%; height: 50%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #444; }
+        .col-list { width: 90%; height: 45%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #444; }
         .col-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
         .col-item.owned { border-left-color: var(--gold); }
         .col-item.UZ { border-left-color: var(--uz-color); }
@@ -56,6 +56,8 @@
         @keyframes x-border { 0% { border-left-color: #fff; } 50% { border-left-color: #0ff; } 100% { border-left-color: #f0f; } }
         .equip-btn { padding: 6px 12px; border-radius: 15px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
         .equipped { background: var(--grass-light) !important; color: #000; }
+
+        .bonus-info { background: #222; width: 90%; padding: 8px; border-radius: 10px; margin-bottom: 10px; font-size: 11px; color: var(--bonus-color); border: 1px solid #444; }
 
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 85%; }
         .btn { padding: 12px; font-size: 14px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
@@ -171,6 +173,7 @@
 
         <div id="col-screen" class="overlay" style="display:none;">
             <h2>COLLECTION</h2>
+            <div class="bonus-info" id="collection-bonus-display">図鑑ボーナス: +0% (所持: 0)</div>
             <div class="col-tabs">
                 <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
                 <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
@@ -206,14 +209,12 @@
         const items = [
             // --- X RANK ---
             { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 100, isEvolved: true },
-
             // --- UZ RANK ---
             { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 100, isEvolved: true },
             { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 100, isEvolved: true },
             { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 100, isEvolved: true },
-
             // --- SSR RANK ---
             { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 15, isEvent: true },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
@@ -223,7 +224,6 @@
             { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', owned: false, rarity: 'SSR', info: '金12倍/必殺短縮', rate: 12 },
             { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', owned: false, rarity: 'SSR', info: '金11倍/huh強化', rate: 11 },
             { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金13倍/卵反転', rate: 13 },
-
             // --- SR RANK ---
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
@@ -232,7 +232,6 @@
             { id: 'c_hero', type: 'char', name: '勇者ぜん', icon: '🛡️', owned: false, rarity: 'SR', info: '金6倍', rate: 6 },
             { id: 'c_wizard', type: 'char', name: '魔導士ぜん', icon: '🧙', owned: false, rarity: 'SR', info: '金5.8倍', rate: 5.8 },
             { id: 'c_angel', type: 'char', name: '天使ぜん', icon: '👼', owned: false, rarity: 'SR', info: '金5.2倍', rate: 5.2 },
-
             // --- R RANK ---
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
@@ -242,7 +241,6 @@
             { id: 'c_pilot', type: 'char', name: '操縦士ぜん', icon: '👨‍✈️', owned: false, rarity: 'R', info: '金3.2倍', rate: 3.2 },
             { id: 'c_pirate', type: 'char', name: '海賊ぜん', icon: '🏴‍☠️', owned: false, rarity: 'R', info: '金3倍', rate: 3 },
             { id: 'c_detective', type: 'char', name: '探偵ぜん', icon: '🕵️', owned: false, rarity: 'R', info: '金2.9倍', rate: 2.9 },
-
             // --- BASIC RANK ---
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c15', type: 'char', name: '学者ぜん', icon: '📖', owned: false, rarity: 'BASIC', info: '金1.8倍', rate: 1.8 },
@@ -254,7 +252,6 @@
             { id: 'c_artist', type: 'char', name: '画匠ぜん', icon: '🎨', owned: false, rarity: 'BASIC', info: '金1.3倍', rate: 1.3 },
             { id: 'c_clown', type: 'char', name: '道化師ぜん', icon: '🤡', owned: false, rarity: 'BASIC', info: '金1.25倍', rate: 1.25 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
-
             // --- OTHER ITEMS ---
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
             { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
@@ -270,6 +267,12 @@
         ];
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
+
+        function getCollectionBonus() {
+            const ownedChars = items.filter(it => it.type === 'char' && it.owned).length;
+            // キャラ1体につき2%加算
+            return ownedChars * 0.02;
+        }
 
         function isKazuEvent() { return true; }
 
@@ -381,6 +384,11 @@
             const list = document.getElementById('col-list-content');
             list.innerHTML = '';
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === 'tab-' + currentTab));
+            
+            const ownedCharsCount = items.filter(it => it.type === 'char' && it.owned).length;
+            const totalBonus = Math.round(getCollectionBonus() * 100);
+            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${totalBonus}% (所持キャラ: ${ownedCharsCount}体)`;
+
             const filtered = items.filter(i => i.type === currentTab).sort((a, b) => {
                 const getWeight = (r) => {
                     if (r === 'X') return 4;
@@ -511,8 +519,13 @@
         function pluck(el, base) {
             if(el.classList.contains('plucking')) return;
             const isEv = isKazuEvent();
-            let gain = Math.floor((isEv ? 100 : 50) * equipped.char.rate * (isFever ? 3 : 1));
-            if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') gain *= 3;
+            // ベース獲得量
+            let baseGain = (isEv ? 100 : 50) * equipped.char.rate * (isFever ? 3 : 1);
+            if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') baseGain *= 3;
+            
+            // 図鑑ボーナス適用
+            let gain = Math.floor(baseGain * (1 + getCollectionBonus()));
+
             money += gain; feverPoints = Math.min(100, feverPoints + 7);
             if(feverPoints >= 100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top);
@@ -610,10 +623,10 @@
 
         function endGame(msg) { isPlaying = false; document.getElementById('bgm-player').pause(); document.getElementById('end-title').innerText = msg; document.getElementById('res-money').innerText = Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
         function giveUp() { isPlaying = false; document.getElementById('bgm-player').pause(); openLayer('start-screen'); }
-        function saveGame() { localStorage.setItem('zenSurvival_Final_v4', JSON.stringify({ money, owned: items.filter(i => i.owned).map(i => i.id), eq: { c: equipped.char.id, b: equipped.bg.id, s: equipped.skill.id, bgm: equipped.bgm.id } })); }
+        function saveGame() { localStorage.setItem('zenSurvival_Final_v5', JSON.stringify({ money, owned: items.filter(i => i.owned).map(i => i.id), eq: { c: equipped.char.id, b: equipped.bg.id, s: equipped.skill.id, bgm: equipped.bgm.id } })); }
 
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v4'));
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v5'));
             if(data) {
                 money = data.money;
                 data.owned.forEach(id => { const it = items.find(i => i.id === id); if(it) it.owned = true; });
