@@ -26,28 +26,40 @@
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
 
-        /* スキル発動時のド派手エフェクト用CSS */
+        /* --- 必殺技究極演出用CSS --- */
         .skill-active-field {
-            animation: skill-shake 0.1s infinite, skill-flash 0.5s infinite alternate !important;
-            border-width: 5px !important;
+            animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important;
+            border-width: 8px !important;
+        }
+        /* アルティメットZEN専用背景：虹色高速点滅 */
+        .ultimate-field-bg {
+            animation: ultimate-rainbow 0.2s infinite linear !important;
+        }
+        @keyframes ultimate-rainbow {
+            0% { background: #ff0000; } 20% { background: #ffff00; } 40% { background: #00ff00; } 60% { background: #00ffff; } 80% { background: #0000ff; } 100% { background: #ff00ff; }
         }
         @keyframes skill-shake {
-            0% { transform: translate(2px, 2px); }
-            50% { transform: translate(-2px, -2px); }
-            100% { transform: translate(2px, -2px); }
+            0% { transform: translate(4px, 4px); } 50% { transform: translate(-4px, -4px); } 100% { transform: translate(4px, -4px); }
         }
         @keyframes skill-flash {
-            from { box-shadow: inset 0 0 20px rgba(255,255,255,0.2); border-color: #fff; }
-            to { box-shadow: inset 0 0 80px rgba(255,255,255,0.8); border-color: cyan; }
+            from { box-shadow: inset 0 0 50px rgba(255,255,255,0.5); border-color: #fff; }
+            to { box-shadow: inset 0 0 150px rgba(255,255,255,1); border-color: #ff00ff; }
         }
         .skill-icon-anim {
-            animation: skill-icon-pop 0.5s infinite linear !important;
+            animation: skill-icon-pop 0.3s infinite linear !important;
             z-index: 1000;
         }
         @keyframes skill-icon-pop {
-            0% { transform: scale(1.5) rotate(0deg); filter: brightness(2) drop-shadow(0 0 20px gold); }
-            100% { transform: scale(1.5) rotate(360deg); filter: brightness(2) drop-shadow(0 0 20px white); }
+            0% { transform: scale(2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 30px gold); }
+            100% { transform: scale(2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 30px white); }
         }
+        /* 究極カットイン文字 */
+        .ultimate-text {
+            position: absolute; width: 100%; top: 40%; left: 0; text-align: center;
+            font-size: 50px; color: white; font-weight: bold; z-index: 1001; pointer-events: none;
+            text-shadow: 0 0 20px #000, 0 0 40px #ff0000; animation: text-zoom 0.5s ease-out forwards;
+        }
+        @keyframes text-zoom { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1.2); opacity: 1; } }
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
@@ -293,7 +305,6 @@
 
         function getCollectionBonus() {
             const ownedChars = items.filter(it => it.type === 'char' && it.owned).length;
-            // キャラ1体につき2%加算
             return ownedChars * 0.02;
         }
 
@@ -542,13 +553,9 @@
         function pluck(el, base) {
             if(el.classList.contains('plucking')) return;
             const isEv = isKazuEvent();
-            // ベース獲得量
             let baseGain = (isEv ? 100 : 50) * equipped.char.rate * (isFever ? 3 : 1);
             if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') baseGain *= 3;
-            
-            // 図鑑ボーナス適用
             let gain = Math.floor(baseGain * (1 + getCollectionBonus()));
-
             money += gain; feverPoints = Math.min(100, feverPoints + 7);
             if(feverPoints >= 100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top);
@@ -569,28 +576,37 @@
             skillCount = 0; isSkillActive = true;
             const sid = equipped.skill.id;
             const isUZ = equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X' || equipped.char.id === 'ev_kazu';
-            const isX = equipped.char.rarity === 'X';
+            const isX = equipped.char.id === 'fusion_zen_kazu'; // アルティメットZEN判定
 
-            // --- 派手な演出の追加 ---
             const field = document.getElementById('game-field');
             const icon = document.getElementById('tsum-icon');
+            
             field.classList.add('skill-active-field');
             icon.classList.add('skill-icon-anim');
 
-            // 画面中に火花を散らす
+            // アルティメット・カズキング・ZEN専用の超豪華演出
+            let ultimateText;
+            if(isX) {
+                field.classList.add('ultimate-field-bg');
+                ultimateText = document.createElement('div');
+                ultimateText.className = 'ultimate-text';
+                ultimateText.innerHTML = "全・知・全・能<br><span style='font-size:30px'>ULTIMATE ZEN OVERDRIVE</span>";
+                field.appendChild(ultimateText);
+            }
+
             const effectTimer = setInterval(() => {
                 if(!isSkillActive) { clearInterval(effectTimer); return; }
                 createParticles(Math.random()*100+"%", Math.random()*100+"%");
-            }, 100);
+            }, isX ? 50 : 100);
 
             if(sid === 's1') {
                 const skillNameEl = document.getElementById('skill-display-name');
-                if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = isX ? "cyan" : "red"; }
+                if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = isX ? "#0ff" : "red"; }
                 const intervalTime = isX ? 20 : (isUZ ? 70 : 150);
                 const interval = setInterval(() => {
                     const targets = document.querySelectorAll('.grass:not(.plucking)');
                     if(targets.length > 0) pluck(targets[0], 50);
-                    if(equipped.char.id === 'fusion_zen_kazu') { 
+                    if(isX) { 
                         document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "ERASE!"); e.remove(); }); 
                     }
                 }, intervalTime);
@@ -600,7 +616,9 @@
                     skillNameEl.innerText = equipped.skill.name; 
                     skillNameEl.style.color = "#aaa"; 
                     field.classList.remove('skill-active-field');
+                    field.classList.remove('ultimate-field-bg');
                     icon.classList.remove('skill-icon-anim');
+                    if(ultimateText) ultimateText.remove();
                 }, 3000);
             } else if(sid === 's2') { 
                 startFever(); 
@@ -635,11 +653,12 @@
 
         function createParticles(x, y) {
             const field = document.getElementById('game-field');
-            const count = (equipped.char.rarity === 'X' || isSkillActive) ? 15 : 6;
+            const isX = equipped.char.id === 'fusion_zen_kazu';
+            const count = (isX || isSkillActive) ? 15 : 6;
             for(let i=0; i<count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle'; p.style.left = x; p.style.top = y;
-                if(equipped.char.rarity === 'X' || isSkillActive) p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
+                if(isX || isSkillActive) p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
                 p.style.setProperty('--dx', (Math.random()-0.5)*250+"px");
                 p.style.setProperty('--dy', (Math.random()-0.5)*250+"px");
                 p.style.animation = "scatter 0.4s ease-out forwards";
