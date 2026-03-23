@@ -137,6 +137,7 @@
                 <button class="btn btn-gacha" id="g1-btn" onclick="runGacha(1)">1回 (1,000円)</button>
                 <button class="btn btn-gacha" id="g10-btn" onclick="runGacha(10)" style="background:#ff8c00;">10連 (10,000円)</button>
                 <button class="btn btn-gacha" id="g100-btn" onclick="runGacha(100)" style="background:#800080;">100連 (100,000円)</button>
+                <button class="btn btn-gacha" id="g1000-btn" onclick="runGacha(1000)" style="background:#4b0082; border: 2px solid var(--gold);">👑 1000連 (1,000,000円)</button>
             </div>
             <button class="btn" id="g-back-btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
@@ -176,7 +177,7 @@
         let feverPoints = 0, isFever = false, isSkillActive = false;
 
         const items = [
-            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化', rate: 15, isEvent: true },
+            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 15, isEvent: true },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
@@ -206,7 +207,6 @@
             { id: 's3', type: 'skill', name: '吸引', owned: false, rarity: 'SR', info: '画面の草を一括回収' },
             { id: 's4', type: 'skill', name: '停止', owned: false, rarity: 'SSR', info: '5秒間時間停止' },
             { id: 's5', type: 'skill', name: '爆発', owned: false, rarity: 'R', info: '卵を全て除去' },
-            // BGMアイテム
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
             { id: 'bgm2', type: 'bgm', name: '楽しい日常', url: 'https://standard-themes.com/wp-content/uploads/2021/04/music_sample.mp3', icon: '🎶', owned: false, rarity: 'R', info: '明るい曲' },
             { id: 'bgm3', type: 'bgm', name: '決戦のカズキング', url: 'http://googleusercontent.com/file_content/0', icon: '⚔️', owned: false, rarity: 'SSR', info: '王の威厳' }
@@ -283,8 +283,8 @@
         async function runGacha(times) {
             const cost = 1000 * times;
             if(money < cost) return alert("お金が足りません！");
-            const btns = ['g1-btn', 'g10-btn', 'g100-btn', 'g-back-btn'].map(id => document.getElementById(id));
-            btns.forEach(b => b.disabled = true);
+            const btns = ['g1-btn', 'g10-btn', 'g100-btn', 'g1000-btn', 'g-back-btn'].map(id => document.getElementById(id));
+            btns.forEach(b => { if(b) b.disabled = true; });
             money -= cost; updateUI();
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; 
@@ -298,7 +298,7 @@
                 let pick;
                 if(r < 5) { 
                     let ssrPool = items.filter(it => it.rarity === 'SSR' && (!it.isEvent || isEv));
-                    if(isEv && Math.random() < 0.3) pick = items.find(it => it.id === 'ev_kazu');
+                    if(isEv && Math.random() < 0.000001) pick = items.find(it => it.id === 'ev_kazu');
                     else pick = ssrPool[Math.floor(Math.random()*ssrPool.length)];
                     maxRarity = 'SSR'; 
                 }
@@ -321,7 +321,6 @@
             results.forEach(pick => {
                 if(pick) {
                     pick.owned = true;
-                    // カズキングを入手したら専用BGMも解放する
                     if(pick.id === 'ev_kazu') {
                         items.find(it => it.id === 'bgm3').owned = true;
                     }
@@ -333,7 +332,7 @@
             });
             display.scrollTop = display.scrollHeight;
             document.getElementById('gacha-msg').innerText = `${times}連完了！`;
-            btns.forEach(b => b.disabled = false);
+            btns.forEach(b => { if(b) b.disabled = false; });
             saveGame(); updateUI();
         }
 
@@ -459,7 +458,10 @@
             spawn();
             const mainLoop = setInterval(() => {
                 if(!isFever) timeLeft -= 0.1;
-                if(!isSkillActive) skillCount = Math.min(100, skillCount + (100 / 300));
+                if(!isSkillActive) {
+                    let chargeSpeed = (equipped.char.id === 'ev_kazu') ? (500 / 300) : (100 / 300);
+                    skillCount = Math.min(100, skillCount + chargeSpeed);
+                }
                 updateUI();
                 if(timeLeft <= 0 || !isPlaying) { clearInterval(mainLoop); if(timeLeft <= 0) endGame("タイムアップ！"); }
             }, 100);
