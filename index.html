@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - 全抜きボーナス版 -</title>
+    <title>草抜きサバイバル - カズキングイベント開催中！ -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; }
         body { 
@@ -44,14 +44,14 @@
         #gacha-cutin {
             position: absolute; width: 100%; height: 100%;
             display: none; align-items: center; justify-content: center;
-            z-index: 600; font-size: 80px; pointer-events: none;
+            z-index: 600; font-size: 60px; pointer-events: none;
             background: rgba(255,255,255,0); transition: background 0.5s;
         }
         .cutin-anim { animation: cutin-zoom 0.8s ease-out forwards; }
         @keyframes cutin-zoom {
             0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.5); opacity: 1; }
-            100% { transform: scale(1.2); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1.1); opacity: 0; }
         }
 
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
@@ -119,8 +119,8 @@
         <div id="gacha-cutin"></div>
 
         <div id="start-screen" class="overlay">
-            <h1 style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
-            <p style="color:var(--bonus-color); font-size:12px; margin: 5px 0;">草を全抜きしてタイム＋5秒！</p>
+            <h1 id="game-title" style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
+            <p style="color:var(--bonus-color); font-size:12px; margin: 5px 0;">草を全抜きしてタイムボーナス！</p>
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">START</button>
@@ -173,6 +173,7 @@
         let feverPoints = 0, isFever = false, isSkillActive = false;
 
         const items = [
+            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化', rate: 15, isEvent: true },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
@@ -206,6 +207,13 @@
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1') };
 
+        // 期間判定 (2026/3/25まで)
+        function isKazuEvent() {
+            const now = new Date();
+            const end = new Date('2026-03-25T23:59:59');
+            return now <= end;
+        }
+
         function updateUI() {
             document.getElementById('m-val').innerText = Math.floor(money).toLocaleString();
             document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
@@ -222,6 +230,14 @@
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
+                
+                // イベント演出
+                if(isKazuEvent()){
+                    const t = document.getElementById('game-title');
+                    t.innerText = "👑 カズキングイベント 👑";
+                    t.style.color = "gold";
+                    t.style.textShadow = "0 0 10px gold";
+                }
             }
         }
 
@@ -264,10 +280,21 @@
             
             let results = [];
             let maxRarity = 'BASIC';
+            const isEv = isKazuEvent();
+
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
                 let pick;
-                if(r < 5) { pick = items.filter(it => it.rarity === 'SSR')[Math.floor(Math.random()*items.filter(it => it.rarity === 'SSR').length)]; maxRarity = 'SSR'; }
+                if(r < 5) { 
+                    let ssrPool = items.filter(it => it.rarity === 'SSR' && (!it.isEvent || isEv));
+                    // イベント中ならカズキングを優先抽選
+                    if(isEv && Math.random() < 0.3) {
+                        pick = items.find(it => it.id === 'ev_kazu');
+                    } else {
+                        pick = ssrPool[Math.floor(Math.random()*ssrPool.length)];
+                    }
+                    maxRarity = 'SSR'; 
+                }
                 else if(r < 20) { pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random()*items.filter(it => it.rarity === 'SR').length)]; if(maxRarity!=='SSR') maxRarity='SR'; }
                 else if(r < 50) { pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random()*items.filter(it => it.rarity === 'R').length)]; if(maxRarity==='BASIC') maxRarity='R'; }
                 else pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random()*items.filter(it => it.rarity === 'BASIC').length)];
@@ -307,12 +334,14 @@
         function spawn() {
             if(!isPlaying) return;
             const field = document.getElementById('game-field');
-            
+            const isEv = isKazuEvent();
+
             for(let i=0; i<9; i++) {
                 const g = document.createElement('div');
                 g.className = 'item grass';
                 g.style.left = Math.random() * 85 + "%";
                 g.style.top = Math.random() * 80 + "%";
+                if(isEv) g.style.filter = "sepia(1) saturate(10) brightness(1.2) drop-shadow(0 0 5px gold)";
                 g.innerHTML = '<div class="grass-center"></div>';
                 g.onclick = function() {
                     this.onclick = null;
@@ -324,65 +353,48 @@
             const egg = document.createElement('div');
             egg.className = 'item egg';
             egg.innerText = '🥚';
-            
-            let posX = Math.random() * 80;
-            let posY = Math.random() * 75;
-            let velX = (Math.random() - 0.5) * 2.5; 
-            let velY = (Math.random() - 0.5) * 2.5; 
-
-            egg.style.left = posX + "%";
-            egg.style.top = posY + "%";
+            let posX = Math.random() * 80, posY = Math.random() * 75;
+            let velX = (Math.random() - 0.5) * 2.5, velY = (Math.random() - 0.5) * 2.5;
+            egg.style.left = posX + "%"; egg.style.top = posY + "%";
 
             const moveEgg = setInterval(() => {
-                if (!isPlaying || !egg.parentNode) {
-                    clearInterval(moveEgg);
-                    return;
-                }
-                posX += velX;
-                posY += velY;
+                if (!isPlaying || !egg.parentNode) { clearInterval(moveEgg); return; }
+                posX += velX; posY += velY;
                 if (posX <= 0 || posX >= 85) velX *= -1;
                 if (posY <= 0 || posY >= 80) velY *= -1;
-                egg.style.left = posX + "%";
-                egg.style.top = posY + "%";
+                egg.style.left = posX + "%"; egg.style.top = posY + "%";
             }, 30);
 
             egg.onclick = () => {
                 const charId = equipped.char.id;
-                if(charId === 'c1' || charId === 'c7') {
-                    popText(egg.style.left, egg.style.top, "GUARD!");
+                if(charId === 'c1' || charId === 'c7' || charId === 'ev_kazu') {
+                    let eggBonus = (charId === 'ev_kazu') ? 500 : 0;
+                    if(eggBonus > 0) {
+                        money += eggBonus; updateUI();
+                        popText(egg.style.left, egg.style.top, `+${eggBonus} (EGG!)`, "white");
+                    } else {
+                        popText(egg.style.left, egg.style.top, "GUARD!");
+                    }
                     clearInterval(moveEgg); egg.remove();
                 } else if(charId === 'c13') {
-                    money += 100;
-                    popText(egg.style.left, egg.style.top, "+100");
-                    clearInterval(moveEgg); egg.remove();
-                    updateUI();
+                    money += 100; popText(egg.style.left, egg.style.top, "+100");
+                    clearInterval(moveEgg); egg.remove(); updateUI();
                 } else {
-                    clearInterval(moveEgg);
-                    endGame("卵を抜いてしまった！");
+                    clearInterval(moveEgg); endGame("卵を抜いてしまった！");
                 }
             };
             field.appendChild(egg);
         }
 
-        function createParticles(x, y) {
-            const field = document.getElementById('game-field');
-            for(let i=0; i<6; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = x; p.style.top = y;
-                const dx = (Math.random() - 0.5) * 200 + "px";
-                const dy = (Math.random() - 0.5) * 200 + "px";
-                p.style.setProperty('--dx', dx);
-                p.style.setProperty('--dy', dy);
-                p.style.animation = "scatter 0.4s ease-out forwards";
-                field.appendChild(p);
-                setTimeout(() => p.remove(), 400);
-            }
-        }
-
         function pluck(el, base) {
             if(el.classList.contains('plucking')) return;
-            let gain = Math.floor(base * equipped.char.rate * (isFever ? 3 : 1));
+            const isEv = isKazuEvent();
+            let currentBase = isEv ? 100 : 50;
+            let gain = Math.floor(currentBase * equipped.char.rate * (isFever ? 3 : 1));
+            
+            // カズキング特権：常時3倍
+            if(equipped.char.id === 'ev_kazu') gain *= 3;
+
             money += gain; feverPoints = Math.min(100, feverPoints + 7);
             if(feverPoints >= 100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top);
@@ -391,35 +403,38 @@
             
             setTimeout(() => {
                 el.remove();
-                // 残りの草があるかチェック
                 if(document.querySelectorAll('.grass:not(.plucking)').length === 0) {
-                    // 全抜きボーナス！
-                    timeLeft += 5.0; 
-                    popText("40%", "45%", "ALL CLEAR! +5.0s", "var(--bonus-color)");
-                    // 次の波をスポーン
+                    let bonusTime = (equipped.char.id === 'ev_kazu') ? 8.0 : 5.0;
+                    timeLeft += bonusTime; 
+                    popText("30%", "45%", `ALL CLEAR! +${bonusTime}s`, "var(--bonus-color)");
                     spawn();
                 }
             }, 200);
             updateUI();
         }
 
-        function popText(x, y, txt, color="var(--gold)") {
-            const p = document.createElement('div');
-            p.className = 'pop-text'; p.innerText = txt; p.style.left = x; p.style.top = y; p.style.color = color;
-            document.getElementById('game-field').appendChild(p);
-            setTimeout(() => p.remove(), 500);
-        }
-
         function triggerSkill() {
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true;
             const sid = equipped.skill.id;
-            if(sid === 's1') {
+            const isKazu = equipped.char.id === 'ev_kazu';
+
+            if(sid === 's1') { // huh
+                const skillNameEl = document.getElementById('skill-display-name');
+                if(isKazu) {
+                    skillNameEl.innerText = "カズキングタイジュウフエターネキンギーニ";
+                    skillNameEl.style.color = "gold";
+                }
+                const intervalTime = isKazu ? 70 : 150;
                 const interval = setInterval(() => {
                     const targets = document.querySelectorAll('.grass:not(.plucking)');
                     if(targets.length > 0) pluck(targets[0], 50);
-                }, 150);
-                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 3000);
+                }, intervalTime);
+                setTimeout(() => { 
+                    isSkillActive = false; clearInterval(interval); 
+                    skillNameEl.innerText = equipped.skill.name;
+                    skillNameEl.style.color = "#aaa";
+                }, 3000);
             } else if(sid === 's2') { startFever(); isSkillActive = false;
             } else if(sid === 's3') { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); isSkillActive = false;
             } else if(sid === 's4') {
@@ -431,6 +446,28 @@
                 document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "BOM!", "orange"); e.remove(); });
                 isSkillActive = false;
             }
+        }
+
+        function createParticles(x, y) {
+            const field = document.getElementById('game-field');
+            for(let i=0; i<6; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = x; p.style.top = y;
+                const dx = (Math.random() - 0.5) * 200 + "px";
+                const dy = (Math.random() - 0.5) * 200 + "px";
+                p.style.setProperty('--dx', dx); p.style.setProperty('--dy', dy);
+                p.style.animation = "scatter 0.4s ease-out forwards";
+                field.appendChild(p);
+                setTimeout(() => p.remove(), 400);
+            }
+        }
+
+        function popText(x, y, txt, color="var(--gold)") {
+            const p = document.createElement('div');
+            p.className = 'pop-text'; p.innerText = txt; p.style.left = x; p.style.top = y; p.style.color = color;
+            document.getElementById('game-field').appendChild(p);
+            setTimeout(() => p.remove(), 500);
         }
 
         function startFever() {
@@ -462,17 +499,17 @@
 
         function saveGame() {
             const data = { money, owned: items.filter(i => i.owned).map(i => i.id), eq: { c: equipped.char.id, b: equipped.bg.id, s: equipped.skill.id } };
-            localStorage.setItem('zenSurvivalClassicFinal', JSON.stringify(data));
+            localStorage.setItem('zenSurvivalClassicFinal_Kazu', JSON.stringify(data));
         }
 
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvivalClassicFinal'));
+            const data = JSON.parse(localStorage.getItem('zenSurvivalClassicFinal_Kazu'));
             if(data) {
                 money = data.money;
                 data.owned.forEach(id => { const it = items.find(i => i.id === id); if(it) it.owned = true; });
-                equipped.char = items.find(i => i.id === data.eq.c) || items[19];
-                equipped.bg = items.find(i => i.id === data.eq.b) || items[20];
-                equipped.skill = items.find(i => i.id === data.eq.s) || items[24];
+                equipped.char = items.find(i => i.id === data.eq.c) || items[items.length-1];
+                equipped.bg = items.find(i => i.id === data.eq.b) || items.find(i=>i.id==='b1');
+                equipped.skill = items.find(i => i.id === data.eq.s) || items.find(i=>i.id==='s1');
                 document.getElementById('game-field').className = equipped.bg.className;
             }
             updateUI(); openLayer('start-screen');
