@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>草抜きサバイバル - カズキングイベント開催中！ -</title>
     <style>
-        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; }
+        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; }
         body { 
             text-align: center; font-family: 'Arial Black', sans-serif; 
             background-color: #000; color: white; 
@@ -39,9 +39,11 @@
         }
         .res-line.SSR { background: #443300; border: 1px solid var(--gold); color: var(--gold); animation: glow 1s infinite alternate; }
         .res-line.UZ { background: #300; border: 1px solid var(--uz-color); color: var(--uz-color); animation: uz-glow 0.5s infinite alternate; font-weight: bold; }
+        .res-line.X { background: #000; border: 1px solid var(--x-color); color: var(--x-color); animation: x-glow 0.3s infinite alternate; font-weight: bold; }
         .res-line.SR { color: #ff00ff; }
         @keyframes glow { from { box-shadow: 0 0 2px var(--gold); } to { box-shadow: 0 0 10px var(--gold); } }
         @keyframes uz-glow { from { box-shadow: 0 0 5px var(--uz-color); } to { box-shadow: 0 0 20px var(--uz-color); } }
+        @keyframes x-glow { from { box-shadow: 0 0 10px #fff, 0 0 20px #0ff; } to { box-shadow: 0 0 20px #fff, 0 0 40px #f0f; } }
 
         #gacha-cutin {
             position: absolute; width: 100%; height: 100%;
@@ -63,6 +65,8 @@
         .col-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
         .col-item.owned { border-left-color: var(--gold); }
         .col-item.UZ { border-left-color: var(--uz-color); }
+        .col-item.X { border-left-color: var(--x-color); animation: x-border 0.5s infinite; }
+        @keyframes x-border { 0% { border-left-color: #fff; } 50% { border-left-color: #0ff; } 100% { border-left-color: #f0f; } }
         .equip-btn { padding: 6px 12px; border-radius: 15px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
         .equipped { background: var(--grass-light) !important; color: #000; }
 
@@ -71,7 +75,8 @@
         .btn-start { background: var(--gold); color: #000; grid-column: span 2; font-size: 20px; box-shadow: 0 0 15px var(--gold); }
         .btn-gacha { background: #ff4500; color: white; }
         .btn-col { background: var(--blue); color: white; }
-        .btn-evolve { background: #8a2be2; color: white; grid-column: span 2; border: 2px solid #fff; }
+        .btn-evolve { background: #8a2be2; color: white; grid-column: span 1; font-size: 12px; }
+        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; grid-column: span 1; font-size: 12px; text-shadow: 1px 1px 2px #000; }
 
         .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
         @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
@@ -109,6 +114,10 @@
         .gacha-anim { animation: shake 0.1s infinite; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-5deg); } 75% { transform: translateX(5px) rotate(5deg); } }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        
+        /* Xランク専用エフェクト強化 */
+        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.1) 50%, rgba(255,0,255,0.1) 100%); animation: aura-spin 2s linear infinite; }
+        @keyframes aura-spin { from { transform: rotate(0deg); filter: hue-rotate(0deg); } to { transform: rotate(360deg); filter: hue-rotate(360deg); } }
     </style>
 </head>
 <body onload="loadGame()">
@@ -120,6 +129,7 @@
     </div>
 
     <div id="game-field">
+        <div id="x-aura-effect" class="x-aura"></div>
         <div id="gacha-cutin"></div>
 
         <div id="start-screen" class="overlay">
@@ -130,8 +140,24 @@
                 <button class="btn btn-start" onclick="startGame()">START</button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
                 <button class="btn btn-col" onclick="openLayer('col-screen')">COLLECTION</button>
-                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化所 (SSR専用)</button>
+                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
+                <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
             </div>
+        </div>
+
+        <div id="fusion-screen" class="overlay" style="display:none;">
+            <h2 style="color:cyan; text-shadow: 0 0 10px cyan;">🌀 キャラクター合体</h2>
+            <div style="background:#222; padding:15px; border-radius:15px; width:85%; font-size:11px;">
+                <p>【合体条件】</p>
+                <p id="fuse-cond-1">・ｺﾞｯﾄﾞﾈｽｶｽﾞｷﾝｸﾞ(UZ) 所持</p>
+                <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
+                <p id="fuse-cond-3">・費用: 100,000,000円</p>
+            </div>
+            <div id="fusion-result-preview" style="margin:15px; font-size:14px; color:var(--gold);">
+                ??? + ??? = <span style="font-size:20px;">究極体</span>
+            </div>
+            <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:200px; display:none;">フュージョン！</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
         <div id="evolve-screen" class="overlay" style="display:none;">
@@ -198,12 +224,14 @@
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
             { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金8倍', rate: 8 },
             
-            // 進化後定義 (UZランク)
             { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 100, isEvolved: true },
             { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 100, isEvolved: true },
             { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 100, isEvolved: true },
+
+            // アルティメット・カズキング・ZEN (Xランク、ご要望のステータスに強化)
+            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/必殺即充填/huh極限', rate: 100, isEvolved: true },
 
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
@@ -252,6 +280,7 @@
             if(id !== 'none') document.getElementById(id).style.display = 'flex';
             if(id === 'col-screen') renderCol();
             if(id === 'evolve-screen') renderEvolve();
+            if(id === 'fusion-screen') renderFusion();
             if(id === 'start-screen') {
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
@@ -263,6 +292,40 @@
                     t.style.textShadow = "0 0 10px gold";
                 }
             }
+        }
+
+        function renderFusion() {
+            const char1 = items.find(i => i.id === 'ev_kazu_ultimate');
+            const char2 = items.find(i => i.id === 'c1_ultimate');
+            const cost = 100000000;
+            
+            const cond1 = document.getElementById('fuse-cond-1');
+            const cond2 = document.getElementById('fuse-cond-2');
+            const cond3 = document.getElementById('fuse-cond-3');
+            const btn = document.getElementById('fusion-exec-btn');
+
+            cond1.style.color = char1.owned ? "lime" : "red";
+            cond2.style.color = char2.owned ? "lime" : "red";
+            cond3.style.color = money >= cost ? "lime" : "red";
+
+            if(char1.owned && char2.owned && money >= cost) {
+                btn.style.display = "block";
+                document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="font-size:24px; color:white; text-shadow:0 0 10px white; animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`;
+            } else {
+                btn.style.display = "none";
+                document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可";
+            }
+        }
+
+        function executeFusion() {
+            const cost = 100000000;
+            money -= cost;
+            const res = items.find(i => i.id === 'fusion_zen_kazu');
+            res.owned = true;
+            equipped.char = res;
+            alert("合体完了！究極の力「X」を手に入れた！");
+            openLayer('start-screen');
+            saveGame(); updateUI();
         }
 
         function renderEvolve() {
@@ -278,7 +341,7 @@
                 btn.disabled = money < evolveCost;
             } else if(equipped.char.isEvolved) {
                 target.innerText = "これ以上の進化は不能";
-                req.innerText = "最高ランク UZ 到達済み";
+                req.innerText = "最高ランク 到達済み";
                 btn.style.display = "none";
             } else {
                 target.innerText = "このキャラは進化できません";
@@ -320,8 +383,8 @@
             items.filter(i => i.type === currentTab).forEach(item => {
                 const isEq = equipped[item.type].id === item.id;
                 const div = document.createElement('div');
-                div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity === 'UZ' ? 'UZ' : ''}`;
-                div.innerHTML = `<div>${item.owned ? item.icon || '' : '？'} ${item.owned ? item.name : '？？？'}<br><small style="color:${item.rarity==='UZ'?'red':'inherit'}">${item.rarity}</small></div>
+                div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`;
+                div.innerHTML = `<div>${item.owned ? item.icon || '' : '？'} ${item.owned ? item.name : '？？？'}<br><small style="color:${item.rarity==='UZ'?'red':(item.rarity==='X'?'#0ff':'inherit')}">${item.rarity}</small></div>
                     <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`;
                 list.appendChild(div);
             });
@@ -422,8 +485,9 @@
                 egg.style.left = posX + "%"; egg.style.top = posY + "%";
             }, 30);
             egg.onclick = () => {
-                if(equipped.char.rarity === 'SSR' || equipped.char.rarity === 'UZ') {
-                    let eggBonus = (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) ? 500 : 0;
+                // Xランク、UZランク、SSRキャラは卵を抜ける
+                if(equipped.char.rarity === 'SSR' || equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X') {
+                    let eggBonus = (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') ? 1000 : 0;
                     if(equipped.char.id === 'c13_ultimate') eggBonus = 1000;
                     if(eggBonus > 0) { money += eggBonus; updateUI(); popText(egg.style.left, egg.style.top, `+${eggBonus} (EGG!)`, "white"); }
                     else popText(egg.style.left, egg.style.top, "GUARD!");
@@ -440,7 +504,8 @@
             if(el.classList.contains('plucking')) return;
             const isEv = isKazuEvent();
             let gain = Math.floor((isEv ? 100 : 50) * equipped.char.rate * (isFever ? 3 : 1));
-            if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) gain *= 3;
+            // XランクまたはUZ進化系はさらに強化
+            if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') gain *= 3;
             money += gain; feverPoints = Math.min(100, feverPoints + 7);
             if(feverPoints >= 100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top);
@@ -449,7 +514,7 @@
             setTimeout(() => {
                 el.remove();
                 if(document.querySelectorAll('.grass:not(.plucking)').length === 0) {
-                    timeLeft += (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) ? 8.0 : 5.0;
+                    timeLeft += (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') ? 8.0 : 5.0;
                     spawn();
                 }
             }, 200);
@@ -460,15 +525,26 @@
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true;
             const sid = equipped.skill.id;
-            const isUZ = equipped.char.rarity === 'UZ' || equipped.char.id === 'ev_kazu';
+            const isUZ = equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X' || equipped.char.id === 'ev_kazu';
+            const isX = equipped.char.rarity === 'X';
+            
             if(sid === 's1') {
                 const skillNameEl = document.getElementById('skill-display-name');
-                if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = "red"; }
+                if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = isX ? "cyan" : "red"; }
+                
+                // Xランクの場合、huhの間隔を極限まで短縮(大幅強化)
+                const intervalTime = isX ? 20 : (isUZ ? 70 : 150);
                 const interval = setInterval(() => {
                     const targets = document.querySelectorAll('.grass:not(.plucking)');
                     if(targets.length > 0) pluck(targets[0], 50);
-                }, isUZ ? 70 : 150);
-                setTimeout(() => { isSkillActive = false; clearInterval(interval); skillNameEl.innerText = equipped.skill.name; skillNameEl.style.color = "#aaa"; }, 3000);
+                }, intervalTime);
+                
+                setTimeout(() => { 
+                    isSkillActive = false; 
+                    clearInterval(interval); 
+                    skillNameEl.innerText = equipped.skill.name; 
+                    skillNameEl.style.color = "#aaa"; 
+                }, 3000);
             } else if(sid === 's2') { startFever(); isSkillActive = false; }
             else if(sid === 's3') { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); isSkillActive = false; }
             else if(sid === 's4') {
@@ -481,11 +557,13 @@
 
         function createParticles(x, y) {
             const field = document.getElementById('game-field');
-            for(let i=0; i<6; i++) {
+            const count = (equipped.char.rarity === 'X') ? 15 : 6;
+            for(let i=0; i<count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle'; p.style.left = x; p.style.top = y;
-                p.style.setProperty('--dx', (Math.random()-0.5)*200+"px");
-                p.style.setProperty('--dy', (Math.random()-0.5)*200+"px");
+                if(equipped.char.rarity === 'X') p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
+                p.style.setProperty('--dx', (Math.random()-0.5)*250+"px");
+                p.style.setProperty('--dy', (Math.random()-0.5)*250+"px");
                 p.style.animation = "scatter 0.4s ease-out forwards";
                 field.appendChild(p);
                 setTimeout(() => p.remove(), 400);
@@ -495,6 +573,7 @@
         function popText(x, y, txt, color="var(--gold)") {
             const p = document.createElement('div');
             p.className = 'pop-text'; p.innerText = txt; p.style.left = x; p.style.top = y; p.style.color = color;
+            if(equipped.char.rarity === 'X') p.style.fontSize = "30px";
             document.getElementById('game-field').appendChild(p);
             setTimeout(() => p.remove(), 500);
         }
@@ -508,12 +587,29 @@
             isPlaying = true; timeLeft = 30.0; skillCount = feverPoints = 0; openLayer('none');
             document.querySelectorAll('.item').forEach(i => i.remove());
             if(equipped.bgm && equipped.bgm.url) document.getElementById('bgm-player').play().catch(e=>0);
+            
+            // Xランク装備時のエフェクト表示
+            if(equipped.char.rarity === 'X') document.getElementById('x-aura-effect').style.display = 'block';
+            else document.getElementById('x-aura-effect').style.display = 'none';
+
             spawn();
             const mainLoop = setInterval(() => {
                 if(!isFever) timeLeft -= 0.1;
-                if(!isSkillActive) skillCount = Math.min(100, skillCount + ((equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) ? 1.66 : 0.33));
+                
+                // 必殺チャージ時間の調整
+                if(!isSkillActive) {
+                    let chargeSpeed = 0.33;
+                    if(equipped.char.rarity === 'X') chargeSpeed = 100; // Xランクなら一瞬でチャージ(チャージ時間0)
+                    else if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) chargeSpeed = 1.66;
+                    skillCount = Math.min(100, skillCount + chargeSpeed);
+                }
+                
                 updateUI();
-                if(timeLeft <= 0 || !isPlaying) { clearInterval(mainLoop); if(timeLeft <= 0) endGame("タイムアップ！"); }
+                if(timeLeft <= 0 || !isPlaying) { 
+                    clearInterval(mainLoop); 
+                    document.getElementById('x-aura-effect').style.display = 'none';
+                    if(timeLeft <= 0) endGame("タイムアップ！"); 
+                }
             }, 100);
         }
 
