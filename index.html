@@ -31,7 +31,6 @@
             animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important;
             border-width: 8px !important;
         }
-        /* アルティメットZEN専用背景：虹色高速点滅 */
         .ultimate-field-bg {
             animation: ultimate-rainbow 0.2s infinite linear !important;
         }
@@ -53,7 +52,6 @@
             0% { transform: scale(2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 30px gold); }
             100% { transform: scale(2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 30px white); }
         }
-        /* 究極カットイン文字 */
         .ultimate-text {
             position: absolute; width: 100%; top: 40%; left: 0; text-align: center;
             font-size: 50px; color: white; font-weight: bold; z-index: 1001; pointer-events: none;
@@ -99,8 +97,9 @@
         .btn-start { background: var(--gold); color: #000; grid-column: span 2; font-size: 20px; box-shadow: 0 0 15px var(--gold); }
         .btn-gacha { background: #ff4500; color: white; }
         .btn-col { background: var(--blue); color: white; }
-        .btn-evolve { background: #8a2be2; color: white; grid-column: span 1; font-size: 12px; }
-        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; grid-column: span 1; font-size: 12px; text-shadow: 1px 1px 2px #000; }
+        .btn-evolve { background: #8a2be2; color: white; font-size: 12px; }
+        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; font-size: 12px; text-shadow: 1px 1px 2px #000; }
+        .btn-mission { background: #00cc66; color: white; grid-column: span 2; font-size: 14px; }
 
         .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
         @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
@@ -141,6 +140,14 @@
         
         .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.1) 50%, rgba(255,0,255,0.1) 100%); animation: aura-spin 2s linear infinite; }
         @keyframes aura-spin { from { transform: rotate(0deg); filter: hue-rotate(0deg); } to { transform: rotate(360deg); filter: hue-rotate(360deg); } }
+
+        /* ミッション用スタイル */
+        .mission-item { background: #222; border: 1px solid #444; border-radius: 10px; margin: 8px 0; padding: 12px; width: 85%; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+        .mission-progress { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
+        .mission-fill { height: 100%; background: #00cc66; transition: 0.3s; }
+        .mission-reward-btn { align-self: flex-end; padding: 5px 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
+        .claimed { background: #444; color: #888; cursor: default; }
     </style>
 </head>
 <body onload="loadGame()">
@@ -157,15 +164,21 @@
 
         <div id="start-screen" class="overlay">
             <h1 id="game-title" style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
-            <p style="color:var(--bonus-color); font-size:12px; margin: 5px 0;">草を全抜きしてタイムボーナス！</p>
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">START</button>
+                <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 デイリーミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
                 <button class="btn btn-col" onclick="openLayer('col-screen')">COLLECTION</button>
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
             </div>
+        </div>
+
+        <div id="mission-screen" class="overlay" style="display:none;">
+            <h2 style="color:#00cc66;">📅 デイリーミッション</h2>
+            <div id="mission-list" style="width: 100%; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 60%;"></div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
         <div id="fusion-screen" class="overlay" style="display:none;">
@@ -176,19 +189,14 @@
                 <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
                 <p id="fuse-cond-3">・費用: 1兆円</p>
             </div>
-            <div id="fusion-result-preview" style="margin:15px; font-size:14px; color:var(--gold);">
-                ??? + ??? = <span style="font-size:20px;">究極体</span>
-            </div>
+            <div id="fusion-result-preview" style="margin:15px; font-size:14px; color:var(--gold);"></div>
             <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:200px; display:none;">フュージョン！</button>
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
         <div id="evolve-screen" class="overlay" style="display:none;">
             <h2 style="color:#8a2be2;">🧬 キャラクター進化</h2>
-            <div id="evolve-status" style="background:#222; padding:20px; border-radius:15px; width:80%; margin-bottom:15px;">
-                <p id="evolve-target">進化対象を装備してください</p>
-                <div id="evolve-req" style="font-size:12px; color:#aaa;"></div>
-            </div>
+            <div id="evolve-status" style="background:#222; padding:20px; border-radius:15px; width:80%; margin-bottom:15px;"></div>
             <button class="btn" id="evolve-exec-btn" onclick="executeEvolve()" style="background:#ffd700; color:#000; width:180px; margin-bottom:10px; display:none;">進化させる！</button>
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px;">戻る</button>
         </div>
@@ -208,7 +216,7 @@
 
         <div id="col-screen" class="overlay" style="display:none;">
             <h2>COLLECTION</h2>
-            <div class="bonus-info" id="collection-bonus-display">図鑑ボーナス: +0% (所持: 0)</div>
+            <div class="bonus-info" id="collection-bonus-display"></div>
             <div class="col-tabs">
                 <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
                 <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
@@ -241,16 +249,18 @@
         let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0, currentTab = 'char';
         let feverPoints = 0, isFever = false, isSkillActive = false;
 
+        // ミッション関連
+        let missions = [];
+        let missionStats = { plucked: 0, gachaed: 0, earned: 0 };
+        let lastMissionDate = "";
+
         const items = [
-            // --- X RANK ---
             { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 100, isEvolved: true },
-            // --- UZ RANK ---
             { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 100, isEvolved: true },
             { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 100, isEvolved: true },
             { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 100, isEvolved: true },
-            // --- SSR RANK ---
             { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 15, isEvent: true },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
@@ -259,7 +269,6 @@
             { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', owned: false, rarity: 'SSR', info: '金12倍/必殺短縮', rate: 12 },
             { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', owned: false, rarity: 'SSR', info: '金11倍/huh強化', rate: 11 },
             { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金13倍/卵反転', rate: 13 },
-            // --- SR RANK ---
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
             { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
@@ -267,7 +276,6 @@
             { id: 'c_hero', type: 'char', name: '勇者ぜん', icon: '🛡️', owned: false, rarity: 'SR', info: '金6倍', rate: 6 },
             { id: 'c_wizard', type: 'char', name: '魔導士ぜん', icon: '🧙', owned: false, rarity: 'SR', info: '金5.8倍', rate: 5.8 },
             { id: 'c_angel', type: 'char', name: '天使ぜん', icon: '👼', owned: false, rarity: 'SR', info: '金5.2倍', rate: 5.2 },
-            // --- R RANK ---
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
             { id: 'c10', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'R', info: '金2.6倍', rate: 2.6 },
@@ -276,7 +284,6 @@
             { id: 'c_pilot', type: 'char', name: '操縦士ぜん', icon: '👨‍✈️', owned: false, rarity: 'R', info: '金3.2倍', rate: 3.2 },
             { id: 'c_pirate', type: 'char', name: '海賊ぜん', icon: '🏴‍☠️', owned: false, rarity: 'R', info: '金3倍', rate: 3 },
             { id: 'c_detective', type: 'char', name: '探偵ぜん', icon: '🕵️', owned: false, rarity: 'R', info: '金2.9倍', rate: 2.9 },
-            // --- BASIC RANK ---
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c15', type: 'char', name: '学者ぜん', icon: '📖', owned: false, rarity: 'BASIC', info: '金1.8倍', rate: 1.8 },
             { id: 'c16', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'BASIC', info: '金1.7倍', rate: 1.7 },
@@ -287,7 +294,6 @@
             { id: 'c_artist', type: 'char', name: '画匠ぜん', icon: '🎨', owned: false, rarity: 'BASIC', info: '金1.3倍', rate: 1.3 },
             { id: 'c_clown', type: 'char', name: '道化師ぜん', icon: '🤡', owned: false, rarity: 'BASIC', info: '金1.25倍', rate: 1.25 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
-            // --- OTHER ITEMS ---
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
             { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
             { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
@@ -303,11 +309,7 @@
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
 
-        function getCollectionBonus() {
-            const ownedChars = items.filter(it => it.type === 'char' && it.owned).length;
-            return ownedChars * 0.02;
-        }
-
+        function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
         function isKazuEvent() { return true; }
 
         function updateUI() {
@@ -316,6 +318,9 @@
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.getElementById('skill-fill').style.width = skillCount + "%";
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
+            
+            const hasClaimable = missions.some(m => !m.claimed && missionStats[m.key] >= m.goal);
+            document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
         }
 
         function openLayer(id) {
@@ -324,16 +329,59 @@
             if(id === 'col-screen') renderCol();
             if(id === 'evolve-screen') renderEvolve();
             if(id === 'fusion-screen') renderFusion();
+            if(id === 'mission-screen') renderMissions();
             if(id === 'start-screen') {
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
-                if(isKazuEvent()){
-                    const t = document.getElementById('game-title');
-                    t.innerText = "👑 カズキングイベント 👑";
-                    t.style.color = "gold";
-                    t.style.textShadow = "0 0 10px gold";
-                }
+                const t = document.getElementById('game-title');
+                t.innerText = "👑 カズキングイベント 👑";
+            }
+        }
+
+        // --- ミッションロジック ---
+        function initMissions() {
+            const today = new Date().toLocaleDateString();
+            if(lastMissionDate !== today) {
+                lastMissionDate = today;
+                missionStats = { plucked: 0, gachaed: 0, earned: 0 };
+                missions = [
+                    { id: 1, title: "草を抜きまくれ", goal: 100, reward: 50000, key: "plucked", unit: "本", claimed: false },
+                    { id: 2, title: "ガチャを回せ", goal: 10, reward: 20000, key: "gachaed", unit: "回", claimed: false },
+                    { id: 3, title: "今日稼げ", goal: 100000, reward: 100000, key: "earned", unit: "円", claimed: false }
+                ];
+                saveGame();
+            }
+        }
+
+        function renderMissions() {
+            const container = document.getElementById('mission-list');
+            container.innerHTML = '';
+            missions.forEach(m => {
+                const prog = Math.min(100, (missionStats[m.key] / m.goal) * 100);
+                const canClaim = !m.claimed && prog >= 100;
+                const item = document.createElement('div');
+                item.className = 'mission-item';
+                item.innerHTML = `
+                    <div style="font-size:14px; font-weight:bold;">${m.title}</div>
+                    <div style="font-size:12px; color:#aaa;">進行度: ${missionStats[m.key].toLocaleString()} / ${m.goal.toLocaleString()} ${m.unit}</div>
+                    <div class="mission-progress"><div class="mission-fill" style="width:${prog}%"></div></div>
+                    <button class="mission-reward-btn ${m.claimed ? 'claimed' : (canClaim ? 'can-claim' : '')}" 
+                        onclick="${canClaim ? `claimMission(${m.id})` : ''}" ${m.claimed || !canClaim ? 'disabled' : ''}>
+                        ${m.claimed ? '受取済' : `報酬 ${m.reward.toLocaleString()}円`}
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function claimMission(id) {
+            const m = missions.find(x => x.id === id);
+            if(m && !m.claimed) {
+                m.claimed = true;
+                money += m.reward;
+                popText("50%", "50%", `REWARD +${m.reward}!`, "lime");
+                renderMissions(); updateUI(); saveGame();
             }
         }
 
@@ -341,16 +389,13 @@
             const char1 = items.find(i => i.id === 'ev_kazu_ultimate');
             const char2 = items.find(i => i.id === 'c1_ultimate');
             const cost = 1000000000000;
-            const cond1 = document.getElementById('fuse-cond-1');
-            const cond2 = document.getElementById('fuse-cond-2');
-            const cond3 = document.getElementById('fuse-cond-3');
             const btn = document.getElementById('fusion-exec-btn');
-            cond1.style.color = (char1 && char1.owned) ? "lime" : "red";
-            cond2.style.color = (char2 && char2.owned) ? "lime" : "red";
-            cond3.style.color = money >= cost ? "lime" : "red";
+            document.getElementById('fuse-cond-1').style.color = (char1 && char1.owned) ? "lime" : "red";
+            document.getElementById('fuse-cond-2').style.color = (char2 && char2.owned) ? "lime" : "red";
+            document.getElementById('fuse-cond-3').style.color = money >= cost ? "lime" : "red";
             if(char1 && char1.owned && char2 && char2.owned && money >= cost) {
                 btn.style.display = "block";
-                document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="font-size:24px; color:white; text-shadow:0 0 10px white; animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`;
+                document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`;
             } else {
                 btn.style.display = "none";
                 document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可";
@@ -362,38 +407,27 @@
             if(money < cost) return;
             money -= cost;
             const res = items.find(i => i.id === 'fusion_zen_kazu');
-            res.owned = true;
-            equipped.char = res;
-            alert("合体完了！究極の力「X」を手に入れた！");
-            openLayer('start-screen');
-            saveGame(); updateUI();
+            res.owned = true; equipped.char = res;
+            alert("合体完了！"); openLayer('start-screen'); saveGame(); updateUI();
         }
 
         function renderEvolve() {
-            const target = document.getElementById('evolve-target');
-            const req = document.getElementById('evolve-req');
+            const target = document.getElementById('evolve-status');
             const btn = document.getElementById('evolve-exec-btn');
-            const evolveCost = 100000000;
+            const cost = 100000000;
             if(equipped.char.rarity === 'SSR' && !equipped.char.isEvolved) {
-                target.innerText = `進化可能：${equipped.char.name}`;
-                req.innerText = `必要経費: ${evolveCost.toLocaleString()}円\n(究極のUZランクへ進化します)`;
-                btn.style.display = "block";
-                btn.disabled = money < evolveCost;
-            } else if(equipped.char.isEvolved) {
-                target.innerText = "これ以上の進化は不能";
-                req.innerText = "最高ランク 到達済み";
-                btn.style.display = "none";
+                target.innerHTML = `<p>進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">必要経費: ${cost.toLocaleString()}円</p>`;
+                btn.style.display = "block"; btn.disabled = money < cost;
             } else {
-                target.innerText = "このキャラは進化できません";
-                req.innerText = "「SSRキャラ」を装備してください";
+                target.innerHTML = `<p>進化できません</p>`;
                 btn.style.display = "none";
             }
         }
 
         function executeEvolve() {
-            const evolveCost = 100000000;
-            if(money < evolveCost) return;
-            money -= evolveCost;
+            const cost = 100000000;
+            if(money < cost) return;
+            money -= cost;
             let evolveId = '';
             switch(equipped.char.id) {
                 case 'ev_kazu': evolveId = 'ev_kazu_ultimate'; break;
@@ -404,39 +438,24 @@
             }
             if(evolveId) {
                 const ult = items.find(i => i.id === evolveId);
-                ult.owned = true;
-                equipped.char = ult;
-                alert(`進化成功！UZランク「${ult.name}」になりました！`);
+                ult.owned = true; equipped.char = ult;
+                alert(`進化成功！`);
             }
-            openLayer('start-screen');
-            saveGame(); updateUI();
+            openLayer('start-screen'); saveGame(); updateUI();
         }
 
         function setTab(tab) { currentTab = tab; renderCol(); }
-
         function renderCol() {
             const list = document.getElementById('col-list-content');
             list.innerHTML = '';
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === 'tab-' + currentTab));
-            
-            const ownedCharsCount = items.filter(it => it.type === 'char' && it.owned).length;
-            const totalBonus = Math.round(getCollectionBonus() * 100);
-            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${totalBonus}% (所持キャラ: ${ownedCharsCount}体)`;
-
-            const filtered = items.filter(i => i.type === currentTab).sort((a, b) => {
-                const getWeight = (r) => {
-                    if (r === 'X') return 4;
-                    if (r === 'UZ') return 3;
-                    if (r === 'SSR') return 2;
-                    return 1;
-                };
-                return getWeight(b.rarity) - getWeight(a.rarity);
-            });
-            filtered.forEach(item => {
+            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
+            document.getElementById('collection-bonus-display').innerText = `図図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
+            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:1))
+            .forEach(item => {
                 const isEq = equipped[item.type].id === item.id;
                 const div = document.createElement('div');
                 div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`;
-                div.innerHTML = `<div>${item.owned ? item.icon || '' : '？'} ${item.owned ? item.name : '？？？'}<br><small style="color:${item.rarity==='UZ'?'red':(item.rarity==='X'?'#0ff':'inherit')}">${item.rarity}</small></div>
+                div.innerHTML = `<div>${item.owned ? item.icon || '' : '？'} ${item.owned ? item.name : '？？？'}<br><small>${item.rarity}</small></div>
                     <button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`;
                 list.appendChild(div);
             });
@@ -452,121 +471,76 @@
 
         function updateBGM() {
             const player = document.getElementById('bgm-player');
-            if(equipped.bgm && equipped.bgm.url) {
-                player.src = equipped.bgm.url;
-                player.load();
-                if(isPlaying) player.play().catch(e => console.log("BGM Play Error"));
-            } else { player.pause(); player.src = ""; }
+            if(equipped.bgm && equipped.bgm.url) { player.src = equipped.bgm.url; player.load(); if(isPlaying) player.play(); }
+            else { player.pause(); player.src = ""; }
         }
 
         async function runGacha(times) {
             const cost = 1000 * times;
-            if(money < cost) return alert("お金が足りません！");
-            const btns = ['g1-btn', 'g10-btn', 'g100-btn', 'g1000-btn', 'g-back-btn'].map(id => document.getElementById(id));
-            btns.forEach(b => { if(b) b.disabled = true; });
+            if(money < cost) return alert("金欠です！");
             money -= cost; updateUI();
+            missionStats.gachaed += times;
             const display = document.getElementById('gacha-result-display');
-            display.innerHTML = ''; 
-            const box = document.getElementById('gacha-box');
-            const cutin = document.getElementById('gacha-cutin');
-            const screen = document.getElementById('gacha-screen');
-            let results = [], maxRarity = 'BASIC';
-            const isEv = isKazuEvent();
+            display.innerHTML = '';
+            document.getElementById('gacha-box').classList.add('gacha-anim');
+            await new Promise(r => setTimeout(r, 600));
+            document.getElementById('gacha-box').classList.remove('gacha-anim');
+            let results = [], maxR = 'BASIC';
             for(let i=0; i<times; i++) {
-                const r = Math.random() * 100;
-                let pick;
-                if(r < 5) { 
-                    let ssrPool = items.filter(it => it.rarity === 'SSR' && (!it.isEvent || isEv) && !it.isEvolved);
-                    pick = ssrPool[Math.floor(Math.random()*ssrPool.length)];
-                    maxRarity = 'SSR'; 
-                }
-                else if(r < 20) { pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random()*items.filter(it => it.rarity === 'SR').length)]; if(maxRarity!=='SSR') maxRarity='SR'; }
-                else if(r < 50) { pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random()*items.filter(it => it.rarity === 'R').length)]; if(maxRarity==='BASIC') maxRarity='R'; }
-                else pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random()*items.filter(it => it.rarity === 'BASIC').length)];
+                const r = Math.random()*100;
+                let pick = items.filter(it => it.rarity === 'BASIC')[0];
+                if(r<5) { pick = items.filter(it=>it.rarity==='SSR'&&!it.isEvolved)[Math.floor(Math.random()*items.filter(it=>it.rarity==='SSR'&&!it.isEvolved).length)]; maxR='SSR'; }
+                else if(r<20) { pick = items.filter(it=>it.rarity==='SR')[Math.floor(Math.random()*items.filter(it=>it.rarity==='SR').length)]; if(maxR!=='SSR')maxR='SR'; }
+                else if(r<50) { pick = items.filter(it=>it.rarity==='R')[Math.floor(Math.random()*items.filter(it=>it.rarity==='R').length)]; if(maxR==='BASIC')maxR='R'; }
+                else pick = items.filter(it=>it.rarity==='BASIC')[Math.floor(Math.random()*items.filter(it=>it.rarity==='BASIC').length)];
                 results.push(pick);
             }
-            box.classList.add('gacha-anim');
-            await new Promise(r => setTimeout(r, 800));
-            box.classList.remove('gacha-anim');
-            cutin.style.display = 'flex';
-            cutin.innerText = maxRarity === 'SSR' ? '🌈SSR!!' : (maxRarity === 'SR' ? '✨SR!' : '🎁');
-            cutin.style.color = maxRarity === 'SSR' ? 'gold' : (maxRarity === 'SR' ? '#ff00ff' : 'white');
-            cutin.classList.add('cutin-anim');
-            screen.style.background = maxRarity === 'SSR' ? 'rgba(50,40,0,0.95)' : 'rgba(0,0,0,0.95)';
-            await new Promise(r => setTimeout(r, 800));
-            cutin.style.display = 'none';
-            results.forEach(pick => {
-                if(pick) {
-                    pick.owned = true;
-                    const line = document.createElement('div');
-                    line.className = `res-line ${pick.rarity}`;
-                    line.innerHTML = `<span>${pick.icon || ''} ${pick.name}</span> <span>[${pick.rarity}]</span>`;
-                    display.appendChild(line);
-                }
-            });
+            results.forEach(p => { p.owned = true; const l = document.createElement('div'); l.className = `res-line ${p.rarity}`; l.innerHTML = `<span>${p.icon} ${p.name}</span><span>[${p.rarity}]</span>`; display.appendChild(l); });
             display.scrollTop = display.scrollHeight;
-            btns.forEach(b => { if(b) b.disabled = false; });
             saveGame(); updateUI();
         }
 
         function spawn() {
             if(!isPlaying) return;
             const field = document.getElementById('game-field');
-            const isEv = isKazuEvent();
             for(let i=0; i<9; i++) {
                 const g = document.createElement('div');
-                g.className = 'item grass';
-                g.style.left = Math.random() * 85 + "%";
-                g.style.top = Math.random() * 80 + "%";
-                if(isEv) g.style.filter = "sepia(1) saturate(10) brightness(1.2) drop-shadow(0 0 5px gold)";
+                g.className = 'item grass'; g.style.left = Math.random()*85+"%"; g.style.top = Math.random()*80+"%";
                 g.innerHTML = '<div class="grass-center"></div>';
-                g.onclick = function() { this.onclick = null; pluck(this, 50); };
+                g.onclick = function(){ pluck(this); };
                 field.appendChild(g);
             }
             const egg = document.createElement('div');
-            egg.className = 'item egg';
-            egg.innerText = '🥚';
-            let posX = Math.random() * 80, posY = Math.random() * 75, velX = (Math.random() - 0.5) * 2.5, velY = (Math.random() - 0.5) * 2.5;
-            egg.style.left = posX + "%"; egg.style.top = posY + "%";
-            const moveEgg = setInterval(() => {
-                if (!isPlaying || !egg.parentNode) { clearInterval(moveEgg); return; }
-                posX += velX; posY += velY;
-                if (posX <= 0 || posX >= 85) velX *= -1;
-                if (posY <= 0 || posY >= 80) velY *= -1;
-                egg.style.left = posX + "%"; egg.style.top = posY + "%";
-            }, 30);
+            egg.className = 'item egg'; egg.innerText = '🥚';
+            let px = Math.random()*80, py = Math.random()*75, vx = (Math.random()-0.5)*2.5, vy = (Math.random()-0.5)*2.5;
+            egg.style.left = px+"%"; egg.style.top = py+"%";
+            const move = setInterval(() => {
+                if(!isPlaying || !egg.parentNode){ clearInterval(move); return; }
+                px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1;
+                egg.style.left=px+"%"; egg.style.top=py+"%";
+            },30);
             egg.onclick = () => {
-                if(equipped.char.rarity === 'SSR' || equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X') {
-                    let eggBonus = (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') ? 1000 : 0;
-                    if(equipped.char.id === 'c13_ultimate') eggBonus = 1000;
-                    if(eggBonus > 0) { money += eggBonus; updateUI(); popText(egg.style.left, egg.style.top, `+${eggBonus} (EGG!)`, "white"); }
-                    else popText(egg.style.left, egg.style.top, "GUARD!");
-                    clearInterval(moveEgg); egg.remove();
-                } else if(equipped.char.id === 'c13') {
-                    money += 100; popText(egg.style.left, egg.style.top, "+100");
-                    clearInterval(moveEgg); egg.remove(); updateUI();
-                } else { clearInterval(moveEgg); endGame("卵を抜いてしまった！"); }
+                if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') {
+                    let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0;
+                    if(b>0){ money+=b; missionStats.earned+=b; updateUI(); }
+                    egg.remove();
+                } else { endGame("卵だ！"); }
             };
             field.appendChild(egg);
         }
 
-        function pluck(el, base) {
+        function pluck(el) {
             if(el.classList.contains('plucking')) return;
-            const isEv = isKazuEvent();
-            let baseGain = (isEv ? 100 : 50) * equipped.char.rate * (isFever ? 3 : 1);
-            if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') baseGain *= 3;
-            let gain = Math.floor(baseGain * (1 + getCollectionBonus()));
-            money += gain; feverPoints = Math.min(100, feverPoints + 7);
-            if(feverPoints >= 100 && !isFever) startFever();
+            let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1) * (1+getCollectionBonus()));
+            money += gain; missionStats.earned += gain; missionStats.plucked++;
+            feverPoints = Math.min(100, feverPoints+7);
+            if(feverPoints>=100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top);
             popText(el.style.left, el.style.top, `+${gain}`);
             el.classList.add('plucking');
             setTimeout(() => {
                 el.remove();
-                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) {
-                    timeLeft += (equipped.char.id === 'ev_kazu' || equipped.char.isEvolved || equipped.char.rarity === 'X') ? 8.0 : 5.0;
-                    spawn();
-                }
+                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) { timeLeft+=5; spawn(); }
             }, 200);
             updateUI();
         }
@@ -574,153 +548,84 @@
         function triggerSkill() {
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true;
-            const sid = equipped.skill.id;
-            const isUZ = equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X' || equipped.char.id === 'ev_kazu';
-            const isX = equipped.char.id === 'fusion_zen_kazu'; // アルティメットZEN判定
-
             const field = document.getElementById('game-field');
             const icon = document.getElementById('tsum-icon');
+            const isX = equipped.char.id === 'fusion_zen_kazu';
+            field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
+            let ultText;
+            if(isX){ field.classList.add('ultimate-field-bg'); ultText = document.createElement('div'); ultText.className='ultimate-text'; ultText.innerHTML="全・知・全・能<br><span style='font-size:30px'>ULTIMATE ZEN OVERDRIVE</span>"; field.appendChild(ultText); }
             
-            field.classList.add('skill-active-field');
-            icon.classList.add('skill-icon-anim');
+            const interval = setInterval(() => {
+                const ts = document.querySelectorAll('.grass:not(.plucking)');
+                if(ts.length>0) pluck(ts[0]);
+                if(isX) document.querySelectorAll('.egg').forEach(e => e.remove());
+            }, isX?20:(equipped.char.isEvolved?70:150));
 
-            // アルティメット・カズキング・ZEN専用の超豪華演出
-            let ultimateText;
-            if(isX) {
-                field.classList.add('ultimate-field-bg');
-                ultimateText = document.createElement('div');
-                ultimateText.className = 'ultimate-text';
-                ultimateText.innerHTML = "全・知・全・能<br><span style='font-size:30px'>ULTIMATE ZEN OVERDRIVE</span>";
-                field.appendChild(ultimateText);
-            }
-
-            const effectTimer = setInterval(() => {
-                if(!isSkillActive) { clearInterval(effectTimer); return; }
-                createParticles(Math.random()*100+"%", Math.random()*100+"%");
-            }, isX ? 50 : 100);
-
-            if(sid === 's1') {
-                const skillNameEl = document.getElementById('skill-display-name');
-                if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = isX ? "#0ff" : "red"; }
-                const intervalTime = isX ? 20 : (isUZ ? 70 : 150);
-                const interval = setInterval(() => {
-                    const targets = document.querySelectorAll('.grass:not(.plucking)');
-                    if(targets.length > 0) pluck(targets[0], 50);
-                    if(isX) { 
-                        document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "ERASE!"); e.remove(); }); 
-                    }
-                }, intervalTime);
-                setTimeout(() => { 
-                    isSkillActive = false; 
-                    clearInterval(interval); 
-                    skillNameEl.innerText = equipped.skill.name; 
-                    skillNameEl.style.color = "#aaa"; 
-                    field.classList.remove('skill-active-field');
-                    field.classList.remove('ultimate-field-bg');
-                    icon.classList.remove('skill-icon-anim');
-                    if(ultimateText) ultimateText.remove();
-                }, 3000);
-            } else if(sid === 's2') { 
-                startFever(); 
-                isSkillActive = false; 
-                field.classList.remove('skill-active-field');
+            setTimeout(() => {
+                isSkillActive = false; clearInterval(interval);
+                field.classList.remove('skill-active-field', 'ultimate-field-bg');
                 icon.classList.remove('skill-icon-anim');
-            }
-            else if(sid === 's3') { 
-                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); 
-                isSkillActive = false; 
-                field.classList.remove('skill-active-field');
-                icon.classList.remove('skill-icon-anim');
-            }
-            else if(sid === 's4') {
-                document.getElementById('game-field').style.filter = "grayscale(1)";
-                const timerBackup = timeLeft;
-                const stop = setInterval(() => { timeLeft = timerBackup; updateUI(); }, 10);
-                setTimeout(() => { 
-                    clearInterval(stop); 
-                    document.getElementById('game-field').style.filter = "none"; 
-                    isSkillActive = false; 
-                    field.classList.remove('skill-active-field');
-                    icon.classList.remove('skill-icon-anim');
-                }, 5000);
-            } else if(sid === 's5') { 
-                document.querySelectorAll('.egg').forEach(e => e.remove()); 
-                isSkillActive = false; 
-                field.classList.remove('skill-active-field');
-                icon.classList.remove('skill-icon-anim');
-            }
+                if(ultText) ultText.remove();
+            }, 3000);
         }
 
         function createParticles(x, y) {
             const field = document.getElementById('game-field');
-            const isX = equipped.char.id === 'fusion_zen_kazu';
-            const count = (isX || isSkillActive) ? 15 : 6;
-            for(let i=0; i<count; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle'; p.style.left = x; p.style.top = y;
-                if(isX || isSkillActive) p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
-                p.style.setProperty('--dx', (Math.random()-0.5)*250+"px");
-                p.style.setProperty('--dy', (Math.random()-0.5)*250+"px");
-                p.style.animation = "scatter 0.4s ease-out forwards";
-                field.appendChild(p);
-                setTimeout(() => p.remove(), 400);
+            for(let i=0; i<6; i++) {
+                const p = document.createElement('div'); p.className='particle'; p.style.left=x; p.style.top=y;
+                p.style.setProperty('--dx', (Math.random()-0.5)*200+"px"); p.style.setProperty('--dy', (Math.random()-0.5)*200+"px");
+                p.style.animation="scatter 0.4s forwards"; field.appendChild(p); setTimeout(()=>p.remove(),400);
             }
         }
 
         function popText(x, y, txt, color="var(--gold)") {
-            const p = document.createElement('div');
-            p.className = 'pop-text'; p.innerText = txt; p.style.left = x; p.style.top = y; p.style.color = color;
-            if(equipped.char.rarity === 'X') p.style.fontSize = "30px";
-            document.getElementById('game-field').appendChild(p);
-            setTimeout(() => p.remove(), 500);
+            const p = document.createElement('div'); p.className='pop-text'; p.innerText=txt; p.style.left=x; p.style.top=y; p.style.color=color;
+            document.getElementById('game-field').appendChild(p); setTimeout(()=>p.remove(),500);
         }
 
         function startFever() {
-            isFever = true; document.getElementById('game-field').style.filter = "hue-rotate(180deg) brightness(1.2)";
-            setTimeout(() => { isFever = false; feverPoints = 0; document.getElementById('game-field').style.filter = "none"; }, 6000);
+            isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg)";
+            setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000);
         }
 
         function startGame() {
-            isPlaying = true; timeLeft = 30.0; skillCount = feverPoints = 0; openLayer('none');
-            document.querySelectorAll('.item').forEach(i => i.remove());
-            if(equipped.bgm && equipped.bgm.url) document.getElementById('bgm-player').play().catch(e=>0);
-            if(equipped.char.rarity === 'X') document.getElementById('x-aura-effect').style.display = 'block';
-            else document.getElementById('x-aura-effect').style.display = 'none';
+            isPlaying=true; timeLeft=30; openLayer('none');
+            document.querySelectorAll('.item').forEach(i=>i.remove());
+            if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
             spawn();
-            const mainLoop = setInterval(() => {
-                if(!isFever) timeLeft -= 0.1;
-                if(!isSkillActive) {
-                    let chargeSpeed = 0.33;
-                    if(equipped.char.rarity === 'X') chargeSpeed = 100;
-                    else if(equipped.char.id === 'ev_kazu' || equipped.char.isEvolved) chargeSpeed = 1.66;
-                    skillCount = Math.min(100, skillCount + chargeSpeed);
-                }
+            const loop = setInterval(() => {
+                if(!isFever) timeLeft-=0.1;
+                if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
                 updateUI();
-                if(timeLeft <= 0 || !isPlaying) { 
-                    clearInterval(mainLoop); 
-                    document.getElementById('x-aura-effect').style.display = 'none';
-                    if(timeLeft <= 0) endGame("タイムアップ！"); 
-                }
+                if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0)endGame("終了"); }
             }, 100);
         }
 
-        function endGame(msg) { isPlaying = false; document.getElementById('bgm-player').pause(); document.getElementById('end-title').innerText = msg; document.getElementById('res-money').innerText = Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
-        function giveUp() { isPlaying = false; document.getElementById('bgm-player').pause(); openLayer('start-screen'); }
-        function saveGame() { localStorage.setItem('zenSurvival_Final_v5', JSON.stringify({ money, owned: items.filter(i => i.owned).map(i => i.id), eq: { c: equipped.char.id, b: equipped.bg.id, s: equipped.skill.id, bgm: equipped.bgm.id } })); }
+        function endGame(msg) { isPlaying=false; document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
+        function giveUp() { isPlaying=false; openLayer('start-screen'); }
+        
+        function saveGame() { 
+            localStorage.setItem('zenSurvival_Final_v6', JSON.stringify({ 
+                money, owned: items.filter(i=>i.owned).map(i=>i.id), 
+                eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id},
+                missions, missionStats, lastMissionDate
+            })); 
+        }
 
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v5'));
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v6'));
             if(data) {
                 money = data.money;
-                data.owned.forEach(id => { const it = items.find(i => i.id === id); if(it) it.owned = true; });
-                equipped.char = items.find(i => i.id === data.eq.c) || items.find(i=>i.id==='c20');
-                equipped.bg = items.find(i => i.id === data.eq.b) || items.find(i=>i.id==='b1');
-                equipped.skill = items.find(i => i.id === data.eq.s) || items.find(i=>i.id==='s1');
-                equipped.bgm = items.find(i => i.id === data.eq.bgm) || items.find(i=>i.id==='bgm1');
-                document.getElementById('game-field').className = equipped.bg.className;
-                updateBGM();
+                data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char;
+                equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg;
+                equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill;
+                equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
+                missions = data.missions || [];
+                missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 };
+                lastMissionDate = data.lastMissionDate || "";
             }
-            updateUI(); openLayer('start-screen');
+            initMissions(); updateUI(); openLayer('start-screen');
         }
     </script>
 </body>
