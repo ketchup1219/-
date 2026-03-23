@@ -170,7 +170,7 @@
         </div>
     </div>
 
-    <audio id="bgm-player" loop></audio>
+    <audio id="bgm-player" loop preload="auto"></audio>
 
     <script>
         let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0, currentTab = 'char';
@@ -184,7 +184,7 @@
             { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金8倍', rate: 8 },
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
-            { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
+            { id: 'c4', type: 'char', name: '地主ぜん', icon: ' castle', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
             { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', owned: false, rarity: 'SR', info: '金4倍', rate: 4 },
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
@@ -271,9 +271,12 @@
 
         function updateBGM() {
             const player = document.getElementById('bgm-player');
-            if(equipped.bgm.url) {
+            if(equipped.bgm && equipped.bgm.url) {
                 player.src = equipped.bgm.url;
-                if(isPlaying) player.play().catch(e => console.log("再生制限"));
+                player.load();
+                if(isPlaying) {
+                    player.play().catch(e => console.log("ユーザー操作が必要です"));
+                }
             } else {
                 player.pause();
                 player.src = "";
@@ -454,7 +457,11 @@
         function startGame() {
             isPlaying = true; timeLeft = 30.0; skillCount = 0; feverPoints = 0; openLayer('none');
             document.querySelectorAll('.item').forEach(i => i.remove());
-            document.getElementById('bgm-player').play().catch(e => console.log("再生制限"));
+            // Play BGM
+            const player = document.getElementById('bgm-player');
+            if(equipped.bgm && equipped.bgm.url) {
+                player.play().catch(e => console.log("BGM再生制限回避"));
+            }
             spawn();
             const mainLoop = setInterval(() => {
                 if(!isFever) timeLeft -= 0.1;
