@@ -26,7 +26,6 @@
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
 
-        /* スキル演出 */
         .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
         .ultimate-field-bg { animation: ultimate-rainbow 0.2s infinite linear !important; }
         @keyframes ultimate-rainbow { 0% { background: #ff0000; } 20% { background: #ffff00; } 40% { background: #00ff00; } 60% { background: #00ffff; } 80% { background: #0000ff; } 100% { background: #ff00ff; } }
@@ -48,7 +47,6 @@
         @keyframes uz-glow { from { box-shadow: 0 0 5px var(--uz-color); } to { box-shadow: 0 0 20px var(--uz-color); } }
         @keyframes x-glow { from { box-shadow: 0 0 10px #fff, 0 0 20px #0ff; } to { box-shadow: 0 0 20px #fff, 0 0 40px #f0f; } }
 
-        /* ガチャ演出用 */
         #gacha-box { font-size: 80px; filter: drop-shadow(0 0 20px white); cursor: pointer; position: relative; z-index: 600; transition: 0.3s; }
         .gacha-shake { animation: gacha-vibrate 0.1s infinite; }
         @keyframes gacha-vibrate { 0% { transform: translate(2px, 2px) rotate(0deg); } 25% { transform: translate(-2px, -2px) rotate(1deg); } 50% { transform: translate(2px, -2px) rotate(-1deg); } 75% { transform: translate(-2px, 2px) rotate(0deg); } 100% { transform: translate(2px, 2px) rotate(0deg); } }
@@ -255,7 +253,7 @@
             { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 100, isEvolved: true },
             { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
             { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 100, isEvolved: true },
-            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 15, isEvent: true },
+            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 45, isEvent: true },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
@@ -379,7 +377,6 @@
         }
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
 
-        /* ガチャ演出コアロジック */
         async function runGacha(times) {
             const cost = 1000 * times; if(money < cost) return alert("金欠です！");
             money -= cost; updateUI(); missionStats.gachaed += times;
@@ -389,28 +386,46 @@
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; 
             
-            // 1. 抽選
             let results = []; let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
-                const r = Math.random()*100; let pick;
-                if(r<5) { pick = items.filter(it=>it.rarity==='SSR'&&!it.isEvolved)[Math.floor(Math.random()*items.filter(it=>it.rarity==='SSR'&&!it.isEvolved).length)]; maxRarity = 'SSR'; }
-                else if(r<20) { pick = items.filter(it=>it.rarity==='SR')[Math.floor(Math.random()*items.filter(it=>it.rarity==='SR').length)]; if(maxRarity==='BASIC') maxRarity='SR'; }
-                else if(r<50) { pick = items.filter(it=>it.rarity==='R')[Math.floor(Math.random()*items.filter(it=>it.rarity==='R').length)]; }
-                else { pick = items.filter(it=>it.rarity==='BASIC')[Math.floor(Math.random()*items.filter(it=>it.rarity==='BASIC').length)]; }
+                const r = Math.random() * 100;
+                let pick;
+
+                if (r < 0.0001) { 
+                    pick = items.find(it => it.id === 'ev_kazu');
+                    maxRarity = 'SSR';
+                }
+                else if (r < 0.001) { 
+                    pick = items.find(it => it.id === 'c1');
+                    maxRarity = 'SSR';
+                }
+                else if(r < 5) { 
+                    const ssrPool = items.filter(it => it.rarity === 'SSR' && !it.isEvolved && it.id !== 'ev_kazu' && it.id !== 'c1');
+                    pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; 
+                    maxRarity = 'SSR'; 
+                }
+                else if(r < 20) { 
+                    pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random() * items.filter(it => it.rarity === 'SR').length)]; 
+                    if(maxRarity === 'BASIC') maxRarity = 'SR'; 
+                }
+                else if(r < 50) { 
+                    pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random() * items.filter(it => it.rarity === 'R').length)]; 
+                }
+                else { 
+                    pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random() * items.filter(it => it.rarity === 'BASIC').length)]; 
+                }
                 results.push(pick);
             }
 
-            // 2. 演出開始
             box.classList.add('gacha-shake');
             box.style.filter = "drop-shadow(0 0 30px white) brightness(1.5)";
             
-            await new Promise(r => setTimeout(r, 800)); // 溜め
+            await new Promise(r => setTimeout(r, 800));
             
-            // 3. フラッシュ演出（最高レア度で色を変える）
             flash.style.display = 'block';
             let fColor = "rgba(255,255,255,0.8)";
-            if(maxRarity==='SSR') fColor = "rgba(255,215,0,0.9)";
-            if(maxRarity==='SR') fColor = "rgba(255,0,255,0.7)";
+            if(maxRarity === 'SSR') fColor = "rgba(255,215,0,0.9)";
+            if(maxRarity === 'SR') fColor = "rgba(255,0,255,0.7)";
             flash.style.background = fColor;
             
             await new Promise(r => setTimeout(r, 100));
@@ -419,7 +434,6 @@
             box.classList.remove('gacha-shake');
             box.style.filter = "drop-shadow(0 0 20px white)";
 
-            // 4. 結果表示
             results.forEach(p => { 
                 p.owned = true; 
                 const l = document.createElement('div'); l.className = `res-line ${p.rarity}`; 
