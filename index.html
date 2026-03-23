@@ -26,6 +26,29 @@
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
 
+        /* スキル発動時のド派手エフェクト用CSS */
+        .skill-active-field {
+            animation: skill-shake 0.1s infinite, skill-flash 0.5s infinite alternate !important;
+            border-width: 5px !important;
+        }
+        @keyframes skill-shake {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(2px, -2px); }
+        }
+        @keyframes skill-flash {
+            from { box-shadow: inset 0 0 20px rgba(255,255,255,0.2); border-color: #fff; }
+            to { box-shadow: inset 0 0 80px rgba(255,255,255,0.8); border-color: cyan; }
+        }
+        .skill-icon-anim {
+            animation: skill-icon-pop 0.5s infinite linear !important;
+            z-index: 1000;
+        }
+        @keyframes skill-icon-pop {
+            0% { transform: scale(1.5) rotate(0deg); filter: brightness(2) drop-shadow(0 0 20px gold); }
+            100% { transform: scale(1.5) rotate(360deg); filter: brightness(2) drop-shadow(0 0 20px white); }
+        }
+
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         #gacha-result-display {
@@ -547,6 +570,19 @@
             const sid = equipped.skill.id;
             const isUZ = equipped.char.rarity === 'UZ' || equipped.char.rarity === 'X' || equipped.char.id === 'ev_kazu';
             const isX = equipped.char.rarity === 'X';
+
+            // --- 派手な演出の追加 ---
+            const field = document.getElementById('game-field');
+            const icon = document.getElementById('tsum-icon');
+            field.classList.add('skill-active-field');
+            icon.classList.add('skill-icon-anim');
+
+            // 画面中に火花を散らす
+            const effectTimer = setInterval(() => {
+                if(!isSkillActive) { clearInterval(effectTimer); return; }
+                createParticles(Math.random()*100+"%", Math.random()*100+"%");
+            }, 100);
+
             if(sid === 's1') {
                 const skillNameEl = document.getElementById('skill-display-name');
                 if(isUZ) { skillNameEl.innerText = equipped.char.name; skillNameEl.style.color = isX ? "cyan" : "red"; }
@@ -558,24 +594,52 @@
                         document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "ERASE!"); e.remove(); }); 
                     }
                 }, intervalTime);
-                setTimeout(() => { isSkillActive = false; clearInterval(interval); skillNameEl.innerText = equipped.skill.name; skillNameEl.style.color = "#aaa"; }, 3000);
-            } else if(sid === 's2') { startFever(); isSkillActive = false; }
-            else if(sid === 's3') { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); isSkillActive = false; }
+                setTimeout(() => { 
+                    isSkillActive = false; 
+                    clearInterval(interval); 
+                    skillNameEl.innerText = equipped.skill.name; 
+                    skillNameEl.style.color = "#aaa"; 
+                    field.classList.remove('skill-active-field');
+                    icon.classList.remove('skill-icon-anim');
+                }, 3000);
+            } else if(sid === 's2') { 
+                startFever(); 
+                isSkillActive = false; 
+                field.classList.remove('skill-active-field');
+                icon.classList.remove('skill-icon-anim');
+            }
+            else if(sid === 's3') { 
+                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g, 50)); 
+                isSkillActive = false; 
+                field.classList.remove('skill-active-field');
+                icon.classList.remove('skill-icon-anim');
+            }
             else if(sid === 's4') {
                 document.getElementById('game-field').style.filter = "grayscale(1)";
                 const timerBackup = timeLeft;
                 const stop = setInterval(() => { timeLeft = timerBackup; updateUI(); }, 10);
-                setTimeout(() => { clearInterval(stop); document.getElementById('game-field').style.filter = "none"; isSkillActive = false; }, 5000);
-            } else if(sid === 's5') { document.querySelectorAll('.egg').forEach(e => e.remove()); isSkillActive = false; }
+                setTimeout(() => { 
+                    clearInterval(stop); 
+                    document.getElementById('game-field').style.filter = "none"; 
+                    isSkillActive = false; 
+                    field.classList.remove('skill-active-field');
+                    icon.classList.remove('skill-icon-anim');
+                }, 5000);
+            } else if(sid === 's5') { 
+                document.querySelectorAll('.egg').forEach(e => e.remove()); 
+                isSkillActive = false; 
+                field.classList.remove('skill-active-field');
+                icon.classList.remove('skill-icon-anim');
+            }
         }
 
         function createParticles(x, y) {
             const field = document.getElementById('game-field');
-            const count = (equipped.char.rarity === 'X') ? 15 : 6;
+            const count = (equipped.char.rarity === 'X' || isSkillActive) ? 15 : 6;
             for(let i=0; i<count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle'; p.style.left = x; p.style.top = y;
-                if(equipped.char.rarity === 'X') p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
+                if(equipped.char.rarity === 'X' || isSkillActive) p.style.background = `hsl(${Math.random()*360}, 100%, 70%)`;
                 p.style.setProperty('--dx', (Math.random()-0.5)*250+"px");
                 p.style.setProperty('--dy', (Math.random()-0.5)*250+"px");
                 p.style.animation = "scatter 0.4s ease-out forwards";
