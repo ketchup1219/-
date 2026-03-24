@@ -22,9 +22,17 @@
             border: 3px solid #333; border-radius: 20px; overflow: hidden;
             transition: 0.3s;
         }
+        /* 背景バリエーション */
         #game-field.bg-desert { background: #4d3319; border-color: #d2b48c; }
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
+        #game-field.bg-night { background: #0a0a20; border-color: #483d8b; }
+        #game-field.bg-sakura { background: #2d1a1a; border-color: #ffb7c5; box-shadow: inset 0 0 50px #ffb7c533; }
+        #game-field.bg-gold { background: #3d3300; border-color: #ffd700; }
+        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; }
+        #game-field.bg-deepsea { background: #00121a; border-color: #008b8b; }
+        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 5s infinite alternate; }
+        @keyframes dim-pulse { from { background: #1a001a; } to { background: #00001a; } }
 
         .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
         .ultimate-field-bg { animation: ultimate-rainbow 0.2s infinite linear !important; }
@@ -53,8 +61,9 @@
         .gacha-flash { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 700; display: none; }
 
         .col-tabs { display: flex; width: 95%; gap: 5px; margin-bottom: 10px; }
-        .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: none; border-radius: 5px; }
-        .tab-btn.active { background: var(--blue); }
+        .tab-btn { flex: 1; padding: 10px 5px; font-size: 11px; background: #333; color: white; border: 2px solid #444; border-radius: 5px; transition: 0.2s; opacity: 0.6; }
+        .tab-btn.active { background: var(--blue); border-color: #fff; opacity: 1; font-weight: bold; box-shadow: 0 0 10px var(--blue); }
+        
         .col-list { width: 90%; height: 45%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #444; }
         .col-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
         .col-item.owned { border-left-color: var(--gold); }
@@ -89,8 +98,8 @@
         #skill-fill { width: 0%; height: 100%; background: #f00; transition: 0.1s; }
 
         .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
-        .plucking { animation: pluck-anim 0.2s ease-out forwards; pointer-events: none; }
-        @keyframes pluck-anim { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); } 100% { transform: scale(0); opacity: 0; } }
+        .plucking { animation: slice-anim 0.2s ease-out forwards; pointer-events: none; }
+        @keyframes slice-anim { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); } 100% { transform: scale(0); opacity: 0; } }
 
         .grass { width: 75px; height: 75px; }
         .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; }
@@ -265,16 +274,34 @@
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
             { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
             { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', owned: false, rarity: 'SR', info: '金4倍', rate: 4 },
+            { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', owned: false, rarity: 'SR', info: '金5.8倍/美しい筆致', rate: 5.8 },
+            { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', owned: false, rarity: 'SR', info: '金6.2倍/お宝発見', rate: 6.2 },
+            { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金6.0倍/爆音抜き', rate: 6.0 },
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
+            { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'R', info: '金3.2倍/収穫の喜び', rate: 3.2 },
+            { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', owned: false, rarity: 'R', info: '金3.0倍/フレー！フレー！', rate: 3.0 },
+            { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
+            /* 背景 */
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
             { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
             { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
             { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: false, rarity: 'SSR', info: '灼熱の地' },
+            { id: 'b5', type: 'bg', name: '夜の草原', className: 'bg-night', owned: false, rarity: 'R', info: '静かな夜' },
+            { id: 'b6', type: 'bg', name: '桜吹雪', className: 'bg-sakura', owned: false, rarity: 'SR', info: '舞い散る花びら' },
+            { id: 'b7', type: 'bg', name: '黄金郷', className: 'bg-gold', owned: false, rarity: 'SSR', info: '富の象徴' },
+            { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: false, rarity: 'UZ', info: '銀河の果て' },
+            { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: false, rarity: 'SSR', info: '水圧と闇' },
+            { id: 'b10', type: 'bg', name: '次元の狭間', className: 'bg-dimension', owned: false, rarity: 'X', info: '時空の歪み' },
+            /* 必殺技 */
             { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
             { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
+            { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' },
+            { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
+            { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
+            { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
         ];
 
@@ -363,81 +390,74 @@
             const cost = 100000000; if(money < cost) return; money -= cost;
             let evolveId = '';
             switch(equipped.char.id) { case 'ev_kazu': evolveId = 'ev_kazu_ultimate'; break; case 'c1': evolveId = 'c1_ultimate'; break; case 'c13': evolveId = 'c13_ultimate'; break; case 'c7': evolveId = 'c7_ultimate'; break; case 'c2': evolveId = 'c2_ultimate'; break; }
-            if(evolveId) { const ult = items.find(i => i.id === evolveId); ult.owned = true; equipped.char = ult; alert(`進化成功！`); }
+            if(evolveId) { 
+                const ult = items.find(i => i.id === evolveId); 
+                ult.owned = true; 
+                equipped.char = ult; 
+                if(evolveId === 'ev_kazu_ultimate') {
+                    items.find(i => i.id === 's3').owned = true; 
+                }
+                alert(`進化成功！`); 
+            }
             openLayer('start-screen'); saveGame(); updateUI();
         }
 
-        function setTab(tab) { currentTab = tab; renderCol(); }
+        function setTab(tab) { 
+            currentTab = tab; 
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            renderCol(); 
+        }
         function renderCol() {
             const list = document.getElementById('col-list-content'); list.innerHTML = '';
             const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
             document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
-            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:1))
-            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div>${item.owned ? item.icon || '' : '？'} ${item.owned ? item.name : '？？？'}<br><small>${item.rarity}</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
+            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:b.rarity==='SR'?1.5:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:a.rarity==='SR'?1.5:1))
+            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div>${item.owned ? item.icon || (item.type==='skill'?'⚡':'') : '？'} ${item.owned ? item.name : '？？？'}<br><small>${item.rarity}</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
         }
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
 
         async function runGacha(times) {
             const cost = 1000 * times; if(money < cost) return alert("金欠です！");
             money -= cost; updateUI(); missionStats.gachaed += times;
-            
-            const box = document.getElementById('gacha-box');
-            const flash = document.getElementById('gacha-flash-overlay');
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; 
-            
             let results = []; let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
                 let pick;
-
-                if (r < 0.0001) { 
-                    pick = items.find(it => it.id === 'ev_kazu');
-                    maxRarity = 'SSR';
-                }
-                else if (r < 0.001) { 
-                    pick = items.find(it => it.id === 'c1');
-                    maxRarity = 'SSR';
-                }
+                let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && !it.isEvolved);
+                if (r < 0.0001) { pick = pool.find(it => it.id === 'ev_kazu'); maxRarity = 'SSR'; }
+                else if (r < 0.001) { pick = pool.find(it => it.id === 'c1'); maxRarity = 'SSR'; }
                 else if(r < 5) { 
-                    const ssrPool = items.filter(it => it.rarity === 'SSR' && !it.isEvolved && it.id !== 'ev_kazu' && it.id !== 'c1');
-                    pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; 
-                    maxRarity = 'SSR'; 
+                    const ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'ev_kazu' && it.id !== 'c1');
+                    pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; maxRarity = 'SSR'; 
                 }
-                else if(r < 20) { 
-                    pick = items.filter(it => it.rarity === 'SR')[Math.floor(Math.random() * items.filter(it => it.rarity === 'SR').length)]; 
-                    if(maxRarity === 'BASIC') maxRarity = 'SR'; 
+                else if(r < 25) { 
+                    const srPool = pool.filter(it => it.rarity === 'SR');
+                    pick = srPool[Math.floor(Math.random() * srPool.length)]; if(maxRarity === 'BASIC') maxRarity = 'SR'; 
                 }
-                else if(r < 50) { 
-                    pick = items.filter(it => it.rarity === 'R')[Math.floor(Math.random() * items.filter(it => it.rarity === 'R').length)]; 
+                else if(r < 55) { 
+                    const rPool = pool.filter(it => it.rarity === 'R');
+                    pick = rPool[Math.floor(Math.random() * rPool.length)]; 
                 }
                 else { 
-                    pick = items.filter(it => it.rarity === 'BASIC')[Math.floor(Math.random() * items.filter(it => it.rarity === 'BASIC').length)]; 
+                    const basicPool = pool.filter(it => it.rarity === 'BASIC');
+                    pick = basicPool[Math.floor(Math.random() * basicPool.length)]; 
                 }
+                if(!pick) pick = items.find(it => it.id === 'c20');
                 results.push(pick);
             }
-
-            box.classList.add('gacha-shake');
-            box.style.filter = "drop-shadow(0 0 30px white) brightness(1.5)";
-            
+            document.getElementById('gacha-box').classList.add('gacha-shake');
             await new Promise(r => setTimeout(r, 800));
-            
-            flash.style.display = 'block';
-            let fColor = "rgba(255,255,255,0.8)";
-            if(maxRarity === 'SSR') fColor = "rgba(255,215,0,0.9)";
-            if(maxRarity === 'SR') fColor = "rgba(255,0,255,0.7)";
-            flash.style.background = fColor;
-            
+            document.getElementById('gacha-flash-overlay').style.display = 'block';
             await new Promise(r => setTimeout(r, 100));
-            flash.style.background = 'transparent';
-            flash.style.display = 'none';
-            box.classList.remove('gacha-shake');
-            box.style.filter = "drop-shadow(0 0 20px white)";
-
+            document.getElementById('gacha-flash-overlay').style.display = 'none';
+            document.getElementById('gacha-box').classList.remove('gacha-shake');
             results.forEach(p => { 
                 p.owned = true; 
                 const l = document.createElement('div'); l.className = `res-line ${p.rarity}`; 
-                l.innerHTML = `<span>${p.icon} ${p.name}</span><span>[${p.rarity}]</span>`; 
+                l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`; 
                 display.appendChild(l); 
             });
             display.scrollTop = display.scrollHeight; saveGame(); updateUI();
@@ -454,6 +474,7 @@
             egg.style.left = px+"%"; egg.style.top = py+"%";
             const move = setInterval(() => {
                 if(!isPlaying || !egg.parentNode){ clearInterval(move); return; }
+                if(isSkillActive && equipped.skill.id === 's3') return; 
                 px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1; egg.style.left=px+"%"; egg.style.top=py+"%";
             },30);
             egg.onclick = () => {
@@ -479,6 +500,41 @@
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true;
             const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
+            
+            if(equipped.skill.id === 's3') {
+                field.style.filter = "grayscale(1) invert(1)"; field.classList.add('skill-active-field');
+                popText("50%", "40%", "カズキング・ザ・ワールド！", "white");
+                const worldInterval = setInterval(() => {
+                    const ts = document.querySelectorAll('.grass:not(.plucking)');
+                    if(ts.length>0) pluck(ts[0]);
+                }, 30);
+                setTimeout(() => { isSkillActive = false; clearInterval(worldInterval); field.style.filter = "none"; field.classList.remove('skill-active-field'); }, 4000);
+                return;
+            }
+
+            if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
+
+            if(equipped.skill.id === 's4') { // 草の呼吸
+                popText("50%", "40%", "草の呼吸・壱ノ型！", "cyan");
+                const interval = setInterval(() => { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); }, 100);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000);
+                return;
+            }
+
+            if(equipped.skill.id === 's5') { // ZENの導き
+                popText("50%", "40%", "ZENの導き...", "gold");
+                const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 5000);
+                return;
+            }
+
+            if(equipped.skill.id === 's6') { // カズキング・フラッシュ
+                popText("50%", "40%", "カズキング・フラッシュ！", "white");
+                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
+                setTimeout(() => { isSkillActive = false; }, 500);
+                return;
+            }
+
             const isX = equipped.char.id === 'fusion_zen_kazu';
             field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
             let ultText;
@@ -511,7 +567,7 @@
             if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
             spawn();
             const loop = setInterval(() => {
-                if(!isFever) timeLeft-=0.1;
+                if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
                 if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
                 updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0)endGame("終了"); }
             }, 100);
@@ -519,13 +575,14 @@
         function endGame(msg) { isPlaying=false; document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
         function giveUp() { isPlaying=false; openLayer('start-screen'); }
         
-        function saveGame() { localStorage.setItem('zenSurvival_Final_v9', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle })); }
+        function saveGame() { localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle })); }
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v9'));
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
             if(data) {
                 money = data.money; data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
                 equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
                 missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 }; lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし";
+                document.getElementById('game-field').className = equipped.bg.className;
             }
             initMissions(); updateUI(); openLayer('start-screen');
         }
