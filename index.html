@@ -3,114 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - オンライン対戦版 -</title>
+    <title>草抜きサバイバル - 完全版 -</title>
     <style>
-        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; }
-        body { 
-            text-align: center; font-family: 'Arial Black', sans-serif; 
-            background-color: #000; color: white; 
-            margin: 0; overflow: hidden; touch-action: none; user-select: none;
-        }
-
+        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --uz-color: #ff0000; --x-color: #ffffff; }
+        body { text-align: center; font-family: 'Arial Black', sans-serif; background-color: #000; color: white; margin: 0; overflow: hidden; touch-action: none; user-select: none; }
         .header { background: #111; padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; position: relative; z-index: 1000; }
         #fever-container { position: absolute; bottom: -5px; left: 0; width: 100%; height: 6px; background: #222; }
         #fever-fill { width: 0%; height: 100%; background: var(--fever-pink); transition: width 0.2s; box-shadow: 0 0 15px var(--fever-pink); }
-
-        #game-field { 
-            position: relative; width: 95vw; height: 55vh; 
-            background: #1a2a1a; margin: 10px auto; 
-            border: 3px solid #333; border-radius: 20px; overflow: hidden;
-            transition: 0.3s;
-        }
-
-        /* 相手の画面（リモートフィールド） */
-        #remote-field {
-            position: absolute; right: 5px; top: 5px; width: 40%; height: 35%;
-            background: rgba(0,0,0,0.6); border: 2px solid #00d2ff; border-radius: 10px;
-            display: none; z-index: 100; pointer-events: none; overflow: hidden;
-        }
-        .remote-label { position: absolute; top: 2px; left: 5px; font-size: 8px; color: #00d2ff; }
-        #remote-items-container { position: relative; width: 100%; height: 100%; }
+        #game-field { position: relative; width: 95vw; height: 55vh; background: #1a2a1a; margin: 10px auto; border: 3px solid #333; border-radius: 20px; overflow: hidden; }
         
-        /* 相手の画面の草のデザイン修正 */
-        .remote-grass {
-            position: absolute; width: 20px; height: 20px;
-            display: flex; align-items: center; justify-content: center; font-size: 14px;
-        }
+        /* リモートフィールド設定 */
+        #remote-field { position: absolute; right: 5px; top: 5px; width: 40%; height: 35%; background: rgba(0,0,0,0.6); border: 2px solid #00d2ff; border-radius: 10px; display: none; z-index: 100; pointer-events: none; overflow: hidden; }
+        .remote-grass { position: absolute; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .remote-grass::before { content: '🌿'; }
         .remote-egg { position: absolute; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
 
-        /* 背景バリエーション */
-        #game-field.bg-desert { background: #4d3319; border-color: #d2b48c; }
-        #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
-        #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
-        #game-field.bg-night { background: #0a0a20; border-color: #483d8b; }
-        #game-field.bg-sakura { background: #2d1a1a; border-color: #ffb7c5; }
-        #game-field.bg-gold { background: #3d3300; border-color: #ffd700; }
-        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; }
-        #game-field.bg-deepsea { background: #00121a; border-color: #008b8b; }
-        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 5s infinite alternate; }
-        @keyframes dim-pulse { from { background: #1a001a; } to { background: #00001a; } }
-
-        .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
-        .ultimate-field-bg { animation: ultimate-rainbow 0.2s infinite linear !important; }
-        @keyframes ultimate-rainbow { 0% { background: #ff0000; } 20% { background: #ffff00; } 40% { background: #00ff00; } 60% { background: #00ffff; } 80% { background: #0000ff; } 100% { background: #ff00ff; } }
-        @keyframes skill-shake { 0% { transform: translate(4px, 4px); } 50% { transform: translate(-4px, -4px); } 100% { transform: translate(4px, -4px); } }
-        @keyframes skill-flash { from { box-shadow: inset 0 0 50px rgba(255,255,255,0.5); border-color: #fff; } to { box-shadow: inset 0 0 150px rgba(255,255,255,1); border-color: #ff00ff; } }
-        
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .col-list { width: 90%; height: 45%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; }
+        .col-item { background: #222; padding: 10px; margin-bottom: 5px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
         
-        #gacha-result-display { width: 85%; height: 140px; overflow-y: auto; background: #111; border: 1px solid #444; border-radius: 10px; margin: 10px 0; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .res-line { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; border-radius: 5px; background: #222; font-size: 12px; }
-        .res-line.SSR { background: #443300; border: 1px solid var(--gold); color: var(--gold); animation: glow 1s infinite alternate; }
-        .res-line.UZ { background: #300; border: 1px solid var(--uz-color); color: var(--uz-color); animation: uz-glow 0.5s infinite alternate; font-weight: bold; }
-        .res-line.X { background: #000; border: 1px solid var(--x-color); color: var(--x-color); animation: x-glow 0.3s infinite alternate; font-weight: bold; }
-
-        #gacha-box { font-size: 80px; filter: drop-shadow(0 0 20px white); cursor: pointer; position: relative; z-index: 600; transition: 0.3s; }
-        .gacha-shake { animation: gacha-vibrate 0.1s infinite; }
-        @keyframes gacha-vibrate { 0% { transform: translate(2px, 2px) rotate(0deg); } 25% { transform: translate(-2px, -2px) rotate(1deg); } 50% { transform: translate(2px, -2px) rotate(-1deg); } 75% { transform: translate(-2px, 2px) rotate(0deg); } 100% { transform: translate(2px, 2px) rotate(0deg); } }
-
-        .col-list { width: 90%; height: 45%; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #444; }
-        .col-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid transparent; }
-        .col-item.owned { border-left-color: var(--gold); }
-        .equip-btn { padding: 6px 12px; border-radius: 15px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .equipped { background: var(--grass-light) !important; color: #000; }
-
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 85%; }
-        .btn { padding: 12px; font-size: 14px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
-        .btn-start { background: var(--gold); color: #000; grid-column: span 2; font-size: 20px; box-shadow: 0 0 15px var(--gold); }
-        .btn-online { background: #00d2ff; color: #000; grid-column: span 2; font-size: 16px; box-shadow: 0 0 10px #00d2ff; }
-
-        .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
-        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
-
-        .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
-        #tsum-icon { width: 70px; height: 70px; border: 4px solid #444; border-radius: 50%; font-size: 35px; display: flex; align-items: center; justify-content: center; background: #222; transition: 0.2s; }
-        .ready #tsum-icon { border-color: var(--zen-red); animation: pulse 0.4s infinite alternate; cursor: pointer; }
-        #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
-        #skill-fill { width: 0%; height: 100%; background: #f00; transition: 0.1s; }
-
-        .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
-        .plucking { animation: slice-anim 0.2s ease-out forwards; pointer-events: none; }
-        @keyframes slice-anim { 0% { transform: scale(1); } 100% { transform: scale(0); opacity: 0; } }
-
+        .btn { padding: 12px; font-size: 14px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        .btn-start { background: var(--gold); color: #000; width: 80%; font-size: 18px; margin-top: 10px; }
+        .btn-gacha { background: #ff4500; color: white; width: 45%; }
+        .btn-col { background: var(--blue); color: white; width: 45%; }
+        
+        .item { position: absolute; z-index: 10; cursor: pointer; }
         .grass { width: 75px; height: 75px; }
-        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; background: var(--grass-dark); border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; }
-        .grass::before { transform: rotate(-35deg); left: 10px; }
-        .grass::after { transform: rotate(35deg); right: 10px; }
-        .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; }
+        .grass-center { position: absolute; width: 30px; height: 60px; background: var(--grass-light); border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; }
+        .egg { width: 70px; height: 70px; font-size: 50px; display: flex; align-items: center; justify-content: center; }
         
-        .egg { width: 70px; height: 70px; font-size: 50px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 5px white); animation: egg-shake 0.5s ease-in-out infinite alternate; }
-        @keyframes egg-shake { 0% { transform: rotate(-10deg) scale(0.9); } 100% { transform: rotate(10deg) scale(1.1); } }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-        
-        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.1) 50%, rgba(255,0,255,0.1) 100%); animation: aura-spin 2s linear infinite; }
-        @keyframes aura-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
+        #tsum-icon { width: 70px; height: 70px; border: 4px solid #444; border-radius: 50%; font-size: 35px; display: flex; align-items: center; justify-content: center; background: #222; }
+        #skill-fill { width: 0%; height: 100%; background: #f00; transition: 0.1s; }
+        #skill-bar { width: 140px; height: 18px; background: #222; border-radius: 10px; overflow: hidden; border: 2px solid #444; }
     </style>
 </head>
 <body onload="loadGame()">
     <div class="header">
-        <button onclick="giveUp()" style="background:#444; color:white; border:none; padding:5px; font-size:10px; border-radius:3px;">リタイア</button>
+        <button onclick="giveUp()" style="background:#444; color:white; border:none; padding:5px; font-size:10px;">リタイア</button>
         <div>💰 <span id="m-val">0</span></div>
         <div style="font-size: 18px; font-weight: bold; color: #ffcc00;">⏳ <span id="t-val">30.0</span></div>
         <div id="opp-score-display" style="color: #00d2ff; font-size: 12px; display: none;">相手: <span id="opp-m-val">0</span></div>
@@ -118,58 +48,47 @@
     </div>
 
     <div id="game-field">
-        <div id="x-aura-effect" class="x-aura"></div>
         <div id="remote-field">
-            <div class="remote-label">リモート</div>
             <div id="remote-items-container"></div>
         </div>
 
         <div id="start-screen" class="overlay">
-            <h1 id="game-title" style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
-            <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small>称号：<span id="u-title-display">なし</span></small></div>
-            <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
-            <div class="btn-group">
-                <button class="btn btn-online" onclick="startOnlineMatch()">🌐 1v1 スコア対決</button>
-                <button class="btn btn-start" onclick="startGame()">START</button>
-                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')" style="background:#ff4500; color:white;">GACHA</button>
-                <button class="btn btn-col" onclick="openLayer('col-screen')" style="background:var(--blue); color:white;">COLLECTION</button>
-                <button class="btn" onclick="openLayer('profile-screen')" style="background:#555; color:white; grid-column: span 2;">👤 プロフィール編集</button>
+            <h1 style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
+            <p>所持金: <span id="start-money">0</span>円</p>
+            <button class="btn btn-start" onclick="startOnlineMatch()" style="background:#00d2ff;">🌐 オンライン対戦</button>
+            <button class="btn btn-start" onclick="startGame()">ソロプレイ開始</button>
+            <div style="display:flex; gap:10px; width:80%; margin-top:10px;">
+                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">ガチャ</button>
+                <button class="btn btn-col" onclick="openLayer('col-screen')">図鑑/進化</button>
             </div>
         </div>
 
         <div id="gacha-screen" class="overlay" style="display:none;">
-            <div id="gacha-box">🎁</div>
-            <div id="gacha-result-display"></div>
-            <button class="btn" onclick="runGacha(10)" style="background:#ff8c00; color:white; width:150px;">10連 (1万円)</button>
-            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
+            <h2>キャラガチャ</h2>
+            <div id="gacha-result" style="height:100px; font-size:24px;">🎁</div>
+            <button class="btn" onclick="runGacha()" style="background:orange; color:white;">1回引く (1000円)</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px;">戻る</button>
         </div>
 
         <div id="col-screen" class="overlay" style="display:none;">
-            <h2>COLLECTION</h2>
+            <h2>図鑑 / 進化 / 合体</h2>
             <div class="col-list" id="col-list-content"></div>
-            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
-        </div>
-
-        <div id="profile-screen" class="overlay" style="display:none;">
-            <h2 style="color:var(--gold);">👤 プロフィール</h2>
-            <input type="text" id="name-input" maxlength="10" onchange="updateName(this.value)" style="padding:8px; border-radius:5px; background:#111; color:white; border:1px solid #555;">
-            <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:20px;">戻る</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px;">戻る</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none">
-            <h2 id="end-title" style="color:red; font-size:40px; text-shadow: 0 0 15px red;">GAME OVER</h2>
-            <p id="end-msg">タイムアップ！</p>
-            <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
-            <p id="online-result" style="color: #00d2ff; font-weight: bold; font-size:14px; padding:10px;"></p>
-            <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">タイトルへ</button>
+            <h2 id="end-title" style="color:red; font-size:40px;">終了！</h2>
+            <p>獲得: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
+            <p id="online-result" style="color: #00d2ff; font-weight: bold;"></p>
+            <button class="btn btn-start" onclick="openLayer('start-screen')">タイトルへ</button>
         </div>
     </div>
 
     <div class="bottom-ui">
-        <div id="tsum-icon" onclick="triggerSkill()">👤</div>
+        <div id="tsum-icon">👤</div>
         <div>
             <div id="skill-bar"><div id="skill-fill"></div></div>
-            <div id="skill-display-name" style="font-size:10px; color:#aaa;">huh</div>
+            <div id="equipped-name" style="font-size:10px; color:#aaa;">普通のぜん</div>
         </div>
     </div>
 
@@ -177,262 +96,174 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
-            authDomain: "game-685f2.firebaseapp.com",
-            databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
-            projectId: "game-685f2",
-            storageBucket: "game-685f2.firebasestorage.app",
-            messagingSenderId: "266871071111",
-            appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSy...", databaseURL: "https://...", projectId: "...", appId: "..." };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         window.db = db; window.dbRef = ref; window.dbSet = set; window.dbOnValue = onValue; window.dbOnDisconnect = onDisconnect;
     </script>
 
     <script>
-        let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0;
-        let feverPoints = 0, isFever = false, isSkillActive = false;
-        let isOnlineMode = false, playerId = "p_" + Math.floor(Math.random() * 1000000), currentRoomId = "global_match_1";
-        let userName = "ぜん", currentTitle = "なし";
+        let money = 2000, timeLeft = 30.0, isPlaying = false, isOnlineMode = false;
+        let feverPoints = 0, skillCount = 0, playerId = "p_" + Math.floor(Math.random() * 1000000);
+        let currentRoomId = "match_v1", userName = "ぜん";
 
         const items = [
-            { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
-            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
-            { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC' },
-            { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC' }
+            { id: 'c1', name: '普通のぜん', icon: '👤', rarity: 'C', rate: 1, owned: true },
+            { id: 'c2', name: 'プロぜん', icon: '🔥', rarity: 'R', rate: 2, owned: false },
+            { id: 'c3', name: '神ぜん', icon: '⚡', rarity: 'SSR', rate: 10, owned: false },
+            { id: 'c4', name: '究極ぜん', icon: '👑', rarity: 'UZ', rate: 50, owned: false }
         ];
-
-        let equipped = { char: items[0], bg: items[2], skill: items[3] };
+        let equipped = items[0];
 
         function updateUI() {
             document.getElementById('m-val').innerText = Math.floor(money).toLocaleString();
+            document.getElementById('start-money').innerText = Math.floor(money).toLocaleString();
             document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.getElementById('skill-fill').style.width = skillCount + "%";
-            document.getElementById('u-name-display').innerText = userName;
-            document.getElementById('u-title-display').innerText = currentTitle;
-            document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
+            document.getElementById('equipped-name').innerText = equipped.name;
         }
 
         function openLayer(id) {
             document.querySelectorAll('.overlay').forEach(l => l.style.display = 'none');
-            if(id !== 'none') document.getElementById(id).style.display = 'flex';
-            if(id === 'start-screen') {
-                document.getElementById('remote-field').style.display = 'none';
-                isOnlineMode = false;
-            }
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'col-screen') renderCollection();
         }
 
-        function updateName(val) { userName = val || "ぜん"; saveGame(); updateUI(); }
-
-        function spawn() {
-            if(!isPlaying) return; const field = document.getElementById('game-field');
-            for(let i=0; i<8; i++) {
-                const g = document.createElement('div'); g.className = 'item grass';
-                g.style.left = Math.random()*85+"%"; g.style.top = Math.random()*80+"%";
-                g.innerHTML = '<div class="grass-center"></div>';
-                g.onclick = function(){ pluck(this); }; field.appendChild(g);
-            }
-            const egg = document.createElement('div'); egg.className = 'item egg'; egg.innerText = '🥚';
-            let px = Math.random()*80, py = Math.random()*75, vx = (Math.random()-0.5)*2, vy = (Math.random()-0.5)*2;
-            egg.style.left = px+"%"; egg.style.top = py+"%";
-            const move = setInterval(() => {
-                if(!isPlaying || !egg.parentNode){ clearInterval(move); return; }
-                px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1;
-                egg.style.left=px+"%"; egg.style.top=py+"%";
-                if(isOnlineMode) syncOnlineData();
-            }, 50);
+        // --- ガチャ・進化ロジック ---
+        function runGacha() {
+            if(money < 1000) return alert("お金が足りません！");
+            money -= 1000;
+            const rand = Math.random();
+            let result = items[0];
+            if(rand < 0.05) result = items[2];
+            else if(rand < 0.2) result = items[1];
             
-            egg.onclick = () => {
-                // 卵に触れた際の終了処理。SSR以上ならセーフ。
-                if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') {
-                    egg.remove();
-                } else {
-                    // オンライン中は相手に負けを知らせるためにステータスをdiedにする
-                    if (isOnlineMode) {
-                        const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-                        window.dbSet(myRoomRef, { name: userName, score: Math.floor(money), status: "died", items: [] });
-                    }
-                    endGame("卵だ！");
-                }
-            };
-            field.appendChild(egg);
-            if(isOnlineMode) syncOnlineData();
+            result.owned = true;
+            document.getElementById('gacha-result').innerText = result.icon + " " + result.name;
+            saveGame(); updateUI();
         }
 
-        function pluck(el) {
-            if(el.classList.contains('plucking')) return;
-            let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1));
-            money += gain; feverPoints = Math.min(100, feverPoints+8);
-            if(feverPoints>=100 && !isFever) startFever();
-            popText(el.style.left, el.style.top, `+${gain}`);
-            el.classList.add('plucking');
-            setTimeout(() => { 
-                el.remove(); 
-                if(document.querySelectorAll('.grass:not(.plucking)').length === 0) { timeLeft+=3; spawn(); } 
-            }, 200);
-            updateUI();
-            if(isOnlineMode) syncOnlineData();
+        function renderCollection() {
+            const cont = document.getElementById('col-list-content');
+            cont.innerHTML = '';
+            items.forEach(it => {
+                const div = document.createElement('div');
+                div.className = 'col-item';
+                div.innerHTML = `<span>${it.icon} ${it.name} (${it.rarity})</span>
+                                 <button onclick="equipChar('${it.id}')" ${it.owned?'':'disabled'}>${equipped.id===it.id?'装備中':'装備'}</button>`;
+                cont.appendChild(div);
+            });
         }
 
-        function startFever() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },5000); }
-
-        function triggerSkill() {
-            if(skillCount < 100 || isSkillActive) return;
-            skillCount = 0; isSkillActive = true;
-            const interval = setInterval(() => { 
-                const ts = document.querySelectorAll('.grass:not(.plucking)'); 
-                if(ts.length>0) pluck(ts[0]); 
-            }, 150);
-            setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 3000);
+        function equipChar(id) {
+            equipped = items.find(i => i.id === id);
+            renderCollection(); updateUI(); saveGame();
         }
 
-        function popText(x, y, txt) {
-            const p = document.createElement('div'); p.className='pop-text'; p.innerText=txt;
-            p.style.left=x; p.style.top=y; document.getElementById('game-field').appendChild(p);
-            setTimeout(()=>p.remove(),500);
-        }
-
-        function startGame() {
-            isPlaying=true; timeLeft=30; openLayer('none');
-            document.querySelectorAll('.item').forEach(i=>i.remove());
-            spawn();
-            const loop = setInterval(() => {
-                if(!isPlaying){ clearInterval(loop); return; }
-                timeLeft -= 0.1;
-                if(!isSkillActive) skillCount = Math.min(100, skillCount + 0.5);
-                updateUI();
-                if(timeLeft<=0) { endGame("終了"); }
-            }, 100);
-        }
-
-        // --- オンライン対戦ロジック ---
+        // --- オンライン対戦ロジック (ご要望の修正すべて反映) ---
         function startOnlineMatch() {
-            if(!window.db) return alert("Firebase読み込み中...");
-            isOnlineMode = true;
+            isOnlineMode = true; isPlaying = false;
             document.getElementById('opp-score-display').style.display = 'block';
             document.getElementById('remote-field').style.display = 'block';
-            document.getElementById('online-result').innerText = "対戦相手を待っています...";
+            document.getElementById('online-result').innerText = "対戦相手を探しています...";
             
-            const roomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-            window.dbSet(roomRef, { name: userName, score: 0, status: "playing", items: [] });
-            window.dbOnDisconnect(roomRef).remove();
-            
-            const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
-            window.dbOnValue(allPlayersRef, (snapshot) => {
-                const data = snapshot.val();
-                if(!data || !isPlaying) return;
-                
-                let opponentFound = false;
-                for(let key in data) {
-                    if(key !== playerId) {
-                        opponentFound = true;
-                        const opp = data[key];
+            const myRef = window.dbRef(window.db, 'rooms/'+currentRoomId+'/'+playerId);
+            window.dbSet(myRef, { name: userName, score: 0, status: "waiting", items: [] });
+            window.dbOnDisconnect(myRef).remove();
+
+            const timeout = setTimeout(() => {
+                if(!isPlaying) { alert("相手が見つかりませんでした。"); openLayer('start-screen'); }
+            }, 80000);
+
+            window.dbOnValue(window.dbRef(window.db, 'rooms/'+currentRoomId), (snap) => {
+                const data = snap.val();
+                if(!data) return;
+                const pIds = Object.keys(data);
+                if(!isPlaying && pIds.length >= 2) {
+                    clearTimeout(timeout); isPlaying = true;
+                    let c = 3;
+                    const cd = setInterval(() => {
+                        if(c > 0) { document.getElementById('online-result').innerText = `開始まで... ${c--}`; }
+                        else { clearInterval(cd); document.getElementById('online-result').innerText = "GO!!"; startGame(); }
+                    }, 1000);
+                }
+                for(let k in data) {
+                    if(k !== playerId) {
+                        const opp = data[k];
                         document.getElementById('opp-m-val').innerText = Math.floor(opp.score).toLocaleString();
-                        
-                        // 1. 相手が卵に触れて自爆(died)した場合
-                        if (opp.status === "died") {
-                            isPlaying = false;
-                            document.getElementById('online-result').innerText = `${opp.name}が卵に触れました - あなたの勝利！ 🎉`;
-                            endGame("相手が脱落");
-                            return;
-                        }
-
-                        // 2. 相手のリタイア監視
-                        if (opp.status === "retired") {
-                            isPlaying = false;
-                            document.getElementById('online-result').innerText = `${opp.name}がリタイアしました - あなたの勝利！ 🎉`;
-                            endGame("相手退出");
-                            return;
-                        }
-
+                        if(opp.status === "died") { isPlaying = false; document.getElementById('online-result').innerText = "相手が卵で脱落！勝利！"; endGame("WIN"); }
                         updateRemoteView(opp.items || []);
                     }
                 }
-                
-                // 3. 相手が通信切れ等で消えた場合
-                if (isPlaying && !opponentFound && Object.keys(data).length === 1) {
-                    isPlaying = false;
-                    document.getElementById('online-result').innerText = `相手が退出しました - あなたの勝利！ 🎉`;
-                    endGame("相手退出");
-                }
             });
-            startGame();
         }
 
-        function syncOnlineData() {
-            if(!isOnlineMode) return;
-            const myItems = [];
-            document.querySelectorAll('.item').forEach(el => {
-                myItems.push({ x: el.style.left, y: el.style.top, type: el.classList.contains('grass') ? 'grass' : 'egg' });
-            });
-            const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-            window.dbSet(myRoomRef, { name: userName, score: Math.floor(money), status: "playing", items: myItems });
+        // --- ゲーム基本ロジック ---
+        function spawn() {
+            if(!isPlaying) return;
+            const field = document.getElementById('game-field');
+            for(let i=0; i<3; i++) {
+                const g = document.createElement('div'); g.className = 'item grass';
+                g.style.left = Math.random()*85+"%"; g.style.top = Math.random()*80+"%";
+                g.innerHTML = '<div class="grass-center"></div>';
+                g.onclick = function(){ 
+                    money += (100 * equipped.rate); feverPoints = Math.min(100, feverPoints+5);
+                    this.remove(); spawn(); updateUI(); if(isOnlineMode) syncOnlineData();
+                }; 
+                field.appendChild(g);
+            }
+            const egg = document.createElement('div'); egg.className = 'item egg'; egg.innerText = '🥚';
+            egg.style.left = "50%"; egg.style.top = "50%";
+            egg.onclick = () => {
+                if(equipped.rarity === 'SSR' || equipped.rarity === 'UZ') { egg.remove(); return; }
+                if(isOnlineMode) window.dbSet(window.dbRef(window.db, 'rooms/'+currentRoomId+'/'+playerId), { status: "died", score: money });
+                endGame("卵自爆");
+            };
+            field.appendChild(egg);
         }
 
-        function updateRemoteView(remoteItems) {
-            const container = document.getElementById('remote-items-container');
-            container.innerHTML = '';
-            remoteItems.forEach(item => {
-                const div = document.createElement('div');
-                div.className = item.type === 'grass' ? 'remote-grass' : 'remote-egg';
-                div.style.left = item.x; div.style.top = item.y;
-                if(item.type === 'egg') { div.innerText = '🥚'; div.style.fontSize = '12px'; }
-                container.appendChild(div);
-            });
+        function startGame() {
+            isPlaying = true; timeLeft = 30.0; openLayer('none');
+            document.querySelectorAll('.item').forEach(i => i.remove());
+            spawn();
+            const t = setInterval(() => {
+                if(!isPlaying) { clearInterval(t); return; }
+                timeLeft -= 0.1; updateUI();
+                if(timeLeft <= 0) endGame("終了");
+            }, 100);
         }
 
         function endGame(msg) {
-            isPlaying = false;
-            let finalScore = Math.floor(money);
-            document.getElementById('res-money').innerText = finalScore.toLocaleString();
-            
-            if(isOnlineMode) {
-                const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-                window.dbSet(myRoomRef, { name: userName, score: finalScore, status: "finished", items: [] });
-                
-                // スコア比較
-                const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
-                window.dbOnValue(allPlayersRef, (snapshot) => {
-                    const data = snapshot.val();
-                    let oppScore = 0, oppName = "対戦相手";
-                    for(let key in data) { if(key !== playerId) { oppScore = data[key].score; oppName = data[key].name; } }
-                    if(oppScore > 0 || (data && Object.keys(data).length > 1)) {
-                        let winMsg = finalScore > oppScore ? "WIN! 🎉" : (finalScore < oppScore ? "LOSE... 💀" : "DRAW 🤝");
-                        if(!document.getElementById('online-result').innerText.includes("リタイア") && 
-                           !document.getElementById('online-result').innerText.includes("卵")) {
-                            document.getElementById('online-result').innerText = `${oppName}: ${oppScore.toLocaleString()}円 - ${winMsg}`;
-                        }
-                    }
-                }, { onlyOnce: true });
-            }
-
-            openLayer('end-screen');
+            isPlaying = false; openLayer('end-screen');
+            document.getElementById('res-money').innerText = Math.floor(money).toLocaleString();
             saveGame();
-
-            // 【追加】3秒後に自動で最初の画面に戻る
-            setTimeout(() => {
-                if (document.getElementById('end-screen').style.display === 'flex') {
-                    openLayer('start-screen');
-                }
-            }, 3000); 
+            setTimeout(() => { if(document.getElementById('end-screen').style.display==='flex') openLayer('start-screen'); }, 3000);
         }
 
-        function giveUp() {
-            if(isOnlineMode) {
-                const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-                window.dbSet(myRoomRef, { name: userName, score: Math.floor(money), status: "retired", items: [] });
-            }
-            isPlaying=false; openLayer('start-screen');
+        function syncOnlineData() {
+            const myItems = [];
+            document.querySelectorAll('.item').forEach(el => myItems.push({ x: el.style.left, y: el.style.top, type: el.classList.contains('grass')?'grass':'egg' }));
+            window.dbSet(window.dbRef(window.db, 'rooms/'+currentRoomId+'/'+playerId), { name: userName, score: money, status: "playing", items: myItems });
         }
 
-        function saveGame() { localStorage.setItem('zenSurvival_v1', JSON.stringify({ money, userName })); }
+        function updateRemoteView(items) {
+            const cont = document.getElementById('remote-items-container');
+            cont.innerHTML = '';
+            items.forEach(it => {
+                const d = document.createElement('div');
+                d.className = it.type === 'grass' ? 'remote-grass' : 'remote-egg';
+                d.style.left = it.x; d.style.top = it.y;
+                if(it.type === 'egg') d.innerText = '🥚';
+                cont.appendChild(d);
+            });
+        }
+
+        function giveUp() { location.reload(); }
+        function saveGame() { localStorage.setItem('zenSave', JSON.stringify({ money, ownedIds: items.filter(i=>i.owned).map(i=>i.id), eqId: equipped.id })); }
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_v1'));
-            if(data) { money = data.money; userName = data.userName || "ぜん"; }
+            const s = JSON.parse(localStorage.getItem('zenSave'));
+            if(s) { money = s.money; s.ownedIds.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; }); equipped = items.find(i=>i.id===s.eqId)||items[0]; }
             updateUI(); openLayer('start-screen');
         }
     </script>
