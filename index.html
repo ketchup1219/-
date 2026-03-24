@@ -127,49 +127,6 @@
         .mission-reward-btn { align-self: flex-end; padding: 5px 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; }
         .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
         .claimed { background: #444; color: #888; cursor: default; }
-
-        /* 追加：マッチング・カウントダウン演出用スタイル */
-        #countdown-screen {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #count-number {
-            font-size: 120px;
-            font-weight: bold;
-            color: var(--gold);
-            text-shadow: 0 0 30px var(--gold);
-            animation: count-pop 1s infinite;
-        }
-        #match-status {
-            font-size: 18px;
-            color: #00ffcc;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-            animation: match-blink 0.5s infinite alternate;
-        }
-        @keyframes count-pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.3); opacity: 1; }
-            100% { transform: scale(1); opacity: 0; }
-        }
-        @keyframes match-blink {
-            from { opacity: 0.5; text-shadow: 0 0 5px #00ffcc; }
-            to { opacity: 1; text-shadow: 0 0 20px #00ffcc; }
-        }
-        .flash-effect {
-            animation: white-out 0.6s ease-out;
-        }
-        @keyframes white-out {
-            0% { background: white; }
-            100% { background: transparent; }
-        }
     </style>
 </head>
 <body onload="loadGame()">
@@ -184,17 +141,12 @@
         <div id="x-aura-effect" class="x-aura"></div>
         <div id="gacha-flash-overlay" class="gacha-flash"></div>
 
-        <div id="countdown-screen">
-            <div id="match-status">ALL PLAYERS MATCHED!</div>
-            <div id="count-number">5</div>
-        </div>
-
         <div id="start-screen" class="overlay">
             <h1 id="game-title" style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
             <div id="title-display">称号：なし</div>
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
-                <button class="btn btn-start" onclick="startMatchingSequence()">START</button>
+                <button class="btn btn-start" onclick="startGame()">START</button>
                 <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
                 <button class="btn btn-title" onclick="openLayer('title-screen')">🎖️ 称号変更</button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
@@ -325,11 +277,17 @@
             { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', owned: false, rarity: 'SR', info: '金5.8倍/美しい筆致', rate: 5.8 },
             { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', owned: false, rarity: 'SR', info: '金6.2倍/お宝発見', rate: 6.2 },
             { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金6.0倍/爆音抜き', rate: 6.0 },
+            { id: 'sr_fisher', type: 'char', name: '釣り師ぜん', icon: '🎣', owned: false, rarity: 'SR', info: '金5.7倍/入れ食い状態', rate: 5.7 },
+            { id: 'sr_science', type: 'char', name: '科学者ぜん', icon: '🧪', owned: false, rarity: 'SR', info: '金6.5倍/効率の研究', rate: 6.5 },
+            { id: 'sr_fortune', type: 'char', name: '占い師ぜん', icon: '🔮', owned: false, rarity: 'SR', info: '金5.9倍/未来を見通す', rate: 5.9 },
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
             { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'R', info: '金3.2倍/収穫の喜び', rate: 3.2 },
             { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', owned: false, rarity: 'R', info: '金3.0倍/フレー！フレー！', rate: 3.0 },
             { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
+            { id: 'r_cleaner', type: 'char', name: '掃除夫ぜん', icon: '🧹', owned: false, rarity: 'R', info: '金3.1倍/隅々まで抜く', rate: 3.1 },
+            { id: 'r_post', type: 'char', name: '郵便局員ぜん', icon: '📮', owned: false, rarity: 'R', info: '金2.7倍/迅速にお届け', rate: 2.7 },
+            { id: 'r_zoo', type: 'char', name: '飼育員ぜん', icon: '🐘', owned: false, rarity: 'R', info: '金3.3倍/動物と草抜き', rate: 3.3 },
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
             /* 背景 */
@@ -608,34 +566,6 @@
         function popText(x, y, txt, color="var(--gold)") { const p = document.createElement('div'); p.className='pop-text'; p.innerText=txt; p.style.left=x; p.style.top=y; p.style.color=color; document.getElementById('game-field').appendChild(p); setTimeout(()=>p.remove(),500); }
 
         function startFever() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000); }
-
-        /* 追加：マッチング・カウントダウン演出のロジック */
-        async function startMatchingSequence() {
-            // 1. スタート画面を閉じてカウントダウン画面を表示
-            openLayer('none');
-            const countdownScreen = document.getElementById('countdown-screen');
-            const countNum = document.getElementById('count-number');
-            countdownScreen.style.display = 'flex';
-
-            // 2. カウントダウンループ
-            for (let i = 5; i > 0; i--) {
-                countNum.innerText = i;
-                // ここで本来は数字が変わる際の効果音などがあると良い
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            // 3. フィニッシュ演出
-            countNum.innerText = "GO!!";
-            const field = document.getElementById('game-field');
-            field.classList.add('flash-effect');
-            
-            await new Promise(resolve => setTimeout(resolve, 600));
-
-            // 4. 画面を隠してゲーム開始
-            countdownScreen.style.display = 'none';
-            field.classList.remove('flash-effect');
-            startGame();
-        }
 
         function startGame() {
             isPlaying=true; timeLeft=30; openLayer('none');
