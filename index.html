@@ -84,6 +84,7 @@
         .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; font-size: 12px; text-shadow: 1px 1px 2px #000; }
         .btn-mission { background: #00cc66; color: white; grid-column: span 1; font-size: 12px; }
         .btn-title { background: #666; color: white; grid-column: span 1; font-size: 12px; }
+        .btn-vs { background: #ff0033; color: white; grid-column: span 2; font-size: 18px; box-shadow: 0 0 10px #f00; border: 2px solid white; }
 
         .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
         @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
@@ -127,6 +128,15 @@
         .mission-reward-btn { align-self: flex-end; padding: 5px 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; }
         .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
         .claimed { background: #444; color: #888; cursor: default; }
+
+        /* VS Mode Specific CSS */
+        #vs-header { position: absolute; top: 0; width: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; z-index: 100; border-bottom: 2px solid #ff0033; }
+        .vs-bar-container { display: flex; height: 30px; border-bottom: 1px solid #333; }
+        .vs-score-bar { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        #my-vs-score { background: #0044ff; }
+        #opp-vs-score { background: #cc0000; }
+        .vs-matching-loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff0033; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body onload="loadGame()">
@@ -138,6 +148,13 @@
     </div>
 
     <div id="game-field">
+        <div id="vs-header">
+            <div class="vs-bar-container">
+                <div id="my-vs-score" class="vs-score-bar">YOU: 0</div>
+                <div id="opp-vs-score" class="vs-score-bar">RIVAL: 0</div>
+            </div>
+        </div>
+
         <div id="x-aura-effect" class="x-aura"></div>
         <div id="gacha-flash-overlay" class="gacha-flash"></div>
 
@@ -147,6 +164,7 @@
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">START</button>
+                <button class="btn btn-vs" onclick="startMatching()">⚔️ 1v1 オンライン対決</button>
                 <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
                 <button class="btn btn-title" onclick="openLayer('title-screen')">🎖️ 称号変更</button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
@@ -154,6 +172,13 @@
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
             </div>
+        </div>
+
+        <div id="matching-screen" class="overlay" style="display:none;">
+            <h2 style="color:white;">MATCHING...</h2>
+            <div class="vs-matching-loader"></div>
+            <p id="matching-msg">対戦相手を探しています...</p>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px;">キャンセル</button>
         </div>
 
         <div id="title-screen" class="overlay" style="display:none;">
@@ -219,6 +244,7 @@
             <h2 id="end-title" style="color:red; font-size:40px; text-shadow: 0 0 15px red;">GAME OVER</h2>
             <p id="end-msg">タイムアップ！</p>
             <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
+            <p id="vs-res-msg" style="display:none; color:cyan; font-weight:bold;"></p>
             <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">リトライ</button>
         </div>
     </div>
@@ -238,6 +264,9 @@
         let feverPoints = 0, isFever = false, isSkillActive = false;
         let missions = [], missionStats = { plucked: 0, gachaed: 0, earned: 0 }, lastMissionDate = "";
         
+        /* VS Variables */
+        let isVsMode = false, oppScore = 0, myStartMoney = 0;
+
         let currentTitle = "なし";
         const titles = [
             { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000 },
@@ -318,6 +347,12 @@
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
             const hasClaimable = missions.some(m => !m.claimed && missionStats[m.key] >= m.goal);
             document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
+
+            if(isVsMode) {
+                let currentSessionScore = money - myStartMoney;
+                document.getElementById('my-vs-score').innerText = `YOU: ${Math.floor(currentSessionScore).toLocaleString()}`;
+                document.getElementById('opp-vs-score').innerText = `RIVAL: ${Math.floor(oppScore).toLocaleString()}`;
+            }
         }
 
         function openLayer(id) {
@@ -332,7 +367,31 @@
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
+                isVsMode = false;
+                document.getElementById('vs-header').style.display = 'none';
+                document.getElementById('vs-res-msg').style.display = 'none';
             }
+        }
+
+        /* VS Functions */
+        function startMatching() {
+            openLayer('matching-screen');
+            let time = 0;
+            const matchInterval = setInterval(() => {
+                time++;
+                if(time > 20) {
+                    clearInterval(matchInterval);
+                    startVsGame();
+                }
+            }, 100);
+        }
+
+        function startVsGame() {
+            isVsMode = true;
+            oppScore = 0;
+            myStartMoney = money;
+            document.getElementById('vs-header').style.display = 'flex';
+            startGame();
         }
 
         function renderTitles() {
@@ -569,10 +628,38 @@
             const loop = setInterval(() => {
                 if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
                 if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
+                
+                /* Rival AI Scoring */
+                if(isVsMode && isPlaying) {
+                    let basePower = equipped.char.rate * 100;
+                    let variance = 0.8 + Math.random() * 0.4;
+                    oppScore += (basePower * variance * 0.1);
+                }
+
                 updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0)endGame("終了"); }
             }, 100);
         }
-        function endGame(msg) { isPlaying=false; document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
+        function endGame(msg) { 
+            isPlaying=false; 
+            document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); 
+            
+            if(isVsMode) {
+                let myFinalSessionScore = money - myStartMoney;
+                const vsRes = document.getElementById('vs-res-msg');
+                vsRes.style.display = 'block';
+                if(myFinalSessionScore > oppScore) {
+                    vsRes.innerText = "🏆 対戦勝利！ +100,000円ボーナス！";
+                    vsRes.style.color = "gold";
+                    money += 100000;
+                } else {
+                    vsRes.innerText = "💀 対戦敗北... どんまい！";
+                    vsRes.style.color = "red";
+                }
+            }
+            
+            openLayer('end-screen'); 
+            saveGame(); 
+        }
         function giveUp() { isPlaying=false; openLayer('start-screen'); }
         
         function saveGame() { localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle })); }
