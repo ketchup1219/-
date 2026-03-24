@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - オンライン対戦復活版 -</title>
+    <title>草抜きサバイバル - カズキングイベント開催中！ -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; }
         body { 
@@ -75,21 +75,15 @@
 
         .bonus-info { background: #222; width: 90%; padding: 8px; border-radius: 10px; margin-bottom: 10px; font-size: 11px; color: var(--bonus-color); border: 1px solid #444; }
 
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; width: 90%; }
-        .btn { padding: 10px; font-size: 13px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
-        .btn-start { background: var(--gold); color: #000; grid-column: span 1; font-size: 16px; box-shadow: 0 0 10px var(--gold); }
-        .btn-online { background: var(--zen-red); color: white; grid-column: span 1; font-size: 16px; box-shadow: 0 0 15px var(--zen-red); animation: pulse 1s infinite alternate; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 85%; }
+        .btn { padding: 12px; font-size: 14px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        .btn-start { background: var(--gold); color: #000; grid-column: span 2; font-size: 20px; box-shadow: 0 0 15px var(--gold); }
         .btn-gacha { background: #ff4500; color: white; }
         .btn-col { background: var(--blue); color: white; }
-        .btn-evolve { background: #8a2be2; color: white; font-size: 11px; }
-        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; font-size: 11px; text-shadow: 1px 1px 2px #000; }
-        .btn-mission { background: #00cc66; color: white; font-size: 11px; }
-        .btn-title { background: #666; color: white; font-size: 11px; }
-
-        /* オンライン用ランキング表示 */
-        #online-rank-box { position: absolute; top: 10px; right: 10px; width: 120px; background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 5px; font-size: 10px; text-align: left; padding: 5px; z-index: 100; pointer-events: none; display: none; }
-        .rank-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 2px 0; }
-        .rank-row.me { color: var(--gold); font-weight: bold; }
+        .btn-evolve { background: #8a2be2; color: white; font-size: 12px; }
+        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; font-size: 12px; text-shadow: 1px 1px 2px #000; }
+        .btn-mission { background: #00cc66; color: white; grid-column: span 1; font-size: 12px; }
+        .btn-title { background: #666; color: white; grid-column: span 1; font-size: 12px; }
 
         .pop-text { position: absolute; font-weight: bold; pointer-events: none; animation: pop-up-enhanced 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; z-index: 100; text-shadow: 2px 2px 0 black; font-size: 20px; }
         @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-40px) scale(1.4); } 100% { transform: translateY(-80px) scale(1.1); opacity: 0; } }
@@ -120,18 +114,19 @@
         .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.1) 50%, rgba(255,0,255,0.1) 100%); animation: aura-spin 2s linear infinite; }
         @keyframes aura-spin { from { transform: rotate(0deg); filter: hue-rotate(0deg); } to { transform: rotate(360deg); filter: hue-rotate(360deg); } }
 
-        #title-display { font-size: 11px; color: var(--gold); margin-top: 5px; background: rgba(255,215,0,0.1); padding: 2px 8px; border-radius: 10px; display: inline-block; border: 1px solid var(--gold); }
+        #title-display { font-size: 12px; color: var(--gold); margin-top: 5px; background: rgba(255,215,0,0.1); padding: 2px 8px; border-radius: 10px; display: inline-block; border: 1px solid var(--gold); }
         .title-item { width: 85%; background: #222; border: 1px solid #444; border-radius: 8px; padding: 10px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
         .title-item.locked { opacity: 0.5; filter: grayscale(1); }
+        .title-info { text-align: left; }
+        .title-name { font-weight: bold; color: #fff; }
+        .title-cond { font-size: 10px; color: #aaa; }
 
         .mission-item { background: #222; border: 1px solid #444; border-radius: 10px; margin: 8px 0; padding: 12px; width: 85%; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         .mission-progress { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
         .mission-fill { height: 100%; background: #00cc66; transition: 0.3s; }
         .mission-reward-btn { align-self: flex-end; padding: 5px 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .can-claim { background: var(--gold); color: #000; }
+        .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
         .claimed { background: #444; color: #888; cursor: default; }
-
-        input#nick-input { background: #222; border: 1px solid var(--gold); color: white; padding: 10px; border-radius: 10px; text-align: center; font-size: 18px; width: 200px; margin-bottom: 20px; }
     </style>
 </head>
 <body onload="loadGame()">
@@ -146,32 +141,23 @@
         <div id="x-aura-effect" class="x-aura"></div>
         <div id="gacha-flash-overlay" class="gacha-flash"></div>
 
-        <div id="online-rank-box"></div>
-
         <div id="start-screen" class="overlay">
-            <h1 id="game-title" style="color:var(--gold); margin:0; font-size: 24px;">草抜きサバイバル</h1>
+            <h1 id="game-title" style="color:var(--gold); margin:0;">草抜きサバイバル</h1>
             <div id="title-display">称号：なし</div>
-            <div id="nick-display" style="font-size: 12px; margin: 5px; color: cyan; cursor: pointer;" onclick="openLayer('name-screen')">👤 名無しの草抜き師</div>
+            <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
-                <button class="btn btn-start" onclick="startGame(false)">SOLO START</button>
-                <button class="btn btn-online" onclick="startGame(true)">ONLINE BATTLE</button>
-                <button class="btn btn-mission" onclick="openLayer('mission-screen')">ミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
-                <button class="btn btn-title" onclick="openLayer('title-screen')">称号変更</button>
-                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">ガチャ</button>
-                <button class="btn btn-col" onclick="openLayer('col-screen')">図鑑</button>
-                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">進化</button>
-                <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">合体</button>
+                <button class="btn btn-start" onclick="startGame()">START</button>
+                <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
+                <button class="btn btn-title" onclick="openLayer('title-screen')">🎖️ プロフィール編集</button>
+                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
+                <button class="btn btn-col" onclick="openLayer('col-screen')">COLLECTION</button>
+                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
+                <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
             </div>
         </div>
 
-        <div id="name-screen" class="overlay" style="display:none;">
-            <h2 style="color:var(--gold);">ニックネーム登録</h2>
-            <input type="text" id="nick-input" maxlength="10" placeholder="名前を入力">
-            <button class="btn btn-start" onclick="saveNick()" style="width: 150px;">決定</button>
-        </div>
-
         <div id="title-screen" class="overlay" style="display:none;">
-            <h2 style="color:var(--gold);">🎖️ 獲得称号</h2>
+            <h2 style="color:var(--gold);">🎖️ プロフィール編集</h2>
             <div id="title-list" style="width:100%; height:65%; overflow-y:auto; display:flex; flex-direction:column; align-items:center;"></div>
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
@@ -183,19 +169,21 @@
         </div>
 
         <div id="fusion-screen" class="overlay" style="display:none;">
-            <h2 style="color:cyan;">🌀 キャラクター合体</h2>
+            <h2 style="color:cyan; text-shadow: 0 0 10px cyan;">🌀 キャラクター合体</h2>
             <div style="background:#222; padding:15px; border-radius:15px; width:85%; font-size:11px;">
+                <p>【合体条件】</p>
                 <p id="fuse-cond-1">・ｺﾞｯﾄﾞﾈｽｶｽﾞｷﾝｸﾞ(UZ) 所持</p>
                 <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
                 <p id="fuse-cond-3">・費用: 1兆円</p>
             </div>
             <div id="fusion-result-preview" style="margin:15px; font-size:14px; color:var(--gold);"></div>
-            <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:white; color:#000; width:200px; display:none;">フュージョン！</button>
+            <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:200px; display:none;">フュージョン！</button>
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
         <div id="evolve-screen" class="overlay" style="display:none;">
             <h2 style="color:#8a2be2;">🧬 キャラクター進化</h2>
+            <p style="font-size: 12px; color: #ffcc00; margin-top: -10px;">(SSRのみ進化可能)</p>
             <div id="evolve-status" style="background:#222; padding:20px; border-radius:15px; width:80%; margin-bottom:15px;"></div>
             <button class="btn" id="evolve-exec-btn" onclick="executeEvolve()" style="background:#ffd700; color:#000; width:180px; margin-bottom:10px; display:none;">進化させる！</button>
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px;">戻る</button>
@@ -204,11 +192,12 @@
         <div id="gacha-screen" class="overlay" style="display:none;">
             <div id="gacha-box">🎁</div>
             <div id="gacha-result-display"></div>
+            <div id="gacha-msg" style="margin:5px; color:gold; min-height:20px; font-size:12px;">タップで箱を開けろ！</div>
             <div style="display:flex; flex-direction:column; gap:5px; width: 220px;">
-                <button class="btn btn-gacha" onclick="runGacha(1)">1回 (1,000円)</button>
-                <button class="btn btn-gacha" onclick="runGacha(10)" style="background:#ff8c00;">10連 (1万円)</button>
-                <button class="btn btn-gacha" onclick="runGacha(100)" style="background:#800080;">100連 (10万円)</button>
-                <button class="btn btn-gacha" onclick="runGacha(1000)" style="background:#4b0082; border: 2px solid var(--gold);">👑 1000連 (100万円)</button>
+                <button class="btn btn-gacha" id="g1-btn" onclick="runGacha(1)">1回 (1,000円)</button>
+                <button class="btn btn-gacha" id="g10-btn" onclick="runGacha(10)" style="background:#ff8c00;">10連 (10,000円)</button>
+                <button class="btn btn-gacha" id="g100-btn" onclick="runGacha(100)" style="background:#800080;">100連 (100,000円)</button>
+                <button class="btn btn-gacha" id="g1000-btn" onclick="runGacha(1000)" style="background:#4b0082; border: 2px solid var(--gold);">👑 1000連 (1,000,000円)</button>
             </div>
             <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
@@ -219,15 +208,16 @@
             <div class="col-tabs">
                 <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
                 <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
-                <button class="tab-btn" id="tab-skill" onclick="setTab('skill')">技</button>
+                <button class="tab-btn" id="tab-skill" onclick="setTab('skill')">必殺技</button>
+                <button class="tab-btn" id="tab-bgm" onclick="setTab('bgm')">BGM</button>
             </div>
             <div class="col-list" id="col-list-content"></div>
             <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none">
-            <h2 id="end-title" style="color:red; font-size:40px;">GAME OVER</h2>
-            <p id="online-res-rank" style="color:var(--gold); font-size:20px; font-weight:bold;"></p>
+            <h2 id="end-title" style="color:red; font-size:40px; text-shadow: 0 0 15px red;">GAME OVER</h2>
+            <p id="end-msg">タイムアップ！</p>
             <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
             <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">リトライ</button>
         </div>
@@ -241,13 +231,16 @@
         </div>
     </div>
 
+    <audio id="bgm-player" loop preload="auto"></audio>
+
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
+
     <script>
         let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0, currentTab = 'char';
         let feverPoints = 0, isFever = false, isSkillActive = false;
         let missions = [], missionStats = { plucked: 0, gachaed: 0, earned: 0 }, lastMissionDate = "";
-        let nickname = "名無しの草抜き師", isOnlineMode = false, pluckedInGame = 0;
-        let enemyData = [];
-
+        
         let currentTitle = "なし";
         const titles = [
             { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000 },
@@ -259,7 +252,10 @@
             { name: "億万長者", cond: "所持金が1億円を超える", check: () => money > 100000000 },
             { name: "神の領域", cond: "UZキャラを所持する", check: () => items.some(i=>i.rarity==='UZ' && i.owned) },
             { name: "終焉を告げる者", cond: "合体キャラ(X)を所持する", check: () => items.find(i=>i.id==='fusion_zen_kazu').owned },
-            { name: "伝説の草抜き師", cond: "所持金が1兆円を超える", check: () => money > 1000000000000 }
+            { name: "草原の主", cond: "草を累計1000本抜く", check: () => missionStats.plucked >= 1000 },
+            { name: "不屈の精神", cond: "ゲームオーバーを経験する", check: () => true },
+            { name: "伝説の草抜き師", cond: "所持金が1兆円を超える", check: () => money > 1000000000000 },
+            { name: "Huhマスター", cond: "スキル「huh」を極める", check: () => equipped.skill.id === 's1' }
         ];
 
         const items = [
@@ -275,19 +271,44 @@
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
             { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金8倍', rate: 8 },
             { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', owned: false, rarity: 'SSR', info: '金12倍/必殺短縮', rate: 12 },
+            { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', owned: false, rarity: 'SSR', info: '金11倍/huh強化', rate: 11 },
+            { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金13倍/卵反転', rate: 13 },
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
+            { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
+            { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', owned: false, rarity: 'SR', info: '金4倍', rate: 4 },
+            { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', owned: false, rarity: 'SR', info: '金5.8倍/美しい筆致', rate: 5.8 },
+            { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', owned: false, rarity: 'SR', info: '金6.2倍/お宝発見', rate: 6.2 },
+            { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金6.0倍/爆音抜き', rate: 6.0 },
+            { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
+            { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
+            { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'R', info: '金3.2倍/収穫の喜び', rate: 3.2 },
+            { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', owned: false, rarity: 'R', info: '金3.0倍/フレー！フレー！', rate: 3.0 },
+            { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
+            { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
             /* 背景 */
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
+            { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
+            { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
+            { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: false, rarity: 'SSR', info: '灼熱の地' },
+            { id: 'b5', type: 'bg', name: '夜の草原', className: 'bg-night', owned: false, rarity: 'R', info: '静かな夜' },
+            { id: 'b6', type: 'bg', name: '桜吹雪', className: 'bg-sakura', owned: false, rarity: 'SR', info: '舞い散る花びら' },
+            { id: 'b7', type: 'bg', name: '黄金郷', className: 'bg-gold', owned: false, rarity: 'SSR', info: '富の象徴' },
             { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: false, rarity: 'UZ', info: '銀河の果て' },
+            { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: false, rarity: 'SSR', info: '水圧と闇' },
             { id: 'b10', type: 'bg', name: '次元の狭間', className: 'bg-dimension', owned: false, rarity: 'X', info: '時空の歪み' },
             /* 必殺技 */
             { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
-            { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' }
+            { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
+            { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' },
+            { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
+            { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
+            { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
+            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
         ];
 
-        let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1') };
+        let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
 
         function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
 
@@ -297,7 +318,6 @@
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             document.getElementById('skill-fill').style.width = skillCount + "%";
             document.getElementById('title-display').innerText = "称号：" + currentTitle;
-            document.getElementById('nick-display').innerText = "👤 " + nickname;
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
             const hasClaimable = missions.some(m => !m.claimed && missionStats[m.key] >= m.goal);
             document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
@@ -312,15 +332,10 @@
             if(id === 'mission-screen') renderMissions();
             if(id === 'title-screen') renderTitles();
             if(id === 'start-screen') {
+                document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
-                document.getElementById('online-rank-box').style.display = 'none';
             }
-        }
-
-        function saveNick() {
-            const val = document.getElementById('nick-input').value;
-            if(val) { nickname = val; saveGame(); openLayer('start-screen'); updateUI(); }
         }
 
         function renderTitles() {
@@ -338,11 +353,7 @@
             const today = new Date().toLocaleDateString();
             if(lastMissionDate !== today) {
                 lastMissionDate = today; missionStats = { plucked: 0, gachaed: 0, earned: 0 };
-                missions = [
-                    { id: 1, title: "草を抜きまくれ", goal: 100, reward: 50000, key: "plucked", unit: "本", claimed: false },
-                    { id: 2, title: "ガチャを回せ", goal: 10, reward: 20000, key: "gachaed", unit: "回", claimed: false },
-                    { id: 3, title: "今日稼げ", goal: 100000, reward: 100000, key: "earned", unit: "円", claimed: false }
-                ];
+                missions = [{ id: 1, title: "草を抜きまくれ", goal: 100, reward: 50000, key: "plucked", unit: "本", claimed: false },{ id: 2, title: "ガチャを回せ", goal: 10, reward: 20000, key: "gachaed", unit: "回", claimed: false },{ id: 3, title: "今日稼げ", goal: 100000, reward: 100000, key: "earned", unit: "円", claimed: false }];
                 saveGame();
             }
         }
@@ -368,61 +379,90 @@
             document.getElementById('fuse-cond-2').style.color = (char2 && char2.owned) ? "lime" : "red";
             document.getElementById('fuse-cond-3').style.color = money >= cost ? "lime" : "red";
             if(char1 && char1.owned && char2 && char2.owned && money >= cost) { btn.style.display = "block"; document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`; }
-            else { btn.style.display = "none"; document.getElementById('fusion-result-preview').innerHTML = "条件未達成"; }
+            else { btn.style.display = "none"; document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可"; }
         }
         function executeFusion() { const cost = 1000000000000; if(money < cost) return; money -= cost; const res = items.find(i => i.id === 'fusion_zen_kazu'); res.owned = true; equipped.char = res; alert("合体完了！"); openLayer('start-screen'); saveGame(); updateUI(); }
 
         function renderEvolve() {
             const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn');
             const cost = 100000000;
-            if(equipped.char.rarity === 'SSR' && !equipped.char.isEvolved) { target.innerHTML = `<p>進化：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">費用: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
-            else { target.innerHTML = `<p>SSRキャラを選択してください</p>`; btn.style.display = "none"; }
+            if(equipped.char.rarity === 'SSR' && !equipped.char.isEvolved) { target.innerHTML = `<p>進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">必要経費: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
+            else { target.innerHTML = `<p>進化対象がありません</p>`; btn.style.display = "none"; }
         }
         function executeEvolve() {
             const cost = 100000000; if(money < cost) return; money -= cost;
             let evolveId = '';
             switch(equipped.char.id) { case 'ev_kazu': evolveId = 'ev_kazu_ultimate'; break; case 'c1': evolveId = 'c1_ultimate'; break; case 'c13': evolveId = 'c13_ultimate'; break; case 'c7': evolveId = 'c7_ultimate'; break; case 'c2': evolveId = 'c2_ultimate'; break; }
             if(evolveId) { 
-                const ult = items.find(i => i.id === evolveId); ult.owned = true; equipped.char = ult; 
-                if(evolveId === 'ev_kazu_ultimate') items.find(i => i.id === 's3').owned = true; 
+                const ult = items.find(i => i.id === evolveId); 
+                ult.owned = true; 
+                equipped.char = ult; 
+                if(evolveId === 'ev_kazu_ultimate') {
+                    items.find(i => i.id === 's3').owned = true; 
+                }
                 alert(`進化成功！`); 
             }
             openLayer('start-screen'); saveGame(); updateUI();
         }
 
         function setTab(tab) { 
-            currentTab = tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active'); renderCol(); 
+            currentTab = tab; 
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            renderCol(); 
         }
         function renderCol() {
             const list = document.getElementById('col-list-content'); list.innerHTML = '';
-            items.filter(i => i.type === currentTab).forEach(item => {
-                const isEq = equipped[item.type].id === item.id;
-                const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`;
-                div.innerHTML = `<div>${item.owned ? item.icon || '⚡' : '？'} ${item.owned ? item.name : '？？？'}<br><small>${item.rarity}</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`;
-                list.appendChild(div);
-            });
+            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
+            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
+            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:b.rarity==='SR'?1.5:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:a.rarity==='SR'?1.5:1))
+            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div>${item.owned ? item.icon || (item.type==='skill'?'⚡':'') : '？'} ${item.owned ? item.name : '？？？'}<br><small>${item.rarity}</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
         }
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
 
         async function runGacha(times) {
             const cost = 1000 * times; if(money < cost) return alert("金欠です！");
             money -= cost; updateUI(); missionStats.gachaed += times;
-            const display = document.getElementById('gacha-result-display'); display.innerHTML = ''; 
+            const display = document.getElementById('gacha-result-display');
+            display.innerHTML = ''; 
+            let results = []; let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
                 let pick;
                 let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && !it.isEvolved);
-                if (r < 0.05) pick = pool.filter(it => it.rarity === 'SSR')[0];
-                else if(r < 5) pick = pool.filter(it => it.rarity === 'SSR')[Math.floor(Math.random()*4)];
-                else if(r < 25) pick = pool.filter(it => it.rarity === 'SR')[Math.floor(Math.random()*2)];
-                else pick = pool.filter(it => it.rarity === 'BASIC' || it.rarity === 'R')[Math.floor(Math.random()*2)];
+                if (r < 0.0001) { pick = pool.find(it => it.id === 'ev_kazu'); maxRarity = 'SSR'; }
+                else if (r < 0.001) { pick = pool.find(it => it.id === 'c1'); maxRarity = 'SSR'; }
+                else if(r < 5) { 
+                    const ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'ev_kazu' && it.id !== 'c1');
+                    pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; maxRarity = 'SSR'; 
+                }
+                else if(r < 25) { 
+                    const srPool = pool.filter(it => it.rarity === 'SR');
+                    pick = srPool[Math.floor(Math.random() * srPool.length)]; if(maxRarity === 'BASIC') maxRarity = 'SR'; 
+                }
+                else if(r < 55) { 
+                    const rPool = pool.filter(it => it.rarity === 'R');
+                    pick = rPool[Math.floor(Math.random() * rPool.length)]; 
+                }
+                else { 
+                    const basicPool = pool.filter(it => it.rarity === 'BASIC');
+                    pick = basicPool[Math.floor(Math.random() * basicPool.length)]; 
+                }
                 if(!pick) pick = items.find(it => it.id === 'c20');
-                pick.owned = true;
-                const l = document.createElement('div'); l.className = `res-line ${pick.rarity}`; 
-                l.innerHTML = `<span>${pick.icon || '🎁'} ${pick.name}</span><span>[${pick.rarity}]</span>`; 
-                display.appendChild(l); 
+                results.push(pick);
             }
+            document.getElementById('gacha-box').classList.add('gacha-shake');
+            await new Promise(r => setTimeout(r, 800));
+            document.getElementById('gacha-flash-overlay').style.display = 'block';
+            await new Promise(r => setTimeout(r, 100));
+            document.getElementById('gacha-flash-overlay').style.display = 'none';
+            document.getElementById('gacha-box').classList.remove('gacha-shake');
+            results.forEach(p => { 
+                p.owned = true; 
+                const l = document.createElement('div'); l.className = `res-line ${p.rarity}`; 
+                l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`; 
+                display.appendChild(l); 
+            });
             display.scrollTop = display.scrollHeight; saveGame(); updateUI();
         }
 
@@ -451,7 +491,7 @@
         function pluck(el) {
             if(el.classList.contains('plucking')) return;
             let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1) * (1+getCollectionBonus()));
-            money += gain; missionStats.earned += gain; missionStats.plucked++; pluckedInGame++;
+            money += gain; missionStats.earned += gain; missionStats.plucked++;
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top); popText(el.style.left, el.style.top, `+${gain}`);
             el.classList.add('plucking');
@@ -462,20 +502,54 @@
         function triggerSkill() {
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true;
-            const field = document.getElementById('game-field');
+            const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
+            
             if(equipped.skill.id === 's3') {
                 field.style.filter = "grayscale(1) invert(1)"; field.classList.add('skill-active-field');
-                const worldInterval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 30);
+                popText("50%", "40%", "カズキング・ザ・ワールド！", "white");
+                const worldInterval = setInterval(() => {
+                    const ts = document.querySelectorAll('.grass:not(.plucking)');
+                    if(ts.length>0) pluck(ts[0]);
+                }, 30);
                 setTimeout(() => { isSkillActive = false; clearInterval(worldInterval); field.style.filter = "none"; field.classList.remove('skill-active-field'); }, 4000);
                 return;
             }
+
+            if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
+
+            if(equipped.skill.id === 's4') { // 草の呼吸
+                popText("50%", "40%", "草の呼吸・壱ノ型！", "cyan");
+                const interval = setInterval(() => { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); }, 100);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000);
+                return;
+            }
+
+            if(equipped.skill.id === 's5') { // ZENの導き
+                popText("50%", "40%", "ZENの導き...", "gold");
+                const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 5000);
+                return;
+            }
+
+            if(equipped.skill.id === 's6') { // カズキング・フラッシュ
+                popText("50%", "40%", "カズキング・フラッシュ！", "white");
+                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
+                setTimeout(() => { isSkillActive = false; }, 500);
+                return;
+            }
+
             const isX = equipped.char.id === 'fusion_zen_kazu';
-            field.classList.add('skill-active-field');
+            field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
+            let ultText;
+            if(isX){ field.classList.add('ultimate-field-bg'); ultText = document.createElement('div'); ultText.className='ultimate-text'; ultText.innerHTML="全・知・全・能<br><span style='font-size:30px'>ULTIMATE ZEN OVERDRIVE</span>"; field.appendChild(ultText); }
             const interval = setInterval(() => {
                 const ts = document.querySelectorAll('.grass:not(.plucking)');
                 if(ts.length>0) pluck(ts[0]); if(isX) document.querySelectorAll('.egg').forEach(e => e.remove());
             }, isX?20:(equipped.char.isEvolved?70:150));
-            setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('skill-active-field'); }, 3000);
+            setTimeout(() => {
+                isSkillActive = false; clearInterval(interval); field.classList.remove('skill-active-field', 'ultimate-field-bg');
+                icon.classList.remove('skill-icon-anim'); if(ultText) ultText.remove();
+            }, 3000);
         }
 
         function createParticles(x, y) {
@@ -487,76 +561,89 @@
             }
         }
         function popText(x, y, txt, color="var(--gold)") { const p = document.createElement('div'); p.className='pop-text'; p.innerText=txt; p.style.left=x; p.style.top=y; p.style.color=color; document.getElementById('game-field').appendChild(p); setTimeout(()=>p.remove(),500); }
+
         function startFever() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000); }
 
-        /* オンライン対戦ロジック */
-        function initOnline() {
-            enemyData = [
-                { name: "ZEN様", score: 0, speed: Math.random() * 2 + 1 },
-                { name: "カズキング", score: 0, speed: Math.random() * 2 + 1.5 },
-                { name: "草抜きマン", score: 0, speed: Math.random() * 1.5 + 0.5 },
-                { name: "Huh?", score: 0, speed: Math.random() * 3 + 0.1 }
-            ];
-            document.getElementById('online-rank-box').style.display = 'block';
-            updateRank();
-        }
-
-        function updateRank() {
-            if(!isOnlineMode) return;
-            enemyData.forEach(e => e.score += Math.floor(Math.random() * e.speed));
-            let rankArr = [...enemyData, { name: nickname, score: pluckedInGame, isMe: true }];
-            rankArr.sort((a,b) => b.score - a.score);
-            const box = document.getElementById('online-rank-box');
-            box.innerHTML = '<div style="border-bottom:1px solid white; margin-bottom:3px;">ONLINE RANK</div>';
-            rankArr.forEach((r, i) => {
-                box.innerHTML += `<div class="rank-row ${r.isMe?'me':''}"><span>${i+1}.${r.name}</span><span>${r.score}</span></div>`;
-            });
-            if(rankArr.findIndex(r => r.isMe) === 0 && pluckedInGame > 10) box.style.borderColor = "var(--gold)";
-        }
-
-        function startGame(online) {
-            isOnlineMode = online; pluckedInGame = 0; isPlaying=true; timeLeft=30; openLayer('none');
+        function startGame() {
+            isPlaying=true; timeLeft=30; openLayer('none');
             document.querySelectorAll('.item').forEach(i=>i.remove());
             if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
-            if(isOnlineMode) initOnline();
             spawn();
             const loop = setInterval(() => {
                 if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
                 if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
-                if(isOnlineMode) updateRank();
                 updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0)endGame("終了"); }
             }, 100);
         }
-
-        function endGame(msg) {
-            isPlaying=false; 
-            document.getElementById('res-money').innerText=Math.floor(money).toLocaleString();
-            const rankText = document.getElementById('online-res-rank');
-            if(isOnlineMode) {
-                let rankArr = [...enemyData, { name: nickname, score: pluckedInGame, isMe: true }].sort((a,b) => b.score - a.score);
-                let myRank = rankArr.findIndex(r => r.isMe) + 1;
-                rankText.innerText = `オンライン順位: ${myRank}位 / ${rankArr.length}人`;
-                rankText.style.display = 'block';
-            } else { rankText.style.display = 'none'; }
-            openLayer('end-screen'); saveGame();
-        }
-
+        function endGame(msg) { isPlaying=false; document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
         function giveUp() { isPlaying=false; openLayer('start-screen'); }
-        function saveGame() { localStorage.setItem('zenSurvival_Online_v1', JSON.stringify({ money, nickname, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id}, missions, missionStats, lastMissionDate, currentTitle })); }
-        function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Online_v1'));
-            if(data) {
-                money = data.money; nickname = data.nickname || "名無しの草抜き師";
-                data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
-                equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char;
-                equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg;
-                equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill;
-                missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 };
-                lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし";
-                document.getElementById('game-field').className = equipped.bg.className;
-            } else { openLayer('name-screen'); }
-            initMissions(); updateUI(); if(!data) openLayer('name-screen'); else openLayer('start-screen');
+        
+        function saveGame() { 
+            localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle })); 
+            updateOnlineScore(); // Firebase同期
         }
+        function loadGame() {
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
+            if(data) {
+                money = data.money; data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
+                missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 }; lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし";
+                document.getElementById('game-field').className = equipped.bg.className;
+            }
+            initMissions(); updateUI(); openLayer('start-screen');
+        }
+
+        // --- Firebase 初期化 ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
+            authDomain: "game-685f2.firebaseapp.com",
+            databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
+            projectId: "game-685f2",
+            storageBucket: "game-685f2.firebasestorage.app",
+            messagingSenderId: "266871071111",
+            appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- オンラインランキング UI ---
+        const rankingDiv = document.createElement('div');
+        rankingDiv.id = 'online-ranking';
+        rankingDiv.style = `
+            position: absolute; top: 10px; right: 10px; 
+            background: rgba(0,0,0,0.7); color: #fff; 
+            padding: 5px; border-radius: 5px; font-size: 10px; 
+            z-index: 1000; text-align: left; pointer-events: none;
+        `;
+        rankingDiv.innerHTML = '<strong>🌐 世界ランク</strong><div id="ranking-list">読み込み中...</div>';
+        document.getElementById('game-field').appendChild(rankingDiv);
+
+        function updateOnlineScore() {
+            let userId = localStorage.getItem('zen_user_id');
+            if (!userId) {
+                userId = 'User_' + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('zen_user_id', userId);
+            }
+            database.ref('ranking/' + userId).set({
+                name: currentTitle + " " + equipped.char.icon,
+                money: money,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        database.ref('ranking').orderByChild('money').limitToLast(5).on('value', (snapshot) => {
+            const list = document.getElementById('ranking-list');
+            let html = '';
+            let scores = [];
+            snapshot.forEach(child => { scores.push(child.val()); });
+            scores.reverse().forEach((s, i) => {
+                html += `<div>${i+1}. ${s.name}: ${Math.floor(s.money).toLocaleString()}円</div>`;
+            });
+            list.innerHTML = html;
+        });
+
+        setTimeout(updateOnlineScore, 2000);
     </script>
 </body>
 </html>
