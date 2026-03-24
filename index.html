@@ -131,7 +131,6 @@
         .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
         .claimed { background: #444; color: #888; cursor: default; }
 
-        /* プロフィール編集用スタイル */
         .profile-input-group { background: #222; padding: 15px; border-radius: 10px; width: 80%; margin-bottom: 10px; border: 1px solid #444; }
         .profile-input-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; text-align: left; }
         .profile-input-group input { width: 90%; background: #111; border: 1px solid #555; color: white; padding: 8px; border-radius: 5px; font-family: inherit; }
@@ -168,17 +167,14 @@
 
         <div id="profile-screen" class="overlay" style="display:none;">
             <h2 style="color:var(--gold);">👤 プロフィール編集</h2>
-            
             <div class="profile-input-group">
                 <label>名前の変更</label>
                 <input type="text" id="name-input" maxlength="10" placeholder="なまえを入力" onchange="updateName(this.value)">
             </div>
-
             <div style="width:100%; height:50%; overflow-y:auto; display:flex; flex-direction:column; align-items:center;">
                 <label style="font-size:12px; color:#aaa; margin-bottom:5px;">称号の選択</label>
                 <div id="title-list" style="width:100%;"></div>
             </div>
-            
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
@@ -285,7 +281,7 @@
         let isOnlineMode = false;
         let playerId = "p_" + Math.floor(Math.random() * 1000000);
         let currentRoomId = "global_match_1";
-        let sessionScore = 0; // スコア対決用の今回稼いだスコア
+        let sessionScore = 0;
 
         let userName = "ぜん";
         let currentTitle = "なし";
@@ -376,17 +372,13 @@
             if(id === 'evolve-screen') renderEvolve();
             if(id === 'fusion-screen') renderFusion();
             if(id === 'mission-screen') renderMissions();
-            if(id === 'profile-screen') {
-                document.getElementById('name-input').value = userName;
-                renderTitles();
-            }
+            if(id === 'profile-screen') { document.getElementById('name-input').value = userName; renderTitles(); }
             if(id === 'start-screen') {
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
                 document.getElementById('online-result').innerText = "";
                 document.getElementById('opp-score-display').style.display = 'none';
-                document.getElementById('opp-name-label').innerText = "相手";
             }
         }
 
@@ -468,8 +460,8 @@
             display.innerHTML = ''; let results = []; let maxRarity = 'BASIC';
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
-                let pick;
                 let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && !it.isEvolved);
+                let pick;
                 if (r < 0.0001) { pick = pool.find(it => it.id === 'ev_kazu'); maxRarity = 'SSR'; }
                 else if (r < 0.0101) { pick = pool.find(it => it.id === 'c1'); maxRarity = 'SSR'; }
                 else if(r < 5) { const ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'ev_kazu' && it.id !== 'c1'); pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; maxRarity = 'SSR'; }
@@ -555,8 +547,7 @@
 
         function startOnlineMatch() {
             if(!window.db) return alert("Firebase読み込み中...");
-            isOnlineMode = true;
-            sessionScore = 0;
+            isOnlineMode = true; sessionScore = 0;
             document.getElementById('opp-score-display').style.display = 'block';
             document.getElementById('opp-m-val').innerText = "0";
             document.getElementById('opp-name-label').innerText = "相手";
@@ -567,23 +558,15 @@
             const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
             window.dbOnValue(allPlayersRef, (snapshot) => {
                 const data = snapshot.val();
-
-                // 相手が抜けた時の判定
                 if (isPlaying && isOnlineMode) {
                     let opponentExists = false;
-                    if (data) {
-                        for (let key in data) {
-                            if (key !== playerId) opponentExists = true;
-                        }
-                    }
+                    if (data) { for (let key in data) { if (key !== playerId) opponentExists = true; } }
                     if (!opponentExists) {
                         isPlaying = false;
-                        document.getElementById('online-result').innerText = "相手が退出しました。あなたの不戦勝です！ 🎉";
-                        endGame("相手退出");
-                        return;
+                        document.getElementById('online-result').innerText = "相手がリタイアしました。あなたの不戦勝です！ 🎉";
+                        openLayer('end-screen'); isOnlineMode = false; return;
                     }
                 }
-
                 if(!data) return;
                 for(let key in data) {
                     if(key !== playerId && data[key].status === "playing") {
@@ -627,7 +610,7 @@
         function loadGame() {
             const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
             if(data) {
-                money = data.money; data.owned.forEach(id => { const it=items.find(id=>i.id===id); if(it)it.owned=true; });
+                money = data.money; data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
                 equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
                 missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 }; lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし"; userName = data.userName || "ぜん";
                 document.getElementById('game-field').className = equipped.bg.className;
