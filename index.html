@@ -556,6 +556,7 @@
         function startOnlineMatch() {
             if(!window.db) return alert("Firebase読み込み中...");
             isOnlineMode = true;
+            sessionScore = 0;
             document.getElementById('opp-score-display').style.display = 'block';
             document.getElementById('opp-m-val').innerText = "0";
             document.getElementById('opp-name-label').innerText = "相手";
@@ -566,10 +567,27 @@
             const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
             window.dbOnValue(allPlayersRef, (snapshot) => {
                 const data = snapshot.val();
+
+                // 相手が抜けた時の判定
+                if (isPlaying && isOnlineMode) {
+                    let opponentExists = false;
+                    if (data) {
+                        for (let key in data) {
+                            if (key !== playerId) opponentExists = true;
+                        }
+                    }
+                    if (!opponentExists) {
+                        isPlaying = false;
+                        document.getElementById('online-result').innerText = "相手が退出しました。あなたの不戦勝です！ 🎉";
+                        endGame("相手退出");
+                        return;
+                    }
+                }
+
                 if(!data) return;
                 for(let key in data) {
                     if(key !== playerId && data[key].status === "playing") {
-                        document.getElementById('opp-name-label').innerText = data[key].name; // ★相手の名前を表示
+                        document.getElementById('opp-name-label').innerText = data[key].name;
                         document.getElementById('opp-m-val').innerText = Math.floor(data[key].score).toLocaleString();
                     }
                 }
@@ -609,7 +627,7 @@
         function loadGame() {
             const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
             if(data) {
-                money = data.money; data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                money = data.money; data.owned.forEach(id => { const it=items.find(id=>i.id===id); if(it)it.owned=true; });
                 equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
                 missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 }; lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし"; userName = data.userName || "ぜん";
                 document.getElementById('game-field').className = equipped.bg.className;
