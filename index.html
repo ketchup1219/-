@@ -142,7 +142,7 @@
         <button onclick="giveUp()" style="background:#444; color:white; border:none; padding:5px; font-size:10px; border-radius:3px;">リタイア</button>
         <div>💰 <span id="m-val">0</span></div>
         <div style="font-size: 18px; font-weight: bold; color: #ffcc00;">⏳ <span id="t-val">30.0</span></div>
-        <div id="opp-score-display" style="color: #00d2ff; font-size: 12px; display: none;">相手: <span id="opp-m-val">0</span></div>
+        <div id="opp-score-display" style="color: #00d2ff; font-size: 12px; display: none;"><span id="opp-name-label">相手</span>: <span id="opp-m-val">0</span></div>
         <div id="fever-container"><div id="fever-fill"></div></div>
     </div>
 
@@ -240,7 +240,7 @@
             <p id="end-msg">タイムアップ！</p>
             <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
             <p id="online-result" style="color: #00d2ff; font-weight: bold;"></p>
-            <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">リトライ</button>
+            <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">リretry</button>
         </div>
     </div>
 
@@ -285,6 +285,7 @@
         let isOnlineMode = false;
         let playerId = "p_" + Math.floor(Math.random() * 1000000);
         let currentRoomId = "global_match_1";
+        let sessionScore = 0; // スコア対決用の今回稼いだスコア
 
         let userName = "ぜん";
         let currentTitle = "なし";
@@ -385,6 +386,7 @@
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
                 document.getElementById('online-result').innerText = "";
                 document.getElementById('opp-score-display').style.display = 'none';
+                document.getElementById('opp-name-label').innerText = "相手";
             }
         }
 
@@ -468,7 +470,6 @@
                 const r = Math.random() * 100;
                 let pick;
                 let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && !it.isEvolved);
-                // 覚醒ぜん(c1) の確率を 0.01% (1万分の1) に設定
                 if (r < 0.0001) { pick = pool.find(it => it.id === 'ev_kazu'); maxRarity = 'SSR'; }
                 else if (r < 0.0101) { pick = pool.find(it => it.id === 'c1'); maxRarity = 'SSR'; }
                 else if(r < 5) { const ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'ev_kazu' && it.id !== 'c1'); pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; maxRarity = 'SSR'; }
@@ -491,13 +492,13 @@
             const egg = document.createElement('div'); egg.className = 'item egg'; egg.innerText = '🥚';
             let px = Math.random()*80, py = Math.random()*75, vx = (Math.random()-0.5)*2.5, vy = (Math.random()-0.5)*2.5; egg.style.left = px+"%"; egg.style.top = py+"%";
             const move = setInterval(() => { if(!isPlaying || !egg.parentNode){ clearInterval(move); return; } if(isSkillActive && equipped.skill.id === 's3') return; px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1; egg.style.left=px+"%"; egg.style.top=py+"%"; },30);
-            egg.onclick = () => { if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') { let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0; if(b>0){ money+=b; missionStats.earned+=b; updateUI(); } egg.remove(); } else { endGame("卵だ！"); } }; field.appendChild(egg);
+            egg.onclick = () => { if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') { let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0; if(b>0){ money+=b; missionStats.earned+=b; sessionScore+=b; updateUI(); } egg.remove(); } else { endGame("卵だ！"); } }; field.appendChild(egg);
         }
 
         function pluck(el) {
             if(el.classList.contains('plucking')) return;
             let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1) * (1+getCollectionBonus()));
-            money += gain; missionStats.earned += gain; missionStats.plucked++;
+            money += gain; sessionScore += gain; missionStats.earned += gain; missionStats.plucked++;
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top); popText(el.style.left, el.style.top, `+${gain}`);
             el.classList.add('plucking');
@@ -542,7 +543,7 @@
         function startFever() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000); }
 
         function startGame() {
-            isPlaying=true; timeLeft=30; openLayer('none'); document.querySelectorAll('.item').forEach(i=>i.remove());
+            isPlaying=true; timeLeft=30; sessionScore=0; openLayer('none'); document.querySelectorAll('.item').forEach(i=>i.remove());
             if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
             spawn();
             const loop = setInterval(() => {
@@ -557,6 +558,7 @@
             isOnlineMode = true;
             document.getElementById('opp-score-display').style.display = 'block';
             document.getElementById('opp-m-val').innerText = "0";
+            document.getElementById('opp-name-label').innerText = "相手";
             const roomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
             window.dbSet(roomRef, { name: userName, score: 0, status: "playing" });
             window.dbOnDisconnect(roomRef).remove();
@@ -567,6 +569,7 @@
                 if(!data) return;
                 for(let key in data) {
                     if(key !== playerId && data[key].status === "playing") {
+                        document.getElementById('opp-name-label').innerText = data[key].name; // ★相手の名前を表示
                         document.getElementById('opp-m-val').innerText = Math.floor(data[key].score).toLocaleString();
                     }
                 }
@@ -577,13 +580,13 @@
         function syncOnlineScore() {
             if(!isOnlineMode) return;
             const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
-            window.dbSet(myRoomRef, { name: userName, score: Math.floor(money), status: "playing" });
+            window.dbSet(myRoomRef, { name: userName, score: Math.floor(sessionScore), status: "playing" });
         }
 
         function endGame(msg) {
             isPlaying = false;
-            let finalScore = Math.floor(money);
-            document.getElementById('res-money').innerText = finalScore.toLocaleString();
+            let finalScore = Math.floor(sessionScore);
+            document.getElementById('res-money').innerText = Math.floor(money).toLocaleString();
             if(isOnlineMode) {
                 const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
                 window.dbSet(myRoomRef, { name: userName, score: finalScore, status: "finished" });
@@ -592,7 +595,7 @@
                     const data = snapshot.val();
                     let oppScore = 0, oppName = "対戦相手";
                     for(let key in data) { if(key !== playerId) { oppScore = data[key].score; oppName = data[key].name; } }
-                    if(oppScore > 0) {
+                    if(oppScore > 0 || (data && Object.keys(data).length > 1)) {
                         let winMsg = finalScore > oppScore ? "WIN! 🎉" : (finalScore < oppScore ? "LOSE... 💀" : "DRAW 🤝");
                         document.getElementById('online-result').innerText = `${oppName}: ${oppScore.toLocaleString()}円 - ${winMsg}`;
                     }
