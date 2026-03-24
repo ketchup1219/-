@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - カズキングイベント開催中！ -</title>
+    <title>草抜きサバイバル - 1v1オンライン対戦 -</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; }
         body { 
@@ -22,7 +24,10 @@
             border: 3px solid #333; border-radius: 20px; overflow: hidden;
             transition: 0.3s;
         }
-        /* 背景バリエーション */
+        /* オンライン対戦用UI追加 */
+        #vs-info { position: absolute; top: 10px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 100; font-size: 12px; }
+        .vs-score { color: #ff00ff; text-shadow: 0 0 5px #000; }
+
         #game-field.bg-desert { background: #4d3319; border-color: #d2b48c; }
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
@@ -78,6 +83,7 @@
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 85%; }
         .btn { padding: 12px; font-size: 14px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
         .btn-start { background: var(--gold); color: #000; grid-column: span 2; font-size: 20px; box-shadow: 0 0 15px var(--gold); }
+        .btn-online { background: #00d2ff; color: #000; grid-column: span 2; font-size: 16px; margin-top: 5px; }
         .btn-gacha { background: #ff4500; color: white; }
         .btn-col { background: var(--blue); color: white; }
         .btn-evolve { background: #8a2be2; color: white; font-size: 12px; }
@@ -130,10 +136,11 @@
         .can-claim { background: var(--gold); color: #000; animation: pulse 0.5s infinite alternate; }
         .claimed { background: #444; color: #888; cursor: default; }
 
-        /* プロフィール編集用スタイル */
         .profile-input-group { background: #222; padding: 15px; border-radius: 10px; width: 80%; margin-bottom: 10px; border: 1px solid #444; }
         .profile-input-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; text-align: left; }
         .profile-input-group input { width: 90%; background: #111; border: 1px solid #555; color: white; padding: 8px; border-radius: 5px; font-family: inherit; }
+
+        #matching-screen p { animation: pulse 0.5s infinite alternate; color: var(--blue); }
     </style>
 </head>
 <body onload="loadGame()">
@@ -145,6 +152,7 @@
     </div>
 
     <div id="game-field">
+        <div id="vs-info"><div id="p1-name">YOU: 0</div><div id="p2-name" class="vs-score">WAITING: 0</div></div>
         <div id="x-aura-effect" class="x-aura"></div>
         <div id="gacha-flash-overlay" class="gacha-flash"></div>
 
@@ -153,7 +161,8 @@
             <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small>称号：<span id="u-title-display">なし</span></small></div>
             <p id="passive-info" style="font-size:10px; color:var(--blue); margin-bottom:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
-                <button class="btn btn-start" onclick="startGame()">START</button>
+                <button class="btn btn-start" onclick="startGame()">SOLO START</button>
+                <button class="btn btn-online" onclick="startOnlineMatch()">⚔️ 1v1 オンライン対戦</button>
                 <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:red; display:none;">●</span></button>
                 <button class="btn btn-profile" onclick="openLayer('profile-screen')">👤 プロフィール編集</button>
                 <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
@@ -163,19 +172,22 @@
             </div>
         </div>
 
+        <div id="matching-screen" class="overlay" style="display:none;">
+            <h2 style="color:var(--blue);">マッチング中...</h2>
+            <p>対戦相手を探しています</p>
+            <button class="btn" onclick="cancelMatching()" style="background:#444; width:150px; margin-top:20px;">キャンセル</button>
+        </div>
+
         <div id="profile-screen" class="overlay" style="display:none;">
             <h2 style="color:var(--gold);">👤 プロフィール編集</h2>
-            
             <div class="profile-input-group">
                 <label>名前の変更</label>
                 <input type="text" id="name-input" maxlength="10" placeholder="なまえを入力" onchange="updateName(this.value)">
             </div>
-
             <div style="width:100%; height:50%; overflow-y:auto; display:flex; flex-direction:column; align-items:center;">
                 <label style="font-size:12px; color:#aaa; margin-bottom:5px;">称号の選択</label>
                 <div id="title-list" style="width:100%;"></div>
             </div>
-            
             <button class="btn" onclick="openLayer('start-screen')" style="background:#444; width:100px; margin-top:10px;">戻る</button>
         </div>
 
@@ -235,6 +247,7 @@
         <div id="end-screen" class="overlay" style="display:none">
             <h2 id="end-title" style="color:red; font-size:40px; text-shadow: 0 0 15px red;">GAME OVER</h2>
             <p id="end-msg">タイムアップ！</p>
+            <p id="vs-result-text" style="color:cyan; font-weight:bold;"></p>
             <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
             <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:200px;">リトライ</button>
         </div>
@@ -251,12 +264,28 @@
     <audio id="bgm-player" loop preload="auto"></audio>
 
     <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
+            authDomain: "game-685f2.firebaseapp.com",
+            databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
+            projectId: "game-685f2",
+            storageBucket: "game-685f2.firebasestorage.app",
+            messagingSenderId: "266871071111",
+            appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0, currentTab = 'char';
         let feverPoints = 0, isFever = false, isSkillActive = false;
         let missions = [], missionStats = { plucked: 0, gachaed: 0, earned: 0 }, lastMissionDate = "";
         
+        // オンライン対戦用変数
+        let isOnline = false, roomId = null, playerNum = null, opponentScore = 0, opponentName = "";
         let userName = "ぜん";
         let currentTitle = "なし";
+        
         const titles = [
             { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000 },
             { name: "ZENの友達", cond: "キャラを5種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 5 },
@@ -302,7 +331,6 @@
             { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
-            /* 背景 */
             { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
             { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
             { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
@@ -313,7 +341,6 @@
             { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: false, rarity: 'UZ', info: '銀河の果て' },
             { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: false, rarity: 'SSR', info: '水圧と闇' },
             { id: 'b10', type: 'bg', name: '次元の狭間', className: 'bg-dimension', owned: false, rarity: 'X', info: '時空の歪み' },
-            /* 必殺技 */
             { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
             { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
             { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' },
@@ -337,6 +364,13 @@
             document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
             const hasClaimable = missions.some(m => !m.claimed && missionStats[m.key] >= m.goal);
             document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
+            
+            if(isOnline && roomId) {
+                document.getElementById('p1-name').innerText = `YOU: ${Math.floor(currentScore).toLocaleString()}`;
+                document.getElementById('p2-name').innerText = `${opponentName}: ${Math.floor(opponentScore).toLocaleString()}`;
+                // スコア送信
+                db.ref(`rooms/${roomId}/p${playerNum}_score`).set(currentScore);
+            }
         }
 
         function openLayer(id) {
@@ -354,10 +388,62 @@
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
+                document.getElementById('vs-info').style.display = 'none';
+                isOnline = false;
+                roomId = null;
             }
         }
 
-        // 名前更新関数
+        // オンライン対戦ロジック
+        let currentScore = 0;
+        function startOnlineMatch() {
+            openLayer('matching-screen');
+            db.ref('matching').once('value', snapshot => {
+                const waitingRoom = snapshot.val();
+                if(waitingRoom) {
+                    // 参加者として入室
+                    roomId = waitingRoom.roomId;
+                    playerNum = 2;
+                    opponentName = waitingRoom.name;
+                    db.ref('matching').remove();
+                    db.ref(`rooms/${roomId}`).update({
+                        p2_name: userName,
+                        status: 'start'
+                    });
+                    initRoomListener();
+                } else {
+                    // 待機者として作成
+                    roomId = "room_" + Date.now();
+                    playerNum = 1;
+                    db.ref('matching').set({ roomId: roomId, name: userName });
+                    initRoomListener();
+                }
+            });
+        }
+
+        function initRoomListener() {
+            db.ref(`rooms/${roomId}`).on('value', snapshot => {
+                const room = snapshot.val();
+                if(!room) return;
+                if(playerNum === 1 && room.p2_name) opponentName = room.p2_name;
+                if(room.status === 'start' && !isPlaying) {
+                    isOnline = true;
+                    currentScore = 0;
+                    opponentScore = 0;
+                    document.getElementById('vs-info').style.display = 'flex';
+                    startGame();
+                }
+                if(isOnline) {
+                    opponentScore = (playerNum === 1) ? (room.p2_score || 0) : (room.p1_score || 0);
+                }
+            });
+        }
+
+        function cancelMatching() {
+            if(roomId && playerNum === 1) db.ref('matching').remove();
+            openLayer('start-screen');
+        }
+
         function updateName(val) {
             if(val.trim() === "") return;
             userName = val;
@@ -510,7 +596,11 @@
             egg.onclick = () => {
                 if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') {
                     let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0;
-                    if(b>0){ money+=b; missionStats.earned+=b; updateUI(); } egg.remove();
+                    if(b>0){ 
+                        if(isOnline) currentScore += b;
+                        else { money+=b; missionStats.earned+=b; }
+                        updateUI(); 
+                    } egg.remove();
                 } else { endGame("卵だ！"); }
             }; field.appendChild(egg);
         }
@@ -518,7 +608,11 @@
         function pluck(el) {
             if(el.classList.contains('plucking')) return;
             let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1) * (1+getCollectionBonus()));
-            money += gain; missionStats.earned += gain; missionStats.plucked++;
+            
+            if(isOnline) currentScore += gain;
+            else { money += gain; missionStats.earned += gain; }
+            
+            missionStats.plucked++;
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top); popText(el.style.left, el.style.top, `+${gain}`);
             el.classList.add('plucking');
@@ -599,11 +693,45 @@
             const loop = setInterval(() => {
                 if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
                 if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
-                updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0)endGame("終了"); }
+                updateUI(); if(timeLeft<=0||!isPlaying){ 
+                    clearInterval(loop); 
+                    document.getElementById('x-aura-effect').style.display='none'; 
+                    if(timeLeft<=0) endGame(isOnline ? "TIME UP!" : "終了"); 
+                }
             }, 100);
         }
-        function endGame(msg) { isPlaying=false; document.getElementById('res-money').innerText=Math.floor(money).toLocaleString(); openLayer('end-screen'); saveGame(); }
-        function giveUp() { isPlaying=false; openLayer('start-screen'); }
+
+        function endGame(msg) {
+            isPlaying = false;
+            let finalMoney = isOnline ? currentScore : money;
+            document.getElementById('res-money').innerText = Math.floor(finalMoney).toLocaleString();
+            
+            if(isOnline) {
+                money += currentScore; // 対戦で稼いだ分も所持金に加算
+                missionStats.earned += currentScore;
+                let resultText = "";
+                if(currentScore > opponentScore) resultText = `WIN! (${opponentName}に勝利)`;
+                else if(currentScore < opponentScore) resultText = `LOSE... (${opponentName}の勝ち)`;
+                else resultText = "DRAW!";
+                document.getElementById('vs-result-text').innerText = resultText;
+                db.ref(`rooms/${roomId}`).off();
+                if(playerNum === 1) db.ref(`rooms/${roomId}`).remove();
+            } else {
+                document.getElementById('vs-result-text').innerText = "";
+            }
+            
+            openLayer('end-screen');
+            saveGame();
+        }
+
+        function giveUp() { 
+            if(isOnline && roomId) {
+                db.ref(`rooms/${roomId}`).off();
+                if(playerNum === 1) db.ref(`rooms/${roomId}`).remove();
+            }
+            isPlaying=false; 
+            openLayer('start-screen'); 
+        }
         
         function saveGame() { localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle, userName })); }
         function loadGame() {
