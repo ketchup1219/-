@@ -273,6 +273,8 @@
             { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', owned: false, rarity: 'SSR', info: '金12倍/必殺短縮', rate: 12 },
             { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', owned: false, rarity: 'SSR', info: '金11倍/huh強化', rate: 11 },
             { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金13倍/卵反転', rate: 13 },
+            
+            // --- SR追加・更新 ---
             { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
             { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
             { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
@@ -280,11 +282,22 @@
             { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', owned: false, rarity: 'SR', info: '金5.8倍/美しい筆致', rate: 5.8 },
             { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', owned: false, rarity: 'SR', info: '金6.2倍/お宝発見', rate: 6.2 },
             { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金6.0倍/爆音抜き', rate: 6.0 },
+            { id: 'sr_ninja', type: 'char', name: '忍者ぜん', icon: '🥷', owned: false, rarity: 'SR', info: '金6.5倍/分身抜き', rate: 6.5 },
+            { id: 'sr_chef', type: 'char', name: '一流シェフぜん', icon: '👨‍🍳', owned: false, rarity: 'SR', info: '金5.9倍/草のフルコース', rate: 5.9 },
+            { id: 'sr_detective', type: 'char', name: '名探偵ぜん', icon: '🕵️', owned: false, rarity: 'SR', info: '金6.3倍/草の正体を暴く', rate: 6.3 },
+            
+            // --- R追加・更新 ---
             { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
             { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
             { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'R', info: '金3.2倍/収穫の喜び', rate: 3.2 },
             { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', owned: false, rarity: 'R', info: '金3.0倍/フレー！フレー！', rate: 3.0 },
             { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
+            { id: 'r_athlete', type: 'char', name: '運動家ぜん', icon: '🏃', owned: false, rarity: 'R', info: '金3.1倍/爆走抜き', rate: 3.1 },
+            { id: 'r_artist', type: 'char', name: '芸術家ぜん', icon: '🎨', owned: false, rarity: 'R', info: '金3.3倍/草をアートに', rate: 3.3 },
+            { id: 'r_doctor', type: 'char', name: '医者ぜん', icon: '🩺', owned: false, rarity: 'R', info: '金2.7倍/精密な草抜き', rate: 2.7 },
+            { id: 'r_police', type: 'char', name: '警察ぜん', icon: '👮', owned: false, rarity: 'R', info: '金3.4倍/草を逮捕', rate: 3.4 },
+            { id: 'r_worker', type: 'char', name: '作業員ぜん', icon: '👷', owned: false, rarity: 'R', info: '金3.0倍/安全第一', rate: 3.0 },
+
             { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
             { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
             /* 背景 */
@@ -517,21 +530,21 @@
 
             if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
 
-            if(equipped.skill.id === 's4') { // 草の呼吸
+            if(equipped.skill.id === 's4') { 
                 popText("50%", "40%", "草の呼吸・壱ノ型！", "cyan");
                 const interval = setInterval(() => { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); }, 100);
                 setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000);
                 return;
             }
 
-            if(equipped.skill.id === 's5') { // ZENの導き
+            if(equipped.skill.id === 's5') { 
                 popText("50%", "40%", "ZENの導き...", "gold");
                 const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200);
                 setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 5000);
                 return;
             }
 
-            if(equipped.skill.id === 's6') { // カズキング・フラッシュ
+            if(equipped.skill.id === 's6') { 
                 popText("50%", "40%", "カズキング・フラッシュ！", "white");
                 document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
                 setTimeout(() => { isSkillActive = false; }, 500);
@@ -580,7 +593,7 @@
         
         function saveGame() { 
             localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle })); 
-            updateOnlineScore(); // Firebase同期
+            updateOnlineScore(); 
         }
         function loadGame() {
             const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
@@ -607,7 +620,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- オンラインランキング UI ---
         const rankingDiv = document.createElement('div');
         rankingDiv.id = 'online-ranking';
         rankingDiv.style = `
