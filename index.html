@@ -308,6 +308,7 @@
         ];
 
         const items = [
+            { id: 'c_scarlet_ham', type: 'char', name: '緋色の金権覇者：ハム', icon: '🐹👑', owned: false, rarity: 'SSR', info: '金10倍/必殺：画面の草と卵を一掃', rate: 10 },
             { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 100, isEvolved: true },
             { id: 'c_rampage_venom', type: 'char', name: 'ランペイジ・イット(ヴェノム)', icon: '☣️', owned: false, rarity: 'X', info: '進化：金100倍/全スキル自動発動', rate: 100, isEvolved: true },
             { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 50, isEvolved: true },
@@ -353,7 +354,6 @@
             { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
             { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
             { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' },
-            { id: 's_raitei', type: 'skill', name: '雷霆蒼破', owned: false, rarity: 'UZ', info: '蒼い雷とスイーツが舞い、草を消し飛ばす' },
             { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
             { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
@@ -388,6 +388,7 @@
             if(id === 'start-screen') {
                 document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
                 document.getElementById('tsum-icon').innerText = equipped.char.icon;
+                document.getElementById('skill-fill').style.width = skillCount + "%";
                 document.getElementById('skill-display-name').innerText = equipped.skill.name;
                 document.getElementById('online-result').innerText = "";
                 document.getElementById('opp-score-display').style.display = 'none';
@@ -457,10 +458,6 @@
                 case 'c13': evolveId = 'c13_ultimate'; break; 
                 case 'c7': evolveId = 'c7_ultimate'; break; 
                 case 'c2': evolveId = 'c2_ultimate'; break; 
-                case 'c_seimaro': 
-                    evolveId = 'c_seimaro_uz'; 
-                    items.find(i => i.id === 's_raitei').owned = true;
-                    break;
                 case 'c_rampage': 
                     evolveId = 'c_rampage_venom';
                     const mudaSkill = items.find(i => i.id === 's_muda');
@@ -583,7 +580,8 @@
                 currentRate = Math.floor(Math.random() * 100) + 1;
             }
             let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0;
-            let gain = Math.floor(100 * (currentRate + speedBonus) * (isFever?3:1) * (1+getCollectionBonus()));
+            let feverMult = (equipped.char.id === 'c_scarlet_ham' && isFever) ? 6 : (isFever ? 3 : 1);
+            let gain = Math.floor(100 * (currentRate + speedBonus) * feverMult * (1+getCollectionBonus()));
             money += gain; sessionScore += gain; missionStats.earned += gain; missionStats.plucked++;
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
             createParticles(el.style.left, el.style.top); 
@@ -599,6 +597,29 @@
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true; const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
             
+            // ハム専用スキル：ツムツム風全消し
+            if(equipped.char.id === 'c_scarlet_ham') {
+                popText("50%", "40%", "金権覇者の粛清！", "gold");
+                field.classList.add('skill-active-field');
+                
+                // 画面上の全草を抜く
+                const allGrass = document.querySelectorAll('.grass:not(.plucking)');
+                allGrass.forEach(g => pluck(g));
+                
+                // 画面上の全卵を消す
+                const allEggs = document.querySelectorAll('.egg');
+                allEggs.forEach(e => {
+                    popText(e.style.left, e.style.top, "消去！", "white");
+                    e.remove();
+                });
+
+                setTimeout(() => { 
+                    isSkillActive = false; 
+                    field.classList.remove('skill-active-field'); 
+                }, 1000);
+                return;
+            }
+
             if(equipped.char.id === 'c_rampage_venom') {
                 field.classList.add('ultimate-field-bg');
                 popText("50%", "40%", "ヴェノム・バースト！！", "white");
@@ -620,19 +641,6 @@
                 document.head.appendChild(style);
                 const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) pluck(ts[0]); }, 50);
                 setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('lightning-effect')?.remove(); }, 3000);
-                return;
-            }
-
-            if(equipped.skill.id === 's_raitei') {
-                const isEnhanced = (equipped.char.id === 'c_seimaro_uz');
-                field.style.animation = isEnhanced ? "skill-shake 0.01s infinite, raitei-ultra-flash 0.05s infinite" : "skill-shake 0.02s infinite, raitei-flash 0.1s infinite";
-                popText("50%", "40%", isEnhanced ? "真・雷霆蒼破！！" : "奥義・雷霆蒼破！", "#00d2ff");
-                const style = document.createElement('style'); style.id = "raitei-effect";
-                style.innerHTML = `@keyframes raitei-flash { 0% { background: #00121a; } 50% { background: #00d2ff; } 100% { background: #00121a; } } @keyframes raitei-ultra-flash { 0% { background: #002b3d; } 50% { background: #fff; } 100% { background: #002b3d; } }`;
-                document.head.appendChild(style);
-                for(let i=0; i<20; i++){ setTimeout(() => { const s = document.createElement('div'); s.className = 'pop-text'; s.innerText = ['🍰','🍩','🍦','🍭'][Math.floor(Math.random()*4)]; s.style.left = Math.random()*100+"%"; s.style.top = "100%"; field.appendChild(s); setTimeout(() => s.remove(), 1000); }, i * 100); }
-                const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) { const count = isEnhanced ? 12 : 6; for(let i=0; i<count; i++) if(ts[i]) pluck(ts[i]); } if(isEnhanced) document.querySelectorAll('.egg').forEach(e => e.remove()); }, isEnhanced ? 25 : 40);
-                setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('raitei-effect')?.remove(); }, 4000);
                 return;
             }
 
