@@ -26,7 +26,7 @@
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
         #game-field.bg-night { background: #0a0a20; border-color: #483d8b; }
-        #game-field.bg-櫻 { background: #2d1a1a; border-color: #ffb7c5; box-shadow: inset 0 0 50px #ffb7c533; }
+        #game-field.bg-sakura { background: #2d1a1a; border-color: #ffb7c5; box-shadow: inset 0 0 50px #ffb7c533; }
         #game-field.bg-gold { background: #3d3300; border-color: #ffd700; }
         #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; }
         #game-field.bg-deepsea { background: #00121a; border-color: #008b8b; }
@@ -35,10 +35,10 @@
 
         .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
         
-        /* 「無駄」専用の画面割れエフェクト */
-        .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-flash 0.05s infinite !important; border: 10px solid #fff !important; }
-        @keyframes muda-shake { 0% { transform: translate(8px, 8px); } 25% { transform: translate(-8px, -8px); } 50% { transform: translate(-8px, 8px); } 75% { transform: translate(8px, -8px); } 100% { transform: translate(0,0); } }
-        @keyframes muda-flash { 0% { background: #fff; } 50% { background: #000; } 100% { background: #333; } }
+        /* 「無駄」専用：闇のエフェクト */
+        .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-dark-flash 0.1s infinite !important; border: 10px solid #4b0082 !important; box-shadow: inset 0 0 100px #000 !important; }
+        @keyframes muda-shake { 0% { transform: translate(10px, 10px); } 25% { transform: translate(-10px, -10px); } 50% { transform: translate(-10px, 10px); } 75% { transform: translate(10px, -10px); } 100% { transform: translate(0,0); } }
+        @keyframes muda-dark-flash { 0% { background: #000; } 50% { background: #1a001a; } 100% { background: #0a000a; } }
 
         .ultimate-field-bg { animation: ultimate-rainbow 0.2s infinite linear !important; }
         @keyframes ultimate-rainbow { 0% { background: #ff0000; } 20% { background: #ffff00; } 40% { background: #00ff00; } 60% { background: #00ffff; } 80% { background: #0000ff; } 100% { background: #ff00ff; } }
@@ -357,7 +357,7 @@
             { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
             { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
-            { id: 's_muda', type: 'skill', name: '無駄', owned: false, rarity: 'X', info: 'パンチですべてを破壊するエフェクト。ランペイジ系専用', rate: 100 },
+            { id: 's_muda', type: 'skill', name: '無駄', owned: false, rarity: 'X', info: 'パンチですべてを破壊する闇のエフェクト。ランペイジ系専用', rate: 100 },
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
         ];
 
@@ -661,14 +661,22 @@
                     isSkillActive = false;
                     return;
                 }
-                // エフェクト発動
-                document.getElementById('gacha-flash-overlay').style.display = 'block';
-                setTimeout(() => document.getElementById('gacha-flash-overlay').style.display = 'none', 100);
+                const overlay = document.getElementById('gacha-flash-overlay');
+                overlay.style.background = "#000";
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.display = 'none', 100);
+                
                 field.classList.add('muda-crack-effect');
-                popText("50%", "40%", "無駄ァ！！", "white");
+                popText("50%", "40%", "無駄ァ！！", "#4b0082");
+                
                 document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
                 document.querySelectorAll('.egg').forEach(e => e.remove());
-                setTimeout(() => { isSkillActive = false; field.classList.remove('muda-crack-effect'); }, 600);
+                
+                setTimeout(() => { 
+                    isSkillActive = false; 
+                    field.classList.remove('muda-crack-effect'); 
+                    overlay.style.background = "";
+                }, 600);
                 return;
             }
 
