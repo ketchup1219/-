@@ -35,7 +35,6 @@
 
         .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
         
-        /* 無駄：画面割れエフェクト */
         .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-flash 0.05s infinite !important; border: 10px solid #fff !important; }
         @keyframes muda-shake { 0% { transform: translate(8px, 8px); } 25% { transform: translate(-8px, -8px); } 50% { transform: translate(-8px, 8px); } 75% { transform: translate(8px, -8px); } 100% { transform: translate(0,0); } }
         @keyframes muda-flash { 0% { background: #fff; } 50% { background: #000; } 100% { background: #333; } }
@@ -316,7 +315,7 @@
             { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 30, isEvolved: true },
             { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で5秒100倍/雷霆蒼破', rate: 50, isEvolved: true },
             { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 45, isEvent: true },
-            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: true, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
+            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: false, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
             { id: 'c_rampage', type: 'char', name: 'ランペイジイット', icon: '🦖', owned: false, rarity: 'UZ', info: '金15倍/草を抜くほど速度UP', rate: 50 },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
@@ -627,18 +626,14 @@
                 setTimeout(() => { isSkillActive = false; }, 500); return;
             }
 
-            /* 無駄ァ！：画面割れエフェクト強化版 */
             if(equipped.skill.id === 's_muda') {
                 if(equipped.char.id !== 'c_rampage' && equipped.char.id !== 'c_rampage_venom') {
                     popText("50%", "40%", "失敗...（ランペイジ専用）", "red");
                     isSkillActive = false;
                     return;
                 }
-                
-                // 画面全体フラッシュ
                 document.getElementById('gacha-flash-overlay').style.display = 'block';
                 setTimeout(() => document.getElementById('gacha-flash-overlay').style.display = 'none', 100);
-
                 field.classList.add('muda-crack-effect');
                 popText("50%", "40%", "無駄ァ！！", "white");
                 document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
