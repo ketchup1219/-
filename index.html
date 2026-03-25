@@ -218,6 +218,7 @@
                 <button class="btn btn-gacha" id="g10-btn" onclick="runGacha(10)" style="background:#ff8c00;">10連 (10,000円)</button>
                 <button class="btn btn-gacha" id="g100-btn" onclick="runGacha(100)" style="background:#800080;">100連 (100,000円)</button>
                 <button class="btn btn-gacha" id="g1000-btn" onclick="runGacha(1000)" style="background:#4b0082; border: 2px solid var(--gold);">👑 1000連 (1,000,000円)</button>
+                <button class="btn btn-gacha" id="g10000-btn" onclick="runGacha(10000)" style="background:#000; border: 2px solid #fff; color: #fff;">🌌 10000連 (1,000,000,000円)</button>
             </div>
             <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
@@ -486,7 +487,9 @@
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
 
         async function runGacha(times) {
-            const cost = 1000 * times; if(money < cost) return alert("金欠です！");
+            const cost = (times === 10000) ? 1000000000 : 1000 * times;
+            if(money < cost) return alert("金欠です！");
+            
             money -= cost; updateUI(); missionStats.gachaed += times;
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; let results = [];
@@ -496,7 +499,11 @@
                 let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && it.id !== 's_raitei' && !it.isEvolved && it.id !== 's_muda');
                 let pick;
 
-                if (r < 0.001) {
+                // 確率判定
+                if (r < 0.0001) {
+                    pick = pool.find(it => it.id === 'c_rampage'); // ランペイジイットを0.0001%に設定
+                }
+                else if (r < 0.001) {
                     pick = pool.find(it => it.id === 'c_seimaro');
                 } 
                 else if (r < 0.0011) { 
@@ -514,11 +521,33 @@
                 }
                 if(!pick) pick = items.find(it => it.id === 'c20'); results.push(pick);
             }
+            
             document.getElementById('gacha-box').classList.add('gacha-shake');
             await new Promise(r => setTimeout(r, 800));
             document.getElementById('gacha-flash-overlay').style.display = 'block'; await new Promise(r => setTimeout(r, 100)); document.getElementById('gacha-flash-overlay').style.display = 'none';
             document.getElementById('gacha-box').classList.remove('gacha-shake');
-            results.forEach(p => { p.owned = true; const l = document.createElement('div'); l.className = `res-line ${p.rarity}`; l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`; display.appendChild(l); });
+
+            if(times > 1000) {
+                const fragment = document.createDocumentFragment();
+                results.forEach((p, idx) => {
+                    p.owned = true;
+                    if(p.rarity === 'SSR' || p.rarity === 'UZ' || p.rarity === 'X' || idx % 50 === 0) {
+                        const l = document.createElement('div');
+                        l.className = `res-line ${p.rarity}`;
+                        l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`;
+                        fragment.appendChild(l);
+                    }
+                });
+                display.appendChild(fragment);
+            } else {
+                results.forEach(p => { 
+                    p.owned = true; 
+                    const l = document.createElement('div'); 
+                    l.className = `res-line ${p.rarity}`; 
+                    l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`; 
+                    display.appendChild(l); 
+                });
+            }
             display.scrollTop = display.scrollHeight; saveGame(); updateUI();
         }
 
