@@ -194,7 +194,7 @@
                 <p>【合体条件】</p>
                 <p id="fuse-cond-1">・ｺﾞｯﾄﾞﾈｽｶｽﾞｷﾝｸﾞ(UZ) 所持</p>
                 <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
-                <p id="fuse-cond-3">・費用: 1兆円</p>
+                <p id="fuse-cond-3">・費用: 100,000,000円</p>
             </div>
             <div id="fusion-result-preview" style="margin:15px; font-size:14px; color:var(--gold);"></div>
             <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:200px; display:none;">フュージョン！</button>
@@ -430,24 +430,24 @@
 
         function renderFusion() {
             const char1 = items.find(i => i.id === 'ev_kazu_ultimate'); const char2 = items.find(i => i.id === 'c1_ultimate');
-            const cost = 1000000000000; const btn = document.getElementById('fusion-exec-btn');
+            const cost = 100000000; const btn = document.getElementById('fusion-exec-btn');
             document.getElementById('fuse-cond-1').style.color = (char1 && char1.owned) ? "lime" : "red";
             document.getElementById('fuse-cond-2').style.color = (char2 && char2.owned) ? "lime" : "red";
             document.getElementById('fuse-cond-3').style.color = money >= cost ? "lime" : "red";
             if(char1 && char1.owned && char2 && char2.owned && money >= cost) { btn.style.display = "block"; document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`; }
             else { btn.style.display = "none"; document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可"; }
         }
-        function executeFusion() { const cost = 1000000000000; if(money < cost) return; money -= cost; const res = items.find(i => i.id === 'fusion_zen_kazu'); res.owned = true; equipped.char = res; alert("合体完了！"); openLayer('start-screen'); saveGame(); updateUI(); }
+        function executeFusion() { const cost = 100000000; if(money < cost) return; money -= cost; const res = items.find(i => i.id === 'fusion_zen_kazu'); res.owned = true; equipped.char = res; alert("合体完了！"); openLayer('start-screen'); saveGame(); updateUI(); }
 
         function renderEvolve() {
             const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn');
-            const cost = 100000000;
+            const cost = 1000000;
             if((equipped.char.rarity === 'SSR' || equipped.char.id === 'c_rampage') && !equipped.char.isEvolved) { target.innerHTML = `<p>進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">必要経費: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
             else { target.innerHTML = `<p>進化対象がありません</p>`; btn.style.display = "none"; }
         }
 
         function executeEvolve() {
-            const cost = 100000000; if(money < cost) return; money -= cost;
+            const cost = 1000000; if(money < cost) return; money -= cost;
             let evolveId = '';
             switch(equipped.char.id) { 
                 case 'ev_kazu': evolveId = 'ev_kazu_ultimate'; break; 
