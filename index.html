@@ -13,584 +13,870 @@
             background-image: radial-gradient(circle at center, #111 0%, #000 100%);
         }
 
-        .header { background: linear-gradient(to bottom, #222, #0a0a0a); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 1.2rem; }
-        .money-display { color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        
-        #game-container { position: relative; width: 100vw; height: calc(100vh - 60px); overflow: hidden; }
-        canvas { display: block; background: #0a1a0a; cursor: crosshair; }
+        .header { background: linear-gradient(to bottom, #222, #0a0a0a); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 10; }
+        #fever-container { position: absolute; bottom: -6px; left: 0; width: 100%; height: 6px; background: #111; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
+        #fever-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--fever-pink), #ffffff, var(--fever-pink)); background-size: 200% 100%; transition: width 0.2s; box-shadow: 0 0 20px var(--fever-pink), 0 0 40px var(--fever-pink); animation: bg-scroll 0.5s linear infinite; }
 
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 100; }
-        .ui-layer.active { display: flex; }
-
-        h1 { font-size: 3rem; margin: 0; text-transform: uppercase; letter-spacing: 5px; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); }
-        .subtitle { color: var(--zen-red); font-size: 1.2rem; margin-bottom: 30px; }
-
-        .btn { 
-            padding: 15px 40px; margin: 10px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 50px;
-            background: linear-gradient(135deg, #444, #111); color: white; transition: 0.3s; position: relative; overflow: hidden; border: 1px solid #555;
+        #game-field { 
+            position: relative; width: 95vw; height: 55vh; 
+            background: #1a2a1a; margin: 10px auto; 
+            border: 3px solid #333; border-radius: 20px; overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.7);
         }
-        .btn:hover { transform: scale(1.1); background: linear-gradient(135deg, #666, #222); border-color: #999; }
-        .btn-main { background: linear-gradient(135deg, var(--zen-red), #800); border-color: #f55; }
-        .btn-main:hover { background: linear-gradient(135deg, #ff3366, #a00); }
+        #game-field::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 100; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); border-radius: 17px; }
 
-        #shop-container { width: 90%; max-height: 70vh; overflow-y: auto; background: rgba(20,20,20,0.9); padding: 20px; border-radius: 15px; border: 1px solid #444; }
-        .shop-item { display: flex; align-items: center; background: #222; margin: 10px 0; padding: 15px; border-radius: 10px; border-left: 5px solid #444; transition: 0.2s; }
-        .shop-item.owned { border-left-color: var(--grass-light); opacity: 0.8; }
-        .shop-item.equipped { border-left-color: var(--blue); background: #2a2a3a; box-shadow: inset 0 0 10px rgba(0,210,255,0.3); }
-        .item-info { flex-grow: 1; text-align: left; margin-left: 20px; }
-        .item-name { font-weight: bold; font-size: 1.1rem; display: block; }
-        .item-desc { font-size: 0.8rem; color: #aaa; }
-        .item-price { color: var(--gold); font-size: 1.2rem; }
+        #game-field.bg-desert { background: radial-gradient(circle, #7a5026 0%, #4d3319 100%); border-color: #d2b48c; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 0 20px rgba(210,180,140,0.2); }
+        #game-field.bg-cyber { background: radial-gradient(circle, #001030 0%, #000520 100%); border-color: #00d2ff; box-shadow: inset 0 0 40px #00d2ff33, 0 0 20px #00d2ff; }
+        #game-field.bg-cyber::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,210,255,0.05) 0, rgba(0,210,255,0.05) 2px, transparent 2px, transparent 4px); pointer-events: none; }
+        #game-field.bg-volcano { background: radial-gradient(circle, #4a0000 0%, #2b0000 100%); border-color: #ff4500; box-shadow: inset 0 0 60px #ff450066, 0 0 30px #ff4500; }
+        #game-field.bg-night { background: radial-gradient(circle, #1a1a3a 0%, #0a0a20 100%); border-color: #483d8b; }
+        #game-field.bg-sakura { background: radial-gradient(circle, #3d2a2a 0%, #2d1a1a 100%); border-color: #ffb7c5; box-shadow: inset 0 0 60px #ffb7c566; }
+        #game-field.bg-gold { background: radial-gradient(circle, #5d4d00 0%, #3d3300 100%); border-color: #ffd700; box-shadow: inset 0 0 60px rgba(255,215,0,0.4); }
+        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; box-shadow: inset 0 0 80px rgba(255,255,255,0.2); }
+        #game-field.bg-deepsea { background: radial-gradient(circle, #002233 0%, #00121a 100%); border-color: #008b8b; box-shadow: inset 0 0 50px rgba(0,139,139,0.5); }
+        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 80px #9400d366; }
+        @keyframes dim-pulse { 0% { background: radial-gradient(circle, #2a002a 0%, #1a001a 100%); filter: hue-rotate(0deg); } 100% { background: radial-gradient(circle, #00001a 0%, #00003a 100%); filter: hue-rotate(45deg); } }
 
-        .hud { position: absolute; pointer-events: none; width: 100%; height: 100%; top: 0; left: 0; }
-        .combo-box { position: absolute; top: 20px; right: 20px; font-size: 2rem; color: var(--blue); text-shadow: 0 0 10px var(--blue); }
-        .fever-bar-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 250px; height: 15px; background: #333; border-radius: 10px; border: 2px solid #555; }
-        #fever-bar { width: 0%; height: 100%; background: linear-gradient(to right, var(--fever-pink), #fff); border-radius: 8px; transition: width 0.1s; box-shadow: 0 0 15px var(--fever-pink); }
+        .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.15s infinite alternate !important; border-width: 8px !important; box-shadow: 0 0 50px var(--fever-pink), inset 0 0 50px var(--fever-pink) !important; }
         
-        #skill-btn { 
-            position: absolute; bottom: 50px; right: 30px; width: 80px; height: 80px; border-radius: 50%;
-            background: rgba(255,0,51,0.2); border: 3px solid var(--zen-red); color: white; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; font-size: 0.9rem; pointer-events: auto;
-            text-shadow: 0 0 5px #000; transition: 0.2s; box-shadow: 0 0 20px rgba(255,0,51,0.3);
+        .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-dark-flash 0.1s infinite !important; border: 10px solid #4b0082 !important; box-shadow: inset 0 0 150px #000, 0 0 50px #4b0082 !important; filter: contrast(1.5); }
+        @keyframes muda-shake { 0% { transform: translate(12px, 12px) rotate(1deg); } 25% { transform: translate(-12px, -12px) rotate(-1deg); } 50% { transform: translate(-12px, 12px) rotate(1deg); } 75% { transform: translate(12px, -12px) rotate(-1deg); } 100% { transform: translate(0,0) rotate(0); } }
+        @keyframes muda-dark-flash { 0% { background: #000; filter: invert(0); } 50% { background: #1a001a; filter: invert(0.2); } 100% { background: #0a000a; filter: invert(0); } }
+
+        .ultimate-field-bg { animation: ultimate-rainbow 3s infinite linear !important; background-size: 400% 400% !important; background: linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff) !important; }
+        @keyframes ultimate-rainbow { 0% { background-position: 0% 50%; filter: hue-rotate(0deg); } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; filter: hue-rotate(360deg); } }
+        @keyframes skill-shake { 0% { transform: translate(6px, 6px); } 50% { transform: translate(-6px, -6px); } 100% { transform: translate(6px, -6px); } }
+        @keyframes skill-flash { from { box-shadow: inset 0 0 50px rgba(255,255,255,0.5); border-color: #fff; } to { box-shadow: inset 0 0 150px rgba(255,255,255,1); border-color: #ff00ff; } }
+        .skill-icon-anim { animation: skill-icon-pop 0.3s infinite linear !important; z-index: 1000; }
+        @keyframes skill-icon-pop { 0% { transform: scale(2.2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 40px gold); } 100% { transform: scale(2.2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 40px white); } }
+        .ultimate-text { position: absolute; width: 100%; top: 40%; left: 0; text-align: center; font-size: 55px; color: white; font-weight: 900; z-index: 1001; pointer-events: none; text-shadow: 0 0 20px #000, 0 0 40px #ff0000, 0 0 80px #ff00ff; animation: text-zoom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes text-zoom { 0% { transform: scale(0) rotate(-10deg); opacity: 0; } 100% { transform: scale(1.2) rotate(0deg); opacity: 1; } }
+
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        
+        #gacha-result-display { width: 85%; height: 140px; overflow-y: auto; background: rgba(17,17,17,0.8); border: 2px solid #444; border-radius: 12px; margin: 10px 0; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        
+        /* ガチャ結果ラインの演出強化 */
+        .res-line { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; border-radius: 6px; background: linear-gradient(90deg, #222, #111); font-size: 13px; font-weight: bold; border-left: 4px solid #555; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: res-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: left center; opacity: 0; }
+        .res-line.SSR { background: linear-gradient(90deg, #443300, #221a00); border: 1px solid var(--gold); border-left: 6px solid var(--gold); color: var(--gold); animation: res-pop-ssr 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, glow 1s infinite alternate 0.5s; }
+        .res-line.UZ { background: linear-gradient(90deg, #300, #100); border: 1px solid var(--uz-color); border-left: 6px solid var(--uz-color); color: var(--uz-color); text-shadow: 0 0 5px var(--uz-color); animation: res-pop-uz 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, uz-glow 0.5s infinite alternate 0.6s; }
+        .res-line.X { background: linear-gradient(90deg, #111, #000); border: 1px solid var(--x-color); border-left: 6px solid var(--x-color); color: var(--x-color); text-shadow: 0 0 10px #fff; animation: res-pop-x 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards, x-glow 0.3s infinite alternate 0.7s; }
+        
+        @keyframes res-pop { 0% { opacity: 0; transform: translateX(-20px) scale(0.9); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes res-pop-ssr { 0% { opacity: 0; transform: scale(0.8) translateY(10px); filter: brightness(2); } 100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); } }
+        @keyframes res-pop-uz { 0% { opacity: 0; transform: scale(0.5) rotate(-5deg); filter: brightness(3) blur(5px); } 100% { opacity: 1; transform: scale(1) rotate(0deg); filter: brightness(1) blur(0); } }
+        @keyframes res-pop-x { 0% { opacity: 0; transform: scale(2); filter: invert(1); } 100% { opacity: 1; transform: scale(1); filter: invert(0); } }
+
+        @keyframes glow { from { box-shadow: 0 0 5px var(--gold), inset 0 0 5px rgba(255,215,0,0.2); } to { box-shadow: 0 0 15px var(--gold), inset 0 0 10px rgba(255,215,0,0.5); } }
+        @keyframes uz-glow { from { box-shadow: 0 0 10px var(--uz-color), inset 0 0 10px rgba(255,0,0,0.3); } to { box-shadow: 0 0 25px var(--uz-color), inset 0 0 20px rgba(255,0,0,0.6); } }
+        @keyframes x-glow { from { box-shadow: 0 0 15px #fff, 0 0 30px #0ff, inset 0 0 10px #0ff; } to { box-shadow: 0 0 30px #fff, 0 0 60px #f0f, inset 0 0 20px #f0f; } }
+
+        #gacha-box { font-size: 85px; filter: drop-shadow(0 10px 15px rgba(255,255,255,0.4)); cursor: pointer; position: relative; z-index: 600; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #gacha-box:active { transform: scale(0.9); }
+        
+        /* ガチャ箱の揺れ強化 */
+        .gacha-shake { animation: gacha-vibrate-intense 0.1s infinite !important; filter: drop-shadow(0 0 40px var(--gold)) hue-rotate(45deg) !important; transform: scale(1.15) !important; }
+        @keyframes gacha-vibrate-intense { 
+            0% { transform: translate(6px, 6px) rotate(0deg) scale(1.15); filter: brightness(1); } 
+            25% { transform: translate(-6px, -6px) rotate(4deg) scale(1.2); filter: brightness(1.5); } 
+            50% { transform: translate(6px, -6px) rotate(-4deg) scale(1.15); filter: brightness(1); } 
+            75% { transform: translate(-6px, 6px) rotate(0deg) scale(1.2); filter: brightness(2); } 
+            100% { transform: translate(6px, 6px) rotate(0deg) scale(1.15); filter: brightness(1); } 
         }
-        #skill-btn:active { transform: scale(0.9); }
-        #skill-btn.disabled { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
-        #skill-cooldown { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: rgba(0,0,0,0.6); border-radius: 50%; pointer-events: none; }
 
-        .mission-panel { position: absolute; top: 10px; left: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; font-size: 0.8rem; pointer-events: auto; }
-        .mission-item { margin-bottom: 5px; color: #ddd; }
-        .mission-item.done { color: var(--grass-light); text-decoration: line-through; }
+        /* ガチャフラッシュ演出強化 */
+        .gacha-flash { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 700; display: none; background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%); animation: flash-bang 0.6s ease-out forwards; mix-blend-mode: screen; }
+        .gacha-flash-super { background: radial-gradient(circle, #fff 0%, #00ffff 30%, #ff00ff 70%, rgba(0,0,0,0) 100%); animation: flash-bang-super 1s ease-out forwards; }
+        @keyframes flash-bang { 0% { opacity: 0; transform: scale(0.5); } 20% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0; transform: scale(2); } }
+        @keyframes flash-bang-super { 0% { opacity: 0; transform: scale(0.5) rotate(0deg); filter: hue-rotate(0deg); } 20% { opacity: 1; transform: scale(1.5) rotate(45deg); filter: hue-rotate(90deg); } 100% { opacity: 0; transform: scale(3) rotate(180deg); filter: hue-rotate(360deg); } }
 
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border: 2px solid var(--gold); border-radius: 20px; z-index: 1000; display: none; box-shadow: 0 0 50px rgba(255,215,0,0.3); }
+        .col-tabs { display: flex; width: 95%; gap: 6px; margin-bottom: 12px; }
+        .tab-btn { flex: 1; padding: 12px 5px; font-size: 12px; background: linear-gradient(to bottom, #444, #222); color: white; border: 1px solid #555; border-radius: 8px; transition: all 0.2s; opacity: 0.7; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+        .tab-btn.active { background: linear-gradient(to bottom, var(--blue), #0088aa); border-color: #fff; opacity: 1; font-weight: bold; box-shadow: 0 0 15px var(--blue), inset 0 0 10px rgba(255,255,255,0.5); transform: translateY(-2px); }
+        
+        .col-list { width: 90%; height: 45%; overflow-y: auto; background: rgba(20,20,20,0.8); border-radius: 12px; padding: 10px; border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .col-item { background: linear-gradient(90deg, #2a2a2a, #1a1a1a); padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.6); transition: transform 0.2s; }
+        .col-item:active { transform: scale(0.98); }
+        .col-item.owned { border-left-color: var(--gold); }
+        .col-item.UZ { border-left-color: var(--uz-color); box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        .col-item.X { border-left-color: var(--x-color); animation: x-border 0.5s infinite; box-shadow: 0 0 15px rgba(0,255,255,0.3); }
+        @keyframes x-border { 0% { border-left-color: #fff; } 50% { border-left-color: #0ff; } 100% { border-left-color: #f0f; } }
+        .equip-btn { padding: 8px 14px; border-radius: 20px; border: none; font-size: 11px; font-weight: bold; cursor: pointer; background: linear-gradient(to bottom, #ddd, #999); color: #000; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: all 0.2s; }
+        .equip-btn:active { transform: scale(0.9); }
+        .equipped { background: linear-gradient(to bottom, var(--grass-light), #4b9c00) !important; color: #000; box-shadow: 0 0 10px var(--grass-light) !important; border: 1px solid #fff; }
 
-        /* Titles */
-        .rank-label { font-size: 0.7rem; color: #aaa; vertical-align: middle; margin-right: 5px; border: 1px solid #555; padding: 1px 4px; border-radius: 3px; }
+        .bonus-info { background: linear-gradient(90deg, #112233, #001122); width: 90%; padding: 10px; border-radius: 12px; margin-bottom: 12px; font-size: 12px; color: var(--bonus-color); border: 1px solid #005577; box-shadow: 0 0 15px rgba(0,255,204,0.2); font-weight: bold; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; width: 85%; }
+        .btn { padding: 14px; font-size: 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; font-weight: 900; cursor: pointer; transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .btn:active { transform: scale(0.92); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .btn-start { background: linear-gradient(45deg, var(--gold), #ffaa00); color: #000; grid-column: span 2; font-size: 22px; box-shadow: 0 0 20px rgba(255,215,0,0.6); border: 2px solid #fff; }
+        .btn-gacha { background: linear-gradient(45deg, #ff4500, #cc0000); color: white; }
+        .btn-col { background: linear-gradient(45deg, var(--blue), #0066ff); color: white; }
+        .btn-evolve { background: linear-gradient(45deg, #8a2be2, #4b0082); color: white; font-size: 13px; }
+        .btn-fusion { background: linear-gradient(45deg, #ff00ff, #00ffff); color: white; font-size: 13px; text-shadow: 1px 1px 3px #000; box-shadow: 0 0 15px rgba(255,0,255,0.5); border: 1px solid #fff; animation: bg-scroll 2s linear infinite; background-size: 200% 200%; }
+        .btn-mission { background: linear-gradient(45deg, #00cc66, #008844); color: white; grid-column: span 1; font-size: 13px; }
+        .btn-profile { background: linear-gradient(45deg, #666, #333); color: white; grid-column: span 1; font-size: 13px; }
+        .btn-online { background: linear-gradient(45deg, #00d2ff, #0088ff); color: #000; grid-column: span 2; font-size: 18px; box-shadow: 0 0 15px rgba(0,210,255,0.6); border: 2px solid #fff; }
+
+        .pop-text { position: absolute; font-weight: 900; font-style: italic; pointer-events: none; animation: pop-up-enhanced 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; z-index: 100; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 6px 8px rgba(0,0,0,0.8); font-size: 24px; letter-spacing: 1px; }
+        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.2) rotate(var(--rot, -10deg)); opacity: 0; } 30% { opacity: 1; transform: translateY(-40px) scale(1.6) rotate(var(--rot, 5deg)); } 50% { transform: translateY(-50px) scale(1.3) rotate(0deg); } 100% { transform: translateY(-100px) scale(1.1); opacity: 0; filter: blur(2px); } }
+
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 90; box-shadow: 0 0 10px currentColor; }
+        @keyframes scatter { 0% { transform: scale(1) translate(0,0); opacity: 1; } 100% { transform: scale(0) translate(var(--dx), var(--dy)) rotate(720deg); opacity: 0; } }
+
+        .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 12px; background: linear-gradient(to top, #000, transparent); }
+        #tsum-icon { width: 75px; height: 75px; border: 4px solid #444; border-radius: 50%; font-size: 38px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #333 0%, #111 100%); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .ready #tsum-icon { border-color: var(--zen-red); animation: pulse-ready 0.4s infinite alternate; cursor: pointer; box-shadow: 0 0 25px var(--zen-red), inset 0 0 15px var(--zen-red); background: radial-gradient(circle, #500 0%, #100 100%); transform: scale(1.05); }
+        #skill-bar { width: 160px; height: 22px; background: #111; border-radius: 12px; overflow: hidden; border: 2px solid #555; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #ff5500, #ff0); background-size: 200% 100%; transition: width 0.1s linear; animation: bg-scroll 1s linear infinite; box-shadow: 0 0 10px #f00; }
+        @keyframes bg-scroll { 0% { background-position: 100% 0; } 100% { background-position: 0% 0; } }
+
+        .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
+        .plucking { animation: slice-anim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
+        @keyframes slice-anim { 0% { transform: scale(1) rotate(0deg); filter: brightness(1); } 40% { transform: scale(1.6) rotate(15deg); filter: brightness(2.5) drop-shadow(0 0 20px #fff); } 100% { transform: scale(0) rotate(-20deg); opacity: 0; filter: blur(4px); } }
+
+        .grass { width: 75px; height: 75px; filter: drop-shadow(0 6px 5px rgba(0,0,0,0.7)); animation: grass-base-sway 3s ease-in-out infinite alternate; }
+        @keyframes grass-base-sway { 0% { transform: translateY(0); } 100% { transform: translateY(2px); } }
+        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; background: linear-gradient(to top, #0f2b0f, var(--grass-dark)); box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5); }
+        .grass::before { transform: rotate(-35deg); left: 10px; animation: sway-left 2s ease-in-out infinite alternate; transform-origin: bottom center; }
+        .grass::after { transform: rotate(35deg); right: 10px; animation: sway-right 2.2s ease-in-out infinite alternate; transform-origin: bottom center; }
+        .grass-center { position: absolute; width: 30px; height: 60px; border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; background: linear-gradient(to top, var(--grass-dark), var(--grass-light)); box-shadow: inset 2px 2px 5px rgba(255,255,255,0.4), inset -2px -2px 5px rgba(0,0,0,0.4); animation: sway-center 2.5s ease-in-out infinite alternate; transform-origin: bottom center; z-index: 2; }
+        @keyframes sway-left { 0% { transform: rotate(-35deg) skewX(2deg); } 100% { transform: rotate(-30deg) skewX(-2deg); } }
+        @keyframes sway-right { 0% { transform: rotate(35deg) skewX(-2deg); } 100% { transform: rotate(30deg) skewX(2deg); } }
+        @keyframes sway-center { 0% { transform: translateX(-50%) rotate(-3deg); } 100% { transform: translateX(-50%) rotate(3deg); } }
+        
+        .egg { width: 70px; height: 70px; font-size: 55px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 40px var(--gold); animation: egg-pulse-glow 1s infinite alternate, egg-shake 0.3s ease-in-out infinite alternate; z-index: 15; }
+        @keyframes egg-pulse-glow { from { filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)) brightness(1); } to { filter: drop-shadow(0 0 20px var(--gold)) drop-shadow(0 0 30px #ff0) brightness(1.2); } }
+        @keyframes egg-shake { 0% { transform: rotate(-12deg) scale(0.95); } 100% { transform: rotate(12deg) scale(1.05); } }
+        @keyframes pulse-ready { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.15); filter: brightness(1.3); } }
+        
+        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,255,255,0.15) 50%, rgba(255,0,255,0.15) 100%); animation: aura-spin 3s linear infinite; mix-blend-mode: screen; }
+        @keyframes aura-spin { from { transform: rotate(0deg) scale(1.5); filter: hue-rotate(0deg); } to { transform: rotate(360deg) scale(1.5); filter: hue-rotate(360deg); } }
+
+        #profile-info-display { font-size: 15px; color: #fff; margin-top: 5px; background: rgba(255,255,255,0.05); padding: 8px 20px; border-radius: 20px; display: inline-block; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        #profile-info-display span { color: var(--gold); font-weight: 900; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+
+        .title-item { width: 85%; background: linear-gradient(90deg, #2a2a2a, #1a1a1a); border: 1px solid #555; border-radius: 10px; padding: 12px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
+        .title-item.locked { opacity: 0.6; filter: grayscale(1); background: #111; border-color: #333; box-shadow: none; }
+        .title-info { text-align: left; }
+        .title-name { font-weight: 900; color: #fff; font-size: 14px; }
+        .title-cond { font-size: 11px; color: #bbb; margin-top: 4px; }
+
+        .mission-item { background: linear-gradient(135deg, #222, #111); border: 1px solid #444; border-radius: 12px; margin: 10px 0; padding: 14px; width: 85%; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; box-shadow: 0 5px 10px rgba(0,0,0,0.6); }
+        .mission-progress { width: 100%; height: 12px; background: #000; border-radius: 6px; overflow: hidden; border: 1px solid #333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
+        .mission-fill { height: 100%; background: linear-gradient(90deg, #00cc66, #00ff88); transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 10px #00ff88; }
+        .mission-reward-btn { align-self: flex-end; padding: 6px 18px; border-radius: 20px; border: none; font-weight: 900; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .mission-reward-btn:active { transform: scale(0.9); }
+        .can-claim { background: linear-gradient(45deg, var(--gold), #ffaa00); color: #000; animation: pulse-ready 0.5s infinite alternate; border: 1px solid #fff; }
+        .claimed { background: #333; color: #666; cursor: default; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+
+        .profile-input-group { background: linear-gradient(135deg, #2a2a2a, #1a1a1a); padding: 18px; border-radius: 12px; width: 80%; margin-bottom: 12px; border: 1px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .profile-input-group label { display: block; font-size: 13px; color: #ccc; margin-bottom: 8px; text-align: left; font-weight: bold; }
+        .profile-input-group input { width: 90%; background: #000; border: 1px solid #666; color: white; padding: 10px; border-radius: 6px; font-family: inherit; font-size: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transition: border-color 0.2s; }
+        .profile-input-group input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 10px rgba(0,210,255,0.3), inset 0 2px 5px rgba(0,0,0,0.8); }
     </style>
 </head>
-<body>
-
+<body onload="loadGame()">
     <div class="header">
-        <div id="user-title-display" style="font-size: 0.8rem; color: var(--gold);"></div>
-        <div class="money-display">円: <span id="money-val">0</span></div>
-        <div id="current-score" style="font-size: 1.2rem;">SCORE: 0</div>
+        <button onclick="giveUp()" style="background:linear-gradient(to bottom, #555, #333); color:white; border:1px solid #777; padding:6px 10px; font-size:11px; border-radius:5px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.5);">リタイア</button>
+        <div style="font-size:16px; font-weight:900; text-shadow:0 2px 4px rgba(0,0,0,0.8);">💰 <span id="m-val" style="color:var(--gold);">0</span></div>
+        <div style="font-size: 20px; font-weight: 900; color: #ffcc00; text-shadow:0 0 10px rgba(255,204,0,0.5);">⏳ <span id="t-val">30.0</span></div>
+        <div id="opp-score-display" style="color: #00d2ff; font-size: 13px; font-weight:bold; display: none; text-shadow:0 0 5px #00d2ff;"><span id="opp-name-label">相手</span>: <span id="opp-m-val">0</span></div>
+        <div id="fever-container"><div id="fever-fill"></div></div>
     </div>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        
-        <div class="hud">
-            <div class="combo-box"><span id="combo-val">0</span> COMBO</div>
-            <div class="fever-bar-container"><div id="fever-bar"></div></div>
-            <div id="skill-btn" onclick="useSkill()">
-                SKILL
-                <div id="skill-cooldown"></div>
+    <div id="game-field">
+        <div id="x-aura-effect" class="x-aura"></div>
+        <div id="gacha-flash-overlay" class="gacha-flash"></div>
+
+        <div id="start-screen" class="overlay">
+            <h1 id="game-title" style="color:var(--gold); margin:0; font-size:36px; text-shadow:0 0 20px rgba(255,215,0,0.6), 0 5px 10px rgba(0,0,0,0.8); letter-spacing:2px;">草抜きサバイバル</h1>
+            <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small style="color:#ccc;">称号：<span id="u-title-display" style="color:#fff;">なし</span></small></div>
+            <p id="passive-info" style="font-size:12px; color:var(--blue); margin-bottom:15px; font-weight:bold; text-shadow:0 0 5px rgba(0,210,255,0.5); background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:10px;">動く卵に触れたら即終了...</p>
+            <div class="btn-group">
+                <button class="btn btn-online" id="online-match-btn" onclick="startOnlineMatch()">🌐 1v1 スコア対決</button>
+                <button class="btn btn-start" onclick="startGame()">START</button>
+                <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:#ff0033; display:none; text-shadow:0 0 10px #ff0033;">●</span></button>
+                <button class="btn btn-profile" onclick="openLayer('profile-screen')">👤 プロフィール編集</button>
+                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">GACHA</button>
+                <button class="btn btn-col" onclick="openLayer('col-screen')">COLLECTION</button>
+                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
+                <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
             </div>
-            <div class="mission-panel" id="mission-panel"></div>
         </div>
 
-        <div id="start-screen" class="ui-layer active">
-            <h1>草抜きサバイバル</h1>
-            <div class="subtitle">― ヴェノム覚醒 ―</div>
-            <button class="btn btn-main" onclick="startGame()">サバイバル開始</button>
-            <button class="btn" onclick="openLayer('shop-screen'); renderShop();">コレクション / 強化</button>
-            <button class="btn" onclick="openLayer('mission-screen'); renderMissions();">本日の任務</button>
-            <button class="btn" onclick="openLayer('online-screen')">オンライン(準備中)</button>
+        <div id="profile-screen" class="overlay" style="display:none;">
+            <h2 style="color:var(--gold); text-shadow:0 0 15px rgba(255,215,0,0.5);">👤 プロフィール編集</h2>
+            <div class="profile-input-group">
+                <label>名前の変更</label>
+                <input type="text" id="name-input" maxlength="10" placeholder="なまえを入力" onchange="updateName(this.value)">
+            </div>
+            <div style="width:100%; height:50%; overflow-y:auto; display:flex; flex-direction:column; align-items:center;">
+                <label style="font-size:13px; color:#ccc; margin-bottom:8px; font-weight:bold;">称号の選択</label>
+                <div id="title-list" style="width:100%;"></div>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
         </div>
 
-        <div id="shop-screen" class="ui-layer">
-            <h2 style="color:var(--gold)">コレクション</h2>
-            <div id="shop-container"></div>
-            <button class="btn" onclick="openLayer('start-screen')">戻る</button>
+        <div id="mission-screen" class="overlay" style="display:none;">
+            <h2 style="color:#00ff88; text-shadow:0 0 15px rgba(0,255,136,0.5);">📅 デイリーミッション</h2>
+            <div id="mission-list" style="width: 100%; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 60%;"></div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
         </div>
 
-        <div id="mission-screen" class="ui-layer">
-            <h2 style="color:var(--blue)">本日の任務</h2>
-            <div id="mission-list" style="width: 80%; text-align: left; background: #222; padding: 20px; border-radius: 10px;"></div>
-            <button class="btn" onclick="openLayer('start-screen')">戻る</button>
+        <div id="fusion-screen" class="overlay" style="display:none;">
+            <h2 style="color:cyan; text-shadow: 0 0 20px cyan, 0 0 40px #00d2ff; font-size:28px;">🌀 キャラクター合体</h2>
+            <div style="background:rgba(20,20,20,0.9); padding:20px; border-radius:15px; width:85%; font-size:13px; border:1px solid #00d2ff; box-shadow:0 0 20px rgba(0,210,255,0.2), inset 0 0 20px rgba(0,0,0,0.8);">
+                <p style="font-weight:bold; color:#fff; font-size:15px;">【合体条件】</p>
+                <p id="fuse-cond-1">・ｺﾞｯﾄﾞﾈｽｶｽﾞｷﾝｸﾞ(UZ) 所持</p>
+                <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
+                <p id="fuse-cond-3">・費用: 100,000,000円</p>
+            </div>
+            <div id="fusion-result-preview" style="margin:20px; font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.8);"></div>
+            <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:220px; font-size:16px; display:none; box-shadow:0 0 20px rgba(255,255,255,0.6);">フュージョン！</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
         </div>
 
-        <div id="end-screen" class="ui-layer">
-            <h2 id="result-title">RESULT</h2>
-            <div style="font-size: 2rem; margin: 20px;" id="final-score">0</div>
-            <div style="color: var(--gold); margin-bottom: 30px;">獲得: <span id="earned-money">0</span> 円</div>
-            <button class="btn btn-main" onclick="openLayer('start-screen')">拠点へ戻る</button>
+        <div id="evolve-screen" class="overlay" style="display:none;">
+            <h2 style="color:#b266ff; text-shadow:0 0 20px #8a2be2; font-size:28px;">🧬 キャラクター進化</h2>
+            <p style="font-size: 13px; color: #ffcc00; font-weight:bold; margin-top: -10px; text-shadow:0 0 5px rgba(255,204,0,0.5);">(SSRのみ進化可能)</p>
+            <div id="evolve-status" style="background:rgba(20,20,20,0.9); padding:20px; border-radius:15px; width:80%; margin-bottom:20px; border:1px solid #8a2be2; box-shadow:0 0 20px rgba(138,43,226,0.3), inset 0 0 20px rgba(0,0,0,0.8); font-weight:bold; font-size:15px;"></div>
+            <button class="btn" id="evolve-exec-btn" onclick="executeEvolve()" style="background:linear-gradient(45deg, #ffd700, #ff8c00); color:#000; width:200px; font-size:16px; margin-bottom:15px; display:none; box-shadow:0 0 20px rgba(255,215,0,0.5); border:2px solid #fff;">進化させる！</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px;">戻る</button>
+        </div>
+
+        <div id="gacha-screen" class="overlay" style="display:none;">
+            <div id="gacha-box">🎁</div>
+            <div id="gacha-result-display"></div>
+            <div id="gacha-msg" style="margin:8px; color:var(--gold); min-height:20px; font-size:14px; font-weight:bold; text-shadow:0 0 5px rgba(255,215,0,0.5);">タップで箱を開けろ！</div>
+            <div style="display:flex; flex-direction:column; gap:8px; width: 240px;">
+                <button class="btn btn-gacha" id="g1-btn" onclick="runGacha(1)">1回 (1,000円)</button>
+                <button class="btn btn-gacha" id="g10-btn" onclick="runGacha(10)" style="background:linear-gradient(45deg, #ff8c00, #e65c00);">10連 (10,000円)</button>
+                <button class="btn btn-gacha" id="g100-btn" onclick="runGacha(100)" style="background:linear-gradient(45deg, #800080, #4d004d);">100連 (100,000円)</button>
+                <button class="btn btn-gacha" id="g1000-btn" onclick="runGacha(1000)" style="background:linear-gradient(45deg, #4b0082, #29004d); border: 2px solid var(--gold); box-shadow:0 0 15px rgba(255,215,0,0.4);">👑 1000連 (1,000,000円)</button>
+                <button class="btn btn-gacha" id="g10000-btn" onclick="runGacha(10000)" style="background:linear-gradient(45deg, #111, #000); border: 2px solid #fff; color: #fff; box-shadow:0 0 20px rgba(255,255,255,0.3);">🌌 10000連 (10,000,000円)</button>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:15px; background:linear-gradient(#555, #333); width:120px;">戻る</button>
+        </div>
+
+        <div id="col-screen" class="overlay" style="display:none;">
+            <h2 style="text-shadow:0 0 15px rgba(255,255,255,0.5); letter-spacing:2px;">COLLECTION</h2>
+            <div class="bonus-info" id="collection-bonus-display"></div>
+            <div class="col-tabs">
+                <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
+                <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
+                <button class="tab-btn" id="tab-skill" onclick="setTab('skill')">必殺技</button>
+                <button class="tab-btn" id="tab-bgm" onclick="setTab('bgm')">BGM</button>
+            </div>
+            <div class="col-list" id="col-list-content"></div>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:15px; background:linear-gradient(#555, #333); width:120px;">戻る</button>
+        </div>
+
+        <div id="end-screen" class="overlay" style="display:none">
+            <h2 id="end-title" style="color:#ff3333; font-size:48px; text-shadow: 0 0 25px #ff0000, 0 5px 10px rgba(0,0,0,0.8); margin-bottom:10px;">GAME OVER</h2>
+            <p id="end-msg" style="font-size:18px; font-weight:bold; color:#ccc;">タイムアップ！</p>
+            <p style="font-size:18px; font-weight:bold; margin-top:20px;">最終金額: <span id="res-money" style="font-size:32px; color:var(--gold); text-shadow:0 0 15px rgba(255,215,0,0.6);">0</span>円</p>
+            <p id="online-result" style="color: #00d2ff; font-size:20px; font-weight: 900; text-shadow:0 0 10px #00d2ff; margin:20px 0;"></p>
+            <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:240px; margin-top:20px;">リretry</button>
         </div>
     </div>
 
-    <audio id="bgm-player" loop></audio>
+    <div class="bottom-ui">
+        <div id="tsum-icon" onclick="triggerSkill()">👤</div>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+            <div id="skill-bar"><div id="skill-fill"></div></div>
+            <div id="skill-display-name" style="font-size:12px; color:#ccc; font-weight:bold; text-shadow:0 1px 2px #000; letter-spacing:1px;">huh</div>
+        </div>
+    </div>
+
+    <audio id="bgm-player" loop preload="auto"></audio>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
+            authDomain: "game-685f2.firebaseapp.com",
+            databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
+            projectId: "game-685f2",
+            storageBucket: "game-685f2.firebasestorage.app",
+            messagingSenderId: "266871071111",
+            appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        window.dbOnDisconnect = onDisconnect;
+    </script>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const moneyDisplay = document.getElementById('money-val');
-        const comboDisplay = document.getElementById('combo-val');
-        const feverBar = document.getElementById('fever-bar');
-        const skillBtn = document.getElementById('skill-btn');
-        const skillCooldownOverlay = document.getElementById('skill-cooldown');
-
-        let money = 0;
-        let score = 0;
-        let combo = 0;
-        let comboTimer = 0;
-        let isPlaying = false;
+        let money = 2000, timeLeft = 30.0, isPlaying = false, skillCount = 0, currentTab = 'char';
+        let feverPoints = 0, isFever = false, isSkillActive = false;
+        let missions = [], missionStats = { plucked: 0, gachaed: 0, earned: 0 }, lastMissionDate = "";
+        
         let isOnlineMode = false;
-        let grasses = [];
-        let particles = [];
-        let fever = 0;
-        let isFever = false;
-        let feverTimer = 0;
-        let skillCooldown = 0;
-        let userName = "名無しの草刈り師";
-        let currentTitle = "一般人";
+        let playerId = "p_" + Math.floor(Math.random() * 1000000);
+        let currentRoomId = "global_match_1";
+        let sessionScore = 0;
 
-        const items = [
-            // Characters
-            { id: 'c1', type: 'char', name: '草神ヴェノム', price: 0, desc: '初期キャラクター。基本性能。', bonus: 1, speed: 5, owned: true },
-            { id: 'c2', type: 'char', name: '極・草神', price: 50000, desc: '研ぎ澄まされた感覚を持つ。獲得円1.5倍。', bonus: 1.5, speed: 7, owned: false },
-            { id: 'c3', type: 'char', name: '黄金の草刈り師', price: 500000, desc: '全てを金に変える者。獲得円3倍。', bonus: 3, speed: 9, owned: false },
-            { id: 'c4', type: 'char', name: 'ゴッドネスせいまろ', price: 15000000, desc: '全知全能の草抜きの神。全てを超越する。', bonus: 20, speed: 12, owned: false },
-            
-            // Backgrounds
-            { id: 'b1', type: 'bg', name: '始まりの草原', price: 0, desc: '普通の草原。', color: '#0a1a0a', owned: true },
-            { id: 'b2', type: 'bg', name: '燃える荒野', price: 20000, desc: '情熱的な赤い荒野。', color: '#1a0500', owned: false },
-            { id: 'b3', type: 'bg', name: 'サイバー空間', price: 100000, desc: 'デジタルの海。', color: '#00051a', owned: false },
-            { id: 'b4', type: 'bg', name: '虚無の領域', price: 1000000, desc: '何も存在しない漆黒。', color: '#000000', owned: false },
-
-            // Skills
-            { id: 's1', type: 'skill', name: '疾風', price: 5000, desc: '一時的に移動速度が2倍になる。', power: 0, owned: false },
-            { id: 's2', type: 'skill', name: '煉獄', price: 30000, desc: '周囲の草を焼き払う。', power: 50, owned: false },
-            { id: 's3', type: 'skill', name: '神速', price: 150000, desc: '画面内の草を半分瞬時に刈る。', power: 100, owned: false },
-            { id: 's4', type: 'skill', name: '時空断', price: 800000, desc: '時間を止め、全ての草を消滅させる。', power: 200, owned: false },
-            { id: 's5', type: 'skill', name: '終焉の裁き', price: 2000000, desc: '神の雷が降り注ぐ。大量の円を獲得。', power: 500, owned: false },
-            { id: 's6', type: 'skill', name: 'ヴェノム・ノヴァ', price: 5000000, desc: '画面全体の草を爆破し、大量のボーナスを得る。', power: 300, owned: false },
-            { id: 's7', type: 'skill', name: '雷霆蒼破', price: 0, desc: '【神】ゴッドネスせいまろ入手で解放。蒼き雷が全てを穿つ。', power: 1000, owned: false },
-
-            // BGMs
-            { id: 'bgm1', type: 'bgm', name: 'Grass Loop', price: 0, src: '', owned: true },
-            { id: 'bgm2', type: 'bgm', name: 'Cyber Beat', price: 10000, src: '', owned: false },
-            { id: 'bgm3', type: 'bgm', name: 'Zenith', price: 50000, src: '', owned: false },
-            { id: 'bgm4', type: 'bgm', name: 'Apocalypse', price: 200000, src: '', owned: false },
-            { id: 'bgm5', type: 'bgm', name: 'Venom Awakening', price: 1000000, src: '', owned: false }
+        let userName = "ぜん";
+        let currentTitle = "なし";
+        const titles = [
+            { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000 },
+            { name: "ZENの友達", cond: "キャラを5種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 5 },
+            { name: "草抜き職人", cond: "所持金が100万円を超える", check: () => money > 1000000 },
+            { name: "ガチャ廃人", cond: "累計100回ガチャを回す", check: () => missionStats.gachaed >= 100 },
+            { name: "カズキングの右腕", cond: "カズキング(SSR)を所持する", check: () => items.find(i=>i.id==='ev_kazu').owned },
+            { name: "スピードスター", cond: "必殺技を1回使う", check: () => skillCount < 100 && isSkillActive },
+            { name: "億万長者", cond: "所持金が1億円を超える", check: () => money > 100000000 },
+            { name: "神の領域", cond: "UZキャラを所持する", check: () => items.some(i=>i.rarity==='UZ' && i.owned) },
+            { name: "終焉を告げる者", cond: "合体キャラ(X)を所持する", check: () => items.find(i=>i.id==='fusion_zen_kazu').owned },
+            { name: "草原の主", cond: "草を累計1000本抜く", check: () => missionStats.plucked >= 1000 },
+            { name: "不屈の精神", cond: "ゲームオーバーを経験する", check: () => true },
+            { name: "伝説の草抜き師", cond: "所持金が1兆円を超える", check: () => money > 1000000000000 },
+            { name: "Huhマスター", cond: "スキル「huh」を極める", check: () => equipped.skill.id === 's1' }
         ];
 
-        let equipped = { char: items[0], bg: items[4], skill: null, bgm: items[13] };
+        const items = [
+            { id: 'c_scarlet_ham', type: 'char', name: '緋色の金権覇者：ハム', icon: '🐹👑', owned: false, rarity: 'SSR', info: '金10倍/必殺：画面の草と卵を一掃', rate: 10 },
+            { id: 'c_scarlet_ham_uz', type: 'char', name: '緋色の金権覇王：ハム', icon: '🐹🔥', owned: false, rarity: 'UZ', info: '進化：金100倍/なぞり消し/全画面一掃', rate: 100, isEvolved: true },
+            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 100, isEvolved: true },
+            { id: 'c_rampage_venom', type: 'char', name: 'ランペイジ・イット(ヴェノム)', icon: '☣️', owned: false, rarity: 'X', info: '進化：金100倍/全スキル自動発動', rate: 100, isEvolved: true },
+            { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 50, isEvolved: true },
+            { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 50, isEvolved: true },
+            { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 30, isEvolved: true },
+            { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 30, isEvolved: true },
+            { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 30, isEvolved: true },
+            { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で5秒100倍/雷霆蒼破', rate: 50, isEvolved: true },
+            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 45, isEvent: true },
+            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: false, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
+            { id: 'c_rampage', type: 'char', name: 'ランペイジイット', icon: '🦖', owned: false, rarity: 'UZ', info: '金15倍/草を抜くほど速度UP', rate: 50 },
+            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
+            { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
+            { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
+            { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金8倍', rate: 8 },
+            { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', owned: false, rarity: 'SSR', info: '金12倍/必殺短縮', rate: 12 },
+            { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', owned: false, rarity: 'SSR', info: '金11倍/huh強化', rate: 11 },
+            { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金13倍/卵反転', rate: 13 },
+            { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', owned: false, rarity: 'SR', info: '金5.5倍', rate: 5.5 },
+            { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', owned: false, rarity: 'SR', info: '金5倍', rate: 5 },
+            { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', owned: false, rarity: 'SR', info: '金4.5倍', rate: 4.5 },
+            { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', owned: false, rarity: 'SR', info: '金4倍', rate: 4 },
+            { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', owned: false, rarity: 'SR', info: '金5.8倍/美しい筆致', rate: 5.8 },
+            { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', owned: false, rarity: 'SR', info: '金6.2倍/お宝発見', rate: 6.2 },
+            { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金6.0倍/爆音抜き', rate: 6.0 },
+            { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', owned: false, rarity: 'R', info: '金3.5倍', rate: 3.5 },
+            { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', owned: false, rarity: 'R', info: '金2.8倍', rate: 2.8 },
+            { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', owned: false, rarity: 'R', info: '金3.2倍/収穫の喜び', rate: 3.2 },
+            { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', owned: false, rarity: 'R', info: '金3.0倍/フレー！フレー！', rate: 3.0 },
+            { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', owned: false, rarity: 'R', info: '金2.9倍/知識で抜く', rate: 2.9 },
+            { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', owned: false, rarity: 'BASIC', info: '金1.9倍', rate: 1.9 },
+            { id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', owned: true, rarity: 'BASIC', info: '金1.2倍', rate: 1.2 },
+            { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
+            { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: false, rarity: 'R', info: '茶色い大地' },
+            { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
+            { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: false, rarity: 'SSR', info: '灼熱の地' },
+            { id: 'b5', type: 'bg', name: '夜の草原', className: 'bg-night', owned: false, rarity: 'R', info: '静かな夜' },
+            { id: 'b6', type: 'bg', name: '櫻吹雪', className: 'bg-sakura', owned: false, rarity: 'SR', info: '舞い散る花びら' },
+            { id: 'b7', type: 'bg', name: '黄金郷', className: 'bg-gold', owned: false, rarity: 'SSR', info: '富の象徴' },
+            { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: false, rarity: 'UZ', info: '銀河の果て' },
+            { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: false, rarity: 'SSR', info: '水圧と闇' },
+            { id: 'b10', type: 'bg', name: '次元の狭間', className: 'bg-dimension', owned: false, rarity: 'X', info: '時空の歪み' },
+            { id: 's1', type: 'skill', name: 'huh', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
+            { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', owned: false, rarity: 'SSR', info: '強制フィーバー' },
+            { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', owned: false, rarity: 'UZ', info: '時を止め、草を一掃する' },
+            { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
+            { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
+            { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
+            { id: 's_muda', type: 'skill', name: '無駄', owned: false, rarity: 'X', info: 'パンチですべてを破壊する闇のエフェクト。ランペイジ系専用', rate: 100 },
+            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
+        ];
 
-        // Missions
-        let missions = [];
-        let missionStats = { plucked: 0, gachaed: 0, earned: 0 };
-        let lastMissionDate = "";
+        let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
 
-        function init() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight - 60;
-            loadGame();
-            updateUI();
-            loop();
-        }
+        function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
 
-        function startGame() {
-            isPlaying = true;
-            score = 0;
-            combo = 0;
-            fever = 0;
-            isFever = false;
-            grasses = [];
-            particles = [];
-            skillCooldown = 0;
-            openLayer('none');
-            spawnGrass(20);
-            
-            // Apply BG Color
-            canvas.style.background = equipped.bg.color;
-        }
-
-        function spawnGrass(count) {
-            for(let i=0; i<count; i++) {
-                let type = 'normal';
-                let r = Math.random();
-                if(r > 0.98) type = 'uz';
-                else if(r > 0.93) type = 'gold';
-                else if(r > 0.88) type = 'fever';
-                
-                grasses.push({
-                    x: Math.random() * (canvas.width - 40) + 20,
-                    y: Math.random() * (canvas.height - 40) + 20,
-                    w: 20 + Math.random()*20,
-                    h: 30 + Math.random()*40,
-                    type: type,
-                    life: 100,
-                    rot: (Math.random()-0.5)*0.5
-                });
-            }
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        function update() {
-            if(!isPlaying) return;
-
-            // Combo logic
-            if(comboTimer > 0) comboTimer--;
-            else { combo = 0; }
-
-            // Fever logic
-            if(isFever) {
-                feverTimer--;
-                if(feverTimer <= 0) { isFever = false; fever = 0; }
-                if(Math.random() < 0.2) spawnGrass(1);
-            }
-
-            // Skill logic
-            if(skillCooldown > 0) {
-                skillCooldown--;
-                skillCooldownOverlay.style.height = (skillCooldown / 100) * 100 + "%";
-            }
-
-            // Particles
-            particles.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy; p.life--; p.size *= 0.95;
-                if(p.life <= 0) particles.splice(i, 1);
-            });
-
-            // Grass spawning
-            if(grasses.length < 30 + (score/100)) {
-                if(Math.random() < 0.05) spawnGrass(1);
-            }
-
-            updateUI();
-        }
-
-        function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-
-            // Draw Grasses
-            grasses.forEach(g => {
-                ctx.save();
-                ctx.translate(g.x, g.y);
-                ctx.rotate(g.rot);
-                
-                let col = 'var(--grass-light)';
-                if(g.type === 'gold') col = 'var(--gold)';
-                if(g.type === 'fever') col = 'var(--fever-pink)';
-                if(g.type === 'uz') col = 'var(--uz-color)';
-                
-                ctx.fillStyle = col;
-                if(isFever) ctx.shadowBlur = 10; ctx.shadowColor = col;
-
-                // Simple Grass Shape
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.quadraticCurveTo(-10, -g.h/2, 0, -g.h);
-                ctx.quadraticCurveTo(10, -g.h/2, 0, 0);
-                ctx.fill();
-                ctx.restore();
-            });
-
-            // Particles
-            particles.forEach(p => {
-                ctx.globalAlpha = p.life / 50;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            });
-        }
-
-        canvas.addEventListener('touchstart', handleInput);
-        canvas.addEventListener('mousedown', handleInput);
-
-        function handleInput(e) {
-            if(!isPlaying) return;
-            const x = e.clientX || (e.touches && e.touches[0].clientX);
-            const y = (e.clientY - 60) || (e.touches && e.touches[0].clientY - 60);
-
-            let hit = false;
-            for(let i = grasses.length - 1; i >= 0; i--) {
-                let g = grasses[i];
-                let dist = Math.hypot(g.x - x, g.y - y);
-                if(dist < 50) {
-                    pluck(i);
-                    hit = true;
-                }
-            }
-        }
-
-        function pluck(index) {
-            const g = grasses[index];
-            grasses.splice(index, 1);
-            
-            // Combo & Fever
-            combo++;
-            comboTimer = 60;
-            if(!isFever) {
-                fever += 2;
-                if(fever >= 100) startFever();
-            }
-
-            // Money & Score
-            let gain = 1;
-            if(g.type === 'gold') gain = 50;
-            if(g.type === 'uz') gain = 500;
-            if(g.type === 'fever') gain = 10;
-            
-            let finalGain = Math.floor(gain * equipped.char.bonus);
-            if(isFever) finalGain *= 2;
-            
-            money += finalGain;
-            score += finalGain * 10;
-            missionStats.earned += finalGain;
-            missionStats.plucked++;
-
-            spawnParticle(g.x, g.y, g.type === 'gold' ? 'var(--gold)' : 'var(--grass-light)');
-            checkMissions();
-        }
-
-        function startFever() {
-            isFever = true;
-            feverTimer = 300;
-            fever = 100;
-            showDamage(canvas.width/2, canvas.height/2, "FEVER TIME!!", "var(--fever-pink)");
-        }
-
-        function spawnParticle(x, y, color) {
-            for(let i=0; i<5; i++) {
-                particles.push({
-                    x, y, 
-                    vx: (Math.random()-0.5)*10, 
-                    vy: (Math.random()-0.5)*10, 
-                    life: 30 + Math.random()*20,
-                    color: color,
-                    size: 5 + Math.random()*5
-                });
-            }
-        }
-
-        function useSkill() {
-            if(!isPlaying || skillCooldown > 0 || !equipped.skill) return;
-            const s = equipped.skill;
-            skillCooldown = 100;
-
-            if(s.id === 's1') {
-                // Wind
-                showDamage(canvas.width/2, canvas.height/2, "神速抜法", "#fff");
-            } else if(s.id === 's2') {
-                // Fire
-                score += 100;
-                grasses.forEach((g, i) => {
-                    if(Math.random() < 0.3) { spawnParticle(g.x, g.y, '#f00'); pluck(i); }
-                });
-            } else if(s.id === 's5') {
-                score += 500;
-                grasses.forEach(g => {
-                    spawnParticle(g.x, g.y, '#ffd700');
-                    money += (g.type==='gold'?20:2);
-                });
-                grasses = [];
-            } else if(s.id === 's6') {
-                score += 1000;
-                showDamage(canvas.width/2, canvas.height/2, "ヴェノム・ノヴァ", "#ff0033");
-                grasses.forEach(g => {
-                    spawnParticle(g.x, g.y, '#ff0033');
-                    money += (g.type==='gold'?50:5);
-                });
-                grasses = [];
-            } else if(s.id === 's7') {
-                score += 5000;
-                showDamage(canvas.width/2, canvas.height/2, "雷霆蒼破", "#00d2ff");
-                for(let i=0; i<40; i++) {
-                    particles.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: 0, vy: 0, life: 30, color: '#00d2ff', size: 20});
-                }
-                grasses.forEach(g => {
-                    spawnParticle(g.x, g.y, '#00d2ff');
-                    let m = (g.type==='gold'?200:20);
-                    money += m; missionStats.earned += m;
-                });
-                grasses = [];
-            }
-        }
-
-        function showDamage(x, y, text, color) {
-            const div = document.createElement('div');
-            div.style.position = 'absolute';
-            div.style.left = x + 'px';
-            div.style.top = y + 'px';
-            div.style.color = color;
-            div.style.fontSize = '2rem';
-            div.style.fontWeight = 'bold';
-            div.style.pointerEvents = 'none';
-            div.style.animation = 'fadeOut 1s forwards';
-            div.innerText = text;
-            document.getElementById('game-container').appendChild(div);
-            setTimeout(() => div.remove(), 1000);
+        function updateUI() {
+            document.getElementById('m-val').innerText = Math.floor(money).toLocaleString();
+            document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
+            document.getElementById('fever-fill').style.width = feverPoints + "%";
+            document.getElementById('skill-fill').style.width = skillCount + "%";
+            document.getElementById('u-name-display').innerText = userName;
+            document.getElementById('u-title-display').innerText = currentTitle;
+            document.querySelector('.bottom-ui').classList.toggle('ready', skillCount >= 100);
+            const hasClaimable = missions.some(m => !m.claimed && missionStats[m.key] >= m.goal);
+            document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
         }
 
         function openLayer(id) {
-            document.querySelectorAll('.ui-layer').forEach(l => l.classList.remove('active'));
-            if(id !== 'none') document.getElementById(id).classList.add('active');
-            
-            if(id === 'end-screen') {
-                document.getElementById('final-score').innerText = "SCORE: " + score;
-                document.getElementById('earned-money').innerText = score / 10;
-                money += score / 10;
-                saveGame();
+            document.querySelectorAll('.overlay').forEach(l => l.style.display = 'none');
+            if(id !== 'none') document.getElementById(id).style.display = 'flex';
+            if(id === 'col-screen') renderCol();
+            if(id === 'evolve-screen') renderEvolve();
+            if(id === 'fusion-screen') renderFusion();
+            if(id === 'mission-screen') renderMissions();
+            if(id === 'profile-screen') { document.getElementById('name-input').value = userName; renderTitles(); }
+            if(id === 'start-screen') {
+                document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
+                document.getElementById('tsum-icon').innerText = equipped.char.icon;
+                document.getElementById('skill-fill').style.width = skillCount + "%";
+                document.getElementById('skill-display-name').innerText = equipped.skill.name;
+                document.getElementById('online-result').innerText = "";
+                document.getElementById('opp-score-display').style.display = 'none';
             }
         }
 
-        function renderShop() {
-            const container = document.getElementById('shop-container');
-            container.innerHTML = '';
+        function updateName(val) { if(val.trim() === "") return; userName = val; saveGame(); updateUI(); }
 
-            // Update ownership for s7 (Godness Seimaro check)
-            const c4 = items.find(i=>i.id==='c4');
-            const s7 = items.find(i=>i.id==='s7');
-            if(c4 && c4.owned && s7) s7.owned = true;
-
-            items.forEach(it => {
-                const div = document.createElement('div');
-                div.className = `shop-item ${it.owned ? 'owned' : ''} ${isEquipped(it) ? 'equipped' : ''}`;
-                div.onclick = () => {
-                    if(it.owned) equip(it);
-                    else buyItem(it.id);
-                };
-                
-                div.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-name">${it.name} ${isEquipped(it) ? '<span style="color:var(--blue)">[装備中]</span>' : ''}</span>
-                        <span class="item-desc">${it.desc}</span>
-                    </div>
-                    <div class="item-price">${it.owned ? 'OWNED' : it.price + '円'}</div>
-                `;
-                container.appendChild(div);
+        function renderTitles() {
+            const list = document.getElementById('title-list'); list.innerHTML = '';
+            titles.forEach(t => {
+                const unlocked = t.check();
+                const div = document.createElement('div'); div.className = `title-item ${unlocked ? '' : 'locked'}`;
+                div.innerHTML = `<div class="title-info"><div class="title-name">${unlocked ? t.name : '？？？？'}</div><div class="title-cond">条件: ${t.cond}</div></div>${unlocked ? `<button class="equip-btn ${currentTitle === t.name ? 'equipped' : ''}" onclick="setTitle('${t.name}')">${currentTitle === t.name ? '使用中' : '変更'}</button>` : '🔒'}`;
+                list.appendChild(div);
             });
         }
+        function setTitle(name) { currentTitle = name; renderTitles(); updateUI(); saveGame(); }
 
-        function isEquipped(it) {
-            if(it.type === 'char') return equipped.char.id === it.id;
-            if(it.type === 'bg') return equipped.bg.id === it.id;
-            if(it.type === 'skill') return equipped.skill && equipped.skill.id === it.id;
-            if(it.type === 'bgm') return equipped.bgm.id === it.id;
-            return false;
-        }
-
-        function equip(it) {
-            if(it.type === 'char') equipped.char = it;
-            if(it.type === 'bg') equipped.bg = it;
-            if(it.type === 'skill') equipped.skill = it;
-            if(it.type === 'bgm') equipped.bgm = it;
-            saveGame();
-            renderShop();
-        }
-
-        function buyItem(id) {
-            const it = items.find(i=>i.id === id);
-            if(it && !it.owned && money >= it.price) {
-                money -= it.price;
-                it.owned = true;
-                // Immediate unlock check
-                if(it.id === 'c4') { const s7 = items.find(i=>i.id==='s7'); if(s7) s7.owned = true; }
+        function initMissions() {
+            const today = new Date().toLocaleDateString();
+            if(lastMissionDate !== today) {
+                lastMissionDate = today; missionStats = { plucked: 0, gachaed: 0, earned: 0 };
+                missions = [{ id: 1, title: "草を抜きまくれ", goal: 100, reward: 50000, key: "plucked", unit: "本", claimed: false },{ id: 2, title: "ガチャを回せ", goal: 10, reward: 20000, key: "gachaed", unit: "回", claimed: false },{ id: 3, title: "今日稼げ", goal: 100000, reward: 100000, key: "earned", unit: "円", claimed: false }];
                 saveGame();
-                renderShop();
-                updateUI();
             }
         }
-
-        function updateUI() {
-            moneyDisplay.innerText = Math.floor(money).toLocaleString();
-            comboDisplay.innerText = combo;
-            feverBar.style.width = fever + "%";
-            document.getElementById('current-score').innerText = "SCORE: " + score;
-            if(equipped.skill) {
-                skillBtn.classList.remove('disabled');
-                skillBtn.innerText = equipped.skill.name;
-            } else {
-                skillBtn.classList.add('disabled');
-                skillBtn.innerText = "NO SKILL";
-            }
-        }
-
         function renderMissions() {
-            const list = document.getElementById('mission-list');
-            list.innerHTML = missions.map(m => `
-                <div class="mission-item ${m.done ? 'done' : ''}">
-                    ${m.text} (${m.progress}/${m.target}) - ${m.reward}円
-                </div>
-            `).join('');
+            const container = document.getElementById('mission-list'); container.innerHTML = '';
+            missions.forEach(m => {
+                const prog = Math.min(100, (missionStats[m.key] / m.goal) * 100);
+                const canClaim = !m.claimed && prog >= 100;
+                const item = document.createElement('div'); item.className = 'mission-item';
+                item.innerHTML = `<div style="font-size:15px; font-weight:bold; color:#fff;">${m.title}</div><div style="font-size:12px; color:#ccc;">進行度: ${missionStats[m.key].toLocaleString()} / ${m.goal.toLocaleString()} ${m.unit}</div><div class="mission-progress"><div class="mission-fill" style="width:${prog}%"></div></div><button class="mission-reward-btn ${m.claimed ? 'claimed' : (canClaim ? 'can-claim' : '')}" onclick="${canClaim ? `claimMission(${m.id})` : ''}" ${m.claimed || !canClaim ? 'disabled' : ''}>${m.claimed ? '受取済' : `報酬 ${m.reward.toLocaleString()}円`}</button>`;
+                container.appendChild(item);
+            });
+        }
+        function claimMission(id) {
+            const m = missions.find(x => x.id === id);
+            if(m && !m.claimed) { m.claimed = true; money += m.reward; popText("50%", "50%", `REWARD +${m.reward}!`, "lime"); renderMissions(); updateUI(); saveGame(); }
         }
 
-        function checkMissions() {
-            missions.forEach(m => {
-                if(!m.done) {
-                    if(m.type === 'pluck') m.progress = missionStats.plucked;
-                    if(m.type === 'earn') m.progress = missionStats.earned;
-                    if(m.progress >= m.target) {
-                        m.done = true;
-                        money += m.reward;
-                        updateUI();
+        function renderFusion() {
+            const char1 = items.find(i => i.id === 'ev_kazu_ultimate'); const char2 = items.find(i => i.id === 'c1_ultimate');
+            const cost = 100000000; const btn = document.getElementById('fusion-exec-btn');
+            document.getElementById('fuse-cond-1').style.color = (char1 && char1.owned) ? "lime" : "red";
+            document.getElementById('fuse-cond-2').style.color = (char2 && char2.owned) ? "lime" : "red";
+            document.getElementById('fuse-cond-3').style.color = money >= cost ? "lime" : "red";
+            if(char1 && char1.owned && char2 && char2.owned && money >= cost) { btn.style.display = "block"; document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`; }
+            else { btn.style.display = "none"; document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可"; }
+        }
+        function executeFusion() { const cost = 100000000; if(money < cost) return; money -= cost; const res = items.find(i => i.id === 'fusion_zen_kazu'); res.owned = true; equipped.char = res; alert("合体完了！"); openLayer('start-screen'); saveGame(); updateUI(); }
+
+        function renderEvolve() {
+            const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn');
+            const cost = 1000000;
+            const isHam = equipped.char.id === 'c_scarlet_ham';
+            if((equipped.char.rarity === 'SSR' || equipped.char.id === 'c_rampage' || isHam) && !equipped.char.isEvolved) { target.innerHTML = `<p style="color:#fff;">進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#ccc;margin-top:5px;">必要経費: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
+            else { target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; btn.style.display = "none"; }
+        }
+
+        function executeEvolve() {
+            const cost = 1000000; if(money < cost) return; money -= cost;
+            let evolveId = '';
+            switch(equipped.char.id) { 
+                case 'c_scarlet_ham': evolveId = 'c_scarlet_ham_uz'; break;
+                case 'ev_kazu': evolveId = 'ev_kazu_ultimate'; break; 
+                case 'c1': evolveId = 'c1_ultimate'; break; 
+                case 'c13': evolveId = 'c13_ultimate'; break; 
+                case 'c7': evolveId = 'c7_ultimate'; break; 
+                case 'c2': evolveId = 'c2_ultimate'; break; 
+                case 'c_rampage': 
+                    evolveId = 'c_rampage_venom';
+                    const mudaSkill = items.find(i => i.id === 's_muda');
+                    if(mudaSkill) mudaSkill.owned = true;
+                    break;
+            }
+            if(evolveId) { 
+                const ult = items.find(i => i.id === evolveId); 
+                ult.owned = true; 
+                equipped.char = ult; 
+                if(evolveId === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } 
+                alert(`進化成功！ ${ult.name} を手に入れた！`); 
+            }
+            openLayer('start-screen'); saveGame(); updateUI();
+        }
+
+        function setTab(tab) { currentTab = tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); renderCol(); }
+        function renderCol() {
+            const list = document.getElementById('col-list-content'); list.innerHTML = '';
+            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
+            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
+            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:b.rarity==='SR'?1.5:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:a.rarity==='SR'?1.5:1))
+            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div><span style="font-size:18px;">${item.owned ? item.icon || (item.type==='skill'?'⚡':'') : '？'}</span> <span style="font-weight:bold; color:#fff;">${item.owned ? item.name : '？？？'}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
+        }
+        function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
+
+        async function runGacha(times) {
+            const cost = (times === 10000) ? 10000000 : 1000 * times;
+            if(money < cost) return alert("金欠です！");
+            
+            money -= cost; updateUI(); missionStats.gachaed += times;
+            const display = document.getElementById('gacha-result-display');
+            display.innerHTML = ''; let results = [];
+            
+            for(let i=0; i<times; i++) {
+                const r = Math.random() * 100;
+                let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && it.id !== 's_raitei' && !it.isEvolved && it.id !== 's_muda');
+                let pick;
+
+                if (r < 0.0001) {
+                    pick = pool.find(it => it.id === 'c_rampage'); 
+                }
+                else if (r < 0.001) {
+                    pick = pool.find(it => it.id === 'c_seimaro');
+                } 
+                else if (r < 0.0011) { 
+                    pick = pool.find(it => it.id === 'ev_kazu'); 
+                } else if (r < 0.0101) { 
+                    pick = pool.find(it => it.id === 'c1'); 
+                } else if(r < 5) { 
+                    const ssrPool = pool.filter(it => it.rarity === 'SSR'); pick = ssrPool[Math.floor(Math.random() * ssrPool.length)]; 
+                } else if(r < 25) { 
+                    const srPool = pool.filter(it => it.rarity === 'SR'); pick = srPool[Math.floor(Math.random() * srPool.length)]; 
+                } else if(r < 55) { 
+                    const rPool = pool.filter(it => it.rarity === 'R'); pick = rPool[Math.floor(Math.random() * rPool.length)]; 
+                } else { 
+                    const basicPool = pool.filter(it => it.rarity === 'BASIC'); pick = basicPool[Math.floor(Math.random() * basicPool.length)]; 
+                }
+                if(!pick) pick = items.find(it => it.id === 'c20'); results.push(pick);
+            }
+            
+            // 最高レアリティが含まれているかチェックして演出を強化
+            const hasSuperRare = results.some(p => p.rarity === 'UZ' || p.rarity === 'X');
+
+            document.getElementById('gacha-box').classList.add('gacha-shake');
+            await new Promise(r => setTimeout(r, 1000));
+            
+            const flashOverlay = document.getElementById('gacha-flash-overlay');
+            if(hasSuperRare) flashOverlay.classList.add('gacha-flash-super');
+            flashOverlay.style.display = 'block'; 
+            
+            await new Promise(r => setTimeout(r, hasSuperRare ? 800 : 500)); 
+            
+            flashOverlay.style.display = 'none';
+            flashOverlay.classList.remove('gacha-flash-super');
+            document.getElementById('gacha-box').classList.remove('gacha-shake');
+
+            if(times > 1000) {
+                const fragment = document.createDocumentFragment();
+                results.forEach((p, idx) => {
+                    p.owned = true;
+                    if(p.rarity === 'SSR' || p.rarity === 'UZ' || p.rarity === 'X' || idx % 50 === 0) {
+                        const l = document.createElement('div');
+                        l.className = `res-line ${p.rarity}`;
+                        l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`;
+                        // 大量処理時はアニメーションディレイをかけすぎると重くなるため制限
+                        l.style.animationDelay = `${(idx % 20) * 0.02}s`;
+                        fragment.appendChild(l);
+                    }
+                });
+                display.appendChild(fragment);
+            } else {
+                results.forEach((p, idx) => { 
+                    p.owned = true; 
+                    const l = document.createElement('div'); 
+                    l.className = `res-line ${p.rarity}`; 
+                    l.innerHTML = `<span>${p.icon || '🎁'} ${p.name}</span><span>[${p.rarity}]</span>`; 
+                    l.style.animationDelay = `${idx * 0.05}s`;
+                    display.appendChild(l); 
+                });
+            }
+            display.scrollTop = display.scrollHeight; saveGame(); updateUI();
+        }
+
+        const gameField = document.getElementById('game-field');
+        const isHamEquipped = () => equipped.char.id === 'c_scarlet_ham' || equipped.char.id === 'c_scarlet_ham_uz';
+
+        const handleTouchMove = (e) => {
+            if (!isPlaying || !isHamEquipped()) return;
+            e.preventDefault(); 
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && (el.classList.contains('grass') || el.classList.contains('egg')) && !el.classList.contains('plucking')) {
+                const item = el.closest('.item');
+                if (item) pluck(item);
+            }
+        };
+
+        gameField.addEventListener('touchmove', handleTouchMove, { passive: false });
+        gameField.addEventListener('pointermove', (e) => {
+            if (!isPlaying || !isHamEquipped()) return;
+            if (e.pointerType === 'mouse' && e.buttons !== 1) return;
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if (el && (el.classList.contains('grass') || el.classList.contains('egg')) && !el.classList.contains('plucking')) {
+                const item = el.closest('.item');
+                if (item) pluck(item);
+            }
+        });
+
+        function spawn() {
+            if(!isPlaying) return; const field = document.getElementById('game-field');
+            for(let i=0; i<9; i++) { const g = document.createElement('div'); g.className = 'item grass'; g.style.left = Math.random()*85+"%"; g.style.top = Math.random()*80+"%"; g.innerHTML = '<div class="grass-center"></div>'; g.onclick = function(){ pluck(this); }; field.appendChild(g); }
+            const egg = document.createElement('div'); egg.className = 'item egg'; egg.innerText = '🥚';
+            let px = Math.random()*80, py = Math.random()*75, vx = (Math.random()-0.5)*2.5, vy = (Math.random()-0.5)*2.5; egg.style.left = px+"%"; egg.style.top = py+"%";
+            const move = setInterval(() => { if(!isPlaying || !egg.parentNode){ clearInterval(move); return; } if(isSkillActive && equipped.skill.id === 's3') return; px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1; egg.style.left=px+"%"; egg.style.top=py+"%"; },30);
+            egg.onclick = () => { 
+                if(isHamEquipped()) {
+                    pluck(egg);
+                } else if(equipped.char.id === 'c_seimaro' || equipped.char.id === 'c_seimaro_uz') {
+                    popText(egg.style.left, egg.style.top, "100倍ブースト！", "pink");
+                    const originalRate = equipped.char.rate;
+                    equipped.char.rate = 100;
+                    setTimeout(() => { equipped.char.rate = originalRate; }, 5000);
+                    egg.remove();
+                } else if(equipped.char.id === 'c_rampage_venom') {
+                    let randomGain = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                    money += randomGain; missionStats.earned += randomGain; sessionScore += randomGain;
+                    popText(egg.style.left, egg.style.top, `+${randomGain}`, "white");
+                    updateUI(); egg.remove();
+                } else if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') { 
+                    let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0; 
+                    if(b>0){ money+=b; missionStats.earned+=b; sessionScore+=b; updateUI(); } egg.remove(); 
+                } else { endGame("卵だ！"); } 
+            }; field.appendChild(egg);
+        }
+
+        function pluck(el) {
+            if(el.classList.contains('plucking')) return;
+            let currentRate = equipped.char.rate;
+            if(equipped.char.id === 'c_rampage' || equipped.char.id === 'c_rampage_venom') {
+                currentRate = Math.floor(Math.random() * 100) + 1;
+            }
+            let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0;
+            let feverMult = (isFever) ? 3 : 1;
+            let gain = Math.floor(100 * (currentRate + speedBonus) * feverMult * (1+getCollectionBonus()));
+            money += gain; sessionScore += gain; missionStats.earned += gain; missionStats.plucked++;
+            feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
+            createParticles(el.style.left, el.style.top); 
+            let popMsg = (isSkillActive && equipped.skill.id === 's_muda') ? "無駄" : `+${gain}`;
+            popText(el.style.left, el.style.top, popMsg);
+            el.classList.add('plucking');
+            setTimeout(() => { el.remove(); if(document.querySelectorAll('.grass:not(.plucking)').length === 0) { timeLeft+=5; spawn(); } }, 280);
+            updateUI();
+            if(isOnlineMode) syncOnlineScore();
+        }
+
+        function triggerSkill() {
+            if(skillCount < 100 || isSkillActive) return;
+            skillCount = 0; isSkillActive = true; const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
+            
+            if(isHamEquipped()) {
+                popText("50%", "40%", "金権覇者の粛清！", "gold");
+                field.classList.add('skill-active-field');
+                const allGrass = document.querySelectorAll('.grass:not(.plucking)');
+                allGrass.forEach(g => pluck(g));
+                const allEggs = document.querySelectorAll('.egg');
+                allEggs.forEach(e => { popText(e.style.left, e.style.top, "消去！", "white"); e.remove(); });
+                setTimeout(() => { isSkillActive = false; field.classList.remove('skill-active-field'); }, 1000);
+                return;
+            }
+
+            if(equipped.char.id === 'c_rampage_venom') {
+                field.classList.add('ultimate-field-bg');
+                popText("50%", "40%", "ヴェノム・バースト！！", "white");
+                startFever();
+                const interval = setInterval(() => { 
+                    const ts = document.querySelectorAll('.grass:not(.plucking)'); 
+                    if(ts.length > 0) { for(let i=0; i<10; i++) if(ts[i]) pluck(ts[i]); }
+                    document.querySelectorAll('.egg').forEach(e => e.remove());
+                }, 20);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('ultimate-field-bg'); }, 5000);
+                return;
+            }
+
+            if(equipped.char.id === 'c_seimaro' && equipped.skill.id === 's1') {
+                field.style.animation = "skill-shake 0.05s infinite, lightning-flash 0.1s infinite alternate";
+                const style = document.createElement('style');
+                style.id = "lightning-effect";
+                style.innerHTML = `@keyframes lightning-flash { from { filter: brightness(1) contrast(1); } to { filter: brightness(3) contrast(1.5); background: #fff; } }`;
+                document.head.appendChild(style);
+                const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) pluck(ts[0]); }, 50);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('lightning-effect')?.remove(); }, 3000);
+                return;
+            }
+
+            if(equipped.skill.id === 's3') {
+                field.style.filter = "grayscale(1) invert(1) contrast(1.5)"; field.classList.add('skill-active-field'); popText("50%", "40%", "カズキング・ザ・ワールド！", "white");
+                const worldInterval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 30);
+                setTimeout(() => { isSkillActive = false; clearInterval(worldInterval); field.style.filter = "none"; field.classList.remove('skill-active-field'); }, 4000); return;
+            }
+            if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
+            if(equipped.skill.id === 's4') {
+                popText("50%", "40%", "草の呼吸・壱ノ型！", "cyan"); const interval = setInterval(() => { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); }, 100);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000); return;
+            }
+            if(equipped.skill.id === 's5') {
+                popText("50%", "40%", "ZENの導き...", "gold"); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 5000); return;
+            }
+            if(equipped.skill.id === 's6') {
+                popText("50%", "40%", "カズキング・フラッシュ！", "white"); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
+                setTimeout(() => { isSkillActive = false; }, 500); return;
+            }
+
+            if(equipped.skill.id === 's_muda') {
+                if(equipped.char.id !== 'c_rampage' && equipped.char.id !== 'c_rampage_venom') {
+                    popText("50%", "40%", "失敗...（ランペイジ専用）", "red");
+                    isSkillActive = false;
+                    return;
+                }
+                const overlay = document.getElementById('gacha-flash-overlay');
+                overlay.style.background = "#000";
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.display = 'none', 100);
+                
+                field.classList.add('muda-crack-effect');
+                popText("50%", "40%", "無駄ァ！！", "#b266ff");
+                
+                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
+                document.querySelectorAll('.egg').forEach(e => e.remove());
+                
+                setTimeout(() => { 
+                    isSkillActive = false; 
+                    field.classList.remove('muda-crack-effect'); 
+                    overlay.style.background = "";
+                }, 600);
+                return;
+            }
+
+            const isX = equipped.char.rarity === 'X'; field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
+            let ultText; if(isX){ field.classList.add('ultimate-field-bg'); ultText = document.createElement('div'); ultText.className='ultimate-text'; ultText.innerHTML="全・知・全・能<br><span style='font-size:35px'>ULTIMATE ZEN OVERDRIVE</span>"; field.appendChild(ultText); }
+            const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); if(isX) document.querySelectorAll('.egg').forEach(e => e.remove()); }, isX?20:(equipped.char.isEvolved?70:150));
+            setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('skill-active-field', 'ultimate-field-bg'); icon.classList.remove('skill-icon-anim'); if(ultText) ultText.remove(); }, 3000);
+        }
+
+        function createParticles(x, y) {
+            const field = document.getElementById('game-field');
+            const colors = ['var(--grass-light)', '#aaff00', 'var(--gold)', '#ffffff'];
+            for(let i=0; i<8; i++) { 
+                const p = document.createElement('div'); 
+                p.className='particle'; 
+                p.style.left=x; p.style.top=y; 
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                p.style.color = p.style.backgroundColor;
+                p.style.setProperty('--dx', (Math.random()-0.5)*300+"px"); 
+                p.style.setProperty('--dy', (Math.random()-0.5)*300+"px"); 
+                p.style.width = Math.random() * 10 + 5 + "px"; 
+                p.style.height = p.style.width;
+                p.style.animation="scatter 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards"; 
+                field.appendChild(p); 
+                setTimeout(()=>p.remove(),500); 
+            }
+        }
+        function popText(x, y, txt, color="var(--gold)") { 
+            const p = document.createElement('div'); 
+            p.className='pop-text'; 
+            p.innerText=txt; 
+            p.style.left=x; p.style.top=y; 
+            p.style.color=color; 
+            const rot = (Math.random() - 0.5) * 20;
+            p.style.setProperty('--rot', rot + "deg");
+            document.getElementById('game-field').appendChild(p); 
+            setTimeout(()=>p.remove(),600); 
+        }
+
+        function startFever() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg) saturate(2) contrast(1.2)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000); }
+
+        function startGame() {
+            isPlaying=true; timeLeft=30; sessionScore=0; openLayer('none'); document.querySelectorAll('.item').forEach(i=>i.remove());
+            if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
+            spawn();
+            const loop = setInterval(() => {
+                if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
+                if(!isSkillActive) skillCount = Math.min(100, skillCount + (equipped.char.rarity==='X'?100:equipped.char.isEvolved?1.6:0.3));
+                updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0) endGame("終了"); }
+            }, 100);
+        }
+
+        function startOnlineMatch() {
+            if(!window.db) return alert("Firebase読み込み中...");
+            isOnlineMode = true; sessionScore = 0;
+            document.getElementById('opp-score-display').style.display = 'block';
+            document.getElementById('opp-m-val').innerText = "0";
+            document.getElementById('opp-name-label').innerText = "相手";
+            const roomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
+            window.dbSet(roomRef, { name: userName, score: 0, status: "playing" });
+            window.dbOnDisconnect(roomRef).remove();
+            const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
+            window.dbOnValue(allPlayersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (isPlaying && isOnlineMode) {
+                    let opponentExists = false;
+                    if (data) { for (let key in data) { if (key !== playerId) opponentExists = true; } }
+                    if (!opponentExists) {
+                        isPlaying = false;
+                        document.getElementById('online-result').innerText = "相手がリタイアしました。あなたの不戦勝です！ 🎉";
+                        openLayer('end-screen'); isOnlineMode = false; return;
+                    }
+                }
+                if(!data) return;
+                for(let key in data) {
+                    if(key !== playerId && data[key].status === "playing") {
+                        document.getElementById('opp-name-label').innerText = data[key].name;
+                        document.getElementById('opp-m-val').innerText = Math.floor(data[key].score).toLocaleString();
                     }
                 }
             });
+            startGame();
         }
 
-        function saveGame() {
-            const data = {
-                money,
-                ownedIds: items.filter(i=>i.owned).map(i=>i.id),
-                equipped: {
-                    char: equipped.char.id,
-                    bg: equipped.bg.id,
-                    skill: equipped.skill ? equipped.skill.id : null,
-                    bgm: equipped.bgm.id
-                },
-                missionStats,
-                lastDate: new Date().toDateString()
-            };
-            localStorage.setItem('zenSurvival_v15', JSON.stringify(data));
+        function syncOnlineScore() {
+            if(!isOnlineMode) return;
+            const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
+            window.dbSet(myRoomRef, { name: userName, score: Math.floor(sessionScore), status: "playing" });
         }
 
-        function loadGame() {
-            const raw = localStorage.getItem('zenSurvival_v15');
-            if(raw) {
-                const data = JSON.parse(raw);
-                money = data.money || 0;
-                if(data.ownedIds) {
-                    data.ownedIds.forEach(id => {
-                        const it = items.find(i=>i.id === id);
-                        if(it) it.owned = true;
-                    });
-                }
-                if(data.equipped) {
-                    equipped.char = items.find(i=>i.id === data.equipped.char) || items[0];
-                    equipped.bg = items.find(i=>i.id === data.equipped.bg) || items[4];
-                    equipped.skill = items.find(i=>i.id === data.equipped.skill) || null;
-                    equipped.bgm = items.find(i=>i.id === data.equipped.bgm) || items[13];
-                }
-                missionStats = data.missionStats || { plucked:0, gachaed:0, earned:0 };
-                
-                // Initialize daily missions
-                const today = new Date().toDateString();
-                if(data.lastDate !== today) {
-                    generateDailyMissions();
-                }
-            } else {
-                generateDailyMissions();
+        function endGame(msg) {
+            isPlaying = false;
+            let finalScore = Math.floor(sessionScore);
+            document.getElementById('res-money').innerText = Math.floor(money).toLocaleString();
+            if(isOnlineMode) {
+                const myRoomRef = window.dbRef(window.db, 'rooms/' + currentRoomId + '/' + playerId);
+                window.dbSet(myRoomRef, { name: userName, score: finalScore, status: "finished" });
+                const allPlayersRef = window.dbRef(window.db, 'rooms/' + currentRoomId);
+                window.dbOnValue(allPlayersRef, (snapshot) => {
+                    const data = snapshot.val();
+                    let oppScore = 0, oppName = "対戦相手";
+                    for(let key in data) { if(key !== playerId) { oppScore = data[key].score; oppName = data[key].name; } }
+                    if(oppScore > 0 || (data && Object.keys(data).length > 1)) {
+                        let winMsg = finalScore > oppScore ? "WIN! 🎉" : (finalScore < oppScore ? "LOSE... 💀" : "DRAW 🤝");
+                        document.getElementById('online-result').innerText = `${oppName}: ${oppScore.toLocaleString()}円 - ${winMsg}`;
+                    }
+                });
             }
+            openLayer('end-screen'); isOnlineMode = false; saveGame();
         }
 
-        function generateDailyMissions() {
-            missions = [
-                { id: 1, type: 'pluck', text: '草を100本抜く', target: 100, progress: 0, reward: 1000, done: false },
-                { id: 2, type: 'earn', text: '5000円稼ぐ', target: 5000, progress: 0, reward: 2000, done: false },
-                { id: 3, type: 'pluck', text: '草を500本抜く', target: 500, progress: 0, reward: 5000, done: false }
-            ];
-            missionStats = { plucked: 0, gachaed: 0, earned: 0 };
+        function giveUp() { isPlaying=false; isOnlineMode=false; openLayer('start-screen'); }
+        function saveGame() { localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ money, owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, missions, missionStats, lastMissionDate, currentTitle, userName })); }
+        function loadGame() {
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
+            if(data) {
+                money = data.money; data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
+                missions = data.missions || []; missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: 0 }; lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし"; userName = data.userName || "ぜん";
+                document.getElementById('game-field').className = equipped.bg.className;
+            }
+            initMissions(); updateUI(); openLayer('start-screen');
         }
-
-        window.onload = init;
     </script>
 </body>
 </html>
