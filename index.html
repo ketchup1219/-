@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>草抜きサバイバル - せいまろ参戦イベント！ -</title>
+    <title>草抜きサバイバル - ヴェノム覚醒 -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; }
         body { 
@@ -22,12 +22,11 @@
             border: 3px solid #333; border-radius: 20px; overflow: hidden;
             transition: 0.3s;
         }
-        /* 背景バリエーション */
         #game-field.bg-desert { background: #4d3319; border-color: #d2b48c; }
         #game-field.bg-cyber { background: #000520; border-color: #00d2ff; }
         #game-field.bg-volcano { background: #2b0000; border-color: #ff4500; }
         #game-field.bg-night { background: #0a0a20; border-color: #483d8b; }
-        #game-field.bg-sakura { background: #2d1a1a; border-color: #ffb7c5; box-shadow: inset 0 0 50px #ffb7c533; }
+        #game-field.bg-櫻 { background: #2d1a1a; border-color: #ffb7c5; box-shadow: inset 0 0 50px #ffb7c533; }
         #game-field.bg-gold { background: #3d3300; border-color: #ffd700; }
         #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; }
         #game-field.bg-deepsea { background: #00121a; border-color: #008b8b; }
@@ -35,6 +34,12 @@
         @keyframes dim-pulse { from { background: #1a001a; } to { background: #00001a; } }
 
         .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.2s infinite alternate !important; border-width: 8px !important; }
+        
+        /* 無駄：画面割れエフェクト */
+        .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-flash 0.05s infinite !important; border: 10px solid #fff !important; }
+        @keyframes muda-shake { 0% { transform: translate(8px, 8px); } 25% { transform: translate(-8px, -8px); } 50% { transform: translate(-8px, 8px); } 75% { transform: translate(8px, -8px); } 100% { transform: translate(0,0); } }
+        @keyframes muda-flash { 0% { background: #fff; } 50% { background: #000; } 100% { background: #333; } }
+
         .ultimate-field-bg { animation: ultimate-rainbow 0.2s infinite linear !important; }
         @keyframes ultimate-rainbow { 0% { background: #ff0000; } 20% { background: #ffff00; } 40% { background: #00ff00; } 60% { background: #00ffff; } 80% { background: #0000ff; } 100% { background: #ff00ff; } }
         @keyframes skill-shake { 0% { transform: translate(4px, 4px); } 50% { transform: translate(-4px, -4px); } 100% { transform: translate(4px, -4px); } }
@@ -231,7 +236,7 @@
             <button class="btn" onclick="openLayer('start-screen')" style="margin-top:10px; background:#444; width:100px;">戻る</button>
         </div>
 
-        <div id="end-screen" class="overlay" style="display:none retail-pricing;">
+        <div id="end-screen" class="overlay" style="display:none">
             <h2 id="end-title" style="color:red; font-size:40px; text-shadow: 0 0 15px red;">GAME OVER</h2>
             <p id="end-msg">タイムアップ！</p>
             <p>最終金額: <span id="res-money" style="font-size:24px; color:var(--gold);">0</span>円</p>
@@ -302,15 +307,17 @@
         ];
 
         const items = [
-            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 1000000000000000, isEvolved: true },
-            { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 100000, isEvolved: true },
-            { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
-            { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 100, isEvolved: true },
-            { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 100, isEvolved: true },
-            { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 100, isEvolved: true },
-            { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で5秒1万倍/雷霆蒼破', rate: 100, isEvolved: true },
+            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金100倍/卵抜き/huh卵消去/必殺即チャージ', rate: 100, isEvolved: true },
+            { id: 'c_rampage_venom', type: 'char', name: 'ランペイジ・イット(ヴェノム)', icon: '☣️', owned: false, rarity: 'X', info: '進化：金100倍/全スキル自動発動', rate: 100, isEvolved: true },
+            { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金100倍/全スキル自動発動/不死身', rate: 50, isEvolved: true },
+            { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 50, isEvolved: true },
+            { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で+1000円', rate: 30, isEvolved: true },
+            { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金100倍/卵無効', rate: 30, isEvolved: true },
+            { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金100倍', rate: 30, isEvolved: true },
+            { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金100倍/卵で5秒100倍/雷霆蒼破', rate: 50, isEvolved: true },
             { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金45倍/huh強化/必殺超速', rate: 45, isEvent: true },
-            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: false, rarity: 'SSR', info: '金10倍/卵で5秒1万倍/huhで雷', rate: 10 },
+            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: true, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
+            { id: 'c_rampage', type: 'char', name: 'ランペイジイット', icon: '🦖', owned: false, rarity: 'UZ', info: '金15倍/草を抜くほど速度UP', rate: 50 },
             { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵無効', rate: 10 },
             { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金7倍/卵で+100円', rate: 7 },
             { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金7.5倍/卵無効', rate: 7.5 },
@@ -337,7 +344,7 @@
             { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: false, rarity: 'SR', info: 'ネオンの輝き' },
             { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: false, rarity: 'SSR', info: '灼熱の地' },
             { id: 'b5', type: 'bg', name: '夜の草原', className: 'bg-night', owned: false, rarity: 'R', info: '静かな夜' },
-            { id: 'b6', type: 'bg', name: '桜吹雪', className: 'bg-sakura', owned: false, rarity: 'SR', info: '舞い散る花びら' },
+            { id: 'b6', type: 'bg', name: '櫻吹雪', className: 'bg-sakura', owned: false, rarity: 'SR', info: '舞い散る花びら' },
             { id: 'b7', type: 'bg', name: '黄金郷', className: 'bg-gold', owned: false, rarity: 'SSR', info: '富の象徴' },
             { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: false, rarity: 'UZ', info: '銀河の果て' },
             { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: false, rarity: 'SSR', info: '水圧と闇' },
@@ -349,6 +356,7 @@
             { id: 's4', type: 'skill', name: '草の呼吸', owned: false, rarity: 'SSR', info: '超高速で草を抜く(4秒)' },
             { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
+            { id: 's_muda', type: 'skill', name: '無駄', owned: false, rarity: 'X', info: 'パンチですべてを破壊するエフェクト。ランペイジ系専用', rate: 100 },
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
         ];
 
@@ -435,9 +443,10 @@
         function renderEvolve() {
             const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn');
             const cost = 100000000;
-            if(equipped.char.rarity === 'SSR' && !equipped.char.isEvolved) { target.innerHTML = `<p>進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">必要経費: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
+            if((equipped.char.rarity === 'SSR' || equipped.char.id === 'c_rampage') && !equipped.char.isEvolved) { target.innerHTML = `<p>進化対象：${equipped.char.name}</p><p style="font-size:12px;color:#aaa;">必要経費: ${cost.toLocaleString()}円</p>`; btn.style.display = "block"; btn.disabled = money < cost; }
             else { target.innerHTML = `<p>進化対象がありません</p>`; btn.style.display = "none"; }
         }
+
         function executeEvolve() {
             const cost = 100000000; if(money < cost) return; money -= cost;
             let evolveId = '';
@@ -451,8 +460,19 @@
                     evolveId = 'c_seimaro_uz'; 
                     items.find(i => i.id === 's_raitei').owned = true;
                     break;
+                case 'c_rampage': 
+                    evolveId = 'c_rampage_venom';
+                    const mudaSkill = items.find(i => i.id === 's_muda');
+                    if(mudaSkill) mudaSkill.owned = true;
+                    break;
             }
-            if(evolveId) { const ult = items.find(i => i.id === evolveId); ult.owned = true; equipped.char = ult; if(evolveId === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } alert(`進化成功！`); }
+            if(evolveId) { 
+                const ult = items.find(i => i.id === evolveId); 
+                ult.owned = true; 
+                equipped.char = ult; 
+                if(evolveId === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } 
+                alert(`進化成功！ ${ult.name} を手に入れた！`); 
+            }
             openLayer('start-screen'); saveGame(); updateUI();
         }
 
@@ -472,17 +492,15 @@
             const display = document.getElementById('gacha-result-display');
             display.innerHTML = ''; let results = [];
             
-            const now = new Date();
-            const isCampaign = now <= new Date('2026-03-27T00:00:00');
-
             for(let i=0; i<times; i++) {
                 const r = Math.random() * 100;
-                let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && it.id !== 's_raitei' && !it.isEvolved);
+                let pool = items.filter(it => it.id !== 's3' && it.id !== 'fusion_zen_kazu' && it.id !== 's_raitei' && !it.isEvolved && it.id !== 's_muda');
                 let pick;
 
-                if (isCampaign && r < 1.0) {
+                if (r < 0.001) {
                     pick = pool.find(it => it.id === 'c_seimaro');
-                } else if (r < 0.0001) { 
+                } 
+                else if (r < 0.0011) { 
                     pick = pool.find(it => it.id === 'ev_kazu'); 
                 } else if (r < 0.0101) { 
                     pick = pool.find(it => it.id === 'c1'); 
@@ -513,11 +531,16 @@
             const move = setInterval(() => { if(!isPlaying || !egg.parentNode){ clearInterval(move); return; } if(isSkillActive && equipped.skill.id === 's3') return; px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1; egg.style.left=px+"%"; egg.style.top=py+"%"; },30);
             egg.onclick = () => { 
                 if(equipped.char.id === 'c_seimaro' || equipped.char.id === 'c_seimaro_uz') {
-                    popText(egg.style.left, egg.style.top, "10000倍ブースト！", "pink");
+                    popText(egg.style.left, egg.style.top, "100倍ブースト！", "pink");
                     const originalRate = equipped.char.rate;
-                    equipped.char.rate = 10000;
+                    equipped.char.rate = 100;
                     setTimeout(() => { equipped.char.rate = originalRate; }, 5000);
                     egg.remove();
+                } else if(equipped.char.id === 'c_rampage_venom') {
+                    let randomGain = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                    money += randomGain; missionStats.earned += randomGain; sessionScore += randomGain;
+                    popText(egg.style.left, egg.style.top, `+${randomGain}`, "white");
+                    updateUI(); egg.remove();
                 } else if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X') { 
                     let b = (equipped.char.isEvolved || equipped.char.rarity==='X')?1000:0; 
                     if(b>0){ money+=b; missionStats.earned+=b; sessionScore+=b; updateUI(); } egg.remove(); 
@@ -527,10 +550,17 @@
 
         function pluck(el) {
             if(el.classList.contains('plucking')) return;
-            let gain = Math.floor(100 * equipped.char.rate * (isFever?3:1) * (1+getCollectionBonus()));
+            let currentRate = equipped.char.rate;
+            if(equipped.char.id === 'c_rampage' || equipped.char.id === 'c_rampage_venom') {
+                currentRate = Math.floor(Math.random() * 100) + 1;
+            }
+            let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0;
+            let gain = Math.floor(100 * (currentRate + speedBonus) * (isFever?3:1) * (1+getCollectionBonus()));
             money += gain; sessionScore += gain; missionStats.earned += gain; missionStats.plucked++;
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
-            createParticles(el.style.left, el.style.top); popText(el.style.left, el.style.top, `+${gain}`);
+            createParticles(el.style.left, el.style.top); 
+            let popMsg = (isSkillActive && equipped.skill.id === 's_muda') ? "無駄" : `+${gain}`;
+            popText(el.style.left, el.style.top, popMsg);
             el.classList.add('plucking');
             setTimeout(() => { el.remove(); if(document.querySelectorAll('.grass:not(.plucking)').length === 0) { timeLeft+=5; spawn(); } }, 200);
             updateUI();
@@ -541,6 +571,19 @@
             if(skillCount < 100 || isSkillActive) return;
             skillCount = 0; isSkillActive = true; const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
             
+            if(equipped.char.id === 'c_rampage_venom') {
+                field.classList.add('ultimate-field-bg');
+                popText("50%", "40%", "ヴェノム・バースト！！", "white");
+                startFever();
+                const interval = setInterval(() => { 
+                    const ts = document.querySelectorAll('.grass:not(.plucking)'); 
+                    if(ts.length > 0) { for(let i=0; i<10; i++) if(ts[i]) pluck(ts[i]); }
+                    document.querySelectorAll('.egg').forEach(e => e.remove());
+                }, 20);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('ultimate-field-bg'); }, 5000);
+                return;
+            }
+
             if(equipped.char.id === 'c_seimaro' && equipped.skill.id === 's1') {
                 field.style.animation = "skill-shake 0.05s infinite, lightning-flash 0.1s infinite alternate";
                 const style = document.createElement('style');
@@ -583,7 +626,28 @@
                 popText("50%", "40%", "カズキング・フラッシュ！", "white"); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
                 setTimeout(() => { isSkillActive = false; }, 500); return;
             }
-            const isX = equipped.char.id === 'fusion_zen_kazu'; field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
+
+            /* 無駄ァ！：画面割れエフェクト強化版 */
+            if(equipped.skill.id === 's_muda') {
+                if(equipped.char.id !== 'c_rampage' && equipped.char.id !== 'c_rampage_venom') {
+                    popText("50%", "40%", "失敗...（ランペイジ専用）", "red");
+                    isSkillActive = false;
+                    return;
+                }
+                
+                // 画面全体フラッシュ
+                document.getElementById('gacha-flash-overlay').style.display = 'block';
+                setTimeout(() => document.getElementById('gacha-flash-overlay').style.display = 'none', 100);
+
+                field.classList.add('muda-crack-effect');
+                popText("50%", "40%", "無駄ァ！！", "white");
+                document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g));
+                document.querySelectorAll('.egg').forEach(e => e.remove());
+                setTimeout(() => { isSkillActive = false; field.classList.remove('muda-crack-effect'); }, 600);
+                return;
+            }
+
+            const isX = equipped.char.rarity === 'X'; field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim');
             let ultText; if(isX){ field.classList.add('ultimate-field-bg'); ultText = document.createElement('div'); ultText.className='ultimate-text'; ultText.innerHTML="全・知・全・能<br><span style='font-size:30px'>ULTIMATE ZEN OVERDRIVE</span>"; field.appendChild(ultText); }
             const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); if(isX) document.querySelectorAll('.egg').forEach(e => e.remove()); }, isX?20:(equipped.char.isEvolved?70:150));
             setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('skill-active-field', 'ultimate-field-bg'); icon.classList.remove('skill-icon-anim'); if(ultText) ultText.remove(); }, 3000);
