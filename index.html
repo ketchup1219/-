@@ -706,7 +706,7 @@
                 field.style.animation = "skill-shake 0.05s infinite, lightning-flash 0.1s infinite alternate";
                 const style = document.createElement('style');
                 style.id = "lightning-effect";
-                style.innerHTML = `@keyframes lightning-flash { from { filter: brightness(1) contrast(1); } to { filter: brightness(3) contrast(1.5); background: #fff; } }`;
+                style.innerHTML = `@keyframes lightnconst itemsOnField = ...ing-flash { from { filter: brightness(1) contrast(1); } to { filter: brightness(3) contrast(1.5); background: #fff; } }`;
                 document.head.appendChild(style);
                 const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) pluck(ts[0]); }, 50);
                 setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('lightning-effect')?.remove(); }, 3000);
@@ -720,8 +720,23 @@
             }
             if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
             if(equipped.skill.id === 's4') {
-                popText("50%", "40%", "雷霆蒼破！", "cyan"); const interval = setInterval(() => { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); }, 100);
-                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000); return;
+                popText("50%", "40%", "雷霆蒼破！", "cyan");
+                const interval = setInterval(() => {
+                    // ★修正：草(.grass)だけでなく、卵(.egg)も一緒に探す
+                    const targets = document.querySelectorAll('.grass:not(.plucking), .egg');
+                    targets.forEach(g => {
+                        if (g.classList.contains('egg')) {
+                            // 卵なら金色の火花を出して消す（ミスにならない）
+                            createParticles(g.offsetLeft + 35, g.offsetTop + 35, 'var(--gold)');
+                            g.remove();
+                        } else {
+                            // 草なら普通に抜く
+                            pluck(g);
+                        }
+                    });
+                }, 100);
+                setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000);
+                return;
             }
             if(equipped.skill.id === 's5') {
                 popText("50%", "40%", "ZENの導き...", "gold"); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200);
