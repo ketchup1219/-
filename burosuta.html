@@ -20,7 +20,6 @@
         #upgrade-panel { width: 100%; max-width: 500px; background: rgba(0,0,0,0.9); border: 3px solid #ffd700; border-radius: 15px; padding: 20px; margin-top: 20px; display: none; text-align: center; margin-bottom: 40px;}
         .play-btn { width: 100%; padding: 15px; font-size: 20px; background: #4caf50; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* 操作UI */
         #mobile-controls { position: fixed; bottom: 40px; right: 40px; display: none; z-index: 100; }
         .attack-btn { width: 90px; height: 90px; background: rgba(255,0,0,0.7); border: 4px solid white; border-radius: 50%; color: white; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
         .attack-btn:active { transform: scale(0.9); background: rgba(255,0,0,0.9); }
@@ -171,20 +170,14 @@
         const now = Date.now();
         if(now - myLocal.lastShot < 250) return;
         myLocal.lastShot = now;
-
-        let vx = 0, vy = -15;
+        let vx = 0, vy = -15; 
         if(tx !== null && ty !== null) {
             const angle = Math.atan2(ty - myLocal.y, tx - myLocal.x);
             vx = Math.cos(angle) * 18;
             vy = Math.sin(angle) * 18;
         }
-
         const bid = 'b_' + myId + '_' + now;
-        // Firebaseに弾を追加（他プレイヤー用）
-        const bData = { x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId };
-        bulletsRef.child(bid).set(bData);
-        // ローカルに即時反映（自分の表示用）
-        bullets[bid] = bData;
+        bulletsRef.child(bid).set({ x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId });
     }
 
     window.addEventListener('keydown', e => { 
@@ -192,28 +185,16 @@
         if(e.code === 'Space' || e.code === 'Enter') shoot(); 
     });
     window.addEventListener('keyup', e => keys[e.code] = false);
-    
-    canvas.addEventListener('mousedown', e => {
-        if(isPlaying) shoot(e.clientX, e.clientY);
-    });
-
-    document.getElementById('atk-btn').addEventListener('touchstart', e => {
-        e.preventDefault();
-        shoot(); 
-    });
+    canvas.addEventListener('mousedown', e => { if(isPlaying) shoot(e.clientX, e.clientY); });
+    document.getElementById('atk-btn').addEventListener('touchstart', e => { e.preventDefault(); shoot(); });
 
     playersRef.on('value', s => { 
         players = s.val() || {}; 
         if(players[myId]) myLocal.hp = players[myId].hp; 
     });
-    bulletsRef.on('value', s => {
-        const cloudBullets = s.val() || {};
-        // 自分の弾はローカルを優先、他人の弾をマージ
-        bullets = { ...bullets, ...cloudBullets };
-    });
+    bulletsRef.on('value', s => { bullets = s.val() || {}; });
 
     function drawChar(x, y, icon, name, hp, maxHp, isMe) {
-        if(!icon) return;
         ctx.font = 'bold 12px sans-serif';
         ctx.fillStyle = isMe ? '#ffff00' : 'white';
         ctx.textAlign = 'center';
@@ -231,73 +212,50 @@
         if(!isPlaying) return;
         ctx.fillStyle = '#4a7c44';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         let mvx = 0, mvy = 0;
         if(keys['ArrowUp'] || keys['KeyW']) mvy = -7;
         if(keys['ArrowDown'] || keys['KeyS']) mvy = 7;
         if(keys['ArrowLeft'] || keys['KeyA']) mvx = -7;
         if(keys['ArrowRight'] || keys['KeyD']) mvx = 7;
-
         if(mvx !== 0 || mvy !== 0) {
             myLocal.x = Math.max(30, Math.min(canvas.width - 30, myLocal.x + mvx));
             myLocal.y = Math.max(30, Math.min(canvas.height - 30, myLocal.y + mvy));
             playersRef.child(myId).update({ x: myLocal.x, y: myLocal.y });
         }
-
         Object.keys(bullets).forEach(bid => {
             const b = bullets[bid];
             b.x += b.vx; b.y += b.vy;
             ctx.fillStyle = 'yellow';
             ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, Math.PI*2); ctx.fill();
-
             if(b.owner === myId) {
                 Object.keys(players).forEach(pid => {
-                    if(pid !== myId) {
-                        const p = players[pid];
-                        if(Math.hypot(b.x - p.x, b.y - p.y) < 35) {
-                            playersRef.child(pid).transaction(current => {
-                                if(current) current.hp -= 20;
-                                return current;
-                            });
-                            bulletsRef.child(bid).remove();
-                            delete bullets[bid];
-                        }
+                    if(pid !== myId && Math.hypot(b.x - players[pid].x, b.y - players[pid].y) < 35) {
+                        playersRef.child(pid).transaction(current => { if(current) current.hp -= 20; return current; });
+                        bulletsRef.child(bid).remove();
                     }
                 });
             }
             if(b.x < -50 || b.x > canvas.width + 50 || b.y < -50 || b.y > canvas.height + 50) {
                 if(b.owner === myId) bulletsRef.child(bid).remove();
-                delete bullets[bid];
             }
         });
-
         Object.keys(players).forEach(id => {
-            if(id === myId) return;
+            if(id === myId) return; 
             const p = players[id];
             drawChar(p.x, p.y, p.icon, p.name, p.hp, p.maxHp, false);
         });
-
-        if(myLocal.active) {
-            drawChar(myLocal.x, myLocal.y, myLocal.icon, myLocal.name, myLocal.hp, myLocal.maxHp, true);
-        }
-
-        if(myLocal.hp <= 0) {
-            alert("戦闘不能！");
-            exitGame();
-            return;
-        }
+        if(myLocal.active) drawChar(myLocal.x, myLocal.y, myLocal.icon, myLocal.name, myLocal.hp, myLocal.maxHp, true);
+        if(myLocal.hp <= 0) { alert("戦闘不能！"); exitGame(); return; }
         requestAnimationFrame(loop);
     }
 
     function exitGame() {
-        isPlaying = false;
-        myLocal.active = false;
+        isPlaying = false; myLocal.active = false;
         playersRef.child(myId).remove();
         document.getElementById('selector').style.display = 'flex';
         document.getElementById('exit-btn').style.display = 'none';
         document.getElementById('mobile-controls').style.display = 'none';
     }
-
     window.onload = init;
 </script>
 </body>
