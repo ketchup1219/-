@@ -427,14 +427,6 @@
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
             { id: 's_muda', type: 'skill', name: '無駄無駄ラッシュ', owned: false, rarity: 'X', info: 'パンチですべてを破壊する闇のエフェクト。イット系専用', rate: 100 },
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
-            { 
-    id: 'bgm_kazuking', 
-    name: 'カズキングタイジュウ', 
-    type: 'bgm', 
-    rarity: 'UZ', 
-    url: 'カズキングタイジュウフエターネキンギーニ.mp3', 
-    owned: true 
-}
             { id: 'ket_r', type: 'char', name: 'ただのケチャップ', icon: '👤', rarity: 'R', mult: 1.0, cost: 500, owned: false },
             { id: 'ket_sr', type: 'char', name: '普通のケチャップ', icon: '👤', rarity: 'SR', mult: 5, cost: 0, owned: false },
             { id: 'ket_ssr', type: 'char', name: '覚醒ケチャップ', icon: '🔥', rarity: 'SSR', mult: 15, cost: 0, owned: false },
@@ -995,12 +987,6 @@
                 updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0) endGame("終了"); }
             }, 100);
         }
-        // BGMの再生を開始
-if (equipped.bgm && equipped.bgm.url) {
-    audioBGM.src = equipped.bgm.url;
-    audioBGM.loop = true;
-    audioBGM.play().catch(e => console.log("再生エラー:", e));
-}
 
         function startOnlineMatch() {
             if(!window.db) return alert("Firebase読み込み中...");
@@ -1022,9 +1008,6 @@ if (equipped.bgm && equipped.bgm.url) {
                         document.getElementById('online-result').innerText = "相手がリタイアしました。あなたの不戦勝です！ 🎉";
                         openLayer('end-screen'); isOnlineMode = false; return;
                     }
-                    // BGMを停止
-audioBGM.pause();
-audioBGM.currentTime = 0;
                 }
                 if(!data) return;
                 for(let key in data) {
@@ -1093,25 +1076,6 @@ audioBGM.currentTime = 0;
             }
             initMissions(); updateUI(); openLayer('start-screen');
         }
-        // 画面を切り替えるための関数
-function openLayer(layerId) {
-    // 全ての画面（オーバーレイ）を一度隠す
-    document.querySelectorAll('.overlay').forEach(l => {
-        l.style.display = 'none';
-    });
-
-    // 指定された画面だけを表示する
-    const target = document.getElementById(layerId);
-    if (target) {
-        target.style.display = 'flex';
-    }
-
-    // --- ここにBGM停止の処理を入れる ---
-    if (layerId === 'start-screen' && typeof audioBGM !== 'undefined') {
-        audioBGM.pause();
-        audioBGM.currentTime = 0;
-    }
-}
     </script>
 </body>
 </html>
