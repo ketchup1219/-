@@ -987,6 +987,12 @@
                 updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0) endGame("終了"); }
             }, 100);
         }
+        // BGMの再生を開始
+if (equipped.bgm && equipped.bgm.url) {
+    audioBGM.src = equipped.bgm.url;
+    audioBGM.loop = true;
+    audioBGM.play().catch(e => console.log("再生エラー:", e));
+}
 
         function startOnlineMatch() {
             if(!window.db) return alert("Firebase読み込み中...");
@@ -1008,6 +1014,9 @@
                         document.getElementById('online-result').innerText = "相手がリタイアしました。あなたの不戦勝です！ 🎉";
                         openLayer('end-screen'); isOnlineMode = false; return;
                     }
+                    // BGMを停止
+audioBGM.pause();
+audioBGM.currentTime = 0;
                 }
                 if(!data) return;
                 for(let key in data) {
