@@ -238,15 +238,28 @@
 
         <div id="fusion-screen" class="overlay">
             <h2 style="color:cyan; text-shadow: 0 0 20px cyan, 0 0 40px #00d2ff; font-size:28px;">🌀 キャラクター合体</h2>
+            
             <div style="background:rgba(20,20,20,0.9); padding:20px; border-radius:15px; width:85%; font-size:13px; border:1px solid #00d2ff; box-shadow:0 0 20px rgba(0,210,255,0.2), inset 0 0 20px rgba(0,0,0,0.8);">
-                <p style="font-weight:bold; color:#fff; font-size:15px;">【合体条件】</p>
-                <p id="fuse-cond-1">・ｺﾞｯﾄﾞﾈｽｶｽﾞｷﾝｸﾞ(UZ) 所持</p>
-                <p id="fuse-cond-2">・ﾏｷｼﾏﾑZEN(UZ) 所持</p>
-                <p id="fuse-cond-3">・費用: 100,000,000円</p>
+                <p style="font-weight:bold; color:#fff; font-size:15px; margin-bottom:10px;">【素材を選択】</p>
+                <div style="display:flex; justify-content:center; gap:20px; margin-bottom: 15px;">
+                    <div id="fuse-slot-1" onclick="openFuseSelect(1)" style="width:70px; height:70px; border:2px dashed #00d2ff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:35px; cursor:pointer; background:rgba(0,0,0,0.5); box-shadow:inset 0 0 10px rgba(0,210,255,0.3);">+</div>
+                    <div style="font-size:30px; display:flex; align-items:center; color:#fff;">+</div>
+                    <div id="fuse-slot-2" onclick="openFuseSelect(2)" style="width:70px; height:70px; border:2px dashed #00d2ff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:35px; cursor:pointer; background:rgba(0,0,0,0.5); box-shadow:inset 0 0 10px rgba(0,210,255,0.3);">+</div>
+                </div>
+                <div id="fusion-cond-box">
+                    <p style="color:#ccc;">素材となるキャラを2体選んでください</p>
+                </div>
             </div>
+
             <div id="fusion-result-preview" style="margin:20px; font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.8);"></div>
             <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:220px; font-size:16px; display:none; box-shadow:0 0 20px rgba(255,255,255,0.6);">フュージョン！</button>
-            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
+            <button class="btn" onclick="fuseSelection=[null,null]; openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
+        </div>
+
+        <div id="fuse-select-screen" class="overlay">
+            <h2 style="color:cyan; text-shadow: 0 0 15px rgba(0,255,255,0.5); letter-spacing:2px;">素材キャラ選択</h2>
+            <div class="col-list" id="fuse-select-list"></div>
+            <button class="btn" onclick="openLayer('fusion-screen')" style="margin-top:15px; background:linear-gradient(#555, #333); width:120px;">戻る</button>
         </div>
 
         <div id="evolve-screen" class="overlay">
@@ -338,6 +351,10 @@
 
         let userName = "ぜん";
         let currentTitle = "なし";
+
+        // ★追加部分：合体用の選択状況を保存する変数
+        let fuseSelection = [null, null];
+        let currentFuseSlot = 1;
         
         const titles = [
             { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000 },
@@ -408,7 +425,6 @@
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
             { id: 's_muda', type: 'skill', name: '無駄無駄ラッシュ', owned: false, rarity: 'X', info: 'パンチですべてを破壊する闇のエフェクト。イット系専用', rate: 100 },
             { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
-            // --- ここから追加 ---
             { id: 'ket_r', type: 'char', name: 'ただのケチャップ', icon: '👤', rarity: 'R', mult: 1.0, cost: 500, owned: false },
             { id: 'ket_sr', type: 'char', name: '普通のケチャップ', icon: '👤', rarity: 'SR', mult: 5, cost: 0, owned: false },
             { id: 'ket_ssr', type: 'char', name: '覚醒ケチャップ', icon: '🔥', rarity: 'SSR', mult: 15, cost: 0, owned: false },
@@ -424,7 +440,6 @@
             { id: 'ven_gastro', type: 'char', name: 'ヴェノム・ガストロノミー', icon: '☣️', rarity: 'X', mult: 100, cost: 0, owned: false },
             { id: 'ug_emperor', type: 'char', name: '天界統括神：UGカズキング', icon: '👑', rarity: 'X', mult: 100, cost: 0, owned: false },
             { id: 'deus_ex', type: 'char', name: '混沌の調味主：デウス・エクス・マキナ', icon: '🤠', rarity: 'OG', mult: 1200, cost: 0, owned: false }
-            // --- ここまで追加 ---
         ];
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
@@ -443,24 +458,22 @@
             document.getElementById('mission-alert').style.display = hasClaimable ? 'inline' : 'none';
         }
 
-        // ここに以前提案した新しいopenLayerを1つだけ記述します
+        // ★追加・変更部分：画面の切り替え処理
         function openLayer(id) {
-            // すべてのオーバーレイを一旦隠す
             document.querySelectorAll('.overlay').forEach(el => {
                 el.style.display = 'none';
                 el.style.opacity = '1'; 
             });
 
-            // 指定されたIDの画面だけを表示する
             const target = document.getElementById(id);
             if (target && id !== 'none') {
                 target.style.display = 'flex';
             }
 
-            // 画面ごとの処理
             if(id === 'col-screen') renderCol();
             if(id === 'evolve-screen') renderEvolve();
             if(id === 'fusion-screen') renderFusion();
+            if(id === 'fuse-select-screen') renderFuseSelect(); // 追加：キャラ選択画面の描画
             if(id === 'mission-screen') renderMissions();
             if(id === 'profile-screen') { document.getElementById('name-input').value = userName; renderTitles(); }
             if(id === 'start-screen') {
@@ -509,47 +522,109 @@
             if(m && !m.claimed) { m.claimed = true; money += m.reward; popText("50%", "50%", `REWARD +${m.reward}!`, "lime"); renderMissions(); updateUI(); saveGame(); }
         }
 
+        // ★追加部分：合体素材を選択する処理
+        function openFuseSelect(slot) {
+            currentFuseSlot = slot;
+            openLayer('fuse-select-screen');
+        }
+
+        function renderFuseSelect() {
+            const list = document.getElementById('fuse-select-list');
+            list.innerHTML = '';
+            // 所持しているキャラのみ表示
+            items.filter(i => i.type === 'char' && i.owned).forEach(item => {
+                // 既に片方の枠で選ばれているキャラは選択できないようにする
+                const isSelected = fuseSelection.includes(item.id);
+                const div = document.createElement('div');
+                div.className = `col-item ${item.rarity}`;
+                div.innerHTML = `
+                    <div>
+                        <span style="font-size:18px;">${item.icon}</span> 
+                        <span style="font-weight:bold; color:#fff;">${item.name}</span>
+                        <br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small>
+                    </div>
+                    <button class="equip-btn ${isSelected ? 'equipped' : ''}" onclick="selectFuseItem('${item.id}')" ${isSelected ? 'disabled' : ''}>
+                        ${isSelected ? '選択中' : '選択'}
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function selectFuseItem(id) {
+            fuseSelection[currentFuseSlot - 1] = id;
+            openLayer('fusion-screen');
+        }
+
+        // ★変更部分：選んだ素材を元に合体結果を判定する処理
         function renderFusion() {
-            const char1 = items.find(i => i.id === 'ev_kazu_ultimate'); const char2 = items.find(i => i.id === 'c1_ultimate');
-            const cost = 100000000; const btn = document.getElementById('fusion-exec-btn');
-            document.getElementById('fuse-cond-1').style.color = (char1 && char1.owned) ? "lime" : "red";
-            document.getElementById('fuse-cond-2').style.color = (char2 && char2.owned) ? "lime" : "red";
-            document.getElementById('fuse-cond-3').style.color = money >= cost ? "lime" : "red";
-            if(char1 && char1.owned && char2 && char2.owned && money >= cost) { btn.style.display = "block"; document.getElementById('fusion-result-preview').innerHTML = `${char1.icon} + ${char2.icon} = <span style="animation:x-glow 0.3s infinite alternate;">☯️究極合体(X)</span>`; }
-            else { btn.style.display = "none"; document.getElementById('fusion-result-preview').innerHTML = "??? + ??? = 合体不可"; }
+            const slot1 = document.getElementById('fuse-slot-1');
+            const slot2 = document.getElementById('fuse-slot-2');
+            const item1 = items.find(i => i.id === fuseSelection[0]);
+            const item2 = items.find(i => i.id === fuseSelection[1]);
+            
+            // 枠の表示更新
+            slot1.innerHTML = item1 ? item1.icon : '+';
+            slot2.innerHTML = item2 ? item2.icon : '+';
+
+            const btn = document.getElementById('fusion-exec-btn');
+            const preview = document.getElementById('fusion-result-preview');
+            const condBox = document.getElementById('fusion-cond-box');
+            
+            let fusionResultId = '';
+            let cost = 100000000;
+
+            // ユーザー指定の組み合わせパターン
+            if (fuseSelection.includes('ket_uz') && fuseSelection.includes('c_seimaro_god')) fusionResultId = 'sei_dragon';
+            else if (fuseSelection.includes('ket_uz') && fuseSelection.includes('ev_kazu_ultimate')) fusionResultId = 'ket_royal_k';
+            else if (fuseSelection.includes('ven_gastro') && fuseSelection.includes('zen_ult_final')) fusionResultId = 'deus_ex';
+            else if (fuseSelection.includes('ev_kazu_ultimate') && fuseSelection.includes('c1_ultimate')) fusionResultId = 'fusion_zen_kazu';
+
+            // 結果の描画
+            if (fusionResultId) {
+                const res = items.find(i => i.id === fusionResultId);
+                condBox.innerHTML = `<p style="color:lime; font-weight:bold; margin:5px 0;">組み合わせ: 成功！</p><p style="color:${money >= cost ? 'lime' : 'red'}; font-weight:bold; margin:5px 0;">費用: ${cost.toLocaleString()}円</p>`;
+                preview.innerHTML = `<span style="animation:x-glow 0.5s infinite alternate; font-size:24px;">${res.icon} ${res.name}</span>`;
+                if (money >= cost) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            } else {
+                condBox.innerHTML = `<p style="color:#ff3333; font-weight:bold; margin:5px 0;">正しい組み合わせではありません</p><p style="color:#ccc; font-weight:bold; margin:5px 0;">費用: 100,000,000円</p>`;
+                if(item1 && item2) {
+                    preview.innerHTML = "合成できません";
+                } else {
+                    preview.innerHTML = "素材を2体セットしてください";
+                }
+                btn.style.display = 'none';
+            }
         }
         
+        // ★変更部分：合体実行ボタンを押した時の処理
         function executeFusion() {
-            const ids = items.filter(i => i.owned).map(i => i.id);
             let fusionResultId = '';
+            if (fuseSelection.includes('ket_uz') && fuseSelection.includes('c_seimaro_god')) fusionResultId = 'sei_dragon';
+            else if (fuseSelection.includes('ket_uz') && fuseSelection.includes('ev_kazu_ultimate')) fusionResultId = 'ket_royal_k';
+            else if (fuseSelection.includes('ven_gastro') && fuseSelection.includes('zen_ult_final')) fusionResultId = 'deus_ex';
+            else if (fuseSelection.includes('ev_kazu_ultimate') && fuseSelection.includes('c1_ultimate')) fusionResultId = 'fusion_zen_kazu';
 
-            if (ids.includes('ket_uz') && ids.includes('c_seimaro_god')) {
-                fusionResultId = 'sei_dragon';
-            } else if (ids.includes('ket_uz') && ids.includes('ev_kazu_ultimate')) {
-                fusionResultId = 'ket_royal_k';
-            } else if (ids.includes('ven_gastro') && ids.includes('zen_ult_final')) {
-                fusionResultId = 'deus_ex';
+            const cost = 100000000;
+            if (money < cost) {
+                alert("お金が足りません！");
+                return;
             }
 
             if(fusionResultId) {
                 const res = items.find(i => i.id === fusionResultId);
+                money -= cost;
                 res.owned = true;
                 equipped.char = res;
                 alert(`究極合体成功！ ${res.name} が誕生した！`);
-                openLayer('start-screen'); saveGame(); updateUI();
-                return; 
-            }
-
-            // 元々の合体処理
-            const cost = 100000000;
-            if (money < cost) return;
-            money -= cost;
-            const res = items.find(i => i.id === 'fusion_zen_kazu');
-            if(res) {
-                res.owned = true;
-                equipped.char = res;
-                alert("合体完了！");
-                openLayer('start-screen'); saveGame(); updateUI();
+                fuseSelection = [null, null]; // 選択状態をリセット
+                openLayer('start-screen'); 
+                saveGame(); 
+                updateUI();
             } else {
                 alert("合体できる組み合わせではありません。");
             }
