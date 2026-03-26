@@ -20,8 +20,11 @@
         #upgrade-panel { width: 100%; max-width: 500px; background: rgba(0,0,0,0.9); border: 3px solid #ffd700; border-radius: 15px; padding: 20px; margin-top: 20px; display: none; text-align: center; margin-bottom: 40px;}
         .play-btn { width: 100%; padding: 15px; font-size: 20px; background: #4caf50; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
+        /* スティックとボタン */
+        #joystick-container { position: fixed; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 50%; display: none; touch-action: none; z-index: 100; border: 2px solid rgba(255,255,255,0.3); }
+        #joystick-knob { position: absolute; top: 30px; left: 30px; width: 60px; height: 60px; background: rgba(255,255,255,0.8); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         #mobile-controls { position: fixed; bottom: 40px; right: 40px; display: none; z-index: 100; }
-        .attack-btn { width: 90px; height: 90px; background: rgba(255,0,0,0.7); border: 4px solid white; border-radius: 50%; color: white; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+        .attack-btn { width: 100px; height: 100px; background: rgba(255,0,0,0.7); border: 4px solid white; border-radius: 50%; color: white; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .attack-btn:active { transform: scale(0.9); background: rgba(255,0,0,0.9); }
 
         #exit-btn { position: fixed; top: 15px; right: 15px; padding: 10px 20px; background: #ff4444; border: 2px solid white; border-radius: 8px; display: none; z-index: 100; cursor: pointer; font-weight: bold; }
@@ -44,6 +47,10 @@
 </div>
 
 <button id="exit-btn" onclick="exitGame()">🏠 撤退</button>
+
+<div id="joystick-container">
+    <div id="joystick-knob"></div>
+</div>
 
 <div id="mobile-controls">
     <div class="attack-btn" id="atk-btn">ATTACK</div>
@@ -118,6 +125,10 @@
     let players = {}, bullets = {};
     let myLocal = { x: 0, y: 0, hp: 100, maxHp: 100, icon: '👤', name: '', active: false, lastShot: 0 };
     let keys = {};
+    
+    // ジョイスティック用変数
+    let stickX = 0, stickY = 0;
+    let isSticking = false;
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -161,9 +172,33 @@
         document.getElementById('selector').style.display = 'none';
         document.getElementById('exit-btn').style.display = 'block';
         document.getElementById('mobile-controls').style.display = 'block';
+        document.getElementById('joystick-container').style.display = 'block';
         playersRef.child(myId).set({ id: myId, x: myLocal.x, y: myLocal.y, icon: myLocal.icon, name: myLocal.name, hp: myLocal.hp, maxHp: myLocal.maxHp });
         requestAnimationFrame(loop);
     }
+
+    // ジョイスティック制御
+    const container = document.getElementById('joystick-container');
+    const knob = document.getElementById('joystick-knob');
+    container.addEventListener('touchstart', e => { isSticking = true; });
+    window.addEventListener('touchmove', e => {
+        if(!isSticking) return;
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        let dx = touch.clientX - centerX;
+        let dy = touch.clientY - centerY;
+        const dist = Math.min(60, Math.hypot(dx, dy));
+        const angle = Math.atan2(dy, dx);
+        stickX = (Math.cos(angle) * dist) / 60;
+        stickY = (Math.sin(angle) * dist) / 60;
+        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+    });
+    window.addEventListener('touchend', () => {
+        isSticking = false; stickX = 0; stickY = 0;
+        knob.style.transform = `translate(0,0)`;
+    });
 
     function shoot(tx = null, ty = null) {
         if(!isPlaying) return;
@@ -180,10 +215,7 @@
         bulletsRef.child(bid).set({ x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId });
     }
 
-    window.addEventListener('keydown', e => { 
-        keys[e.code] = true; 
-        if(e.code === 'Space' || e.code === 'Enter') shoot(); 
-    });
+    window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code === 'Space' || e.code === 'Enter') shoot(); });
     window.addEventListener('keyup', e => keys[e.code] = false);
     canvas.addEventListener('mousedown', e => { if(isPlaying) shoot(e.clientX, e.clientY); });
     document.getElementById('atk-btn').addEventListener('touchstart', e => { e.preventDefault(); shoot(); });
@@ -212,16 +244,20 @@
         if(!isPlaying) return;
         ctx.fillStyle = '#4a7c44';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        let mvx = 0, mvy = 0;
+        
+        // 移動処理 (キーボード + スティック)
+        let mvx = stickX * 7, mvy = stickY * 7;
         if(keys['ArrowUp'] || keys['KeyW']) mvy = -7;
         if(keys['ArrowDown'] || keys['KeyS']) mvy = 7;
         if(keys['ArrowLeft'] || keys['KeyA']) mvx = -7;
         if(keys['ArrowRight'] || keys['KeyD']) mvx = 7;
+
         if(mvx !== 0 || mvy !== 0) {
             myLocal.x = Math.max(30, Math.min(canvas.width - 30, myLocal.x + mvx));
             myLocal.y = Math.max(30, Math.min(canvas.height - 30, myLocal.y + mvy));
             playersRef.child(myId).update({ x: myLocal.x, y: myLocal.y });
         }
+
         Object.keys(bullets).forEach(bid => {
             const b = bullets[bid];
             b.x += b.vx; b.y += b.vy;
@@ -239,11 +275,13 @@
                 if(b.owner === myId) bulletsRef.child(bid).remove();
             }
         });
+
         Object.keys(players).forEach(id => {
             if(id === myId) return; 
             const p = players[id];
             drawChar(p.x, p.y, p.icon, p.name, p.hp, p.maxHp, false);
         });
+
         if(myLocal.active) drawChar(myLocal.x, myLocal.y, myLocal.icon, myLocal.name, myLocal.hp, myLocal.maxHp, true);
         if(myLocal.hp <= 0) { alert("戦闘不能！"); exitGame(); return; }
         requestAnimationFrame(loop);
@@ -255,6 +293,7 @@
         document.getElementById('selector').style.display = 'flex';
         document.getElementById('exit-btn').style.display = 'none';
         document.getElementById('mobile-controls').style.display = 'none';
+        document.getElementById('joystick-container').style.display = 'none';
     }
     window.onload = init;
 </script>
