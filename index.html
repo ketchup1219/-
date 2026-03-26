@@ -176,6 +176,14 @@
         .profile-input-group label { display: block; font-size: 13px; color: #ccc; margin-bottom: 8px; text-align: left; font-weight: bold; }
         .profile-input-group input { width: 90%; background: #000; border: 1px solid #666; color: white; padding: 10px; border-radius: 6px; font-family: inherit; font-size: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transition: border-color 0.2s; }
         .profile-input-group input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 10px rgba(0,210,255,0.3), inset 0 2px 5px rgba(0,0,0,0.8); }
+:root { --og-color: #ff00ff; }
+.rarity-OG { background: var(--og-color); color: #fff; animation: glow 1s infinite alternate; border: 1px solid #fff; }
+@keyframes glow { from { box-shadow: 0 0 5px #fff; } to { box-shadow: 0 0 20px var(--og-color); } }
+/* OGランクの左側を赤くする設定 */
+.col-item.OG {
+    border-left: 15px solid #ff0000 !important; /* 左側に15pxの赤い線 */
+    background: linear-gradient(90deg, #300, #1a1a1a) !important; /* 背景も少し赤黒く */
+}
     </style>
 </head>
 <body onload="loadGame()">
@@ -396,7 +404,24 @@
             { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
             { id: 's_muda', type: 'skill', name: '無駄無駄ラッシュ', owned: false, rarity: 'X', info: 'パンチですべてを破壊する闇のエフェクト。イット系専用', rate: 100 },
-            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
+            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
+// --- ここから追加 ---
+{ id: 'ket_r', type: 'char', name: 'ただのケチャップ', rarity: 'R', mult: 1.0, cost: 500, owned: false },
+{ id: 'ket_sr', type: 'char', name: '普通のケチャップ', rarity: 'SR', mult: 5, cost: 0, owned: false },
+{ id: 'ket_ssr', type: 'char', name: '覚醒ケチャップ', rarity: 'SSR', mult: 15, cost: 0, owned: false },
+{ id: 'ket_uz', type: 'char', name: '伝説のケチャップ', rarity: 'UZ', mult: 100, cost: 0, owned: false },
+{ id: 'ket_x', type: 'char', name: '究極ケチャップ', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ket_og', type: 'char', name: '不滅のケチャップ', rarity: 'OG', mult: 1000, cost: 0, owned: false },
+{ id: 'sei_cook', type: 'char', name: 'キングオブクッキングせいまろ', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'sei_dragon', type: 'char', name: '神託の紅蓮龍・セイマロッチ', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ket_royal_k', type: 'char', name: 'アルティメット・カズケチャ', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'zen_omelette', type: 'char', name: 'マキシマム・オムレツ・ゴッド・ZEN', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ham_pork', type: 'char', name: '鮮血の金権帝：ロイヤル・ポーク', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ven_eclipse', type: 'char', name: 'ヴェノム・ブラッド・エクリプス', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ven_gastro', type: 'char', name: 'ヴェノム・ガストロノミー', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'ug_emperor', type: 'char', name: '天界統括神：UGカズキング', rarity: 'X', mult: 100, cost: 0, owned: false },
+{ id: 'deus_ex', type: 'char', name: '混沌の調味主：デウス・エクス・マキナ', rarity: 'OG', mult: 1200, cost: 0, owned: false }
+// --- ここまで追加 ---
         ];
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
@@ -488,8 +513,38 @@
             else { target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; btn.style.display = "none"; }
         }
 
+function executeFusion() {
+            // --- ケチャップ合体ルールを追加 ---
+            const ids = items.filter(i => i.owned).map(i => i.id);
+            let fusionResultId = '';
+
+            if (ids.includes('ket_uz') && ids.includes('c_seimaro_god')) {
+                fusionResultId = 'sei_dragon';
+            } else if (ids.includes('ket_uz') && ids.includes('ev_kazu_ultimate')) {
+                fusionResultId = 'ket_royal_k';
+            } else if (ids.includes('ven_gastro') && ids.includes('zen_ult_final')) {
+                fusionResultId = 'deus_ex';
+            }
+
+            if(fusionResultId) {
+                const res = items.find(i => i.id === fusionResultId);
+                res.owned = true;
+                equipped.char = res;
+                alert(`究極合体成功！ ${res.name} が誕生した！`);
+                openLayer('start-screen'); saveGame(); updateUI();
+                return; 
+            }
+
+            // 元々の合体処理（ここからは消さずに残す）
+            const currentId = equipped.char.id;
+            // ... ここに元々の合体ロジックが続く場合は記述 ...
+            alert("合体できる組み合わせではありません。");
+        }
+
         function executeEvolve() {
-            const cost = 1000000; if(money < cost) return; money -= cost;
+            const cost = 1000000; 
+            if(money < cost) { alert("お金が足りません！"); return; }
+            
             let evolveId = '';
             switch(equipped.char.id) { 
                 case 'c_scarlet_ham': evolveId = 'c_scarlet_ham_uz'; break;
@@ -498,28 +553,46 @@
                 case 'c13': evolveId = 'c13_ultimate'; break; 
                 case 'c7': evolveId = 'c7_ultimate'; break; 
                 case 'c2': evolveId = 'c2_ultimate'; break; 
+                case 'ket_r': evolveId = 'ket_sr'; break;
+                case 'ket_sr': evolveId = 'ket_ssr'; break;
+                case 'ket_ssr': evolveId = 'ket_uz'; break;
+                case 'ket_uz': evolveId = 'ket_x'; break;
+                case 'ket_x': evolveId = 'ket_og'; break;
                 case 'c_rampage': 
                     evolveId = 'c_rampage_venom';
                     const mudaSkill = items.find(i => i.id === 's_muda');
                     if(mudaSkill) mudaSkill.owned = true;
                     break;
             }
+
             if(evolveId) { 
                 const ult = items.find(i => i.id === evolveId); 
+                money -= cost;
                 ult.owned = true; 
                 equipped.char = ult; 
                 if(evolveId === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } 
                 alert(`進化成功！ ${ult.name} を手に入れた！`); 
+            } else {
+                alert("このキャラは進化できません。");
             }
             openLayer('start-screen'); saveGame(); updateUI();
-        }
-
-        function setTab(tab) { currentTab = tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); renderCol(); }
+        }        function setTab(tab) { currentTab = tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); renderCol(); }
         function renderCol() {
             const list = document.getElementById('col-list-content'); list.innerHTML = '';
             const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
             document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
-            items.filter(i => i.type === currentTab).sort((a,b)=> (b.rarity==='X'?4:b.rarity==='UZ'?3:b.rarity==='SSR'?2:b.rarity==='SR'?1.5:1) - (a.rarity==='X'?4:a.rarity==='UZ'?3:a.rarity==='SSR'?2:a.rarity==='SR'?1.5:1))
+           items.filter(i => i.type === currentTab)
+.sort((a,b)=> {
+    // ランクごとの点数（高いほど上にくる）
+    const score = { 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1 };
+    const aScore = score[a.rarity] || 0;
+    const bScore = score[b.rarity] || 0;
+    
+    // 1. まずはランク順で並べる
+    if (bScore !== aScore) return bScore - aScore;
+    // 2. 同じランクなら、倍率（mult）が高い順に並べる
+    return (b.mult || 0) - (a.mult || 0);
+})
             .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div><span style="font-size:18px;">${item.owned ? item.icon || (item.type==='skill'?'⚡':'') : '？'}</span> <span style="font-weight:bold; color:#fff;">${item.owned ? item.name : '？？？'}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
         }
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
@@ -637,7 +710,7 @@
                 if(isHamEquipped()) {
                     pluck(egg);
                 } else if(equipped.char.id === 'c_seimaro' || equipped.char.id === 'c_seimaro_uz') {
-                    popText(egg.style.left, egg.style.top, "100倍ブースト！", "pink");
+                    popText(egg.style.left, egg.style.top, "10倍ブースト！", "pink");
                     const originalRate = equipped.char.rate;
                     equipped.char.rate = 100;
                     setTimeout(() => { equipped.char.rate = originalRate; }, 5000);
