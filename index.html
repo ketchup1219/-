@@ -1093,6 +1093,25 @@ audioBGM.currentTime = 0;
             }
             initMissions(); updateUI(); openLayer('start-screen');
         }
+        // 画面を切り替えるための関数
+function openLayer(layerId) {
+    // 全ての画面（オーバーレイ）を一度隠す
+    document.querySelectorAll('.overlay').forEach(l => {
+        l.style.display = 'none';
+    });
+
+    // 指定された画面だけを表示する
+    const target = document.getElementById(layerId);
+    if (target) {
+        target.style.display = 'flex';
+    }
+
+    // --- ここにBGM停止の処理を入れる ---
+    if (layerId === 'start-screen' && typeof audioBGM !== 'undefined') {
+        audioBGM.pause();
+        audioBGM.currentTime = 0;
+    }
+}
     </script>
 </body>
 </html>
