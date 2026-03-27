@@ -53,8 +53,18 @@
             width: 100%; padding: 18px; font-size: 22px; background: linear-gradient(135deg, #4caf50, #2e7d32); 
             color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3); box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s;
+            margin-top: 20px;
         }
         .play-btn:active { transform: scale(0.96); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+        /* アップグレードセクション用CSS */
+        .upgrade-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+        .up-btn { 
+            flex: 1; background: rgba(255,255,255,0.1); border: 1px solid #ffd700; color: white; 
+            border-radius: 8px; padding: 10px 5px; cursor: pointer; font-size: 12px;
+        }
+        .up-btn:hover { background: rgba(255,215,0,0.2); }
+        .up-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: #666; }
 
         /* コントローラーのエフェクト */
         #joystick-container { 
@@ -94,6 +104,13 @@
     <div id="upgrade-panel">
         <div id="up-icon" style="font-size: 80px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));">❓</div>
         <h3 id="up-name" style="font-size: 24px; margin: 15px 0;">---</h3>
+        
+        <div class="upgrade-row">
+            <button class="up-btn" onclick="upgrade('hp')">❤️ HP UP<br><span id="cost-hp">0</span></button>
+            <button class="up-btn" onclick="upgrade('atk')">⚔️ ATK UP<br><span id="cost-atk">0</span></button>
+            <button class="up-btn" onclick="upgrade('spd')">⚡ SPD UP<br><span id="cost-spd">0</span></button>
+        </div>
+
         <button class="play-btn" onclick="startGame()">⚔️ ENTER THE ARENA ⚔️</button>
     </div>
 </div>
@@ -111,7 +128,7 @@
 <canvas id="gameCanvas"></canvas>
 
 <script>
-    // --- データと基本設定 (変更なし) ---
+    // --- データと基本設定 ---
     const firebaseConfig = { databaseURL: "https://game-685f2-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -171,12 +188,12 @@
     ];
 
     const STORAGE_KEY = 'zenSurvival_Final_v14';
+    let gameData = { money: 0, owned: ["c20"], stats: { hpLv: 0, atkLv: 0, spdLv: 0 } };
     let myId = 'p_' + Math.random().toString(36).substr(2, 6);
-    let gameData = { money: 0, owned: ["c20"] };
     let selectedChar = null;
     let isPlaying = false;
     let players = {}, bullets = {};
-    let myLocal = { x: 0, y: 0, hp: 100, maxHp: 100, icon: '👤', name: '', active: false, lastShot: 0 };
+    let myLocal = { x: 0, y: 0, hp: 100, maxHp: 100, icon: '👤', name: '', active: false, lastShot: 0, atk: 20, spd: 7 };
     let keys = {};
     
     let stickX = 0, stickY = 0;
@@ -207,8 +224,11 @@
 
     function init() {
         const d = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        gameData.money = d.money || 0;
         gameData.owned = d.owned || ["c20"];
-        document.getElementById('money-val').innerText = (d.money || 0).toLocaleString();
+        gameData.stats = d.stats || { hpLv: 0, atkLv: 0, spdLv: 0 };
+        
+        updateUI();
 
         const grid = document.getElementById('grid');
         grid.innerHTML = "";
@@ -224,19 +244,59 @@
                 document.getElementById('upgrade-panel').style.display = 'block';
                 document.getElementById('up-icon').innerText = c.icon;
                 document.getElementById('up-name').innerText = c.name;
+                updateUpgradeCosts();
             };
             grid.appendChild(card);
         });
+    }
+
+    // UI更新用
+    function updateUI() {
+        document.getElementById('money-val').innerText = gameData.money.toLocaleString();
+    }
+
+    // ステータス強化コスト計算
+    function getCost(lv) {
+        return Math.floor(100 * Math.pow(1.5, lv));
+    }
+
+    function updateUpgradeCosts() {
+        document.getElementById('cost-hp').innerText = `💰${getCost(gameData.stats.hpLv)}`;
+        document.getElementById('cost-atk').innerText = `💰${getCost(gameData.stats.atkLv)}`;
+        document.getElementById('cost-spd').innerText = `💰${getCost(gameData.stats.spdLv)}`;
+    }
+
+    function upgrade(type) {
+        let lvKey = type + 'Lv';
+        let cost = getCost(gameData.stats[lvKey]);
+        if(gameData.money >= cost) {
+            gameData.money -= cost;
+            gameData.stats[lvKey]++;
+            saveData();
+            updateUI();
+            updateUpgradeCosts();
+        } else {
+            alert("Not enough money!");
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
     }
 
     function startGame() {
         if(!selectedChar) return;
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        // ステータス計算 (基本値 + 強化値)
+        myLocal.maxHp = selectedChar.hp + (gameData.stats.hpLv * 50);
+        myLocal.hp = myLocal.maxHp;
+        myLocal.atk = 20 + (gameData.stats.atkLv * 5);
+        myLocal.spd = 7 + (gameData.stats.spdLv * 0.5);
+        
         myLocal.x = canvas.width / 2;
         myLocal.y = canvas.height / 2;
-        myLocal.hp = selectedChar.hp;
-        myLocal.maxHp = selectedChar.hp;
         myLocal.icon = selectedChar.icon;
         myLocal.name = selectedChar.name;
         myLocal.active = true;
@@ -283,7 +343,8 @@
             vy = Math.sin(angle) * 18;
         }
         const bid = 'b_' + myId + '_' + now;
-        bulletsRef.child(bid).set({ x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId });
+        // ダメージ値を弾に持たせる
+        bulletsRef.child(bid).set({ x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId, damage: myLocal.atk });
     }
 
     window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code === 'Space' || e.code === 'Enter') shoot(); });
@@ -299,42 +360,30 @@
 
     function drawChar(x, y, icon, name, hp, maxHp, isMe) {
         ctx.save();
-        // シャドウエフェクト
         ctx.shadowBlur = 20;
         ctx.shadowColor = isMe ? 'rgba(255,255,0,0.5)' : 'rgba(255,255,255,0.3)';
-        
-        // 名前
         ctx.font = 'bold 14px sans-serif';
         ctx.fillStyle = isMe ? '#ffd700' : 'white';
         ctx.textAlign = 'center';
         ctx.fillText(name, x, y - 80);
-        
-        // アイコン（キャラ本体）
         ctx.font = '55px Arial';
         ctx.fillText(icon, x, y);
-        
-        // HPバー（強化テクスチャ）
         const bw = 70;
         ctx.shadowBlur = 0;
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.roundRect ? ctx.beginPath() || ctx.roundRect(x - bw/2, y - 70, bw, 8, 4) || ctx.fill() : ctx.fillRect(x - bw/2, y - 70, bw, 8);
-        
+        if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x - bw/2, y - 70, bw, 8, 4); ctx.fill(); } else { ctx.fillRect(x - bw/2, y - 70, bw, 8); }
         const hpPercent = Math.max(0, hp)/maxHp;
         const barColor = hpPercent > 0.5 ? '#4caf50' : (hpPercent > 0.2 ? '#ff9800' : '#f44336');
         ctx.fillStyle = barColor;
         ctx.shadowBlur = 10;
         ctx.shadowColor = barColor;
-        ctx.roundRect ? ctx.beginPath() || ctx.roundRect(x - bw/2, y - 70, bw * hpPercent, 8, 4) || ctx.fill() : ctx.fillRect(x - bw/2, y - 70, bw * hpPercent, 8);
-        
+        if(ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x - bw/2, y - 70, bw * hpPercent, 8, 4); ctx.fill(); } else { ctx.fillRect(x - bw/2, y - 70, bw * hpPercent, 8); }
         ctx.restore();
     }
 
     function drawBackground() {
-        // ベースの芝生
         ctx.fillStyle = '#2d5a27';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // テクスチャパターン（ノイズ/草）
         ctx.globalAlpha = 0.1;
         for(let i=0; i<canvas.width; i+=40) {
             for(let j=0; j<canvas.height; j+=40) {
@@ -343,8 +392,6 @@
             }
         }
         ctx.globalAlpha = 1.0;
-
-        // 周辺減光（ヴィネット効果）
         const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width*0.8);
         grad.addColorStop(0, 'rgba(0,0,0,0)');
         grad.addColorStop(1, 'rgba(0,0,0,0.4)');
@@ -354,49 +401,40 @@
 
     function loop() {
         if(!isPlaying) return;
-        
         drawBackground();
-        
-        // パーティクル更新
         particles = particles.filter(p => p.life > 0);
         particles.forEach(p => { p.update(); p.draw(ctx); });
         
-        let mvx = stickX * 7, mvy = stickY * 7;
-        if(keys['ArrowUp'] || keys['KeyW']) mvy = -7;
-        if(keys['ArrowDown'] || keys['KeyS']) mvy = 7;
-        if(keys['ArrowLeft'] || keys['KeyA']) mvx = -7;
-        if(keys['ArrowRight'] || keys['KeyD']) mvx = 7;
+        let mvx = stickX * myLocal.spd, mvy = stickY * myLocal.spd;
+        if(keys['ArrowUp'] || keys['KeyW']) mvy = -myLocal.spd;
+        if(keys['ArrowDown'] || keys['KeyS']) mvy = myLocal.spd;
+        if(keys['ArrowLeft'] || keys['KeyA']) mvx = -myLocal.spd;
+        if(keys['ArrowRight'] || keys['KeyD']) mvx = myLocal.spd;
 
         if(mvx !== 0 || mvy !== 0) {
             myLocal.x = Math.max(30, Math.min(canvas.width - 30, myLocal.x + mvx));
             myLocal.y = Math.max(30, Math.min(canvas.height - 30, myLocal.y + mvy));
             playersRef.child(myId).update({ x: myLocal.x, y: myLocal.y });
-            // 移動パーティクル
             if(Math.random() > 0.7) particles.push(new Particle(myLocal.x, myLocal.y + 10, 'rgba(255,255,255,0.3)'));
         }
 
         Object.keys(bullets).forEach(bid => {
             const b = bullets[bid];
             b.x += b.vx; b.y += b.vy;
-            
-            // 弾丸の強化レンダリング
             ctx.save();
             ctx.shadowBlur = 15;
             ctx.shadowColor = '#fff700';
             ctx.fillStyle = '#fff700';
             ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, Math.PI*2); ctx.fill();
-            
-            // 弾の軌跡パーティクル
             if(Math.random() > 0.5) particles.push(new Particle(b.x, b.y, '#ffd700'));
-            
             ctx.restore();
 
             if(b.owner === myId) {
                 Object.keys(players).forEach(pid => {
                     if(pid !== myId && Math.hypot(b.x - players[pid].x, b.y - players[pid].y) < 35) {
-                        playersRef.child(pid).transaction(current => { if(current) current.hp -= 20; return current; });
+                        const dmg = b.damage || 20; // 強化されたダメージを使用
+                        playersRef.child(pid).transaction(current => { if(current) current.hp -= dmg; return current; });
                         bulletsRef.child(bid).remove();
-                        // ヒットエフェクト
                         for(let i=0; i<10; i++) particles.push(new Particle(b.x, b.y, '#ff4444'));
                     }
                 });
@@ -424,6 +462,7 @@
         document.getElementById('exit-btn').style.display = 'none';
         document.getElementById('mobile-controls').style.display = 'none';
         document.getElementById('joystick-container').style.display = 'none';
+        init(); // データを再読み込みして所持金などを同期
     }
     window.onload = init;
 </script>
