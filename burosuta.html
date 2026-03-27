@@ -305,7 +305,11 @@
         document.getElementById('exit-btn').style.display = 'block';
         document.getElementById('mobile-controls').style.display = 'block';
         document.getElementById('joystick-container').style.display = 'block';
+        
+        // プレイヤーデータのセットと、通信切断時の自動削除設定
         playersRef.child(myId).set({ id: myId, x: myLocal.x, y: myLocal.y, icon: myLocal.icon, name: myLocal.name, hp: myLocal.hp, maxHp: myLocal.maxHp });
+        playersRef.child(myId).onDisconnect().remove(); // ← 追加: 接続が切れたら自動でデータベースから削除
+        
         requestAnimationFrame(loop);
     }
 
@@ -343,7 +347,6 @@
             vy = Math.sin(angle) * 18;
         }
         const bid = 'b_' + myId + '_' + now;
-        // ダメージ値を弾に持たせる
         bulletsRef.child(bid).set({ x: myLocal.x, y: myLocal.y, vx: vx, vy: vy, owner: myId, damage: myLocal.atk });
     }
 
@@ -431,8 +434,9 @@
 
             if(b.owner === myId) {
                 Object.keys(players).forEach(pid => {
-                    if(pid !== myId && Math.hypot(b.x - players[pid].x, b.y - players[pid].y) < 35) {
-                        const dmg = b.damage || 20; // 強化されたダメージを使用
+                    // 死んでいるプレイヤーには当たり判定をなくす
+                    if(pid !== myId && players[pid].hp > 0 && Math.hypot(b.x - players[pid].x, b.y - players[pid].y) < 35) {
+                        const dmg = b.damage || 20;
                         playersRef.child(pid).transaction(current => { if(current) current.hp -= dmg; return current; });
                         bulletsRef.child(bid).remove();
                         for(let i=0; i<10; i++) particles.push(new Particle(b.x, b.y, '#ff4444'));
@@ -444,20 +448,30 @@
             }
         });
 
+        // 他のプレイヤーの描画
         Object.keys(players).forEach(id => {
             if(id === myId) return; 
             const p = players[id];
+            if (p.hp <= 0) return; // ← 追加: HPが0以下のプレイヤーは画面に描画しない
             drawChar(p.x, p.y, p.icon, p.name, p.hp, p.maxHp, false);
         });
 
+        // 自分の描画と死亡判定
         if(myLocal.active) drawChar(myLocal.x, myLocal.y, myLocal.icon, myLocal.name, myLocal.hp, myLocal.maxHp, true);
-        if(myLocal.hp <= 0) { alert("COMBAT INCAPACITATED!"); exitGame(); return; }
+        
+        if(myLocal.hp <= 0) { 
+            playersRef.child(myId).remove(); // ← 追加: 自分が死んだら確実にデータベースから消す
+            alert("COMBAT INCAPACITATED!"); 
+            exitGame(); 
+            return; 
+        }
+        
         requestAnimationFrame(loop);
     }
 
     function exitGame() {
         isPlaying = false; myLocal.active = false;
-        playersRef.child(myId).remove();
+        playersRef.child(myId).remove(); // 明示的に退出した場合も削除
         document.getElementById('selector').style.display = 'flex';
         document.getElementById('exit-btn').style.display = 'none';
         document.getElementById('mobile-controls').style.display = 'none';
