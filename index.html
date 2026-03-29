@@ -1134,7 +1134,7 @@
         function giveUp() { isPlaying=false; isOnlineMode=false; openLayer('start-screen'); }
         
         function saveGame() { 
-            localStorage.setItem('zenSurvival_Final_v14', JSON.stringify({ 
+            localStorage.setItem('zenSurvival_Final_v15', JSON.stringify({ 
                 money: money.toString(), 
                 owned: items.filter(i=>i.owned).map(i=>i.id), 
                 eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
@@ -1143,7 +1143,7 @@
         }
         
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v14'));
+            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v15'));
             if(data) {
                 money = BigInt(data.money || "2000"); 
                 data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
@@ -1162,8 +1162,8 @@
         }
         function loadGame() {
     // 追加：古いバージョンのデータを削除する
-    if (localStorage.getItem('zenSurvival_Final_v13')) {
-        localStorage.removeItem('zenSurvival_Final_v13');
+    if (localStorage.getItem('zenSurvival_Final_v14')) {
+        localStorage.removeItem('zenSurvival_Final_v14');
     }
 
     // 以下、通常の読み込み処理...
