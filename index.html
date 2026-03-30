@@ -6,13 +6,12 @@
     <title>草抜きサバイバル - 紙と神 -</title>
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; --og-color: #ff00ff; }
-body { 
+        body { 
             text-align: center; 
             font-family: 'Arial Black', sans-serif; 
             background-color: #050505; 
             color: white; 
             margin: 0; 
-            /* ↓ここが重要：高さを固定せず、はみ出してもOKにする */
             min-height: 100vh;
             overflow-y: visible !important; 
             overflow-x: hidden;
@@ -21,18 +20,6 @@ body {
             background-image: radial-gradient(circle at center, #111 0%, #000 100%);
         }
 
-       .header { 
-    background: linear-gradient(to bottom, #222, #0a0a0a); 
-    padding: 10px; 
-    display: flex; 
-    justify-content: center; /* タイトルとボタンを中央に寄せる */
-    align-items: center; 
-    border-bottom: 2px solid #333; 
-    font-size: 14px; 
-    position: relative; /* 固定を解除して、普通の流れに置く */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.8); 
-    z-index: 10; 
-}
         .header { background: linear-gradient(to bottom, #222, #0a0a0a); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #333; font-size: 14px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 10; }
         #fever-container { position: absolute; bottom: -6px; left: 0; width: 100%; height: 6px; background: #111; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
         #fever-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--fever-pink), #ffffff, var(--fever-pink)); background-size: 200% 100%; transition: width 0.2s; box-shadow: 0 0 20px var(--fever-pink), 0 0 40px var(--fever-pink); animation: bg-scroll 0.5s linear infinite; }
@@ -249,18 +236,10 @@ body {
                 <button class="btn btn-col" onclick="openLayer('col-screen')">COLLECTION</button>
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
-                <button class="btn" 
-                    <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; width: 100%;">
-                <button class="btn" 
-                    style="background: linear-gradient(45deg, #4caf50, #2e7d32); color: white; font-weight: bold; border: 2px solid #fff; padding: 10px; font-size: 13px;" 
-                    onclick="location.href='burosuta.html'">
-                    ⚔️ アリーナ
-                </button>
-                <button class="btn" 
-                    style="background: linear-gradient(45deg, #2196f3, #1976d2); color: white; font-weight: bold; border: 2px solid #fff; padding: 10px; font-size: 13px;" 
-                    onclick="location.href='setumei.html'">
-                    📖 遊び方
-                </button>
+                <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; width: 100%;">
+                    <button class="btn" style="background: linear-gradient(45deg, #4caf50, #2e7d32); color: white; font-weight: bold; border: 2px solid #fff; padding: 10px; font-size: 13px;" onclick="location.href='burosuta.html'">⚔️ アリーナ</button>
+                    <button class="btn" style="background: linear-gradient(45deg, #2196f3, #1976d2); color: white; font-weight: bold; border: 2px solid #fff; padding: 10px; font-size: 13px;" onclick="location.href='setumei.html'">📖 遊び方</button>
+                </div>
             </div>
         </div>
 
@@ -285,7 +264,6 @@ body {
 
         <div id="fusion-screen" class="overlay">
             <h2 style="color:cyan; text-shadow: 0 0 20px cyan, 0 0 40px #00d2ff; font-size:28px;">🌀 キャラクター合体</h2>
-            
             <div style="background:rgba(20,20,20,0.9); padding:20px; border-radius:15px; width:85%; font-size:13px; border:1px solid #00d2ff; box-shadow:0 0 20px rgba(0,210,255,0.2), inset 0 0 20px rgba(0,0,0,0.8);">
                 <p style="font-weight:bold; color:#fff; font-size:15px; margin-bottom:10px;">【素材を選択】</p>
                 <div style="display:flex; justify-content:center; gap:20px; margin-bottom: 15px;">
@@ -297,7 +275,6 @@ body {
                     <p style="color:#ccc;">素材となるキャラを2体選んでください</p>
                 </div>
             </div>
-
             <div id="fusion-result-preview" style="margin:20px; font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.8);"></div>
             <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(to bottom, #fff, #aaa); color:#000; width:220px; font-size:16px; display:none; box-shadow:0 0 20px rgba(255,255,255,0.6);">フュージョン！</button>
             <button class="btn" onclick="fuseSelection=[null,null]; openLayer('start-screen')" style="background:linear-gradient(#555, #333); width:120px; margin-top:15px;">戻る</button>
@@ -504,7 +481,12 @@ body {
             { id: 's5', type: 'skill', name: 'ZENの導き', owned: false, rarity: 'SR', info: '少しの間自動抜き' },
             { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', owned: false, rarity: 'SSR', info: '全草を一気に排除' },
             { id: 's_muda', type: 'skill', name: '無駄無駄ラッシュ', owned: false, rarity: 'UZ', info: 'パンチですべてを破壊する闇のエフェクト。イット系専用', rate: 100 },
-            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' }
+            
+            // ★新規追加 BGM (全て最初から所持設定)
+            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
+            { id: 'bgm_kazu', type: 'bgm', name: 'カズキング降臨', url: 'カズキングタイジュウフエターネキンギーニ.mp3', icon: '🎵', owned: true, rarity: 'OG', info: '激しいビート' },
+            { id: 'bgm_aggro', type: 'bgm', name: 'Aggressive Synth', url: '(Aggressive synth and drum beats).mp3', icon: '🎸', owned: true, rarity: 'UZ', info: '攻撃的なシンセ' },
+            { id: 'bgm_morning', type: 'bgm', name: '朝焼けの街', url: '朝焼けの街を走り抜けてく  .mp3', icon: '🌅', owned: true, rarity: 'X', info: '爽やかな朝' }
         ];
 
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
@@ -759,7 +741,7 @@ body {
                 if (bScore !== aScore) return bScore - aScore;
                 return ((b.rate || b.mult) || 0) - ((a.rate || a.mult) || 0);
             })
-            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div><span style="font-size:18px;">${item.owned ? item.icon || (item.type==='skill'?'⚡':'') : '？'}</span> <span style="font-weight:bold; color:#fff;">${item.owned ? item.name : '？？？'}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
+            .forEach(item => { const isEq = equipped[item.type].id === item.id; const div = document.createElement('div'); div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; div.innerHTML = `<div><span style="font-size:18px;">${item.owned ? item.icon || (item.type==='skill'?'⚡':'🎵') : '？'}</span> <span style="font-weight:bold; color:#fff;">${item.owned ? item.name : '？？？'}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; list.appendChild(div); });
         }
         
         function equip(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
@@ -1081,6 +1063,13 @@ body {
             isPlaying=true; timeLeft=30; sessionScore=0n; openLayer('none'); document.querySelectorAll('.item').forEach(i=>i.remove());
             if(equipped.char.rarity==='X') document.getElementById('x-aura-effect').style.display='block';
             
+            // ★ BGM再生ロジック追加
+            const bgmPlayer = document.getElementById('bgm-player');
+            if (equipped.bgm && equipped.bgm.url) {
+                bgmPlayer.src = equipped.bgm.url;
+                bgmPlayer.play().catch(e => console.log("BGM自動再生がブロックされました:", e));
+            }
+
             if (equipped.char.rarity === 'X') {
                 skillCount = 0;
             } else if (['OG', 'OMEGA'].includes(equipped.char.rarity)) {
@@ -1116,7 +1105,9 @@ body {
                     if (!opponentExists) {
                         isPlaying = false;
                         document.getElementById('online-result').innerText = "相手がリタイアしました。あなたの不戦勝です！ 🎉";
-                        openLayer('end-screen'); isOnlineMode = false; return;
+                        openLayer('end-screen'); isOnlineMode = false; 
+                        stopBGM(); // ★ リタイア時もBGM停止
+                        return;
                     }
                 }
                 if(!data) return;
@@ -1136,8 +1127,16 @@ body {
             window.dbSet(myRoomRef, { name: userName, score: sessionScore.toString(), status: "playing" });
         }
 
+        // ★ BGM停止用の関数を追加
+        function stopBGM() {
+            const bgmPlayer = document.getElementById('bgm-player');
+            bgmPlayer.pause();
+            bgmPlayer.currentTime = 0;
+        }
+
         function endGame(msg) {
             isPlaying = false;
+            stopBGM(); // ★ ゲーム終了時にBGM停止
             let finalScore = sessionScore;
             document.getElementById('res-money').innerText = money.toLocaleString();
             if(isOnlineMode) {
@@ -1157,19 +1156,31 @@ body {
             openLayer('end-screen'); isOnlineMode = false; saveGame();
         }
 
-        function giveUp() { isPlaying=false; isOnlineMode=false; openLayer('start-screen'); }
+        function giveUp() { isPlaying=false; isOnlineMode=false; stopBGM(); openLayer('start-screen'); }
         
+        // ★ セーブ機能の修正: missions内のBigIntも文字列化して保存
         function saveGame() { 
-            localStorage.setItem('zenSurvival_Final_v15', JSON.stringify({ 
+            const missionsToSave = missions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
+            
+            localStorage.setItem('zenSurvival_Final_v16', JSON.stringify({ 
                 money: money.toString(), 
                 owned: items.filter(i=>i.owned).map(i=>i.id), 
                 eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
-                missions, missionStats, lastMissionDate, currentTitle, userName 
+                missions: missionsToSave, 
+                missionStats, 
+                lastMissionDate, 
+                currentTitle, 
+                userName 
             })); 
         }
         
+        // ★ セーブ機能の修正: v16とv15両方に対応し、missions復元時に確実にBigIntへ変換
         function loadGame() {
-            const data = JSON.parse(localStorage.getItem('zenSurvival_Final_v15'));
+            let data = JSON.parse(localStorage.getItem('zenSurvival_Final_v16'));
+            if (!data) {
+                data = JSON.parse(localStorage.getItem('zenSurvival_Final_v15')); // 過去バージョンからの引継ぎ
+            }
+
             if(data) {
                 money = BigInt(data.money || "2000"); 
                 data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
@@ -1177,7 +1188,11 @@ body {
                 equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; 
                 equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; 
                 equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm;
-                missions = data.missions || []; 
+                
+                if (data.missions) {
+                    missions = data.missions.map(m => ({...m, goal: BigInt(m.goal), reward: BigInt(m.reward)}));
+                }
+                
                 missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: "0" }; 
                 lastMissionDate = data.lastMissionDate || ""; 
                 currentTitle = data.currentTitle || "なし"; 
