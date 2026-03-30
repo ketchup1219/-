@@ -712,7 +712,7 @@
             }
         }
 
-        function executeEvolve() {
+       function executeEvolve() {
             const evData = getEvolveData();
             if(!evData) { alert("このキャラは進化できません。"); return; }
             if(money < evData.cost) { alert("お金が足りません！"); return; }
@@ -721,12 +721,20 @@
             money -= evData.cost;
             ult.owned = true; 
             equipped.char = ult; 
+
+            // --- ここを修正：進化した先がベクター・キンギーニだった時の処理を追加 ---
+            if(evData.id === 'vector_kinguini') { 
+                // スキル「月牙天衝」などを解放したい場合はここに記述
+                // 例: items.find(i => i.id === 's_getsuga').owned = true; 
+            }
+            
+            // 既存のゴッドネス進化時の処理
             if(evData.id === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } 
             if(evData.getMuda) { const muda = items.find(i => i.id === 's_muda'); if(muda) muda.owned = true; }
             
             alert(`進化成功！ ${ult.name} に進化した！`); 
             openLayer('start-screen'); saveGame(); updateUI();
-        }        
+        }
         
         function setTab(tab) { currentTab = tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); renderCol(); }
         
