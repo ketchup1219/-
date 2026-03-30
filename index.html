@@ -703,21 +703,21 @@
         }
 
        function renderEvolve() {
-            const target = document.getElementById('evolve-status'); 
-            const btn = document.getElementById('evolve-exec-btn');
-            const evData = getEvolveData();
-            
-            // !equipped.char.isEvolved を削除しました
-            if(evData) { 
-                const nextChar = items.find(i => i.id === evData.id);
-                target.innerHTML = `<p style="color:#fff;">進化対象：${nextChar.name}</p><p style="font-size:12px;color:#ccc;margin-top:5px;">必要経費: ${evData.cost.toLocaleString()}円</p>`; 
-                btn.style.display = "block"; 
-                btn.disabled = money < evData.cost; 
-            } else { 
-                target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; 
-                btn.style.display = "none"; 
-            }
-        }
+    const target = document.getElementById('evolve-status'); 
+    const btn = document.getElementById('evolve-exec-btn');
+    const evData = getEvolveData();
+    
+    // !equipped.char.isEvolved の条件を削除
+    if(evData) { 
+        const nextChar = items.find(i => i.id === evData.id);
+        target.innerHTML = `<p style="color:#fff;">進化対象：${nextChar.name}</p><p style="font-size:12px;color:#ccc;margin-top:5px;">必要経費: ${evData.cost.toLocaleString()}円</p>`; 
+        btn.style.display = "block"; 
+        btn.disabled = money < evData.cost; 
+    } else { 
+        target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; 
+        btn.style.display = "none"; 
+    }
+}
 
         function executeEvolve() {
             const evData = getEvolveData();
