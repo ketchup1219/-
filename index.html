@@ -698,21 +698,24 @@
             return null;
         }
 
-        function renderEvolve() {
-            const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn');
+       function renderEvolve() {
+            const target = document.getElementById('evolve-status'); 
+            const btn = document.getElementById('evolve-exec-btn');
             const evData = getEvolveData();
             
-            if(evData && !equipped.char.isEvolved) {
+            // !equipped.char.isEvolved を削除しました
+            if(evData) { 
                 const nextChar = items.find(i => i.id === evData.id);
                 target.innerHTML = `<p style="color:#fff;">進化対象：${nextChar.name}</p><p style="font-size:12px;color:#ccc;margin-top:5px;">必要経費: ${evData.cost.toLocaleString()}円</p>`; 
                 btn.style.display = "block"; 
                 btn.disabled = money < evData.cost; 
             } else { 
-                target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; btn.style.display = "none"; 
+                target.innerHTML = `<p style="color:#888;">進化対象がありません</p>`; 
+                btn.style.display = "none"; 
             }
         }
 
-       function executeEvolve() {
+        function executeEvolve() {
             const evData = getEvolveData();
             if(!evData) { alert("このキャラは進化できません。"); return; }
             if(money < evData.cost) { alert("お金が足りません！"); return; }
@@ -722,13 +725,12 @@
             ult.owned = true; 
             equipped.char = ult; 
 
-            // --- ここを修正：進化した先がベクター・キンギーニだった時の処理を追加 ---
-            if(evData.id === 'vector_kinguini') { 
-                // スキル「月牙天衝」などを解放したい場合はここに記述
-                // 例: items.find(i => i.id === 's_getsuga').owned = true; 
+            // ベクター・キンギーニに進化した場合の特別なフラグ処理
+            if(evData.id === 'vector_kinguini') {
+                // 必要に応じてスキル解放などの処理をここに追加
+                // items.find(i => i.id === 's_getsuga').owned = true;
             }
             
-            // 既存のゴッドネス進化時の処理
             if(evData.id === 'ev_kazu_ultimate') { items.find(i => i.id === 's3').owned = true; } 
             if(evData.getMuda) { const muda = items.find(i => i.id === 's_muda'); if(muda) muda.owned = true; }
             
