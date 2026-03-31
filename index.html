@@ -1372,6 +1372,24 @@
             }
             initMissions(); updateUI(); openLayer('start-screen');
         }
+        // --- 以下のコードを追加してください ---
+window.dbGet = function(path) {
+    if (typeof firebase === 'undefined') return Promise.resolve(null);
+    return firebase.database().ref(path).get().then(snapshot => {
+        return snapshot.exists() ? snapshot.val() : null;
+    });
+};
+
+window.dbSet = function(path, value) {
+    if (typeof firebase === 'undefined') return Promise.resolve();
+    return firebase.database().ref(path).set(value);
+};
+
+window.dbUpdate = function(path, value) {
+    if (typeof firebase === 'undefined') return Promise.resolve();
+    return firebase.database().ref(path).update(value);
+};
+// --- ここまで ---
     </script>
 </body>
 </html>
