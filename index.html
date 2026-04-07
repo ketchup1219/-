@@ -140,7 +140,7 @@
         .btn-mission { background: linear-gradient(135deg, #00d26a, #006b36); color: white; grid-column: span 1; font-size: 13px; }
         .btn-profile { background: linear-gradient(135deg, #777, #222); color: white; grid-column: span 1; font-size: 13px; }
         .btn-online { background: linear-gradient(135deg, #00d2ff, #0066cc); color: #fff; grid-column: span 2; font-size: 18px; box-shadow: 0 0 20px rgba(0,210,255,0.6), inset 0 2px 5px rgba(255,255,255,0.4); border: 2px solid #fff; }
-        .btn-settings { background: linear-gradient(135deg, #555, #222); color: white; grid-column: span 2; } /* 追加 */
+        .btn-settings { background: linear-gradient(135deg, #555, #222); color: white; grid-column: span 2; } 
 
         /* コトダマン風 エフェクト文字 */
         .koto-dama-text {
@@ -306,10 +306,9 @@
                 <button class="btn btn-col" onclick="openLayer('col-screen')">📖 図鑑</button>
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
-                <!-- ⚙️設定ボタン 追加 -->
                 <button class="btn btn-settings" onclick="openLayer('settings-screen')">⚙️ 設定</button>
                 <button class="menu-item" onclick="location.href='burosuta.html'" style="background: linear-gradient(135deg, #ff4500, #ff8c00); color: white;">アリーナ</button>
-    <button class="menu-item" onclick="location.href='setumei.html'" style="background: #444;">遊び方</button>
+                <button class="menu-item" onclick="location.href='setumei.html'" style="background: #444;">遊び方</button>
             </div>
         </div>
 
@@ -352,7 +351,7 @@
             <div class="boss-grid" id="host-boss-grid-container"></div>
             
             <div id="difficulty-select-dialog" style="display:none; flex-direction:column; align-items:center; width:90%; background:rgba(0,0,0,0.9); padding:20px; border-radius:10px; border:2px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3);">
-                <img id="diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;">
+                <img id="diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23333%22/><text x=%2250%22 y=%2255%22 fill=%22red%22 font-size=%2220%22 text-anchor=%22middle%22>BOSS</text></svg>'">
                 <h3 id="diff-boss-name" style="color:var(--gold); margin:10px 0; text-shadow: 1px 1px 2px #000;"></h3>
                 <p style="color:#ddd; font-size:12px; margin-bottom:15px;">難易度を選択してください</p>
                 <button class="btn" style="background:linear-gradient(135deg, #0055ff, #002288); width:100%; margin-bottom:10px; color:white;" onclick="confirmCreateRoom(1)">初級 (報酬1倍)</button>
@@ -648,6 +647,11 @@
         let isDoubleSpeed = false;
         let itemCooldowns = { herb: 0, drop: 0, star: 0 };
         const ITEM_MAX_CD = { herb: 100, drop: 300, star: 600 }; 
+        
+        // --- 修正: 同期用変数 ---
+        let syncTimer = null;
+        let oppScore = 0n;
+        let lastUsedSkillData = "";
         // -----------------------
         
         const titles = [
@@ -845,7 +849,6 @@
             field.style.animation = `skill-shake 0.05s infinite`;
             setTimeout(() => field.style.animation = "", dur * 1000);
         }
-
 
         function openLayer(id) {
             document.querySelectorAll('.overlay').forEach(el => { el.style.display = 'none'; el.style.opacity = '1'; });
@@ -1046,6 +1049,7 @@
 
         function leaveRoom() {
             isOnlineMode = false;
+            if(syncTimer) { clearInterval(syncTimer); syncTimer = null; }
             if(roomListenerRef) window.dbOff(roomListenerRef);
             if(isHost) window.dbRemove(window.dbRef(window.db, 'rooms/' + currentRoomId));
             else if(currentRoomId) window.dbRemove(window.dbRef(window.db, `rooms/${currentRoomId}/guest`));
@@ -1491,7 +1495,7 @@
         }
 
         // ==========================================
-        // ボスバトル機能の実装 (星ドラ風手動スキル)
+        // ボスバトル機能の実装 (協力オンライン同期対応)
         // ==========================================
         function startBossBattle(bossIndex, diff, isOnline = false) {
             bossDifficulty = diff;
@@ -1503,6 +1507,9 @@
             currentBoss.atk = currentBoss.atk * bossDifficultyMult;
             bossCurrentHp = currentBoss.hp;
             
+            oppScore = 0n;
+            lastUsedSkillData = "";
+            
             isBossBattle = true;
             isDoubleSpeed = false;
             updateSpeedBtn();
@@ -1510,6 +1517,8 @@
             if(diff === 3) document.getElementById('arena-boss-image').style.filter = 'hue-rotate(180deg) contrast(1.5)';
             else document.getElementById('arena-boss-image').style.filter = 'none';
             
+            if(syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+
             if(isOnline) {
                 isOnlineMode = true;
                 sessionScore = 0n; 
@@ -1526,18 +1535,41 @@
                     }
                 });
 
+                // 相手のスコア・スキル発動を受信してHPを同期
                 const oppPath = isHost ? 'guest' : 'host';
-                const oppScoreRef = window.dbRef(window.db, `rooms/${currentRoomId}/${oppPath}`);
-                window.dbOnValue(oppScoreRef, (snap) => {
+                const oppRef = window.dbRef(window.db, `rooms/${currentRoomId}/${oppPath}`);
+                window.dbOnValue(oppRef, (snap) => {
                     const data = snap.val();
                     if(data) {
-                        if(data.score) document.getElementById('opp-m-val').innerText = BigInt(data.score).toLocaleString();
-                        // 相手のスキル発動エフェクト
-                        if(data.usedSkill) {
-                            popText("80%", "40%", data.usedSkill, "orange");
+                        if(data.score) {
+                            oppScore = BigInt(data.score);
+                            document.getElementById('opp-m-val').innerText = oppScore.toLocaleString();
+                            
+                            // 合算してボスのHPを再計算
+                            bossCurrentHp = currentBoss.hp - Number(sessionScore + oppScore);
+                            if(bossCurrentHp < 0) bossCurrentHp = 0;
+                            updateBossHpUI();
+                            
+                            // 相手の攻撃で倒したかチェック
+                            if(bossCurrentHp <= 0 && isBossBattle) endBossBattle(true);
+                        }
+                        
+                        if(data.usedSkill && data.usedSkill !== lastUsedSkillData) {
+                            lastUsedSkillData = data.usedSkill;
+                            const skillName = data.usedSkill.split('_')[0]; // タイムスタンプを除外
+                            popText("80%", "40%", skillName, "orange");
                         }
                     }
                 });
+
+                // 自分のスコアを定期的に送信
+                syncTimer = setInterval(() => {
+                    if(isBossBattle && isOnlineMode && window.db) {
+                        const myPath = isHost ? 'host' : 'guest';
+                        window.dbUpdate(window.dbRef(window.db, `rooms/${currentRoomId}/${myPath}`), { score: sessionScore.toString() });
+                    }
+                }, 500);
+
             } else {
                 document.getElementById('opp-score-display').style.display = 'none';
             }
@@ -1624,10 +1656,15 @@
 
         function executePlayerAttack(player) {
             let dmg = player.atk + Math.floor(Math.random() * 50);
-            bossCurrentHp -= dmg;
+            
+            if(isOnlineMode) { 
+                sessionScore += BigInt(dmg); 
+                bossCurrentHp = currentBoss.hp - Number(sessionScore + oppScore);
+            } else {
+                bossCurrentHp -= dmg;
+            }
             if(bossCurrentHp < 0) bossCurrentHp = 0;
             
-            if(isOnlineMode) { sessionScore += BigInt(dmg); }
             showDamageText(dmg, 'boss'); updateBossHpUI();
         }
 
@@ -1662,7 +1699,8 @@
             if(gameSettings.effectLevel >= 1) showKotoDama(skillItem.name + "!!", "cyan");
             if(gameSettings.effectLevel == 2) shakeScreen(0.3);
             
-            if(isOnlineMode) window.dbUpdate(window.dbRef(window.db, `rooms/${currentRoomId}/${isHost ? 'host' : 'guest'}`), { usedSkill: skillItem.name });
+            // 相手にスキル使用を通知 (タイムスタンプを付けて同じスキルの連続使用も検知可能に)
+            if(isOnlineMode) window.dbUpdate(window.dbRef(window.db, `rooms/${currentRoomId}/${isHost ? 'host' : 'guest'}`), { usedSkill: skillItem.name + "_" + Date.now() });
 
             if(skillId === 's1') { // huh
                 bossImg.classList.add('muda-crack-effect');
@@ -1755,6 +1793,7 @@
         async function endBossBattle(isWin) {
             isBossBattle = false;
             clearInterval(battleTimer);
+            if(syncTimer) { clearInterval(syncTimer); syncTimer = null; }
             isPlaying = false;
             stopBGM();
             
@@ -1921,6 +1960,7 @@
         function giveUp() { 
             isPlaying = false; 
             stopBGM();
+            if(syncTimer) { clearInterval(syncTimer); syncTimer = null; }
             if(isOnlineMode) { leaveRoom(); } else { openLayer('start-screen'); }
         }
         
