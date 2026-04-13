@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>草抜きサバイバル - 銀河の英雄達 -</title>
+    
+    <!-- Firebase SDK (v8 互換) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; --og-color: #ff00ff; --fossil: #d2b48c; --ex-green: #00ff88; --boss-color: #ff0044; }
         body { 
@@ -238,6 +243,11 @@
         .boss-card:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
         .boss-card h3 { margin: 8px 0; font-size: 14px; color: var(--gold); text-shadow: 2px 2px 4px #000, -2px -2px 4px #000; }
         
+        .lobby-list-item { background: linear-gradient(90deg, #112233, #001122); border: 1px solid #00d2ff; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .lobby-list-item:hover { box-shadow: 0 0 15px rgba(0,210,255,0.5); transform: translateY(-2px); }
+        .lobby-player-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 10px; margin-bottom: 8px; border-radius: 6px; }
+        .lobby-player-row.ready { border-color: #00ff00; box-shadow: inset 0 0 10px rgba(0,255,0,0.3); }
+
         /* ========= BOSS BATTLE UI ========= */
         #arena-boss-image { width: 100%; height: 200px; background-size: cover; background-position: center; border-bottom: 4px solid #f00; position: relative; box-shadow: inset 0 -20px 30px rgba(0,0,0,0.8); transition: filter 0.3s; }
         .boss-hp-bg { width: 90%; height: 24px; background: #111; border: 2px solid #fff; border-radius: 12px; margin: 10px auto; overflow: hidden; position: relative; box-shadow: 0 0 15px #f00, inset 0 3px 6px rgba(0,0,0,0.9); }
@@ -248,6 +258,7 @@
         
         .party-side { width: 50%; background: rgba(0,0,0,0.6); border-radius: 10px; border: 1px solid #555; padding: 5px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
         .party-member { background: linear-gradient(135deg, #333, #111); border-radius: 8px; padding: 5px; border: 1px solid #666; display: flex; align-items: center; justify-content: space-between; position: relative; }
+        .party-member.multi-player { border-color: #00d2ff; }
         .member-hp-bg { width: 60px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
         .member-hp-fill { height: 100%; background: linear-gradient(90deg, #00aa00, #00ff00); transition: width 0.2s; }
         .member-ct-bg { width: 60px; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 2px; }
@@ -263,16 +274,23 @@
         .my-skill-bar { width: 100%; height: 20px; background: #111; border: 2px solid #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .my-skill-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff00ff, #00ffff); transition: width 0.1s; animation: bg-scroll 1s linear infinite; background-size: 200% 100%; }
 
-        .speed-toggle { position: absolute; top: 12px; right: 12px; background: linear-gradient(to bottom, #fff, #ddd); color: #111; padding: 6px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 10; border: 2px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.6); transition: all 0.2s; }
+        .speed-toggle { position: absolute; top: 12px; right: 12px; background: linear-gradient(to bottom, #fff, #ddd); color: #111; padding: 6px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 10; border: 2px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.6); transition: all 0.2s; display:none; /* マルチ時は非表示にするかも */ }
         .speed-toggle:active { transform: scale(0.9); }
         .speed-toggle.active { background: linear-gradient(to bottom, #ff3366, #cc0033); color: #fff; border-color: #fff; animation: glow-boss 0.5s infinite alternate; box-shadow: 0 0 15px #ff0044; }
         @keyframes glow-boss { from { box-shadow: 0 0 10px #ff0044; } to { box-shadow: 0 0 25px #ff0044; } }
         
-        .damage-text, .heal-text { position: absolute; font-size: 34px; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: dmg-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; z-index: 200; }
-        .damage-text { color: #fff; filter: drop-shadow(0 0 15px #f00); }
-        .heal-text { color: #0f0; filter: drop-shadow(0 0 15px #0f0); }
-        @keyframes dmg-pop { 0% { transform: scale(0.5) translateY(0); opacity: 0; } 20% { transform: scale(1.6) translateY(-25px); opacity: 1; } 100% { transform: scale(1) translateY(-70px); opacity: 0; filter: blur(2px); } }
+        .damage-text, .heal-text, .critical-text, .miss-text { position: absolute; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: dmg-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; z-index: 200; }
+        .damage-text { color: #fff; filter: drop-shadow(0 0 10px #f00); font-size: 34px; }
+        .heal-text { color: #0f0; filter: drop-shadow(0 0 10px #0f0); font-size: 34px; }
+        .critical-text { color: #ffcc00; filter: drop-shadow(0 0 15px #ff0000); font-size: 44px; font-style: italic; }
+        .miss-text { color: #00ffff; filter: drop-shadow(0 0 15px #0088ff); font-size: 34px; animation: miss-pop 0.8s ease-out forwards; }
         
+        @keyframes dmg-pop { 0% { transform: scale(0.5) translateY(0); opacity: 0; } 20% { transform: scale(1.6) translateY(-25px); opacity: 1; } 100% { transform: scale(1) translateY(-70px); opacity: 0; filter: blur(2px); } }
+        @keyframes miss-pop { 0% { transform: scale(0.5) translateX(-20px); opacity: 0; } 20% { transform: scale(1.2) translateX(0); opacity: 1; } 100% { transform: scale(1) translateY(-30px); opacity: 0; } }
+        
+        .barrier-effect { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #00ffff; box-shadow: 0 0 20px #00ffff, inset 0 0 20px #00ffff; pointer-events: none; z-index: 150; animation: barrier-flash 0.4s ease-out forwards; left: 5px; top: 5px; }
+        @keyframes barrier-flash { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+
         .boss-warning { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.4); pointer-events: none; z-index: 150; display: none; animation: flash-warn 0.4s infinite alternate; mix-blend-mode: overlay; }
         @keyframes flash-warn { from { opacity: 0.2; } to { opacity: 0.9; } }
 
@@ -285,6 +303,21 @@
         .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; border: 1px solid #333; }
         .boss-list-item { background: linear-gradient(90deg, #331111, #110000); border: 1px solid #ff4444; padding: 10px; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; cursor: pointer; }
         .boss-list-item:hover { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.5); }   
+
+        /* 新規：絶望画面（ゲームオーバー） */
+        #despair-screen { background: #000; z-index: 2000; }
+        .glitch-text { font-size: 60px; color: #ff0000; font-weight: 900; letter-spacing: 5px; position: relative; animation: glitch-anim 0.2s infinite; text-shadow: 2px 0 blue, -2px 0 green; }
+        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-5px, 5px); } 40% { transform: translate(-5px, -5px); } 60% { transform: translate(5px, 5px); } 80% { transform: translate(5px, -5px); } 100% { transform: translate(0); } }
+
+        /* 新規：宝箱画面 */
+        #chest-screen { background: rgba(0,0,0,0.9); z-index: 1500; }
+        .chest-box { font-size: 120px; cursor: pointer; animation: chest-shake 1s infinite alternate; filter: drop-shadow(0 0 30px gold); transition: transform 0.2s; }
+        .chest-box:active { transform: scale(0.9); }
+        @keyframes chest-shake { 0% { transform: rotate(-5deg) scale(1); } 100% { transform: rotate(5deg) scale(1.05); } }
+        
+        /* ガチャ提供割合モーダル */
+        #gacha-prob-modal .prob-row { display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0; font-size:12px; }
+        #gacha-prob-modal .prob-row.header { font-weight:bold; color:var(--gold); border-bottom:2px solid var(--gold); }
     </style>
 </head>
 <body onload="loadGame()">
@@ -317,7 +350,7 @@
             <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small style="color:#ddd;">称号：<span id="u-title-display" style="color:#fff;">なし</span></small></div>
             <p id="passive-info" style="font-size:13px; color:var(--blue); margin-bottom:18px; font-weight:bold; text-shadow:0 0 8px rgba(0,210,255,0.6); background:linear-gradient(90deg, transparent, rgba(0,0,0,0.7), transparent); padding:8px 20px; border-radius:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
-                <button class="btn btn-cockpit" onclick="openLayer('cockpit-screen')">🚀 ボス討伐</button>
+                <button class="btn btn-cockpit" onclick="openLayer('multi-menu-screen')">🚀 ボス討伐 (ソロ/マルチ)</button>
                 <button class="btn btn-start" onclick="startGame()">▶ 草を抜く (START)</button>
                 <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:#ff0033; display:none; text-shadow:0 0 10px #ff0033;">●</span></button>
                 <button class="btn btn-profile" onclick="openLayer('profile-screen')">👤 プロフィール</button>
@@ -328,49 +361,116 @@
                 <button class="btn btn-settings" onclick="openLayer('settings-screen')">⚙️ 設定</button>
                 <button class="menu-item" onclick="location.href='burosuta.html'" style="background: linear-gradient(135deg, #ff4500, #ff8c00); color: white;">アリーナ</button>
                 <button class="menu-item" onclick="location.href='setumei.html'" style="background: #444;">遊び方</button>
+                <button class="menu-item" onclick="openLayer('cockpit-screen')" style="background: linear-gradient(135deg, #112233, #001122); color: white; border: 1px solid #00d2ff; border-radius: 30px;">編成・強化</button>
             </div>
         </div>
 
-        <!-- コックピット画面 (ソロ討伐・育成) -->
+        <!-- 編成・強化画面 (従来のコックピットから分離) -->
         <div id="cockpit-screen" class="overlay">
-            <h2 style="color:var(--blue); text-shadow:0 0 20px cyan; margin-top:5px; font-size:32px;">COCKPIT - 司令室</h2>
+            <h2 style="color:var(--blue); text-shadow:0 0 20px cyan; margin-top:5px; font-size:32px;">編成・強化</h2>
             <div style="display:flex; width:95%; height:75%; gap:10px;">
                 <!-- 左：所持キャラリスト -->
                 <div style="width:45%; background:rgba(0,0,0,0.7); border:2px solid #555; border-radius:10px; overflow-y:auto; padding:10px;" id="cpt-char-list">
                     <!-- JSで描画 -->
                 </div>
-                <!-- 右：詳細・強化・ボス討伐 -->
+                <!-- 右：詳細・強化 -->
                 <div style="width:55%; background:rgba(0,0,0,0.7); border:2px solid var(--gold); border-radius:10px; padding:10px; display:flex; flex-direction:column;">
-                    <div class="col-tabs" style="margin-bottom:5px;">
-                        <button class="tab-btn active" id="cpt-tab-train" onclick="setCptTab('train')">編成・強化</button>
-                        <button class="tab-btn" id="cpt-tab-boss" onclick="setCptTab('boss')">ボス討伐</button>
-                    </div>
-                    
                     <div id="cpt-content-train" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding:5px;">
                         <div id="cpt-char-detail" style="text-align:left;">
                             <p style="color:#aaa; text-align:center; margin-top:50px;">左からキャラクターを選択してください</p>
                         </div>
                     </div>
-                    
-                    <div id="cpt-content-boss" style="flex-grow:1; display:none; flex-direction:column; overflow-y:auto; padding:5px;" id="host-boss-grid-container">
-                        <!-- JSで描画 -->
-                    </div>
                 </div>
             </div>
-            
-            <div id="solo-difficulty-select-dialog" style="display:none; flex-direction:column; align-items:center; width:90%; position:absolute; z-index:600; background:rgba(0,0,0,0.95); padding:20px; border-radius:10px; border:2px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3);">
-                <img id="solo-diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23333%22/><text x=%2250%22 y=%2255%22 fill=%22red%22 font-size=%2220%22 text-anchor=%22middle%22>BOSS</text></svg>'">
-                <h3 id="solo-diff-boss-name" style="color:var(--gold); margin:10px 0; text-shadow: 1px 1px 2px #000;"></h3>
-                <p style="color:#ddd; font-size:12px; margin-bottom:15px;">難易度を選択してください</p>
-                <button class="btn" style="background:linear-gradient(135deg, #0055ff, #002288); width:100%; margin-bottom:10px; color:white;" onclick="confirmSoloBossStart(1)">初級 (報酬1倍)</button>
-                <button class="btn" style="background:linear-gradient(135deg, #ffaa00, #aa5500); width:100%; margin-bottom:10px; color:white;" onclick="confirmSoloBossStart(2)">中級 (報酬3倍)</button>
-                <button class="btn" style="background:linear-gradient(135deg, #ff0044, #880000); width:100%; margin-bottom:10px; color:white; box-shadow:0 0 15px red;" onclick="confirmSoloBossStart(3)">上級 (報酬10倍)</button>
-                <button class="btn" style="background:linear-gradient(135deg, #cc00ff, #440066); width:100%; margin-bottom:10px; color:white; box-shadow:0 0 20px #cc00ff; border:2px solid #fff;" onclick="confirmSoloBossStart(4)">伝説級 (ステ20倍 / 化石 / BOSS加入)</button>
-                <button class="btn" style="background:#555; width:100%; color:white;" onclick="document.getElementById('solo-difficulty-select-dialog').style.display='none';">キャンセル</button>
-            </div>
-
             <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
         </div>
+
+        <!-- =================== マルチプレイ関連UI =================== -->
+        
+        <!-- モード選択 -->
+        <div id="multi-menu-screen" class="overlay">
+            <h2 style="color:var(--boss-color); text-shadow:0 0 20px #ff0044; font-size:36px; margin-bottom: 30px;">ボス討伐メニュー</h2>
+            <div style="display:flex; flex-direction:column; gap:20px; width:80%;">
+                <button class="btn" onclick="openLayer('multi-create-screen')" style="background:linear-gradient(135deg, #001122, #003366); color:#fff; font-size:20px; padding:20px; border:2px solid #00d2ff; box-shadow:0 0 20px rgba(0,210,255,0.5);">👑 ロビーを作成 (ホスト)</button>
+                <button class="btn" onclick="openLayer('multi-search-screen')" style="background:linear-gradient(135deg, #221100, #663300); color:#fff; font-size:20px; padding:20px; border:2px solid var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.5);">🔍 ロビーを検索 (ゲスト)</button>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:40px;">戻る</button>
+        </div>
+
+        <!-- ロビー作成 (ボス・難易度選択) -->
+        <div id="multi-create-screen" class="overlay">
+            <h2 style="color:#fff; text-shadow:0 0 10px #fff;">討伐対象の選択</h2>
+            <div id="create-boss-grid" class="boss-grid" style="height:60%;"></div>
+            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+
+            <!-- 難易度・モード選択ダイアログ -->
+            <div id="multi-difficulty-dialog" style="display:none; flex-direction:column; align-items:center; width:90%; position:absolute; z-index:600; background:rgba(0,0,0,0.95); padding:20px; border-radius:10px; border:2px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3);">
+                <img id="multi-diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;">
+                <h3 id="multi-diff-boss-name" style="color:var(--gold); margin:10px 0; text-shadow: 1px 1px 2px #000;"></h3>
+                <p style="color:#ddd; font-size:12px; margin-bottom:10px;">難易度を選択</p>
+                <div style="display:flex; width:100%; gap:5px; margin-bottom:15px;">
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#002288; color:#fff;" onclick="selectLobbyDiff(1, this)">初級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#aa5500; color:#fff;" onclick="selectLobbyDiff(2, this)">中級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#880000; color:#fff;" onclick="selectLobbyDiff(3, this)">上級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#440066; color:#fff;" onclick="selectLobbyDiff(4, this)">伝説</button>
+                </div>
+                <div style="display:flex; width:100%; gap:10px;">
+                    <button class="btn" style="flex:1; background:linear-gradient(135deg, #555, #222); color:white;" onclick="confirmLobbyCreate(false)">ソロで挑む</button>
+                    <button class="btn" style="flex:1; background:linear-gradient(135deg, #00d2ff, #0044cc); color:white;" onclick="confirmLobbyCreate(true)">ロビー作成</button>
+                </div>
+                <button class="btn" style="background:transparent; border:none; color:#888; margin-top:10px;" onclick="document.getElementById('multi-difficulty-dialog').style.display='none';">キャンセル</button>
+            </div>
+        </div>
+
+        <!-- ロビー検索 -->
+        <div id="multi-search-screen" class="overlay">
+            <h2 style="color:var(--gold);">ロビー検索</h2>
+            <button class="btn" onclick="fetchLobbies()" style="background:linear-gradient(135deg, #00aa55, #005522); color:#fff; padding:8px 20px; margin-bottom:10px;">🔄 更新</button>
+            <div id="lobby-list-container" style="width:90%; height:60%; overflow-y:auto; background:rgba(0,0,0,0.6); border:1px solid #555; border-radius:10px; padding:10px;">
+                <!-- ロビーリスト表示 -->
+            </div>
+            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+        </div>
+
+        <!-- ロビー待機室 -->
+        <div id="multi-room-screen" class="overlay">
+            <h2 id="room-boss-title" style="color:#f00; text-shadow:0 0 15px red; margin-bottom:5px;">ボス名 (難易度)</h2>
+            <div style="color:#aaa; font-size:12px; margin-bottom:15px;">主催者: <span id="room-host-name" style="color:var(--gold);"></span></div>
+            
+            <div id="room-members-container" style="width:90%; flex-grow:1; max-height:40%; overflow-y:auto; background:rgba(0,0,0,0.5); border:1px solid #00d2ff; border-radius:10px; padding:10px;">
+                <!-- メンバー一覧 -->
+            </div>
+            
+            <div style="display:flex; width:90%; gap:10px; margin-top:20px;">
+                <button id="btn-room-leave" class="btn" style="flex:1; background:#555; color:#fff;" onclick="leaveLobby()">退出</button>
+                <button id="btn-room-ready" class="btn" style="flex:2; background:#aa5500; color:#fff;" onclick="toggleReady()">準備OK</button>
+                <button id="btn-room-start" class="btn" style="flex:2; background:#00cc00; color:#fff; display:none;" onclick="hostStartBattle()">出発する</button>
+            </div>
+        </div>
+
+        <!-- =================== ガチャ提供割合モーダル =================== -->
+        <div id="gacha-prob-modal" class="overlay" style="background:rgba(0,0,0,0.9); z-index:1000; justify-content:center;">
+            <div style="background:#111; border:2px solid var(--gold); border-radius:10px; width:85%; max-height:80%; display:flex; flex-direction:column; padding:15px; box-shadow:0 0 30px rgba(255,215,0,0.3);">
+                <h3 style="color:var(--gold); margin-top:0;">提供割合・ラインナップ</h3>
+                <div id="gacha-prob-content" style="flex-grow:1; overflow-y:auto; text-align:left; padding-right:10px;"></div>
+                <button class="btn" onclick="document.getElementById('gacha-prob-modal').style.display='none'" style="background:#444; color:#fff; margin-top:15px;">閉じる</button>
+            </div>
+        </div>
+
+        <!-- =================== 演出用画面 =================== -->
+        <!-- 宝箱（クリア） -->
+        <div id="chest-screen" class="overlay">
+            <h2 style="color:lime; font-size:40px; text-shadow:0 0 20px lime;">BOSS CLEARED!</h2>
+            <p style="color:#ddd; font-weight:bold;">宝箱をタップして開けろ！</p>
+            <div class="chest-box" onclick="openChest()">🎁</div>
+        </div>
+
+        <!-- 絶望（ゲームオーバー） -->
+        <div id="despair-screen" class="overlay">
+            <div class="glitch-text">GAME OVER</div>
+            <p style="color:#888; font-size:12px; margin-top:20px;">生存者がいません...</p>
+        </div>
+
 
         <!-- ⚙️ 設定画面 -->
         <div id="settings-screen" class="overlay">
@@ -516,6 +616,8 @@
                     <img src="草コイン.png" style="width:24px; vertical-align:middle;"> 所持金: <span style="color:gold;">0</span>
                 </div>
                 <div id="gacha-prob-display" style="font-size:11px; color:#aaa; margin-bottom:10px;">SSR: 1% / SR: 20% / R: 79%</div>
+                <button class="btn" onclick="openGachaProb()" style="background:transparent; border:1px solid #00d2ff; color:#00d2ff; padding:5px 15px; font-size:12px; margin-bottom:15px; border-radius:15px;">提供割合を確認</button>
+
                 <div style="display:flex; flex-direction:column; gap:12px; width: 280px;">
                     <button class="btn btn-gacha" id="gacha-btn-1" onclick="runGacha(1)">1回 (1,000円)</button>
                     <button class="btn btn-gacha" id="gacha-btn-10" onclick="runGacha(10)" style="background:linear-gradient(135deg, #ff8c00, #e65c00);">10連 (10,000円)</button>
@@ -593,8 +695,33 @@
     <audio id="bgm-player" loop preload="auto"></audio>
     <audio id="se-decide" src="決定効果音.mp3" preload="auto"></audio>
     <audio id="se-menu-open" src="メニューを開く4.mp3" preload="auto"></audio>
+    <audio id="se-zombie" src="ゾンビに体をえぐられる.mp3" preload="auto"></audio>
 
     <script>
+        // ==========================================
+        // Firebase 初期設定 & マルチプレイ用変数
+        // ==========================================
+        const firebaseConfig = { databaseURL: "https://game-685f2-default-rtdb.firebaseio.com/" };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+        const roomsRef = db.ref('rooms');
+        const battlesRef = db.ref('battles');
+
+        let myUid = localStorage.getItem('zen_survival_uid');
+        if (!myUid) { myUid = 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000); localStorage.setItem('zen_survival_uid', myUid); }
+        
+        let isMultiplayer = false;
+        let isHost = false;
+        let currentRoomId = null;
+        let multiPlayers = {}; // Firebaseから取得したプレイヤー情報
+        let roomStatus = 'waiting'; // waiting, playing, cleared, gameover
+        let roomListeners = []; // クリーンアップ用
+
+        // ==========================================
+        // 既存変数群
+        // ==========================================
         let money = 2000n; // 草コイン
         let fossilCount = 0; // 草の化石
         let kusakakuCount = 0; // 🌿草核
@@ -624,6 +751,7 @@
         let selectedHostBossIndex = 0;
         let bossDifficulty = 1;
         let bossDifficultyMult = 1;
+        let diffSelectBtnRef = null;
         
         let isBossBattle = false;
         let currentBoss = null;
@@ -635,6 +763,7 @@
         const ITEM_MAX_CD = { herb: 100, drop: 300, star: 600 }; 
         let isBossResultDropBoss = false;
         
+        // --- データ定義 ---
         const titles = [
             { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000n },
             { name: "草抜き職人", cond: "所持金が100万円を超える", check: () => money > 1000000n },
@@ -755,8 +884,7 @@
 
         // SE再生関数
         document.addEventListener('click', (e) => {
-            if(e.target.closest('.btn') || e.target.closest('.tab-btn') || e.target.closest('.equip-btn') || e.target.closest('.col-item') || e.target.closest('.boss-card') || e.target.closest('.cpt-char-item') || e.target.closest('.upgrade-btn')) {
-                // コックピットを開くボタンの場合は専用SEを鳴らす
+            if(e.target.closest('.btn') || e.target.closest('.tab-btn') || e.target.closest('.equip-btn') || e.target.closest('.col-item') || e.target.closest('.boss-card') || e.target.closest('.cpt-char-item') || e.target.closest('.upgrade-btn') || e.target.closest('.lobby-list-item')) {
                 if(e.target.closest('.btn-cockpit')) { playMenuSE(); } 
                 else { playDecideSE(); }
             }
@@ -778,7 +906,6 @@
             return { hp: finalHp, atk: finalAtk, data: charData, level: cl };
         }
 
-        // コスト計算関数
         function getAtkHpCost(lv) { let cost = 1000n; for(let i=0; i<lv; i++) cost = (cost * 15n) / 10n; return cost; }
         function getSkillLvCost(lv) { let cost = 50000n; for(let i=0; i<lv; i++) cost = cost * 5n; return cost; }
 
@@ -861,6 +988,8 @@
             if (target && id !== 'none') target.style.display = 'flex';
 
             if(id === 'cockpit-screen') { renderCockpitChars(); setCptTab('train'); }
+            if(id === 'multi-create-screen') renderCreateBossGrid();
+            if(id === 'multi-search-screen') fetchLobbies();
             if(id === 'col-screen') renderCol();
             if(id === 'evolve-screen') renderEvolve();
             if(id === 'fusion-screen') renderFusion();
@@ -875,6 +1004,7 @@
                 document.getElementById('skill-display-name').innerText = equipped.char.id === 'vector_kinguini' ? '月牙天衝' : equipped.skill.name;
                 document.getElementById('main-bottom-ui').style.display = 'flex';
                 isBossBattle = false;
+                clearRoomListeners();
             } else if (id === 'boss-arena-screen') {
                 document.getElementById('main-bottom-ui').style.display = 'none';
             }
@@ -882,18 +1012,11 @@
         }
 
         // ==========================================
-        // コックピット機能 (育成・ソロ討伐)
+        // 編成・強化 (旧コックピットのソロ討伐分離)
         // ==========================================
         function setCptTab(tab) {
             currentCptTab = tab;
-            document.getElementById('cpt-tab-train').classList.toggle('active', tab === 'train');
-            document.getElementById('cpt-tab-boss').classList.toggle('active', tab === 'boss');
-            
-            document.getElementById('cpt-content-train').style.display = tab === 'train' ? 'flex' : 'none';
-            document.getElementById('cpt-content-boss').style.display = tab === 'boss' ? 'flex' : 'none';
-            
-            if(tab === 'boss') renderSoloBossGrid();
-            else if(selectedCptCharId) renderCockpitDetail(selectedCptCharId);
+            if(selectedCptCharId) renderCockpitDetail(selectedCptCharId);
         }
 
         function renderCockpitChars() {
@@ -981,433 +1104,275 @@
             saveGame(); updateUI(); renderCockpitChars(); renderCockpitDetail(id);
         }
 
-        function renderSoloBossGrid() {
-            const container = document.getElementById('cpt-content-boss');
+        // ==========================================
+        // マルチプレイ・ロビー機能
+        // ==========================================
+        function renderCreateBossGrid() {
+            const container = document.getElementById('create-boss-grid');
             container.innerHTML = '';
             bosses.forEach((b, index) => {
                 const card = document.createElement('div');
-                card.className = 'boss-list-item';
-                card.onclick = () => showSoloDifficultySelect(index);
+                card.className = 'boss-card';
+                card.onclick = () => showLobbyDifficultySelect(index);
                 card.innerHTML = `
-                    <img src="${b.img}" style="width:60px; height:60px; border-radius:8px; border:1px solid #555; margin-right:15px; object-fit:cover;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23333%22/><text x=%2250%22 y=%2255%22 fill=%22red%22 font-size=%2220%22 text-anchor=%22middle%22>BOSS</text></svg>'">
-                    <div style="flex-grow:1; text-align:left;">
-                        <div style="font-size:14px; font-weight:bold; color:var(--gold);">${b.name}</div>
-                        <div style="font-size:10px; color:#aaa;">推奨Lv.${index*20 + 10}</div>
-                    </div>
-                    <div style="font-size:24px; color:#ff4444;">⚔️</div>
+                    <img src="${b.img}" style="width:100%; height:60px; border-radius:8px; object-fit:cover;" onerror="this.style.display='none'">
+                    <h3>${b.name}</h3>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function showSoloDifficultySelect(index) {
+        function showLobbyDifficultySelect(index) {
             selectedHostBossIndex = index;
             const b = bosses[index];
-            document.getElementById('solo-difficulty-select-dialog').style.display = 'flex';
-            document.getElementById('solo-diff-boss-name').innerText = b.name;
-            document.getElementById('solo-diff-boss-img').src = b.img;
+            document.getElementById('multi-difficulty-dialog').style.display = 'flex';
+            document.getElementById('multi-diff-boss-name').innerText = b.name;
+            document.getElementById('multi-diff-boss-img').src = b.img;
+            // 初期選択
+            if(diffSelectBtnRef) diffSelectBtnRef.style.border = "none";
+            bossDifficulty = 1; 
+            const btns = document.querySelectorAll('.diff-btn');
+            btns.forEach(btn => btn.style.border = "none");
+            btns[0].style.border = "2px solid #fff";
+            diffSelectBtnRef = btns[0];
         }
 
-        function confirmSoloBossStart(diff) {
-            document.getElementById('solo-difficulty-select-dialog').style.display = 'none';
-            startBossBattle(selectedHostBossIndex, diff, false);
+        window.selectLobbyDiff = function(diff, btn) {
+            bossDifficulty = diff;
+            const btns = document.querySelectorAll('.diff-btn');
+            btns.forEach(b => b.style.border = "none");
+            btn.style.border = "2px solid #fff";
+            diffSelectBtnRef = btn;
         }
 
-        // ==========================================
-        // 既存システム群（タイトル、ミッション等）
-        // ==========================================
-        function updateName(val) { if(val.trim() === "") return; userName = val; saveGame(); updateUI(); }
-
-        function renderTitles() {
-            const list = document.getElementById('title-list'); list.innerHTML = '';
-            titles.forEach(t => {
-                const unlocked = t.check();
-                const div = document.createElement('div'); div.className = `title-item ${unlocked ? '' : 'locked'}`;
-                div.style = `background: ${unlocked ? 'linear-gradient(90deg, #333, #111)' : '#111'}; border:1px solid #444; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; opacity:${unlocked?1:0.5};`;
-                div.innerHTML = `<div class="title-info" style="text-align:left;"><div class="title-name" style="color:var(--gold); font-weight:bold;">${unlocked ? t.name : '？？？？'}</div><div class="title-cond" style="font-size:11px; color:#aaa;">条件: ${t.cond}</div></div>${unlocked ? `<button class="equip-btn ${currentTitle === t.name ? 'equipped' : ''}" onclick="setTitle('${t.name}')">${currentTitle === t.name ? '使用中' : '変更'}</button>` : '🔒'}`;
-                list.appendChild(div);
-            });
-        }
-        function setTitle(name) { currentTitle = name; renderTitles(); updateUI(); saveGame(); }
-
-        function setMissionTab(tab) {
-            currentMissionTab = tab;
-            document.getElementById('tab-mission-def').classList.toggle('active', tab === 'DEFAULT');
-            document.getElementById('tab-mission-ex').classList.toggle('active', tab === 'EX');
-            renderMissions();
-        }
-
-        function initMissions() {
-            const today = new Date().toLocaleDateString();
-            if(lastMissionDate !== today) {
-                lastMissionDate = today; 
-                missionStats = { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 };
-                missions = [
-                    { id: 1, title: "草を抜きまくれ", goal: 100n, reward: 50000n, key: "plucked", unit: "本", claimed: false },
-                    { id: 2, title: "ガチャを回せ", goal: 10n, reward: 20000n, key: "gachaed", unit: "回", claimed: false },
-                    { id: 3, title: "今日稼げ", goal: 100000n, reward: 100000n, key: "earned", unit: "円", claimed: false }
-                ];
-                exMissions = [
-                    { id: 101, title: "EX: 草を500本抜く", goal: 500n, reward: 100n, key: "plucked", unit: "本", claimed: false },
-                    { id: 102, title: "EX: ボスを撃破せよ", goal: 1n, reward: 50n, key: "bossDefeated", unit: "回", claimed: false }
-                ];
-                saveGame();
-            }
-        }
-        
-        function renderMissions() {
-            const container = document.getElementById('mission-list'); container.innerHTML = '';
-            const listToRender = currentMissionTab === 'DEFAULT' ? missions : exMissions;
-            const isEx = currentMissionTab === 'EX';
-
-            listToRender.forEach(m => {
-                let currentVal = BigInt(missionStats[m.key] || 0);
-                let numGoal = Number(m.goal);
-                const prog = Math.min(100, (Number(currentVal) / numGoal) * 100);
-                const canClaim = !m.claimed && prog >= 100;
-                
-                const item = document.createElement('div');
-                item.className = 'mission-item ' + (canClaim ? 'mission-clear' : '');
-                if(isEx && canClaim) item.style.borderColor = "var(--ex-green)";
-
-                const iconHTML = isEx 
-                    ? `<img src="草核.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--ex-green);">`
-                    : `<img src="草コイン.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--gold);">`;
-                
-                const rewardHTML = isEx
-                    ? `報酬: 草核 × ${m.reward.toLocaleString()}`
-                    : `報酬: ${m.reward.toLocaleString()}円`;
-
-                item.innerHTML = `
-                    <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
-                        <div style="width:15%; text-align:center;">
-                            ${iconHTML}
-                        </div>
-                        <div style="width:55%; text-align:left; padding-left:10px;">
-                            <div style="font-size:14px; font-weight:900; color:#fff;">${m.title}</div>
-                            <div style="font-size:10px; color:#ccc;">進捗: ${currentVal.toLocaleString()}/${m.goal.toLocaleString()}${m.unit}</div>
-                            <div class="mission-progress" style="margin-top:5px;"><div class="mission-fill" style="width:${prog}%; ${isEx ? 'background: linear-gradient(90deg, #00ff88, #00ffff); box-shadow: 0 0 15px #00ff88;' : ''}"></div></div>
-                        </div>
-                        <div style="width:25%; text-align:right;">
-                            <button class="mission-reward-btn ${m.claimed ? 'claimed' : (canClaim ? 'can-claim' : '')} ${isEx && canClaim ? 'ex-reward' : ''}" onclick="${canClaim ? `claimMission(${m.id}, ${isEx})` : ''}" ${m.claimed || !canClaim ? 'disabled' : ''}>
-                                ${m.claimed ? '受取済' : (canClaim ? '受取る' : '挑戦中')}
-                            </button>
-                        </div>
-                    </div>
-                    <div style="font-size:11px; color:${isEx ? 'var(--ex-green)' : 'var(--gold)'}; font-weight:bold; width:100%; text-align:right; margin-top:5px;">${rewardHTML}</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-        
-        window.claimMission = function(id, isEx) {
-            const list = isEx ? exMissions : missions;
-            const m = list.find(x => x.id === id);
-            if(m && !m.claimed) { 
-                m.claimed = true; 
-                if(isEx) { kusakakuCount += Number(m.reward); showKotoDama(`希少素材 獲得`, 'var(--ex-green)'); } 
-                else { money += m.reward; popText("50%", "50%", `REWARD +${m.reward.toLocaleString()}!`, "lime"); }
-                renderMissions(); updateUI(); saveGame(); 
-            }
-        }
-
-        // ==========================================
-        // 合体 (お金消費)
-        // ==========================================
-        function openFuseSelect(slot) { currentFuseSlot = slot; openLayer('fuse-select-screen'); }
-        function renderFuseSelect() {
-            const list = document.getElementById('fuse-select-list'); list.innerHTML = '';
-            items.filter(i => i.type === 'char' && i.owned).forEach(item => {
-                const isSelected = fuseSelection.includes(item.id);
-                const div = document.createElement('div'); div.className = `col-item ${item.rarity}`;
-                div.innerHTML = `<div><span style="font-size:20px;">${item.icon}</span> <span style="font-weight:900; color:#fff;">${item.name}</span><br><small style="color:#bbb; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isSelected ? 'equipped' : ''}" onclick="selectFuseItem('${item.id}')" ${isSelected ? 'disabled' : ''}>${isSelected ? '選択中' : '選択'}</button>`;
-                list.appendChild(div);
-            });
-        }
-        window.selectFuseItem = function(id) { fuseSelection[currentFuseSlot - 1] = id; openLayer('fusion-screen'); }
-
-        function checkFusionResultId() {
-            const pStr = [fuseSelection[0], fuseSelection[1]].sort().join('+');
-            if(pStr === [ 'c_seimaro_uz', 'ket_uz' ].sort().join('+')) return 'sei_dragon';
-            if(pStr === [ 'c_seimaro_uz', 'c_scarlet_ham_uz' ].sort().join('+')) return 'ham_pork';
-            if(pStr === [ 'c1_ultimate', 'c_scarlet_ham_uz' ].sort().join('+')) return 'zen_omelette';
-            if(pStr === [ 'sei_cook', 'c_rampage_venom' ].sort().join('+')) return 'ven_seimaro';
-            if(pStr === [ 'ev_kazu_ultimate', 'c_rampage_venom' ].sort().join('+')) return 'ven_kazu';
-            if(pStr === [ 'ket_x', 'c_rampage_venom' ].sort().join('+')) return 'ven_ket';
-            if(pStr === [ 'ev_kazu_ultimate', 'ket_uz' ].sort().join('+')) return 'ket_royal_k';
-            if(pStr === [ 'ven_seimaro', 'fusion_zen_kazu' ].sort().join('+')) return 'deus_ex';
-            if(pStr === [ 'ev_kazu_ultimate', 'c1_ultimate' ].sort().join('+')) return 'fusion_zen_kazu';
-            return '';
-        }
-
-        function renderFusion() {
-            const slot1 = document.getElementById('fuse-slot-1'); const slot2 = document.getElementById('fuse-slot-2');
-            const item1 = items.find(i => i.id === fuseSelection[0]); const item2 = items.find(i => i.id === fuseSelection[1]);
-            slot1.innerHTML = item1 ? item1.icon : '+'; slot2.innerHTML = item2 ? item2.icon : '+';
-            const btn = document.getElementById('fusion-exec-btn'); const preview = document.getElementById('fusion-result-preview'); const condBox = document.getElementById('fusion-cond-box');
-            let fusionResultId = checkFusionResultId(); const cost = 100000000n;
-
-            if (fusionResultId) {
-                const res = items.find(i => i.id === fusionResultId);
-                condBox.innerHTML = `<p style="color:lime; font-weight:bold; margin:5px 0;">組み合わせ: 成功！</p><p style="color:${money >= cost ? 'lime' : 'red'}; font-weight:bold; margin:5px 0;"><img src="草コイン.png" style="width:16px;"> 費用: ${cost.toLocaleString()}</p>`;
-                preview.innerHTML = `<span style="animation:x-glow 0.5s infinite alternate; font-size:28px;">${res.icon} ${res.name}</span>`;
-                btn.style.display = money >= cost ? 'block' : 'none';
+        window.confirmLobbyCreate = function(multi) {
+            document.getElementById('multi-difficulty-dialog').style.display = 'none';
+            if(multi) {
+                createLobby();
             } else {
-                condBox.innerHTML = `<p style="color:#ff3333; font-weight:bold; margin:5px 0;">正しい組み合わせではありません</p><p style="color:#aaa; font-weight:bold; margin:5px 0;"><img src="草コイン.png" style="width:16px;"> 費用: 100,000,000</p>`;
-                preview.innerHTML = item1 && item2 ? "合成できません" : "素材を2体セットしてください";
-                btn.style.display = 'none';
+                startBossBattle(selectedHostBossIndex, bossDifficulty, false);
             }
         }
-        
-        window.executeFusion = function() {
-            let fusionResultId = checkFusionResultId(); const cost = 100000000n;
-            if (money < cost) return alert("お金が足りません！");
-            if(fusionResultId) {
-                const res = items.find(i => i.id === fusionResultId);
-                money -= cost; res.owned = true; equipped.char = res;
-                showKotoDama("合成成功！", "var(--og-color)");
-                fuseSelection = [null, null]; setTimeout(()=>openLayer('start-screen'), 1000); saveGame(); updateUI();
-            } else alert("合体できる組み合わせではありません。");
-        }
 
-        // ==========================================
-        // 進化 (化石消費)
-        // ==========================================
-        function getEvolveData() {
-            let id = equipped.char.id;
-            switch(id) {
-                case 'kaguya_ssr': return { id: 'yachiyo_uz', cost: 168, isFossil: true };
-                case 'ket_r': return { id: 'ket_sr', cost: 0, isFossil: true };
-                case 'ket_sr': return { id: 'ket_ssr', cost: 0, isFossil: true };
-                case 'c_scarlet_ham': return { id: 'c_scarlet_ham_uz', cost: 1, isFossil: true };
-                case 'ev_kazu': return { id: 'ev_kazu_ultimate', cost: 1, isFossil: true };
-                case 'c_rampage': return { id: 'c_rampage_venom', cost: 1, getMuda: true, isFossil: true };
-                case 'c1': return { id: 'c1_ultimate', cost: 1, isFossil: true };
-                case 'c13': return { id: 'c13_ultimate', cost: 1, isFossil: true };
-                case 'c7': return { id: 'c7_ultimate', cost: 1, isFossil: true };
-                case 'c2': return { id: 'c2_ultimate', cost: 1, isFossil: true };
-                case 'c_seimaro': return { id: 'c_seimaro_uz', cost: 1, isFossil: true };
-                case 'ket_ssr': return { id: 'ket_uz', cost: 1, isFossil: true };
-                case 'c_seimaro_uz': return { id: 'sei_cook', cost: 5, isFossil: true };
-                case 'ket_uz': return { id: 'ket_x', cost: 5, isFossil: true };
-                case 'sei_cook': return { id: 'sei_god', cost: 15, isFossil: true };
-                case 'ket_x': return { id: 'ket_og', cost: 15, isFossil: true };
-                case 'ev_kazu_ultimate': return { id: 'vector_kinguini', cost: 15, isFossil: true }; 
-            }
-            return null;
-        }
-
-       function renderEvolve() {
-            const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn'); const evData = getEvolveData();
-            if(evData) { 
-                const nextChar = items.find(i => i.id === evData.id);
-                target.innerHTML = `
-                    <p style="color:#fff; text-shadow: 1px 1px 2px #000;">進化対象：${nextChar.name}</p>
-                    <div style="margin-top:15px; display:flex; align-items:center; justify-content:center; gap:10px;">
-                        <img src="草の化石.png" style="width:30px; filter:drop-shadow(0 0 5px rgba(210,180,140,0.8));">
-                        <span style="font-size:20px; font-weight:900; color:${fossilCount >= evData.cost ? 'lime' : 'red'}; text-shadow: 1px 1px 2px #000;">
-                            ${fossilCount} / ${evData.cost}
-                        </span>
-                    </div>`; 
-                btn.style.display = "block"; btn.disabled = fossilCount < evData.cost; 
-            } else { target.innerHTML = `<p style="color:#888;">装備中のキャラは進化できません</p>`; btn.style.display = "none"; }
-        }
-
-        window.executeEvolve = function() {
-            const evData = getEvolveData();
-            if(!evData) return alert("このキャラは進化できません。");
-            if(fossilCount < evData.cost) return alert("草の化石が足りません！"); 
+        async function createLobby() {
+            isHost = true;
+            isMultiplayer = true;
+            currentRoomId = 'room_' + Date.now() + '_' + Math.floor(Math.random()*1000);
             
-            const ult = items.find(i => i.id === evData.id); 
-            fossilCount -= evData.cost; 
-            ult.owned = true; equipped.char = ult; 
+            const b = bosses[selectedHostBossIndex];
+            const diffNames = ['初級', '中級', '上級', '伝説'];
             
-            if(evData.cost >= 5) {
-                document.getElementById('evolve-screen').classList.add('ultimate-field-bg');
-                setTimeout(() => document.getElementById('evolve-screen').classList.remove('ultimate-field-bg'), 2000);
-            }
-            if(evData.id === 'ev_kazu_ultimate') items.find(i => i.id === 's3').owned = true;
-            if(evData.getMuda) { const muda = items.find(i => i.id === 's_muda'); if(muda) muda.owned = true; }
+            const roomData = {
+                hostUid: myUid,
+                hostName: userName,
+                bossIndex: selectedHostBossIndex,
+                difficulty: bossDifficulty,
+                difficultyName: diffNames[bossDifficulty-1],
+                status: 'waiting',
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            await roomsRef.child(currentRoomId).set(roomData);
             
-            showKotoDama("魂 の 進 化", "var(--blue)");
-            setTimeout(() => openLayer('start-screen'), 1500); saveGame(); updateUI();
-        }
-        
-        // ==========================================
-        // 図鑑
-        // ==========================================
-        window.setTab = function(tab) { 
-            currentTab = tab; 
-            document.querySelectorAll('.tab-btn:not(.ex-tab):not(#gacha-tab-default):not(#cpt-tab-train):not(#cpt-tab-boss)').forEach(b => b.classList.remove('active')); 
-            document.getElementById('tab-' + tab).classList.add('active'); 
-            document.getElementById('char-sub-tabs').style.display = tab === 'char' ? 'flex' : 'none';
-            renderCol(); 
-        }
-
-        window.setCharSubTab = function(sub) {
-            currentColCharTab = sub;
-            document.getElementById('sub-char-def').classList.toggle('active', sub === 'DEFAULT');
-            document.getElementById('sub-char-ex').classList.toggle('active', sub === 'EX');
-            renderCol();
-        }
-        
-        function renderCol() {
-            const list = document.getElementById('col-list-content'); list.innerHTML = '';
-            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
-            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
-            
-            let filteredItems = items.filter(i => i.type === currentTab);
-            if(currentTab === 'char') filteredItems = filteredItems.filter(i => currentColCharTab === 'DEFAULT' ? !i.isEX && i.rarity !== 'BOSS' : (i.isEX || i.rarity === 'BOSS'));
-
-            filteredItems.sort((a,b)=> {
-                const score = { 'BOSS': 7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1 };
-                const aScore = score[a.rarity] || 0; const bScore = score[b.rarity] || 0;
-                if (bScore !== aScore) return bScore - aScore; return ((b.rate || b.mult) || 0) - ((a.rate || a.mult) || 0);
-            }).forEach(item => { 
-                const isEq = equipped[item.type].id === item.id; 
-                const div = document.createElement('div'); 
-                div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; 
-                let iconStyle = `font-size:22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));`;
-                if(gameSettings.textureLevel === 0) iconStyle = `font-size:22px;`;
-
-                let nameHtml = item.owned ? item.name : '？？？';
-                if(!item.owned && currentTab === 'char') { iconStyle += `opacity: 0.3;`; nameHtml = `<span style="color:#00aa55;">[未解放]</span>`; }
-
-                div.innerHTML = `<div><span style="${iconStyle}">${item.owned ? (item.icon || (item.type==='skill'?'⚡':'🎵')) : '？'}</span> <span style="font-weight:900; color:#fff; text-shadow: 1px 1px 2px #000;">${nameHtml}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; 
-                list.appendChild(div); 
+            // メンバーとして自分を追加
+            const myChar = getCharFinalStats(leaderId);
+            await roomsRef.child(currentRoomId).child('members').child(myUid).set({
+                name: userName,
+                icon: myChar.data.icon,
+                isReady: true // ホストは最初からReady扱い
             });
-        }
-        window.equip = function(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
 
-        // ==========================================
-        // ガチャ (演出付き・2種類対応)
-        // ==========================================
-        window.setGachaTab = function(tab) {
-            currentGachaTab = tab;
-            document.getElementById('gacha-tab-default').classList.toggle('active', tab === 'DEFAULT');
-            document.getElementById('gacha-tab-ex').classList.toggle('active', tab === 'EX');
+            // 自分が切断されたら部屋ごと消す
+            roomsRef.child(currentRoomId).onDisconnect().remove();
             
-            if(tab === 'DEFAULT') {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle;"> 所持金: <span style="color:gold;">${money.toLocaleString()}</span>`;
-                document.getElementById('gacha-prob-display').innerText = "SSR: 1% / SR: 20% / R: 79% (※OGは排出されません)";
-                document.getElementById('gacha-btn-1').innerText = "1回 (1,000円)";
-                document.getElementById('gacha-btn-10').innerText = "10連 (10,000円)";
-                document.getElementById('gacha-btn-100').innerText = "100連 (100,000円)";
-                document.getElementById('gacha-btn-1000').innerText = "👑 1000連 (1,000,000円)";
-            } else {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
-                document.getElementById('gacha-prob-display').innerText = "かぐや(SSR): 1% / SSR通常: 10% / SR: 30% / R: 59%";
-                document.getElementById('gacha-btn-1').innerText = "1回 (1個)";
-                document.getElementById('gacha-btn-10').innerText = "10連 (10個)";
-                document.getElementById('gacha-btn-100').innerText = "100連 (100個)";
-                document.getElementById('gacha-btn-1000').innerText = "👑 1000連 (1000個)";
-            }
+            setupRoomListeners();
+            openLayer('multi-room-screen');
         }
 
-        window.runGacha = async function(times) {
-            let isEX = currentGachaTab === 'EX';
-            if(isEX) {
-                if(kusakakuCount < times) return alert("草核が足りません！EXミッションで集めよう！");
-                kusakakuCount -= times;
-            } else {
-                const cost = BigInt((times === 1000) ? 1000000 : 1000 * times);
-                if(money < cost) return alert("金欠みたいやわぁ！");
-                money -= cost;
-            }
+        window.fetchLobbies = function() {
+            const container = document.getElementById('lobby-list-container');
+            container.innerHTML = '<p style="color:#aaa;">検索中...</p>';
             
-            updateUI(); missionStats.gachaed += times;
-            
-            document.getElementById('gacha-controls').style.display = 'none';
-            document.getElementById('gacha-result-display').style.display = 'none';
-            document.getElementById('gacha-anim-overlay').style.display = 'flex';
-            
-            let results = [];
-            // OG, UZ, X, BOSS, OMEGA, 進化後, スキル等を除外
-            let pool = items.filter(it => it.type === 'char' && !it.isEvolved && it.rarity !== 'OG' && it.rarity !== 'OMEGA' && it.rarity !== 'X' && it.rarity !== 'UZ' && it.rarity !== 'BOSS');
-            
-            let ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'kaguya_ssr');
-            let srPool = pool.filter(it => it.rarity === 'SR');
-            let rPool = pool.filter(it => it.rarity === 'R' || it.rarity === 'BASIC');
-            let kaguya = items.find(it => it.id === 'kaguya_ssr');
-
-            for(let i=0; i<times; i++) {
-                const r = Math.random() * 100;
-                let pick;
-                if(isEX) {
-                    if(r < 1) pick = kaguya;
-                    else if (r < 11) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-                    else if (r < 41) pick = srPool[Math.floor(Math.random() * srPool.length)];
-                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
-                } else {
-                    if (r < 1) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-                    else if (r < 21) pick = srPool[Math.floor(Math.random() * srPool.length)];
-                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
+            roomsRef.orderByChild('status').equalTo('waiting').once('value', (snapshot) => {
+                container.innerHTML = '';
+                if(!snapshot.exists()) {
+                    container.innerHTML = '<p style="color:#aaa;">募集中のロビーはありません</p>';
+                    return;
                 }
-                if(!pick) pick = items.find(it => it.id === 'c20'); 
                 
-                // 重複処理
-                if(pick.owned) {
-                    if(!charLevels[pick.id]) charLevels[pick.id] = {atk:0, hp:0, skill:0, dup:0};
-                    charLevels[pick.id].dup++;
-                } else {
-                    pick.owned = true;
-                }
-                results.push(pick);
-            }
-            
-            const hasSuperRare = results.some(p => p.rarity === 'UZ' || p.rarity === 'X' || p.rarity === 'SSR');
-            const hasOG = results.some(p => p.rarity === 'OG' || p.rarity === 'X');
-            const egg = document.getElementById('gacha-anim-egg');
-            
-            if(isEX) { egg.className = 'gacha-egg egg-ex'; egg.innerText = ''; } 
-            else { egg.className = 'gacha-egg ' + (hasOG ? 'egg-rainbow' : (hasSuperRare ? 'egg-red' : '')); egg.innerText = '🎁'; }
+                snapshot.forEach(child => {
+                    const room = child.val();
+                    const roomId = child.key;
+                    const b = bosses[room.bossIndex];
+                    const membersCount = room.members ? Object.keys(room.members).length : 0;
+                    
+                    if(membersCount >= 4) return; // 満員は表示しない(最大4人と仮定)
 
-            if(times >= 1000 && gameSettings.effectLevel > 0) {
-                for(let i=0; i<100; i++) {
-                    setTimeout(() => {
-                        const rain = document.createElement('div'); rain.className = 'rain-capsule'; rain.style.left = Math.random() * 100 + "vw"; rain.style.background = (Math.random() > 0.9) ? "radial-gradient(circle, #fff, #f0f)" : "#ddd";
-                        document.getElementById('gacha-anim-overlay').appendChild(rain); setTimeout(() => rain.remove(), 1000);
-                    }, i * 15);
-                }
-            }
-            
-            await new Promise(r => setTimeout(r, 2000));
-
-            if(hasSuperRare && gameSettings.effectLevel >= 1) { showKotoDama(isEX ? "神 降 臨" : "覚醒", "rainbow"); if(gameSettings.effectLevel === 2) shakeScreen(0.5); await new Promise(r => setTimeout(r, 1000)); }
-
-            document.getElementById('gacha-anim-overlay').style.display = 'none';
-            const display = document.getElementById('gacha-result-display'); display.innerHTML = ''; display.style.display = 'grid';
-
-            results.sort((a,b) => { const score = { 'BOSS':7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1, 'BASIC': 0 }; return score[b.rarity] - score[a.rarity]; });
-
-            if(times >= 100) {
-                results.slice(0, 50).forEach((p, idx) => {
-                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || '🎁'}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${(idx % 10) * 0.05}s`; display.appendChild(l);
+                    const div = document.createElement('div');
+                    div.className = 'lobby-list-item';
+                    div.onclick = () => joinLobby(roomId);
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center;">
+                            <div style="font-size:24px; margin-right:10px;">${b.name.includes('ラフレシア')?'🌺':'😈'}</div>
+                            <div style="text-align:left;">
+                                <div style="font-size:14px; font-weight:bold; color:var(--gold);">${b.name}</div>
+                                <div style="font-size:10px; color:#aaa;">主催: ${room.hostName} | ${room.difficultyName}</div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:cyan;">参加 ${membersCount}/4</div>
+                    `;
+                    container.appendChild(div);
                 });
-                const info = document.createElement('div'); info.style="grid-column: span 2; text-align:center; padding: 20px; color:#aaa;"; info.innerText = `...他 ${times - 50} 個獲得`; display.appendChild(info);
-            } else {
-                results.forEach((p, idx) => { 
-                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || '🎁'}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${idx * 0.1}s`; display.appendChild(l); 
-                });
-            }
-            document.getElementById('gacha-controls').style.display = 'none';
-            saveGame(); updateUI();
+            });
         }
 
-        window.closeGachaResult = function() {
-            if(document.getElementById('gacha-result-display').style.display !== 'none') {
-                document.getElementById('gacha-result-display').style.display = 'none';
-                document.getElementById('gacha-controls').style.display = 'flex';
-                setGachaTab(currentGachaTab); 
-            } else {
-                openLayer('start-screen');
+        window.joinLobby = async function(roomId) {
+            isHost = false;
+            isMultiplayer = true;
+            currentRoomId = roomId;
+            
+            const myChar = getCharFinalStats(leaderId);
+            const memberRef = roomsRef.child(currentRoomId).child('members').child(myUid);
+            
+            await memberRef.set({
+                name: userName,
+                icon: myChar.data.icon,
+                isReady: false
+            });
+            memberRef.onDisconnect().remove();
+
+            setupRoomListeners();
+            openLayer('multi-room-screen');
+        }
+
+        function setupRoomListeners() {
+            clearRoomListeners();
+            const roomRef = roomsRef.child(currentRoomId);
+            
+            const listener = roomRef.on('value', (snapshot) => {
+                if(!snapshot.exists()) {
+                    // 部屋が消滅した（ホスト切断など）
+                    if(!isBossBattle && isMultiplayer) {
+                        alert("ロビーが解散されました");
+                        leaveLobby(true);
+                    }
+                    return;
+                }
+                
+                const room = snapshot.val();
+                selectedHostBossIndex = room.bossIndex;
+                bossDifficulty = room.difficulty;
+                
+                const b = bosses[selectedHostBossIndex];
+                const diffNames = ['初級', '中級', '上級', '伝説'];
+                document.getElementById('room-boss-title').innerText = `${b.name} (${diffNames[bossDifficulty-1]})`;
+                document.getElementById('room-host-name').innerText = room.hostName;
+
+                // メンバー描画
+                const membersContainer = document.getElementById('room-members-container');
+                membersContainer.innerHTML = '';
+                let allReady = true;
+                
+                if(room.members) {
+                    multiPlayers = room.members; // キャッシュ
+                    Object.keys(room.members).forEach(uid => {
+                        const m = room.members[uid];
+                        if(!m.isReady && uid !== room.hostUid) allReady = false;
+                        
+                        const div = document.createElement('div');
+                        div.className = `lobby-player-row ${m.isReady ? 'ready' : ''}`;
+                        div.innerHTML = `
+                            <div style="display:flex; align-items:center;">
+                                <span style="font-size:24px; margin-right:10px;">${m.icon}</span>
+                                <span style="color:#fff; font-weight:bold;">${m.name} ${uid===room.hostUid ? '<span style="color:gold;">(HOST)</span>' : ''}</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:bold; color:${m.isReady?'#0f0':'#888'}">${m.isReady?'READY':'WAITING...'}</div>
+                        `;
+                        membersContainer.appendChild(div);
+                    });
+                }
+                
+                // ボタン表示制御
+                if(isHost) {
+                    document.getElementById('btn-room-ready').style.display = 'none';
+                    document.getElementById('btn-room-start').style.display = 'block';
+                    document.getElementById('btn-room-start').disabled = !allReady;
+                    document.getElementById('btn-room-start').style.opacity = allReady ? 1 : 0.5;
+                } else {
+                    document.getElementById('btn-room-ready').style.display = 'block';
+                    document.getElementById('btn-room-start').style.display = 'none';
+                    const myStatus = room.members && room.members[myUid] ? room.members[myUid].isReady : false;
+                    document.getElementById('btn-room-ready').innerText = myStatus ? "準備完了" : "準備OK";
+                    document.getElementById('btn-room-ready').style.background = myStatus ? "#555" : "#aa5500";
+                }
+
+                // ゲーム開始検知
+                if(room.status === 'playing' && !isBossBattle) {
+                    startBossBattle(selectedHostBossIndex, bossDifficulty, true);
+                }
+            });
+            roomListeners.push({ ref: roomRef, callback: listener });
+        }
+
+        function clearRoomListeners() {
+            roomListeners.forEach(l => l.ref.off('value', l.callback));
+            roomListeners = [];
+        }
+
+        window.toggleReady = function() {
+            if(!isMultiplayer || isHost) return;
+            const ref = roomsRef.child(currentRoomId).child('members').child(myUid).child('isReady');
+            ref.once('value', snap => {
+                ref.set(!snap.val());
+            });
+        }
+
+        window.leaveLobby = function(force = false) {
+            if(!force) {
+                if(isHost) {
+                    roomsRef.child(currentRoomId).remove();
+                } else {
+                    roomsRef.child(currentRoomId).child('members').child(myUid).remove();
+                }
             }
+            clearRoomListeners();
+            isMultiplayer = false;
+            currentRoomId = null;
+            openLayer('multi-menu-screen');
+        }
+
+        window.hostStartBattle = async function() {
+            if(!isHost || !isMultiplayer) return;
+            
+            // バトルデータ初期化
+            const b = bosses[selectedHostBossIndex];
+            bossDifficultyMult = bossDifficulty === 1 ? 1 : (bossDifficulty === 2 ? 3 : (bossDifficulty === 3 ? 10 : 20));
+            const hp = b.hp * bossDifficultyMult * 2;
+            
+            // パーティデータ構築
+            let playersData = {};
+            Object.keys(multiPlayers).forEach(uid => {
+                // 実際は各クライアントが自分のステータスを上げるべきだが、簡易化のためホストが代表値を入れる
+                // （本格的には各クライアントが自分のHPを送信するフェーズが必要）
+                // ここでは仮にホスト基準のパラメータを初期値とし、各自がローカルで上書きする
+                playersData[uid] = { hp: 1000, maxHp: 1000, isDead: false, name: multiPlayers[uid].name, icon: multiPlayers[uid].icon };
+            });
+
+            await battlesRef.child(currentRoomId).set({
+                bossHp: hp,
+                maxBossHp: hp,
+                status: 'playing', // playing, clear, gameover
+                players: playersData
+            });
+
+            await roomsRef.child(currentRoomId).update({ status: 'playing' });
         }
 
         // ==========================================
-        // ボスバトル機能 (ソロ専用)
+        // ボスバトル機能 (ソロ・マルチ統合)
         // ==========================================
-        window.startBossBattle = function(bossIndex, diff, isOnline = false) {
+        window.startBossBattle = function(bossIndex, diff, online = false) {
+            isMultiplayer = online;
             bossDifficulty = diff;
             bossDifficultyMult = diff === 1 ? 1 : (diff === 2 ? 3 : (diff === 3 ? 10 : 20)); // 伝説級は20倍
             
@@ -1426,12 +1391,29 @@
             
             itemCooldowns = { herb: 0, drop: 0, star: 0 };
             
-            const ownedChars = items.filter(i => i.type === 'char' && i.owned && i.id !== leaderId);
-            ownedChars.sort(() => Math.random() - 0.5);
-            
             let leaderChar = items.find(i=>i.id===leaderId) || items.find(i=>i.id==='c20');
-            battleParty = [createFighter(leaderChar, true)];
-            for(let i=0; i<3; i++) battleParty.push(createFighter(ownedChars[i] || items.find(it => it.id === 'c20'), false)); 
+            battleParty = [];
+
+            if(isMultiplayer) {
+                // マルチの場合、自分のステータスをFirebaseに登録
+                const myStats = getCharFinalStats(leaderChar.id);
+                battlesRef.child(currentRoomId).child('players').child(myUid).update({
+                    hp: myStats.hp,
+                    maxHp: myStats.hp,
+                    atk: myStats.atk,
+                    isDead: false,
+                    isInvincible: false
+                });
+                
+                // バトル用リスナー設定
+                setupBattleListeners();
+            } else {
+                // ソロの場合、NPCを含めたパーティを組む
+                const ownedChars = items.filter(i => i.type === 'char' && i.owned && i.id !== leaderId);
+                ownedChars.sort(() => Math.random() - 0.5);
+                battleParty = [createFighter(leaderChar, true)];
+                for(let i=0; i<3; i++) battleParty.push(createFighter(ownedChars[i] || items.find(it => it.id === 'c20'), false)); 
+            }
 
             document.getElementById('arena-boss-name').innerText = currentBoss.name;
             document.getElementById('arena-boss-image').style.backgroundImage = `url('${currentBoss.img}')`;
@@ -1450,9 +1432,68 @@
             if (equipped.bgm && equipped.bgm.url) { bgmPlayer.src = equipped.bgm.url; bgmPlayer.volume = gameSettings.bgmVol / 100; bgmPlayer.play().catch(()=>{}); }
         }
 
+        function setupBattleListeners() {
+            const battleRef = battlesRef.child(currentRoomId);
+            
+            // Boss HP
+            const hpListener = battleRef.child('bossHp').on('value', snap => {
+                if(snap.exists()) {
+                    bossCurrentHp = snap.val();
+                    updateBossHpUI();
+                }
+            });
+            roomListeners.push({ ref: battleRef.child('bossHp'), callback: hpListener });
+
+            // Players status
+            const playersListener = battleRef.child('players').on('value', snap => {
+                if(snap.exists()) {
+                    multiPlayers = snap.val();
+                    renderPartyUI();
+                }
+            });
+            roomListeners.push({ ref: battleRef.child('players'), callback: playersListener });
+
+            // Events (スキル発動など)
+            const eventsListener = battleRef.child('events').on('child_added', snap => {
+                const ev = snap.val();
+                if(!ev) return;
+                
+                if(ev.type === 'skill') {
+                    if(ev.uid !== myUid) showKotoDama(`${ev.name} 発動!`, 'cyan');
+                    if(ev.skillId === 's5') { // ZENの導き: 全員回復
+                        if(multiPlayers[myUid] && !multiPlayers[myUid].isDead) {
+                            let mhp = multiPlayers[myUid].maxHp;
+                            battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: mhp, isInvincible: true });
+                            setTimeout(() => {
+                                if(isBossBattle && isMultiplayer) battlesRef.child(currentRoomId).child('players').child(myUid).update({ isInvincible: false });
+                            }, 3000);
+                            showHealText('FULL!', myUid);
+                        }
+                    } else if(ev.skillId === 's3') { // カズキング・ザ・ワールド
+                        const bossImg = document.getElementById('arena-boss-image');
+                        bossImg.style.filter = "grayscale(1) invert(1) contrast(1.5)";
+                        setTimeout(() => bossImg.style.filter = "none", 3000);
+                    }
+                } else if(ev.type === 'miss') {
+                    if(ev.targetId === myUid || !isMultiplayer) showMissText(ev.targetId);
+                }
+            });
+            roomListeners.push({ ref: battleRef.child('events'), callback: eventsListener });
+
+            // Status (勝利/敗北)
+            const statusListener = battleRef.child('status').on('value', snap => {
+                if(snap.exists()) {
+                    const st = snap.val();
+                    if(st === 'clear') showChestScreen();
+                    else if(st === 'gameover') showDespairScreen();
+                }
+            });
+            roomListeners.push({ ref: battleRef.child('status'), callback: statusListener });
+        }
+
         function createFighter(charData, isLdr) {
             const stats = getCharFinalStats(charData.id);
-            return { id: charData.id, name: charData.name, icon: charData.icon, maxHp: stats.hp, hp: stats.hp, atk: stats.atk, ct: 0, ctSpeed: 1.0 + (Math.random() * 0.5), isDead: false, isLeader: isLdr };
+            return { id: charData.id, name: charData.name, icon: charData.icon, maxHp: stats.hp, hp: stats.hp, atk: stats.atk, ct: 0, ctSpeed: 1.0 + (Math.random() * 0.5), isDead: false, isLeader: isLdr, isInvincible: false };
         }
 
         function renderArenaSkillList() {
@@ -1461,10 +1502,12 @@
             
             let leaderChar = items.find(i => i.id === leaderId) || items.find(i=>i.id==='c20');
             let skillName = leaderChar.skillName || "強撃";
+            // 既存スキル(装備中)がある場合はそれも使えるように統合
+            let eqSkillName = equipped.skill.name;
             
             const div = document.createElement('div');
             div.className = 'arena-skill-item';
-            div.innerHTML = `<div style="font-size:24px; filter:drop-shadow(0 0 5px cyan);">⚡</div><div style="flex-grow:1; margin-left:10px; text-align:left;"><div style="font-weight:900; color:#fff; text-shadow:1px 1px 2px #000;">${skillName}</div><div style="font-size:10px; color:#aaa;">リーダー専用手動スキル</div></div>`;
+            div.innerHTML = `<div style="font-size:24px; filter:drop-shadow(0 0 5px cyan);">⚡</div><div style="flex-grow:1; margin-left:10px; text-align:left;"><div style="font-weight:900; color:#fff; text-shadow:1px 1px 2px #000;">${eqSkillName}</div><div style="font-size:10px; color:#aaa;">必殺技</div></div>`;
             div.onclick = () => useLeaderManualSkill(leaderChar, div);
             container.appendChild(div);
         }
@@ -1473,15 +1516,44 @@
             if(!isBossBattle) return;
             const speedMult = isDoubleSpeed ? 2 : 1;
 
-            let allDead = true;
-            battleParty.forEach((p) => {
-                if(p.isDead) return;
-                allDead = false;
-                p.ct += p.ctSpeed * speedMult * 2;
-                if(p.ct >= 100) { p.ct = 0; executePlayerAttack(p); }
-            });
+            if(!isMultiplayer) {
+                // ソロプレイ
+                let allDead = true;
+                battleParty.forEach((p) => {
+                    if(p.isDead) return;
+                    allDead = false;
+                    p.ct += p.ctSpeed * speedMult * 2;
+                    if(p.ct >= 100) { p.ct = 0; executePlayerAttack(p); }
+                });
 
-            if(Math.random() < 0.03 * speedMult) executeBossAttack();
+                if(Math.random() < 0.03 * speedMult) executeBossAttack();
+
+                if(bossCurrentHp <= 0) showChestScreen();
+                else if(allDead) showDespairScreen();
+
+            } else {
+                // マルチプレイ (自キャラのみCT進行・攻撃)
+                let me = multiPlayers[myUid];
+                if(me && !me.isDead) {
+                    // ローカルでCT管理
+                    if(!me.ct) me.ct = 0;
+                    me.ct += 2 * speedMult;
+                    if(me.ct >= 100) { me.ct = 0; executePlayerAttack(me, true); }
+                }
+
+                // ホストがボスの攻撃と全体状態を管理
+                if(isHost) {
+                    if(Math.random() < 0.03 * speedMult) executeBossAttack();
+
+                    if(bossCurrentHp <= 0) {
+                        battlesRef.child(currentRoomId).update({ status: 'clear' });
+                    } else {
+                        let allDead = true;
+                        Object.values(multiPlayers).forEach(p => { if(!p.isDead) allDead = false; });
+                        if(allDead) battlesRef.child(currentRoomId).update({ status: 'gameover' });
+                    }
+                }
+            }
 
             for(let key in itemCooldowns) {
                 if(itemCooldowns[key] > 0) itemCooldowns[key] -= speedMult;
@@ -1496,26 +1568,78 @@
                 });
             }
 
-            renderPartyUI();
-            
-            if(bossCurrentHp <= 0) endBossBattle(true);
-            else if(allDead) endBossBattle(false);
+            if(!isMultiplayer) renderPartyUI(); // マルチはリスナーで更新
         }
 
-        function executePlayerAttack(player) {
-            let dmg = player.atk + Math.floor(Math.random() * 50);
-            bossCurrentHp -= dmg; if(bossCurrentHp < 0) bossCurrentHp = 0;
-            showDamageText(dmg, 'boss'); updateBossHpUI();
+        function executePlayerAttack(player, isMulti = false) {
+            let isCrit = Math.random() < 0.1; // 10%で会心
+            let dmg = (player.atk || 500) + Math.floor(Math.random() * 50);
+            if(isCrit) dmg *= 3;
+            
+            if(isMulti) {
+                // トランザクションでHP減算
+                battlesRef.child(currentRoomId).child('bossHp').transaction(currentHp => {
+                    if(currentHp === null) return 0;
+                    return Math.max(0, currentHp - dmg);
+                });
+            } else {
+                bossCurrentHp -= dmg; if(bossCurrentHp < 0) bossCurrentHp = 0;
+                updateBossHpUI();
+            }
+            
+            if(isCrit) {
+                showCriticalText(dmg, 'boss');
+                shakeScreen(0.2);
+            } else {
+                showDamageText(dmg, 'boss');
+            }
         }
 
         function executeBossAttack() {
             const warning = document.getElementById('boss-warning-overlay');
             warning.style.display = 'block'; setTimeout(() => warning.style.display = 'none', 300);
-            const alive = battleParty.filter(p => !p.isDead); if(alive.length === 0) return;
-            const target = alive[Math.floor(Math.random() * alive.length)];
+            
+            let alive = [];
+            if(isMultiplayer) {
+                Object.keys(multiPlayers).forEach(uid => { if(!multiPlayers[uid].isDead) alive.push(uid); });
+            } else {
+                alive = battleParty.filter(p => !p.isDead);
+            }
+            
+            if(alive.length === 0) return;
+            
+            let target, targetId;
+            if(isMultiplayer) {
+                targetId = alive[Math.floor(Math.random() * alive.length)];
+                target = multiPlayers[targetId];
+            } else {
+                target = alive[Math.floor(Math.random() * alive.length)];
+                targetId = `player-${battleParty.indexOf(target)}`;
+            }
+
+            // 回避判定 (基礎5% + スキル等)
+            if(target.isInvincible || Math.random() < 0.05) {
+                if(isMultiplayer) {
+                    battlesRef.child(currentRoomId).child('events').push({ type: 'miss', targetId: targetId });
+                } else {
+                    showMissText(targetId);
+                }
+                return;
+            }
+            
             let dmg = currentBoss.atk + Math.floor(Math.random() * 100);
-            target.hp -= dmg; showDamageText(dmg, `player-${battleParty.indexOf(target)}`);
-            if(target.hp <= 0) { target.hp = 0; target.isDead = true; target.ct = 0; }
+            
+            if(isMultiplayer) {
+                let newHp = Math.max(0, target.hp - dmg);
+                battlesRef.child(currentRoomId).child('players').child(targetId).update({
+                    hp: newHp,
+                    isDead: newHp <= 0
+                });
+            } else {
+                target.hp -= dmg; showDamageText(dmg, targetId);
+                if(target.hp <= 0) { target.hp = 0; target.isDead = true; target.ct = 0; }
+            }
+            
             if(gameSettings.effectLevel >= 2) shakeScreen(0.1);
         }
 
@@ -1528,42 +1652,71 @@
             element.style.transform = 'scale(1.1)'; setTimeout(() => element.style.transform = 'scale(1)', 200);
 
             const bossImg = document.getElementById('arena-boss-image');
-            let skillName = leaderChar.skillName || "強撃";
+            let skillId = equipped.skill.id;
+            let skillName = equipped.skill.name;
             
             if(gameSettings.effectLevel >= 1) showKotoDama(skillName + "!!", "cyan");
             if(gameSettings.effectLevel == 2) shakeScreen(0.3);
             
-            // スキル効果分岐 (特別キャラ)
-            if(skillName === '私はわたしのことが好き。') {
-                bossImg.style.filter = "contrast(1.5) drop-shadow(0 0 20px pink)";
-                battleParty.forEach(p => { if(!p.isDead) p.hp = Math.min(p.maxHp, p.hp + p.maxHp*0.5); });
-                let interval = setInterval(()=>executePlayerAttack({atk: leaderChar.rarity==='SSR'?2000:500}), 100);
-                setTimeout(()=>{ clearInterval(interval); isSkillActive = false; bossImg.style.filter = "none"; }, 2000);
-            } else if(skillName === 'Remember') {
+            if(isMultiplayer) {
+                battlesRef.child(currentRoomId).child('events').push({ type: 'skill', uid: myUid, name: userName, skillId: skillId });
+            }
+
+            // スキル効果分岐
+            if(skillId === 's3') { // 時止め
+                bossImg.style.filter = "grayscale(1) invert(1) contrast(1.5)";
+                setTimeout(()=>{ isSkillActive = false; bossImg.style.filter = "none"; }, 4000);
+            } else if(skillId === 's_muda') {
                 bossImg.classList.add('muda-crack-effect');
-                let interval = setInterval(()=>executePlayerAttack({atk: 5000}), 50);
+                let interval = setInterval(()=>executePlayerAttack(getCharFinalStats(leaderChar.id), isMultiplayer), 50);
                 setTimeout(()=>{ clearInterval(interval); isSkillActive = false; bossImg.classList.remove('muda-crack-effect'); }, 3000);
+            } else if(skillId === 's5') { // 回復
+                if(isMultiplayer) {
+                    // Firebase経由で回復（イベント送信済）
+                } else {
+                    battleParty.forEach(p => { if(!p.isDead) { p.hp = p.maxHp; p.isInvincible = true; showHealText('FULL!', `player-${battleParty.indexOf(p)}`); }});
+                    setTimeout(() => battleParty.forEach(p => p.isInvincible = false), 3000);
+                }
+                setTimeout(()=>isSkillActive = false, 1000);
             } else {
                 bossImg.style.background = "#fff"; setTimeout(()=>bossImg.style.background = "", 200);
-                executePlayerAttack({atk: 2000 + (charLevels[leaderChar.id]?.skill||0)*500});
+                let dmgPlayer = getCharFinalStats(leaderChar.id);
+                dmgPlayer.atk *= 5; // 必殺ダメージ
+                executePlayerAttack(dmgPlayer, isMultiplayer);
                 setTimeout(()=>isSkillActive = false, 1000);
             }
         }
 
         window.useBattleItem = function(type) {
             if(itemCooldowns[type] > 0) return;
-            const alive = battleParty.filter(p => !p.isDead);
-            if(type === 'herb') {
-                if(alive.length === 0) return; alive.sort((a,b) => (a.hp/a.maxHp) - (b.hp/b.maxHp));
-                const target = alive[0]; const heal = Math.floor(target.maxHp * 0.5); target.hp = Math.min(target.maxHp, target.hp + heal);
-                showHealText(heal, `player-${battleParty.indexOf(target)}`); itemCooldowns.herb = ITEM_MAX_CD.herb;
-            } else if(type === 'drop') {
-                if(alive.length === 0) return; alive.forEach(p => { const heal = p.maxHp - p.hp; p.hp = p.maxHp; showHealText(heal, `player-${battleParty.indexOf(p)}`); });
-                itemCooldowns.drop = ITEM_MAX_CD.drop;
-            } else if(type === 'star') {
-                const dead = battleParty.filter(p => p.isDead); if(dead.length === 0) return;
-                dead.forEach(p => { p.isDead = false; p.hp = Math.floor(p.maxHp * 0.5); showHealText('REVIVE!', `player-${battleParty.indexOf(p)}`); });
-                itemCooldowns.star = ITEM_MAX_CD.star;
+            
+            if(isMultiplayer) {
+                let me = multiPlayers[myUid];
+                if(!me || me.isDead) return;
+                
+                if(type === 'herb') {
+                    battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: Math.min(me.maxHp, me.hp + me.maxHp*0.5) });
+                    itemCooldowns.herb = ITEM_MAX_CD.herb;
+                }
+                // しずくと蘇生は自分のみに適用（簡易化）
+                else if(type === 'drop') {
+                    battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: me.maxHp });
+                    itemCooldowns.drop = ITEM_MAX_CD.drop;
+                }
+            } else {
+                const alive = battleParty.filter(p => !p.isDead);
+                if(type === 'herb') {
+                    if(alive.length === 0) return; alive.sort((a,b) => (a.hp/a.maxHp) - (b.hp/b.maxHp));
+                    const target = alive[0]; const heal = Math.floor(target.maxHp * 0.5); target.hp = Math.min(target.maxHp, target.hp + heal);
+                    showHealText(heal, `player-${battleParty.indexOf(target)}`); itemCooldowns.herb = ITEM_MAX_CD.herb;
+                } else if(type === 'drop') {
+                    if(alive.length === 0) return; alive.forEach(p => { const heal = p.maxHp - p.hp; p.hp = p.maxHp; showHealText(heal, `player-${battleParty.indexOf(p)}`); });
+                    itemCooldowns.drop = ITEM_MAX_CD.drop;
+                } else if(type === 'star') {
+                    const dead = battleParty.filter(p => p.isDead); if(dead.length === 0) return;
+                    dead.forEach(p => { p.isDead = false; p.hp = Math.floor(p.maxHp * 0.5); showHealText('REVIVE!', `player-${battleParty.indexOf(p)}`); });
+                    itemCooldowns.star = ITEM_MAX_CD.star;
+                }
             }
         }
 
@@ -1575,21 +1728,47 @@
 
         function renderPartyUI() {
             const container = document.getElementById('arena-party-container'); container.innerHTML = '';
-            battleParty.forEach((p, index) => {
-                const hpPct = Math.max(0, (p.hp / p.maxHp) * 100); const ctPct = Math.min(100, p.ct);
-                const isDying = p.hp > 0 && hpPct <= 20 ? 'color:#ff3333; animation:flash-warn 0.5s infinite;' : '';
-                const div = document.createElement('div'); div.className = 'party-member'; div.id = `ui-player-${index}`;
-                div.innerHTML = `
-                    <div style="font-size:20px; ${p.isDead ? 'filter:grayscale(1) brightness(0.3);' : ''}">${p.icon}</div>
-                    <div style="flex-grow:1; margin-left:5px; text-align:left;">
-                        <div class="member-hp-bg"><div class="member-hp-fill" style="width:${hpPct}%; background:${p.isDead?'transparent':(hpPct<20?'#ff0000':'linear-gradient(90deg, #00aa00, #00ff00)')};"></div></div>
-                        <div class="member-ct-bg"><div class="member-ct-fill" style="width:${ctPct}%;"></div></div>
-                    </div>
-                    <div style="font-size:9px; font-weight:bold; color:#fff; width:30px; text-align:right; ${isDying}">${Math.floor(p.hp)}</div>
-                    ${p.isDead ? '<div style="position:absolute; top:5px; left:20px; color:#ff0000; font-size:12px; font-weight:900; transform:rotate(-15deg);">DEAD</div>' : ''}
-                `;
-                container.appendChild(div);
-            });
+            
+            if(isMultiplayer) {
+                Object.keys(multiPlayers).forEach(uid => {
+                    const p = multiPlayers[uid];
+                    const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
+                    const isDying = p.hp > 0 && hpPct <= 20 ? 'color:#ff3333; animation:flash-warn 0.5s infinite;' : '';
+                    const div = document.createElement('div'); div.className = 'party-member multi-player'; div.id = `ui-${uid}`;
+                    div.innerHTML = `
+                        <div style="font-size:20px; ${p.isDead ? 'filter:grayscale(1) brightness(0.3);' : ''}">
+                            ${p.icon}
+                            ${p.isInvincible ? '<div class="barrier-effect"></div>' : ''}
+                        </div>
+                        <div style="flex-grow:1; margin-left:5px; text-align:left;">
+                            <div style="font-size:10px; color:#ddd;">${p.name}</div>
+                            <div class="member-hp-bg"><div class="member-hp-fill" style="width:${hpPct}%; background:${p.isDead?'transparent':(hpPct<20?'#ff0000':'linear-gradient(90deg, #00aa00, #00ff00)')};"></div></div>
+                        </div>
+                        <div style="font-size:9px; font-weight:bold; color:#fff; width:30px; text-align:right; ${isDying}">${Math.floor(p.hp)}</div>
+                        ${p.isDead ? '<div style="position:absolute; top:5px; left:20px; color:#ff0000; font-size:12px; font-weight:900; transform:rotate(-15deg);">DEAD</div>' : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            } else {
+                battleParty.forEach((p, index) => {
+                    const hpPct = Math.max(0, (p.hp / p.maxHp) * 100); const ctPct = Math.min(100, p.ct);
+                    const isDying = p.hp > 0 && hpPct <= 20 ? 'color:#ff3333; animation:flash-warn 0.5s infinite;' : '';
+                    const div = document.createElement('div'); div.className = 'party-member'; div.id = `ui-player-${index}`;
+                    div.innerHTML = `
+                        <div style="font-size:20px; ${p.isDead ? 'filter:grayscale(1) brightness(0.3);' : ''}">
+                            ${p.icon}
+                            ${p.isInvincible ? '<div class="barrier-effect"></div>' : ''}
+                        </div>
+                        <div style="flex-grow:1; margin-left:5px; text-align:left;">
+                            <div class="member-hp-bg"><div class="member-hp-fill" style="width:${hpPct}%; background:${p.isDead?'transparent':(hpPct<20?'#ff0000':'linear-gradient(90deg, #00aa00, #00ff00)')};"></div></div>
+                            <div class="member-ct-bg"><div class="member-ct-fill" style="width:${ctPct}%;"></div></div>
+                        </div>
+                        <div style="font-size:9px; font-weight:bold; color:#fff; width:30px; text-align:right; ${isDying}">${Math.floor(p.hp)}</div>
+                        ${p.isDead ? '<div style="position:absolute; top:5px; left:20px; color:#ff0000; font-size:12px; font-weight:900; transform:rotate(-15deg);">DEAD</div>' : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            }
         }
 
         window.toggleSpeed = function() { isDoubleSpeed = !isDoubleSpeed; updateSpeedBtn(); }
@@ -1598,7 +1777,17 @@
         function showDamageText(dmg, targetId) {
             const el = document.createElement('div'); el.className = 'damage-text'; el.innerText = Math.floor(dmg);
             if(targetId === 'boss') { el.style.left = (35 + Math.random() * 30) + '%'; el.style.top = (40 + Math.random() * 40) + 'px'; document.getElementById('arena-boss-image').appendChild(el); } 
-            else { el.style.left = '30px'; el.style.top = '-10px'; el.style.fontSize = '20px'; const container = document.getElementById(`ui-${targetId}`); if(container) container.appendChild(el); }
+            else { el.style.left = '30px'; el.style.top = '-10px'; const container = document.getElementById(`ui-${targetId}`); if(container) container.appendChild(el); }
+            setTimeout(() => el.remove(), 800);
+        }
+        function showCriticalText(dmg, targetId) {
+            const el = document.createElement('div'); el.className = 'critical-text'; el.innerText = `CRITICAL!\n${Math.floor(dmg)}`;
+            if(targetId === 'boss') { el.style.left = (25 + Math.random() * 20) + '%'; el.style.top = (30 + Math.random() * 20) + 'px'; document.getElementById('arena-boss-image').appendChild(el); } 
+            setTimeout(() => el.remove(), 1000);
+        }
+        function showMissText(targetId) {
+            const el = document.createElement('div'); el.className = 'miss-text'; el.innerText = "MISS!!";
+            el.style.left = '30px'; el.style.top = '-20px'; const container = document.getElementById(`ui-${targetId}`); if(container) container.appendChild(el); 
             setTimeout(() => el.remove(), 800);
         }
         function showHealText(val, targetId) {
@@ -1606,11 +1795,52 @@
             const container = document.getElementById(`ui-${targetId}`); if(container) container.appendChild(el); setTimeout(() => el.remove(), 800);
         }
 
+        // ==========================================
+        // 演出処理 (宝箱・絶望)
+        // ==========================================
+        let bossBattleWinFlag = false;
+        function showChestScreen() {
+            if(!isPlaying) return;
+            bossBattleWinFlag = true;
+            isPlaying = false; clearInterval(battleTimer); stopBGM();
+            openLayer('chest-screen');
+        }
+
+        window.openChest = function() {
+            const chest = document.querySelector('.chest-box');
+            chest.style.animation = 'none';
+            chest.innerText = '✨📦✨';
+            playDecideSE();
+            setTimeout(() => {
+                endBossBattle(true);
+            }, 1000);
+        }
+
+        function showDespairScreen() {
+            if(!isPlaying) return;
+            bossBattleWinFlag = false;
+            isPlaying = false; clearInterval(battleTimer); stopBGM();
+            openLayer('despair-screen');
+            const zombieSE = document.getElementById('se-zombie');
+            if(zombieSE) { zombieSE.volume = gameSettings.seVol / 100; zombieSE.play().catch(()=>{}); }
+            setTimeout(() => {
+                endBossBattle(false);
+            }, 3000);
+        }
+
         async function endBossBattle(isWin) {
-            isBossBattle = false; clearInterval(battleTimer); isPlaying = false; stopBGM();
-            
+            if(isMultiplayer) {
+                clearRoomListeners();
+                // 退室処理
+                if(isHost) roomsRef.child(currentRoomId).remove();
+                else roomsRef.child(currentRoomId).child('members').child(myUid).remove();
+                isMultiplayer = false;
+            }
+
             const baseReward = BigInt(bosses[currentBoss.bossOriginalIndex || 0].hp * 10);
-            const finalReward = isWin ? (baseReward * BigInt(bossDifficultyMult)) : 0n;
+            // マルチならボーナス
+            const multiBonus = isMultiplayer ? 2n : 1n;
+            const finalReward = isWin ? (baseReward * BigInt(bossDifficultyMult) * multiBonus) : 0n;
             
             let fossilDrops = 0;
             isBossResultDropBoss = false;
@@ -1785,11 +2015,61 @@
             if (el && (el.classList.contains('grass') || el.classList.contains('egg')) && !el.classList.contains('plucking')) { const item = el.closest('.item'); if (item) pluck(item); }
         });
 
+        // ==========================================
+        // 図鑑 (COLLECTION)
+        // ==========================================
+        window.setTab = function(tab) { 
+            currentTab = tab; 
+            document.querySelectorAll('.tab-btn:not(.ex-tab):not(#gacha-tab-default):not(#cpt-tab-train):not(#cpt-tab-boss)').forEach(b => b.classList.remove('active')); 
+            document.getElementById('tab-' + tab).classList.add('active'); 
+            document.getElementById('char-sub-tabs').style.display = tab === 'char' ? 'flex' : 'none';
+            renderCol(); 
+        }
+
+        window.setCharSubTab = function(sub) {
+            currentColCharTab = sub;
+            document.getElementById('sub-char-def').classList.toggle('active', sub === 'DEFAULT');
+            document.getElementById('sub-char-ex').classList.toggle('active', sub === 'EX');
+            renderCol();
+        }
+        
+        function renderCol() {
+            const list = document.getElementById('col-list-content'); list.innerHTML = '';
+            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
+            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
+            
+            let filteredItems = items.filter(i => i.type === currentTab);
+            if(currentTab === 'char') filteredItems = filteredItems.filter(i => currentColCharTab === 'DEFAULT' ? !i.isEX && i.rarity !== 'BOSS' : (i.isEX || i.rarity === 'BOSS'));
+
+            filteredItems.sort((a,b)=> {
+                const score = { 'BOSS': 7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1 };
+                const aScore = score[a.rarity] || 0; const bScore = score[b.rarity] || 0;
+                if (bScore !== aScore) return bScore - aScore; return ((b.rate || b.mult) || 0) - ((a.rate || a.mult) || 0);
+            }).forEach(item => { 
+                const isEq = equipped[item.type].id === item.id; 
+                const div = document.createElement('div'); 
+                div.className = `col-item ${item.owned ? 'owned' : ''} ${item.rarity}`; 
+                let iconStyle = `font-size:22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));`;
+                if(gameSettings.textureLevel === 0) iconStyle = `font-size:22px;`;
+
+                let nameHtml = item.owned ? item.name : '？？？';
+                if(!item.owned && currentTab === 'char') { iconStyle += `opacity: 0.3;`; nameHtml = `<span style="color:#00aa55;">[未解放]</span>`; }
+
+                div.innerHTML = `<div><span style="${iconStyle}">${item.owned ? (item.icon || (item.type==='skill'?'⚡':'🎵')) : '？'}</span> <span style="font-weight:900; color:#fff; text-shadow: 1px 1px 2px #000;">${nameHtml}</span><br><small style="color:#aaa; font-weight:bold;">[${item.rarity}]</small></div><button class="equip-btn ${isEq ? 'equipped' : ''}" onclick="equip('${item.id}')" ${item.owned ? '' : 'disabled'}>${isEq ? '選択中' : '選択'}</button>`; 
+                list.appendChild(div); 
+            });
+        }
+
+        window.equip = function(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
+
+        // ==========================================
+        // セーブ・ロード
+        // ==========================================
         function saveGame() { 
             const missionsToSave = missions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
             const exMissionsToSave = exMissions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
             
-            localStorage.setItem('zenSurvival_Final_v20', JSON.stringify({ 
+            localStorage.setItem('zenSurvival_Final_v22', JSON.stringify({ 
                 money: money.toString(), fossilCount, kusakakuCount,
                 gameSettings, charLevels, leaderId,
                 owned: items.filter(i=>i.owned).map(i=>i.id), 
@@ -1797,16 +2077,10 @@
                 missions: missionsToSave, exMissions: exMissionsToSave,
                 missionStats, lastMissionDate, currentTitle, userName 
             })); 
-            
-            // Firebase Update (簡易連携維持)
-            if(window.db && window.dbUpdate) {
-                const uid = "local_" + userName; // デモ用簡易ID
-                window.dbUpdate(window.dbRef(window.db, `users/${uid}`), { money: money.toString(), fossilCount, kusakakuCount, leaderId });
-            }
         }
         
         window.loadGame = function() {
-            let data = JSON.parse(localStorage.getItem('zenSurvival_Final_v20')) || JSON.parse(localStorage.getItem('zenSurvival_Final_v19'));
+            let data = JSON.parse(localStorage.getItem('zenSurvival_Final_v22')) || JSON.parse(localStorage.getItem('zenSurvival_Final_v21')) || JSON.parse(localStorage.getItem('zenSurvival_Final_v20'));
             if(data) {
                 money = BigInt(data.money || "2000"); fossilCount = data.fossilCount || 0; 
                 kusakakuCount = data.kusakakuCount || 0;
@@ -1831,9 +2105,6 @@
             
             initMissions(); updateUI(); openLayer('start-screen');
         }
-        
-        // --- Firebase Dummy Wrapper (For Standalone Run) ---
-        window.db = null; window.dbRef = null; window.dbSet = null; window.dbUpdate = null; window.dbGet = null; window.dbOnValue = null; window.dbOff = null;
     </script>
 </body>
 </html>
