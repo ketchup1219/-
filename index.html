@@ -48,8 +48,8 @@
         
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; backdrop-filter: blur(8px); padding-bottom: 20px; pointer-events: none; }
         
-        /* ここでスクロール可能にし、下の余白を増やして設定ボタンを押せるようにする */
-        #start-screen { background-image: url('ツクヨミ.jpg'); background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 80px; overflow-y: auto; }
+        /* ここでスクロール可能にし、下の余白を大幅に増やして設定ボタンを押せるようにする */
+        #start-screen { background-image: url('ツクヨミ.jpg'); background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 150px; overflow-y: auto; }
         #game-title { margin-bottom: 20px; }
         #cockpit-screen { background: radial-gradient(circle at bottom, #112233, #050505); background-size: cover; border: 4px solid #445566; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); }
         #gacha-result-display { width: 90%; height: 400px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-y: auto; padding: 10px; scrollbar-width: none; align-content: start; z-index: 600; position: relative; }
@@ -103,7 +103,6 @@
         .btn:hover::after { opacity: 1; }
         .btn:active { transform: scale(0.92) translateY(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 3px 8px rgba(0,0,0,0.6); }
         .btn-start { background: linear-gradient(135deg, var(--gold), #e69900); color: #111; grid-column: span 2; font-size: 24px; box-shadow: 0 0 25px rgba(255,215,0,0.6), inset 0 2px 10px rgba(255,255,255,0.5); border: 2px solid #fff; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
-        .btn-cockpit { background: linear-gradient(135deg, #112233, #001122); color: #fff; font-size: 20px; box-shadow: 0 0 20px rgba(0,210,255,0.5), inset 0 2px 5px rgba(255,255,255,0.3); border: 2px solid #00d2ff; }
         .btn-gacha { background: linear-gradient(135deg, #ff4500, #aa0000); color: white; }
         .btn-col { background: linear-gradient(135deg, var(--blue), #0044cc); color: white; }
         .btn-evolve { background: linear-gradient(135deg, #9933ff, #4b0082); color: white; font-size: 13px; }
@@ -403,7 +402,6 @@
                     <div class="player-hp-bar"><div class="player-hp-fill" id="leader-hp-fill"></div></div>
                     <div style="font-size:10px; width:40px; text-align:right;" id="leader-hp-text">1000</div>
                 </div>
-                <div class="cockpit-controls"><button class="cockpit-btn" onclick="openLayer('cockpit-screen')">⚙️ 編成・強化</button></div>
             </div>
             <div id="skill-dock" class="skill-slot-container"></div>
         </div>
@@ -1612,7 +1610,7 @@
         window.saveGame = function() { 
             const missionsToSave = missions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
             const exMissionsToSave = exMissions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
-            localStorage.setItem('zenSurvival_Final_v25', JSON.stringify({ 
+            localStorage.setItem('zenSurvival_Final_v26', JSON.stringify({ 
                 money: money.toString(), fossilCount, kusakakuCount, gameSettings, charLevels, leaderId,
                 owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
                 missions: missionsToSave, exMissions: exMissionsToSave, missionStats, lastMissionDate, currentTitle, userName, defeatedBosses, todayBossBonusDate
@@ -1625,7 +1623,7 @@
         
         window.loadGame = function() {
             try {
-                let dataStr = localStorage.getItem('zenSurvival_Final_v25') || localStorage.getItem('zenSurvival_Final_v24') || localStorage.getItem('zenSurvival_Final_v23');
+                let dataStr = localStorage.getItem('zenSurvival_Final_v26') || localStorage.getItem('zenSurvival_Final_v25') || localStorage.getItem('zenSurvival_Final_v24');
                 let data = dataStr ? JSON.parse(dataStr) : null;
                 if(data) {
                     money = parseBigInt(data.money, 2000n); fossilCount = parseInt(data.fossilCount) || 0; kusakakuCount = parseInt(data.kusakakuCount) || 0;
