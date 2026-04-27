@@ -723,7 +723,9 @@
             { id: 'boss4', name: '道化師 ジャック・ザ・リッパー', hp: 8000, atk: 450, img: '狂い咲きの道化師 ジャック・ザ・リッパー.png', diff: '鬼級', dropMultiplier: 5 },
             { id: 'boss5', name: '破滅の化身 終焉王テラ・ガイア', hp: 10000, atk: 600, img: '破滅の化身 終焉王テラ・ガイア.png', diff: '超鬼級', dropMultiplier: 8 },
             { id: 'boss6', name: '命竜アルバナム', hp: 15000, atk: 800, img: 'アルバナム.png', diff: '神級', dropMultiplier: 10 },
-            { id: 'boss7', name: 'せいまろ', hp: 25000, atk: 1000, img: 'せいまろ.png', diff: '超級', dropMultiplier: 12 }
+            { id: 'boss7', name: 'せいまろ', hp: 25000, atk: 1000, img: 'せいまろ.png', diff: 'イベント級', dropMultiplier: 12 }
+            { id: 'boss8', name: 'カズキングタイジュウフエターネキンギーニ', hp: 35000, atk: 1500, img: 'カズキングタイジュウフエターネキンギーニ.png', diff: 'イベント級', dropMultiplier: 14 }
+            { id: 'boss9', name: 'いろは', hp: 168000000, atk: 168000, img: 'いろは.jpg', diff: 'イベント級', dropMultiplier: 168 }
         ];
 
         document.addEventListener('click', (e) => {
@@ -966,7 +968,7 @@
                 if(!snapshot.exists()) { if(!isBossBattle && isMultiplayer) { alert("ロビーが解散されました"); leaveLobby(true); } return; }
                 const room = snapshot.val(); selectedHostBossIndex = room.bossIndex; bossDifficulty = room.difficulty;
                 const b = bosses[selectedHostBossIndex]; const diffNames = ['初級', '中級', '上級', '伝説']; const isDefeated = defeatedBosses.includes(b.id);
-                document.getElementById('room-boss-title').innerText = `${isDefeated ? b.name : 'UNKNOWN'} (${diffNames[bossDifficulty-1]})`;
+                document.getElementById('room-boss-title').innerText = `${isDefeated ? b.name : '未討伐ボス'} (${diffNames[bossDifficulty-1]})`;
                 document.getElementById('room-host-name').innerText = room.hostName;
                 const membersContainer = document.getElementById('room-members-container'); membersContainer.innerHTML = ''; let allReady = true;
                 if(room.members) {
@@ -1324,9 +1326,11 @@
                 document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle; border-radius:50%;"> 所持金: <span style="color:gold;">${formatMoney(money)}</span>`;
                 document.getElementById('gacha-prob-display').innerText = "SSR: 1% / SR: 20% / R: 79%";
                 document.getElementById('gacha-btn-1').innerText = "1回 (1,000円)";
-                document.getElementById('gacha-btn-10').innerText = "10連 (10,000円)";
-                document.getElementById('gacha-btn-100').innerText = "100連 (100,000円)";
-                document.getElementById('gacha-btn-1000').innerText = "👑 1000連 (1,000,000円)";
+                document.getElementById('gacha-btn-10').innerText = "10連 (1万円)";
+                document.getElementById('gacha-btn-100').innerText = "100連 (10万円)";
+                document.getElementById('gacha-btn-1000').innerText = " 1000連 (100万円)";
+                document.getElementById('gacha-btn-10000').innerText = " 10000連 (1000万円)";
+                document.getElementById('gacha-btn-100000').innerText = "👑 100000連 (1億円)";
             } else {
                 document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
                 document.getElementById('gacha-prob-display').innerText = "かぐや(SSR): 1% / SSR通常: 10% / SR: 30% / R: 59%";
