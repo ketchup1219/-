@@ -722,10 +722,11 @@
             { id: 'boss3', name: '禁忌の賢者 メルキオール', hp: 7500, atk: 350, img: '禁忌の賢者 メルキオール.png', diff: '上級', dropMultiplier: 3 },
             { id: 'boss4', name: '道化師 ジャック・ザ・リッパー', hp: 8000, atk: 450, img: '狂い咲きの道化師 ジャック・ザ・リッパー.png', diff: '鬼級', dropMultiplier: 5 },
             { id: 'boss5', name: '破滅の化身 終焉王テラ・ガイア', hp: 10000, atk: 600, img: '破滅の化身 終焉王テラ・ガイア.png', diff: '超鬼級', dropMultiplier: 8 },
-            { id: 'boss6', name: '命竜アルバナム', hp: 15000, atk: 800, img: 'アルバナム.png', diff: '神級', dropMultiplier: 10 },
+            { id: 'boss6', name: '命竜アルバナム', hp: 35000, atk: 2000, img: 'アルバナム.png', diff: '神級', dropMultiplier: 15 },
             { id: 'boss7', name: 'せいまろ', hp: 25000, atk: 1000, img: 'せいまろ.png', diff: 'イベント級', dropMultiplier: 12 },
             { id: 'boss8', name: 'カズキングタイジュウフエターネキンギーニ', hp: 35000, atk: 1500, img: 'カズキングタイジュウフエターネキンギーニ.png', diff: 'イベント級', dropMultiplier: 14 },
-            { id: 'boss9', name: 'いろP', hp: 1680000, atk: 1680, img: 'いろは.jpg', diff: 'イベント級', dropMultiplier: 168 }
+            { id: 'boss9', name: 'ランペイジ・イット', hp: 50000, atk: 1800, img: 'ランペイジイット.png', diff: 'イベント級', dropMultiplier: 16 },
+            { id: 'boss10', name: 'いろP', hp: 1680000, atk: 1680, img: 'いろは.jpg', diff: 'イベント級', dropMultiplier: 168 }
         ];
 
         document.addEventListener('click', (e) => {
@@ -895,9 +896,9 @@
             detail.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:10px; margin-bottom:10px;"><div style="font-size:35px; text-shadow:0 0 10px #fff;">${stats.data.icon || '⚡'}</div><div style="text-align:right;"><div style="font-size:16px; font-weight:bold; color:var(--gold);">${stats.data.name}</div><div style="font-size:11px; color:#aaa;">限界突破ボーナス: +${cl.dup}% 全ステータスUP</div></div></div>
                 ${leaderBtnHtml}
-                <div class="stat-row"><div><span style="font-weight:bold; color:#ff3333;">ATK Lv.${cl.atk}</span> (MAX:100)<br><span style="font-size:11px; color:#ccc;">威力: ${Math.floor(stats.atk).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'atk')" ${cl.atk>=100||money<atkCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(atkCost)}</span></button></div>
-                <div class="stat-row"><div><span style="font-weight:bold; color:#33ff33;">HP Lv.${cl.hp}</span> (MAX:100)<br><span style="font-size:11px; color:#ccc;">体力: ${Math.floor(stats.hp).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'hp')" ${cl.hp>=100||money<hpCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(hpCost)}</span></button></div>
-                <div class="stat-row"><div><span style="font-weight:bold; color:#00ffff;">SKILL Lv.${cl.skill}</span> (MAX:10)<br><span style="font-size:11px; color:#ccc;">技名: ${stats.data.skillName || '通常効果'}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'skill')" ${cl.skill>=10||money<skillCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(skillCost)}</span></button></div>
+                <div class="stat-row"><div><span style="font-weight:bold; color:#ff3333;">ATK Lv.${cl.atk}</span> (MAX:1000)<br><span style="font-size:11px; color:#ccc;">威力: ${Math.floor(stats.atk).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'atk')" ${cl.atk>=1000||money<atkCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(atkCost)}</span></button></div>
+                <div class="stat-row"><div><span style="font-weight:bold; color:#33ff33;">HP Lv.${cl.hp}</span> (MAX:1000)<br><span style="font-size:11px; color:#ccc;">体力: ${Math.floor(stats.hp).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'hp')" ${cl.hp>=1000||money<hpCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(hpCost)}</span></button></div>
+                <div class="stat-row"><div><span style="font-weight:bold; color:#00ffff;">SKILL Lv.${cl.skill}</span> (MAX:15)<br><span style="font-size:11px; color:#ccc;">技名: ${stats.data.skillName || '通常効果'}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'skill')" ${cl.skill>=15||money<skillCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(skillCost)}</span></button></div>
             `;
         }
         window.setLeader = function(id) { leaderId = id; saveGame(); renderCockpitChars(); renderCockpitDetail(id); }
