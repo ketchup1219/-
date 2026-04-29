@@ -78,6 +78,56 @@
         .rank-og    { background-color: #9932cc; color: #ffffff; font-weight: bold; }
         .rank-omega { background-color: #333333; color: #00ffff; font-weight: bold; }
         .rank-admin { background-color: #000000; color: #ff0000; font-weight: bold; }
+
+        /* -------------------------------------
+           追加：秘密のコード用モーダルのスタイル
+        ------------------------------------- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); /* 背景を暗く */
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+
+        .modal-content input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .modal-content button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal-content button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +141,7 @@
             <ul>
                 <li><a href="index.html">草抜きサバイバル</a></li>
                 <li><a href="burosuta.html">サバイバルアリーナ</a></li>
+                <!-- 秘密のコードのリンクはこのままでOK（JavaScriptで制御します） -->
                 <li><a href="#">秘密のコード</a></li>
             </ul>
         </nav>
@@ -169,8 +220,8 @@
                     <tr><td>???</td><td class="rank-omega">OMEGA</td><td>??倍</td><td>???</td></tr>
                     <tr><td></td><td class="rank-"></td><td></td><td></td></tr>
                     <tr><td>EX</td><td class="rank-">EX</td><td>??倍</td><td>???</td></tr>
-                    <tr><td>かぐや</td><td class="rank-SSR">SSR</td><td>16.8倍</td><td>EXガチャ</td></tr>
-                    <tr><td>やちよ</td><td class="rank-UZ">UZ</td><td>168倍</td><td>かぐやを草の化石168で進化</td></tr>
+                    <tr><td>🌙かぐや</td><td class="rank-ssr">SSR</td><td>16.8倍</td><td>EXガチャ</td></tr>
+                    <tr><td>🥞やちよ</td><td class="rank-uz">UZ</td><td>168倍</td><td>かぐやを草の化石168で進化</td></tr>
                     <tr><td></td><td class="rank-"></td><td></td><td></td></tr>
                     <tr><td>🌺屍花の主 ラフレシアン</td><td class="rank-BOSS">BOSS</td><td>30倍</td><td>???</td></tr>
                     <tr><td>🤖鋼鉄の審判官 ユニット-000</td><td class="rank-BOSS">BOSS</td><td>35倍</td><td>???</td></tr>
@@ -184,5 +235,137 @@
             </table>
         </main>
     </div>
+
+    <!-- ==============================================
+         秘密のコード入力用モーダル（ポップアップ画面）
+         ============================================== -->
+    <div id="codeModal" class="modal">
+        <div class="modal-content">
+            <h2>秘密のコード入力</h2>
+            <p>コードを入力してください</p>
+            <input type="text" id="secretInput" placeholder="CODE HERE...">
+            <br>
+            <button onclick="checkCode()">送信</button>
+            <button onclick="closeModal()" style="background-color:#999; margin-top:5px;">閉じる</button>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         秘密のコードとセーブデータ連動システム
+         ============================================== -->
+    <script>
+    /* ---------------------------------------------------------
+       【設定エリア】秘密のコードと報酬の内容
+       --------------------------------------------------------- */
+    const SAVE_KEY = "zenSurvival_Final_v26"; // ゲーム本体のセーブデータキー
+
+    // コードごとの報酬設定 (gold: 増えるお金, char: 解放されるキャラ名)
+    // 新しいコードを追加する場合は、この形式に沿って行を増やしてください。
+    const SECRET_CODES = {
+        "草抜き": { msg: "隠しキャラ「👤 ただのケチャップ」を解放！", gold: 0, char: "👤 ただのケチャップ" },
+        "ゼンの目覚め": { msg: "修行代として10,000円獲得！", gold: 10000, char: null },
+        "ケチャップの奇跡": { msg: "ボーナス50,000円を獲得！", gold: 50000, char: null },
+        "v26": { msg: "最新Ver記念！1,000円と「🍳 料理人ぜん」を配布！", gold: 1000, char: "🍳 料理人ぜん" },
+        "草の化石発掘": { msg: "化石発掘資金 5,000円を獲得！", gold: 5000, char: null }
+    };
+
+    /* ---------------------------------------------------------
+       以下、システム部分（UI制御とデータ書き込み処理）
+       --------------------------------------------------------- */
+    const modal = document.getElementById("codeModal");
+
+    // メニューの「秘密のコード」リンクをクリックした時の動作
+    const secretLink = Array.from(document.querySelectorAll('.sidebar li a')).find(a => a.textContent === '秘密のコード');
+    if(secretLink) {
+        secretLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.display = "block";
+        });
+    }
+
+    // モーダルを閉じる関数
+    function closeModal() {
+        modal.style.display = "none";
+        document.getElementById("secretInput").value = "";
+    }
+
+    // コードの判定とセーブデータへの反映処理
+    function checkCode() {
+        const input = document.getElementById("secretInput").value;
+        const reward = SECRET_CODES[input];
+        
+        if (reward) {
+            // 1. 現在のセーブデータをlocalStorageから読み込む
+            let saveData = {};
+            const localData = localStorage.getItem(SAVE_KEY);
+            
+            if (localData) {
+                try {
+                    saveData = JSON.parse(localData);
+                } catch (e) {
+                    console.error("セーブデータの読み込みに失敗しました", e);
+                }
+            }
+            
+            // データが存在しない場合の初期化
+            if (!saveData.money) saveData.money = 0;
+            // index.html側で 'owned' というキーが使われている可能性があるため両方用意
+            if (!saveData.ownedCharacters) saveData.ownedCharacters = [];
+            if (!saveData.owned) saveData.owned = [];
+
+            let isUpdated = false;
+
+            // 2. お金の加算 (ゲーム側の仕様に合わせて数値や文字列を考慮)
+            if (reward.gold > 0) {
+                let currentMoney = 0;
+                if (typeof saveData.money === 'string') {
+                    currentMoney = parseInt(saveData.money, 10) || 0;
+                } else {
+                    currentMoney = Number(saveData.money) || 0;
+                }
+                saveData.money = (currentMoney + reward.gold).toString(); // 数値が大きくなることを考慮し文字列で保存
+                isUpdated = true;
+            }
+
+            // 3. キャラの解放 (重複チェック付き)
+            if (reward.char) {
+                let alreadyOwned = false;
+                
+                if (saveData.ownedCharacters.includes(reward.char) || saveData.owned.includes(reward.char)) {
+                    alreadyOwned = true;
+                }
+
+                if (!alreadyOwned) {
+                    saveData.ownedCharacters.push(reward.char);
+                    saveData.owned.push(reward.char);
+                    isUpdated = true;
+                } else if (!isUpdated) {
+                    // お金も増えず、キャラも既に持っている場合
+                    alert("そのコードの特典は既に獲得済みです！");
+                    return; 
+                }
+            }
+
+            // 4. セーブデータを上書き保存
+            if (isUpdated) {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+                alert(`【コード入力成功！】\n${reward.msg}\n\n※草抜きサバイバルのゲーム画面に戻って「再読み込み（リロード）」すると反映されます。`);
+                closeModal();
+            }
+
+        } else if (input === "") {
+            alert("コードを入力してください。");
+        } else {
+            alert("コードが正しくありません。");
+        }
+    }
+
+    // モーダルの枠外（暗い背景部分）をクリックしても閉じるようにする
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    </script>
 </body>
 </html>
