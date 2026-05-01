@@ -662,8 +662,8 @@
         ];
 
         const items = [
-            { id: 'Adomin', type: 'char', name: 'Adomin', icon: '👑', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, hp: 999999999999999999999,      // ボス戦の体力
-    bossDmg: 10000000000000000000000000000n, // ボスへのダメージ
+            { id: 'Adomin', type: 'char', name: 'Adomin', icon: '👑', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: "10000000000000000000", hp: "9999999999999",      // ボス戦の体力
+    bossDmg: "10000000000000", // ボスへのダメージ
     speed: 1000,           // 攻撃スピード
 },
             { id: 'kaguya_ssr', type: 'char', name: 'かぐや', icon: '🌙', rarity: 'SSR', isEX: true, info: 'スキル: 私はわたしのことが好き。', rate: 16.8, skillName: '私はわたしのことが好き。' },
@@ -788,6 +788,15 @@
 
         function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
         function getCharFinalStats(charId) {
+            // --- ここから追加 ---
+    if (charId === 'Adomin') {
+        return {
+            hp: 999999,      // ボス戦のHPを9億にする
+            atk: 1000000, // ボスへのダメージを1000億にする
+            data: items.find(i => i.id === 'Adomin'),
+            level: {atk:0, hp:0, skill:0, dup:0}
+        };
+    }
             const charData = items.find(i => i.id === charId) || items.find(i=>i.id==='c20');
             const base = charStats[charData.rarity] || charStats['BASIC'];
             const cl = charLevels[charId] || {atk:0, hp:0, skill:0, dup:0};
