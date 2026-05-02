@@ -263,13 +263,14 @@
 
     // コードごとの報酬設定 (gold: 増えるお金, char: 解放されるキャラ名)
     // 新しいコードを追加する場合は、この形式に沿って行を増やしてください。
+    // ※修正点：超巨大な数値による精度消失・指数表記化（お金リセットのバグ）を防ぐため、goldの値を文字列("")にしました。
     const SECRET_CODES = {
-        "0512": { msg: "「創世神せいまろ」を解放＆草コイン512B", gold: 512000000000, char: "seimarotuyoi" },
-        "0928": { msg: "「糖質神カズキング」を解放＆草コイン928B", gold: 928000000000, char: "seimarotuyoi" },
-        "4545": { msg: "ボーナス50,000円を獲得！", gold: 45454545454545454545454545454545455454545454545454545454545545454545454545, char: null },
-        "v26": { msg: "最新Ver記念！1,000円と「🍳 料理人ぜん」を配布！", gold: 1000, char: "🍳 料理人ぜん" },
-        "草の化石発掘": { msg: "化石発掘資金 5,000円を獲得！", gold: 5000, char: null },
-        "012190": { msg: "管理者『Adomin』を解放＆草コイン", gold: 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999, char: "Adomin" }
+        "0512": { msg: "「創世神せいまろ」を解放＆草コイン512B", gold: "512000000000", char: "seimarotuyoi" },
+        "0928": { msg: "「糖質神カズキング」を解放＆草コイン928B", gold: "928000000000", char: "seimarotuyoi" },
+        "4545": { msg: "ボーナス50,000円を獲得！", gold: "45454545454545454545454545454545455454545454545454545454545545454545454545", char: null },
+        "v26": { msg: "最新Ver記念！1,000円と「🍳 料理人ぜん」を配布！", gold: "1000", char: "🍳 料理人ぜん" },
+        "草の化石発掘": { msg: "化石発掘資金 5,000円を獲得！", gold: "5000", char: null },
+        "012190": { msg: "管理者『Adomin』を解放＆草コイン", gold: "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999", char: "Adomin" }
     };
 
     /* ---------------------------------------------------------
@@ -311,7 +312,7 @@
             }
             
             // データが存在しない場合の初期化
-            if (!saveData.money) saveData.money = 0;
+            if (!saveData.money) saveData.money = "0";
             // index.html側で 'owned' というキーが使われている可能性があるため両方用意
             if (!saveData.ownedCharacters) saveData.ownedCharacters = [];
             if (!saveData.owned) saveData.owned = [];
@@ -319,15 +320,26 @@
             let isUpdated = false;
 
             // 2. お金の加算 (ゲーム側の仕様に合わせて数値や文字列を考慮)
-            if (reward.gold > 0) {
-                let currentMoney = 0;
-                if (typeof saveData.money === 'string') {
-                    currentMoney = parseInt(saveData.money, 10) || 0;
-                } else {
-                    currentMoney = Number(saveData.money) || 0;
+            // ※修正点：index.html側のBigInt仕様に合わせて、BigIntで計算するように変更しました。
+            if (reward.gold) {
+                let currentMoney = 0n;
+                try {
+                    currentMoney = BigInt(saveData.money || 0);
+                } catch(e) {
+                    currentMoney = 0n;
                 }
-                saveData.money = (currentMoney + reward.gold).toString(); // 数値が大きくなることを考慮し文字列で保存
-                isUpdated = true;
+                
+                let addMoney = 0n;
+                try {
+                    addMoney = BigInt(reward.gold);
+                } catch(e) {
+                    addMoney = 0n;
+                }
+
+                if (addMoney > 0n) {
+                    saveData.money = (currentMoney + addMoney).toString(); // 巨大な数値を正確なまま文字列として保存
+                    isUpdated = true;
+                }
             }
 
             // 3. キャラの解放 (重複チェック付き)
