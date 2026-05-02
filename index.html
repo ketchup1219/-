@@ -667,7 +667,7 @@
     speed: 1000,           // 攻撃スピード
 },
             { id: 'kazusan', type: 'char', name: '糖質神カズキング', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: 'デブイネ', rate: 928000000, isEvolved: true, },
-            { id: 'seimarotuyoi', type: 'char', name: '創世神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 50, isEvolved: true, },
+            { id: 'seimarotuyoi', type: 'char', name: '創世神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 100, isEvolved: true, },
             { id: 'kaguya_ssr', type: 'char', name: 'かぐや', icon: '🌙', rarity: 'SSR', isEX: true, info: 'スキル: 私はわたしのことが好き。', rate: 16.8, skillName: '私はわたしのことが好き。' },
             { id: 'yachiyo_uz', type: 'char', name: 'やちよ', icon: '🥞', rarity: 'UZ', isEX: true, isEvolved: true, info: 'スキル: Remember', rate: 168, skillName: 'Remember' },
             { id: 'sei_god', type: 'char', name: '究極膳神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OG', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 35, isEvolved: true, },
@@ -964,9 +964,9 @@
         window.setLeader = function(id) { leaderId = id; saveGame(); renderCockpitChars(); renderCockpitDetail(id); }
         window.upgradeStat = function(id, type) {
             let cl = charLevels[id]; let cost = 0n;
-            if(type === 'atk' && cl.atk < 100) { cost = getAtkHpCost(cl.atk); if(money >= cost){ money-=cost; cl.atk++; } }
-            if(type === 'hp' && cl.hp < 100) { cost = getAtkHpCost(cl.hp); if(money >= cost){ money-=cost; cl.hp++; } }
-            if(type === 'skill' && cl.skill < 10) { cost = getSkillLvCost(cl.skill); if(money >= cost){ money-=cost; cl.skill++; } }
+            if(type === 'atk' && cl.atk < 1000) { cost = getAtkHpCost(cl.atk); if(money >= cost){ money-=cost; cl.atk++; } }
+            if(type === 'hp' && cl.hp < 1000) { cost = getAtkHpCost(cl.hp); if(money >= cost){ money-=cost; cl.hp++; } }
+            if(type === 'skill' && cl.skill < 15) { cost = getSkillLvCost(cl.skill); if(money >= cost){ money-=cost; cl.skill++; } }
             saveGame(); updateUI(); renderCockpitChars(); renderCockpitDetail(id);
         }
 
@@ -1599,7 +1599,7 @@
                     setTimeout(() => { equipped.char.rate = originalRate; }, 5000); 
                     egg.remove(); 
                 } else if(seiChars.includes(id)) { 
-                    let mult = (id === 'seimarotuyoi') ? 75 : 10;
+                    let mult = (id === 'seimarotuyoi') ? 150 : 10;
                     popText(egg.style.left, egg.style.top, `${mult}倍ブースト！`, "pink"); 
                     const originalRate = equipped.char.rate || equipped.char.mult || 1; 
                     equipped.char.rate = originalRate * (mult/10);
@@ -1630,7 +1630,9 @@
             if(equipped.char.id === 'c_rampage' || equipped.char.id === 'c_rampage_venom') currentRate = Math.floor(Math.random() * 100) + 1;
             let isVectorEquipped = equipped.char.id === 'vector_kinguini'; let eggExists = document.querySelectorAll('.egg').length > 0;
             if (equipped.char.id === 'sei_god') { if (!eggExists || isVectorEquipped) { isGoldenDomain = true; clearTimeout(goldenDomainTimer); goldenDomainTimer = setTimeout(() => isGoldenDomain = false, 5000); } }
-            if (isGoldenDomain && equipped.char.id === 'sei_god') currentRate = 75; 
+            if (isGoldenDomain && equipped.char.id === 'sei_god') currentRate = 75;
+            if (equipped.char.id === 'seimarotuyoi') { if (!eggExists || isVectorEquipped) { isGoldenDomain = true; clearTimeout(goldenDomainTimer); goldenDomainTimer = setTimeout(() => isGoldenDomain = false, 5000); } }
+            if (isGoldenDomain && equipped.char.id === 'seimarotuyoi') currentRate = 150;
             let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0; let feverMult = (isFever) ? 3 : 1;
             let gain = BigInt(Math.floor(100 * (currentRate + speedBonus) * feverMult * (1+getCollectionBonus()) * currentPlayRateMultiplier));
             money += gain; missionStats.earned = (parseBigInt(missionStats.earned) + gain).toString(); missionStats.plucked++;
