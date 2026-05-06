@@ -1,1 +1,1822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="草抜きサバイバル">
+    <link rel="apple-touch-icon" href="kusanukiaikon.png">
+    <link rel="manifest" href="manifest.json">
 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service Worker Registered'));
+  }
+</script>
+    <title>草抜きサバイバル - 復活の記憶 -</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        /* ロゴを置く箱の設定 */
+.logo-container {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* ロゴ本体の設定（ふわふわ浮いて、影が光る） */
+#game-title-img {
+    width: 85%;
+    max-width: 500px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); /* 金色の光 */
+    animation: floating 3s ease-in-out infinite, shine-glitter 2s linear infinite;
+}
+
+/* ふわふわ浮く動き */
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ロゴの表面をキラッと光が走る演出 */
+@keyframes shine-glitter {
+    0% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1); }
+    50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 1)) brightness(1.3); }
+    100% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1); }
+}
+        :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; --og-color: #ff00ff; --fossil: #d2b48c; --ex-green: #00ff88; --boss-color: #ff0044; }
+        body { text-align: center; font-family: 'Arial Black', sans-serif; background-color: #050505; color: white; margin: 0; min-height: 100vh; overflow-y: visible !important; overflow-x: hidden; touch-action: auto !important; user-select: none; background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px); }
+        .header { background: linear-gradient(to bottom, rgba(40,40,40,0.9), rgba(10,10,10,0.95)); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #444; font-size: 14px; position: relative; box-shadow: 0 5px 25px rgba(0,0,0,0.9); z-index: 10; backdrop-filter: blur(5px); }
+        #fever-container { position: absolute; bottom: -6px; left: 0; width: 100%; height: 6px; background: #0a0a0a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); }
+        #fever-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--fever-pink), #ffffff, var(--fever-pink)); background-size: 200% 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 0 20px var(--fever-pink), 0 0 40px var(--fever-pink), inset 0 0 10px rgba(255,255,255,0.8); animation: bg-scroll 0.5s linear infinite; }
+        #game-field { position: relative; width: 95vw; height: 55vh; background: linear-gradient(135deg, #1a2a1a 0%, #0f1c0f 100%); margin: 10px auto; border: 3px solid #444; border-radius: 20px; overflow: hidden; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.05); }
+        #game-field::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 100; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); border-radius: 17px; }
+        #game-field.bg-desert { background: radial-gradient(circle, #8b5a2b 0%, #4d3319 100%); border-color: #e6c2a0; box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 30px rgba(210,180,140,0.3); }
+        #game-field.bg-cyber { background: radial-gradient(circle, #001540 0%, #000520 100%); border-color: #00d2ff; box-shadow: inset 0 0 50px #00d2ff44, 0 0 30px #00d2ff; }
+        #game-field.bg-cyber::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,210,255,0.08) 0, rgba(0,210,255,0.08) 2px, transparent 2px, transparent 4px); pointer-events: none; }
+        #game-field.bg-volcano { background: radial-gradient(circle, #5a0000 0%, #2b0000 100%); border-color: #ff5500; box-shadow: inset 0 0 80px #ff450088, 0 0 40px #ff4500; }
+        #game-field.bg-night { background: radial-gradient(circle, #20204a 0%, #0a0a20 100%); border-color: #5c52a0; }
+        #game-field.bg-sakura { background: radial-gradient(circle, #4a2f2f 0%, #2d1a1a 100%); border-color: #ffc2ce; box-shadow: inset 0 0 70px #ffb7c588; }
+        #game-field.bg-gold { background: radial-gradient(circle, #6a5800 0%, #3d3300 100%); border-color: #ffdf00; box-shadow: inset 0 0 80px rgba(255,215,0,0.5), 0 0 20px rgba(255,215,0,0.3); }
+        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; box-shadow: inset 0 0 100px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
+        #game-field.bg-deepsea { background: radial-gradient(circle, #002b40 0%, #00121a 100%); border-color: #00aaaa; box-shadow: inset 0 0 70px rgba(0,139,139,0.7); }
+        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 100px #9400d388, 0 0 30px #9400d3; }
+        #game-field.bg-universe { background: radial-gradient(circle at center, #2b0044 0%, #000011 100%); border-color: #8a2be2; box-shadow: inset 0 0 80px rgba(138,43,226,0.6); }
+        #game-field.bg-universe::before { content:''; position:absolute; inset:0; background-image: radial-gradient(white 1px, transparent 1px); background-size: 30px 30px; opacity: 0.3; animation: star-move 20s linear infinite; pointer-events: none;}
+        @keyframes star-move { from { background-position: 0 0; } to { background-position: -100px 100px; } }
+        #game-field.bg-neon { background: #050510; border-color: #ff00ff; box-shadow: inset 0 0 60px #ff00ff, 0 0 20px #00ffff; }
+        #game-field.bg-neon::after { content:''; position:absolute; inset:0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px); pointer-events:none; }
+        @keyframes dim-pulse { 0% { background: radial-gradient(circle, #3a003a 0%, #1a001a 100%); filter: hue-rotate(0deg); } 100% { background: radial-gradient(circle, #00002a 0%, #00004a 100%); filter: hue-rotate(45deg); } }
+        .og-time-stop { filter: invert(1) grayscale(1) brightness(1.8) contrast(1.2) !important; transition: filter 0.1s; }
+        .og-shake { animation: og-shake-anim 0.1s infinite; }
+        @keyframes og-shake-anim { 0% { transform: translate(15px, 15px) rotate(2deg); } 50% { transform: translate(-15px, -15px) rotate(-2deg); } 100% { transform: translate(15px, -15px) rotate(0deg); } }
+        .getsuga { position: absolute; width: 120px; height: 350px; background: radial-gradient(ellipse at center, rgba(0,255,255,1) 0%, rgba(0,100,255,0) 70%); border-radius: 50%; box-shadow: 0 0 80px cyan, inset 0 0 60px white; animation: getsuga-fire 1s linear forwards; pointer-events: none; z-index: 999; left: -120px; top: 10%; filter: contrast(1.5); }
+        @keyframes getsuga-fire { 0% { transform: translateX(0) scale(0.5); opacity: 1; } 100% { transform: translateX(120vw) scale(2.5); opacity: 0; } }
+        .skill-active-field { animation: skill-shake 0.05s infinite, skill-flash 0.15s infinite alternate !important; border-width: 8px !important; box-shadow: 0 0 80px var(--fever-pink), inset 0 0 80px var(--fever-pink) !important; }
+        .muda-crack-effect { animation: muda-shake 0.05s infinite, muda-dark-flash 0.1s infinite !important; border: 10px solid #4b0082 !important; box-shadow: inset 0 0 200px #000, 0 0 80px #4b0082 !important; filter: contrast(1.8); }
+        @keyframes muda-shake { 0% { transform: translate(15px, 15px) rotate(2deg); } 25% { transform: translate(-15px, -15px) rotate(-2deg); } 50% { transform: translate(-15px, 15px) rotate(2deg); } 75% { transform: translate(15px, -15px) rotate(-2deg); } 100% { transform: translate(0,0) rotate(0); } }
+        @keyframes muda-dark-flash { 0% { background: #000; filter: invert(0); } 50% { background: #2a002a; filter: invert(0.3); } 100% { background: #0a000a; filter: invert(0); } }
+        .ultimate-field-bg { animation: ultimate-rainbow 3s infinite linear !important; background-size: 400% 400% !important; background: linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff) !important; }
+        @keyframes ultimate-rainbow { 0% { background-position: 0% 50%; filter: hue-rotate(0deg); } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; filter: hue-rotate(360deg); } }
+        @keyframes skill-shake { 0% { transform: translate(8px, 8px); } 50% { transform: translate(-8px, -8px); } 100% { transform: translate(8px, -8px); } }
+        @keyframes skill-flash { from { box-shadow: inset 0 0 80px rgba(255,255,255,0.6); border-color: #fff; } to { box-shadow: inset 0 0 200px rgba(255,255,255,1); border-color: #ff00ff; } }
+        .skill-icon-anim { animation: skill-icon-pop 0.3s infinite linear !important; z-index: 1000; }
+        @keyframes skill-icon-pop { 0% { transform: scale(2.2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 50px gold); } 100% { transform: scale(2.2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 50px white); } }
+        
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; backdrop-filter: blur(8px); padding-bottom: 20px; pointer-events: none; }
+        
+        /* ここでスクロール可能にし、下の余白を大幅に増やして設定ボタンを押せるようにする */
+        #start-screen { background-image: url('ネオン.jpg'); background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 150px; overflow-y: auto; }
+        #game-title { margin-bottom: 20px; }
+        #cockpit-screen { background: radial-gradient(circle at bottom, #112233, #050505); background-size: cover; border: 4px solid #445566; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); }
+        #gacha-result-display { width: 90%; height: 400px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-y: auto; padding: 10px; scrollbar-width: none; align-content: start; z-index: 600; position: relative; }
+        .gacha-card { background: linear-gradient(135deg, #2a2a2a, #111); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; border: 2px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.8); animation: card-flip 0.5s ease-out forwards; opacity: 0; transform: perspective(400px) rotateY(90deg); }
+        .gacha-card.SSR { border-color: var(--gold); box-shadow: 0 0 15px rgba(255,215,0,0.5); background: linear-gradient(135deg, #443300, #221a00); }
+        .gacha-card.UZ { border-color: var(--uz-color); box-shadow: 0 0 20px rgba(255,0,0,0.6); background: linear-gradient(135deg, #440000, #110000); }
+        .gacha-card.X { border-color: var(--x-color); box-shadow: 0 0 25px rgba(255,255,255,0.8); background: linear-gradient(135deg, #222, #000); animation: card-flip 0.5s ease-out forwards, x-glow 1s infinite alternate; }
+        .gacha-card.OG { border-color: var(--og-color); box-shadow: 0 0 35px var(--og-color); background: linear-gradient(135deg, #303, #101); animation: card-flip 0.5s ease-out forwards, og-glow 0.5s infinite alternate; }
+        .gacha-card.BOSS { border-color: var(--boss-color); box-shadow: 0 0 30px var(--boss-color); background: linear-gradient(135deg, #330000, #110000); }
+        .gacha-card-icon { font-size: 40px; margin-bottom: 5px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
+        .gacha-card-name { font-size: 12px; font-weight: 900; color: #fff; text-align: center; }
+        .gacha-card-rarity { font-size: 10px; font-weight: bold; margin-top: 5px; padding: 2px 8px; border-radius: 10px; background: rgba(0,0,0,0.5); }
+        @keyframes card-flip { to { opacity: 1; transform: perspective(400px) rotateY(0deg); } }
+        
+        #gacha-anim-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 800; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
+        .gacha-egg { font-size: 100px; animation: egg-shake-gacha 0.1s infinite; filter: drop-shadow(0 0 20px #fff); transition: 0.5s; }
+        .gacha-egg.egg-red { filter: drop-shadow(0 0 50px red) hue-rotate(300deg); }
+        .gacha-egg.egg-rainbow { filter: drop-shadow(0 0 80px #ff00ff); animation: egg-shake-gacha 0.05s infinite, ultimate-rainbow 1s infinite linear; }
+        .gacha-egg.egg-ex { background-image: url('草核.png'); background-size: cover; width: 120px; height: 120px; border-radius: 50%; font-size: 0; box-shadow: 0 0 50px var(--ex-green); animation: egg-shake-gacha 0.05s infinite, og-glow 0.5s infinite alternate; }
+        @keyframes egg-shake-gacha { 0% { transform: translate(5px, 5px) rotate(5deg) scale(1.1); } 50% { transform: translate(-5px, -5px) rotate(-5deg) scale(1.1); } 100% { transform: translate(5px, -5px) rotate(0deg) scale(1.1); } }
+        @keyframes x-glow { from { box-shadow: 0 0 20px #fff, 0 0 40px #0ff, inset 0 0 15px #0ff; } to { box-shadow: 0 0 40px #fff, 0 0 80px #f0f, inset 0 0 30px #f0f; } }
+        @keyframes og-glow { from { box-shadow: 0 0 25px var(--og-color); } to { box-shadow: 0 0 50px #fff, 0 0 100px var(--og-color); } }
+        
+        .col-tabs, .gacha-tabs, .mission-tabs { display: flex; width: 95%; gap: 8px; margin-bottom: 12px; }
+        .tab-btn { flex: 1; padding: 12px 5px; font-size: 13px; background: linear-gradient(to bottom, #555, #333); color: white; border: 1px solid #666; border-radius: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0.7; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; overflow: hidden;}
+        .tab-btn::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent); pointer-events: none; }
+        .tab-btn.active { background: linear-gradient(to bottom, var(--blue), #007799); border-color: #fff; opacity: 1; font-weight: bold; box-shadow: 0 0 20px var(--blue), inset 0 0 15px rgba(255,255,255,0.4); transform: translateY(-3px); }
+        .tab-btn.ex-tab.active { background: linear-gradient(to bottom, #00aa55, #005522); border-color: var(--ex-green); box-shadow: 0 0 20px var(--ex-green); }
+        
+        .col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 10px; width: 90%; height: 45%; overflow-y: auto; background: linear-gradient(135deg, rgba(25,25,25,0.9), rgba(15,15,15,0.9)); border-radius: 12px; padding: 12px; border: 1px solid #555; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); scrollbar-width: thin; scrollbar-color: var(--blue) #111; align-content: start; }
+        .col-card { background: linear-gradient(135deg, #333, #1a1a1a); border: 2px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 5px; height: 90px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; }
+        .col-card:active { transform: scale(0.95); }
+        .col-card.not-owned { filter: grayscale(1) brightness(0.3); cursor: default; }
+        .col-card.owned { border-color: #555; }
+        .col-card.equipped-card { border-color: var(--grass-light); box-shadow: 0 0 15px var(--grass-light); background: linear-gradient(135deg, #3a8a00, #113300); }
+        .col-card.UZ.owned { border-color: var(--uz-color); box-shadow: 0 0 10px var(--uz-color); }
+        .col-card.X.owned { border-color: var(--x-color); box-shadow: 0 0 15px var(--x-color); animation: x-border 1s infinite; }
+        .col-card.OG.owned { border-color: var(--og-color); box-shadow: 0 0 15px var(--og-color); }
+        .col-card.BOSS.owned { border-color: var(--boss-color); box-shadow: 0 0 10px var(--boss-color); }
+        .col-card-icon { font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); margin-bottom: 5px; }
+        .col-card-name { font-size: 9px; font-weight: bold; color: #fff; text-align: center; line-height: 1.2; }
+        .col-card-rarity { position: absolute; top: 2px; left: 2px; font-size: 8px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px; border-radius: 3px; color: #ccc; }
+        
+        .equip-btn { padding: 8px 16px; border-radius: 20px; border: none; font-size: 12px; font-weight: bold; cursor: pointer; background: linear-gradient(to bottom, #eee, #aaa); color: #111; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 -2px 5px rgba(0,0,0,0.2); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 10; position: relative;}
+        .equip-btn:active { transform: scale(0.9) translateY(2px); box-shadow: 0 1px 3px rgba(0,0,0,0.6), inset 0 2px 5px rgba(0,0,0,0.4); }
+        .equipped { background: linear-gradient(to bottom, var(--grass-light), #3a8a00) !important; color: #000; box-shadow: 0 0 15px var(--grass-light), inset 0 2px 5px rgba(255,255,255,0.5) !important; border: 1px solid #fff; }
+.btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+    width: 85%;
+}
+        .btn { padding: 14px; font-size: 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; font-weight: 900; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); text-shadow: 1px 1px 3px rgba(0,0,0,0.8); box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3); position: relative; overflow: hidden; z-index: 10; }
+        .btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .btn:hover::after { opacity: 1; }
+        .btn:active { transform: scale(0.92) translateY(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 3px 8px rgba(0,0,0,0.6); }
+        .btn-start { background: linear-gradient(135deg, var(--gold), #e69900); color: #111; grid-column: span 2; font-size: 24px; box-shadow: 0 0 25px rgba(255,215,0,0.6), inset 0 2px 10px rgba(255,255,255,0.5); border: 2px solid #fff; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+        .btn-gacha { background: linear-gradient(135deg, #ff4500, #aa0000); color: white; }
+        .btn-col { background: linear-gradient(135deg, var(--blue), #0044cc); color: white; }
+        .btn-evolve { background: linear-gradient(135deg, #9933ff, #4b0082); color: white; font-size: 13px; }
+        .btn-fusion { background: linear-gradient(135deg, #ff00ff, #00ffff); color: white; font-size: 13px; text-shadow: 1px 1px 4px #000; box-shadow: 0 0 20px rgba(255,0,255,0.6); border: 1px solid #fff; animation: bg-scroll 2s linear infinite; background-size: 200% 200%; }
+        .btn-mission { background: linear-gradient(135deg, #00d26a, #006b36); color: white; grid-column: span 1; font-size: 13px; }
+        .btn-profile { background: linear-gradient(135deg, #777, #222); color: white; grid-column: span 1; font-size: 13px; }
+        .btn-settings { background: linear-gradient(135deg, #555, #222); color: white; grid-column: span 2; } 
+        
+        .koto-dama-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 55px; font-weight: 900; font-family: 'Yu Mincho', 'Arial', serif; color: #fff; text-shadow: 0 0 20px #f0f, 0 0 40px #0ff, 0 5px 10px #000; z-index: 1000; pointer-events: none; white-space: nowrap; animation: koto-dama-anim 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes koto-dama-anim { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-10deg); opacity: 0; filter: blur(10px); } 15% { transform: translate(-50%, -50%) scale(1.6) rotate(5deg); opacity: 1; filter: blur(0); } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); } 70% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5) rotate(10deg); opacity: 0; filter: blur(10px); } }
+        
+        #skill-cutin { display:none; position:absolute; z-index:9999; top:0; left:0; width:100%; height:100%; align-items:center; justify-content:center; flex-direction:column; background:rgba(0,0,0,0.4); pointer-events:none; }
+        #cutin-bg { width:100%; height:180px; background:linear-gradient(90deg, transparent, rgba(255,0,85,0.8), transparent); display:flex; align-items:center; justify-content:center; flex-direction:column; transform:scaleY(0); transition:0.1s; }
+        #cutin-char { font-size:20px; color:white; font-style:italic; font-weight:bold; text-shadow:0 0 10px black; margin-bottom:5px;}
+        #cutin-skill { font-size:36px; color:gold; font-weight:900; letter-spacing:5px; text-shadow:0 0 20px red, 0 0 10px white, 2px 2px 0px black; }
+
+        .pop-text { position: absolute; font-weight: 900; font-style: italic; pointer-events: none; animation: pop-up-enhanced 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; z-index: 100; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 8px 10px rgba(0,0,0,0.9); font-size: 26px; letter-spacing: 1px; }
+        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.2) rotate(var(--rot, -10deg)); opacity: 0; filter: drop-shadow(0 0 5px currentColor); } 30% { opacity: 1; transform: translateY(-40px) scale(1.6) rotate(var(--rot, 5deg)); filter: drop-shadow(0 0 15px currentColor); } 50% { transform: translateY(-50px) scale(1.3) rotate(0deg); filter: drop-shadow(0 0 10px currentColor); } 100% { transform: translateY(-110px) scale(1.1); opacity: 0; filter: blur(3px); } }
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 90; box-shadow: 0 0 12px currentColor; }
+        @keyframes scatter { 0% { transform: scale(1) translate(0,0); opacity: 1; } 100% { transform: scale(0) translate(var(--dx), var(--dy)) rotate(720deg); opacity: 0; } }
+        .rain-capsule { position: absolute; width: 15px; height: 15px; background: #fff; border-radius: 50%; animation: rain-fall linear forwards; pointer-events: none; z-index: 790; box-shadow: 0 0 10px #fff; }
+        @keyframes rain-fall { 0% { transform: translateY(-50px); opacity: 1; } 100% { transform: translateY(110vh); opacity: 0; } }
+        
+        .light-mode-active .particle, .light-mode-active #fever-fill, .light-mode-active .x-aura, .light-mode-active .glitch-noise, .light-mode-active .ultimate-field-bg, .light-mode-active #game-field.bg-universe::before, .light-mode-active .getsuga { animation: none !important; box-shadow: none !important; }
+
+        .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); position: relative; z-index: 10;}
+        #tsum-icon { width: 80px; height: 80px; border: 4px solid #555; border-radius: 50%; font-size: 42px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #444 0%, #111 100%); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 20px rgba(0,0,0,0.9), inset 0 2px 10px rgba(255,255,255,0.2); cursor: pointer; z-index: 20;}
+        .ready #tsum-icon { border-color: var(--zen-red); animation: pulse-ready 0.4s infinite alternate; box-shadow: 0 0 30px var(--zen-red), inset 0 0 20px var(--zen-red); background: radial-gradient(circle, #600 0%, #200 100%); transform: scale(1.1); }
+        #skill-bar { width: 170px; height: 24px; background: #111; border-radius: 12px; overflow: hidden; border: 2px solid #666; box-shadow: inset 0 3px 6px rgba(0,0,0,0.9), 0 2px 5px rgba(0,0,0,0.5); }
+        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #ff6600, #ff0); background-size: 200% 100%; transition: width 0.1s linear; animation: bg-scroll 1s linear infinite; box-shadow: 0 0 15px #f00, inset 0 2px 5px rgba(255,255,255,0.5); }
+        .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
+        .plucking { animation: slice-anim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
+        @keyframes slice-anim { 0% { transform: scale(1) rotate(0deg); filter: brightness(1); } 40% { transform: scale(1.7) rotate(20deg); filter: brightness(3) drop-shadow(0 0 25px #fff); } 100% { transform: scale(0) rotate(-25deg); opacity: 0; filter: blur(5px); } }
+        .grass { width: 75px; height: 75px; filter: drop-shadow(0 8px 6px rgba(0,0,0,0.8)); animation: grass-base-sway 3s ease-in-out infinite alternate; }
+        @keyframes grass-base-sway { 0% { transform: translateY(0); } 100% { transform: translateY(3px); } }
+        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; background: linear-gradient(to top, #0f2b0f, var(--grass-dark)); box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6); }
+        .grass::before { transform: rotate(-35deg); left: 10px; animation: sway-left 2s ease-in-out infinite alternate; transform-origin: bottom center; }
+        .grass::after { transform: rotate(35deg); right: 10px; animation: sway-right 2.2s ease-in-out infinite alternate; transform-origin: bottom center; }
+        .grass-center { position: absolute; width: 30px; height: 60px; border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; background: linear-gradient(to top, var(--grass-dark), var(--grass-light)); box-shadow: inset 2px 2px 6px rgba(255,255,255,0.5), inset -2px -2px 6px rgba(0,0,0,0.6); animation: sway-center 2.5s ease-in-out infinite alternate; transform-origin: bottom center; z-index: 2; }
+        @keyframes sway-left { 0% { transform: rotate(-35deg) skewX(2deg); } 100% { transform: rotate(-30deg) skewX(-2deg); } }
+        @keyframes sway-right { 0% { transform: rotate(35deg) skewX(-2deg); } 100% { transform: rotate(30deg) skewX(2deg); } }
+        @keyframes sway-center { 0% { transform: translateX(-50%) rotate(-3deg); } 100% { transform: translateX(-50%) rotate(3deg); } }
+        .egg { width: 70px; height: 70px; font-size: 55px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 25px rgba(255,255,255,1), 0 0 50px var(--gold); animation: egg-pulse-glow 1s infinite alternate, egg-shake 0.3s ease-in-out infinite alternate; z-index: 15; }
+        @keyframes egg-pulse-glow { from { filter: drop-shadow(0 8px 8px rgba(0,0,0,0.7)) brightness(1); } to { filter: drop-shadow(0 0 25px var(--gold)) drop-shadow(0 0 40px #ff0) brightness(1.3); } }
+        @keyframes egg-shake { 0% { transform: rotate(-15deg) scale(0.95); } 100% { transform: rotate(15deg) scale(1.05); } }
+        @keyframes pulse-ready { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.15); filter: brightness(1.4); } }
+        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,255,255,0.2) 50%, rgba(255,0,255,0.2) 100%); animation: aura-spin 3s linear infinite; mix-blend-mode: screen; }
+        @keyframes aura-spin { from { transform: rotate(0deg) scale(1.5); filter: hue-rotate(0deg); } to { transform: rotate(360deg) scale(1.5); filter: hue-rotate(360deg); } }
+        #profile-info-display { font-size: 15px; color: #fff; margin-top: 5px; background: rgba(255,255,255,0.1); padding: 10px 25px; border-radius: 25px; display: inline-block; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 5px 15px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
+        #profile-info-display span { color: var(--gold); font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); }
+        .mission-item { background: linear-gradient(135deg, #2a2a2a, #111); border: 1px solid #555; border-radius: 12px; margin: 10px 0; padding: 15px; width: 85%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        .mission-item.mission-clear { border-color: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.3); background: linear-gradient(135deg, #113311, #001100); }
+        .mission-item.mission-clear::after { content: 'CLEAR!'; position: absolute; right: -20px; top: 10px; background: red; color: white; padding: 5px 30px; transform: rotate(45deg); font-weight: 900; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; pointer-events: none; }
+        .mission-progress { width: 100%; height: 14px; background: #000; border-radius: 7px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 3px 6px rgba(0,0,0,0.9); }
+        .mission-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #00cc66); transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 15px #00ff88, inset 0 2px 5px rgba(255,255,255,0.5); }
+        .mission-reward-btn { padding: 8px 15px; border-radius: 20px; border: none; font-weight: 900; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.6); z-index: 10; position: relative;}
+        .mission-reward-btn:active { transform: scale(0.9) translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.6); }
+        .can-claim { background: linear-gradient(135deg, var(--gold), #ffaa00); color: #111; animation: pulse-ready 0.5s infinite alternate; border: 1px solid #fff; }
+        .claimed { background: #222; color: #555; cursor: default; box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); border: 1px solid #333;}
+        .mission-reward-btn.can-claim.ex-reward { background: linear-gradient(135deg, var(--ex-green), #00aa55); color: #000; box-shadow: 0 0 15px var(--ex-green); border-color: #fff;}
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 8px; border: 1px solid #444; }
+        .setting-btn { padding: 8px 15px; border-radius: 5px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; transition: 0.2s; font-weight: bold;}
+        .setting-btn.active { background: linear-gradient(135deg, var(--gold), #ff8c00); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--gold); transform: scale(1.05);}
+        .boss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 95%; margin-top: 15px; overflow-y: auto; max-height: 60vh; padding: 10px; }
+        .boss-card { border: 2px solid #555; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 15px rgba(0,0,0,0.8); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; height: 120px; }
+        .boss-card:hover { border-color: var(--gold); box-shadow: 0 8px 20px rgba(255,215,0,0.3); transform: translateY(-2px); }
+        .boss-card:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .boss-card h3 { margin: 8px 0; font-size: 14px; color: var(--gold); text-shadow: 2px 2px 4px #000, -2px -2px 4px #000; z-index: 2;}
+        .lobby-list-item { background: linear-gradient(90deg, #112233, #001122); border: 1px solid #00d2ff; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .lobby-list-item:hover { box-shadow: 0 0 15px rgba(0,210,255,0.5); transform: translateY(-2px); }
+        .lobby-player-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 10px; margin-bottom: 8px; border-radius: 6px; }
+        .lobby-player-row.ready { border-color: #00ff00; box-shadow: inset 0 0 10px rgba(0,255,0,0.3); }
+        .cockpit-view { background: radial-gradient(circle at bottom, #001122 0%, #000 100%) !important; border: 4px solid #445566 !important; box-shadow: inset 0 0 100px rgba(0, 255, 255, 0.1) !important; }
+        .cockpit-view::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 1; }
+        #arena-boss-image { width: 100%; height: 180px; background-size: cover; background-position: center; border-bottom: 2px solid #00ffff; position: relative; box-shadow: inset 0 -20px 30px rgba(0,0,0,0.8); transition: filter 0.3s; z-index: 2; margin-top: 5px; }
+        .boss-hp-bg { width: 90%; height: 24px; background: #111; border: 2px solid #fff; border-radius: 12px; margin: 10px auto; overflow: hidden; position: relative; box-shadow: 0 0 15px #f00, inset 0 3px 6px rgba(0,0,0,0.9); z-index: 2; }
+        .boss-hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5); }
+        .boss-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 13px; font-weight: bold; color: white; line-height: 24px; text-shadow: 1px 1px 3px #000, 0 0 5px #000; }
+        #leader-showcase { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 2; width: 100%; margin-top: 10px; }
+        .leader-sprite-large { font-size: 120px; filter: drop-shadow(0 0 25px rgba(0,255,255,0.6)); animation: float-anim 3s infinite ease-in-out; text-shadow: 0 0 20px #000; z-index: 5; }
+        @keyframes float-anim { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+        .player-status-panel { background: rgba(0,0,0,0.7); border: 2px solid #00d2ff; border-radius: 8px; padding: 10px; color: #fff; width: 80%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,210,255,0.3); margin-top: 10px; }
+        .player-hp-bar { width: 60%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #555; }
+        .player-hp-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #00ffff); transition: width 0.2s; }
+        .cockpit-controls { display: flex; gap: 15px; margin-top: 15px; z-index: 10; }
+        .cockpit-btn { background: linear-gradient(135deg, #112233, #001122); border: 1px solid #00ffff; color: #00ffff; padding: 8px 20px; border-radius: 5px; font-weight: bold; font-family: monospace; box-shadow: 0 0 10px rgba(0,255,255,0.3); cursor: pointer; transition: 0.2s; }
+        .cockpit-btn:active { transform: scale(0.9); box-shadow: 0 0 5px rgba(0,255,255,0.5); }
+        .skill-slot-container { position: absolute; bottom: 10px; width: 95%; display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; background: rgba(0,0,0,0.7); border-top: 2px solid #00d2ff; border-radius: 15px 15px 0 0; z-index: 200; box-shadow: 0 -5px 20px rgba(0,210,255,0.3); scrollbar-width: none; align-items: center; }
+        .star-skill-btn { width: 65px; height: 65px; border-radius: 50%; background: radial-gradient(circle, #333, #111); border: 3px solid #555; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; overflow: hidden; box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
+        .star-skill-btn.ready { border-color: #ffd700; box-shadow: 0 0 20px #ffd700, inset 0 0 10px rgba(255,215,0,0.5); animation: pulse-ready 0.8s infinite alternate; }
+        .star-skill-btn:active { transform: scale(0.9); }
+        .skill-icon-inner { font-size: 30px; z-index: 2; pointer-events: none; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
+        .ct-ring { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; overflow: hidden; z-index: 1; }
+        .ct-ring-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: rgba(0,255,255,0.4); transition: height 0.1s linear; }
+        .ready .ct-ring-fill { background: rgba(255,215,0,0.4); height: 100% !important; }
+        .skill-name-label { position: absolute; bottom: -18px; width: 100%; text-align: center; font-size: 10px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
+        .multi-ally-list { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10; width: 80px; }
+        .multi-ally-item { background: rgba(0,0,0,0.6); border: 1px solid #555; border-radius: 5px; padding: 3px; font-size: 12px; display: flex; flex-direction: column; align-items: center; }
+        .multi-ally-hp { width: 100%; height: 4px; background: #f00; margin-top: 2px; }
+        .multi-ally-hp-fill { height: 100%; background: #0f0; }
+        .speed-toggle { position: absolute; top: 12px; left: 12px; background: linear-gradient(to bottom, #fff, #ddd); color: #111; padding: 6px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 150; border: 2px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.6); transition: all 0.2s; }
+        .speed-toggle:active { transform: scale(0.9); }
+        .speed-toggle.active { background: linear-gradient(to bottom, #ff3366, #cc0033); color: #fff; border-color: #fff; animation: glow-boss 0.5s infinite alternate; box-shadow: 0 0 15px #ff0044; }
+        .damage-text, .heal-text, .critical-text, .miss-text { position: absolute; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: dmg-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; z-index: 300; }
+        .damage-text { color: #fff; filter: drop-shadow(0 0 10px #f00); font-size: 34px; }
+        .heal-text { color: #0f0; filter: drop-shadow(0 0 10px #0f0); font-size: 34px; }
+        .critical-text { color: #ffcc00; filter: drop-shadow(0 0 15px #ff0000); font-size: 44px; font-style: italic; }
+        .miss-text { color: #00ffff; filter: drop-shadow(0 0 15px #0088ff); font-size: 34px; animation: miss-pop 0.8s ease-out forwards; }
+        .barrier-effect { position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 3px solid #00ffff; box-shadow: 0 0 30px #00ffff, inset 0 0 30px #00ffff; pointer-events: none; z-index: 150; animation: barrier-flash 0.4s ease-out forwards; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+        .boss-warning { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.4); pointer-events: none; z-index: 150; display: none; animation: flash-warn 0.4s infinite alternate; mix-blend-mode: overlay; }
+        .glitch-noise { filter: grayscale(1) contrast(2) brightness(0.7) sepia(1) hue-rotate(180deg); animation: glitch-skew 0.3s infinite alternate; mix-blend-mode: hard-light; }
+        @keyframes glitch-skew { 0% { transform: skewX(2deg); opacity: 0.8;} 50% { transform: skewX(-5deg) translateY(-2px); opacity: 0.5;} 100% { transform: skewX(3deg) translateY(2px); opacity: 0.9;} }
+        .unknown-boss-text { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:red; font-size:24px; font-weight:900; text-shadow:0 0 10px #000; z-index:5; pointer-events:none; letter-spacing:5px;}
+        .cpt-char-item { background: linear-gradient(90deg, #222, #111); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #444; cursor: pointer; transition: 0.2s; }
+        .cpt-char-item.active { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); background: linear-gradient(90deg, #443300, #111); }
+        .cpt-char-item.leader { border-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
+        .upgrade-btn { padding: 5px 10px; background: linear-gradient(135deg, #00d2ff, #0044cc); color: white; border: 1px solid #fff; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 11px; z-index:10; position:relative; }
+        .upgrade-btn:disabled { background: #555; color: #888; border-color: #444; cursor: not-allowed; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; border: 1px solid #333; }
+        .boss-list-item { background: linear-gradient(90deg, #331111, #110000); border: 1px solid #ff4444; padding: 10px; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; cursor: pointer; }
+        .boss-list-item:hover { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.5); }   
+        #despair-screen { background: #000; z-index: 2000; }
+        .glitch-text { font-size: 60px; color: #ff0000; font-weight: 900; letter-spacing: 5px; position: relative; animation: glitch-anim 0.2s infinite; text-shadow: 2px 0 blue, -2px 0 green; }
+        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-5px, 5px); } 40% { transform: translate(-5px, -5px); } 60% { transform: translate(5px, 5px); } 80% { transform: translate(5px, -5px); } 100% { transform: translate(0); } }
+        #chest-screen { background: rgba(0,0,0,0.9); z-index: 1500; }
+        .chest-box { font-size: 120px; cursor: pointer; animation: chest-shake 1s infinite alternate; filter: drop-shadow(0 0 30px gold); transition: transform 0.2s; }
+        .chest-box:active { transform: scale(0.9); }
+        @keyframes chest-shake { 0% { transform: rotate(-5deg) scale(1); } 100% { transform: rotate(5deg) scale(1.05); } }
+        #gacha-prob-modal .prob-row { display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0; font-size:12px; }
+        #gacha-prob-modal .prob-row.header { font-weight:bold; color:var(--gold); border-bottom:2px solid var(--gold); }
+    </style>
+</head>
+<body onload="loadGame()">
+    <div id="skill-cutin">
+        <div id="cutin-bg">
+            <div id="cutin-char"></div>
+            <div id="cutin-skill"></div>
+        </div>
+    </div>
+
+    <div class="header">
+        <button onclick="giveUp()" style="background:linear-gradient(to bottom, #666, #444); color:white; border:1px solid #888; padding:8px 12px; font-size:12px; border-radius:6px; font-weight:bold; box-shadow:0 3px 6px rgba(0,0,0,0.6); pointer-events: auto;">リタイア</button>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
+            <img src="草コイン.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--gold);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22gold%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>¥</text></svg>'">
+            <span id="m-val" style="color:var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.5);">0</span>
+        </div>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
+            <img src="草の化石.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--fossil);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22tan%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🦴</text></svg>'">
+            <span id="fossil-val" style="color:var(--fossil); text-shadow: 0 0 8px rgba(210,180,140,0.8);">0</span>
+        </div>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
+            <img src="草核.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 8px var(--ex-green);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%2300ff88%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🌿</text></svg>'">
+            <span id="kusakaku-val" style="color:var(--ex-green); text-shadow: 0 0 8px rgba(0,255,136,0.8);">0</span>
+        </div>
+        <div style="font-size: 20px; font-weight: 900; color: #ffcc00; text-shadow:0 0 10px rgba(255,204,0,0.6);">⏳ <span id="t-val">30.0</span></div>
+        <div id="fever-container"><div id="fever-fill"></div></div>
+    </div>
+
+    <div id="game-field">
+        <div id="x-aura-effect" class="x-aura"></div>
+        <div id="gacha-anim-overlay">
+            <div id="gacha-anim-egg" class="gacha-egg">🎁</div>
+        </div>
+
+       <div id="start-screen" class="overlay" style="display: flex; pointer-events: auto;">
+<div class="logo-container">
+    <img src="草抜きサバイバルのロゴ2.png" alt="草抜きサバイバル" id="game-title-img">
+    <div class="sparkle-effect"></div>
+</div>
+            <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small style="color:#ddd;">称号：<span id="u-title-display" style="color:#fff;">なし</span></small></div>
+            <p id="passive-info" style="font-size:13px; color:var(--blue); margin-bottom:18px; font-weight:bold; text-shadow:0 0 8px rgba(0,210,255,0.6); background:linear-gradient(90deg, transparent, rgba(0,0,0,0.7), transparent); padding:8px 20px; border-radius:10px;">動く卵に触れたら即終了...</p>
+            <div class="btn-group">
+                <button class="btn btn-start" onclick="startGame()">▶ 草を抜く (START)</button>
+                <button class="btn" style="background:linear-gradient(135deg, #001122, #003366); color:#fff; grid-column: span 2; border: 2px solid #00d2ff;" onclick="openLayer('multi-menu-screen')">🚀 ボス討伐・編成</button>
+                <button class="btn btn-mission" onclick="openLayer('mission-screen')">📅 ミッション <span id="mission-alert" style="color:#ff0033; display:none; text-shadow:0 0 10px #ff0033;">●</span></button>
+                <button class="btn btn-profile" onclick="openLayer('profile-screen')">👤 プロフィール</button>
+                <button class="btn btn-gacha" onclick="openLayer('gacha-screen')">🎰 GACHA</button>
+                <button class="btn btn-col" onclick="openLayer('col-screen')">📖 コレクション</button>
+                <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
+                <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
+                <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
+                <button class="btn" style="background: linear-gradient(135deg, #444, #222); color: #fff; border: 2px solid var(--grass-light); grid-column: span 2;" onclick="location.href='setumei.html'">
+    📖 攻略ガイド
+</button>
+                <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
+            </div>
+        </div>
+
+        <div id="cockpit-screen" class="overlay">
+            <h2 style="color:var(--blue); text-shadow:0 0 20px cyan; margin-top:5px; font-size:32px;">編成・強化</h2>
+            <div style="display:flex; width:95%; height:75%; gap:10px;">
+                <div style="width:45%; background:rgba(0,0,0,0.7); border:2px solid #555; border-radius:10px; overflow-y:auto; padding:10px;" id="cpt-char-list"></div>
+                <div style="width:55%; background:rgba(0,0,0,0.7); border:2px solid var(--gold); border-radius:10px; padding:10px; display:flex; flex-direction:column;">
+                    <div id="cpt-content-train" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding:5px;">
+                        <div id="cpt-char-detail" style="text-align:left;">
+                            <p style="color:#aaa; text-align:center; margin-top:50px;">左からキャラクターを選択してください</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+        </div>
+
+        <div id="multi-menu-screen" class="overlay">
+            <h2 style="color:var(--boss-color); text-shadow:0 0 20px #ff0044; font-size:36px; margin-bottom: 20px;">ボス討伐メニュー</h2>
+            <button class="btn btn-cockpit" onclick="openLayer('cockpit-screen')" style="width: 80%; margin-bottom: 20px; font-size: 18px; box-shadow:0 0 20px rgba(0,210,255,0.5);">🛠️ パーティ編成・強化</button>
+            <div style="display:flex; flex-direction:column; gap:15px; width:80%;">
+                <button class="btn" onclick="openLayer('multi-create-screen')" style="background:linear-gradient(135deg, #001122, #003366); color:#fff; font-size:20px; padding:20px; border:2px solid #00d2ff;">👑 ロビーを作成 (ホスト)</button>
+                <button class="btn" onclick="openLayer('multi-search-screen')" style="background:linear-gradient(135deg, #221100, #663300); color:#fff; font-size:20px; padding:20px; border:2px solid var(--gold);">🔍 ロビーを検索 (ゲスト)</button>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:30px;">戻る</button>
+        </div>
+
+        <div id="multi-create-screen" class="overlay">
+            <h2 style="color:#fff; text-shadow:0 0 10px #fff;">討伐対象の選択</h2>
+            <div id="create-boss-grid" class="boss-grid" style="height:60%;"></div>
+            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+
+            <div id="multi-difficulty-dialog" style="display:none; flex-direction:column; align-items:center; width:90%; position:absolute; z-index:600; background:rgba(0,0,0,0.95); padding:20px; border-radius:10px; border:2px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3); pointer-events: auto;">
+                <img id="multi-diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;">
+                <h3 id="multi-diff-boss-name" style="color:var(--gold); margin:10px 0; text-shadow: 1px 1px 2px #000;"></h3>
+                <p style="color:#ddd; font-size:12px; margin-bottom:10px;">難易度を選択</p>
+                <div style="display:flex; width:100%; gap:5px; margin-bottom:15px;">
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#002288; color:#fff;" onclick="selectLobbyDiff(1, this)">初級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#aa5500; color:#fff;" onclick="selectLobbyDiff(2, this)">中級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#880000; color:#fff;" onclick="selectLobbyDiff(3, this)">上級</button>
+                    <button class="btn diff-btn" style="flex:1; padding:10px; font-size:12px; background:#440066; color:#fff;" onclick="selectLobbyDiff(4, this)">伝説</button>
+                </div>
+                <div style="display:flex; width:100%; gap:10px;">
+                    <button class="btn" style="flex:1; background:linear-gradient(135deg, #555, #222); color:white;" onclick="confirmLobbyCreate(false)">ソロで挑む</button>
+                    <button class="btn" style="flex:1; background:linear-gradient(135deg, #00d2ff, #0044cc); color:white;" onclick="confirmLobbyCreate(true)">ロビー作成</button>
+                </div>
+                <button class="btn" style="background:transparent; border:none; color:#888; margin-top:10px;" onclick="document.getElementById('multi-difficulty-dialog').style.display='none';">キャンセル</button>
+            </div>
+        </div>
+
+        <div id="multi-search-screen" class="overlay">
+            <h2 style="color:var(--gold);">ロビー検索</h2>
+            <button class="btn" onclick="fetchLobbies()" style="background:linear-gradient(135deg, #00aa55, #005522); color:#fff; padding:8px 20px; margin-bottom:10px;">🔄 更新</button>
+            <div id="lobby-list-container" style="width:90%; height:60%; overflow-y:auto; background:rgba(0,0,0,0.6); border:1px solid #555; border-radius:10px; padding:10px;"></div>
+            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+        </div>
+
+        <div id="multi-room-screen" class="overlay">
+            <h2 id="room-boss-title" style="color:#f00; text-shadow:0 0 15px red; margin-bottom:5px;">ボス名 (難易度)</h2>
+            <div style="color:#aaa; font-size:12px; margin-bottom:15px;">主催者: <span id="room-host-name" style="color:var(--gold);"></span></div>
+            <div id="room-members-container" style="width:90%; flex-grow:1; max-height:40%; overflow-y:auto; background:rgba(0,0,0,0.5); border:1px solid #00d2ff; border-radius:10px; padding:10px;"></div>
+            <div style="display:flex; width:90%; gap:10px; margin-top:20px;">
+                <button id="btn-room-leave" class="btn" style="flex:1; background:#555; color:#fff;" onclick="leaveLobby()">退出</button>
+                <button id="btn-room-ready" class="btn" style="flex:2; background:#aa5500; color:#fff;" onclick="toggleReady()">準備OK</button>
+                <button id="btn-room-start" class="btn" style="flex:2; background:#00cc00; color:#fff; display:none;" onclick="hostStartBattle()">出発する</button>
+            </div>
+        </div>
+
+        <div id="gacha-prob-modal" class="overlay" style="background:rgba(0,0,0,0.9); z-index:1000; justify-content:center;">
+            <div style="background:#111; border:2px solid var(--gold); border-radius:10px; width:85%; max-height:80%; display:flex; flex-direction:column; padding:15px; box-shadow:0 0 30px rgba(255,215,0,0.3); pointer-events: auto;">
+                <h3 style="color:var(--gold); margin-top:0;">提供割合・ラインナップ</h3>
+                <div id="gacha-prob-content" style="flex-grow:1; overflow-y:auto; text-align:left; padding-right:10px;"></div>
+                <button class="btn" onclick="document.getElementById('gacha-prob-modal').style.display='none'" style="background:#444; color:#fff; margin-top:15px;">閉じる</button>
+            </div>
+        </div>
+
+        <div id="chest-screen" class="overlay">
+            <h2 style="color:lime; font-size:40px; text-shadow:0 0 20px lime;">BOSS CLEARED!</h2>
+            <p style="color:#ddd; font-weight:bold;">宝箱をタップして開けろ！</p>
+            <div class="chest-box" onclick="openChest()">🎁</div>
+        </div>
+
+        <div id="despair-screen" class="overlay">
+            <div class="glitch-text">GAME OVER</div>
+            <p style="color:#888; font-size:12px; margin-top:20px;">生存者がいません...</p>
+        </div>
+
+        <div id="settings-screen" class="overlay">
+            <h2 style="color:#ddd; text-shadow:0 0 15px #fff; font-size: 32px; letter-spacing: 2px;">⚙️ SETTINGS</h2>
+            <div style="width: 85%; max-width: 400px; text-align: left;">
+                <div class="setting-row"><label style="font-weight:bold;">🎵 BGM音量</label><input type="range" id="set-bgm-vol" min="0" max="100" value="50" onchange="updateSettings()" style="width: 120px;"></div>
+                <div class="setting-row"><label style="font-weight:bold;">🔊 SE音量</label><input type="range" id="set-se-vol" min="0" max="100" value="50" onchange="updateSettings()" style="width: 120px;"></div>
+                <div class="setting-row"><label style="font-weight:bold;">✨ エフェクト</label><div><button class="setting-btn" id="eff-0" onclick="setEffect(0)">低</button><button class="setting-btn" id="eff-1" onclick="setEffect(1)">中</button><button class="setting-btn active" id="eff-2" onclick="setEffect(2)">高</button></div></div>
+                <div class="setting-row"><label style="font-weight:bold;">🖼️ テクスチャ</label><div><button class="setting-btn" id="tex-0" onclick="setTexture(0)">低</button><button class="setting-btn" id="tex-1" onclick="setTexture(1)">中</button><button class="setting-btn active" id="tex-2" onclick="setTexture(2)">高</button></div></div>
+                <div class="setting-row"><label style="font-weight:bold;">⚡ 軽量モード</label><div><button class="setting-btn active" id="light-off" onclick="setLightMode(false)">OFF</button><button class="setting-btn" id="light-on" onclick="setLightMode(true)">ON</button></div></div>
+            </div>
+            <p style="font-size:11px; color:#888; margin-top:20px;">※動作が重い場合は、軽量モードをONにするかエフェクトを低くしてください。</p>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:20px;">閉じる</button>
+        </div>
+
+        <div id="boss-arena-screen" class="overlay cockpit-view" style="padding:0; justify-content:flex-start;">
+            <div id="arena-boss-image">
+                <div class="boss-warning" id="boss-warning-overlay"></div>
+                <div class="speed-toggle" id="speed-btn" onclick="toggleSpeed()">⏩ 1倍速</div>
+                <div style="position:absolute; bottom:5px; right:5px; display:flex; flex-direction:column; align-items:flex-end; gap:5px; z-index:100;">
+                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(0,150,0,0.8); color:white;" onclick="useBattleItem('herb')">🌿特やく</button>
+                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(0,100,200,0.8); color:white;" onclick="useBattleItem('drop')">💧しずく</button>
+                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(200,100,0,0.8); color:white;" onclick="useBattleItem('star')">✨蘇生</button>
+                </div>
+            </div>
+            <div style="width:100%; text-align:center; padding:5px 0; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index:2;"><div style="font-size:16px; font-weight:900; color:var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.8);" id="arena-boss-name">ボス名</div></div>
+            <div class="boss-hp-bg"><div class="boss-hp-fill" id="arena-boss-hp-fill"></div><div class="boss-hp-text" id="arena-boss-hp-text">10000 / 10000</div></div>
+            <div id="multi-ally-container" class="multi-ally-list"></div>
+            <div id="leader-showcase">
+                <div id="arena-leader-sprite" class="leader-sprite-large">👤</div>
+                <div class="player-status-panel" id="leader-status-panel">
+                    <div style="font-size:12px; font-weight:bold;">HP</div>
+                    <div class="player-hp-bar"><div class="player-hp-fill" id="leader-hp-fill"></div></div>
+                    <div style="font-size:10px; width:40px; text-align:right;" id="leader-hp-text">1000</div>
+                </div>
+            </div>
+            <div id="skill-dock" class="skill-slot-container"></div>
+        </div>
+
+        <div id="profile-screen" class="overlay">
+            <h2 style="color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.6); font-size: 30px;">👤 プロフィール</h2>
+            <div class="profile-input-group" style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #555;">
+                <label style="font-weight:bold;">名前の変更</label><br>
+                <input type="text" id="name-input" maxlength="10" placeholder="なまえを入力" onchange="updateName(this.value)" style="padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-top: 5px; background: #222; color: #fff; text-align: center;">
+            </div>
+            <div style="width:100%; height:50%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top: 10px;">
+                <label style="font-size:14px; color:#ddd; margin-bottom:10px; font-weight:bold; text-shadow: 1px 1px 2px #000;">称号の選択</label>
+                <div id="title-list" style="width:90%; padding-bottom: 20px; display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+        </div>
+
+        <div id="mission-screen" class="overlay">
+            <h2 style="color:#00ff88; text-shadow:0 0 20px rgba(0,255,136,0.6); font-size: 28px; margin-top:10px;">銀河の指令ボード</h2>
+            <div class="mission-tabs">
+                <button class="tab-btn active" id="tab-mission-def" onclick="setMissionTab('DEFAULT')">通常任務</button>
+                <button class="tab-btn ex-tab" id="tab-mission-ex" onclick="setMissionTab('EX')">EX 任務</button>
+            </div>
+            <div id="mission-list" style="width: 100%; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 60%; padding-top: 10px; padding-bottom: 20px;"></div>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+        </div>
+
+        <div id="fusion-screen" class="overlay">
+            <h2 style="color:cyan; text-shadow: 0 0 25px cyan, 0 0 50px #00d2ff; font-size:32px;">🌀 キャラクター合体</h2>
+            <div style="background:linear-gradient(135deg, rgba(30,30,30,0.95), rgba(15,15,15,0.95)); padding:25px; border-radius:15px; width:85%; font-size:14px; border:1px solid #00d2ff; box-shadow:0 0 30px rgba(0,210,255,0.3), inset 0 0 30px rgba(0,0,0,0.9);">
+                <p style="font-weight:900; color:#fff; font-size:16px; margin-bottom:15px; text-shadow: 1px 1px 2px #000;">【素材を選択】</p>
+                <div style="display:flex; justify-content:center; gap:25px; margin-bottom: 20px;">
+                    <div id="fuse-slot-1" onclick="openFuseSelect(1)" style="width:75px; height:75px; border:2px dashed #00d2ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:38px; cursor:pointer; background:rgba(0,0,0,0.6); box-shadow:inset 0 0 15px rgba(0,210,255,0.4); transition: all 0.2s;">+</div>
+                    <div style="font-size:35px; display:flex; align-items:center; color:#fff; font-weight: bold;">+</div>
+                    <div id="fuse-slot-2" onclick="openFuseSelect(2)" style="width:75px; height:75px; border:2px dashed #00d2ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:38px; cursor:pointer; background:rgba(0,0,0,0.6); box-shadow:inset 0 0 15px rgba(0,210,255,0.4); transition: all 0.2s;">+</div>
+                </div>
+                <div id="fusion-cond-box" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; border: 1px solid #333;"><p style="color:#ccc;">素材となるキャラを2体選んでください</p></div>
+            </div>
+            <div id="fusion-result-preview" style="margin:15px; font-size:18px; font-weight:900; color:var(--gold); text-shadow:0 0 15px rgba(255,215,0,0.9);"></div>
+            <button class="btn" id="fusion-exec-btn" onclick="executeFusion()" style="background:linear-gradient(135deg, #fff, #bbb); color:#111; width:240px; font-size:18px; display:none; box-shadow:0 0 25px rgba(255,255,255,0.7); border: 2px solid #fff;">フュージョン！</button>
+            <button class="btn" onclick="fuseSelection=[null,null]; openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:20px;">戻る</button>
+        </div>
+
+        <div id="fuse-select-screen" class="overlay">
+            <h2 style="color:cyan; text-shadow: 0 0 20px rgba(0,255,255,0.6); letter-spacing:2px; font-size: 28px;">素材キャラ選択</h2>
+            <div class="col-grid" id="fuse-select-list" style="height: 55%; width: 90%;"></div>
+            <button class="btn" onclick="openLayer('fusion-screen')" style="margin-top:20px; background:linear-gradient(135deg, #666, #444); width:140px;">戻る</button>
+        </div>
+
+        <div id="evolve-screen" class="overlay">
+            <h2 style="color:#b266ff; text-shadow:0 0 25px #8a2be2; font-size:32px;">🧬 キャラクター進化</h2>
+            <p style="font-size: 12px; color: #ffcc00; font-weight:bold; margin-top: -15px; text-shadow:0 0 8px rgba(255,204,0,0.6);">※特別な進化には「草の化石」等が必要です</p>
+            <div id="evolve-status" style="background:linear-gradient(135deg, rgba(30,30,30,0.95), rgba(15,15,15,0.95)); padding:25px; border-radius:15px; width:80%; margin-bottom:25px; border:1px solid #8a2be2; box-shadow:0 0 30px rgba(138,43,226,0.4), inset 0 0 30px rgba(0,0,0,0.9); font-weight:900; font-size:16px;"></div>
+            <button class="btn" id="evolve-exec-btn" onclick="executeEvolve()" style="background:linear-gradient(135deg, #ffd700, #ff8c00); color:#111; width:220px; font-size:18px; margin-bottom:20px; display:none; box-shadow:0 0 25px rgba(255,215,0,0.6); border:2px solid #fff;">進化させる！</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px;">戻る</button>
+        </div>
+
+        <!-- 🎰 ガチャ画面 -->
+<div id="gacha-screen" class="overlay">
+    <h2 style="color:var(--gold); font-size:32px; margin-top:10px;">SUMMON</h2>
+    <div class="gacha-tabs">
+        <button class="tab-btn active" id="gacha-tab-default" onclick="setGachaTab('DEFAULT')">通常 ガチャ</button>
+        <button class="tab-btn ex-tab" id="gacha-tab-ex" onclick="setGachaTab('EX')">EX ガチャ</button>
+    </div>
+    
+    <div id="gacha-result-display" style="display:none; height: 300px; overflow-y: auto;"></div>
+    
+    <div id="gacha-controls" style="display:flex; flex-direction:column; align-items:center; width:100%; z-index:100; position:relative;">
+        <div id="gacha-currency-display" style="font-size:16px; margin-bottom:5px; font-weight:bold; background:rgba(0,0,0,0.6); padding:10px 20px; border-radius:20px; border:1px solid #555;">
+            <img src="草コイン.png" style="width:24px; vertical-align:middle;"> 所持金: <span style="color:gold;">0</span>
+        </div>
+        <div id="gacha-prob-display" style="font-size:11px; color:#aaa; margin-bottom:10px;">SSR: 1% / SR: 20% / R: 79%</div>
+        <button class="btn" onclick="openGachaProb()" style="background:transparent; border:1px solid #00d2ff; color:#00d2ff; padding:5px 15px; font-size:12px; margin-bottom:15px; border-radius:15px;">提供割合を確認</button>
+
+        <div style="display:flex; flex-direction:column; gap:12px; width: 280px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.3);">
+            <button class="btn btn-gacha" id="gacha-btn-1" onclick="runGacha(1)">1回 (1K円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-10" onclick="runGacha(10)" style="background:linear-gradient(135deg, #ff8c00, #e65c00);">10連 (10K円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-100" onclick="runGacha(100)" style="background:linear-gradient(135deg, #800080, #4d004d);">100連 (100K円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-1000" onclick="runGacha(1000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1000連 (1M円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-10000" onclick="runGacha(10000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1万連 (10M円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-100000" onclick="runGacha(100000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">10万連 (100M円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-1000000" onclick="runGacha(1000000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">100万連 (1B円)</button>
+            <button class="btn btn-gacha" id="gacha-btn-10000000" onclick="runGacha(10000000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1000万連 (10B円)</button>
+        </div>
+    </div>
+            <button class="btn" id="gacha-back-btn" onclick="closeGachaResult()" style="margin-top:20px; background:linear-gradient(135deg, #666, #444); width:140px; z-index:900; position:relative;">戻る</button>
+        </div>
+
+        <div id="col-screen" class="overlay">
+            <h2 style="text-shadow:0 0 20px rgba(255,255,255,0.6); letter-spacing:3px; font-size: 28px;">COLLECTION</h2>
+            <div class="bonus-info" id="collection-bonus-display" style="color: var(--gold); font-weight:bold; margin-bottom:5px;"></div>
+            
+            <div class="col-tabs" style="margin-bottom: 5px;">
+                <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
+                <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
+                <button class="tab-btn" id="tab-skill" onclick="setTab('skill')">必殺技</button>
+                <button class="tab-btn" id="tab-bgm" onclick="setTab('bgm')">BGM</button>
+            </div>
+            <div id="char-sub-tabs" style="display:flex; gap:10px; margin-bottom:10px; width:90%; justify-content:center;">
+                <button class="setting-btn active" id="sub-char-def" onclick="setCharSubTab('DEFAULT')" style="flex:1;">通常</button>
+                <button class="setting-btn" id="sub-char-ex" onclick="setCharSubTab('EX')" style="flex:1; border-color:var(--ex-green);">EX限定</button>
+            </div>
+            <div class="col-grid" id="col-list-content"></div>
+            <button class="btn" onclick="openLayer('start-screen')" style="margin-top:20px; background:linear-gradient(135deg, #666, #444); width:140px;">戻る</button>
+        </div>
+
+        <div id="end-screen" class="overlay">
+            <h2 id="end-title" style="color:#ff3333; font-size:54px; text-shadow: 0 0 35px #ff0000, 0 8px 15px rgba(0,0,0,0.9); margin-bottom:15px; font-weight: 900;">TIME UP</h2>
+            <p style="font-size:20px; font-weight:900; margin-top:25px; text-shadow: 1px 1px 3px #000;">最終金額</p>
+            <div style="font-size:38px; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.8); font-weight:bold;">
+                <img src="草コイン.png" style="width:40px; vertical-align:middle;"> <span id="res-money">0</span>
+            </div>
+            <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:260px; margin-top:40px;">拠点に戻る</button>
+        </div>
+
+        <div id="boss-result-screen" class="overlay" style="background:rgba(0,0,0,0.9);">
+            <h2 id="boss-res-title" style="font-size:50px; margin-bottom:10px;">VICTORY</h2>
+            <p id="boss-res-msg" style="color:#ddd; font-weight:bold;"></p>
+            <div style="background:rgba(255,255,255,0.1); border:1px solid #555; border-radius:10px; padding:20px; width:80%; margin-top:20px;">
+                <p style="font-size:14px; color:#aaa; margin:0 0 5px 0;">獲得報酬</p>
+                <div style="font-size:35px; color:var(--gold); font-weight:bold; text-shadow:0 0 15px rgba(255,215,0,0.8);"><img src="草コイン.png" style="width:35px; vertical-align:middle;"> +<span id="boss-res-reward-money-val">0</span></div>
+            </div>
+            <div id="boss-res-reward-fossil" style="display:none; margin-top:30px; animation: egg-pulse-glow 1.5s infinite alternate;">
+                <h3 style="color:#ff0044; margin:0 0 10px 0; font-size:24px; text-shadow:0 0 10px #ff0044;">!! RARE DROP !!</h3>
+                <img src="草の化石.png" style="width:100px; filter:drop-shadow(0 0 20px rgba(210,180,140,0.8));">
+                <p style="color:var(--fossil); font-weight:bold; font-size:18px;">草の化石 × <span id="fossil-drop-count">1</span></p>
+                <p id="fossil-bonus-msg" style="color:var(--bonus-color); font-size:12px; font-weight:bold; text-shadow:0 0 5px var(--bonus-color); display:none;">【1日1回限定】化石ボーナス3倍！</p>
+            </div>
+            <div id="boss-res-reward-char" style="display:none; margin-top:15px; animation: x-glow 1s infinite alternate;">
+                <h3 style="color:#ff0044; margin:0 0 5px 0; font-size:20px; text-shadow:0 0 10px #ff0044;">BOSS JOINED!</h3>
+                <p id="boss-join-name" style="color:#fff; font-weight:bold; font-size:16px;">〇〇が仲間になった！</p>
+            </div>
+            <button class="btn" onclick="closeBossResult()" style="background:linear-gradient(135deg, #666, #444); width:200px; margin-top:40px;">戻る</button>
+        </div>
+    </div>
+
+    <!-- 本編用の下部UI -->
+    <div class="bottom-ui" id="main-bottom-ui">
+        <div id="tsum-icon" onclick="triggerSkill()">👤</div>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px;">
+            <div id="skill-bar"><div id="skill-fill"></div></div>
+            <div id="skill-display-name" style="font-size:13px; color:#ddd; font-weight:900; text-shadow:0 2px 4px #000; letter-spacing:1.5px;">huh</div>
+        </div>
+    </div>
+
+    <audio id="bgm-player" loop preload="auto"></audio>
+    <audio id="se-decide" src="決定効果音.mp3" preload="auto"></audio>
+    <audio id="se-menu-open" src="メニューを開く4.mp3" preload="auto"></audio>
+    <audio id="se-zombie" src="ゾンビに体をえぐられる.mp3" preload="auto"></audio>
+
+    <script>
+        BigInt.prototype.toJSON = function() { return this.toString(); };
+        function parseBigInt(val, def = 0n) { try { return BigInt(val); } catch(e) { return BigInt(def); } }
+        
+        function formatMoney(val) {
+            let n = typeof val === 'bigint' ? Number(val) : Number(val);
+            if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+            if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+            if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+            if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+            return n.toLocaleString();
+        }
+
+        const firebaseConfig = { databaseURL: "https://game-685f2-default-rtdb.firebaseio.com/" };
+        try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e) { console.log(e); }
+        const db = typeof firebase !== 'undefined' ? firebase.database() : null;
+        const roomsRef = db ? db.ref('rooms') : null;
+        const battlesRef = db ? db.ref('battles') : null;
+
+        let myUid = localStorage.getItem('zen_survival_uid');
+        if (!myUid) { myUid = 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000); localStorage.setItem('zen_survival_uid', myUid); }
+        
+        let isMultiplayer = false, isHost = false, currentRoomId = null, multiPlayers = {}, roomStatus = 'waiting', roomListeners = []; 
+        let money = 2000n, fossilCount = 0, kusakakuCount = 0;
+        let gameSettings = { bgmVol: 50, seVol: 50, effectLevel: 2, textureLevel: 2, lightMode: false };
+        let timeLeft = 30.0, isPlaying = false, skillCount = 0;
+        let currentTab = 'char', currentColCharTab = 'DEFAULT', currentGachaTab = 'DEFAULT', currentMissionTab = 'DEFAULT';
+        let feverPoints = 0, isFever = false, isSkillActive = false;
+        let missions = [], exMissions = [], missionStats = { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 }, lastMissionDate = "";
+        let isGoldenDomain = false, goldenDomainTimer = null;
+        let userName = "ぜん", currentTitle = "なし";
+        let fuseSelection = [null, null], currentFuseSlot = 1;
+        let defeatedBosses = [], todayBossBonusDate = "";
+        let currentCptTab = 'train', selectedCptCharId = null, leaderId = 'c20', charLevels = {}; 
+        let selectedHostBossIndex = 0, bossDifficulty = 1, bossDifficultyMult = 1, diffSelectBtnRef = null;
+        let isBossBattle = false, currentBoss = null, bossCurrentHp = 0, battleTimer = null, isDoubleSpeed = false, itemCooldowns = { herb: 0, drop: 0, star: 0 };
+        const ITEM_MAX_CD = { herb: 100, drop: 300, star: 600 }; 
+        let isBossResultDropBoss = false;
+        let arenaSkills = []; 
+        let currentPlayRateMultiplier = 1;
+
+        const titles = [
+            { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000n },
+            { name: "草抜き中級者", cond: "所持金が10万を超える", check: () => money > 100000n },
+        　  { name: "草抜き上級者", cond: "所持金が1億円を超える", check: () => money > 100000000n },
+            { name: "草抜き職人", cond: "所持金が100億円を超える", check: () => money > 10000000000n },
+            { name: "草抜き師", cond: "所持金が1兆円を超える", check: () => money > 1000000000000n },
+            { name: "伝説の草抜き師", cond: "所持金が100兆円を超える", check: () => money > 100000000000000n },
+            { name: "古のCEO", cond: "所持金が9999兆円を超える", check: () => money > 9999000000000000n },
+    　      { name: "ガチャ初心者", cond: "累計1回ガチャを回す", check: () => missionStats.gachaed >= 1 },
+            { name: "ガチャ中級者", cond: "累計100回ガチャを回す", check: () => missionStats.gachaed >= 100 },
+            { name: "ガチャ上級者", cond: "累計1万回ガチャを回す", check: () => missionStats.gachaed >= 10000 },
+            { name: "ガチャマスター", cond: "累計100万回ガチャを回す", check: () => missionStats.gachaed >= 1000000 },
+            { name: "ガチャ廃人", cond: "累計1億回ガチャを回す", check: () => missionStats.gachaed >= 100000000 },
+            { name: "化石発掘者", cond: "草の化石を手に入れる", check: () => fossilCount > 0 },
+            { name: "草核の共鳴", cond: "草核を手に入れる", check: () => kusakakuCount > 0 },
+            { name: "ZENの友達", cond: "キャラを15種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 15 },
+            { name: "ZENの親友", cond: "キャラを30種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 30 },
+            { name: "ZENの大親友", cond: "キャラを50種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 50 },
+            { name: "ZENの相棒", cond: "キャラを75種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 75 },
+            { name: "ZENの理解者", cond: "キャラを100種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 100 },
+            { name: "初心者", cond: "SRキャラを所持する", check: () => items.some(i=>i.rarity==='SR' && i.owned) },
+            { name: "中級者", cond: "SSRキャラを所持する", check: () => items.some(i=>i.rarity==='SSR' && i.owned) },
+    　　    { name: "神の領域", cond: "UZキャラを所持する", check: () => items.some(i=>i.rarity==='UZ' && i.owned) },
+         　 { name: "合体の神", cond: "Xキャラを所持する", check: () => items.some(i=>i.rarity==='X' && i.owned) },
+            { name: "管理者", cond: "OGキャラを所持する", check: () => items.some(i=>i.rarity==='OG' && i.owned) },
+            { name: "王", cond: "BOSSキャラを所持する", check: () => items.some(i=>i.rarity==='BOSS' && i.owned) },
+            { name: "世界の覇者", cond: "OMEGAキャラを所持する", check: () => items.some(i=>i.rarity==='OMEGA' && i.owned) },
+            { name: "世界の創生者", cond: "GODキャラを所持する", check: () => items.some(i=>i.rarity==='GOD' && i.owned) }
+        ];
+
+        const items = [
+            { id: 'Adomin', type: 'char', name: 'Adomin', icon: '👑', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: "9999999999999999999999999999999999999999999999", hp: "9999999999999",      // ボス戦の体力
+    bossDmg: "99999999999999999", // ボスへのダメージ
+    speed: 99999,           // 攻撃スピード
+},
+            { id: 'kazusan', type: 'char', name: 'ラッキーカズキング', icon: '🎰', owned: false, rarity: 'OMEGA', info: '777', rate: 92.8, isEvolved: true, },
+            { id: 'seimarotuyoi', type: 'char', name: '創世神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 100, isEvolved: true, },
+            { id: 'kaguya_ssr', type: 'char', name: 'かぐや', icon: '🌙', rarity: 'SSR', isEX: true, info: 'スキル: 私はわたしのことが好き。', rate: 16.8, skillName: '私はわたしのことが好き。' },
+            { id: 'yachiyo_uz', type: 'char', name: 'やちよ', icon: '🥞', rarity: 'UZ', isEX: true, isEvolved: true, info: 'スキル: Remember', rate: 168, skillName: 'Remember' },
+            { id: 'sei_god', type: 'char', name: '究極膳神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OG', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 35, isEvolved: true, },
+            { id: 'vector_kinguini', type: 'char', name: 'ベクター・キンギーニ', icon: '🌌', owned: false, rarity: 'OG', info: '全技から卵排除/月牙天衝', rate: 40, isEvolved: true, },
+            { id: 'ket_og', type: 'char', name: '不滅のケチャップ', icon: '🍅', rarity: 'OG', mult: 1000, cost: 0, owned: false, rate: 25, },
+            { id: 'deus_ex', type: 'char', name: '全合体', icon: '🤠', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: 100, },
+            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金20倍/卵抜き/huh卵消去/必殺即チャージ', rate: 20, isEvolved: true, },
+            { id: 'c_rampage_venom', type: 'char', name: 'ランペイジ・イット(ヴェノム)', icon: '☣️', owned: false, rarity: 'UZ', info: '進化：金15倍/全スキル自動発動', rate: 15, isEvolved: true, },
+            { id: 'ket_x', type: 'char', name: '究極ケチャップ', icon: '⑨', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 30, },
+            { id: 'sei_cook', type: 'char', name: 'キングオブクッキングせいまろ', icon: '🍳', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 30, },
+            { id: 'sei_dragon', type: 'char', name: '紅蓮犬・せいまろ', icon: '🐉', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 25, },
+            { id: 'ket_royal_k', type: 'char', name: 'アルティメット・カズケチャ', icon: '🎮', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 28, },
+            { id: 'zen_omelette', type: 'char', name: '緋色のオムレツZEN', icon: '🥚', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 23, info: '卵抜きで倍率半減/なぞり消し' },
+            { id: 'ham_pork', type: 'char', name: '緋色のロイヤル・ポーク', icon: '🐷', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 25, info: '卵で5秒間倍率UP/なぞり消しで一掃' },
+            { id: 'ven_kazu', type: 'char', name: 'ランペイジカズキング（ヴェノム）', icon: '👑', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 20, },
+            { id: 'ven_seimaro', type: 'char', name: 'ランペイジせいまろ', icon: '☣️', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 22, },
+            { id: 'ven_ket', type: 'char', name: 'ブラッドケチャップ（ヴェノム）', icon: '🩸', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 20, },
+            { id: 'c_scarlet_ham_uz', type: 'char', name: '緋色の金権覇王：ハム', icon: '🐹🔥', owned: false, rarity: 'UZ', info: '進化：金15倍/なぞり消し/全画面一掃', rate: 15, isEvolved: true, },
+            { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金15倍/全スキル自動発動/不死身', rate: 15, isEvolved: true, },
+            { id: 'huhto2', type: 'char', name: 'BIGhuh翔', icon: '🐈', owned: false, rarity: 'UZ', info: '限定：卵抜きOK/金15倍/huh強化/必殺超速', rate: 15, isEvolved: true},
+            { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金15倍/卵無効', rate: 15, isEvolved: true },
+            { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金10倍/卵で+1000円', rate: 10, isEvolved: true },
+            { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金10倍/卵無効', rate: 10, isEvolved: true },
+            { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金10倍', rate: 10, isEvolved: true },
+            { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金15倍/卵で5秒30倍/雷霆蒼破', rate: 15, isEvolved: true },
+            { id: 'ket_uz', type: 'char', name: '伝説のケチャップ', icon: '✨', rarity: 'UZ', owned: false, rate: 15 },
+            { id: 'c_scarlet_ham', type: 'char', name: '緋色の金権覇者：ハム', icon: '🐹👑', owned: false, rarity: 'SSR', info: '金10倍/必殺：画面の草と卵を一掃', rate: 10, },
+            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金10倍/huh強化/必殺超速', rate: 10, },
+            { id: 'hahto', type: 'char', name: 'huh翔', icon: '🐈', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金10倍/huh強化/必殺超速', rate: 10, },
+            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: false, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
+            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵を抜けるが倍率半減', rate: 10 },
+            { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金5倍/卵で+100円', rate: 5 },
+            { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金5倍/卵無効', rate: 5 },
+            { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金5倍', rate: 5 },
+            { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', image: '龍神ぜん.png', owned: false, rarity: 'SSR', info: '金5倍/必殺短縮', rate: 5 },
+            { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', image: '機甲ぜんTYPE-Z.png', owned: false, rarity: 'SSR', info: '金5倍/huh強化', rate: 5 },
+            { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金5倍/卵反転', rate: 5 },
+            { id: 'c_rampage', type: 'char', name: 'ランペイジイット', icon: '🦖', owned: false, rarity: 'SSR', info: '金10倍/草を抜くほど速度UP', rate: 10 },
+            { id: 'ket_ssr', type: 'char', name: '覚醒ケチャップ', icon: '🔥', rarity: 'SSR', mult: 15, cost: 0, owned: false, rate: 10 },
+            { id: 'ze1', type: 'char', name: 'ウシぜん', icon: '🐄', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze2', type: 'char', name: 'イノシシイット', icon: '🐗', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze3', type: 'char', name: 'ひつじハム', icon: '🐏', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze4', type: 'char', name: 'ヤギカズ', icon: '🐐', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze5', type: 'char', name: 'ラクダぜん', icon: '🐫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze6', type: 'char', name: 'キリンカズ', icon: '🦒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze6', type: 'char', name: 'カバぜん', icon: '🦛', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze7', type: 'char', name: 'ビーバーぜん', icon: '🦫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze8', type: 'char', name: 'ハリネズミぜん', icon: '🦔', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze9', type: 'char', name: 'クマぜん', icon: '🐻', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze10', type: 'char', name: 'シロクマぜん', icon: '🐻‍❄️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze11', type: 'char', name: 'パンダぜん', icon: '🐼', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze12', type: 'char', name: 'カニぜん', icon: '🦀', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze13', type: 'char', name: 'カエルぜん', icon: '🐸', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze14', type: 'char', name: 'ぶどうカズ', icon: '🍇', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze15', type: 'char', name: 'スイカせいまろ', icon: '🍉', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze16', type: 'char', name: 'ココナッツイット', icon: '🥥', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze17', type: 'char', name: 'キウイhuh翔', icon: '🥝', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze18', type: 'char', name: 'ブルーベリーぜん', icon: '🫐', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze19', type: 'char', name: 'チェリーぜん', icon: '🍒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze20', type: 'char', name: 'ピーチハム', icon: '🍑', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze21', type: 'char', name: 'りんごぜん', icon: '🍎', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze22', type: 'char', name: 'マンゴーぜん', icon: '🥭', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze23', type: 'char', name: 'バナナカズ', icon: '🍌', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze24', type: 'char', name: 'みかんぜん', icon: '🍊', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze25', type: 'char', name: 'ペッパーせいまろ', icon: '🌶️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze26', type: 'char', name: 'キノコカズ', icon: '🍄‍', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze27', type: 'char', name: 'チョコせいまろ', icon: '🍫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze28', type: 'char', name: 'ケーキせいまろ', icon: '🍰', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze29', type: 'char', name: 'クッキーせいまろ', icon: '🍪', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze30', type: 'char', name: 'ドーナツせいまろ', icon: '🍩', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze31', type: 'char', name: 'アイスぜん', icon: '🍦', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze32', type: 'char', name: 'アメカズ', icon: '🍬', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze33', type: 'char', name: 'パズルぜん', icon: '🧩', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze34', type: 'char', name: 'スペードイット', icon: '♠', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze35', type: 'char', name: 'ハートぜん', icon: '♥', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze36', type: 'char', name: 'ダイヤせいまろ', icon: '♦', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze37', type: 'char', name: 'クラブカズ', icon: '♣', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze38', type: 'char', name: 'ウッドぜん', icon: '🪵', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze39', type: 'char', name: 'ストーンイット', icon: '🪨', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze40', type: 'char', name: 'ポリスぜん', icon: '🚔', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze41', type: 'char', name: 'ファイヤーぜん', icon: '🚒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze42', type: 'char', name: '救急ぜん', icon: '🚑', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze43', type: 'char', name: '爆走ぜん', icon: '🏍️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze44', type: 'char', name: 'ローラーぜん', icon: '🛼', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze45', type: 'char', name: 'チャリぜん', icon: '🚲', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze46', type: 'char', name: 'サングラスぜん', icon: '🕶️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze47', type: 'char', name: 'メガネカズ', icon: '👓', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze48', type: 'char', name: '歌い手ぜん', icon: '🎤', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze49', type: 'char', name: 'ハッカーぜん', icon: '⌨', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'ze50', type: 'char', name: 'バッドイット', icon: '🗑️', image: '.png', owned: false, rarity: 'SR', info: '金0.1倍', rate: 0.1 },
+            { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', image: '黄金ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', image: '社長ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', image: '地主ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', image: '投資家ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
+            { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', image: '書道家ぜん.png', owned: false, rarity: 'SR', info: '金3倍/美しい筆致', rate: 3.0 },
+            { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', image: '冒険家ぜん.png', owned: false, rarity: 'SR', info: '金3倍/お宝発見', rate: 3.0 },
+            { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金3倍/爆音抜き', rate: 3.0 },
+            { id: 'ket_sr', type: 'char', name: '普通のケチャップ', icon: '👤', rarity: 'SR', mult: 5, cost: 0, owned: false, rate: 3 },
+            { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', image: '商人ぜん.png', owned: false, rarity: 'R', info: '金1.5倍', rate: 1.5 },
+            { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', image: '侍ぜん.png', owned: false, rarity: 'R', info: '金1.5倍', rate: 1.5 },
+            { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', image: '農家ぜん.png', owned: false, rarity: 'R', info: '金1.5倍/収穫の喜び', rate: 1.5 },
+            { id: 'r_cheer', type: 'char', name: '応援団ぜん', icon: '📣', image: '応援団ぜん.png', owned: false, rarity: 'R', info: '金1.5倍/フレー！フレー！', rate: 1.5 },
+            { id: 'r_book', type: 'char', name: '読書家ぜん', icon: '📖', image: '普通のぜん.png', owned: false, rarity: 'R', info: '金1.5倍/知識で抜く', rate: 1.5 },
+            { id: 'ket_r', type: 'char', name: 'ただのケチャップ', icon: '👤', rarity: 'BASIC', mult: 1.0, cost: 500, owned: false, rate: 1 },
+            { id: 'c14', type: 'char', name: '料理人ぜん', icon: '🍳', image: '普通のぜん.png', owned: false, rarity: 'R', info: '金1.5倍', rate: 1.5 },
+　　　　{ id: 'c20', type: 'char', name: '普通のぜん', icon: '👤', image: '普通のぜん.png', owned: true, rarity: 'BASIC', info: '金1倍', rate: 1 },
+            
+            { id: 'boss_char_0', type: 'char', name: '屍花の主 ラフレシアン', icon: '🌺', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 30, skillName: '捕食' },
+            { id: 'boss_char_1', type: 'char', name: '鋼鉄の審判官 ユニット-000', icon: '🤖', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 35, skillName: 'パージ' },
+            { id: 'boss_char_2', type: 'char', name: '禁忌の賢者 メルキオール', icon: '🔮', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 40, skillName: '禁呪' },
+            { id: 'boss_char_3', type: 'char', name: '道化師 ジャック・ザ・リッパー', icon: '🃏', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 45, skillName: '凶気' },
+            { id: 'boss_char_4', type: 'char', name: '終焉王テラ・ガイア', icon: '🌍', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 50, skillName: 'カタストロフィ' },
+            { id: 'boss_char_5', type: 'char', name: '命竜アルバナム', icon: '🐉', rarity: 'BOSS (LEGEND)', mult: 600, cost: 0, owned: false, rate: 55, skillName: '生命の奔流' },
+            
+            { id: 'b1', type: 'bg', name: '草原', className: '', owned: true, rarity: 'BASIC', info: '標準' },
+            { id: 'b2', type: 'bg', name: '砂漠', className: 'bg-desert', owned: true, rarity: 'R', info: '茶色い大地' },
+            { id: 'b3', type: 'bg', name: '電脳', className: 'bg-cyber', owned: true, rarity: 'SR', info: 'ネオンの輝き' },
+            { id: 'b4', type: 'bg', name: '火山', className: 'bg-volcano', owned: true, rarity: 'SSR', info: '灼熱の地' },
+            { id: 'b5', type: 'bg', name: '夜の草原', className: 'bg-night', owned: true, rarity: 'R', info: '静かな夜' },
+            { id: 'b6', type: 'bg', name: '櫻吹雪', className: 'bg-sakura', owned: true, rarity: 'SR', info: '舞い散る花びら' },
+            { id: 'b7', type: 'bg', name: '黄金郷', className: 'bg-gold', owned: true, rarity: 'SSR', info: '富の象徴' },
+            { id: 'b8', type: 'bg', name: '宇宙', className: 'bg-space', owned: true, rarity: 'UZ', info: '銀河の果て' },
+            { id: 'b9', type: 'bg', name: '深海', className: 'bg-deepsea', owned: true, rarity: 'SSR', info: '水圧と闇' },
+            { id: 'b10', type: 'bg', name: '次元の狭間', className: 'bg-dimension', owned: true, rarity: 'X', info: '時空の歪み' },
+            { id: 'b11', type: 'bg', name: '果てなき宇宙', className: 'bg-universe', owned: true, rarity: 'SSR', info: '流れる星々' },
+            { id: 'b12', type: 'bg', name: 'ネオン街', className: 'bg-neon', owned: true, rarity: 'SR', info: 'サイバーパンク' },
+            
+            { id: 's1', type: 'skill', name: 'huh', icon: '🐈', owned: true, rarity: 'BASIC', info: '3秒間自動抜き' },
+            { id: 's2', type: 'skill', name: 'ﾌｨｰﾊﾞｰ', icon: '🎰', owned: false, rarity: 'SSR', info: '強制フィーバー' },
+            { id: 's3', type: 'skill', name: 'カズキング・ザ・ワールド', icon: '⌚', owned: false, rarity: 'UZ', info: '時を止め、大ダメージ' },
+            { id: 's4', type: 'skill', name: '雷霆蒼破', icon: '⚡', owned: false, rarity: 'SSR', info: '超高速連続ダメージ(4秒)' },
+            { id: 's5', type: 'skill', name: 'ZENの導き', icon: '🍳', owned: false, rarity: 'SR', info: '回復＋攻撃力UP' },
+            { id: 's6', type: 'skill', name: 'カズキング・フラッシュ', icon: '👑', owned: false, rarity: 'SSR', info: '一撃必殺の大ダメージ' },
+            { id: 's_muda', type: 'skill', name: '無駄無駄ラッシュ', icon: '☣️', owned: false, rarity: 'UZ', info: '強烈な連打', rate: 100 },
+            
+            { id: 'bgm1', type: 'bgm', name: 'なし', url: '', icon: '🔇', owned: true, rarity: 'BASIC', info: '無音' },
+            { id: 'bgm_seimaro', type: 'bgm', name: 'せいまろのテーマ', url: 'せいまろテーマ.mp3', icon: '🐶', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_kazu', type: 'bgm', name: 'カズキングダム国家', url: 'カズキングタイジュウフエターネキンギーニ.mp3', icon: '👑', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_kazua', type: 'bgm', name: 'カズキング・爆食のその先へ', url: 'カズキングあ.mp3', icon: '👑', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_ranpeizi', type: 'bgm', name: 'ランペイジ', url: 'ランペイジ・イット.mp3', icon: '☣️', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_ranpeizibenomu', type: 'bgm', name: 'ランペイジ・ヴェノム', url: 'ランペイジ・イットヴェノム.mp3', icon: '☣️', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_hiro', type: 'bgm', name: '緋色のサーガ', url: '緋色のサーガ.mp3', icon: '🐹', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_arigato', type: 'bgm', name: 'ありがとうサービス', url: '朝焼けの街を走り抜けてく  .mp3', icon: '🎾', owned: true, rarity: 'SSR', info: '激しいビート' },
+            { id: 'bgm_aggro', type: 'bgm', name: 'サバイバルテーマ', url: 'theme.mp3', icon: '🌱', owned: true, rarity: 'OG', info: '攻撃的なシンセ' },
+            { id: 'bgm_hapi', type: 'bgm', name: 'ハッピーエンド', url: 'ハッピーエンド.mp3', icon: '🌈', owned: true, rarity: 'UZ', info: '攻撃的なシンセ' },
+            { id: 'bgm_caia', type: 'bgm', name: 'CAIA', url: 'caia.mp3', icon: '🌌', owned: true, rarity: 'UZ', info: '攻撃的なシンセ' }
+        ];
+
+        let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
+        const charStats = { 'BOSS (LEGEND)':{hp:60000, atk:15000}, 'BOSS':{hp:6000, atk:1500}, 'OG':{hp:3500, atk:850}, 'OMEGA':{hp:3500, atk:850}, 'X':{hp:2800, atk:700}, 'UZ':{hp:2200, atk:550}, 'SSR':{hp:1800, atk:450}, 'SR':{hp:1200, atk:250}, 'R':{hp:1200, atk:250}, 'BASIC':{hp:800, atk:100} };
+        const bosses = [
+            { id: 'boss1', name: '屍花の主 ラフレシアン', hp: 3500, atk: 100, img: '屍花の主 ラフレシアン.png', diff: '初級', dropMultiplier: 1 },
+            { id: 'boss2', name: '鋼鉄の審判官 ユニット-000', hp: 5000, atk: 250, img: '鋼鉄の審判官 ユニット-000.png', diff: '中級', dropMultiplier: 2 },
+            { id: 'boss3', name: '禁忌の賢者 メルキオール', hp: 7500, atk: 350, img: '禁忌の賢者 メルキオール.png', diff: '上級', dropMultiplier: 3 },
+            { id: 'boss4', name: '道化師 ジャック・ザ・リッパー', hp: 8000, atk: 450, img: '狂い咲きの道化師 ジャック・ザ・リッパー.png', diff: '鬼級', dropMultiplier: 5 },
+            { id: 'boss5', name: '破滅の化身 終焉王テラ・ガイア', hp: 10000, atk: 600, img: '破滅の化身 終焉王テラ・ガイア.png', diff: '超鬼級', dropMultiplier: 8 },
+            { id: 'boss6', name: '命竜アルバナム', hp: 35000, atk: 2000, img: 'アルバナム.png', diff: '神級', dropMultiplier: 15 },
+            { id: 'boss7', name: 'せいまろ', hp: 25000, atk: 1000, img: 'せいまろ.png', diff: 'イベント級', dropMultiplier: 12 },
+            { id: 'boss8', name: 'カズキングタイジュウフエターネキンギーニ', hp: 35000, atk: 1500, img: 'カズキングタイジュウフエターネキンギーニ.png', diff: 'イベント級', dropMultiplier: 14 },
+            { id: 'boss9', name: 'ランペイジ・イット', hp: 50000, atk: 1800, img: 'ランペイジイット.png', diff: 'イベント級', dropMultiplier: 16 },
+            { id: 'boss10', name: 'いろP（酒寄博士）', hp: 16800000, atk: 16800, img: 'いろは.jpg', diff: 'イベント級', dropMultiplier: 168 }
+        ];
+
+        document.addEventListener('click', (e) => {
+            if(e.target.closest('.btn') || e.target.closest('.tab-btn') || e.target.closest('.equip-btn') || e.target.closest('.col-card') || e.target.closest('.boss-card') || e.target.closest('.cpt-char-item') || e.target.closest('.upgrade-btn') || e.target.closest('.lobby-list-item')) {
+                if(e.target.closest('.btn-cockpit')) { playMenuSE(); } else { playDecideSE(); }
+            }
+        });
+        function playDecideSE() { const a = document.getElementById('se-decide'); if(a){ a.volume = gameSettings.seVol/100; a.currentTime=0; a.play().catch(()=>{}); } }
+        function playMenuSE() { const a = document.getElementById('se-menu-open'); if(a){ a.volume = gameSettings.seVol/100; a.currentTime=0; a.play().catch(()=>{}); } }
+
+        function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
+        function getCharFinalStats(charId) {
+            // --- ここから追加 ---
+    if (charId === 'Adomin') {
+        return {
+            hp: 9999999,      // ボス戦のHPを9億にする
+            atk: 99999999999, // ボスへのダメージを1000億にする
+            data: items.find(i => i.id === 'Adomin'),
+            level: {atk:0, hp:0, skill:0, dup:0}
+        };
+    }
+            const charData = items.find(i => i.id === charId) || items.find(i=>i.id==='c20');
+            const base = charStats[charData.rarity] || charStats['BASIC'];
+            const cl = charLevels[charId] || {atk:0, hp:0, skill:0, dup:0};
+            let finalAtk = base.atk * (1 + 0.1 * cl.atk) * (1 + 0.01 * cl.dup);
+            let finalHp = base.hp * (1 + 0.1 * cl.hp) * (1 + 0.01 * cl.dup);
+            if(charId === leaderId) { finalAtk *= 1.2; finalHp *= 1.2; }
+            return { hp: finalHp, atk: finalAtk, data: charData, level: cl };
+        }
+        function getAtkHpCost(lv) { let cost = 1000n; for(let i=0; i<lv; i++) cost = (cost * 12n) / 10n; return cost; }
+        function getSkillLvCost(lv) { let cost = 50000n; for(let i=0; i<lv; i++) cost = cost * 2n; return cost; }
+
+        window.updateUI = function() {
+            document.getElementById('m-val').innerText = formatMoney(money);
+            document.getElementById('fossil-val').innerText = fossilCount.toLocaleString();
+            document.getElementById('kusakaku-val').innerText = kusakakuCount.toLocaleString();
+            if(currentGachaTab === 'DEFAULT') {
+                document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle; border-radius:50%;"> 所持金: <span style="color:gold;">${formatMoney(money)}</span>`;
+            } else {
+                document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
+            }
+            document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
+            document.getElementById('fever-fill').style.width = feverPoints + "%";
+            if(!isBossBattle) {
+                document.getElementById('skill-fill').style.width = skillCount + "%";
+                document.querySelector('#main-bottom-ui').classList.toggle('ready', skillCount >= 100);
+            }
+            document.getElementById('u-name-display').innerText = userName;
+            document.getElementById('u-title-display').innerText = currentTitle;
+            const hasDefClaimable = missions.some(m => !m.claimed && BigInt(missionStats[m.key] || 0) >= m.goal);
+            const hasExClaimable = exMissions.some(m => !m.claimed && BigInt(missionStats[m.key] || 0) >= m.goal);
+            const alertEl = document.getElementById('mission-alert');
+            if(hasExClaimable) { alertEl.style.display = 'inline'; alertEl.style.color = '#00ffff'; alertEl.style.textShadow = '0 0 10px #00ffff'; alertEl.style.animation = 'ultimate-rainbow 1s infinite linear'; } 
+            else if (hasDefClaimable) { alertEl.style.display = 'inline'; alertEl.style.color = '#ff0033'; alertEl.style.textShadow = '0 0 10px #ff0033'; alertEl.style.animation = 'none'; } 
+            else { alertEl.style.display = 'none'; }
+        }
+
+        window.updateSettings = function() {
+            gameSettings.bgmVol = parseInt(document.getElementById('set-bgm-vol').value);
+            gameSettings.seVol = parseInt(document.getElementById('set-se-vol').value);
+            const bgmPlayer = document.getElementById('bgm-player');
+            if(bgmPlayer) bgmPlayer.volume = gameSettings.bgmVol / 100;
+            saveGame();
+        }
+        window.setEffect = function(lvl) {
+            gameSettings.effectLevel = lvl;
+            [0,1,2].forEach(i => document.getElementById('eff-'+i).classList.remove('active'));
+            document.getElementById('eff-'+lvl).classList.add('active');
+            saveGame();
+        }
+        window.setTexture = function(lvl) {
+            gameSettings.textureLevel = lvl;
+            [0,1,2].forEach(i => document.getElementById('tex-'+i).classList.remove('active'));
+            document.getElementById('tex-'+lvl).classList.add('active');
+            saveGame();
+        }
+        window.setLightMode = function(val) {
+            gameSettings.lightMode = val;
+            document.getElementById('light-off').classList.toggle('active', !val);
+            document.getElementById('light-on').classList.toggle('active', val);
+            if(val) document.body.classList.add('light-mode-active');
+            else document.body.classList.remove('light-mode-active');
+            saveGame();
+        }
+
+        window.showKotoDama = function(text, color="cyan") {
+            if (gameSettings.effectLevel === 0 || gameSettings.lightMode) return;
+            const div = document.createElement('div');
+            div.className = 'koto-dama-text'; div.innerHTML = text;
+            if(color==="rainbow") div.style.animation = "koto-dama-anim 1.5s forwards, ultimate-rainbow 1s infinite linear";
+            else div.style.textShadow = `0 0 20px ${color}, 0 0 40px #fff, 0 5px 10px #000`;
+            document.getElementById('game-field').appendChild(div);
+            if(gameSettings.effectLevel === 2) shakeScreen(0.2);
+            setTimeout(() => div.remove(), 1500);
+        }
+
+        window.playSkillCutin = function(charName, skillName) {
+            if(gameSettings.lightMode || gameSettings.effectLevel === 0) return;
+            const cutin = document.getElementById('skill-cutin');
+            const bg = document.getElementById('cutin-bg');
+            document.getElementById('cutin-char').innerText = charName;
+            document.getElementById('cutin-skill').innerText = skillName;
+            cutin.style.display = 'flex';
+            bg.style.transform = 'scaleY(0)';
+            setTimeout(() => {
+                bg.style.transform = 'scaleY(1)';
+                bg.style.animation = 'skill-shake 0.05s infinite, gacha-flash-anim 0.2s alternate 3';
+                if(gameSettings.effectLevel === 2) shakeScreen(0.5);
+            }, 50);
+            setTimeout(() => {
+                bg.style.transform = 'scaleY(0)';
+                setTimeout(() => { cutin.style.display = 'none'; bg.style.animation = ''; }, 200);
+            }, 1200);
+        }
+
+        window.shakeScreen = function(dur=0.1) {
+            if (gameSettings.effectLevel < 2 || gameSettings.lightMode) return;
+            const field = document.getElementById('game-field');
+            field.style.animation = `skill-shake 0.05s infinite`;
+            setTimeout(() => field.style.animation = "", dur * 1000);
+        }
+
+        window.openLayer = function(id) {
+            document.querySelectorAll('.overlay').forEach(el => { 
+                el.style.display = 'none'; 
+                el.style.pointerEvents = 'none';
+            });
+            const target = document.getElementById(id);
+            if (target && id !== 'none') {
+                target.style.display = 'flex';
+                target.style.pointerEvents = 'auto';
+            }
+
+            if(id === 'cockpit-screen') { renderCockpitChars(); setCptTab('train'); }
+            if(id === 'multi-create-screen') renderCreateBossGrid();
+            if(id === 'multi-search-screen') fetchLobbies();
+            if(id === 'col-screen') renderCol();
+            if(id === 'evolve-screen') renderEvolve();
+            if(id === 'fusion-screen') renderFusion();
+            if(id === 'fuse-select-screen') renderFuseSelect(); 
+            if(id === 'mission-screen') renderMissions();
+            if(id === 'gacha-screen') { document.getElementById('gacha-result-display').style.display = 'none'; document.getElementById('gacha-controls').style.display = 'flex'; setGachaTab(currentGachaTab); }
+            if(id === 'profile-screen') { document.getElementById('name-input').value = userName; renderTitles(); }
+            if(id === 'settings-screen') { document.getElementById('set-bgm-vol').value = gameSettings.bgmVol; document.getElementById('set-se-vol').value = gameSettings.seVol; setEffect(gameSettings.effectLevel); setTexture(gameSettings.textureLevel); setLightMode(gameSettings.lightMode); }
+            if(id === 'start-screen') {
+                document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
+const tsumIcon = document.getElementById('tsum-icon');
+if (equipped.char.image) {
+    // 画像がある場合はimgタグを入れる
+    tsumIcon.innerHTML = `<img src="${equipped.char.image}" style="width:100%; height:100%; object-fit:contain;">`;
+    tsumIcon.innerText = ''; // テキスト（絵文字）を消す
+} else {
+    // 画像がない場合は今まで通り絵文字を入れる
+    tsumIcon.innerText = equipped.char.icon;
+    tsumIcon.innerHTML = equipped.char.icon; // 念のため上書き
+}
+                document.getElementById('skill-display-name').innerText = equipped.char.id === 'vector_kinguini' ? '月牙天衝' : equipped.skill.name;
+                document.getElementById('main-bottom-ui').style.display = 'flex';
+                isBossBattle = false; clearRoomListeners();
+            } else if (id === 'boss-arena-screen') {
+                document.getElementById('main-bottom-ui').style.display = 'none';
+            }
+            updateUI();
+        }
+
+        window.setCptTab = function(tab) { currentCptTab = tab; if(selectedCptCharId) renderCockpitDetail(selectedCptCharId); }
+        window.renderCockpitChars = function() {
+            const list = document.getElementById('cpt-char-list'); list.innerHTML = '';
+            const ownedChars = items.filter(i => (i.type === 'char' || i.type === 'skill') && i.owned);
+            ownedChars.forEach(char => {
+                if(!charLevels[char.id]) charLevels[char.id] = {atk:0, hp:0, skill:0, dup:0};
+                const cl = charLevels[char.id]; const isLdr = leaderId === char.id;
+                const div = document.createElement('div'); div.className = `cpt-char-item ${selectedCptCharId === char.id ? 'active' : ''} ${isLdr ? 'leader' : ''}`;
+                div.onclick = () => { selectedCptCharId = char.id; renderCockpitChars(); renderCockpitDetail(char.id); };
+                let iconDisp = char.icon || (char.type==='skill'?'⚡':'');
+                let tagDisp = char.type==='skill' ? '<span style="color:#00ffff; font-size:10px;">[必殺技]</span>' : '';
+                div.innerHTML = `<div style="font-size:24px;">${iconDisp}</div><div style="flex-grow:1; text-align:left; padding-left:10px;"><div style="font-weight:bold; font-size:12px; color:#fff;">${tagDisp} ${char.name} ${isLdr ? '<span style="color:#00ff88;">[LEADER]</span>' : ''}</div><div style="font-size:10px; color:#aaa;">Lv.${cl.atk+cl.hp} <span style="color:var(--og-color);">+${cl.dup}</span></div></div>`;
+                list.appendChild(div);
+            });
+        }
+        window.renderCockpitDetail = function(id) {
+            const detail = document.getElementById('cpt-char-detail'); const stats = getCharFinalStats(id); const cl = stats.level; const isLdr = leaderId === id;
+            const atkCost = getAtkHpCost(cl.atk); const hpCost = getAtkHpCost(cl.hp); const skillCost = getSkillLvCost(cl.skill);
+            let leaderBtnHtml = stats.data.type === 'char' ? `<button class="btn" onclick="setLeader('${id}')" style="width:100%; padding:8px; font-size:14px; margin-bottom:15px; background:${isLdr?'#222':'linear-gradient(135deg,#00d2ff,#0044cc)'}; color:white; border:1px solid ${isLdr?'#444':'#fff'};" ${isLdr?'disabled':''}>${isLdr?'リーダー任命済み':'リーダーに任命 (ステータス1.2倍)'}</button>` : `<div style="text-align:center; color:cyan; margin-bottom:10px;">※必殺技はコレクションから装備してください</div>`;
+            detail.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:10px; margin-bottom:10px;"><div style="font-size:35px; text-shadow:0 0 10px #fff;">${stats.data.icon || '⚡'}</div><div style="text-align:right;"><div style="font-size:16px; font-weight:bold; color:var(--gold);">${stats.data.name}</div><div style="font-size:11px; color:#aaa;">限界突破ボーナス: +${cl.dup}% 全ステータスUP</div></div></div>
+                ${leaderBtnHtml}
+                <div class="stat-row"><div><span style="font-weight:bold; color:#ff3333;">ATK Lv.${cl.atk}</span> (MAX:1000)<br><span style="font-size:11px; color:#ccc;">威力: ${Math.floor(stats.atk).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'atk')" ${cl.atk>=1000||money<atkCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(atkCost)}</span></button></div>
+                <div class="stat-row"><div><span style="font-weight:bold; color:#33ff33;">HP Lv.${cl.hp}</span> (MAX:1000)<br><span style="font-size:11px; color:#ccc;">体力: ${Math.floor(stats.hp).toLocaleString()}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'hp')" ${cl.hp>=1000||money<hpCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(hpCost)}</span></button></div>
+                <div class="stat-row"><div><span style="font-weight:bold; color:#00ffff;">SKILL Lv.${cl.skill}</span> (MAX:15)<br><span style="font-size:11px; color:#ccc;">技名: ${stats.data.skillName || '通常効果'}</span></div><button class="upgrade-btn" onclick="upgradeStat('${id}', 'skill')" ${cl.skill>=15||money<skillCost?'disabled':''}>強化<br><span style="font-size:9px;">¥${formatMoney(skillCost)}</span></button></div>
+            `;
+        }
+        window.setLeader = function(id) { leaderId = id; saveGame(); renderCockpitChars(); renderCockpitDetail(id); }
+        window.upgradeStat = function(id, type) {
+            let cl = charLevels[id]; let cost = 0n;
+            if(type === 'atk' && cl.atk < 1000) { cost = getAtkHpCost(cl.atk); if(money >= cost){ money-=cost; cl.atk++; } }
+            if(type === 'hp' && cl.hp < 1000) { cost = getAtkHpCost(cl.hp); if(money >= cost){ money-=cost; cl.hp++; } }
+            if(type === 'skill' && cl.skill < 15) { cost = getSkillLvCost(cl.skill); if(money >= cost){ money-=cost; cl.skill++; } }
+            saveGame(); updateUI(); renderCockpitChars(); renderCockpitDetail(id);
+        }
+
+        window.renderCreateBossGrid = function() {
+            const container = document.getElementById('create-boss-grid'); container.innerHTML = '';
+            bosses.forEach((b, index) => {
+                const card = document.createElement('div'); card.className = 'boss-card'; card.onclick = () => showLobbyDifficultySelect(index);
+                const isDefeated = defeatedBosses.includes(b.id); let imgClass = isDefeated ? '' : 'glitch-noise'; let txtOverlay = isDefeated ? '' : '<div class="unknown-boss-text">UNKNOWN</div>'; let nameTxt = isDefeated ? b.name : '？？？';
+                card.innerHTML = `<div style="position:relative; width:100%; height:60px;"><img src="${b.img}" class="${imgClass}" style="width:100%; height:100%; border-radius:8px; object-fit:cover;" onerror="this.style.display='none'">${txtOverlay}</div><h3>${nameTxt}</h3>`;
+                container.appendChild(card);
+            });
+        }
+        window.showLobbyDifficultySelect = function(index) {
+            selectedHostBossIndex = index; const b = bosses[index]; const isDefeated = defeatedBosses.includes(b.id);
+            document.getElementById('multi-difficulty-dialog').style.display = 'flex';
+            document.getElementById('multi-diff-boss-name').innerText = isDefeated ? b.name : 'UNKNOWN';
+            const imgEl = document.getElementById('multi-diff-boss-img'); imgEl.src = b.img; imgEl.className = isDefeated ? '' : 'glitch-noise';
+            if(diffSelectBtnRef) diffSelectBtnRef.style.border = "none";
+            bossDifficulty = 1; const btns = document.querySelectorAll('.diff-btn'); btns.forEach(btn => btn.style.border = "none");
+            btns[0].style.border = "2px solid #fff"; diffSelectBtnRef = btns[0];
+        }
+        window.selectLobbyDiff = function(diff, btn) { bossDifficulty = diff; const btns = document.querySelectorAll('.diff-btn'); btns.forEach(b => b.style.border = "none"); btn.style.border = "2px solid #fff"; diffSelectBtnRef = btn; }
+        window.confirmLobbyCreate = function(multi) { document.getElementById('multi-difficulty-dialog').style.display = 'none'; if(multi) { createLobby(); } else { startBossBattle(selectedHostBossIndex, bossDifficulty, false); } }
+        window.createLobby = async function() {
+            if(!roomsRef) return alert("通信エラー：オフラインモードです");
+            isHost = true; isMultiplayer = true; currentRoomId = 'room_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+            const b = bosses[selectedHostBossIndex]; const diffNames = ['初級', '中級', '上級', '伝説'];
+            const roomData = { hostUid: myUid, hostName: userName, bossIndex: selectedHostBossIndex, difficulty: bossDifficulty, difficultyName: diffNames[bossDifficulty-1], status: 'waiting', createdAt: firebase.database.ServerValue.TIMESTAMP };
+            await roomsRef.child(currentRoomId).set(roomData);
+            const myChar = getCharFinalStats(leaderId);
+            await roomsRef.child(currentRoomId).child('members').child(myUid).set({ name: userName, icon: myChar.data.icon, isReady: true });
+            roomsRef.child(currentRoomId).onDisconnect().remove(); setupRoomListeners(); openLayer('multi-room-screen');
+        }
+        window.fetchLobbies = function() {
+            if(!roomsRef) return alert("通信エラー：オフラインモードです");
+            const container = document.getElementById('lobby-list-container'); container.innerHTML = '<p style="color:#aaa;">検索中...</p>';
+            roomsRef.orderByChild('status').equalTo('waiting').once('value', (snapshot) => {
+                container.innerHTML = '';
+                if(!snapshot.exists()) { container.innerHTML = '<p style="color:#aaa;">募集中のロビーはありません</p>'; return; }
+                snapshot.forEach(child => {
+                    const room = child.val(); const roomId = child.key; const b = bosses[room.bossIndex]; const membersCount = room.members ? Object.keys(room.members).length : 0;
+                    if(membersCount >= 4) return;
+                    const isDefeated = defeatedBosses.includes(b.id);
+                    const div = document.createElement('div'); div.className = 'lobby-list-item'; div.onclick = () => joinLobby(roomId);
+                    div.innerHTML = `<div style="display:flex; align-items:center;"><div style="font-size:24px; margin-right:10px;">${b.name.includes('ラフレシア')?'🌺':'😈'}</div><div style="text-align:left;"><div style="font-size:14px; font-weight:bold; color:var(--gold);">${isDefeated ? b.name : '？？？'}</div><div style="font-size:10px; color:#aaa;">主催: ${room.hostName} | ${room.difficultyName}</div></div></div><div style="font-size:12px; color:cyan;">参加 ${membersCount}/4</div>`;
+                    container.appendChild(div);
+                });
+            });
+        }
+        window.joinLobby = async function(roomId) {
+            if(!roomsRef) return;
+            isHost = false; isMultiplayer = true; currentRoomId = roomId;
+            const myChar = getCharFinalStats(leaderId); const memberRef = roomsRef.child(currentRoomId).child('members').child(myUid);
+            await memberRef.set({ name: userName, icon: myChar.data.icon, isReady: false });
+            memberRef.onDisconnect().remove(); setupRoomListeners(); openLayer('multi-room-screen');
+        }
+        window.setupRoomListeners = function() {
+            clearRoomListeners(); const roomRef = roomsRef.child(currentRoomId);
+            const listener = roomRef.on('value', (snapshot) => {
+                if(!snapshot.exists()) { if(!isBossBattle && isMultiplayer) { alert("ロビーが解散されました"); leaveLobby(true); } return; }
+                const room = snapshot.val(); selectedHostBossIndex = room.bossIndex; bossDifficulty = room.difficulty;
+                const b = bosses[selectedHostBossIndex]; const diffNames = ['初級', '中級', '上級', '伝説']; const isDefeated = defeatedBosses.includes(b.id);
+                document.getElementById('room-boss-title').innerText = `${isDefeated ? b.name : '未討伐ボス'} (${diffNames[bossDifficulty-1]})`;
+                document.getElementById('room-host-name').innerText = room.hostName;
+                const membersContainer = document.getElementById('room-members-container'); membersContainer.innerHTML = ''; let allReady = true;
+                if(room.members) {
+                    multiPlayers = room.members;
+                    Object.keys(room.members).forEach(uid => {
+                        const m = room.members[uid]; if(!m.isReady && uid !== room.hostUid) allReady = false;
+                        const div = document.createElement('div'); div.className = `lobby-player-row ${m.isReady ? 'ready' : ''}`;
+                        div.innerHTML = `<div style="display:flex; align-items:center;"><span style="font-size:24px; margin-right:10px;">${m.icon}</span><span style="color:#fff; font-weight:bold;">${m.name} ${uid===room.hostUid ? '<span style="color:gold;">(HOST)</span>' : ''}</span></div><div style="font-size:12px; font-weight:bold; color:${m.isReady?'#0f0':'#888'}">${m.isReady?'READY':'WAITING...'}</div>`;
+                        membersContainer.appendChild(div);
+                    });
+                }
+                if(isHost) { document.getElementById('btn-room-ready').style.display = 'none'; document.getElementById('btn-room-start').style.display = 'block'; document.getElementById('btn-room-start').disabled = !allReady; document.getElementById('btn-room-start').style.opacity = allReady ? 1 : 0.5; } 
+                else { document.getElementById('btn-room-ready').style.display = 'block'; document.getElementById('btn-room-start').style.display = 'none'; const myStatus = room.members && room.members[myUid] ? room.members[myUid].isReady : false; document.getElementById('btn-room-ready').innerText = myStatus ? "準備完了" : "準備OK"; document.getElementById('btn-room-ready').style.background = myStatus ? "#555" : "#aa5500"; }
+                if(room.status === 'playing' && !isBossBattle) { startBossBattle(selectedHostBossIndex, bossDifficulty, true); }
+            });
+            roomListeners.push({ ref: roomRef, callback: listener });
+        }
+        window.clearRoomListeners = function() { roomListeners.forEach(l => l.ref.off('value', l.callback)); roomListeners = []; }
+        window.toggleReady = function() {
+            if(!isMultiplayer || isHost) return;
+            const ref = roomsRef.child(currentRoomId).child('members').child(myUid).child('isReady');
+            ref.once('value', snap => { ref.set(!snap.val()); });
+        }
+        window.leaveLobby = function(force = false) {
+            if(!force && roomsRef && currentRoomId) { if(isHost) { roomsRef.child(currentRoomId).remove(); } else { roomsRef.child(currentRoomId).child('members').child(myUid).remove(); } }
+            clearRoomListeners(); isMultiplayer = false; currentRoomId = null; openLayer('multi-menu-screen');
+        }
+        window.hostStartBattle = async function() {
+            if(!isHost || !isMultiplayer || !battlesRef) return;
+            const b = bosses[selectedHostBossIndex]; bossDifficultyMult = bossDifficulty === 1 ? 1 : (bossDifficulty === 2 ? 3 : (bossDifficulty === 3 ? 10 : 20));
+            const hp = b.hp * bossDifficultyMult * 2; let playersData = {};
+            Object.keys(multiPlayers).forEach(uid => { let charHp = multiPlayers[uid].hp || 1000; let charMaxHp = multiPlayers[uid].maxHp || 1000; playersData[uid] = { hp: charHp, maxHp: charMaxHp, isDead: false, name: multiPlayers[uid].name, icon: multiPlayers[uid].icon }; });
+            await battlesRef.child(currentRoomId).set({ bossHp: hp, maxBossHp: hp, status: 'playing', players: playersData });
+            await roomsRef.child(currentRoomId).update({ status: 'playing' });
+        }
+
+        window.startBossBattle = function(bossIndex, diff, online = false) {
+            isMultiplayer = online; bossDifficulty = diff; bossDifficultyMult = diff === 1 ? 1 : (diff === 2 ? 3 : (diff === 3 ? 10 : 20));
+            currentBoss = JSON.parse(JSON.stringify(bosses[bossIndex])); currentBoss.bossOriginalIndex = bossIndex; currentBoss.hp = currentBoss.hp * bossDifficultyMult * 2; currentBoss.atk = currentBoss.atk * bossDifficultyMult; bossCurrentHp = currentBoss.hp;
+            isBossBattle = true; isDoubleSpeed = false; updateSpeedBtn();
+            let filterStyle = 'none'; if(diff === 3) filterStyle = 'hue-rotate(180deg) contrast(1.5)'; if(diff === 4) filterStyle = 'hue-rotate(270deg) contrast(2) brightness(0.8) drop-shadow(0 0 20px red)';
+            const isDefeated = defeatedBosses.includes(currentBoss.id);
+            if(!isDefeated) { filterStyle += " grayscale(1) contrast(2) brightness(0.7) sepia(1) hue-rotate(180deg)"; document.getElementById('arena-boss-image').classList.add('glitch-noise'); } 
+            else { document.getElementById('arena-boss-image').classList.remove('glitch-noise'); }
+            document.getElementById('arena-boss-image').style.filter = filterStyle; itemCooldowns = { herb: 0, drop: 0, star: 0 };
+            let leaderChar = items.find(i=>i.id===leaderId) || items.find(i=>i.id==='c20'); const leaderStats = getCharFinalStats(leaderChar.id);
+            document.getElementById('arena-leader-sprite').innerText = leaderChar.icon; document.getElementById('leader-hp-text').innerText = Math.floor(leaderStats.hp); document.getElementById('leader-hp-fill').style.width = '100%';
+            arenaSkills = items.filter(i => i.type === 'skill' && i.owned).map(s => ({ data: s, ct: 0, cdSpeed: 1 + (Math.random()*0.5) }));
+            renderStarSkillDock();
+            if(isMultiplayer && battlesRef) { battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: leaderStats.hp, maxHp: leaderStats.hp, atk: leaderStats.atk, isDead: false, isInvincible: false }); setupBattleListeners(); } 
+            else { multiPlayers[myUid] = { hp: leaderStats.hp, maxHp: leaderStats.hp, atk: leaderStats.atk, isDead: false, name: userName, icon: leaderChar.icon, isInvincible: false }; }
+            document.getElementById('arena-boss-name').innerText = isDefeated ? currentBoss.name : 'UNKNOWN BOSS'; document.getElementById('arena-boss-image').style.backgroundImage = `url('${currentBoss.img}')`;
+            updateBossHpUI(); renderMultiAllyUI();
+            document.getElementById('boss-arena-screen').className = 'overlay cockpit-view ' + equipped.bg.className; openLayer('boss-arena-screen');
+            if(battleTimer) clearInterval(battleTimer); battleTimer = setInterval(battleTick, 100); isPlaying = true;
+            const bgmPlayer = document.getElementById('bgm-player'); if (equipped.bgm && equipped.bgm.url) { bgmPlayer.src = equipped.bgm.url; bgmPlayer.volume = gameSettings.bgmVol / 100; bgmPlayer.play().catch(()=>{}); }
+        }
+        window.renderStarSkillDock = function() {
+            const dock = document.getElementById('skill-dock'); dock.innerHTML = '';
+            arenaSkills.forEach(skillObj => {
+                const btn = document.createElement('div'); btn.className = 'star-skill-btn'; btn.id = `btn-skill-${skillObj.data.id}`;
+                btn.innerHTML = `<div class="skill-icon-inner">${skillObj.data.id === 's1' ? '⚡' : (skillObj.data.id === 's5' ? '💖' : '⚔️')}</div><div class="ct-ring"><div class="ct-ring-fill" id="ct-fill-${skillObj.data.id}"></div></div><div class="skill-name-label">${skillObj.data.name}</div>`;
+                btn.onclick = () => useArenaSkill(skillObj); dock.appendChild(btn);
+            });
+        }
+        window.setupBattleListeners = function() {
+            const battleRef = battlesRef.child(currentRoomId);
+            const hpListener = battleRef.child('bossHp').on('value', snap => { if(snap.exists()) { bossCurrentHp = snap.val(); updateBossHpUI(); } }); roomListeners.push({ ref: battleRef.child('bossHp'), callback: hpListener });
+            const playersListener = battleRef.child('players').on('value', snap => { if(snap.exists()) { multiPlayers = snap.val(); renderMultiAllyUI(); } }); roomListeners.push({ ref: battleRef.child('players'), callback: playersListener });
+            const eventsListener = battleRef.child('events').on('child_added', snap => {
+                const ev = snap.val(); if(!ev) return;
+                if(ev.type === 'skill') {
+                    if(ev.uid !== myUid && !gameSettings.lightMode) showKotoDama(`${ev.name} 発動!`, 'cyan');
+                    if(ev.skillId === 's5') { if(multiPlayers[myUid] && !multiPlayers[myUid].isDead) { let mhp = multiPlayers[myUid].maxHp; battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: mhp, isInvincible: true }); setTimeout(() => { if(isBossBattle && isMultiplayer) battlesRef.child(currentRoomId).child('players').child(myUid).update({ isInvincible: false }); }, 3000); showHealText('FULL!', 'leader'); } } 
+                    else if(ev.skillId === 's3') { const bossImg = document.getElementById('arena-boss-image'); bossImg.style.filter = "grayscale(1) invert(1) contrast(1.5)"; setTimeout(() => { if(isBossBattle) bossImg.style.filter = "none"; }, 3000); }
+                } else if(ev.type === 'miss') { if(ev.targetId === myUid || !isMultiplayer) showMissText('leader'); }
+            }); roomListeners.push({ ref: battleRef.child('events'), callback: eventsListener });
+            const statusListener = battleRef.child('status').on('value', snap => { if(snap.exists()) { const st = snap.val(); if(st === 'clear') showChestScreen(); else if(st === 'gameover') showDespairScreen(); } }); roomListeners.push({ ref: battleRef.child('status'), callback: statusListener });
+        }
+        window.renderMultiAllyUI = function() {
+            const container = document.getElementById('multi-ally-container'); container.innerHTML = '';
+            let me = multiPlayers[myUid];
+            if(me) { const hpPct = Math.max(0, (me.hp / me.maxHp) * 100); document.getElementById('leader-hp-text').innerText = Math.floor(me.hp); document.getElementById('leader-hp-fill').style.width = hpPct + '%'; if(me.isDead) document.getElementById('arena-leader-sprite').style.filter = "grayscale(1) brightness(0.3)"; else document.getElementById('arena-leader-sprite').style.filter = "drop-shadow(0 0 25px cyan)"; }
+            if(isMultiplayer) {
+                Object.keys(multiPlayers).forEach(uid => {
+                    if(uid === myUid) return; const p = multiPlayers[uid]; const hpPct = Math.max(0, (p.hp / p.maxHp) * 100); const div = document.createElement('div'); div.className = 'multi-ally-item';
+                    div.innerHTML = `<span>${p.icon} ${p.isDead ? '💀' : ''}</span><span style="font-size:9px; overflow:hidden; white-space:nowrap;">${p.name}</span><div class="multi-ally-hp"><div class="multi-ally-hp-fill" style="width:${hpPct}%; background:${p.isDead?'transparent':'#0f0'};"></div></div>`;
+                    container.appendChild(div);
+                });
+            }
+        }
+        window.battleTick = function() {
+            if(!isBossBattle) return; const speedMult = isDoubleSpeed ? 2 : 1;
+            arenaSkills.forEach(s => {
+                if(s.ct < 100 && !isSkillActive) {
+                    let rate = (equipped.char.isEvolved ? 1.5 : 1.0) * s.cdSpeed; s.ct = Math.min(100, s.ct + rate * speedMult);
+                    const fill = document.getElementById(`ct-fill-${s.data.id}`); const btn = document.getElementById(`btn-skill-${s.data.id}`);
+                    if(fill) fill.style.height = s.ct + '%'; if(s.ct >= 100 && btn) btn.classList.add('ready');
+                }
+            });
+            if(!isMultiplayer) {
+                let me = multiPlayers[myUid];
+                if(!me.isDead) { if(!me.autoCt) me.autoCt = 0; me.autoCt += 2 * speedMult; if(me.autoCt >= 100) { me.autoCt = 0; executePlayerAttack(me, false); } }
+                if(Math.random() < 0.03 * speedMult) executeBossAttack();
+                if(bossCurrentHp <= 0) showChestScreen(); else if(me.isDead) showDespairScreen();
+            } else {
+                let me = multiPlayers[myUid];
+                if(me && !me.isDead) { if(!me.autoCt) me.autoCt = 0; me.autoCt += 2 * speedMult; if(me.autoCt >= 100) { me.autoCt = 0; executePlayerAttack(me, true); } }
+                if(isHost) {
+                    if(Math.random() < 0.03 * speedMult) executeBossAttack();
+                    if(bossCurrentHp <= 0) { battlesRef.child(currentRoomId).update({ status: 'clear' }); } 
+                    else { let allDead = true; Object.values(multiPlayers).forEach(p => { if(!p.isDead) allDead = false; }); if(allDead) battlesRef.child(currentRoomId).update({ status: 'gameover' }); }
+                }
+            }
+            for(let key in itemCooldowns) { if(itemCooldowns[key] > 0) itemCooldowns[key] -= speedMult; if(itemCooldowns[key] < 0) itemCooldowns[key] = 0; }
+            if(!isMultiplayer) renderMultiAllyUI(); 
+        }
+        window.useArenaSkill = function(skillObj) {
+            if(skillObj.ct < 100 || isSkillActive || multiPlayers[myUid].isDead) return;
+            skillObj.ct = 0; isSkillActive = true;
+            const btn = document.getElementById(`btn-skill-${skillObj.data.id}`); const fill = document.getElementById(`ct-fill-${skillObj.data.id}`);
+            if(btn) { btn.classList.remove('ready'); btn.style.transform = 'scale(1.2)'; setTimeout(()=>btn.style.transform='scale(1)', 200); }
+            if(fill) fill.style.height = '0%';
+            const bossImg = document.getElementById('arena-boss-image'); let skillId = skillObj.data.id; let skillName = skillObj.data.name;
+            
+            let leaderChar = items.find(i=>i.id===leaderId) || equipped.char;
+            playSkillCutin(leaderChar.name, skillName);
+
+            if(isMultiplayer && battlesRef) { battlesRef.child(currentRoomId).child('events').push({ type: 'skill', uid: myUid, name: userName, skillId: skillId }); }
+            if(skillId === 's3') { bossImg.style.filter = "grayscale(1) invert(1) contrast(1.5)"; setTimeout(()=>{ isSkillActive = false; if(isBossBattle) bossImg.style.filter = "none"; }, 4000); } 
+            else if(skillId === 's_muda') { bossImg.classList.add('muda-crack-effect'); let interval = setInterval(()=>executePlayerAttack(getCharFinalStats(leaderChar.id), isMultiplayer), 50); setTimeout(()=>{ clearInterval(interval); isSkillActive = false; bossImg.classList.remove('muda-crack-effect'); }, 3000); } 
+            else if(skillId === 's5') { if(!isMultiplayer) { let me = multiPlayers[myUid]; me.hp = me.maxHp; me.isInvincible = true; showHealText('FULL!', 'leader'); setTimeout(() => me.isInvincible = false, 3000); } setTimeout(()=>isSkillActive = false, 1000); } 
+            else { bossImg.style.background = "#fff"; setTimeout(()=>bossImg.style.background = "", 200); let dmgPlayer = getCharFinalStats(leaderChar.id); dmgPlayer.atk *= 5; executePlayerAttack(dmgPlayer, isMultiplayer); setTimeout(()=>isSkillActive = false, 1000); }
+        }
+        window.executePlayerAttack = function(player, isMulti = false) {
+            let isCrit = Math.random() < 0.1; let dmg = (player.atk || 500) + Math.floor(Math.random() * 50); if(isCrit) dmg *= 3;
+            if(isMulti && battlesRef) { battlesRef.child(currentRoomId).child('bossHp').transaction(currentHp => { if(currentHp === null) return 0; return Math.max(0, currentHp - dmg); }); } 
+            else { bossCurrentHp -= dmg; if(bossCurrentHp < 0) bossCurrentHp = 0; updateBossHpUI(); }
+            if(isCrit) { showCriticalText(dmg, 'boss'); shakeScreen(0.2); } else { showDamageText(dmg, 'boss'); }
+        }
+        window.executeBossAttack = function() {
+            const warning = document.getElementById('boss-warning-overlay'); warning.style.display = 'block'; setTimeout(() => warning.style.display = 'none', 300);
+            let alive = []; if(isMultiplayer) { Object.keys(multiPlayers).forEach(uid => { if(!multiPlayers[uid].isDead) alive.push(uid); }); } else { if(!multiPlayers[myUid].isDead) alive.push(myUid); }
+            if(alive.length === 0) return; let targetId = alive[Math.floor(Math.random() * alive.length)]; let target = multiPlayers[targetId];
+            if(target.isInvincible || Math.random() < 0.05) { if(isMultiplayer && battlesRef) { battlesRef.child(currentRoomId).child('events').push({ type: 'miss', targetId: targetId }); } else { showMissText('leader'); } return; }
+            let dmg = currentBoss.atk + Math.floor(Math.random() * 100);
+            if(isMultiplayer && battlesRef) { let newHp = Math.max(0, target.hp - dmg); battlesRef.child(currentRoomId).child('players').child(targetId).update({ hp: newHp, isDead: newHp <= 0 }); } 
+            else { target.hp -= dmg; showDamageText(dmg, 'leader'); if(target.hp <= 0) { target.hp = 0; target.isDead = true; } }
+            if(gameSettings.effectLevel >= 2) shakeScreen(0.1);
+        }
+        window.useBattleItem = function(type) {
+            if(itemCooldowns[type] > 0) return; let me = multiPlayers[myUid]; if(!me || me.isDead) return;
+            if(isMultiplayer && battlesRef) {
+                if(type === 'herb') { battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: Math.min(me.maxHp, me.hp + me.maxHp*0.5) }); itemCooldowns.herb = ITEM_MAX_CD.herb; } 
+                else if(type === 'drop') { battlesRef.child(currentRoomId).child('players').child(myUid).update({ hp: me.maxHp }); itemCooldowns.drop = ITEM_MAX_CD.drop; }
+            } else {
+                if(type === 'herb') { me.hp = Math.min(me.maxHp, me.hp + me.maxHp*0.5); showHealText('HEAL!', 'leader'); itemCooldowns.herb = ITEM_MAX_CD.herb; } 
+                else if(type === 'drop') { me.hp = me.maxHp; showHealText('FULL!', 'leader'); itemCooldowns.drop = ITEM_MAX_CD.drop; } 
+                else if(type === 'star') { if(me.isDead) { me.isDead = false; me.hp = Math.floor(me.maxHp * 0.5); showHealText('REVIVE!', 'leader'); itemCooldowns.star = ITEM_MAX_CD.star; } }
+            }
+        }
+        window.updateBossHpUI = function() { const pct = Math.max(0, (bossCurrentHp / currentBoss.hp) * 100); document.getElementById('arena-boss-hp-fill').style.width = pct + '%'; document.getElementById('arena-boss-hp-text').innerText = `${Math.floor(bossCurrentHp).toLocaleString()} / ${currentBoss.hp.toLocaleString()}`; }
+        window.toggleSpeed = function() { isDoubleSpeed = !isDoubleSpeed; updateSpeedBtn(); }
+        window.updateSpeedBtn = function() { const btn = document.getElementById('speed-btn'); if(isDoubleSpeed) { btn.innerText = "⏩ 2倍速"; btn.classList.add('active'); } else { btn.innerText = "▶ 1倍速"; btn.classList.remove('active'); } }
+        window.showDamageText = function(dmg, targetId) { const el = document.createElement('div'); el.className = 'damage-text'; el.innerText = Math.floor(dmg); if(targetId === 'boss') { el.style.left = (35 + Math.random() * 30) + '%'; el.style.top = (40 + Math.random() * 40) + 'px'; document.getElementById('arena-boss-image').appendChild(el); } else { el.style.left = '50%'; el.style.top = '10%'; el.style.transform = 'translate(-50%, 0)'; document.getElementById('leader-showcase').appendChild(el); } setTimeout(() => el.remove(), 800); }
+        window.showCriticalText = function(dmg, targetId) { const el = document.createElement('div'); el.className = 'critical-text'; el.innerText = `CRITICAL!\n${Math.floor(dmg)}`; if(targetId === 'boss') { el.style.left = (25 + Math.random() * 20) + '%'; el.style.top = (30 + Math.random() * 20) + 'px'; document.getElementById('arena-boss-image').appendChild(el); } setTimeout(() => el.remove(), 1000); }
+        window.showMissText = function(targetId) { const el = document.createElement('div'); el.className = 'miss-text'; el.innerText = "MISS!!"; if(targetId==='boss') { el.style.left='50%'; el.style.top='50%'; document.getElementById('arena-boss-image').appendChild(el); } else { el.style.left = '50%'; el.style.top = '20%'; el.style.transform = 'translate(-50%, 0)'; document.getElementById('leader-showcase').appendChild(el); } setTimeout(() => el.remove(), 800); }
+        window.showHealText = function(val, targetId) { const el = document.createElement('div'); el.className = 'heal-text'; el.innerText = val; el.style.left = '50%'; el.style.top = '10%'; el.style.transform = 'translate(-50%, 0)'; document.getElementById('leader-showcase').appendChild(el); setTimeout(() => el.remove(), 800); }
+
+        window.showChestScreen = function() { if(!isPlaying) return; isPlaying = false; clearInterval(battleTimer); stopBGM(); openLayer('chest-screen'); }
+        window.openChest = function() { const chest = document.querySelector('.chest-box'); chest.style.animation = 'none'; chest.innerText = '✨📦✨'; playDecideSE(); setTimeout(() => { endBossBattle(true); }, 1000); }
+        window.showDespairScreen = function() { if(!isPlaying) return; isPlaying = false; clearInterval(battleTimer); stopBGM(); openLayer('despair-screen'); const zombieSE = document.getElementById('se-zombie'); if(zombieSE) { zombieSE.volume = gameSettings.seVol / 100; zombieSE.play().catch(()=>{}); } setTimeout(() => { endBossBattle(false); }, 3000); }
+        
+        window.endBossBattle = async function(isWin) {
+            if(isMultiplayer && roomsRef) { clearRoomListeners(); if(isHost) roomsRef.child(currentRoomId).remove(); else roomsRef.child(currentRoomId).child('members').child(myUid).remove(); isMultiplayer = false; }
+            const baseReward = BigInt(bosses[currentBoss.bossOriginalIndex || 0].hp * 10); const multiBonus = isMultiplayer ? 2n : 1n; const finalReward = isWin ? (baseReward * BigInt(bossDifficultyMult) * multiBonus) : 0n;
+            let fossilDrops = 0; isBossResultDropBoss = false; let joinedBossName = ""; let gotDailyBonus = false;
+            
+            const today = new Date().toLocaleDateString();
+            if(todayBossBonusDate !== today) { gotDailyBonus = true; }
+
+            if(isWin) {
+                if(!defeatedBosses.includes(currentBoss.id)) { defeatedBosses.push(currentBoss.id); }
+                
+                if(bossDifficulty === 4) {
+                    fossilDrops += currentBoss.dropMultiplier || 1; let bossCharId = 'boss_char_' + currentBoss.bossOriginalIndex; let bossChar = items.find(i => i.id === bossCharId);
+                    if(bossChar && !bossChar.owned) { bossChar.owned = true; isBossResultDropBoss = true; joinedBossName = bossChar.name; }
+                } else if(bossDifficulty === 3 && Math.random() < 0.3) { fossilDrops += 1; }
+                
+                if(gotDailyBonus) {
+                    if (fossilDrops === 0) fossilDrops = 1;
+                    fossilDrops *= 3;
+                    todayBossBonusDate = today;
+                }
+                
+                fossilCount += fossilDrops; missionStats.bossDefeated = (missionStats.bossDefeated || 0) + 1;
+            }
+            document.getElementById('boss-res-title').innerText = isWin ? "VICTORY" : "GAME OVER"; document.getElementById('boss-res-title').style.color = isWin ? "lime" : "red";
+            document.getElementById('boss-res-msg').innerText = isWin ? `${currentBoss.name} を撃破した！` : 'パーティが全滅した...';
+            money += finalReward;
+            document.getElementById('boss-result-screen').style.display = 'flex'; document.getElementById('boss-res-reward-fossil').style.display = 'none'; document.getElementById('boss-res-reward-char').style.display = 'none'; document.getElementById('fossil-bonus-msg').style.display = 'none'; document.getElementById('boss-res-reward-money-val').innerText = "0";
+            let currentVal = 0n; const step = finalReward / 20n || 1n;
+            const interval = setInterval(() => {
+                currentVal += step;
+                if(currentVal >= finalReward) {
+                    currentVal = finalReward; clearInterval(interval);
+                    if(fossilDrops > 0) { document.getElementById('fossil-drop-count').innerText = fossilDrops; if(gotDailyBonus) document.getElementById('fossil-bonus-msg').style.display = 'block'; setTimeout(() => document.getElementById('boss-res-reward-fossil').style.display = 'block', 500); }
+                    if(isBossResultDropBoss) { document.getElementById('boss-join-name').innerText = joinedBossName + " が仲間になった！"; setTimeout(() => document.getElementById('boss-res-reward-char').style.display = 'block', 1000); }
+                }
+                document.getElementById('boss-res-reward-money-val').innerText = formatMoney(currentVal);
+            }, 50);
+            saveGame();
+        }
+        window.closeBossResult = function() { document.getElementById('boss-result-screen').style.display = 'none'; openLayer('multi-menu-screen'); }
+
+        window.updateName = function(val) { if(val.trim() === "") return; userName = val; saveGame(); updateUI(); }
+        window.renderTitles = function() {
+            const list = document.getElementById('title-list'); list.innerHTML = '';
+            titles.forEach(t => {
+                const unlocked = t.check(); const div = document.createElement('div'); div.className = `title-item ${unlocked ? '' : 'locked'}`;
+                div.style = `background: ${unlocked ? 'linear-gradient(90deg, #333, #111)' : '#111'}; border:1px solid #444; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; opacity:${unlocked?1:0.5};`;
+                div.innerHTML = `<div class="title-info" style="text-align:left;"><div class="title-name" style="color:var(--gold); font-weight:bold;">${unlocked ? t.name : '？？？？'}</div><div class="title-cond" style="font-size:11px; color:#aaa;">条件: ${t.cond}</div></div>${unlocked ? `<button class="equip-btn ${currentTitle === t.name ? 'equipped' : ''}" onclick="setTitle('${t.name}')">${currentTitle === t.name ? '使用中' : '変更'}</button>` : '🔒'}`;
+                list.appendChild(div);
+            });
+        }
+        window.setTitle = function(name) { currentTitle = name; renderTitles(); updateUI(); saveGame(); }
+        window.setMissionTab = function(tab) { currentMissionTab = tab; document.getElementById('tab-mission-def').classList.toggle('active', tab === 'DEFAULT'); document.getElementById('tab-mission-ex').classList.toggle('active', tab === 'EX'); renderMissions(); }
+        window.initMissions = function() {
+            const today = new Date().toLocaleDateString();
+            if(lastMissionDate !== today) {
+                lastMissionDate = today; missionStats = { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 };
+                missions = [ { id: 1, title: "草を抜きまくれ", goal: 100n, reward: 50000n, key: "plucked", unit: "本", claimed: false }, { id: 2, title: "ガチャを回せ", goal: 10n, reward: 20000n, key: "gachaed", unit: "回", claimed: false }, { id: 3, title: "今日稼げ", goal: 100000n, reward: 100000n, key: "earned", unit: "円", claimed: false } ];
+                exMissions = [ { id: 101, title: "EX: 草を500本抜く", goal: 500n, reward: 100n, key: "plucked", unit: "本", claimed: false }, { id: 102, title: "EX: ボスを撃破せよ", goal: 1n, reward: 50n, key: "bossDefeated", unit: "回", claimed: false } ];
+                saveGame();
+            }
+        }
+        window.renderMissions = function() {
+            const container = document.getElementById('mission-list'); container.innerHTML = '';
+            const listToRender = currentMissionTab === 'DEFAULT' ? missions : exMissions; const isEx = currentMissionTab === 'EX';
+            listToRender.forEach(m => {
+                let currentVal = parseBigInt(missionStats[m.key]); let numGoal = Number(m.goal); const prog = Math.min(100, (Number(currentVal) / numGoal) * 100); const canClaim = !m.claimed && prog >= 100;
+                const item = document.createElement('div'); item.className = 'mission-item ' + (canClaim ? 'mission-clear' : ''); if(isEx && canClaim) item.style.borderColor = "var(--ex-green)";
+                const iconHTML = isEx ? `<img src="草核.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--ex-green);">` : `<img src="草コイン.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--gold);">`;
+                const rewardHTML = isEx ? `報酬: 草核 × ${m.reward.toLocaleString()}` : `報酬: ${formatMoney(m.reward)}`;
+                item.innerHTML = `<div style="display:flex; width:100%; justify-content:space-between; align-items:center;"><div style="width:15%; text-align:center;">${iconHTML}</div><div style="width:55%; text-align:left; padding-left:10px;"><div style="font-size:14px; font-weight:900; color:#fff;">${m.title}</div><div style="font-size:10px; color:#ccc;">進捗: ${currentVal.toLocaleString()}/${m.goal.toLocaleString()}${m.unit}</div><div class="mission-progress" style="margin-top:5px;"><div class="mission-fill" style="width:${prog}%; ${isEx ? 'background: linear-gradient(90deg, #00ff88, #00ffff); box-shadow: 0 0 15px #00ff88;' : ''}"></div></div></div><div style="width:25%; text-align:right;"><button class="mission-reward-btn ${m.claimed ? 'claimed' : (canClaim ? 'can-claim' : '')} ${isEx && canClaim ? 'ex-reward' : ''}" onclick="${canClaim ? `claimMission(${m.id}, ${isEx})` : ''}" ${m.claimed || !canClaim ? 'disabled' : ''}>${m.claimed ? '受取済' : (canClaim ? '受取る' : '挑戦中')}</button></div></div><div style="font-size:11px; color:${isEx ? 'var(--ex-green)' : 'var(--gold)'}; font-weight:bold; width:100%; text-align:right; margin-top:5px;">${rewardHTML}</div>`;
+                container.appendChild(item);
+            });
+        }
+        window.claimMission = function(id, isEx) {
+            const list = isEx ? exMissions : missions; const m = list.find(x => x.id === id);
+            if(m && !m.claimed) { m.claimed = true; if(isEx) { kusakakuCount += Number(m.reward); showKotoDama(`希少素材 獲得`, 'var(--ex-green)'); } else { money += m.reward; popText("50%", "50%", `REWARD +${formatMoney(m.reward)}!`, "lime"); } renderMissions(); updateUI(); saveGame(); }
+        }
+
+        window.openFuseSelect = function(slot) { currentFuseSlot = slot; openLayer('fuse-select-screen'); }
+        window.renderFuseSelect = function() {
+            const list = document.getElementById('fuse-select-list'); list.innerHTML = '';
+            items.filter(i => i.type === 'char' && i.owned && i.id !== leaderId && i.id !== equipped.char.id).forEach(item => {
+                const isSelected = fuseSelection.includes(item.id); const div = document.createElement('div'); div.className = `col-card ${isSelected ? 'equipped-card' : ''}`;
+                div.innerHTML = `<div class="col-card-icon">${item.icon}</div><div class="col-card-name" style="color:#fff;">${item.name}</div><div class="col-card-rarity">${item.rarity.replace(' (LEGEND)', '')}</div>`;
+                div.onclick = () => { if(!isSelected) selectFuseItem(item.id); };
+                list.appendChild(div);
+            });
+        }
+        window.selectFuseItem = function(id) { fuseSelection[currentFuseSlot - 1] = id; openLayer('fusion-screen'); }
+        window.checkFusionResultId = function() {
+            if(!fuseSelection[0] || !fuseSelection[1]) return ''; const pStr = [fuseSelection[0], fuseSelection[1]].sort().join('+');
+            if(pStr === [ 'c_seimaro_uz', 'ket_uz' ].sort().join('+')) return 'sei_dragon';
+            if(pStr === [ 'c_seimaro_uz', 'c_scarlet_ham_uz' ].sort().join('+')) return 'ham_pork';
+            if(pStr === [ 'c1_ultimate', 'c_scarlet_ham_uz' ].sort().join('+')) return 'zen_omelette';
+            if(pStr === [ 'sei_cook', 'c_rampage_venom' ].sort().join('+')) return 'ven_seimaro';
+            if(pStr === [ 'ev_kazu_ultimate', 'c_rampage_venom' ].sort().join('+')) return 'ven_kazu';
+            if(pStr === [ 'ket_x', 'c_rampage_venom' ].sort().join('+')) return 'ven_ket';
+            if(pStr === [ 'ev_kazu_ultimate', 'ket_uz' ].sort().join('+')) return 'ket_royal_k';
+            if(pStr === [ 'ven_seimaro', 'fusion_zen_kazu' ].sort().join('+')) return 'deus_ex';
+            if(pStr === [ 'ev_kazu_ultimate', 'c1_ultimate' ].sort().join('+')) return 'fusion_zen_kazu';
+            return '';
+        }
+        window.renderFusion = function() {
+            const slot1 = document.getElementById('fuse-slot-1'); const slot2 = document.getElementById('fuse-slot-2');
+            const item1 = items.find(i => i.id === fuseSelection[0]); const item2 = items.find(i => i.id === fuseSelection[1]);
+            slot1.innerHTML = item1 ? item1.icon : '+'; slot2.innerHTML = item2 ? item2.icon : '+';
+            const btn = document.getElementById('fusion-exec-btn'); const preview = document.getElementById('fusion-result-preview'); const condBox = document.getElementById('fusion-cond-box');
+            let fusionResultId = checkFusionResultId(); const cost = 10000000n; 
+            if (fusionResultId) {
+                const res = items.find(i => i.id === fusionResultId);
+                condBox.innerHTML = `<p style="color:lime; font-weight:bold; margin:5px 0;">組み合わせ: 成功！</p><p style="color:${money >= cost ? 'lime' : 'red'}; font-weight:bold; margin:5px 0;"><img src="草コイン.png" style="width:16px;"> 費用: ${formatMoney(cost)}</p>`;
+                preview.innerHTML = `<span style="animation:x-glow 0.5s infinite alternate; font-size:28px;">${res.icon} ${res.name}</span>`;
+                btn.style.display = money >= cost ? 'block' : 'none';
+            } else {
+                condBox.innerHTML = `<p style="color:#ff3333; font-weight:bold; margin:5px 0;">正しい組み合わせではありません</p><p style="color:#aaa; font-weight:bold; margin:5px 0;"><img src="草コイン.png" style="width:16px;"> 費用: 10M</p>`;
+                preview.innerHTML = item1 && item2 ? "合成できません" : "素材を2体セットしてください";
+                btn.style.display = 'none';
+            }
+        }
+        window.executeFusion = function() {
+            let fusionResultId = checkFusionResultId(); const cost = 10000000n;
+            if (money < cost) return alert("お金が足りません！");
+            if(fusionResultId) {
+                const res = items.find(i => i.id === fusionResultId); money -= cost; res.owned = true; equipped.char = res;
+                const overlay = document.getElementById('fusion-screen'); document.getElementById('fuse-slot-1').style.transform = "scale(0) rotate(360deg)"; document.getElementById('fuse-slot-2').style.transform = "scale(0) rotate(-360deg)";
+                setTimeout(() => { overlay.style.background = "#fff"; shakeScreen(1.0); showKotoDama("合 体 成 功 !!", "rainbow"); }, 300);
+                fuseSelection = [null, null]; setTimeout(() => { overlay.style.background = ""; document.getElementById('fuse-slot-1').style.transform = ""; document.getElementById('fuse-slot-2').style.transform = ""; openLayer('start-screen'); }, 1800);
+                saveGame(); updateUI();
+            } else alert("合体できる組み合わせではありません。");
+        }
+
+        window.getEvolveData = function() {
+            let id = equipped.char.id;
+            switch(id) {
+                case 'kaguya_ssr': return { id: 'yachiyo_uz', cost: 168, isFossil: true };
+                case 'huhto': return { id: 'huhto2', cost: 33, isFossil: true };
+                case 'ket_r': return { id: 'ket_sr', cost: 1, isFossil: true };
+                case 'ket_sr': return { id: 'ket_ssr', cost: 3, isFossil: true };
+                case 'c_scarlet_ham': return { id: 'c_scarlet_ham_uz', cost: 3, isFossil: true };
+                case 'ev_kazu': return { id: 'ev_kazu_ultimate', cost: 3, isFossil: true };
+                case 'c_rampage': return { id: 'c_rampage_venom', cost: 3, getMuda: true, isFossil: true };
+                case 'c1': return { id: 'c1_ultimate', cost: 10, isFossil: true };
+                case 'c13': return { id: 'c13_ultimate', cost: 10, isFossil: true };
+                case 'c7': return { id: 'c7_ultimate', cost: 10, isFossil: true };
+                case 'c2': return { id: 'c2_ultimate', cost: 10, isFossil: true };
+                case 'c_seimaro': return { id: 'c_seimaro_uz', cost: 1, isFossil: true };
+                case 'ket_ssr': return { id: 'ket_uz', cost: 10, isFossil: true };
+                case 'c_seimaro_uz': return { id: 'sei_cook', cost: 15, isFossil: true };
+                case 'ket_uz': return { id: 'ket_x', cost: 15, isFossil: true };
+                case 'sei_cook': return { id: 'sei_god', cost: 150, isFossil: true };
+                case 'ket_x': return { id: 'ket_og', cost: 150, isFossil: true };
+                case 'ev_kazu_ultimate': return { id: 'vector_kinguini', cost: 150, isFossil: true }; 
+            }
+            return null;
+        }
+        window.renderEvolve = function() {
+            const target = document.getElementById('evolve-status'); const btn = document.getElementById('evolve-exec-btn'); const evData = getEvolveData();
+            if(evData) { 
+                const nextChar = items.find(i => i.id === evData.id);
+                target.innerHTML = `<p style="color:#fff; text-shadow: 1px 1px 2px #000;">進化対象：${nextChar.name}</p><div style="margin-top:15px; display:flex; align-items:center; justify-content:center; gap:10px;"><img src="草の化石.png" style="width:30px; filter:drop-shadow(0 0 5px rgba(210,180,140,0.8));"><span style="font-size:20px; font-weight:900; color:${fossilCount >= evData.cost ? 'lime' : 'red'}; text-shadow: 1px 1px 2px #000;">${fossilCount} / ${evData.cost}</span></div>`; 
+                btn.style.display = "block"; btn.disabled = fossilCount < evData.cost; 
+            } else { target.innerHTML = `<p style="color:#888;">装備中のキャラは進化できません</p>`; btn.style.display = "none"; }
+        }
+        window.executeEvolve = function() {
+            const evData = getEvolveData();
+            if(!evData) return alert("このキャラは進化できません。");
+            if(fossilCount < evData.cost) return alert("草の化石が足りません！"); 
+            const ult = items.find(i => i.id === evData.id); fossilCount -= evData.cost; ult.owned = true; equipped.char = ult; 
+            if(evData.cost >= 5) { document.getElementById('evolve-screen').classList.add('ultimate-field-bg'); setTimeout(() => document.getElementById('evolve-screen').classList.remove('ultimate-field-bg'), 2000); }
+            if(evData.id === 'ev_kazu_ultimate') items.find(i => i.id === 's3').owned = true;
+            if(evData.getMuda) { const muda = items.find(i => i.id === 's_muda'); if(muda) muda.owned = true; }
+            showKotoDama("魂 の 進 化", "var(--blue)"); setTimeout(() => openLayer('start-screen'), 1500); saveGame(); updateUI();
+        }
+
+        window.setGachaTab = function(tab) {
+            currentGachaTab = tab;
+            document.getElementById('gacha-tab-default').classList.toggle('active', tab === 'DEFAULT');
+            document.getElementById('gacha-tab-ex').classList.toggle('active', tab === 'EX');
+            
+            if(tab === 'DEFAULT') {
+                document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle; border-radius:50%;"> 所持金: <span style="color:gold;">${formatMoney(money)}</span>`;
+                document.getElementById('gacha-prob-display').innerText = "SSR: 1% / SR: 20% / R: 79%";
+                document.getElementById('gacha-btn-1').innerText = "1回 (1K円)";
+                document.getElementById('gacha-btn-10').innerText = "10連 (10K円)";
+                document.getElementById('gacha-btn-100').innerText = "100連 (100K万円)";
+                document.getElementById('gacha-btn-1000').innerText = " 1000連 (1M円)";
+                document.getElementById('gacha-btn-10000').innerText = " 1万連 (10M円)";
+                document.getElementById('gacha-btn-100000').innerText = " 10万連 (100M円)";
+                document.getElementById('gacha-btn-1000000').innerText = " 100万連 (1B円)";
+                document.getElementById('gacha-btn-10000000').innerText = " 1000万連 (10B円)";
+            } else {
+                document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
+                document.getElementById('gacha-prob-display').innerText = "かぐや(SSR): 1% / SSR通常: 10% / SR: 30% / R: 59%";
+                document.getElementById('gacha-btn-1').innerText = "1回 (1個)";
+                document.getElementById('gacha-btn-10').innerText = "10連 (10個)";
+                document.getElementById('gacha-btn-100').innerText = "100連 (100個)";
+                document.getElementById('gacha-btn-1000').innerText = " 1000連 (1K個)";
+                document.getElementById('gacha-btn-10000').innerText = " 1万連 (10K個)";
+                document.getElementById('gacha-btn-100000').innerText = " 10万連 (100K個)";
+                document.getElementById('gacha-btn-1000000').innerText = " 100万連 (1M個)";
+                document.getElementById('gacha-btn-10000000').innerText = " 1000万連 (10M個)";
+            }
+        }
+
+        window.runGacha = async function(times) {
+            let isEX = currentGachaTab === 'EX';
+            if(isEX) {
+                if(kusakakuCount < times) return alert("草核が足りません！EXミッションで集めよう！");
+                kusakakuCount -= times;
+            } else {
+                const cost = BigInt((times === 1000) ? 1000000 : 1000 * times);
+                if(money < cost) return alert("金欠みたいやわぁ！");
+                money -= cost;
+            }
+            
+            updateUI(); missionStats.gachaed += times;
+            document.getElementById('gacha-controls').style.display = 'none';
+            document.getElementById('gacha-result-display').style.display = 'none';
+            
+            const overlay = document.getElementById('gacha-anim-overlay');
+            overlay.style.display = 'flex';
+            overlay.style.pointerEvents = 'auto';
+            
+            let results = [];
+            let pool = items.filter(it => ((it.type === 'char' && !it.isEvolved) || (it.type === 'skill' && it.id !== 's_muda')) && it.rarity !== 'OG' && it.rarity !== 'OMEGA' && it.rarity !== 'X' && it.rarity !== 'UZ' && !it.rarity.includes('BOSS'));
+            let ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'kaguya_ssr');
+            let srPool = pool.filter(it => it.rarity === 'SR');
+            let rPool = pool.filter(it => it.rarity === 'R' || it.rarity === 'BASIC');
+            let kaguya = items.find(it => it.id === 'kaguya_ssr');
+
+            for(let i=0; i<times; i++) {
+                const r = Math.random() * 100; let pick;
+                if(isEX) {
+                    if(r < 1) pick = kaguya;
+                    else if (r < 11) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
+                    else if (r < 41) pick = srPool[Math.floor(Math.random() * srPool.length)];
+                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
+                } else {
+                    if (r < 1) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
+                    else if (r < 21) pick = srPool[Math.floor(Math.random() * srPool.length)];
+                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
+                }
+                if(!pick) pick = items.find(it => it.id === 'c20'); 
+                
+                if(pick.owned && pick.type === 'char') {
+                    if(!charLevels[pick.id]) charLevels[pick.id] = {atk:0, hp:0, skill:0, dup:0};
+                    charLevels[pick.id].dup++;
+                } else { pick.owned = true; }
+                results.push(pick);
+            }
+            
+            const hasSuperRare = results.some(p => p.rarity === 'UZ' || p.rarity === 'X' || p.rarity === 'SSR');
+            const hasOG = results.some(p => p.rarity === 'OG' || p.rarity === 'X');
+            const egg = document.getElementById('gacha-anim-egg');
+            
+            if(isEX) { egg.className = 'gacha-egg egg-ex'; egg.innerText = ''; } 
+            else { egg.className = 'gacha-egg ' + (hasOG ? 'egg-rainbow' : (hasSuperRare ? 'egg-red' : '')); egg.innerText = '🎁'; }
+
+            if(times >= 1000 && gameSettings.effectLevel > 0 && !gameSettings.lightMode) {
+                for(let i=0; i<100; i++) {
+                    setTimeout(() => {
+                        const rain = document.createElement('div'); rain.className = 'rain-capsule'; rain.style.left = Math.random() * 100 + "vw"; rain.style.background = (Math.random() > 0.9) ? "radial-gradient(circle, #fff, #f0f)" : "#ddd";
+                        overlay.appendChild(rain); setTimeout(() => rain.remove(), 1000);
+                    }, i * 15);
+                }
+            }
+            
+            await new Promise(r => setTimeout(r, 2000));
+            if(hasSuperRare && gameSettings.effectLevel >= 1 && !gameSettings.lightMode) { showKotoDama(isEX ? "神 降 臨" : "覚醒", "rainbow"); if(gameSettings.effectLevel === 2) shakeScreen(0.5); await new Promise(r => setTimeout(r, 1000)); }
+
+            overlay.style.display = 'none';
+            overlay.style.pointerEvents = 'none';
+            const display = document.getElementById('gacha-result-display'); display.innerHTML = ''; display.style.display = 'grid';
+
+            results.sort((a,b) => { const score = { 'BOSS (LEGEND)':8, 'BOSS':7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1, 'BASIC': 0 }; return (score[b.rarity]||0) - (score[a.rarity]||0); });
+
+            if(times >= 100) {
+                results.slice(0, 50).forEach((p, idx) => {
+                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity.replace(' (LEGEND)','')}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || (p.type==='skill'?'⚡':'🎁')}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${(idx % 10) * 0.05}s`; display.appendChild(l);
+                });
+                const info = document.createElement('div'); info.style="grid-column: span 2; text-align:center; padding: 20px; color:#aaa;"; info.innerText = `...他 ${times - 50} 個獲得`; display.appendChild(info);
+            } else {
+                results.forEach((p, idx) => { 
+                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity.replace(' (LEGEND)','')}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || (p.type==='skill'?'⚡':'🎁')}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${idx * 0.1}s`; display.appendChild(l); 
+                });
+            }
+            saveGame(); updateUI();
+        }
+
+        window.closeGachaResult = function() {
+            if(document.getElementById('gacha-result-display').style.display !== 'none') {
+                document.getElementById('gacha-result-display').style.display = 'none';
+                document.getElementById('gacha-controls').style.display = 'flex';
+                setGachaTab(currentGachaTab); 
+            } else {
+                openLayer('start-screen');
+            }
+        }
+        
+        window.openGachaProb = function() {
+            const modal = document.getElementById('gacha-prob-modal');
+            const content = document.getElementById('gacha-prob-content');
+            content.innerHTML = '';
+            let isEX = currentGachaTab === 'EX';
+            let pool = items.filter(it => ((it.type === 'char' && !it.isEvolved) || (it.type === 'skill' && it.id !== 's_muda')) && it.rarity !== 'OG' && it.rarity !== 'OMEGA' && it.rarity !== 'X' && it.rarity !== 'UZ' && !it.rarity.includes('BOSS'));
+            let ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'kaguya_ssr'); let srPool = pool.filter(it => it.rarity === 'SR'); let rPool = pool.filter(it => it.rarity === 'R' || it.rarity === 'BASIC'); let kaguya = items.find(it => it.id === 'kaguya_ssr');
+            const addRow = (name, rate) => { content.innerHTML += `<div class="prob-row"><span>${name}</span><span>${rate}</span></div>`; };
+            const addHeader = (text) => { content.innerHTML += `<div class="prob-row header" style="margin-top:10px;"><span>${text}</span><span>割合</span></div>`; };
+            if(isEX) {
+                addHeader('SSR (計11.0%)'); addRow(`【EX限定】${kaguya.name}`, '1.00%'); ssrPool.forEach(c => addRow(c.name, (10.0 / ssrPool.length).toFixed(2) + '%'));
+                addHeader('SR (計30.0%)'); srPool.forEach(c => addRow(c.name, (30.0 / srPool.length).toFixed(2) + '%'));
+                addHeader('R (計59.0%)'); rPool.forEach(c => addRow(c.name, (59.0 / rPool.length).toFixed(2) + '%'));
+            } else {
+                addHeader('SSR (計1.0%)'); ssrPool.forEach(c => addRow(c.name, (1.0 / ssrPool.length).toFixed(2) + '%'));
+                addHeader('SR (計20.0%)'); srPool.forEach(c => addRow(c.name, (20.0 / srPool.length).toFixed(2) + '%'));
+                addHeader('R (計79.0%)'); rPool.forEach(c => addRow(c.name, (79.0 / rPool.length).toFixed(2) + '%'));
+            }
+            modal.style.display = 'flex';
+        }
+
+        window.setTab = function(tab) { 
+            currentTab = tab; 
+            document.querySelectorAll('.tab-btn:not(.ex-tab):not(#gacha-tab-default):not(#cpt-tab-train):not(#cpt-tab-boss)').forEach(b => b.classList.remove('active')); 
+            document.getElementById('tab-' + tab).classList.add('active'); 
+            document.getElementById('char-sub-tabs').style.display = tab === 'char' ? 'flex' : 'none';
+            renderCol(); 
+        }
+
+        window.setCharSubTab = function(sub) {
+            currentColCharTab = sub;
+            document.getElementById('sub-char-def').classList.toggle('active', sub === 'DEFAULT');
+            document.getElementById('sub-char-ex').classList.toggle('active', sub === 'EX');
+            renderCol();
+        }
+        
+        window.renderCol = function() {
+            const list = document.getElementById('col-list-content'); list.innerHTML = '';
+            const ownedCount = items.filter(it => it.type === 'char' && it.owned).length;
+            document.getElementById('collection-bonus-display').innerText = `図鑑ボーナス: +${Math.round(getCollectionBonus()*100)}% (所持: ${ownedCount})`;
+            let filteredItems = items.filter(i => i.type === currentTab);
+            if(currentTab === 'char') { filteredItems = filteredItems.filter(i => currentColCharTab === 'DEFAULT' ? !i.isEX && !i.rarity.includes('BOSS') : (i.isEX || i.rarity.includes('BOSS'))); }
+            
+            filteredItems.sort((a,b)=> {
+                const score = { 'BOSS (LEGEND)': 8, 'BOSS': 7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1, 'BASIC': 0 };
+                const aScore = score[a.rarity] || 0; const bScore = score[b.rarity] || 0;
+                if (bScore !== aScore) return bScore - aScore; return ((b.rate || b.mult) || 0) - ((a.rate || a.mult) || 0);
+            }).forEach(item => { 
+                const isEq = equipped[item.type].id === item.id; 
+                const div = document.createElement('div'); 
+                div.className = `col-card ${item.owned ? 'owned' : 'not-owned'} ${item.rarity.replace(' (LEGEND)','')} ${isEq ? 'equipped-card' : ''}`; 
+                
+                let iconDisp = item.owned ? (item.icon || (item.type==='skill'?'⚡':'🎵')) : '？';
+                let nameDisp = item.owned ? item.name : '未取得';
+                
+                div.innerHTML = `<div class="col-card-rarity">${item.rarity.replace(' (LEGEND)','')}</div><div class="col-card-icon">${iconDisp}</div><div class="col-card-name">${nameDisp}</div>`;
+                div.onclick = () => { if(item.owned) equip(item.id); };
+                list.appendChild(div); 
+            });
+        }
+
+        window.equip = function(id) { const item = items.find(i => i.id === id); equipped[item.type] = item; if(item.type === 'bg') document.getElementById('game-field').className = item.className; renderCol(); saveGame(); updateUI(); }
+
+        window.spawn = function() {
+            if(!isPlaying || isBossBattle) return; const field = document.getElementById('game-field');
+            for(let i=0; i<9; i++) { const g = document.createElement('div'); g.className = 'item grass'; g.style.left = Math.random()*85+"%"; g.style.top = Math.random()*80+"%"; g.innerHTML = '<div class="grass-center"></div>'; g.onclick = function(){ pluck(this); }; field.appendChild(g); }
+            if(equipped.char.id === 'vector_kinguini') return;
+            const egg = document.createElement('div'); egg.className = 'item egg'; egg.innerText = '🥚';
+            let px = Math.random()*80, py = Math.random()*75, vx = (Math.random()-0.5)*2.5, vy = (Math.random()-0.5)*2.5; egg.style.left = px+"%"; egg.style.top = py+"%";
+            const move = setInterval(() => { if(!isPlaying || !egg.parentNode || isBossBattle){ clearInterval(move); return; } if(isSkillActive && equipped.skill.id === 's3') return; px+=vx; py+=vy; if(px<=0||px>=85)vx*=-1; if(py<=0||py>=80)vy*=-1; egg.style.left=px+"%"; egg.style.top=py+"%"; },30);
+            
+            egg.onclick = () => { 
+                const id = equipped.char.id;
+                const hamChars = ['c_scarlet_ham', 'c_scarlet_ham_uz', 'ham_pork', 'zen_omelette'];
+                const seiChars = ['c_seimaro', 'c_seimaro_uz', 'sei_god', 'ham_pork', 'ven_seimaro', 'deus_ex'];
+                const kazuChars = ['ev_kazu', 'ev_kazu_ultimate', 'fusion_zen_kazu', 'ket_royal_k', 'ven_kazu', 'deus_ex'];
+                const c1Chars = ['c1', 'c1_ultimate', 'zen_omelette', 'fusion_zen_kazu'];
+
+                if(hamChars.includes(id) && !seiChars.includes(id) && !c1Chars.includes(id)) { 
+                    pluck(egg, true); 
+                } else if(id === 'ham_pork') {
+                    popText(egg.style.left, egg.style.top, "ポークバフ!!", "red");
+                    const originalRate = equipped.char.rate || equipped.char.mult;
+                    equipped.char.rate = originalRate * 5; 
+                    setTimeout(() => { equipped.char.rate = originalRate; }, 10000); 
+                    egg.remove();
+                    pluck({ style: { left: egg.style.left, top: egg.style.top }, classList: { contains:()=>false, add:()=>{} }, remove:()=>{} }, true);
+                } else if(id === 'zen_omelette') {
+                    popText(egg.style.left, egg.style.top, "倍率半減...", "blue");
+                    currentPlayRateMultiplier /= 2;
+                    egg.remove();
+                } else if(seiChars.includes(id)) { 
+                    let mult = (id === 'sei_god') ? 75 : 10;
+                    popText(egg.style.left, egg.style.top, `${mult}倍ブースト！`, "pink"); 
+                    const originalRate = equipped.char.rate || equipped.char.mult || 1; 
+                    equipped.char.rate = originalRate * (mult/10);
+                    setTimeout(() => { equipped.char.rate = originalRate; }, 5000); 
+                    egg.remove(); 
+                } else if(seiChars.includes(id)) { 
+                    let mult = (id === 'seimarotuyoi') ? 150 : 10;
+                    popText(egg.style.left, egg.style.top, `${mult}倍ブースト！`, "pink"); 
+                    const originalRate = equipped.char.rate || equipped.char.mult || 1; 
+                    equipped.char.rate = originalRate * (mult/10);
+                    setTimeout(() => { equipped.char.rate = originalRate; }, 5000); 
+                    egg.remove();
+                } else if(c1Chars.includes(id)) {
+                    popText(egg.style.left, egg.style.top, "倍率半減...", "blue");
+                    currentPlayRateMultiplier /= 2;
+                    egg.remove();
+                } else if(kazuChars.includes(id)) {
+                    popText(egg.style.left, egg.style.top, "卵排除!", "gold");
+                    egg.remove();
+                } else if(id === 'c_rampage_venom' || id === 'ven_ket') { 
+                    let randomGain = BigInt(Math.floor(Math.random() * (1000 - 100 + 1)) + 100); 
+                    money += randomGain; missionStats.earned = (parseBigInt(missionStats.earned) + randomGain).toString(); 
+                    popText(egg.style.left, egg.style.top, `+${formatMoney(randomGain)}`, "white"); updateUI(); egg.remove(); 
+                } else if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X'||equipped.char.rarity==='OG'||equipped.char.rarity.includes('BOSS')) { 
+                    let b = (equipped.char.isEvolved || equipped.char.rarity==='X' || equipped.char.rarity==='OG' || equipped.char.rarity.includes('BOSS'))?1000n:0n; 
+                    if(b>0n){ money+=b; missionStats.earned = (parseBigInt(missionStats.earned) + b).toString(); updateUI(); } 
+                    egg.remove(); 
+                } else { endGame("卵だ！"); } 
+            }; field.appendChild(egg);
+        }
+
+        window.pluck = function(el, isForced = false) {
+            if(!isForced && (el.classList.contains('plucking') || isBossBattle)) return;
+            let currentRate = equipped.char.rate || equipped.char.mult || 1;
+            if(equipped.char.id === 'c_rampage' || equipped.char.id === 'c_rampage_venom') currentRate = Math.floor(Math.random() * 100) + 1;
+            let isVectorEquipped = equipped.char.id === 'vector_kinguini'; let eggExists = document.querySelectorAll('.egg').length > 0;
+            if (equipped.char.id === 'sei_god') { if (!eggExists || isVectorEquipped) { isGoldenDomain = true; clearTimeout(goldenDomainTimer); goldenDomainTimer = setTimeout(() => isGoldenDomain = false, 5000); } }
+            if (isGoldenDomain && equipped.char.id === 'sei_god') currentRate = 75;
+            if (equipped.char.id === 'seimarotuyoi') { if (!eggExists || isVectorEquipped) { isGoldenDomain = true; clearTimeout(goldenDomainTimer); goldenDomainTimer = setTimeout(() => isGoldenDomain = false, 5000); } }
+            if (isGoldenDomain && equipped.char.id === 'seimarotuyoi') currentRate = 150;
+            let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0; let feverMult = (isFever) ? 3 : 1;
+            let gain = BigInt(Math.floor(100 * (currentRate + speedBonus) * feverMult * (1+getCollectionBonus()) * currentPlayRateMultiplier));
+            money += gain; missionStats.earned = (parseBigInt(missionStats.earned) + gain).toString(); missionStats.plucked++;
+            feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
+            if(gameSettings.effectLevel >= 1 && !gameSettings.lightMode) createParticles(el.style.left, el.style.top); 
+            let popMsg = (isSkillActive && equipped.skill.id === 's_muda') ? "無駄" : `+${formatMoney(gain)}`;
+            popText(el.style.left, el.style.top, popMsg, isGoldenDomain ? "gold" : "white");
+            el.classList.add('plucking'); setTimeout(() => { el.remove(); if(document.querySelectorAll('.grass:not(.plucking)').length === 0) { timeLeft+=5; spawn(); } }, 280); updateUI();
+        }
+
+        window.triggerSkill = function() {
+            if(!isPlaying || skillCount < 100 || isSkillActive || isBossBattle) return;
+            skillCount = 0; isSkillActive = true; const field = document.getElementById('game-field'); const icon = document.getElementById('tsum-icon');
+            if(['OG', 'OMEGA'].includes(equipped.char.rarity) || equipped.char.rarity.includes('BOSS')) { field.classList.add('og-time-stop', 'og-shake'); setTimeout(() => field.classList.remove('og-time-stop', 'og-shake'), 500); }
+            
+            let skillName = equipped.char.id === 'vector_kinguini' ? '月牙天衝' : equipped.skill.name;
+            playSkillCutin(equipped.char.name, skillName);
+
+            if(equipped.char.id === 'vector_kinguini') { const slash = document.createElement('div'); slash.className = 'getsuga'; field.appendChild(slash); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); document.querySelectorAll('.egg').forEach(e => e.remove()); setTimeout(() => { isSkillActive = false; slash.remove(); }, 1000); return; }
+            if(['c_scarlet_ham', 'c_scarlet_ham_uz', 'ham_pork', 'zen_omelette'].includes(equipped.char.id)) { field.classList.add('skill-active-field'); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "消去！", "white"); e.remove(); }); setTimeout(() => { isSkillActive = false; field.classList.remove('skill-active-field'); }, 1000); return; }
+            if(['c_rampage_venom', 'ven_kazu', 'ven_seimaro', 'ven_ket'].includes(equipped.char.id)) { field.classList.add('ultimate-field-bg'); startFever(); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) { for(let i=0; i<10; i++) if(ts[i]) pluck(ts[i]); } document.querySelectorAll('.egg').forEach(e => e.remove()); }, 20); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('ultimate-field-bg'); }, 5000); return; }
+            if(equipped.char.id === 'c_seimaro' && equipped.skill.id === 's1') { field.style.animation = "skill-shake 0.05s infinite, lightning-flash 0.1s infinite alternate"; const style = document.createElement('style'); style.id = "lightning-effect"; style.innerHTML = `@keyframes lightning-flash { from { filter: brightness(1) contrast(1); } to { filter: brightness(3) contrast(1.5); background: #fff; } }`; document.head.appendChild(style); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) pluck(ts[0]); }, 50); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('lightning-effect')?.remove(); }, 3000); return; }
+            if(equipped.skill.id === 's3') { field.style.filter = "grayscale(1) invert(1) contrast(1.5)"; field.classList.add('skill-active-field'); const worldInterval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 30); setTimeout(() => { isSkillActive = false; clearInterval(worldInterval); field.style.filter = "none"; field.classList.remove('skill-active-field'); }, 4000); return; }
+            if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
+            if(equipped.skill.id === 's4') { const interval = setInterval(() => { const targets = document.querySelectorAll('.grass:not(.plucking), .egg'); targets.forEach(g => { if (g.classList.contains('egg')) { if(gameSettings.effectLevel >=1 && !gameSettings.lightMode) createParticles(g.offsetLeft + 35, g.offsetTop + 35, 'var(--gold)'); g.remove(); } else { pluck(g); } }); }, 100); setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 4000); return; }
+            if(equipped.skill.id === 's5') { const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 200); setTimeout(() => { isSkillActive = false; clearInterval(interval); }, 5000); return; }
+            if(equipped.skill.id === 's6') { document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); setTimeout(() => { isSkillActive = false; }, 500); return; }
+            if(equipped.skill.id === 's_muda') { if(equipped.char.id !== 'c_rampage' && equipped.char.id !== 'c_rampage_venom') { popText("50%", "40%", "失敗...", "red"); isSkillActive = false; return; } const overlay = document.getElementById('gacha-anim-overlay'); overlay.style.background = "#000"; overlay.style.display = 'flex'; setTimeout(() => overlay.style.display = 'none', 100); field.classList.add('muda-crack-effect'); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); document.querySelectorAll('.egg').forEach(e => e.remove()); setTimeout(() => { isSkillActive = false; field.classList.remove('muda-crack-effect'); overlay.style.background = "rgba(0,0,0,0.9)"; }, 600); return; }
+            
+            const isX = equipped.char.rarity === 'X' || equipped.char.rarity === 'OG' || equipped.char.rarity === 'OMEGA' || equipped.char.rarity.includes('BOSS'); field.classList.add('skill-active-field'); icon.classList.add('skill-icon-anim'); let ultText; if(isX){ field.classList.add('ultimate-field-bg'); ultText = document.createElement('div'); ultText.className='ultimate-text'; ultText.innerHTML="全・知・全・能<br><span style='font-size:35px'>ULTIMATE ZEN OVERDRIVE</span>"; field.appendChild(ultText); }
+            const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); if(isX) document.querySelectorAll('.egg').forEach(e => e.remove()); }, isX?20:(equipped.char.isEvolved?70:150)); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('skill-active-field', 'ultimate-field-bg'); icon.classList.remove('skill-icon-anim'); if(ultText) ultText.remove(); }, 3000);
+        }
+
+        window.createParticles = function(x, y, forcedColor=null) { const field = document.getElementById('game-field'); const colors = ['var(--grass-light)', '#aaff00', 'var(--gold)', '#ffffff']; for(let i=0; i<8; i++) { const p = document.createElement('div'); p.className='particle'; p.style.left=x; p.style.top=y; p.style.backgroundColor = forcedColor || colors[Math.floor(Math.random() * colors.length)]; p.style.color = p.style.backgroundColor; p.style.setProperty('--dx', (Math.random()-0.5)*350+"px"); p.style.setProperty('--dy', (Math.random()-0.5)*350+"px"); p.style.width = Math.random() * 12 + 6 + "px"; p.style.height = p.style.width; p.style.animation="scatter 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards"; field.appendChild(p); setTimeout(()=>p.remove(),600); } }
+        window.popText = function(x, y, txt, color="var(--gold)") { const p = document.createElement('div'); p.className='pop-text'; p.innerText=txt; p.style.left=x; p.style.top=y; p.style.color=color; const rot = (Math.random() - 0.5) * 25; p.style.setProperty('--rot', rot + "deg"); document.getElementById('game-field').appendChild(p); setTimeout(()=>p.remove(),700); }
+        window.startFever = function() { isFever=true; document.getElementById('game-field').style.filter="hue-rotate(180deg) saturate(2.5) contrast(1.3)"; setTimeout(()=>{ isFever=false; feverPoints=0; document.getElementById('game-field').style.filter="none"; },6000); }
+
+        window.startGame = function() {
+            isPlaying=true; timeLeft=30; currentPlayRateMultiplier = 1; openLayer('none'); document.querySelectorAll('.item').forEach(i=>i.remove());
+            if(equipped.char.rarity==='X' && gameSettings.effectLevel > 0) document.getElementById('x-aura-effect').style.display='block';
+            const bgmPlayer = document.getElementById('bgm-player'); if (equipped.bgm && equipped.bgm.url) { bgmPlayer.src = equipped.bgm.url; bgmPlayer.volume = gameSettings.bgmVol / 100; bgmPlayer.play().catch(()=>{}); }
+            if (equipped.char.rarity === 'X') skillCount = 0; else if (['OG', 'OMEGA'].includes(equipped.char.rarity) || equipped.char.rarity.includes('BOSS')) skillCount = 100; else skillCount = 0;
+            spawn();
+            const loop = setInterval(() => {
+                if(!isFever && !(isSkillActive && equipped.skill.id==='s3')) timeLeft-=0.1;
+                let ctRate = ['X','OG','OMEGA'].includes(equipped.char.rarity) || equipped.char.rarity.includes('BOSS') ? 0.5 : (equipped.char.isEvolved ? 1.6 : 0.3);
+                if(!isSkillActive) skillCount = Math.min(100, skillCount + ctRate);
+                updateUI(); if(timeLeft<=0||!isPlaying){ clearInterval(loop); document.getElementById('x-aura-effect').style.display='none'; if(timeLeft<=0) endGame("終了"); }
+            }, 100);
+        }
+
+        window.stopBGM = function() { const bgmPlayer = document.getElementById('bgm-player'); bgmPlayer.pause(); bgmPlayer.currentTime = 0; }
+        
+        window.endGame = function(msg) { isPlaying = false; stopBGM(); document.getElementById('res-money').innerText = formatMoney(money); openLayer('end-screen'); saveGame(); }
+
+        window.giveUp = function() { if(isMultiplayer) leaveLobby(true); isPlaying = false; stopBGM(); openLayer('start-screen'); }
+        
+        const handleTouchMove = (e) => {
+            const hamChars = ['c_scarlet_ham', 'c_scarlet_ham_uz', 'ham_pork', 'zen_omelette'];
+            if (!isPlaying || isBossBattle || !(hamChars.includes(equipped.char.id))) return; e.preventDefault(); 
+            const touch = e.touches[0]; const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && (el.classList.contains('grass') || el.classList.contains('egg')) && !el.classList.contains('plucking')) { const item = el.closest('.item'); if (item) pluck(item, true); }
+        };
+        document.getElementById('game-field').addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.getElementById('game-field').addEventListener('pointermove', (e) => {
+            const hamChars = ['c_scarlet_ham', 'c_scarlet_ham_uz', 'ham_pork', 'zen_omelette'];
+            if (!isPlaying || isBossBattle || !(hamChars.includes(equipped.char.id))) return;
+            if (e.pointerType === 'mouse' && e.buttons !== 1) return;
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if (el && (el.classList.contains('grass') || el.classList.contains('egg')) && !el.classList.contains('plucking')) { const item = el.closest('.item'); if (item) pluck(item, true); }
+        });
+
+        window.saveGame = function() { 
+            const missionsToSave = missions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
+            const exMissionsToSave = exMissions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
+            localStorage.setItem('zenSurvival_Final_v30', JSON.stringify({ 
+                money: money.toString(), fossilCount, kusakakuCount, gameSettings, charLevels, leaderId,
+                owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
+                missions: missionsToSave, exMissions: exMissionsToSave, missionStats, lastMissionDate, currentTitle, userName, defeatedBosses, todayBossBonusDate
+            })); 
+            if(window.dbUpdate && window.dbRef && window.db) {
+                const uid = "local_" + userName;
+                window.dbUpdate(window.dbRef(window.db, `users/${uid}`), { money: money.toString(), fossilCount, kusakakuCount, leaderId });
+            }
+        }
+        
+        window.loadGame = function() {
+            try {
+                let dataStr = localStorage.getItem('zenSurvival_Final_v30') || localStorage.getItem('zenSurvival_Final_v30') || localStorage.getItem('zenSurvival_Final_v30');
+                let data = dataStr ? JSON.parse(dataStr) : null;
+                if(data) {
+                    money = parseBigInt(data.money, 2000n); fossilCount = parseInt(data.fossilCount) || 0; kusakakuCount = parseInt(data.kusakakuCount) || 0;
+                    if(data.gameSettings) gameSettings = {...gameSettings, ...data.gameSettings}; if(data.charLevels) charLevels = data.charLevels; if(data.leaderId) leaderId = data.leaderId;
+                    if(data.owned) data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                    if(data.eq) { equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm; }
+                    if (data.missions) missions = data.missions.map(m => ({...m, goal: parseBigInt(m.goal), reward: parseBigInt(m.reward)}));
+                    if (data.exMissions) exMissions = data.exMissions.map(m => ({...m, goal: parseBigInt(m.goal), reward: parseBigInt(m.reward)}));
+                    missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 }; 
+                    lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし"; userName = data.userName || "ぜん"; 
+                    defeatedBosses = data.defeatedBosses || []; todayBossBonusDate = data.todayBossBonusDate || "";
+                }
+            } catch (e) { console.error(e); }
+            document.getElementById('game-field').className = equipped.bg.className;
+            items.filter(i=>i.type==='char').forEach(c => { if(!charLevels[c.id]) charLevels[c.id] = {atk:0, hp:0, skill:0, dup:0}; });
+            initMissions(); updateUI(); openLayer('start-screen');
+        }
+    </script>
+</body>
+</html>
