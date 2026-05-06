@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>草抜きサバイバル最強公式攻略サイト</title>
+    <!-- Firebase SDK の追加 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         /* -------------------------------------
            全体のスタイル設定
@@ -236,6 +240,37 @@
                     <tr><td>👑Adomin</td><td class="rank-omega">OMEGA</td><td>∞倍</td><td>秘密のコード</td></tr>
                 </tbody>
             </table>
+
+            <!-- ==============================================
+                 追加：セーブデータ引継ぎ・バックアップ機能 UI
+                 ============================================== -->
+            <section class="code-input-section" style="margin-top: 40px; border-top: 2px dashed #ccc; padding-top: 30px;">
+                <h2 style="color: #4CAF50; text-align: center;">📲 セーブデータ引継ぎ・バックアップ</h2>
+                <p style="text-align: center; font-size: 0.95em; color: #555;">
+                    現在のデータをクラウドに保存したり、別の端末からデータを復元したりできます。<br>
+                    万が一のデータ消失に備えて、定期的にバックアップを取ることをおすすめします。
+                </p>
+                
+                <div style="background: #fdfdfd; border: 1px solid #ddd; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; color: #333; display: block; margin-bottom: 5px;">引継ぎID (任意の英数字)</label>
+                        <input type="text" id="transfer-id" placeholder="例: zen1234" style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: bold; color: #333; display: block; margin-bottom: 5px;">パスワード</label>
+                        <input type="password" id="transfer-pw" placeholder="秘密のパスワード" style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="cloudBackup()" style="flex: 1; background: #2196F3; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s;">
+                            クラウドへ保存 (バックアップ)
+                        </button>
+                        <button onclick="cloudRestore()" style="flex: 1; background: #FF9800; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s;">
+                            データを復元 (引き継ぎ)
+                        </button>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -254,28 +289,39 @@
     </div>
 
     <!-- ==============================================
-         秘密のコードとセーブデータ連動システム
+         秘密のコードとセーブデータ連動システム & 引継ぎシステム
          ============================================== -->
     <script>
     /* ---------------------------------------------------------
+       Firebase 初期化設定 (引継ぎ機能用)
+       --------------------------------------------------------- */
+    const firebaseConfig = { 
+        databaseURL: "https://game-685f2-default-rtdb.firebaseio.com/" 
+    };
+    try { 
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); 
+    } catch(e) { 
+        console.log("Firebase initialization error:", e); 
+    }
+    const db = typeof firebase !== 'undefined' ? firebase.database() : null;
+
+    /* ---------------------------------------------------------
        【設定エリア】秘密のコードと報酬の内容
        --------------------------------------------------------- */
-    const SAVE_KEY = "zenSurvival_Final_v26"; // ゲーム本体のセーブデータキー
+    const SAVE_KEY = "zenSurvival_Final_v30"; // ゲーム本体のセーブデータキー
 
     // コードごとの報酬設定 (gold: 増えるお金, char: 解放されるキャラ名)
-    // 新しいコードを追加する場合は、この形式に沿って行を増やしてください。
-    // ※修正点：超巨大な数値による精度消失・指数表記化（お金リセットのバグ）を防ぐため、goldの値を文字列("")にしました。
     const SECRET_CODES = {
         "0512": { msg: "「創世神せいまろ」を解放＆草コイン512B", gold: "512000000000", char: "seimarotuyoi" },
         "0928": { msg: "「糖質神カズキング」を解放＆草コイン928B", gold: "928000000000", char: "seimarotuyoi" },
         "4545": { msg: "ボーナス50,000円を獲得！", gold: "4545454545454545454545454545454545545454545445454545454545454545454554545454545454545454545545454545454545454545454545545454545454545", char: null },
-        "1031": { msg: "アルバナムあげちゃいます", gold: "1031", char: "boss_char_5", char: "boss_char_5", char: "boss_char_5", char: "boss_char_5", char: "boss_char_5", char: "boss_char_5", char: "boss_char_5" },
+        "1031": { msg: "アルバナムあげちゃいます", gold: "1031", char: "boss_char_5" },
         "草の化石発掘": { msg: "化石発掘資金 5,000円を獲得！", gold: "5000", char: null },
         "012190": { msg: "管理者『Adomin』を解放＆草コイン", gold: "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999", char: "Adomin" }
     };
 
     /* ---------------------------------------------------------
-       以下、システム部分（UI制御とデータ書き込み処理）
+       UI制御 (モーダル処理)
        --------------------------------------------------------- */
     const modal = document.getElementById("codeModal");
 
@@ -294,13 +340,21 @@
         document.getElementById("secretInput").value = "";
     }
 
-    // コードの判定とセーブデータへの反映処理
+    // モーダルの枠外（暗い背景部分）をクリックしても閉じるようにする
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    /* ---------------------------------------------------------
+       秘密のコード判定処理
+       --------------------------------------------------------- */
     function checkCode() {
         const input = document.getElementById("secretInput").value;
         const reward = SECRET_CODES[input];
         
         if (reward) {
-            // 1. 現在のセーブデータをlocalStorageから読み込む
             let saveData = {};
             const localData = localStorage.getItem(SAVE_KEY);
             
@@ -314,39 +368,27 @@
             
             // データが存在しない場合の初期化
             if (!saveData.money) saveData.money = "0";
-            // index.html側で 'owned' というキーが使われている可能性があるため両方用意
             if (!saveData.ownedCharacters) saveData.ownedCharacters = [];
             if (!saveData.owned) saveData.owned = [];
 
             let isUpdated = false;
 
-            // 2. お金の加算 (ゲーム側の仕様に合わせて数値や文字列を考慮)
-            // ※修正点：index.html側のBigInt仕様に合わせて、BigIntで計算するように変更しました。
+            // お金の加算
             if (reward.gold) {
                 let currentMoney = 0n;
-                try {
-                    currentMoney = BigInt(saveData.money || 0);
-                } catch(e) {
-                    currentMoney = 0n;
-                }
-                
+                try { currentMoney = BigInt(saveData.money || 0); } catch(e) { currentMoney = 0n; }
                 let addMoney = 0n;
-                try {
-                    addMoney = BigInt(reward.gold);
-                } catch(e) {
-                    addMoney = 0n;
-                }
+                try { addMoney = BigInt(reward.gold); } catch(e) { addMoney = 0n; }
 
                 if (addMoney > 0n) {
-                    saveData.money = (currentMoney + addMoney).toString(); // 巨大な数値を正確なまま文字列として保存
+                    saveData.money = (currentMoney + addMoney).toString(); 
                     isUpdated = true;
                 }
             }
 
-            // 3. キャラの解放 (重複チェック付き)
+            // キャラの解放
             if (reward.char) {
                 let alreadyOwned = false;
-                
                 if (saveData.ownedCharacters.includes(reward.char) || saveData.owned.includes(reward.char)) {
                     alreadyOwned = true;
                 }
@@ -356,13 +398,12 @@
                     saveData.owned.push(reward.char);
                     isUpdated = true;
                 } else if (!isUpdated) {
-                    // お金も増えず、キャラも既に持っている場合
                     alert("そのコードの特典は既に獲得済みです！");
                     return; 
                 }
             }
 
-            // 4. セーブデータを上書き保存
+            // セーブデータを上書き保存
             if (isUpdated) {
                 localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
                 alert(`【コード入力成功！】\n${reward.msg}\n\n※草抜きサバイバルのゲーム画面に戻って「再読み込み（リロード）」すると反映されます。`);
@@ -376,10 +417,89 @@
         }
     }
 
-    // モーダルの枠外（暗い背景部分）をクリックしても閉じるようにする
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            closeModal();
+    /* ---------------------------------------------------------
+       セーブデータ引継ぎ・バックアップ機能処理
+       --------------------------------------------------------- */
+    
+    // クラウドへ保存（バックアップ）
+    async function cloudBackup() {
+        if (!db) return alert("データベースに接続できません。インターネット環境を確認してください。");
+        
+        const id = document.getElementById('transfer-id').value.trim();
+        const pw = document.getElementById('transfer-pw').value.trim();
+        
+        if (id.length < 4 || pw.length < 4) {
+            alert("IDとパスワードは4文字以上で入力してください。");
+            return;
+        }
+
+        const localData = localStorage.getItem(SAVE_KEY);
+        if (!localData) {
+            alert("セーブデータが見つかりません。\n一度「草抜きサバイバル」のゲームをプレイしてからお試しください。");
+            return;
+        }
+
+        try {
+            const saveData = JSON.parse(localData);
+            // 照合用パスワードを含めて保存
+            saveData.transferPassword = pw; 
+            saveData.lastBackupTimestamp = Date.now();
+
+            // Firebase の transfer_data ノードに保存
+            await db.ref('transfer_data/' + id).set(saveData);
+            alert("クラウドへのバックアップが完了しました！\n別の端末やブラウザで、このIDとパスワードを入力すればデータを復元できます。");
+            
+            // 入力欄をクリア
+            document.getElementById('transfer-id').value = "";
+            document.getElementById('transfer-pw').value = "";
+        } catch (e) {
+            console.error(e);
+            alert("バックアップに失敗しました。時間をおいて再度お試しください。");
+        }
+    }
+
+    // クラウドから復元（引き継ぎ）
+    async function cloudRestore() {
+        if (!db) return alert("データベースに接続できません。インターネット環境を確認してください。");
+
+        const id = document.getElementById('transfer-id').value.trim();
+        const pw = document.getElementById('transfer-pw').value.trim();
+
+        if (!id || !pw) {
+            alert("IDとパスワードを入力してください。");
+            return;
+        }
+
+        if (!confirm("データを復元すると、この端末の現在のセーブデータは上書きされます。\n本当によろしいですか？")) {
+            return;
+        }
+
+        try {
+            const snapshot = await db.ref('transfer_data/' + id).once('value');
+            const cloudData = snapshot.val();
+
+            if (!cloudData) {
+                alert("指定されたIDのセーブデータが見つかりませんでした。\nIDが間違っていないか確認してください。");
+                return;
+            }
+
+            if (cloudData.transferPassword !== pw) {
+                alert("パスワードが正しくありません。");
+                return;
+            }
+
+            // 認証に成功したら、パスワード情報だけ削除してローカルストレージへ保存
+            delete cloudData.transferPassword;
+            localStorage.setItem(SAVE_KEY, JSON.stringify(cloudData));
+
+            alert("データの引き継ぎ（復元）に成功しました！\n「草抜きサバイバル」のゲーム画面を開いて確認してください。");
+            
+            // 入力欄をクリア
+            document.getElementById('transfer-id').value = "";
+            document.getElementById('transfer-pw').value = "";
+        } catch (e) {
+            console.error(e);
+            alert("引き継ぎ処理中にエラーが発生しました。時間をおいて再度お試しください。");
         }
     }
     </script>
