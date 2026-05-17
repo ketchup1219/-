@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KASSEN - Cyberpunk Samurai MOBA (v19.2 Ultimate FPS)</title>
+    <title>KASSEN - Cyberpunk Samurai MOBA (v24.0 Extreme FPS)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap');
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #010305; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
@@ -94,11 +94,11 @@
         .t-btn { width: 70px; height: 70px; background: rgba(0,40,60,0.8); border: 2px solid #0ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0ff; font-weight: bold; font-family: 'Share Tech Mono'; font-size: 14px; text-shadow: 0 0 5px #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.3); }
         .t-btn.active { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
     </style>
-    <!-- ★ Three.jsのバージョンを統一し、依存エラーを解消 -->
+    <!-- Three.js & Firebase -->
     <script type="importmap">
     {
         "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
             "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/",
             "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
             "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
@@ -114,7 +114,6 @@
 <!-- LOBBY & SETUP UI -->
 <div id="customize-screen">
     
-    <!-- 1: SETUP PANEL -->
     <div class="customize-panel" id="panel-setup">
         <h1>装備・外観の選択</h1>
         <div class="picker-group">
@@ -145,7 +144,6 @@
         <button id="btn-to-mp" class="main-btn" style="display:none;">マルチプレイ / ロビー選択へ</button>
     </div>
 
-    <!-- 2: MP MENU -->
     <div class="customize-panel" id="panel-mp-menu" style="display:none;">
         <h1>ONLINE 3v3 MODE</h1>
         <button id="btn-create-lobby" class="main-btn" style="margin-bottom:15px;">新規ロビーを作成</button>
@@ -153,7 +151,6 @@
         <button id="btn-back-setup" class="sub-btn">装備選択へ戻る</button>
     </div>
 
-    <!-- 3: LOBBY LIST -->
     <div class="customize-panel" id="panel-lobby-list" style="display:none;">
         <h1>LOBBY LIST</h1>
         <div id="lobby-list-container" style="max-height:200px; overflow-y:auto; margin-bottom:15px; padding:10px; border:1px solid rgba(0,255,255,0.3); background:rgba(0,0,0,0.5);">
@@ -162,7 +159,6 @@
         <button id="btn-back-mp" class="sub-btn">戻る</button>
     </div>
 
-    <!-- 4: LOBBY ROOM -->
     <div class="customize-panel" id="panel-lobby-room" style="display:none;">
         <h1>ROOM: <span id="room-id-display" style="font-size:14px; color:#aaa;">----</span></h1>
         <div id="room-players-list" style="max-height:200px; overflow-y:auto; margin-bottom:15px; padding:10px; border:1px solid #0ff; background:rgba(0,20,40,0.8);">
@@ -458,14 +454,7 @@ const startGame = () => {
 };
 
 // === Game Core ===
-function createGridTexture() {
-    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512; const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#01050a'; ctx.fillRect(0,0,512,512); 
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'; ctx.lineWidth = 4; ctx.strokeRect(0,0,512,512);
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)'; ctx.lineWidth = 1;
-    for(let i=0; i<8; i++){ ctx.beginPath(); ctx.moveTo(i*64, 0); ctx.lineTo(i*64, 512); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i*64); ctx.lineTo(512, i*64); ctx.stroke(); }
-    const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; return tex;
-}
+
 function createParticleTexture() {
     const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128; const ctx = canvas.getContext('2d');
     const grad = ctx.createRadialGradient(64,64,0, 64,64,64); 
@@ -514,6 +503,7 @@ class InputManager {
         if(this.keys['KeyW']) mY-=1; if(this.keys['KeyS']) mY+=1; if(this.keys['KeyA']) mX-=1; if(this.keys['KeyD']) mX+=1;
         j = this.keys['Space']; d = this.keys['ShiftLeft']; u = this.keys['KeyQ']; r = this.keys['KeyR'] || false;
         lX = this.mouseMove.x; lY = this.mouseMove.y; this.mouseMove = {x:0, y:0};
+        
         a = this.isMouseDown; 
 
         if(this.isTouch) { mX += this.joyMove.val.x; mY += this.joyMove.val.y; lX += this.joyLook.val.x; lY += this.joyLook.val.y; this.joyLook.val = {x:0, y:0}; j=j||this.btns.jump; d=d||this.btns.dash; a=a||this.btns.atk; u=u||this.btns.ult; }
@@ -525,7 +515,8 @@ class InputManager {
     }
 }
 
-const RULES = { MAP_LIMIT: 24000, BASE_POS_X: 14000, GRAVITY: 800, JUMP_FORCE: 500, PLAYER_SPEED: 750, GROUND_Y: 20, STEALTH_HEIGHT: 80 };
+// ★ さらに超絶巨大化されたマップ設定
+const RULES = { MAP_LIMIT: 40000, BASE_POS_X: 25000, GRAVITY: 800, JUMP_FORCE: 500, PLAYER_SPEED: 850, GROUND_Y: 20, STEALTH_HEIGHT: 80 };
 const SKINS = { kogetsu: { colors: { hat: '#f2ebda', body: '#e64a45', glow: '#92c75a' } }, default: { colors: { hat: '#222222', body: '#0088ff', glow: '#00ffff' } }, crimson: { colors: { hat: '#110000', body: '#aa0000', glow: '#ff0000' } }, forest: { colors: { hat: '#001100', body: '#004400', glow: '#00ff44' } } };
 const ENEMY_COLS = { colors: { hat: '#330000', body: '#660000', glow: '#ff0055' } };
 const BOSS_COLS = { colors: { hat: '#222200', body: '#444400', glow: '#ffaa00' } };
@@ -540,11 +531,47 @@ function createExplosion(scene, pos, color, count, size=20, spread=600) {
     const pMesh = new THREE.Points(geo, mat); scene.add(pMesh); particles.push({ mesh: pMesh, vels: velArray, life: 1.5 });
 }
 
+function createKanaboMesh(scale = 1.0) {
+    const kanabo = new THREE.Group();
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5), new THREE.MeshBasicMaterial({color: '#222'}));
+    handle.rotation.x = Math.PI/2;
+    handle.position.set(0, 0, -2.5);
+    kanabo.add(handle);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.1, 8, 16), new THREE.MeshBasicMaterial({color: '#222'}));
+    ring.rotation.x = Math.PI/2;
+    ring.position.set(0, 0, 0.4);
+    kanabo.add(ring);
+    
+    const headHeight = 16;
+    const goldMat = new THREE.MeshBasicMaterial({color: '#FFD700'});
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 0.8, headHeight), goldMat);
+    head.rotation.x = Math.PI/2;
+    head.position.set(0, 0, -(5 + headHeight/2));
+    kanabo.add(head);
+
+    for(let i=0; i<40; i++){
+        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.2, 1.0, 4), goldMat);
+        const h = (Math.random() - 0.5) * (headHeight - 2); 
+        const angle = Math.random() * Math.PI * 2;
+        const r = 1.15 + (h / (headHeight/2)) * 0.35; 
+        spike.position.set(Math.cos(angle) * r, h, Math.sin(angle) * r);
+        spike.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize());
+        head.add(spike);
+    }
+    kanabo.scale.set(scale, scale, scale);
+    return kanabo;
+}
+
 function createViewmodel(weaponType, glowColor) {
     const viewGroup = new THREE.Group(); viewGroup.position.set(2, -2, -3); viewGroup.rotation.y = -Math.PI/10;
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4), new THREE.MeshBasicMaterial({color: '#222222'})); arm.rotation.x = Math.PI/2; arm.position.set(0, 0, 2); viewGroup.add(arm);
     let muzzlePos = new THREE.Vector3(0,0,-2);
-    if (weaponType === 'kanabo') { const kanabo = new THREE.Group(); const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 6), new THREE.MeshBasicMaterial({color: '#211'})); handle.rotation.x = Math.PI/2; handle.position.set(0,0,-2); kanabo.add(handle); const head = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.8, 12), new THREE.MeshBasicMaterial({color: '#333'})); head.rotation.x = Math.PI/2; head.position.set(0,0,-10); kanabo.add(head); const spikeMat = new THREE.MeshBasicMaterial({color: '#fff'}); for(let i=0; i<20; i++){ const spike = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.5, 4), spikeMat); spike.position.set(0, (Math.random()-0.5)*10, 0); spike.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI); head.add(spike); } viewGroup.add(kanabo); muzzlePos.set(0,0,-15); } 
+    
+    if (weaponType === 'kanabo') { 
+        const kanabo = createKanaboMesh();
+        kanabo.position.set(0, 0, -2);
+        viewGroup.add(kanabo); muzzlePos.set(0,0,-20); 
+    } 
     else if (weaponType === 'gun') { const gun = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 4), new THREE.MeshBasicMaterial({color: '#333'})); gun.position.set(0, 0, -1); viewGroup.add(gun); muzzlePos.set(0, 0.3, -3); } 
     else if (weaponType === 'dual_swords') { const sword = new THREE.Mesh(new THREE.BoxGeometry(0.2, 8, 1), new THREE.MeshBasicMaterial({color: glowColor})); sword.rotation.x = Math.PI/2; sword.position.set(0, 0, -3); viewGroup.add(sword); muzzlePos.set(0, 0, -6); } 
     else if (weaponType === 'hammer') { const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 10), new THREE.MeshBasicMaterial({color: '#421'})); handle.rotation.x = Math.PI/2; handle.position.set(0,0,-2); viewGroup.add(handle); const head = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 6), new THREE.MeshBasicMaterial({color: '#555'})); head.position.set(0,0,-6); viewGroup.add(head); muzzlePos.set(0,0,-8); } 
@@ -553,21 +580,45 @@ function createViewmodel(weaponType, glowColor) {
     viewGroup.userData = { originalPos: viewGroup.position.clone(), originalRot: viewGroup.rotation.clone(), attackTimer: 0, muzzlePos: muzzlePos }; return viewGroup;
 }
 
+// ★ アニメーションをオーバーリアクションに大幅強化
 function updateAvatarAnimation(mesh, speed, isGrounded, isDashing, weaponType, dt) {
     const data = mesh.userData; if (!data.leftArm) return; if (data.attackTimer > 0) data.attackTimer -= dt;
     if (isDashing) {
         data.bodyGroup.rotation.x = 0; data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; if(data.dashEff) data.dashEffect.mesh.visible = true;
     } else {
         data.bodyGroup.rotation.y = 0; if(data.dashEff) data.dashEffect.mesh.visible = false;
-        if (!isGrounded) { data.leftLeg.rotation.x = -0.3; data.rightLeg.rotation.x = 0.3; if (data.attackTimer <= 0) { data.leftArm.rotation.x = -0.5; data.rightArm.rotation.x = -0.5; } } 
-        else if (speed > 10) { const time = Date.now() * 0.015; data.leftLeg.rotation.x = Math.sin(time) * 0.6; data.rightLeg.rotation.x = Math.sin(time + Math.PI) * 0.6; data.leftArm.rotation.x = Math.sin(time + Math.PI) * 0.4; if (data.attackTimer <= 0) data.rightArm.rotation.x = Math.sin(time) * 0.4; } 
-        else { data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; data.leftArm.rotation.x = 0; if (data.attackTimer <= 0) data.rightArm.rotation.x = 0; }
-        if (data.attackTimer > 0) { const prog = data.attackTimer / 0.3; data.rightArm.rotation.x = -(Math.PI / 1.5) * prog; data.leftArm.rotation.x = -(Math.PI / 1.5) * prog; }
+        if (!isGrounded) { 
+            data.leftLeg.rotation.x = -0.8; data.rightLeg.rotation.x = 0.8; 
+            if (data.attackTimer <= 0) { data.leftArm.rotation.x = -0.8; data.rightArm.rotation.x = -0.8; } 
+        } 
+        else if (speed > 10) { 
+            const time = Date.now() * 0.025; // ★ 速度アップ
+            data.leftLeg.rotation.x = Math.sin(time) * 1.2; // ★ 振幅2倍
+            data.rightLeg.rotation.x = Math.sin(time + Math.PI) * 1.2; 
+            data.leftArm.rotation.x = Math.sin(time + Math.PI) * 0.8; 
+            if (data.attackTimer <= 0) data.rightArm.rotation.x = Math.sin(time) * 0.8; 
+            
+            // ★ 歩行時の体の揺れを強調
+            data.bodyGroup.rotation.z = Math.sin(time * 0.5) * 0.2;
+            data.bodyGroup.position.y = Math.abs(Math.sin(time)) * 2;
+        } 
+        else { 
+            data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; data.leftArm.rotation.x = 0; 
+            data.bodyGroup.rotation.z = 0; data.bodyGroup.position.y = 0;
+            if (data.attackTimer <= 0) data.rightArm.rotation.x = 0; 
+        }
+        
+        // ★ 攻撃時のアニメーションも強化
+        if (data.attackTimer > 0) { 
+            const prog = data.attackTimer / 0.3; 
+            const ease = prog * prog * prog; // より鋭いイージング
+            data.rightArm.rotation.x = -(Math.PI * 1.2) * ease; 
+            data.leftArm.rotation.x = -(Math.PI * 1.2) * ease; 
+        }
     }
 }
 
-// ★ 修正: createBoxAvatar 関数の実装 (以前欠落していた部分を復元)
-function createBoxAvatar(colors, scale=1.0, weaponType='gun') {
+function createBoxAvatar(colors, scale=1.0, weaponType='bow') {
     const group = new THREE.Group(); 
     const bodyGroup = new THREE.Group(); group.add(bodyGroup);
     const hat = new THREE.Mesh(new THREE.ConeGeometry(9, 3.5, 8), new THREE.MeshBasicMaterial({ color: colors.hat })); hat.position.y=15; bodyGroup.add(hat);
@@ -578,8 +629,10 @@ function createBoxAvatar(colors, scale=1.0, weaponType='gun') {
     const leftLegPivot = new THREE.Group(); leftLegPivot.position.set(-2, 1.5, 0); bodyGroup.add(leftLegPivot); const legL = new THREE.Mesh(new THREE.BoxGeometry(2.5, 6, 2.5), bodyMat); legL.position.set(0, -3, 0); leftLegPivot.add(legL);
     const rightLegPivot = new THREE.Group(); rightLegPivot.position.set(2, 1.5, 0); bodyGroup.add(rightLegPivot); const legR = new THREE.Mesh(new THREE.BoxGeometry(2.5, 6, 2.5), bodyMat); legR.position.set(0, -3, 0); rightLegPivot.add(legR);
     
-    if (weaponType === 'gun') { const gun = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 8), new THREE.MeshBasicMaterial({color: 0x333333})); gun.position.set(0, -3.5, 3); rightArmPivot.add(gun); } 
-    else if (weaponType === 'hammer' || weaponType === 'kanabo') { const wGroup = new THREE.Group(); const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 20), new THREE.MeshBasicMaterial({color: 0x442211})); handle.rotation.x=Math.PI/2; handle.position.set(0,0,6); wGroup.add(handle); wGroup.position.set(0, -3.5, 0); rightArmPivot.add(wGroup); } 
+    if (weaponType === 'kanabo') { const kanabo = createKanaboMesh(1.2); kanabo.position.set(0, -3.5, 0); rightArmPivot.add(kanabo); }
+    else if (weaponType === 'gun') { const gun = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 8), new THREE.MeshBasicMaterial({color: 0x333333})); gun.position.set(0, -3.5, 3); rightArmPivot.add(gun); } 
+    else if (weaponType === 'hammer') { const wGroup = new THREE.Group(); const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 20), new THREE.MeshBasicMaterial({color: 0x442211})); handle.rotation.x=Math.PI/2; handle.position.set(0,0,6); wGroup.add(handle); wGroup.position.set(0, -3.5, 0); rightArmPivot.add(wGroup); } 
+    else if (weaponType === 'bow') { const bow = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 16, Math.PI), new THREE.MeshBasicMaterial({color: '#631'})); bow.rotation.y = Math.PI/2; bow.position.set(0, -3.5, 2); leftArmPivot.add(bow); }
     
     group.userData = { bodyGroup, leftArm: leftArmPivot, rightArm: rightArmPivot, leftLeg: leftLegPivot, rightLeg: rightLegPivot, attackTimer: 0, dashEff:false }; 
     group.position.y = 4.5 * scale; group.scale.set(scale, scale, scale); 
@@ -618,24 +671,64 @@ function createUshiOniModel(scale) {
     group.userData = { legs: legs, attackTimer: 0 }; group.scale.set(scale, scale, scale); return group;
 }
 
+// ★ 天守閣を10倍に超巨大化 (スケール処理を使用)
 function createJapaneseCastle(x, z, isEnemy) {
     const castleGroup = new THREE.Group(); const mainColor = isEnemy ? 0x220000 : 0x001133; const roofColor = 0x111111;
-    const base = new THREE.Mesh(new THREE.BoxGeometry(1200, 400, 1200), new THREE.MeshBasicMaterial({color: 0x333333, wireframe: true})); base.position.y = 200; castleGroup.add(base);
-    const f1 = new THREE.Mesh(new THREE.BoxGeometry(1000, 300, 1000), new THREE.MeshBasicMaterial({color: mainColor})); f1.position.y = 550; castleGroup.add(f1);
-    const r1 = new THREE.Mesh(new THREE.ConeGeometry(800, 200, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 800; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
-    const f2 = new THREE.Mesh(new THREE.BoxGeometry(600, 300, 600), new THREE.MeshBasicMaterial({color: mainColor})); f2.position.y = 1050; castleGroup.add(f2);
-    const r2 = new THREE.Mesh(new THREE.ConeGeometry(500, 160, 4), new THREE.MeshBasicMaterial({color: roofColor})); r2.position.y = 1280; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(2400, 800, 2400), new THREE.MeshBasicMaterial({color: 0x333333, wireframe: true})); base.position.y = 400; castleGroup.add(base);
+    const f1 = new THREE.Mesh(new THREE.BoxGeometry(2000, 600, 2000), new THREE.MeshBasicMaterial({color: mainColor})); f1.position.y = 1100; castleGroup.add(f1);
+    const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
+    const f2 = new THREE.Mesh(new THREE.BoxGeometry(1200, 600, 1200), new THREE.MeshBasicMaterial({color: mainColor})); f2.position.y = 2100; castleGroup.add(f2);
+    const r2 = new THREE.Mesh(new THREE.ConeGeometry(1000, 320, 4), new THREE.MeshBasicMaterial({color: roofColor})); r2.position.y = 2560; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
+    
+    // 10倍化
+    castleGroup.scale.set(10, 10, 10);
     castleGroup.position.set(x, 0, z); return castleGroup;
 }
 
+// ★ 桜の木を 15000本(100倍) × 大きさ5倍 にして配置 (InstancedMeshで最適化)
 function createNature(scene) {
-    const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
-    for(let i=0; i<150; i++) {
-        const tree = new THREE.Group(); const trunk = new THREE.Mesh(new THREE.CylinderGeometry(15, 20, 100), trunkMat); trunk.position.y=50; tree.add(trunk);
-        const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(60, 1), sakuraMat); leaves.position.y=120; tree.add(leaves);
-        tree.position.set((Math.random()-0.5)*RULES.MAP_LIMIT*2, 0, (Math.random()-0.5)*RULES.MAP_LIMIT*2);
-        if(Math.abs(tree.position.x) < RULES.BASE_POS_X - 1000) scene.add(tree);
+    const treeCount = 15000;
+    
+    const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); 
+    const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
+    
+    const trunkGeo = new THREE.CylinderGeometry(15, 20, 100);
+    const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
+    
+    const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
+    const leavesMesh = new THREE.InstancedMesh(leavesGeo, sakuraMat, treeCount);
+    
+    const dummy = new THREE.Object3D();
+    let addedCount = 0;
+    
+    for(let i=0; i<treeCount; i++) {
+        const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
+        const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
+        
+        // プレイヤーの初期位置やレーン付近を避ける
+        if(Math.abs(x) < RULES.BASE_POS_X - 1000) {
+            // スケールを5倍に
+            dummy.scale.set(5, 5, 5);
+            
+            // 幹の配置 (y = 50 * 5)
+            dummy.position.set(x, 250, z);
+            dummy.updateMatrix();
+            trunkMesh.setMatrixAt(addedCount, dummy.matrix);
+            
+            // 葉の配置 (y = 120 * 5)
+            dummy.position.set(x, 600, z);
+            dummy.updateMatrix();
+            leavesMesh.setMatrixAt(addedCount, dummy.matrix);
+            
+            addedCount++;
+        }
     }
+    
+    trunkMesh.count = addedCount;
+    leavesMesh.count = addedCount;
+    
+    scene.add(trunkMesh);
+    scene.add(leavesMesh);
 }
 
 class PlayerLocal {
@@ -677,10 +770,13 @@ class PlayerLocal {
         
         const vd = this.viewmodel.userData;
         if(vd.attackTimer > 0) {
-            vd.attackTimer -= dt; const p = vd.attackTimer / this.weaponStats.cooldown; const ease = p * p; 
-            if(this.weaponType === 'gun' || this.weaponType === 'bow') { this.viewmodel.position.z = vd.originalPos.z + ease * 1.5; this.viewmodel.rotation.x = vd.originalRot.x + ease * 0.8; } 
-            else if (this.weaponType === 'kanabo') { this.viewmodel.position.z = vd.originalPos.z - ease * 4.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 2.0; }
-            else { this.viewmodel.position.z = vd.originalPos.z - ease * 2.5; this.viewmodel.rotation.x = vd.originalRot.x - ease * 1.5; this.viewmodel.rotation.z = vd.originalRot.z - ease * 2.0; }
+            vd.attackTimer -= dt; 
+            const p = vd.attackTimer / this.weaponStats.cooldown; 
+            // ★ 自キャラの攻撃アニメーション（反動）も強化
+            const ease = p * p * p * p; 
+            if(this.weaponType === 'gun' || this.weaponType === 'bow') { this.viewmodel.position.z = vd.originalPos.z + ease * 3.0; this.viewmodel.rotation.x = vd.originalRot.x + ease * 1.5; } 
+            else if (this.weaponType === 'kanabo') { this.viewmodel.position.z = vd.originalPos.z - ease * 8.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 3.0; this.viewmodel.rotation.z = vd.originalRot.z + ease * 1.0; }
+            else { this.viewmodel.position.z = vd.originalPos.z - ease * 5.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 2.5; this.viewmodel.rotation.z = vd.originalRot.z - ease * 3.0; }
         } else { this.viewmodel.position.lerp(vd.originalPos, 0.1); this.viewmodel.quaternion.slerp(new THREE.Quaternion().setFromEuler(vd.originalRot), 0.1); }
     }
 }
@@ -688,43 +784,44 @@ class PlayerLocal {
 class DarumaTower {
     constructor(scene, pos, isEnemy, castleRef) {
         this.scene = scene; this.isEnemy = isEnemy; this.vulnerable = false; this.blown = false; this.castleDestroyed = false; this.castleRef = castleRef; this.maxHp = 20000; this.hp = 20000; 
-        this.mesh = new THREE.Group(); this.mesh.position.copy(pos); this.originalY = pos.y; this.blocks = []; this.blockCount = 10; this.blockHeight = 400; const radius = 600; 
+        this.mesh = new THREE.Group(); this.mesh.position.copy(pos); this.originalY = pos.y; this.blocks = []; this.blockCount = 10; this.blockHeight = 800; const radius = 1200; 
         const blockGeo = new THREE.CylinderGeometry(radius, radius, this.blockHeight, 32); const headGeo = new THREE.SphereGeometry(radius, 32, 32, 0, Math.PI*2, 0, Math.PI/2);
         for (let i = 0; i < this.blockCount; i++) {
             const isHead = (i === this.blockCount - 1); const mat = new THREE.MeshBasicMaterial({ color: isEnemy ? (isHead ? 0xff0000 : (i%2===0?0x880000:0x550000)) : 0x004488, wireframe: !isHead }); const block = new THREE.Mesh(isHead ? headGeo : blockGeo, mat);
-            if (isHead) { const eyeGeo = new THREE.SphereGeometry(80, 16, 16); const eyeMat = new THREE.MeshBasicMaterial({color: 0xffff00}); const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(-250, 200, radius - 20); block.add(eyeL); const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(250, 200, radius - 20); block.add(eyeR); const mouth = new THREE.Mesh(new THREE.BoxGeometry(300, 60, 40), new THREE.MeshBasicMaterial({color:0x111111})); mouth.position.set(0, 80, radius - 10); block.add(mouth); }
+            if (isHead) { const eyeGeo = new THREE.SphereGeometry(160, 16, 16); const eyeMat = new THREE.MeshBasicMaterial({color: 0xffff00}); const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(-500, 400, radius - 40); block.add(eyeL); const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(500, 400, radius - 40); block.add(eyeR); const mouth = new THREE.Mesh(new THREE.BoxGeometry(600, 120, 80), new THREE.MeshBasicMaterial({color:0x111111})); mouth.position.set(0, 160, radius - 20); block.add(mouth); }
             block.position.y = (i + 0.5) * this.blockHeight; this.mesh.add(block); this.blocks.push({ mesh: block, active: true, targetY: block.position.y, vel: new THREE.Vector3(), rot: new THREE.Vector3() });
         }
         scene.add(this.mesh); 
-        this.barrier = new THREE.Mesh(new THREE.CylinderGeometry(radius+200, radius+200, this.blockCount*this.blockHeight, 16), new THREE.MeshBasicMaterial({color: isEnemy ? 0xff0000 : 0x00ffff, wireframe: true, transparent: true, opacity: 0.15})); 
+        this.barrier = new THREE.Mesh(new THREE.CylinderGeometry(radius+400, radius+400, this.blockCount*this.blockHeight, 16), new THREE.MeshBasicMaterial({color: isEnemy ? 0xff0000 : 0x00ffff, wireframe: true, transparent: true, opacity: 0.15})); 
         this.barrier.position.copy(pos).setY(this.blockCount * this.blockHeight / 2); scene.add(this.barrier); 
-        this.hitRadius = radius + 150;
+        this.hitRadius = radius + 300;
 
-        if (this.isEnemy) { this.mesh.position.y -= 8000; this.isSpawned = false; this.barrier.visible = false; } else { this.isSpawned = true; }
+        if (this.isEnemy) { this.mesh.position.y -= 15000; this.isSpawned = false; this.barrier.visible = false; } else { this.isSpawned = true; }
     }
-    setVulnerable() { this.vulnerable = true; this.scene.remove(this.barrier); if (this.isEnemy && !this.isSpawned) { this.isSpawned = true; window.gameEngine.shakeTimer = 3.0; } }
+    setVulnerable() { this.vulnerable = true; this.scene.remove(this.barrier); if (this.isEnemy && !this.isSpawned) { this.isSpawned = true; window.gameEngine.shakeTimer = 5.0; } }
     takeDamage(v) {
         if(!this.vulnerable || !this.isSpawned || this.blown) return; this.blown = true;
         for (let i = 0; i < this.blockCount; i++) {
-            this.blocks[i].vel = new THREE.Vector3(8000 + Math.random()*4000, 3000 + Math.random()*3000, (Math.random()-0.5)*4000); this.blocks[i].rot = new THREE.Vector3(Math.random()*5, Math.random()*5, Math.random()*5);
+            this.blocks[i].vel = new THREE.Vector3(12000 + Math.random()*6000, 5000 + Math.random()*5000, (Math.random()-0.5)*8000); this.blocks[i].rot = new THREE.Vector3(Math.random()*5, Math.random()*5, Math.random()*5);
             const worldPos = new THREE.Vector3(); this.blocks[i].mesh.getWorldPosition(worldPos); this.blocks[i].mesh.position.copy(worldPos); this.scene.add(this.blocks[i].mesh);
         }
-        this.mesh.visible = false; createExplosion(this.scene, this.mesh.position.clone().setY(2000), 0xffaa00, 800, 100, 6000); window.gameEngine.shakeTimer = 2.0;
+        this.mesh.visible = false; createExplosion(this.scene, this.mesh.position.clone().setY(4000), 0xffaa00, 1000, 200, 10000); window.gameEngine.shakeTimer = 3.0;
     }
     update(dt) {
         if (this.isEnemy && this.isSpawned && !this.blown && this.mesh.position.y < this.originalY) {
-            this.mesh.position.y += 3000 * dt; if (this.mesh.position.y >= this.originalY) { this.mesh.position.y = this.originalY; window.gameEngine.shakeTimer = 1.5; createExplosion(this.scene, this.mesh.position, 0xffaa00, 800, 80, 4000); }
+            this.mesh.position.y += 4000 * dt; if (this.mesh.position.y >= this.originalY) { this.mesh.position.y = this.originalY; window.gameEngine.shakeTimer = 2.0; createExplosion(this.scene, this.mesh.position, 0xffaa00, 1000, 150, 8000); }
         }
         if (this.blown && !this.castleDestroyed) {
             let hitCastle = false;
             for(let i = 0; i < this.blockCount; i++) { 
-                let b = this.blocks[i]; b.vel.y -= RULES.GRAVITY * 3 * dt; b.mesh.position.addScaledVector(b.vel, dt); b.mesh.rotation.x += b.rot.x * dt; b.mesh.rotation.y += b.rot.y * dt; b.mesh.rotation.z += b.rot.z * dt; 
-                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 2500) { hitCastle = true; }
+                let b = this.blocks[i]; b.vel.y -= RULES.GRAVITY * 4 * dt; b.mesh.position.addScaledVector(b.vel, dt); b.mesh.rotation.x += b.rot.x * dt; b.mesh.rotation.y += b.rot.y * dt; b.mesh.rotation.z += b.rot.z * dt; 
+                // 城の配置をさらに奥にしたため判定のX座標を変更
+                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 13000) { hitCastle = true; }
             }
             if (hitCastle) {
                 this.castleDestroyed = true; if(this.castleRef) this.castleRef.visible = false;
-                createExplosion(this.scene, new THREE.Vector3(RULES.BASE_POS_X + 3000, 1500, 0), 0xff0000, 2000, 150, 15000); window.gameEngine.shakeTimer = 4.0;
-                setTimeout(() => { window.gameEngine.gameOver(true, "敵城郭陥落！\n\nKASSEN 勝利！"); }, 3000);
+                createExplosion(this.scene, new THREE.Vector3(RULES.BASE_POS_X + 15000, 3000, 0), 0xff0000, 4000, 500, 40000); window.gameEngine.shakeTimer = 8.0;
+                setTimeout(() => { window.gameEngine.gameOver(true, "敵城郭陥落！\n\nKASSEN 勝利！"); }, 5000);
             }
         }
     }
@@ -734,42 +831,44 @@ class Yagura {
     constructor(scene, pos, name) {
         this.name = name; this.scene = scene; this.owner = -1; this.isBossDead = false; this.mesh = new THREE.Group(); this.mesh.position.copy(pos);
         
-        const base = new THREE.Mesh(new THREE.BoxGeometry(400, 200, 400), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
-        for(let i=0; i<70; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(60, 10, 200), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-1500 + i*18, i*4 + 5, 0); this.mesh.add(step); }
+        const base = new THREE.Mesh(new THREE.BoxGeometry(600, 200, 600), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
+        for(let i=0; i<100; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(80, 10, 300), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-2500 + i*22, i*5 + 5, 0); this.mesh.add(step); }
         
-        const platform = new THREE.Mesh(new THREE.BoxGeometry(300, 10, 300), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(-150, 285, 0); this.mesh.add(platform);
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(400, 200, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(0, 700, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
-        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(120, 150, 200), new THREE.MeshBasicMaterial({color: 0xffaa00})); this.bell.position.set(-150, 400, 0); this.mesh.add(this.bell);
+        const platform = new THREE.Mesh(new THREE.BoxGeometry(500, 10, 500), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(-250, 505, 0); this.mesh.add(platform);
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(600, 300, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(0, 1000, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
+        
+        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xffaa00})); this.bell.position.set(-250, 750, 0); this.mesh.add(this.bell);
         scene.add(this.mesh);
     }
     takeHit(projectilePos) {
         if (this.owner !== -1 || !this.isBossDead) return false;
         const bellWorldPos = new THREE.Vector3(); this.bell.getWorldPosition(bellWorldPos);
-        if (projectilePos.distanceTo(bellWorldPos) < 350) { this.capture(); return true; } return false;
+        if (projectilePos.distanceTo(bellWorldPos) < 600) { this.capture(); return true; } return false;
     }
     checkPlayerTouch(playerPos) {
         if (this.owner !== -1 || !this.isBossDead) return;
         const bellWorldPos = new THREE.Vector3(); this.bell.getWorldPosition(bellWorldPos);
-        if (playerPos.distanceTo(bellWorldPos) < 400) { this.capture(); }
+        if (playerPos.distanceTo(bellWorldPos) < 700) { this.capture(); }
     }
     capture() {
         this.owner = 0; this.bell.material.color.setHex(0x00ffff);
-        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(250, 250, 15000, 8), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending})); pillar.position.copy(this.mesh.position).setY(7500); this.scene.add(pillar);
-        createExplosion(this.scene, this.mesh.position.clone().setY(400), 0x00ffff, 500, 60, 4000); window.gameEngine.announce(`鐘が鳴った！\n【${this.name}】占拠！`, "", "#00ffff"); window.gameEngine.checkCaptureState();
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(400, 400, 20000, 8), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending})); pillar.position.copy(this.mesh.position).setY(10000); this.scene.add(pillar);
+        createExplosion(this.scene, this.mesh.position.clone().setY(750), 0x00ffff, 800, 100, 5000); window.gameEngine.announce(`鐘が鳴った！\n【${this.name}】占拠！`, "", "#00ffff"); window.gameEngine.checkCaptureState();
     }
 }
 
 class Projectile {
     constructor(scene, pos, dir, colorStr, team, type='gun', isUlt=false, damage=15) {
-        this.scene=scene; this.team=team; this.type=type; this.active=true; this.life=2.5; this.damage=damage; this.speed=3000; 
+        this.scene=scene; this.team=team; this.type=type; this.active=true; this.life=2.5; this.damage=damage; 
+        this.speed = 10000; 
         let geo, mat = new THREE.MeshBasicMaterial({ color: colorStr });
-        if (isUlt) { geo = new THREE.SphereGeometry(12, 8, 8); this.speed = 1500; } 
-        else if (type === 'hammer') { geo = new THREE.BoxGeometry(40, 40, 40); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1000; this.life = 0.3; } 
-        else if (type === 'kanabo') { geo = new THREE.CylinderGeometry(15, 15, 80); geo.rotateX(Math.PI/2); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1000; this.life = 0.4; } 
-        else if (type === 'bow') { geo = new THREE.CylinderGeometry(1, 1, 40); geo.rotateX(Math.PI/2); this.speed = 6000; this.life = 1.5; } 
-        else if (type === 'dual_swords') { geo = new THREE.BoxGeometry(35, 1, 10); this.speed = 4000; this.life = 0.15; } 
-        else if (type === 'fan') { geo = new THREE.SphereGeometry(15, 8, 8); this.speed = 3000; this.life = 0.3; } 
-        else { geo = new THREE.CylinderGeometry(2, 2, 80); geo.rotateX(Math.PI/2); this.speed = 7000; } 
+        if (isUlt) { geo = new THREE.SphereGeometry(12, 8, 8); this.speed = 3000; } 
+        else if (type === 'hammer') { geo = new THREE.BoxGeometry(40, 40, 40); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 0.3; } 
+        else if (type === 'kanabo') { geo = new THREE.CylinderGeometry(15, 15, 80); geo.rotateX(Math.PI/2); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 0.4; } 
+        else if (type === 'bow') { geo = new THREE.CylinderGeometry(1, 1, 40); geo.rotateX(Math.PI/2); this.speed = 8000; this.life = 1.5; } 
+        else if (type === 'dual_swords') { geo = new THREE.BoxGeometry(35, 1, 10); this.speed = 5000; this.life = 0.15; } 
+        else if (type === 'fan') { geo = new THREE.SphereGeometry(15, 8, 8); this.speed = 4000; this.life = 0.3; } 
+        else { geo = new THREE.CylinderGeometry(2, 2, 80); geo.rotateX(Math.PI/2); this.speed = 10000; } 
         
         this.mesh = new THREE.Group(); const mainMesh = new THREE.Mesh(geo, mat); this.mesh.add(mainMesh);
         if(type==='gun' || type==='bow') { const trail = new THREE.Mesh(new THREE.CylinderGeometry(4, 0, 100), new THREE.MeshBasicMaterial({color:colorStr, transparent:true, opacity:0.3, blending:THREE.AdditiveBlending})); trail.rotateX(Math.PI/2); trail.position.z = 50; this.mesh.add(trail); }
@@ -783,7 +882,8 @@ class Projectile {
 class EnemyBase {
     constructor(scene, pos, hp, isBoss = false) {
         this.scene = scene; this.isBoss = isBoss; this.active = true; this.hp = hp; this.maxHp = hp; this.currentSpeed = 0;
-        if(isBoss) { this.scale = 6.0; this.mesh = createUshiOniModel(this.scale); } else { this.scale = 1.8; this.mesh = createBoxAvatar(ENEMY_COLS.colors, this.scale, 'gun'); }
+        // ★ 牛鬼(Boss)のスケールをさらに超絶巨大化 (15.0)
+        if(isBoss) { this.scale = 15.0; this.mesh = createUshiOniModel(this.scale); } else { this.scale = 1.8; this.mesh = createBoxAvatar(ENEMY_COLS.colors, this.scale, 'bow'); }
         this.mesh.position.copy(pos); scene.add(this.mesh); this.uiElem = document.createElement('div'); this.uiElem.className = 'enemy-label'; this.uiElem.innerHTML = `<div class="enemy-name">Entity</div><div class="enemy-hp-bg"><div class="enemy-hp-fill"></div></div>`; this.hpFillElem = this.uiElem.querySelector('.enemy-hp-fill'); document.getElementById('enemy-hp-container').appendChild(this.uiElem);
     }
     update(dt, playerPos, camera) {
@@ -796,13 +896,41 @@ class EnemyBase {
 }
 
 class Minion extends EnemyBase { 
-    constructor(scene, pos) { super(scene, pos, 20, false); this.uiElem.querySelector('.enemy-name').innerText = "ミニオン"; this.fireTimer = Math.random() * 2; } 
+    constructor(scene, pos) { 
+        super(scene, pos, 20, false); 
+        this.uiElem.querySelector('.enemy-name').innerText = "ミニオン"; 
+        this.fireTimer = Math.random() * 2; 
+        this.moveAngle = (Math.random() - 0.5) * Math.PI; 
+        this.moveTimer = 0;
+    } 
     update(dt, playerPos, camera, playerHeight) { 
         this.currentSpeed = 0; super.update(dt, playerPos, camera, playerHeight); if (!this.active || playerHeight > RULES.STEALTH_HEIGHT) return; 
         const dist = this.mesh.position.distanceTo(playerPos);
-        if (dist < 3000) { 
-            if (dist > 300) { const dir = playerPos.clone().sub(this.mesh.position).normalize(); dir.y=0; this.currentSpeed = 300; this.mesh.position.addScaledVector(dir, this.currentSpeed * dt); }
-            this.fireTimer -= dt; if (this.fireTimer <= 0) { const dir = playerPos.clone().sub(this.mesh.position).normalize(); window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().setY(20), dir, '#ff0055', 1, 'gun', false, 3.0)); this.fireTimer = 2.0; } 
+        if (dist < 4000) { 
+            // ★ AI強化: プレイヤーの周囲を回り込む
+            this.moveTimer += dt;
+            if (this.moveTimer > 1.5) {
+                this.moveAngle = (Math.random() - 0.5) * Math.PI;
+                this.moveTimer = 0;
+            }
+            
+            const dirToPlayer = playerPos.clone().sub(this.mesh.position).normalize();
+            dirToPlayer.y = 0;
+            let moveDir = dirToPlayer.clone().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle);
+            
+            if (dist < 800) { moveDir = dirToPlayer.clone().negate().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle); } 
+            else if (dist > 1500) { moveDir.lerp(dirToPlayer, 0.5).normalize(); }
+            
+            this.currentSpeed = 350; 
+            this.mesh.position.addScaledVector(moveDir, this.currentSpeed * dt);
+            
+            this.fireTimer -= dt; 
+            if (this.fireTimer <= 0) { 
+                const shootDir = playerPos.clone().sub(this.mesh.position).normalize(); 
+                // ★ 攻撃力を 8.0 に増加
+                window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().setY(20), shootDir, '#ff0055', 1, 'bow', false, 8.0)); 
+                this.fireTimer = 2.0; 
+            } 
         } 
     } 
 }
@@ -811,9 +939,15 @@ class UshiOni extends EnemyBase {
     update(dt, playerPos, camera, playerHeight) { 
         this.currentSpeed = 0; super.update(dt, playerPos, camera, playerHeight); if (!this.active) return; 
         const dist = this.mesh.position.distanceTo(playerPos);
-        if (dist < 5000) { 
-            if (dist > 1200) { const dir = playerPos.clone().sub(this.mesh.position).normalize(); dir.y=0; this.currentSpeed = 200; this.mesh.position.addScaledVector(dir, this.currentSpeed * dt); }
-            this.fireTimer -= dt; if (this.fireTimer <= 0) { const dir = playerPos.clone().sub(this.mesh.position).normalize(); window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().add(new THREE.Vector3(0, 50, 0)), dir, '#ffaa00', 1, 'hammer', false, 15)); this.fireTimer = 2.0; } 
+        if (dist < 8000) { 
+            if (dist > 2000) { const dir = playerPos.clone().sub(this.mesh.position).normalize(); dir.y=0; this.currentSpeed = 300; this.mesh.position.addScaledVector(dir, this.currentSpeed * dt); }
+            this.fireTimer -= dt; 
+            if (this.fireTimer <= 0) { 
+                const dir = playerPos.clone().sub(this.mesh.position).normalize(); 
+                // ★ 牛鬼の攻撃力を 40 に増加
+                window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().add(new THREE.Vector3(0, 150, 0)), dir, '#ffaa00', 1, 'hammer', false, 40)); 
+                this.fireTimer = 2.0; 
+            } 
         } 
     }
     die() { super.die(); this.yagura.isBossDead = true; window.gameEngine.announce("牛鬼撃破！", "階段を登って\n鐘を鳴らせ！", "#ffaa00"); }
@@ -833,8 +967,7 @@ class Engine {
     initThree() { 
         this.scene = new THREE.Scene(); 
         this.scene.background = new THREE.Color(0x020810);
-        this.scene.fog = new THREE.FogExp2(0x020810, 0.0001); 
-        this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 60000); 
+        this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 150000); 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); 
         this.renderer.setSize(window.innerWidth, window.innerHeight); 
         this.renderer.setClearColor(0x020810); 
@@ -843,11 +976,8 @@ class Engine {
         try {
             this.composer = new EffectComposer(this.renderer); 
             this.composer.addPass(new RenderPass(this.scene, this.camera)); 
-            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.6, 0.85)); 
-        } catch(e) {
-            console.warn("Composer initialization failed, falling back to standard renderer.");
-            this.composer = null;
-        }
+            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.6, 0.85)); 
+        } catch(e) { this.composer = null; }
 
         window.addEventListener('resize', () => { 
             this.camera.aspect = window.innerWidth / window.innerHeight; 
@@ -857,12 +987,43 @@ class Engine {
         }); 
     }
     buildWorld() {
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.6)); const dirLight = new THREE.DirectionalLight(0xaaccff, 1.2); dirLight.position.set(100, 500, -100); this.scene.add(dirLight); 
-        const gridTex = createGridTexture(); const ground = new THREE.Mesh(new THREE.PlaneGeometry(80000, 80000), new THREE.MeshBasicMaterial({map: gridTex, transparent:true, opacity:0.5})); ground.rotation.x = -Math.PI/2; this.scene.add(ground); 
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.8)); const dirLight = new THREE.DirectionalLight(0xaaccff, 1.5); dirLight.position.set(100, 500, -100); this.scene.add(dirLight); 
+        
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x113311, roughness: 0.9 });
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load(
+            '草床.jpg', 
+            (tex) => {
+                tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+                tex.repeat.set(800, 800); 
+                groundMat.map = tex;
+                groundMat.color.setHex(0xffffff); 
+                groundMat.needsUpdate = true;
+            },
+            undefined,
+            (err) => { console.warn("画像の読み込みに失敗しました。代替の草色を使用します。", err); }
+        );
+
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(120000, 120000), groundMat); 
+        ground.rotation.x = -Math.PI/2; this.scene.add(ground); 
+        
+        textureLoader.load(
+            '空.jpg', 
+            (tex) => {
+                const skyGeo = new THREE.SphereGeometry(100000, 32, 32);
+                const skyMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false });
+                const sky = new THREE.Mesh(skyGeo, skyMat);
+                this.scene.add(sky);
+            },
+            undefined,
+            (err) => { console.warn("空.jpg の読み込みに失敗しました。", err); }
+        );
+
         createNature(this.scene);
 
-        const enemyCastle = createJapaneseCastle(RULES.BASE_POS_X + 2500, 0, true); this.scene.add(enemyCastle);
-        const allyCastle = createJapaneseCastle(-RULES.BASE_POS_X - 2500, 0, false); this.scene.add(allyCastle);
+        // ★ 城の配置座標をさらに奥に設定
+        const enemyCastle = createJapaneseCastle(RULES.BASE_POS_X + 15000, 0, true); this.scene.add(enemyCastle);
+        const allyCastle = createJapaneseCastle(-RULES.BASE_POS_X - 15000, 0, false); this.scene.add(allyCastle);
 
         this.enemyBase = new DarumaTower(this.scene, new THREE.Vector3(RULES.BASE_POS_X, 0, 0), true, enemyCastle); 
         this.allyBase = new DarumaTower(this.scene, new THREE.Vector3(-RULES.BASE_POS_X, 0, 0), false, allyCastle); 
@@ -875,15 +1036,20 @@ class Engine {
         const myUid = currentUser ? currentUser.uid : "local-user";
         if(this.allPlayersData && Array.isArray(this.allPlayersData)) {
             this.allPlayersData.forEach(p => { 
-                if (p.uid !== myUid) { 
-                    this.remotePlayers[p.uid] = new RemotePlayer(this.scene, p); 
-                } 
+                if (p.uid !== myUid) { this.remotePlayers[p.uid] = new RemotePlayer(this.scene, p); } 
             });
         }
 
         const spawnSq = (cx, cz, n, r) => { for(let i=0; i<n; i++) { const a=Math.random()*Math.PI*2; const d=Math.random()*r; this.enemies.push(new Minion(this.scene, new THREE.Vector3(cx+Math.cos(a)*d, RULES.GROUND_Y, cz+Math.sin(a)*d))); } };
-        const cLane = (z) => { const yag = new Yagura(this.scene, new THREE.Vector3(5000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(3000, 0, z), yag)); spawnSq(-2000, z, 8, 400); spawnSq(2000, z, 8, 400); spawnSq(6000, z, 8, 400); };
-        cLane(-8000); cLane(8000); spawnSq(-2000, 0, 12, 500); spawnSq(3000, 0, 12, 500); spawnSq(7000, 0, 12, 500);
+        
+        // ★ ミニオンの数を 3倍（30, 45）に設定
+        const cLane = (z) => { 
+            const yag = new Yagura(this.scene, new THREE.Vector3(8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); 
+            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(5000, 0, z), yag)); 
+            spawnSq(-4000, z, 30, 600); spawnSq(4000, z, 30, 600); spawnSq(10000, z, 30, 600); 
+        };
+        cLane(-12000); cLane(12000); 
+        spawnSq(-4000, 0, 45, 800); spawnSq(4000, 0, 45, 800); spawnSq(10000, 0, 45, 800);
         setTimeout(() => { this.announce("合戦開始", "牛鬼を倒せ！", "#0ff"); }, 500);
     }
     
@@ -899,7 +1065,7 @@ class Engine {
     gameOver(isWin, text) { if(this.isGameOver) return; this.isGameOver = true; document.exitPointerLock(); if(this.playersUnsub) this.playersUnsub(); if(this.actionsUnsub) this.actionsUnsub(); document.getElementById('result-screen').style.display = 'flex'; const title = document.getElementById('result-title'); title.innerText = text; title.style.color = isWin ? '#0ff' : '#f00'; title.style.textShadow = isWin ? '0 0 30px #0ff' : '0 0 30px #f00'; }
     
     checkCaptureState() {
-        let caps = 0; this.yaguras.forEach(y => { if(y.owner === this.myTeam || y.owner === 0) caps++; }); // ソロ時は0が自軍
+        let caps = 0; this.yaguras.forEach(y => { if(y.owner === this.myTeam || y.owner === 0) caps++; });
         if (caps > 0 && !this.enemyBase.vulnerable) { this.enemyBase.setVulnerable(); this.announce("超巨大だるま 出現！", "一撃で敵城を破壊せよ！", "#00ffff"); }
     }
     
@@ -922,13 +1088,12 @@ class Engine {
     animate() {
         requestAnimationFrame(() => this.animate()); if(this.isGameOver) return; const dt = 0.016; this.allyBase.update(dt); this.enemyBase.update(dt); const input = this.inputMgr.update(); 
         
-        // ★ 拡張された長大階段（スロープ）とプラットフォームの地形判定
         let groundY = RULES.GROUND_Y;
         this.yaguras.forEach(yag => {
             const dx = this.player.position.x - yag.mesh.position.x; const dz = this.player.position.z - yag.mesh.position.z;
-            if (Math.abs(dx) < 200 && Math.abs(dz) < 200) { groundY = Math.max(groundY, 100); } // 櫓ベース上
-            if (dx >= -250 && dx <= 50 && Math.abs(dz) < 100) { groundY = Math.max(groundY, 305); } // プラットフォーム
-            if (dx >= -1500 && dx < -250 && Math.abs(dz) < 40) { const sy = ((dx + 1500) / 1250) * 300; groundY = Math.max(groundY, sy); } // ★ 巨大階段スロープ
+            if (Math.abs(dx) < 300 && Math.abs(dz) < 300) { groundY = Math.max(groundY, 100); } 
+            if (dx >= -400 && dx <= 100 && Math.abs(dz) < 150) { groundY = Math.max(groundY, 515); } 
+            if (dx >= -2500 && dx < -250 && Math.abs(dz) < 100) { const sy = ((dx + 2500) / 2250) * 500; groundY = Math.max(groundY, sy); } 
         });
         
         this.player.update(dt, input, groundY);
@@ -939,7 +1104,6 @@ class Engine {
             setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'game_' + currentLobbyId + '_players', currentUser.uid), { x: this.player.position.x, y: this.player.position.y, z: this.player.position.z, yaw: this.player.yaw, timestamp: Date.now() }).catch(()=>{});
         }
 
-        // ★ フルオート連射ロジック
         if(input.a && this.player.atkCooldown <= 0 && !this.player.isReloading && this.player.ammo > 0) { 
             this.player.atkCooldown = this.player.weaponStats.cooldown; 
             if (this.player.weaponStats.ammo !== Infinity) { this.player.ammo--; if (this.player.ammo <= 0) { this.player.isReloading = true; this.player.reloadTimer = this.player.weaponStats.reload; } }
@@ -952,7 +1116,6 @@ class Engine {
             else if (w === 'fan') { fire(dir.clone()); fire(dir.clone().applyAxisAngle(new THREE.Vector3(0,1,0), 0.15)); fire(dir.clone().applyAxisAngle(new THREE.Vector3(0,1,0), -0.15)); } 
             else { fire(dir); } 
             
-            // ★ 美麗化された発砲エフェクト
             createExplosion(this.scene, spawnPos, 0x00ffff, 15, 10, 300);
 
             if (!isOfflineMode && currentLobbyId && currentUser) {
