@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KASSEN - Cyberpunk Samurai MOBA (v29.0 Ultimate FPS)</title>
+    <title>KASSEN - Cyberpunk Samurai MOBA (v30.0 Ultimate FPS)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap');
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #87CEEB; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
@@ -94,6 +94,7 @@
         .t-btn { width: 70px; height: 70px; background: rgba(0,40,60,0.8); border: 2px solid #0ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0ff; font-weight: bold; font-family: 'Share Tech Mono'; font-size: 14px; text-shadow: 0 0 5px #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.3); }
         .t-btn.active { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
     </style>
+    <!-- Three.js & Firebase -->
     <script type="importmap">
     {
         "imports": {
@@ -138,7 +139,7 @@
                 </select>
             </div>
         </div>
-        <!-- ★ 軽量モードの設定 -->
+        
         <div class="picker-group weapon-section" style="border-top: none; padding-top: 0;">
             <div class="picker-item">
                 <label style="color: #ffaa00; font-weight: bold;">超軽いモード<br><span style="font-size: 10px; color: #aaa;">低スペックでもヌルサク動作</span></label>
@@ -444,7 +445,7 @@ class VirtualJoystick {
         let dx = x - this.origin.x, dy = y - this.origin.y; const maxR = 45; const dist = Math.sqrt(dx*dx + dy*dy);
         if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
         this.stick.style.transform = `translate(${dx}px, ${dy}px)`;
-        // ★ スマホの感度を大幅アップ (0.05 -> 0.15)
+        // ★ スマホの感度を大幅アップ
         if(this.isLook) { this.val.x = dx * 0.15; this.val.y = dy * 0.15; } else { this.val.x = dx / maxR; this.val.y = dy / maxR; }
     }
 }
@@ -477,11 +478,21 @@ class InputManager {
     }
 }
 
+// ★ 天守閣間距離は50,000。
 const RULES = { MAP_LIMIT: 40000, BASE_POS_X: 25000, GRAVITY: 800, JUMP_FORCE: 500, PLAYER_SPEED: 850, GROUND_Y: 20, STEALTH_HEIGHT: 80 };
 const SKINS = { kogetsu: { colors: { hat: '#f2ebda', body: '#e64a45', glow: '#92c75a' } }, default: { colors: { hat: '#222222', body: '#0088ff', glow: '#00ffff' } }, crimson: { colors: { hat: '#110000', body: '#aa0000', glow: '#ff0000' } }, forest: { colors: { hat: '#001100', body: '#004400', glow: '#00ff44' } } };
 const ENEMY_COLS = { colors: { hat: '#330000', body: '#660000', glow: '#ff0055' } };
 const BOSS_COLS = { colors: { hat: '#222200', body: '#444400', glow: '#ffaa00' } };
-const WEAPON_STATS = { gun: { damage: 20, ammo: 30, reload: 1.5, cooldown: 0.12 }, bow: { damage: 40, ammo: 10, reload: 1.0, cooldown: 0.4 }, hammer: { damage: 150, ammo: Infinity, reload: 0, cooldown: 0.8 }, kanabo: { damage: 200, ammo: Infinity, reload: 0, cooldown: 1.2 }, dual_swords: { damage: 30, ammo: Infinity, reload: 0, cooldown: 0.35 }, fan: { damage: 20, ammo: Infinity, reload: 0, cooldown: 0.4 } };
+
+// ★ 武器バランスの完全調整 (全武器DPS約150ベース)
+const WEAPON_STATS = { 
+    gun: { damage: 15, ammo: 30, reload: 1.5, cooldown: 0.1 }, 
+    bow: { damage: 75, ammo: 10, reload: 1.0, cooldown: 0.5 }, 
+    hammer: { damage: 120, ammo: Infinity, reload: 0, cooldown: 0.8 }, 
+    kanabo: { damage: 225, ammo: Infinity, reload: 0, cooldown: 1.5 }, 
+    dual_swords: { damage: 25, ammo: Infinity, reload: 0, cooldown: 0.33 }, 
+    fan: { damage: 20, ammo: Infinity, reload: 0, cooldown: 0.4 } 
+};
 
 const particles = [];
 function createExplosion(scene, pos, color, count, size=20, spread=600) {
@@ -613,8 +624,11 @@ function createUshiOniModel(scale) {
     group.userData = { legs: legs, attackTimer: 0, originalY: 0 }; group.scale.set(scale, scale, scale); return group;
 }
 
+// ★ 天守閣: Aチーム(左)は赤系、Bチーム(右)は青系に
 function createJapaneseCastle(x, z, isEnemy) {
-    const castleGroup = new THREE.Group(); const mainColor = isEnemy ? 0x220000 : 0x001133; const roofColor = 0x111111;
+    const castleGroup = new THREE.Group(); 
+    const mainColor = isEnemy ? 0x001133 : 0x220000; 
+    const roofColor = 0x111111;
     const base = new THREE.Mesh(new THREE.BoxGeometry(2400, 800, 2400), new THREE.MeshBasicMaterial({color: 0x333333, wireframe: true})); base.position.y = 400; castleGroup.add(base);
     const f1 = new THREE.Mesh(new THREE.BoxGeometry(2000, 600, 2000), new THREE.MeshBasicMaterial({color: mainColor})); f1.position.y = 1100; castleGroup.add(f1);
     const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
@@ -625,32 +639,52 @@ function createJapaneseCastle(x, z, isEnemy) {
     castleGroup.position.set(x, 0, z); return castleGroup;
 }
 
+// 桜の配置 (デフォルトで1000本)
+function distToSegmentSquared(px, pz, vx, vz, wx, wz) {
+    let l2 = (vx - wx)**2 + (vz - wz)**2;
+    if (l2 === 0) return (px - vx)**2 + (pz - vz)**2;
+    let t = ((px - vx) * (wx - vx) + (pz - vz) * (wz - vz)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return (px - (vx + t * (wx - vx)))**2 + (pz - (vz + t * (wz - vz)))**2;
+}
+
 function createNature(scene, engine) {
     engine.treeGrid = {};
-    // ★ 軽量モード判定
-    const treeCount = engine.isLowSpec ? 1000 : 8000;
+    const treeCount = 1000; // ★ デフォルトで超軽いモードと同じ本数
     
     const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
     const trunkGeo = new THREE.CylinderGeometry(15, 20, 100); const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
     const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount); const leavesMesh = new THREE.InstancedMesh(leavesGeo, sakuraMat, treeCount);
     const dummy = new THREE.Object3D(); let addedCount = 0; let attempts = 0;
     
+    const pathSegments = [
+        {vx: -25000, vz: 0, wx: 25000, wz: 0},
+        {vx: -25000, vz: 0, wx: 0, wz: -15000},
+        {vx: 0, vz: -15000, wx: 25000, wz: 0},
+        {vx: -25000, vz: 0, wx: 0, wz: 15000},
+        {vx: 0, vz: 15000, wx: 25000, wz: 0}
+    ];
+
     while(addedCount < treeCount && attempts < treeCount * 5) {
         attempts++;
         const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2; const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
         let validPos = true;
 
-        if (Math.abs(z) < 1500) validPos = false; // 中央レーンの回避
-        if (Math.abs(x - (-20000)) < 1500 || Math.abs(x - 20000) < 1500) validPos = false;
+        // ★ レーンと川を避ける
+        for (let seg of pathSegments) {
+            if (Math.sqrt(distToSegmentSquared(x, z, seg.vx, seg.vz, seg.wx, seg.wz)) < 1500) { validPos = false; break; }
+        }
         if (Math.abs(x) < 2000) validPos = false;
 
-        const yaguraZs = [0]; // ★ この世に2つになったのでZ=0のみ
+        // ★ 櫓の周辺を避ける
+        const yaguraZs = [-15000, 15000];
         for(let yz of yaguraZs) {
-            const distToYagura = Math.sqrt(Math.pow(x - 8000, 2) + Math.pow(z - yz, 2));
-            if (distToYagura < 5000) { validPos = false; break; }
+            const distToYagura = Math.sqrt(Math.pow(x - 0, 2) + Math.pow(z - yz, 2));
+            if (distToYagura < 4000) { validPos = false; break; }
         }
 
-        if (Math.abs(x) > RULES.BASE_POS_X - 4000) validPos = false;
+        // 拠点を避ける
+        if (Math.abs(x - (-25000)) < 3000 || Math.abs(x - 25000) < 3000) validPos = false;
 
         if (validPos) {
             dummy.scale.set(5, 5, 5);
@@ -776,7 +810,7 @@ class DarumaTower {
             let hitCastle = false;
             for(let i = 0; i < this.blockCount; i++) { 
                 let b = this.blocks[i]; b.vel.y -= RULES.GRAVITY * 4 * dt; b.mesh.position.addScaledVector(b.vel, dt); b.mesh.rotation.x += b.rot.x * dt; b.mesh.rotation.y += b.rot.y * dt; b.mesh.rotation.z += b.rot.z * dt; 
-                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 13000) { hitCastle = true; }
+                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 4000) { hitCastle = true; }
             }
             if (hitCastle) {
                 this.castleDestroyed = true; if(this.castleRef) this.castleRef.visible = false;
@@ -787,27 +821,39 @@ class DarumaTower {
     }
 }
 
+// ★ 左右対称の階段（両チームから登れる）を備えた櫓
 class Yagura {
     constructor(scene, pos, name) {
         this.name = name; this.scene = scene; this.owner = -1; this.isBossDead = false; this.mesh = new THREE.Group(); this.mesh.position.copy(pos);
-        const sign = pos.x > 0 ? 1 : -1;
         
-        const base = new THREE.Mesh(new THREE.BoxGeometry(600, 200, 600), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
-        const platform = new THREE.Mesh(new THREE.BoxGeometry(800, 20, 800), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(-sign * 250, 505, 0); this.mesh.add(platform);
+        const base = new THREE.Mesh(new THREE.BoxGeometry(1000, 200, 1000), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
+        const platform = new THREE.Mesh(new THREE.BoxGeometry(1200, 20, 1200), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(0, 505, 0); this.mesh.add(platform);
         
         const stepCount = 100; const stepWidth = 600; 
-        for(let i=0; i<stepCount; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-sign * (2500 - i*22), i*5 + 5, 0); this.mesh.add(step); }
-        
-        const railL = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL.position.set(-sign * 1400, 300, -stepWidth/2 + 15); railL.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railL);
-        const railR = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR.position.set(-sign * 1400, 300, stepWidth/2 - 15); railR.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railR);
-        
-        for(let i=0; i<stepCount; i+=10) {
-            const poleL = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleL.position.set(-sign * (2500 - i*22), i*5 + 30, -stepWidth/2 + 15); this.mesh.add(poleL);
-            const poleR = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleR.position.set(-sign * (2500 - i*22), i*5 + 30, stepWidth/2 - 15); this.mesh.add(poleR);
+        for(let i=0; i<stepCount; i++) { 
+            // 左(A陣営)側の階段
+            const stepL = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); 
+            stepL.position.set(-2500 + i*20, i*5 + 5, 0); this.mesh.add(stepL); 
+            // 右(B陣営)側の階段
+            const stepR = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); 
+            stepR.position.set(2500 - i*20, i*5 + 5, 0); this.mesh.add(stepR); 
         }
         
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(600, 300, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(-sign * 250, 1000, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
-        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(-sign * 250, 750, 0); this.mesh.add(this.bell);
+        // 手すり(左右)
+        const railL_F = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL_F.position.set(-1500, 300, -stepWidth/2 + 15); railL_F.rotation.z = Math.atan2(500, 2000); this.mesh.add(railL_F);
+        const railL_B = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL_B.position.set(-1500, 300, stepWidth/2 - 15); railL_B.rotation.z = Math.atan2(500, 2000); this.mesh.add(railL_B);
+        const railR_F = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR_F.position.set(1500, 300, -stepWidth/2 + 15); railR_F.rotation.z = -Math.atan2(500, 2000); this.mesh.add(railR_F);
+        const railR_B = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR_B.position.set(1500, 300, stepWidth/2 - 15); railR_B.rotation.z = -Math.atan2(500, 2000); this.mesh.add(railR_B);
+        
+        for(let i=0; i<stepCount; i+=10) {
+            const pLF = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pLF.position.set(-2500 + i*20, i*5 + 30, -stepWidth/2 + 15); this.mesh.add(pLF);
+            const pLB = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pLB.position.set(-2500 + i*20, i*5 + 30, stepWidth/2 - 15); this.mesh.add(pLB);
+            const pRF = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pRF.position.set(2500 - i*20, i*5 + 30, -stepWidth/2 + 15); this.mesh.add(pRF);
+            const pRB = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pRB.position.set(2500 - i*20, i*5 + 30, stepWidth/2 - 15); this.mesh.add(pRB);
+        }
+        
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(800, 400, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(0, 1200, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
+        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(0, 750, 0); this.mesh.add(this.bell);
         scene.add(this.mesh);
     }
     takeHit(projectilePos) {
@@ -989,7 +1035,6 @@ class Engine {
         this.renderer = new THREE.WebGLRenderer({ antialias: !this.isLowSpec, alpha: false }); 
         this.renderer.setSize(window.innerWidth, window.innerHeight); 
         this.renderer.setClearColor(0x87CEEB); 
-        // ★ 軽量モード時は解像度を下げてパフォーマンスを確保
         this.renderer.setPixelRatio(this.isLowSpec ? 1 : window.devicePixelRatio);
         document.getElementById('game-canvas').appendChild(this.renderer.domElement); 
         
@@ -1011,40 +1056,38 @@ class Engine {
         }); 
     }
     
+    // ★ 直線と円を組み合わせた滑らかな地形判定 (画像ベースのMOBAマップ)
     getGroundY(x, z) {
         let gy = RULES.GROUND_Y;
-        const yPos = [
-            {x: 8000, z: 0},
-            {x: -8000, z: 0}
+        // 上下の櫓の判定
+        const yaguraPositions = [
+            {x: 0, z: -15000},
+            {x: 0, z: 15000}
         ];
-        for(let p of yPos) {
+        
+        for(let p of yaguraPositions) {
             const dx = x - p.x; const dz = z - p.z;
-            const sign = p.x > 0 ? 1 : -1;
-            if (Math.abs(dx) < 300 && Math.abs(dz) < 300) { gy = Math.max(gy, 100); } 
             
-            if (sign > 0) {
-                if (dx >= -2540 && dx < -300 && Math.abs(dz) < 300) { 
-                    const ratio = (dx - (-2500)) / (-300 - (-2500)); 
-                    gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500)); 
-                }
-                if (dx >= -400 && dx <= 100 && Math.abs(dz) < 400) { gy = Math.max(gy, 515); }
-            } else {
-                if (dx <= 2540 && dx > 300 && Math.abs(dz) < 300) {
-                    const ratio = (2500 - dx) / (2500 - 300);
-                    gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500));
-                }
-                if (dx <= 400 && dx >= -100 && Math.abs(dz) < 400) { gy = Math.max(gy, 515); }
+            if (Math.abs(dx) < 500 && Math.abs(dz) < 500) { gy = Math.max(gy, 100); } 
+            if (Math.abs(dx) < 600 && Math.abs(dz) < 600) { gy = Math.max(gy, 515); } 
+            
+            // 左階段 (味方側から)
+            if (dx >= -2540 && dx < -500 && Math.abs(dz) < 300) { 
+                const ratio = (dx - (-2500)) / (-500 - (-2500)); 
+                gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500)); 
+            }
+            // 右階段 (敵側から)
+            if (dx <= 2540 && dx > 500 && Math.abs(dz) < 300) {
+                const ratio = (2500 - dx) / (2500 - 500);
+                gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500));
             }
         }
         
-        const bzArr = [0];
-        for(let bz of bzArr) {
-            const dx = x - 0; const dz = z - bz;
-            if (Math.abs(dx) < 2000 && Math.abs(dz) < 500) {
-                const ratio = dx / 2000; 
-                const sy = Math.cos(ratio * Math.PI/2) * 500;
-                gy = Math.max(gy, sy);
-            }
+        // 中央レーンの橋 (X=0, Z=0)
+        if (Math.abs(x) < 2000 && Math.abs(z) < 500) {
+            const ratio = x / 2000; 
+            const sy = Math.cos(ratio * Math.PI/2) * 500;
+            gy = Math.max(gy, sy);
         }
         return gy;
     }
@@ -1060,33 +1103,50 @@ class Engine {
         }
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(120000, 120000), groundMat); ground.rotation.x = -Math.PI/2; this.scene.add(ground); 
 
+        // ★ MOBAスタイルの美しいルート生成
         const pathMat = new THREE.MeshBasicMaterial({ color: 0x4a3c31 }); 
-        [0].forEach(z => { const pathGeo = new THREE.PlaneGeometry(60000, 2000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(0, 0.5, z); this.scene.add(path); });
-        [-20000, 20000].forEach(x => { const pathGeo = new THREE.PlaneGeometry(2000, 26000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(x, 0.6, 0); this.scene.add(path); });
+        const addPath = (x1, z1, x2, z2) => {
+            const length = Math.sqrt((x2-x1)**2 + (z2-z1)**2);
+            const pathGeo = new THREE.PlaneGeometry(length, 2000);
+            const path = new THREE.Mesh(pathGeo, pathMat);
+            path.rotation.x = -Math.PI / 2;
+            path.rotation.z = Math.atan2(z2-z1, x2-x1);
+            path.position.set((x1+x2)/2, 0.5, (z1+z2)/2);
+            this.scene.add(path);
+        };
+        
+        // ミッドレーン
+        addPath(-25000, 0, 25000, 0);
+        // トップレーン
+        addPath(-25000, 0, 0, -15000);
+        addPath(0, -15000, 25000, 0);
+        // ボットレーン
+        addPath(-25000, 0, 0, 15000);
+        addPath(0, 15000, 25000, 0);
 
+        // 中央の川
         const riverMat = new THREE.MeshBasicMaterial({color: 0x44aaff, transparent: true, opacity: 0.8});
         const river = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), riverMat);
         river.rotation.x = -Math.PI / 2; river.position.set(0, 10, 0); this.scene.add(river);
 
-        [0].forEach(z => {
-            const group = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
-            for(let i=-20; i<=20; i++) {
-                const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
-                const step = new THREE.Mesh(new THREE.BoxGeometry(100, 20, 1000), bMat);
-                step.position.set(i * 100, h, 0); step.rotation.z = -Math.sin(ratio * Math.PI/2) * Math.PI/4; group.add(step);
-            }
-            group.position.set(0, 0, z); this.scene.add(group);
-        });
+        // 中央の橋
+        const bridgeGroup = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
+        for(let i=-20; i<=20; i++) {
+            const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
+            const step = new THREE.Mesh(new THREE.BoxGeometry(100, 20, 1000), bMat);
+            step.position.set(i * 100, h, 0); step.rotation.z = -Math.sin(ratio * Math.PI/2) * Math.PI/4; bridgeGroup.add(step);
+        }
+        bridgeGroup.position.set(0, 0, 0); this.scene.add(bridgeGroup);
 
         createNature(this.scene, this);
 
-        const enemyCastle = createJapaneseCastle(RULES.BASE_POS_X + 15000, 0, true); this.scene.add(enemyCastle);
-        const allyCastle = createJapaneseCastle(-RULES.BASE_POS_X - 15000, 0, false); this.scene.add(allyCastle);
+        const enemyCastle = createJapaneseCastle(RULES.BASE_POS_X, 0, true); this.scene.add(enemyCastle);
+        const allyCastle = createJapaneseCastle(-RULES.BASE_POS_X, 0, false); this.scene.add(allyCastle);
 
         this.enemyBase = new DarumaTower(this.scene, new THREE.Vector3(RULES.BASE_POS_X, 0, 0), true, enemyCastle); 
         this.allyBase = new DarumaTower(this.scene, new THREE.Vector3(-RULES.BASE_POS_X, 0, 0), false, allyCastle); 
         
-        const spawnX = this.myTeam === 0 ? -RULES.BASE_POS_X + 2000 : RULES.BASE_POS_X - 2000;
+        const spawnX = this.myTeam === 0 ? -RULES.BASE_POS_X + 4000 : RULES.BASE_POS_X - 4000;
         this.player = new PlayerLocal(this.scene, this.camera, this.skinData, this.weaponType, spawnX); 
         
         this.enemies = []; this.projectiles = []; this.yaguras = [];
@@ -1096,20 +1156,19 @@ class Engine {
 
         const spawnSq = (cx, cz, n, r) => { for(let i=0; i<n; i++) { const a=Math.random()*Math.PI*2; const d=Math.random()*r; this.enemies.push(new Minion(this.scene, new THREE.Vector3(cx+Math.cos(a)*d, RULES.GROUND_Y, cz+Math.sin(a)*d))); } };
         
-        const cLane = (z) => { 
-            const sign = RULES.BASE_POS_X > 0 ? 1 : -1;
-            const yag = new Yagura(this.scene, new THREE.Vector3(8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); 
-            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(8000 - 250, 515, z), yag)); 
-            
-            const yag2 = new Yagura(this.scene, new THREE.Vector3(-8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag2);
-            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(-8000 + 250, 515, z), yag2)); 
-            
-            spawnSq(-4000, z, 30, 600); spawnSq(4000, z, 30, 600); spawnSq(10000, z, 30, 600); 
-        };
-        // ★ 鐘は中央レーン（この世に2つ）のみ
-        cLane(0); 
+        // ★ 櫓と牛鬼は「この世に2つ」 (トップとボット)
+        const yagTop = new Yagura(this.scene, new THREE.Vector3(0, 0, -15000), "TOP"); this.yaguras.push(yagTop); 
+        this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(0, 515, -14000), yagTop)); 
+        spawnSq(-5000, -12000, 20, 600); spawnSq(5000, -12000, 20, 600);
         
-        setTimeout(() => { this.announce("合戦開始", "牛鬼を倒せ！", "#0ff"); }, 500);
+        const yagBot = new Yagura(this.scene, new THREE.Vector3(0, 0, 15000), "BOTTOM"); this.yaguras.push(yagBot);
+        this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(0, 515, 14000), yagBot)); 
+        spawnSq(-5000, 12000, 20, 600); spawnSq(5000, 12000, 20, 600);
+        
+        // ミッドのミニオン
+        spawnSq(-6000, 0, 30, 800); spawnSq(6000, 0, 30, 800);
+        
+        setTimeout(() => { this.announce("合戦開始", "敵陣を制圧せよ！", "#0ff"); }, 500);
     }
     
     startNetworkSync() {
