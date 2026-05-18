@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KASSEN - tukuyomi sengoku MOBA (verβ Ultimate FPS)</title>
+    <title>KASSEN - Cyberpunk Samurai MOBA (v29.0 Ultimate FPS)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap');
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #87CEEB; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
@@ -138,6 +138,14 @@
                 </select>
             </div>
         </div>
+        <!-- ★ 軽量モードの設定 -->
+        <div class="picker-group weapon-section" style="border-top: none; padding-top: 0;">
+            <div class="picker-item">
+                <label style="color: #ffaa00; font-weight: bold;">超軽いモード<br><span style="font-size: 10px; color: #aaa;">低スペックでもヌルサク動作</span></label>
+                <input type="checkbox" id="low-spec-mode" style="width: 25px; height: 25px; cursor: pointer;">
+            </div>
+        </div>
+
         <div id="auth-status" style="color:#0ff; margin-bottom:15px; font-weight:bold; font-family:'Noto Serif JP'; animation: blink 1s infinite;">サーバー接続中...</div>
         <button id="btn-to-mp" class="main-btn" style="display:none;">マルチプレイ / ロビー選択へ</button>
     </div>
@@ -247,6 +255,7 @@ const showPanel = (id) => {
 const startOfflineGame = () => {
     document.getElementById('customize-screen').style.display = 'none';
     const skinData = SKINS[document.getElementById('preset-select').value] || SKINS['default'];
+    const isLowSpec = document.getElementById('low-spec-mode').checked;
     const dummyPlayer = {
         uid: "local-user",
         name: "YOU(OFFLINE)",
@@ -254,7 +263,7 @@ const startOfflineGame = () => {
         weapon: document.getElementById('weapon-select').value,
         team: 0
     };
-    window.gameEngine = new Engine(skinData, dummyPlayer.weapon, 0, [dummyPlayer]);
+    window.gameEngine = new Engine(skinData, dummyPlayer.weapon, 0, [dummyPlayer], isLowSpec);
 };
 
 const initAuth = async () => {
@@ -410,15 +419,16 @@ const startGame = () => {
     if(lobbyUnsubscribe) { lobbyUnsubscribe(); lobbyUnsubscribe = null; }
     const myData = currentLobbyData.players.find(p => p.uid === currentUser.uid);
     const skinData = SKINS[myData.skin] || SKINS['default'];
-    window.gameEngine = new Engine(skinData, myData.weapon, myData.team, currentLobbyData.players);
+    const isLowSpec = document.getElementById('low-spec-mode').checked;
+    window.gameEngine = new Engine(skinData, myData.weapon, myData.team, currentLobbyData.players, isLowSpec);
 };
 
 // === Game Core ===
 function createParticleTexture() {
-    const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128; const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(64,64,0, 64,64,64); 
+    const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64; const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32,32,0, 32,32,32); 
     grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.2, 'rgba(255,255,200,0.8)'); grad.addColorStop(1, 'rgba(255,200,0,0)');
-    ctx.fillStyle = grad; ctx.fillRect(0,0,128,128); return new THREE.CanvasTexture(canvas);
+    ctx.fillStyle = grad; ctx.fillRect(0,0,64,64); return new THREE.CanvasTexture(canvas);
 }
 const particleTex = createParticleTexture();
 
@@ -434,7 +444,8 @@ class VirtualJoystick {
         let dx = x - this.origin.x, dy = y - this.origin.y; const maxR = 45; const dist = Math.sqrt(dx*dx + dy*dy);
         if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
         this.stick.style.transform = `translate(${dx}px, ${dy}px)`;
-        if(this.isLook) { this.val.x = dx * 0.05; this.val.y = dy * 0.05; } else { this.val.x = dx / maxR; this.val.y = dy / maxR; }
+        // ★ スマホの感度を大幅アップ (0.05 -> 0.15)
+        if(this.isLook) { this.val.x = dx * 0.15; this.val.y = dy * 0.15; } else { this.val.x = dx / maxR; this.val.y = dy / maxR; }
     }
 }
 
@@ -474,11 +485,13 @@ const WEAPON_STATS = { gun: { damage: 20, ammo: 30, reload: 1.5, cooldown: 0.12 
 
 const particles = [];
 function createExplosion(scene, pos, color, count, size=20, spread=600) {
+    if (window.gameEngine && window.gameEngine.isLowSpec) { count = Math.floor(count / 5); size = size * 0.8; }
+    if (count <= 0) return;
     const geo = new THREE.BufferGeometry(); const posArray = new Float32Array(count * 3); const velArray = [];
     for(let i=0; i<count; i++) { posArray[i*3]=pos.x; posArray[i*3+1]=pos.y; posArray[i*3+2]=pos.z; const theta=Math.random()*Math.PI*2; const phi=Math.acos((Math.random()*2)-1); const speed=Math.random()*spread+100; velArray.push(new THREE.Vector3(Math.sin(phi)*Math.cos(theta)*speed, Math.sin(phi)*Math.sin(theta)*speed, Math.cos(phi)*speed)); }
     geo.setAttribute('position', new THREE.BufferAttribute(posArray, 3)); 
     const mat = new THREE.PointsMaterial({ color: color, size: size, map: particleTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-    const pMesh = new THREE.Points(geo, mat); scene.add(pMesh); particles.push({ mesh: pMesh, vels: velArray, life: 1.5 });
+    const pMesh = new THREE.Points(geo, mat); scene.add(pMesh); particles.push({ mesh: pMesh, vels: velArray, life: window.gameEngine && window.gameEngine.isLowSpec ? 0.8 : 1.5 });
 }
 
 function createKanaboMesh(scale = 1.0) {
@@ -607,12 +620,16 @@ function createJapaneseCastle(x, z, isEnemy) {
     const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
     const f2 = new THREE.Mesh(new THREE.BoxGeometry(1200, 600, 1200), new THREE.MeshBasicMaterial({color: mainColor})); f2.position.y = 2100; castleGroup.add(f2);
     const r2 = new THREE.Mesh(new THREE.ConeGeometry(1000, 320, 4), new THREE.MeshBasicMaterial({color: roofColor})); r2.position.y = 2560; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
-    castleGroup.scale.set(10, 10, 10); castleGroup.position.set(x, 0, z); return castleGroup;
+    
+    castleGroup.scale.set(10, 10, 10);
+    castleGroup.position.set(x, 0, z); return castleGroup;
 }
 
 function createNature(scene, engine) {
     engine.treeGrid = {};
-    const treeCount = 15000;
+    // ★ 軽量モード判定
+    const treeCount = engine.isLowSpec ? 1000 : 8000;
+    
     const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
     const trunkGeo = new THREE.CylinderGeometry(15, 20, 100); const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
     const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount); const leavesMesh = new THREE.InstancedMesh(leavesGeo, sakuraMat, treeCount);
@@ -623,16 +640,16 @@ function createNature(scene, engine) {
         const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2; const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
         let validPos = true;
 
-        if (Math.abs(z - (-12000)) < 1500 || Math.abs(z) < 1500 || Math.abs(z - 12000) < 1500) validPos = false;
+        if (Math.abs(z) < 1500) validPos = false; // 中央レーンの回避
         if (Math.abs(x - (-20000)) < 1500 || Math.abs(x - 20000) < 1500) validPos = false;
-        // 川・橋の上の配置防止
         if (Math.abs(x) < 2000) validPos = false;
 
-        const yaguraZs = [-12000, 0, 12000];
+        const yaguraZs = [0]; // ★ この世に2つになったのでZ=0のみ
         for(let yz of yaguraZs) {
             const distToYagura = Math.sqrt(Math.pow(x - 8000, 2) + Math.pow(z - yz, 2));
             if (distToYagura < 5000) { validPos = false; break; }
         }
+
         if (Math.abs(x) > RULES.BASE_POS_X - 4000) validPos = false;
 
         if (validPos) {
@@ -825,7 +842,7 @@ class Projectile {
         else { geo = new THREE.CylinderGeometry(2, 2, 80); geo.rotateX(Math.PI/2); this.speed = 10000; } 
         
         this.mesh = new THREE.Group(); const mainMesh = new THREE.Mesh(geo, mat); this.mesh.add(mainMesh);
-        if(type==='gun' || type==='bow') { const trail = new THREE.Mesh(new THREE.CylinderGeometry(4, 0, 100), new THREE.MeshBasicMaterial({color:colorStr, transparent:true, opacity:0.3, blending:THREE.AdditiveBlending})); trail.rotateX(Math.PI/2); trail.position.z = 50; this.mesh.add(trail); }
+        if((type==='gun' || type==='bow') && (!window.gameEngine || !window.gameEngine.isLowSpec)) { const trail = new THREE.Mesh(new THREE.CylinderGeometry(4, 0, 100), new THREE.MeshBasicMaterial({color:colorStr, transparent:true, opacity:0.3, blending:THREE.AdditiveBlending})); trail.rotateX(Math.PI/2); trail.position.z = 50; this.mesh.add(trail); }
         this.mesh.position.copy(pos); if (type === 'bow' || type === 'dual_swords' || type === 'gun' || type === 'kanabo') this.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), dir); 
         this.dir = dir.clone().normalize(); scene.add(this.mesh);
     }
@@ -855,7 +872,6 @@ class Projectile {
 class EnemyBase {
     constructor(scene, pos, hp, isBoss = false) {
         this.scene = scene; this.isBoss = isBoss; this.active = true; this.hp = hp; this.maxHp = hp; this.currentSpeed = 0;
-        // ★ 牛鬼(Boss)のスケールを30に設定 (以前の半分以下、それでも巨大)
         if(isBoss) { this.scale = 30.0; this.mesh = createUshiOniModel(this.scale); } else { this.scale = 1.8; this.mesh = createBoxAvatar(ENEMY_COLS.colors, this.scale, 'bow'); }
         this.mesh.position.copy(pos); scene.add(this.mesh); this.uiElem = document.createElement('div'); this.uiElem.className = 'enemy-label'; this.uiElem.innerHTML = `<div class="enemy-name">Entity</div><div class="enemy-hp-bg"><div class="enemy-hp-fill"></div></div>`; this.hpFillElem = this.uiElem.querySelector('.enemy-hp-fill'); document.getElementById('enemy-hp-container').appendChild(this.uiElem);
     }
@@ -932,7 +948,6 @@ class Minion extends EnemyBase {
 
 class UshiOni extends EnemyBase { 
     constructor(scene, pos, yagura) { 
-        // ★ HPを 5555 に設定
         super(scene, pos, 5555, true); 
         this.yagura = yagura; 
         this.uiElem.querySelector('.enemy-name').innerText = "牛鬼 (魔物)"; 
@@ -946,7 +961,6 @@ class UshiOni extends EnemyBase {
             this.fireTimer -= dt; 
             if (this.fireTimer <= 0) { 
                 const dir = playerPos.clone().sub(this.mesh.position).normalize(); 
-                // スケール(30)に合わせて発射位置を調整
                 window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().add(new THREE.Vector3(0, 300, 0)), dir, '#ffaa00', 1, 'ushi_hammer', false, 40)); 
                 this.fireTimer = 2.0; 
             } 
@@ -956,10 +970,11 @@ class UshiOni extends EnemyBase {
 }
 
 class Engine {
-    constructor(skinData, weaponType, myTeam, allPlayersData) { 
+    constructor(skinData, weaponType, myTeam, allPlayersData, isLowSpec = false) { 
+        this.isLowSpec = isLowSpec;
         this.skinData = skinData; this.weaponType = weaponType; this.myTeam = myTeam; this.allPlayersData = allPlayersData; 
         this.score = 0; this.kills = 0; this.startTime = Date.now(); this.isGameOver = false; this.shakeTimer = 0; 
-        window.gameEngine = this; // ★ グローバル参照を確実にセット
+        window.gameEngine = this; 
         this.initThree(); this.inputMgr = new InputManager(); this.buildWorld(); 
         
         this.remotePlayers = {}; this.processedActions = {}; this.lastSyncTime = 0;
@@ -969,19 +984,24 @@ class Engine {
     }
     initThree() { 
         this.scene = new THREE.Scene(); 
-        this.scene.background = new THREE.Color(0x87CEEB); // ★ 青空フォールバック
-        this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.00004); 
+        this.scene.background = new THREE.Color(0x87CEEB); 
         this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 150000); 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); 
+        this.renderer = new THREE.WebGLRenderer({ antialias: !this.isLowSpec, alpha: false }); 
         this.renderer.setSize(window.innerWidth, window.innerHeight); 
         this.renderer.setClearColor(0x87CEEB); 
+        // ★ 軽量モード時は解像度を下げてパフォーマンスを確保
+        this.renderer.setPixelRatio(this.isLowSpec ? 1 : window.devicePixelRatio);
         document.getElementById('game-canvas').appendChild(this.renderer.domElement); 
         
-        try {
-            this.composer = new EffectComposer(this.renderer); 
-            this.composer.addPass(new RenderPass(this.scene, this.camera)); 
-            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.5, 0.85)); 
-        } catch(e) { this.composer = null; }
+        if (!this.isLowSpec) {
+            try {
+                this.composer = new EffectComposer(this.renderer); 
+                this.composer.addPass(new RenderPass(this.scene, this.camera)); 
+                this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.5, 0.85)); 
+            } catch(e) { this.composer = null; }
+        } else {
+            this.composer = null;
+        }
 
         window.addEventListener('resize', () => { 
             this.camera.aspect = window.innerWidth / window.innerHeight; 
@@ -991,12 +1011,11 @@ class Engine {
         }); 
     }
     
-    // ★ 共通の地形（Y座標）判定ロジック
     getGroundY(x, z) {
         let gy = RULES.GROUND_Y;
         const yPos = [
-            {x: 8000, z: -12000}, {x: 8000, z: 0}, {x: 8000, z: 12000},
-            {x: -8000, z: -12000}, {x: -8000, z: 0}, {x: -8000, z: 12000}
+            {x: 8000, z: 0},
+            {x: -8000, z: 0}
         ];
         for(let p of yPos) {
             const dx = x - p.x; const dz = z - p.z;
@@ -1018,8 +1037,7 @@ class Engine {
             }
         }
         
-        // ★ 橋の判定を追加
-        const bzArr = [-12000, 0, 12000];
+        const bzArr = [0];
         for(let bz of bzArr) {
             const dx = x - 0; const dz = z - bz;
             if (Math.abs(dx) < 2000 && Math.abs(dz) < 500) {
@@ -1035,23 +1053,22 @@ class Engine {
         this.scene.add(new THREE.AmbientLight(0xffffff, 0.9)); const dirLight = new THREE.DirectionalLight(0xffffff, 1.5); dirLight.position.set(100, 500, -100); this.scene.add(dirLight); 
         
         const groundMat = new THREE.MeshStandardMaterial({ color: 0x113311, roughness: 0.9 });
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.load('草床.jpg', (tex) => { tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(800, 800); groundMat.map = tex; groundMat.color.setHex(0xffffff); groundMat.needsUpdate = true; }, undefined, (err) => { console.warn("画像の読み込みに失敗しました。", err); });
+        if (!this.isLowSpec) {
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load('草床.jpg', (tex) => { tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(800, 800); groundMat.map = tex; groundMat.color.setHex(0xffffff); groundMat.needsUpdate = true; }, undefined, (err) => { console.warn("画像の読み込みに失敗しました。", err); });
+            textureLoader.load('空.jpg', (tex) => { const skyGeo = new THREE.SphereGeometry(100000, 32, 32); const skyMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false }); const sky = new THREE.Mesh(skyGeo, skyMat); this.scene.add(sky); }, undefined, (err) => { console.warn("空.jpg の読み込みに失敗しました。", err); });
+        }
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(120000, 120000), groundMat); ground.rotation.x = -Math.PI/2; this.scene.add(ground); 
-        
-        textureLoader.load('空.jpg', (tex) => { const skyGeo = new THREE.SphereGeometry(100000, 32, 32); const skyMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false }); const sky = new THREE.Mesh(skyGeo, skyMat); this.scene.add(sky); }, undefined, (err) => { console.warn("空.jpg の読み込みに失敗しました。", err); });
 
         const pathMat = new THREE.MeshBasicMaterial({ color: 0x4a3c31 }); 
-        [-12000, 0, 12000].forEach(z => { const pathGeo = new THREE.PlaneGeometry(60000, 2000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(0, 0.5, z); this.scene.add(path); });
+        [0].forEach(z => { const pathGeo = new THREE.PlaneGeometry(60000, 2000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(0, 0.5, z); this.scene.add(path); });
         [-20000, 20000].forEach(x => { const pathGeo = new THREE.PlaneGeometry(2000, 26000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(x, 0.6, 0); this.scene.add(path); });
 
-        // ★ 川の作成
         const riverMat = new THREE.MeshBasicMaterial({color: 0x44aaff, transparent: true, opacity: 0.8});
         const river = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), riverMat);
         river.rotation.x = -Math.PI / 2; river.position.set(0, 10, 0); this.scene.add(river);
 
-        // ★ 和風な橋の作成
-        [-12000, 0, 12000].forEach(z => {
+        [0].forEach(z => {
             const group = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
             for(let i=-20; i<=20; i++) {
                 const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
@@ -1082,7 +1099,6 @@ class Engine {
         const cLane = (z) => { 
             const sign = RULES.BASE_POS_X > 0 ? 1 : -1;
             const yag = new Yagura(this.scene, new THREE.Vector3(8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); 
-            // ★ 牛鬼のスポーン位置を鐘の前（プラットフォーム上）に固定
             this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(8000 - 250, 515, z), yag)); 
             
             const yag2 = new Yagura(this.scene, new THREE.Vector3(-8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag2);
@@ -1090,8 +1106,9 @@ class Engine {
             
             spawnSq(-4000, z, 30, 600); spawnSq(4000, z, 30, 600); spawnSq(10000, z, 30, 600); 
         };
-        cLane(-12000); cLane(0); cLane(12000); 
-        spawnSq(-4000, 0, 45, 800); spawnSq(4000, 0, 45, 800); spawnSq(10000, 0, 45, 800);
+        // ★ 鐘は中央レーン（この世に2つ）のみ
+        cLane(0); 
+        
         setTimeout(() => { this.announce("合戦開始", "牛鬼を倒せ！", "#0ff"); }, 500);
     }
     
