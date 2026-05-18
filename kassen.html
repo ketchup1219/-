@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KASSEN - Cyberpunk Samurai MOBA (v26.0 Ultimate FPS)</title>
+    <title>KASSEN - tukuyomi sengoku MOBA (verβ Ultimate FPS)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap');
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #010305; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #87CEEB; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
         #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         
         #customize-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #051515 0%, #010203 100%); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -94,11 +94,10 @@
         .t-btn { width: 70px; height: 70px; background: rgba(0,40,60,0.8); border: 2px solid #0ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0ff; font-weight: bold; font-family: 'Share Tech Mono'; font-size: 14px; text-shadow: 0 0 5px #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.3); }
         .t-btn.active { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
     </style>
-    <!-- ★ Three.js本体とAddonのバージョンを完全に一致させ、描画バグを防止 -->
     <script type="importmap">
     {
         "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
             "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/",
             "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
             "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
@@ -113,7 +112,6 @@
 
 <!-- LOBBY & SETUP UI -->
 <div id="customize-screen">
-    
     <div class="customize-panel" id="panel-setup">
         <h1>装備・外観の選択</h1>
         <div class="picker-group">
@@ -208,7 +206,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-// === Firebase Initialization & Setup ===
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
@@ -261,20 +258,11 @@ const startOfflineGame = () => {
 };
 
 const initAuth = async () => {
-    try {
-        await signInAnonymously(auth);
-    } catch(e) {
-        console.warn("Firebase Auth Error, entering Offline Mode:", e);
+    try { await signInAnonymously(auth); } catch(e) {
         isOfflineMode = true;
-        const statusEl = document.getElementById('auth-status');
-        if(statusEl) statusEl.style.display = 'none';
-        
+        document.getElementById('auth-status').style.display = 'none';
         const btn = document.getElementById('btn-to-mp');
-        if(btn) {
-            btn.innerText = "ソロプレイで出撃 (オフライン)";
-            btn.style.display = 'block';
-            btn.onclick = startOfflineGame;
-        }
+        if(btn) { btn.innerText = "ソロプレイで出撃 (オフライン)"; btn.style.display = 'block'; btn.onclick = startOfflineGame; }
         showError("サーバーに接続できませんでした。ソロモードで開始します。");
     }
 };
@@ -284,19 +272,13 @@ onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if(user && !isAuthInit) {
         isAuthInit = true;
-        const statusEl = document.getElementById('auth-status');
-        if(statusEl) statusEl.style.display = 'none';
+        document.getElementById('auth-status').style.display = 'none';
         const btn = document.getElementById('btn-to-mp');
-        if(btn) {
-            btn.style.display = 'block';
-            btn.onclick = () => showPanel('panel-mp-menu');
-        }
+        if(btn) { btn.style.display = 'block'; btn.onclick = () => showPanel('panel-mp-menu'); }
     }
 });
-
 initAuth();
 
-// === Lobby System Logic ===
 document.getElementById('btn-back-setup').onclick = () => showPanel('panel-setup');
 document.getElementById('btn-back-mp').onclick = () => showPanel('panel-mp-menu');
 
@@ -310,26 +292,17 @@ document.getElementById('btn-create-lobby').onclick = async () => {
             hostId: currentUser.uid,
             status: 'waiting',
             players: [{
-                uid: currentUser.uid,
-                name: 'P_' + currentUser.uid.substring(0,4),
+                uid: currentUser.uid, name: 'P_' + currentUser.uid.substring(0,4),
                 skin: document.getElementById('preset-select').value,
                 weapon: document.getElementById('weapon-select').value,
-                ready: true,
-                team: 0
+                ready: true, team: 0
             }]
         });
         await joinLobby(newLobbyId);
-    } catch(e) {
-        showError("ロビー作成失敗: " + e.message);
-        document.getElementById('btn-create-lobby').disabled = false;
-    }
+    } catch(e) { showError("ロビー作成失敗: " + e.message); document.getElementById('btn-create-lobby').disabled = false; }
 };
 
-document.getElementById('btn-find-lobby').onclick = () => {
-    showPanel('panel-lobby-list');
-    refreshLobbies();
-};
-
+document.getElementById('btn-find-lobby').onclick = () => { showPanel('panel-lobby-list'); refreshLobbies(); };
 document.getElementById('btn-refresh-lobbies').onclick = () => refreshLobbies();
 
 const refreshLobbies = async () => {
@@ -338,19 +311,14 @@ const refreshLobbies = async () => {
     try {
         const lobbiesRef = collection(db, 'artifacts', appId, 'public', 'data', 'lobbies');
         const snap = await getDocs(lobbiesRef);
-        const listEl = document.getElementById('lobby-list-container');
-        listEl.innerHTML = '';
+        const listEl = document.getElementById('lobby-list-container'); listEl.innerHTML = '';
         snap.forEach(docSnap => {
             const data = docSnap.data();
             if (data.status === 'waiting' && data.players.length < 6) {
-                const div = document.createElement('div');
-                div.className = 'lobby-list-item';
+                const div = document.createElement('div'); div.className = 'lobby-list-item';
                 div.innerHTML = `<span>ロビー ${docSnap.id.substring(6,10)} [${data.players.length}/6]</span>`;
-                const btn = document.createElement('button');
-                btn.innerText = '参加';
-                btn.onclick = () => joinLobby(docSnap.id);
-                div.appendChild(btn);
-                listEl.appendChild(div);
+                const btn = document.createElement('button'); btn.innerText = '参加'; btn.onclick = () => joinLobby(docSnap.id);
+                div.appendChild(btn); listEl.appendChild(div);
             }
         });
         if(listEl.innerHTML === '') listEl.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">待機中のロビーはありません</div>';
@@ -373,25 +341,18 @@ const joinLobby = async (lobbyId) => {
             if (!isAlreadyIn) {
                 if (data.players.length >= 6) return showError("満員です。");
                 data.players.push({
-                    uid: currentUser.uid,
-                    name: 'P_' + currentUser.uid.substring(0,4),
-                    skin: document.getElementById('preset-select').value,
-                    weapon: document.getElementById('weapon-select').value,
-                    ready: false,
-                    team: data.players.length % 2
+                    uid: currentUser.uid, name: 'P_' + currentUser.uid.substring(0,4),
+                    skin: document.getElementById('preset-select').value, weapon: document.getElementById('weapon-select').value,
+                    ready: false, team: data.players.length % 2
                 });
                 await updateDoc(lobbyRef, { players: data.players });
             }
         }
-
-        currentLobbyId = lobbyId;
-        document.getElementById('room-id-display').innerText = lobbyId.substring(6,10);
-        showPanel('panel-lobby-room');
+        currentLobbyId = lobbyId; document.getElementById('room-id-display').innerText = lobbyId.substring(6,10); showPanel('panel-lobby-room');
 
         lobbyUnsubscribe = onSnapshot(lobbyRef, (docSnap) => {
             if(!docSnap.exists()) { showError("ロビーが解散されました。"); leaveLobby(); return; }
-            currentLobbyData = docSnap.data();
-            renderLobbyRoom(currentLobbyData);
+            currentLobbyData = docSnap.data(); renderLobbyRoom(currentLobbyData);
             if (currentLobbyData.status === 'playing' && !window.gameEngine) startGame();
         }, err => showError(err.message));
     } catch(e) { showError("参加エラー: " + e.message); }
@@ -442,7 +403,6 @@ const leaveLobby = async () => {
     }
     currentLobbyId = null; currentLobbyData = null; showPanel('panel-mp-menu');
 };
-
 document.getElementById('btn-leave-lobby').onclick = leaveLobby;
 
 const startGame = () => {
@@ -457,9 +417,7 @@ const startGame = () => {
 function createParticleTexture() {
     const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128; const ctx = canvas.getContext('2d');
     const grad = ctx.createRadialGradient(64,64,0, 64,64,64); 
-    grad.addColorStop(0, 'rgba(255,255,255,1)'); 
-    grad.addColorStop(0.2, 'rgba(255,255,200,0.8)'); 
-    grad.addColorStop(1, 'rgba(255,200,0,0)');
+    grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.2, 'rgba(255,255,200,0.8)'); grad.addColorStop(1, 'rgba(255,200,0,0)');
     ctx.fillStyle = grad; ctx.fillRect(0,0,128,128); return new THREE.CanvasTexture(canvas);
 }
 const particleTex = createParticleTexture();
@@ -482,15 +440,13 @@ class VirtualJoystick {
 
 class InputManager {
     constructor() {
-        this.keys = {}; this.mouseMove = {x:0, y:0}; this.locked = false; this.isTouch = false; 
-        this.isMouseDown = false; 
+        this.keys = {}; this.mouseMove = {x:0, y:0}; this.locked = false; this.isTouch = false; this.isMouseDown = false; 
         window.addEventListener('keydown', e => this.keys[e.code] = true);
         window.addEventListener('keyup', e => this.keys[e.code] = false);
         window.addEventListener('mousemove', e => { if(this.locked) { this.mouseMove.x += e.movementX; this.mouseMove.y += e.movementY; } });
         window.addEventListener('mousedown', () => { if(!this.isTouch && !this.locked) document.body.requestPointerLock(); else if (this.locked) this.isMouseDown = true; });
         window.addEventListener('mouseup', () => { this.isMouseDown = false; });
         document.addEventListener('pointerlockchange', () => this.locked = document.pointerLockElement === document.body);
-        
         window.addEventListener('touchstart', () => { if(!this.isTouch) { this.isTouch = true; document.getElementById('touch-ui').style.display = 'block'; } }, {once:true});
         this.joyMove = new VirtualJoystick('joy-move-zone', 'joy-move-stick', false); this.joyLook = new VirtualJoystick('joy-look-zone', 'joy-look-stick', true);
         this.btns = {jump:false, dash:false, atk:false, ult:false};
@@ -502,14 +458,10 @@ class InputManager {
         if(this.keys['KeyW']) mY-=1; if(this.keys['KeyS']) mY+=1; if(this.keys['KeyA']) mX-=1; if(this.keys['KeyD']) mX+=1;
         j = this.keys['Space']; d = this.keys['ShiftLeft']; u = this.keys['KeyQ']; r = this.keys['KeyR'] || false;
         lX = this.mouseMove.x; lY = this.mouseMove.y; this.mouseMove = {x:0, y:0};
-        
         a = this.isMouseDown; 
-
         if(this.isTouch) { mX += this.joyMove.val.x; mY += this.joyMove.val.y; lX += this.joyLook.val.x; lY += this.joyLook.val.y; this.joyLook.val = {x:0, y:0}; j=j||this.btns.jump; d=d||this.btns.dash; a=a||this.btns.atk; u=u||this.btns.ult; }
-        
         const pads = navigator.getGamepads();
         if(pads && pads[0]) { const pad = pads[0]; if(Math.abs(pad.axes[0])>0.1) mX += pad.axes[0]; if(Math.abs(pad.axes[1])>0.1) mY += pad.axes[1]; if(Math.abs(pad.axes[2])>0.1) lX += pad.axes[2]*25; if(Math.abs(pad.axes[3])>0.1) lY += pad.axes[3]*25; j=j||pad.buttons[0].pressed; d=d||pad.buttons[1].pressed||pad.buttons[5].pressed; a=a||pad.buttons[7].pressed||pad.buttons[2].pressed; u=u||pad.buttons[3].pressed; r=r||pad.buttons[2].pressed; }
-
         return { mX, mY, lX, lY, j, d, a, u, r };
     }
 }
@@ -532,32 +484,22 @@ function createExplosion(scene, pos, color, count, size=20, spread=600) {
 function createKanaboMesh(scale = 1.0) {
     const kanabo = new THREE.Group();
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5), new THREE.MeshBasicMaterial({color: '#222'}));
-    handle.rotation.x = Math.PI/2;
-    handle.position.set(0, 0, -2.5);
-    kanabo.add(handle);
+    handle.rotation.x = Math.PI/2; handle.position.set(0, 0, -2.5); kanabo.add(handle);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.1, 8, 16), new THREE.MeshBasicMaterial({color: '#222'}));
-    ring.rotation.x = Math.PI/2;
-    ring.position.set(0, 0, 0.4);
-    kanabo.add(ring);
-    
-    const headHeight = 16;
-    const goldMat = new THREE.MeshBasicMaterial({color: '#FFD700'});
+    ring.rotation.x = Math.PI/2; ring.position.set(0, 0, 0.4); kanabo.add(ring);
+    const headHeight = 16; const goldMat = new THREE.MeshBasicMaterial({color: '#FFD700'});
     const head = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 0.8, headHeight), goldMat);
-    head.rotation.x = Math.PI/2;
-    head.position.set(0, 0, -(5 + headHeight/2));
-    kanabo.add(head);
+    head.rotation.x = Math.PI/2; head.position.set(0, 0, -(5 + headHeight/2)); kanabo.add(head);
 
     for(let i=0; i<40; i++){
         const spike = new THREE.Mesh(new THREE.ConeGeometry(0.2, 1.0, 4), goldMat);
-        const h = (Math.random() - 0.5) * (headHeight - 2); 
-        const angle = Math.random() * Math.PI * 2;
+        const h = (Math.random() - 0.5) * (headHeight - 2); const angle = Math.random() * Math.PI * 2;
         const r = 1.15 + (h / (headHeight/2)) * 0.35; 
         spike.position.set(Math.cos(angle) * r, h, Math.sin(angle) * r);
         spike.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize());
         head.add(spike);
     }
-    kanabo.scale.set(scale, scale, scale);
-    return kanabo;
+    kanabo.scale.set(scale, scale, scale); return kanabo;
 }
 
 function createViewmodel(weaponType, glowColor) {
@@ -565,57 +507,50 @@ function createViewmodel(weaponType, glowColor) {
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4), new THREE.MeshBasicMaterial({color: '#222222'})); arm.rotation.x = Math.PI/2; arm.position.set(0, 0, 2); viewGroup.add(arm);
     let muzzlePos = new THREE.Vector3(0,0,-2);
     
-    if (weaponType === 'kanabo') { 
-        const kanabo = createKanaboMesh();
-        kanabo.position.set(0, 0, -2);
-        viewGroup.add(kanabo); muzzlePos.set(0,0,-20); 
-    } 
+    if (weaponType === 'kanabo') { const kanabo = createKanaboMesh(); kanabo.position.set(0, 0, -2); viewGroup.add(kanabo); muzzlePos.set(0,0,-20); } 
     else if (weaponType === 'gun') { const gun = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 4), new THREE.MeshBasicMaterial({color: '#333'})); gun.position.set(0, 0, -1); viewGroup.add(gun); muzzlePos.set(0, 0.3, -3); } 
     else if (weaponType === 'dual_swords') { const sword = new THREE.Mesh(new THREE.BoxGeometry(0.2, 8, 1), new THREE.MeshBasicMaterial({color: glowColor})); sword.rotation.x = Math.PI/2; sword.position.set(0, 0, -3); viewGroup.add(sword); muzzlePos.set(0, 0, -6); } 
     else if (weaponType === 'hammer') { const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 10), new THREE.MeshBasicMaterial({color: '#421'})); handle.rotation.x = Math.PI/2; handle.position.set(0,0,-2); viewGroup.add(handle); const head = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 6), new THREE.MeshBasicMaterial({color: '#555'})); head.position.set(0,0,-6); viewGroup.add(head); muzzlePos.set(0,0,-8); } 
-    else if (weaponType === 'bow') { const bow = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 16, Math.PI), new THREE.MeshBasicMaterial({color: '#631'})); bow.rotation.y = Math.PI/2; bow.position.set(0, 0, -2); viewGroup.add(bow); muzzlePos.set(0,0,-3); } 
+    else if (weaponType === 'bow') { const bow = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 16, Math.PI), new THREE.MeshBasicMaterial({color: '#631'})); bow.rotation.y = Math.PI/2; bow.position.set(0, -2, 2); viewGroup.add(bow); muzzlePos.set(0,0,-3); } 
     else if (weaponType === 'fan') { const fan = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 0.2, 16, 1, false, 0, Math.PI), new THREE.MeshBasicMaterial({color: glowColor})); fan.rotation.x = Math.PI/2; fan.position.set(0, 0, -2); viewGroup.add(fan); muzzlePos.set(0,0,-4); }
     viewGroup.userData = { originalPos: viewGroup.position.clone(), originalRot: viewGroup.rotation.clone(), attackTimer: 0, muzzlePos: muzzlePos }; return viewGroup;
 }
 
 function updateAvatarAnimation(mesh, speed, isGrounded, isDashing, weaponType, dt) {
     const data = mesh.userData; if (!data.leftArm) return; if (data.attackTimer > 0) data.attackTimer -= dt;
+    const time = Date.now() * 0.015; const breathe = Math.sin(Date.now() * 0.003) * 0.05;
     if (isDashing) {
-        data.bodyGroup.rotation.x = 0; data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; if(data.dashEff) data.dashEffect.mesh.visible = true;
+        data.bodyGroup.rotation.x = 0.3; data.leftLeg.rotation.x = -0.5; data.rightLeg.rotation.x = 0.5; 
+        if(data.dashEff) data.dashEffect.mesh.visible = true; data.bodyGroup.position.y = breathe * 2;
     } else {
         data.bodyGroup.rotation.y = 0; if(data.dashEff) data.dashEffect.mesh.visible = false;
         if (!isGrounded) { 
-            data.leftLeg.rotation.x = -0.8; data.rightLeg.rotation.x = 0.8; 
+            data.bodyGroup.rotation.x = -0.1; data.leftLeg.rotation.x = -0.4; data.rightLeg.rotation.x = 0.2; 
             if (data.attackTimer <= 0) { data.leftArm.rotation.x = -0.8; data.rightArm.rotation.x = -0.8; } 
-        } 
-        else if (speed > 10) { 
-            const time = Date.now() * 0.025; 
-            data.leftLeg.rotation.x = Math.sin(time) * 1.2; 
-            data.rightLeg.rotation.x = Math.sin(time + Math.PI) * 1.2; 
-            data.leftArm.rotation.x = Math.sin(time + Math.PI) * 0.8; 
-            if (data.attackTimer <= 0) data.rightArm.rotation.x = Math.sin(time) * 0.8; 
-            
-            data.bodyGroup.rotation.z = Math.sin(time * 0.5) * 0.2;
-            data.bodyGroup.position.y = Math.abs(Math.sin(time)) * 2;
-        } 
-        else { 
-            data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; data.leftArm.rotation.x = 0; 
-            data.bodyGroup.rotation.z = 0; data.bodyGroup.position.y = 0;
-            if (data.attackTimer <= 0) data.rightArm.rotation.x = 0; 
+        } else if (speed > 10) { 
+            data.bodyGroup.rotation.x = 0.15; 
+            data.leftLeg.rotation.x = Math.sin(time) * 1.0; data.leftLeg.position.y = Math.max(0, Math.cos(time)) * 2 - 3;
+            data.rightLeg.rotation.x = Math.sin(time + Math.PI) * 1.0; data.rightLeg.position.y = Math.max(0, Math.cos(time + Math.PI)) * 2 - 3;
+            data.leftArm.rotation.x = Math.sin(time + Math.PI) * 0.8; data.leftArm.rotation.z = 0.1;
+            if (data.attackTimer <= 0) { data.rightArm.rotation.x = Math.sin(time) * 0.8; data.rightArm.rotation.z = -0.1; }
+            data.bodyGroup.rotation.z = Math.sin(time * 0.5) * 0.08; data.bodyGroup.position.y = Math.abs(Math.sin(time)) * 1.5;
+        } else { 
+            data.bodyGroup.rotation.x = 0; data.leftLeg.rotation.x = 0; data.rightLeg.rotation.x = 0; 
+            data.leftLeg.position.y = -3; data.rightLeg.position.y = -3;
+            data.leftArm.rotation.x = 0; data.leftArm.rotation.z = 0.05 + breathe;
+            data.bodyGroup.rotation.z = 0; data.bodyGroup.position.y = breathe * 5;
+            if (data.attackTimer <= 0) { data.rightArm.rotation.x = 0; data.rightArm.rotation.z = -0.05 - breathe; }
         }
-        
         if (data.attackTimer > 0) { 
-            const prog = data.attackTimer / 0.3; 
-            const ease = prog * prog * prog; 
-            data.rightArm.rotation.x = -(Math.PI * 1.2) * ease; 
-            data.leftArm.rotation.x = -(Math.PI * 1.2) * ease; 
+            const prog = data.attackTimer / 0.3; const ease = 1 - Math.pow(1 - prog, 3);
+            data.rightArm.rotation.x = -(Math.PI * 1.0) * ease; data.rightArm.rotation.z = -0.2 * ease;
+            data.leftArm.rotation.x = -(Math.PI * 1.0) * ease; data.leftArm.rotation.z = 0.2 * ease;
         }
     }
 }
 
 function createBoxAvatar(colors, scale=1.0, weaponType='bow') {
-    const group = new THREE.Group(); 
-    const bodyGroup = new THREE.Group(); group.add(bodyGroup);
+    const group = new THREE.Group(); const bodyGroup = new THREE.Group(); group.add(bodyGroup);
     const hat = new THREE.Mesh(new THREE.ConeGeometry(9, 3.5, 8), new THREE.MeshBasicMaterial({ color: colors.hat })); hat.position.y=15; bodyGroup.add(hat);
     const head = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshBasicMaterial({ color: 0xdddddd })); head.position.y=12; bodyGroup.add(head);
     const bodyMat = new THREE.MeshBasicMaterial({ color: colors.body }); const body = new THREE.Mesh(new THREE.BoxGeometry(7, 9, 4), bodyMat); body.position.y=6; bodyGroup.add(body);
@@ -630,8 +565,7 @@ function createBoxAvatar(colors, scale=1.0, weaponType='bow') {
     else if (weaponType === 'bow') { const bow = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 16, Math.PI), new THREE.MeshBasicMaterial({color: '#631'})); bow.rotation.y = Math.PI/2; bow.position.set(0, -3.5, 2); leftArmPivot.add(bow); }
     
     group.userData = { bodyGroup, leftArm: leftArmPivot, rightArm: rightArmPivot, leftLeg: leftLegPivot, rightLeg: rightLegPivot, attackTimer: 0, dashEff:false }; 
-    group.position.y = 4.5 * scale; group.scale.set(scale, scale, scale); 
-    return group;
+    group.position.y = 4.5 * scale; group.scale.set(scale, scale, scale); return group;
 }
 
 class RemotePlayer {
@@ -663,7 +597,7 @@ function createUshiOniModel(scale) {
         const lPivot = new THREE.Group(); lPivot.position.set(-10, 15, z); group.add(lPivot); const legL = new THREE.Mesh(legGeo, legMat); legL.position.set(-10, -5, 0); legL.rotation.set(0, 0, Math.PI/3); lPivot.add(legL); legs.push({pivot: lPivot, offset: i, isLeft: true});
         const rPivot = new THREE.Group(); rPivot.position.set(10, 15, z); group.add(rPivot); const legR = new THREE.Mesh(legGeo, legMat); legR.position.set(10, -5, 0); legR.rotation.set(0, 0, -Math.PI/3); rPivot.add(legR); legs.push({pivot: rPivot, offset: i, isLeft: false});
     }
-    group.userData = { legs: legs, attackTimer: 0 }; group.scale.set(scale, scale, scale); return group;
+    group.userData = { legs: legs, attackTimer: 0, originalY: 0 }; group.scale.set(scale, scale, scale); return group;
 }
 
 function createJapaneseCastle(x, z, isEnemy) {
@@ -673,58 +607,46 @@ function createJapaneseCastle(x, z, isEnemy) {
     const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
     const f2 = new THREE.Mesh(new THREE.BoxGeometry(1200, 600, 1200), new THREE.MeshBasicMaterial({color: mainColor})); f2.position.y = 2100; castleGroup.add(f2);
     const r2 = new THREE.Mesh(new THREE.ConeGeometry(1000, 320, 4), new THREE.MeshBasicMaterial({color: roofColor})); r2.position.y = 2560; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
-    
-    castleGroup.scale.set(10, 10, 10);
-    castleGroup.position.set(x, 0, z); return castleGroup;
+    castleGroup.scale.set(10, 10, 10); castleGroup.position.set(x, 0, z); return castleGroup;
 }
 
-// 桜の配置
-function createNature(scene) {
+function createNature(scene, engine) {
+    engine.treeGrid = {};
     const treeCount = 15000;
-    const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); 
-    const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
-    const trunkGeo = new THREE.CylinderGeometry(15, 20, 100);
-    const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
-    const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
-    const leavesMesh = new THREE.InstancedMesh(leavesGeo, sakuraMat, treeCount);
-    
-    const dummy = new THREE.Object3D();
-    let addedCount = 0;
-    let attempts = 0;
+    const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
+    const trunkGeo = new THREE.CylinderGeometry(15, 20, 100); const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
+    const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount); const leavesMesh = new THREE.InstancedMesh(leavesGeo, sakuraMat, treeCount);
+    const dummy = new THREE.Object3D(); let addedCount = 0; let attempts = 0;
     
     while(addedCount < treeCount && attempts < treeCount * 5) {
         attempts++;
-        const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
-        const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
-        
+        const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2; const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
         let validPos = true;
 
         if (Math.abs(z - (-12000)) < 1500 || Math.abs(z) < 1500 || Math.abs(z - 12000) < 1500) validPos = false;
         if (Math.abs(x - (-20000)) < 1500 || Math.abs(x - 20000) < 1500) validPos = false;
+        // 川・橋の上の配置防止
+        if (Math.abs(x) < 2000) validPos = false;
 
         const yaguraZs = [-12000, 0, 12000];
         for(let yz of yaguraZs) {
             const distToYagura = Math.sqrt(Math.pow(x - 8000, 2) + Math.pow(z - yz, 2));
             if (distToYagura < 5000) { validPos = false; break; }
         }
-
         if (Math.abs(x) > RULES.BASE_POS_X - 4000) validPos = false;
 
         if (validPos) {
             dummy.scale.set(5, 5, 5);
-            dummy.position.set(x, 250, z);
-            dummy.updateMatrix();
-            trunkMesh.setMatrixAt(addedCount, dummy.matrix);
+            dummy.position.set(x, 250, z); dummy.updateMatrix(); trunkMesh.setMatrixAt(addedCount, dummy.matrix);
+            dummy.position.set(x, 600, z); dummy.updateMatrix(); leavesMesh.setMatrixAt(addedCount, dummy.matrix);
             
-            dummy.position.set(x, 600, z);
-            dummy.updateMatrix();
-            leavesMesh.setMatrixAt(addedCount, dummy.matrix);
-            
+            const gx = Math.floor(x / 1000); const gz = Math.floor(z / 1000); const key = `${gx},${gz}`;
+            if (!engine.treeGrid[key]) engine.treeGrid[key] = [];
+            engine.treeGrid[key].push({x: x, z: z, radius: 75, height: 600});
             addedCount++;
         }
     }
-    trunkMesh.count = addedCount; leavesMesh.count = addedCount;
-    scene.add(trunkMesh); scene.add(leavesMesh);
+    trunkMesh.count = addedCount; leavesMesh.count = addedCount; scene.add(trunkMesh); scene.add(leavesMesh);
 }
 
 class PlayerLocal {
@@ -738,8 +660,13 @@ class PlayerLocal {
     takeDamage(v) { 
         if(window.gameEngine.isGameOver) return; this.hp -= v; const ol = document.getElementById('damage-overlay'); ol.style.opacity = '1'; setTimeout(()=>ol.style.opacity='0', 100);
         if(this.hp <= 0) { 
-            this.lives--; if(this.lives > 0) { this.hp = this.maxHp; this.sp = this.maxSp; this.position.set(this.spawnX, RULES.GROUND_Y, 0); this.velocity.set(0,0,0); window.gameEngine.announce("残機減少", "再出撃します", "#ff0000"); this.ammo = this.weaponStats.ammo; this.isReloading = false; } 
-            else { window.gameEngine.gameOver(false, "SYSTEM OFFLINE\n\nYOU DIED"); } 
+            this.lives--; 
+            if(this.lives > 0) { 
+                this.hp = this.maxHp; this.sp = this.maxSp; 
+                this.position.set(this.spawnX, RULES.GROUND_Y, 0); this.velocity.set(0,0,0); 
+                this.yaw = this.spawnX > 0 ? Math.PI/2 : -Math.PI/2; this.pitch = 0;
+                window.gameEngine.announce("残機減少", "再出撃します", "#ff0000"); this.ammo = this.weaponStats.ammo; this.isReloading = false; 
+            } else { window.gameEngine.gameOver(false, "SYSTEM OFFLINE\n\nYOU DIED"); } 
         } 
     }
     update(dt, input, groundY) {
@@ -757,6 +684,27 @@ class PlayerLocal {
         if (moveDir.lengthSq() > 0) moveDir.normalize(); this.velocity.x = moveDir.x * currentSpeed; this.velocity.z = moveDir.z * currentSpeed;
         if (input.j && this.isGrounded) { this.velocity.y = RULES.JUMP_FORCE; this.isGrounded = false; }
         this.position.addScaledVector(this.velocity, dt);
+
+        let pX = this.position.x; let pZ = this.position.z; const pRadius = 20; const gx = Math.floor(pX / 1000); const gz = Math.floor(pZ / 1000);
+        if (window.gameEngine && window.gameEngine.treeGrid) {
+            for(let i = -1; i <= 1; i++) {
+                for(let j = -1; j <= 1; j++) {
+                    const key = `${gx+i},${gz+j}`; const trees = window.gameEngine.treeGrid[key];
+                    if(trees) {
+                        for(let k=0; k<trees.length; k++) {
+                            const t = trees[k]; if (this.position.y > t.height) continue;
+                            const dx = pX - t.x; const dz = pZ - t.z; const distSq = dx*dx + dz*dz; const minDist = pRadius + t.radius;
+                            if(distSq < minDist * minDist) {
+                                const dist = Math.sqrt(distSq) || 1; const overlap = minDist - dist;
+                                pX += (dx/dist) * overlap; pZ += (dz/dist) * overlap;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.position.x = pX; this.position.z = pZ;
+
         if (this.position.y <= groundY) { this.position.y = groundY; this.velocity.y = Math.max(0, this.velocity.y); this.isGrounded = true; } else { this.isGrounded = false; }
         this.position.x = Math.max(-RULES.MAP_LIMIT, Math.min(RULES.MAP_LIMIT, this.position.x)); this.position.z = Math.max(-RULES.MAP_LIMIT, Math.min(RULES.MAP_LIMIT, this.position.z));
         this.camera.position.copy(this.position).setY(this.position.y + 25);
@@ -766,13 +714,14 @@ class PlayerLocal {
         
         const vd = this.viewmodel.userData;
         if(vd.attackTimer > 0) {
-            vd.attackTimer -= dt; 
-            const p = vd.attackTimer / this.weaponStats.cooldown; 
-            const ease = p * p * p * p; 
-            if(this.weaponType === 'gun' || this.weaponType === 'bow') { this.viewmodel.position.z = vd.originalPos.z + ease * 3.0; this.viewmodel.rotation.x = vd.originalRot.x + ease * 1.5; } 
-            else if (this.weaponType === 'kanabo') { this.viewmodel.position.z = vd.originalPos.z - ease * 8.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 3.0; this.viewmodel.rotation.z = vd.originalRot.z + ease * 1.0; }
-            else { this.viewmodel.position.z = vd.originalPos.z - ease * 5.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 2.5; this.viewmodel.rotation.z = vd.originalRot.z - ease * 3.0; }
-        } else { this.viewmodel.position.lerp(vd.originalPos, 0.1); this.viewmodel.quaternion.slerp(new THREE.Quaternion().setFromEuler(vd.originalRot), 0.1); }
+            vd.attackTimer -= dt; const p = vd.attackTimer / this.weaponStats.cooldown; const ease = p * p * (3 - 2 * p); const heavyEase = Math.pow(p, 4);
+            if(this.weaponType === 'gun' || this.weaponType === 'bow') { this.viewmodel.position.z = vd.originalPos.z + ease * 3.0; this.viewmodel.rotation.x = vd.originalRot.x + ease * 0.5; } 
+            else if (this.weaponType === 'kanabo') { this.viewmodel.position.z = vd.originalPos.z - heavyEase * 6.0; this.viewmodel.rotation.x = vd.originalRot.x - heavyEase * 2.5; this.viewmodel.rotation.z = vd.originalRot.z + heavyEase * 0.5; }
+            else { this.viewmodel.position.z = vd.originalPos.z - ease * 4.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 2.0; this.viewmodel.rotation.z = vd.originalRot.z - ease * 2.0; }
+        } else { 
+            const breathe = Math.sin(Date.now() * 0.002) * 0.05; const targetPos = vd.originalPos.clone(); targetPos.y += breathe;
+            this.viewmodel.position.lerp(targetPos, 0.1); this.viewmodel.quaternion.slerp(new THREE.Quaternion().setFromEuler(vd.originalRot), 0.1); 
+        }
     }
 }
 
@@ -824,16 +773,24 @@ class DarumaTower {
 class Yagura {
     constructor(scene, pos, name) {
         this.name = name; this.scene = scene; this.owner = -1; this.isBossDead = false; this.mesh = new THREE.Group(); this.mesh.position.copy(pos);
+        const sign = pos.x > 0 ? 1 : -1;
         
         const base = new THREE.Mesh(new THREE.BoxGeometry(600, 200, 600), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
-        const platform = new THREE.Mesh(new THREE.BoxGeometry(600, 20, 600), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(0, 1000, 0); this.mesh.add(platform);
-        const pillar = new THREE.Mesh(new THREE.BoxGeometry(400, 1000, 400), new THREE.MeshBasicMaterial({color: 0x110808})); pillar.position.set(0, 500, 0); this.mesh.add(pillar);
+        const platform = new THREE.Mesh(new THREE.BoxGeometry(800, 20, 800), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(-sign * 250, 505, 0); this.mesh.add(platform);
         
-        for(let i=0; i<200; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(80, 10, 300), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-4000 + i*20, i*5 + 5, 0); this.mesh.add(step); }
+        const stepCount = 100; const stepWidth = 600; 
+        for(let i=0; i<stepCount; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-sign * (2500 - i*22), i*5 + 5, 0); this.mesh.add(step); }
         
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(600, 300, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(0, 1500, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
+        const railL = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL.position.set(-sign * 1400, 300, -stepWidth/2 + 15); railL.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railL);
+        const railR = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR.position.set(-sign * 1400, 300, stepWidth/2 - 15); railR.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railR);
         
-        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(0, 1210, 0); this.mesh.add(this.bell);
+        for(let i=0; i<stepCount; i+=10) {
+            const poleL = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleL.position.set(-sign * (2500 - i*22), i*5 + 30, -stepWidth/2 + 15); this.mesh.add(poleL);
+            const poleR = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleR.position.set(-sign * (2500 - i*22), i*5 + 30, stepWidth/2 - 15); this.mesh.add(poleR);
+        }
+        
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(600, 300, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(-sign * 250, 1000, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
+        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(-sign * 250, 750, 0); this.mesh.add(this.bell);
         scene.add(this.mesh);
     }
     takeHit(projectilePos) {
@@ -849,7 +806,7 @@ class Yagura {
     capture() {
         this.owner = 0; this.bell.material.color.setHex(0x00ffff);
         const pillar = new THREE.Mesh(new THREE.CylinderGeometry(400, 400, 20000, 8), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending})); pillar.position.copy(this.mesh.position).setY(10000); this.scene.add(pillar);
-        createExplosion(this.scene, this.mesh.position.clone().setY(1210), 0x00ffff, 800, 100, 5000); window.gameEngine.announce(`鐘が鳴った！\n【${this.name}】占拠！`, "", "#00ffff"); window.gameEngine.checkCaptureState();
+        createExplosion(this.scene, this.mesh.position.clone().setY(750), 0x00ffff, 800, 100, 5000); window.gameEngine.announce(`鐘が鳴った！\n【${this.name}】占拠！`, "", "#00ffff"); window.gameEngine.checkCaptureState();
     }
 }
 
@@ -860,7 +817,7 @@ class Projectile {
         let geo, mat = new THREE.MeshBasicMaterial({ color: colorStr });
         if (isUlt) { geo = new THREE.SphereGeometry(12, 8, 8); this.speed = 3000; } 
         else if (type === 'hammer') { geo = new THREE.BoxGeometry(40, 40, 40); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 0.3; } 
-        else if (type === 'ushi_hammer') { geo = new THREE.BoxGeometry(400, 400, 400); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 5.0; }
+        else if (type === 'ushi_hammer') { geo = new THREE.BoxGeometry(200, 200, 200); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 5.0; }
         else if (type === 'kanabo') { geo = new THREE.CylinderGeometry(15, 15, 80); geo.rotateX(Math.PI/2); mat = new THREE.MeshBasicMaterial({ color: colorStr, wireframe: true }); this.speed = 1500; this.life = 0.4; } 
         else if (type === 'bow') { geo = new THREE.CylinderGeometry(1, 1, 40); geo.rotateX(Math.PI/2); this.speed = 8000; this.life = 1.5; } 
         else if (type === 'dual_swords') { geo = new THREE.BoxGeometry(35, 1, 10); this.speed = 5000; this.life = 0.15; } 
@@ -872,20 +829,73 @@ class Projectile {
         this.mesh.position.copy(pos); if (type === 'bow' || type === 'dual_swords' || type === 'gun' || type === 'kanabo') this.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), dir); 
         this.dir = dir.clone().normalize(); scene.add(this.mesh);
     }
-    update(dt) { this.mesh.position.addScaledVector(this.dir, this.speed * dt); this.life -= dt; if (this.life <= 0) this.destroy(); }
+    update(dt) { 
+        this.mesh.position.addScaledVector(this.dir, this.speed * dt); 
+        this.life -= dt; 
+        
+        if (window.gameEngine && window.gameEngine.treeGrid) {
+            const px = this.mesh.position.x; const py = this.mesh.position.y; const pz = this.mesh.position.z;
+            const gx = Math.floor(px / 1000); const gz = Math.floor(pz / 1000); const key = `${gx},${gz}`;
+            const trees = window.gameEngine.treeGrid[key];
+            if (trees) {
+                for(let k=0; k<trees.length; k++) {
+                    const t = trees[k];
+                    if (py > 0 && py < t.height) { 
+                        const dx = px - t.x; const dz = pz - t.z;
+                        if (dx*dx + dz*dz < (t.radius + 30) * (t.radius + 30)) { this.life = 0; break; }
+                    }
+                }
+            }
+        }
+        if (this.life <= 0) this.destroy(); 
+    }
     destroy() { this.active = false; this.scene.remove(this.mesh); }
 }
 
 class EnemyBase {
     constructor(scene, pos, hp, isBoss = false) {
         this.scene = scene; this.isBoss = isBoss; this.active = true; this.hp = hp; this.maxHp = hp; this.currentSpeed = 0;
-        if(isBoss) { this.scale = 150.0; this.mesh = createUshiOniModel(this.scale); } else { this.scale = 1.8; this.mesh = createBoxAvatar(ENEMY_COLS.colors, this.scale, 'bow'); }
+        // ★ 牛鬼(Boss)のスケールを30に設定 (以前の半分以下、それでも巨大)
+        if(isBoss) { this.scale = 30.0; this.mesh = createUshiOniModel(this.scale); } else { this.scale = 1.8; this.mesh = createBoxAvatar(ENEMY_COLS.colors, this.scale, 'bow'); }
         this.mesh.position.copy(pos); scene.add(this.mesh); this.uiElem = document.createElement('div'); this.uiElem.className = 'enemy-label'; this.uiElem.innerHTML = `<div class="enemy-name">Entity</div><div class="enemy-hp-bg"><div class="enemy-hp-fill"></div></div>`; this.hpFillElem = this.uiElem.querySelector('.enemy-hp-fill'); document.getElementById('enemy-hp-container').appendChild(this.uiElem);
     }
     update(dt, playerPos, camera) {
         if (!this.active) return; const targetPos = playerPos.clone(); targetPos.y = this.mesh.position.y; this.mesh.lookAt(targetPos); const screenPos = this.mesh.position.clone(); screenPos.y += 20 * this.scale; screenPos.project(camera);
         if (screenPos.z < 1) { this.uiElem.style.left = `${(screenPos.x * .5 + .5) * window.innerWidth}px`; this.uiElem.style.top = `${(screenPos.y * -.5 + .5) * window.innerHeight}px`; this.uiElem.style.display = 'flex'; this.hpFillElem.style.width = `${(this.hp/this.maxHp)*100}%`; } else { this.uiElem.style.display = 'none'; }
-        if(this.isBoss) { if(this.currentSpeed > 0) { const time = Date.now() * 0.01; this.mesh.userData.legs.forEach(l => { l.pivot.rotation.x = Math.sin(time + l.offset) * 0.5; }); } } 
+        
+        if(this.isBoss) { 
+            if(this.currentSpeed > 0) { 
+                const time = Date.now() * 0.005; 
+                this.mesh.userData.legs.forEach(l => { 
+                    l.pivot.rotation.x = Math.sin(time + l.offset) * 0.6; 
+                    l.pivot.position.y = 15 + Math.abs(Math.cos(time + l.offset)) * 5;
+                }); 
+                const gy = window.gameEngine ? window.gameEngine.getGroundY(this.mesh.position.x, this.mesh.position.z) : RULES.GROUND_Y;
+                this.mesh.position.y = gy + (this.scale * 10) + Math.abs(Math.sin(time * 2)) * 10;
+            } 
+        } else {
+            const gy = window.gameEngine ? window.gameEngine.getGroundY(this.mesh.position.x, this.mesh.position.z) : RULES.GROUND_Y;
+            this.mesh.position.y = gy + (this.scale * 4.5);
+        }
+        
+        let pX = this.mesh.position.x; let pZ = this.mesh.position.z; const pRadius = this.scale * 10; const gx = Math.floor(pX / 1000); const gz = Math.floor(pZ / 1000);
+        if (window.gameEngine && window.gameEngine.treeGrid) {
+            for(let i = -1; i <= 1; i++) {
+                for(let j = -1; j <= 1; j++) {
+                    const key = `${gx+i},${gz+j}`; const trees = window.gameEngine.treeGrid[key];
+                    if(trees) {
+                        for(let k=0; k<trees.length; k++) {
+                            const t = trees[k]; const dx = pX - t.x; const dz = pZ - t.z; const distSq = dx*dx + dz*dz; const minDist = pRadius + t.radius;
+                            if(distSq < minDist * minDist) {
+                                const dist = Math.sqrt(distSq) || 1; const overlap = minDist - dist;
+                                pX += (dx/dist) * overlap; pZ += (dz/dist) * overlap;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.mesh.position.x = pX; this.mesh.position.z = pZ;
     }
     takeDamage(v) { if (!this.active) return; this.hp -= v; if(this.hp <= 0) this.die(); else { this.mesh.children.forEach(c => { if(c.material && c.material.color) { const o=c.material.color.getHex(); c.material.color.setHex(0xffffff); setTimeout(()=>{if(c)c.material.color.setHex(o)},50);}}); } }
     die() { this.active = false; this.scene.remove(this.mesh); createExplosion(this.scene, this.mesh.position, this.isBoss?0xffaa00:0xff0055, this.isBoss?150:50, this.isBoss?30:15); if(this.uiElem && this.uiElem.parentNode) this.uiElem.parentNode.removeChild(this.uiElem); }
@@ -905,13 +915,10 @@ class Minion extends EnemyBase {
         if (dist < 4000) { 
             this.moveTimer += dt;
             if (this.moveTimer > 1.5) { this.moveAngle = (Math.random() - 0.5) * Math.PI; this.moveTimer = 0; }
-            
             const dirToPlayer = playerPos.clone().sub(this.mesh.position).normalize(); dirToPlayer.y = 0;
             let moveDir = dirToPlayer.clone().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle);
-            
             if (dist < 800) { moveDir = dirToPlayer.clone().negate().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle); } 
             else if (dist > 1500) { moveDir.lerp(dirToPlayer, 0.5).normalize(); }
-            
             this.currentSpeed = 350; this.mesh.position.addScaledVector(moveDir, this.currentSpeed * dt);
             this.fireTimer -= dt; 
             if (this.fireTimer <= 0) { 
@@ -922,8 +929,15 @@ class Minion extends EnemyBase {
         } 
     } 
 }
+
 class UshiOni extends EnemyBase { 
-    constructor(scene, pos, yagura) { super(scene, pos, 800, true); this.yagura = yagura; this.uiElem.querySelector('.enemy-name').innerText = "牛鬼 (魔物)"; this.uiElem.querySelector('.enemy-hp-bg').classList.add('boss-hp-bg'); this.hpFillElem.classList.add('boss-hp-fill'); this.fireTimer = 1.0; } 
+    constructor(scene, pos, yagura) { 
+        // ★ HPを 5555 に設定
+        super(scene, pos, 5555, true); 
+        this.yagura = yagura; 
+        this.uiElem.querySelector('.enemy-name').innerText = "牛鬼 (魔物)"; 
+        this.uiElem.querySelector('.enemy-hp-bg').classList.add('boss-hp-bg'); this.hpFillElem.classList.add('boss-hp-fill'); this.fireTimer = 1.0; 
+    } 
     update(dt, playerPos, camera, playerHeight) { 
         this.currentSpeed = 0; super.update(dt, playerPos, camera, playerHeight); if (!this.active) return; 
         const dist = this.mesh.position.distanceTo(playerPos);
@@ -932,18 +946,20 @@ class UshiOni extends EnemyBase {
             this.fireTimer -= dt; 
             if (this.fireTimer <= 0) { 
                 const dir = playerPos.clone().sub(this.mesh.position).normalize(); 
-                window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().add(new THREE.Vector3(0, 1500, 0)), dir, '#ffaa00', 1, 'ushi_hammer', false, 40)); 
+                // スケール(30)に合わせて発射位置を調整
+                window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().add(new THREE.Vector3(0, 300, 0)), dir, '#ffaa00', 1, 'ushi_hammer', false, 40)); 
                 this.fireTimer = 2.0; 
             } 
         } 
     }
-    die() { super.die(); this.yagura.isBossDead = true; window.gameEngine.announce("牛鬼撃破！", "階段を登って\n鐘を鳴らせ！", "#ffaa00"); }
+    die() { super.die(); this.yagura.isBossDead = true; window.gameEngine.announce("牛鬼撃破！", "鐘を鳴らせ！", "#ffaa00"); }
 }
 
 class Engine {
     constructor(skinData, weaponType, myTeam, allPlayersData) { 
         this.skinData = skinData; this.weaponType = weaponType; this.myTeam = myTeam; this.allPlayersData = allPlayersData; 
         this.score = 0; this.kills = 0; this.startTime = Date.now(); this.isGameOver = false; this.shakeTimer = 0; 
+        window.gameEngine = this; // ★ グローバル参照を確実にセット
         this.initThree(); this.inputMgr = new InputManager(); this.buildWorld(); 
         
         this.remotePlayers = {}; this.processedActions = {}; this.lastSyncTime = 0;
@@ -953,17 +969,18 @@ class Engine {
     }
     initThree() { 
         this.scene = new THREE.Scene(); 
-        this.scene.background = new THREE.Color(0x020810);
+        this.scene.background = new THREE.Color(0x87CEEB); // ★ 青空フォールバック
+        this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.00004); 
         this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 150000); 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); 
         this.renderer.setSize(window.innerWidth, window.innerHeight); 
-        this.renderer.setClearColor(0x020810); 
+        this.renderer.setClearColor(0x87CEEB); 
         document.getElementById('game-canvas').appendChild(this.renderer.domElement); 
         
         try {
             this.composer = new EffectComposer(this.renderer); 
             this.composer.addPass(new RenderPass(this.scene, this.camera)); 
-            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.6, 0.85)); 
+            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.5, 0.85)); 
         } catch(e) { this.composer = null; }
 
         window.addEventListener('resize', () => { 
@@ -973,8 +990,49 @@ class Engine {
             if(this.composer) this.composer.setSize(window.innerWidth, window.innerHeight); 
         }); 
     }
+    
+    // ★ 共通の地形（Y座標）判定ロジック
+    getGroundY(x, z) {
+        let gy = RULES.GROUND_Y;
+        const yPos = [
+            {x: 8000, z: -12000}, {x: 8000, z: 0}, {x: 8000, z: 12000},
+            {x: -8000, z: -12000}, {x: -8000, z: 0}, {x: -8000, z: 12000}
+        ];
+        for(let p of yPos) {
+            const dx = x - p.x; const dz = z - p.z;
+            const sign = p.x > 0 ? 1 : -1;
+            if (Math.abs(dx) < 300 && Math.abs(dz) < 300) { gy = Math.max(gy, 100); } 
+            
+            if (sign > 0) {
+                if (dx >= -2540 && dx < -300 && Math.abs(dz) < 300) { 
+                    const ratio = (dx - (-2500)) / (-300 - (-2500)); 
+                    gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500)); 
+                }
+                if (dx >= -400 && dx <= 100 && Math.abs(dz) < 400) { gy = Math.max(gy, 515); }
+            } else {
+                if (dx <= 2540 && dx > 300 && Math.abs(dz) < 300) {
+                    const ratio = (2500 - dx) / (2500 - 300);
+                    gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500));
+                }
+                if (dx <= 400 && dx >= -100 && Math.abs(dz) < 400) { gy = Math.max(gy, 515); }
+            }
+        }
+        
+        // ★ 橋の判定を追加
+        const bzArr = [-12000, 0, 12000];
+        for(let bz of bzArr) {
+            const dx = x - 0; const dz = z - bz;
+            if (Math.abs(dx) < 2000 && Math.abs(dz) < 500) {
+                const ratio = dx / 2000; 
+                const sy = Math.cos(ratio * Math.PI/2) * 500;
+                gy = Math.max(gy, sy);
+            }
+        }
+        return gy;
+    }
+
     buildWorld() {
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.8)); const dirLight = new THREE.DirectionalLight(0xaaccff, 1.5); dirLight.position.set(100, 500, -100); this.scene.add(dirLight); 
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.9)); const dirLight = new THREE.DirectionalLight(0xffffff, 1.5); dirLight.position.set(100, 500, -100); this.scene.add(dirLight); 
         
         const groundMat = new THREE.MeshStandardMaterial({ color: 0x113311, roughness: 0.9 });
         const textureLoader = new THREE.TextureLoader();
@@ -987,7 +1045,23 @@ class Engine {
         [-12000, 0, 12000].forEach(z => { const pathGeo = new THREE.PlaneGeometry(60000, 2000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(0, 0.5, z); this.scene.add(path); });
         [-20000, 20000].forEach(x => { const pathGeo = new THREE.PlaneGeometry(2000, 26000); const path = new THREE.Mesh(pathGeo, pathMat); path.rotation.x = -Math.PI / 2; path.position.set(x, 0.6, 0); this.scene.add(path); });
 
-        createNature(this.scene);
+        // ★ 川の作成
+        const riverMat = new THREE.MeshBasicMaterial({color: 0x44aaff, transparent: true, opacity: 0.8});
+        const river = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), riverMat);
+        river.rotation.x = -Math.PI / 2; river.position.set(0, 10, 0); this.scene.add(river);
+
+        // ★ 和風な橋の作成
+        [-12000, 0, 12000].forEach(z => {
+            const group = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
+            for(let i=-20; i<=20; i++) {
+                const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
+                const step = new THREE.Mesh(new THREE.BoxGeometry(100, 20, 1000), bMat);
+                step.position.set(i * 100, h, 0); step.rotation.z = -Math.sin(ratio * Math.PI/2) * Math.PI/4; group.add(step);
+            }
+            group.position.set(0, 0, z); this.scene.add(group);
+        });
+
+        createNature(this.scene, this);
 
         const enemyCastle = createJapaneseCastle(RULES.BASE_POS_X + 15000, 0, true); this.scene.add(enemyCastle);
         const allyCastle = createJapaneseCastle(-RULES.BASE_POS_X - 15000, 0, false); this.scene.add(allyCastle);
@@ -1006,11 +1080,17 @@ class Engine {
         const spawnSq = (cx, cz, n, r) => { for(let i=0; i<n; i++) { const a=Math.random()*Math.PI*2; const d=Math.random()*r; this.enemies.push(new Minion(this.scene, new THREE.Vector3(cx+Math.cos(a)*d, RULES.GROUND_Y, cz+Math.sin(a)*d))); } };
         
         const cLane = (z) => { 
+            const sign = RULES.BASE_POS_X > 0 ? 1 : -1;
             const yag = new Yagura(this.scene, new THREE.Vector3(8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); 
-            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(5000, 0, z), yag)); 
+            // ★ 牛鬼のスポーン位置を鐘の前（プラットフォーム上）に固定
+            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(8000 - 250, 515, z), yag)); 
+            
+            const yag2 = new Yagura(this.scene, new THREE.Vector3(-8000, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag2);
+            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(-8000 + 250, 515, z), yag2)); 
+            
             spawnSq(-4000, z, 30, 600); spawnSq(4000, z, 30, 600); spawnSq(10000, z, 30, 600); 
         };
-        cLane(-12000); cLane(12000); 
+        cLane(-12000); cLane(0); cLane(12000); 
         spawnSq(-4000, 0, 45, 800); spawnSq(4000, 0, 45, 800); spawnSq(10000, 0, 45, 800);
         setTimeout(() => { this.announce("合戦開始", "牛鬼を倒せ！", "#0ff"); }, 500);
     }
@@ -1050,14 +1130,7 @@ class Engine {
     animate() {
         requestAnimationFrame(() => this.animate()); if(this.isGameOver) return; const dt = 0.016; this.allyBase.update(dt); this.enemyBase.update(dt); const input = this.inputMgr.update(); 
         
-        let groundY = RULES.GROUND_Y;
-        this.yaguras.forEach(yag => {
-            const dx = this.player.position.x - yag.mesh.position.x; const dz = this.player.position.z - yag.mesh.position.z;
-            if (Math.abs(dx) < 300 && Math.abs(dz) < 300) { groundY = Math.max(groundY, 100); } 
-            if (dx >= -400 && dx <= 100 && Math.abs(dz) < 150) { groundY = Math.max(groundY, 515); } 
-            if (dx >= -2500 && dx < -250 && Math.abs(dz) < 100) { const sy = ((dx + 2500) / 2250) * 500; groundY = Math.max(groundY, sy); } 
-        });
-        
+        const groundY = this.getGroundY(this.player.position.x, this.player.position.z);
         this.player.update(dt, input, groundY);
         Object.values(this.remotePlayers).forEach(rp => rp.update(dt, this.camera));
 
