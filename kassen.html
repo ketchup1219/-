@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KASSEN - Cyberpunk Samurai MOBA (v30.0 Ultimate FPS)</title>
+    <title>KASSEN - Cyberpunk Samurai MOBA (v33.0 Ultimate FPS)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap');
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #87CEEB; color: #fff; overflow: hidden; font-family: 'Share Tech Mono', monospace; user-select: none; touch-action: none;}
@@ -57,6 +57,7 @@
         .bar-bg { flex-grow: 1; height: 10px; background: rgba(0, 40, 50, 0.6); border: 1px solid rgba(0, 255, 255, 0.4); clip-path: polygon(0 0, 100% 0, 98% 100%, 0% 100%); }
         .bar-fill { height: 100%; background: linear-gradient(90deg, #0aa, #0ff); box-shadow: 0 0 8px #0ff; transition: width 0.1s linear; }
         .bar-fill.danger { background: linear-gradient(90deg, #a0a, #f0f); box-shadow: 0 0 8px #f0f; }
+        #shield-hud { font-size: 18px; color: #ff0; font-weight: bold; margin-top: 10px; text-shadow: 0 0 10px #ff0; }
         #ammo-hud { position: absolute; bottom: 100px; right: 40px; font-size: 24px; font-weight: bold; color: #fff; text-shadow: 0 0 10px #0ff; text-align: right;}
         .reloading-text { color: #f05 !important; text-shadow: 0 0 10px #f05 !important; animation: blink 0.5s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
@@ -90,11 +91,10 @@
         .joy-stick { position: absolute; top: 45px; left: 45px; width: 50px; height: 50px; background: rgba(0,255,255,0.6); border-radius: 50%; box-shadow: 0 0 10px #0ff; }
         #joy-move-zone { left: 30px; }
         #joy-look-zone { right: 200px; }
-        #touch-btns { position: absolute; bottom: 30px; right: 20px; display: grid; grid-template-columns: 70px 70px; gap: 15px; pointer-events: auto; }
-        .t-btn { width: 70px; height: 70px; background: rgba(0,40,60,0.8); border: 2px solid #0ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0ff; font-weight: bold; font-family: 'Share Tech Mono'; font-size: 14px; text-shadow: 0 0 5px #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.3); }
+        #touch-btns { position: absolute; bottom: 30px; right: 20px; display: grid; grid-template-columns: 60px 60px 60px; gap: 10px; pointer-events: auto; }
+        .t-btn { width: 60px; height: 60px; background: rgba(0,40,60,0.8); border: 2px solid #0ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0ff; font-weight: bold; font-family: 'Share Tech Mono'; font-size: 12px; text-shadow: 0 0 5px #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.3); }
         .t-btn.active { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
     </style>
-    <!-- Three.js & Firebase -->
     <script type="importmap">
     {
         "imports": {
@@ -184,7 +184,13 @@
 <div id="touch-ui">
     <div id="joy-move-zone" class="joy-zone"><div id="joy-move-stick" class="joy-stick"></div></div>
     <div id="joy-look-zone" class="joy-zone"><div id="joy-look-stick" class="joy-stick"></div></div>
-    <div id="touch-btns"><div id="t-btn-ult" class="t-btn">ULT (Q)</div><div id="t-btn-atk" class="t-btn">ATK</div><div id="t-btn-dash" class="t-btn">DASH</div><div id="t-btn-jump" class="t-btn">JUMP</div></div>
+    <div id="touch-btns">
+        <div id="t-btn-ult" class="t-btn">ULT(Q)</div>
+        <div id="t-btn-shield" class="t-btn" style="border-color:#ff0; color:#ff0;">SHIELD</div>
+        <div id="t-btn-atk" class="t-btn">ATK</div>
+        <div id="t-btn-dash" class="t-btn">DASH</div>
+        <div id="t-btn-jump" class="t-btn">JUMP</div>
+    </div>
 </div>
 
 <div id="game-canvas"></div>
@@ -204,6 +210,7 @@
         <div class="hud-bar-row"><div class="hud-icon">HP</div><div class="bar-bg"><div id="player-hp-bar" class="bar-fill"></div></div></div>
         <div class="hud-bar-row"><div class="hud-icon">SP</div><div class="bar-bg"><div id="player-sp-bar" class="bar-fill" style="background: linear-gradient(90deg, #0a5, #0f8); box-shadow:0 0 5px #0f8;"></div></div></div>
         <div class="hud-bar-row"><div class="hud-icon">EX</div><div class="bar-bg"><div id="player-ult-bar" class="bar-fill danger" style="width:0%;"></div></div></div>
+        <div id="shield-hud">SHIELD: (HOLD R-CLICK/BTN)</div>
     </div>
     <div id="reticle"><div class="reticle-dot"></div></div>
     <div id="announce-container"><div id="announce1" class="announce-text"></div><div id="announce2" class="announce-text" style="font-size: 2.5rem; animation-delay: 0.2s;"></div></div>
@@ -215,6 +222,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+// === Firebase Initialization & Setup ===
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
@@ -433,6 +441,14 @@ function createParticleTexture() {
 }
 const particleTex = createParticleTexture();
 
+function createWaterTexture() {
+    const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0044aa'; ctx.fillRect(0,0,256,256); ctx.fillStyle = '#0066cc';
+    for(let i=0; i<200; i++) { ctx.fillRect(Math.random()*256, Math.random()*256, Math.random()*20+10, Math.random()*5+2); }
+    const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; return tex;
+}
+const waterTex = createWaterTexture();
+
 class VirtualJoystick {
     constructor(zoneId, stickId, isLook) {
         this.zone = document.getElementById(zoneId); this.stick = document.getElementById(stickId); this.isLook = isLook; this.active = false; this.val = {x:0, y:0}; this.origin = {x:0, y:0}; this.touchId = null;
@@ -445,54 +461,64 @@ class VirtualJoystick {
         let dx = x - this.origin.x, dy = y - this.origin.y; const maxR = 45; const dist = Math.sqrt(dx*dx + dy*dy);
         if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
         this.stick.style.transform = `translate(${dx}px, ${dy}px)`;
-        // ★ スマホの感度を大幅アップ
         if(this.isLook) { this.val.x = dx * 0.15; this.val.y = dy * 0.15; } else { this.val.x = dx / maxR; this.val.y = dy / maxR; }
     }
 }
 
 class InputManager {
     constructor() {
-        this.keys = {}; this.mouseMove = {x:0, y:0}; this.locked = false; this.isTouch = false; this.isMouseDown = false; 
+        this.keys = {}; this.mouseMove = {x:0, y:0}; this.locked = false; this.isTouch = false; this.isMouseDown = false; this.isRightMouseDown = false;
+        
         window.addEventListener('keydown', e => this.keys[e.code] = true);
         window.addEventListener('keyup', e => this.keys[e.code] = false);
         window.addEventListener('mousemove', e => { if(this.locked) { this.mouseMove.x += e.movementX; this.mouseMove.y += e.movementY; } });
-        window.addEventListener('mousedown', () => { if(!this.isTouch && !this.locked) document.body.requestPointerLock(); else if (this.locked) this.isMouseDown = true; });
-        window.addEventListener('mouseup', () => { this.isMouseDown = false; });
+        
+        window.addEventListener('mousedown', (e) => { 
+            if(!this.isTouch && !this.locked) document.body.requestPointerLock(); 
+            else if (this.locked) {
+                if(e.button === 0) this.isMouseDown = true; 
+                if(e.button === 2) this.isRightMouseDown = true; 
+            }
+        });
+        window.addEventListener('mouseup', (e) => { 
+            if(e.button === 0) this.isMouseDown = false; 
+            if(e.button === 2) this.isRightMouseDown = false;
+        });
+        window.addEventListener('contextmenu', e => e.preventDefault());
+
         document.addEventListener('pointerlockchange', () => this.locked = document.pointerLockElement === document.body);
+        
         window.addEventListener('touchstart', () => { if(!this.isTouch) { this.isTouch = true; document.getElementById('touch-ui').style.display = 'block'; } }, {once:true});
         this.joyMove = new VirtualJoystick('joy-move-zone', 'joy-move-stick', false); this.joyLook = new VirtualJoystick('joy-look-zone', 'joy-look-stick', true);
-        this.btns = {jump:false, dash:false, atk:false, ult:false};
+        this.btns = {jump:false, dash:false, atk:false, ult:false, shield:false};
         const bindBtn = (id, key) => { const el = document.getElementById(id); el.addEventListener('touchstart', e=>{ e.preventDefault(); this.btns[key]=true; el.classList.add('active'); }); el.addEventListener('touchend', e=>{ e.preventDefault(); this.btns[key]=false; el.classList.remove('active'); }); };
-        bindBtn('t-btn-jump', 'jump'); bindBtn('t-btn-dash', 'dash'); bindBtn('t-btn-atk', 'atk'); bindBtn('t-btn-ult', 'ult');
+        bindBtn('t-btn-jump', 'jump'); bindBtn('t-btn-dash', 'dash'); bindBtn('t-btn-atk', 'atk'); bindBtn('t-btn-ult', 'ult'); bindBtn('t-btn-shield', 'shield');
     }
     update() {
-        let mX=0, mY=0, lX=0, lY=0, j=false, d=false, u=false, a=false, r=false;
+        let mX=0, mY=0, lX=0, lY=0, j=false, d=false, u=false, a=false, r=false, s=false;
         if(this.keys['KeyW']) mY-=1; if(this.keys['KeyS']) mY+=1; if(this.keys['KeyA']) mX-=1; if(this.keys['KeyD']) mX+=1;
         j = this.keys['Space']; d = this.keys['ShiftLeft']; u = this.keys['KeyQ']; r = this.keys['KeyR'] || false;
         lX = this.mouseMove.x; lY = this.mouseMove.y; this.mouseMove = {x:0, y:0};
+        
         a = this.isMouseDown; 
-        if(this.isTouch) { mX += this.joyMove.val.x; mY += this.joyMove.val.y; lX += this.joyLook.val.x; lY += this.joyLook.val.y; this.joyLook.val = {x:0, y:0}; j=j||this.btns.jump; d=d||this.btns.dash; a=a||this.btns.atk; u=u||this.btns.ult; }
+        s = this.isRightMouseDown; 
+
+        if(this.isTouch) { 
+            mX += this.joyMove.val.x; mY += this.joyMove.val.y; lX += this.joyLook.val.x; lY += this.joyLook.val.y; this.joyLook.val = {x:0, y:0}; 
+            j=j||this.btns.jump; d=d||this.btns.dash; a=a||this.btns.atk; u=u||this.btns.ult; s=s||this.btns.shield;
+        }
+        
         const pads = navigator.getGamepads();
-        if(pads && pads[0]) { const pad = pads[0]; if(Math.abs(pad.axes[0])>0.1) mX += pad.axes[0]; if(Math.abs(pad.axes[1])>0.1) mY += pad.axes[1]; if(Math.abs(pad.axes[2])>0.1) lX += pad.axes[2]*25; if(Math.abs(pad.axes[3])>0.1) lY += pad.axes[3]*25; j=j||pad.buttons[0].pressed; d=d||pad.buttons[1].pressed||pad.buttons[5].pressed; a=a||pad.buttons[7].pressed||pad.buttons[2].pressed; u=u||pad.buttons[3].pressed; r=r||pad.buttons[2].pressed; }
-        return { mX, mY, lX, lY, j, d, a, u, r };
+        if(pads && pads[0]) { const pad = pads[0]; if(Math.abs(pad.axes[0])>0.1) mX += pad.axes[0]; if(Math.abs(pad.axes[1])>0.1) mY += pad.axes[1]; if(Math.abs(pad.axes[2])>0.1) lX += pad.axes[2]*25; if(Math.abs(pad.axes[3])>0.1) lY += pad.axes[3]*25; j=j||pad.buttons[0].pressed; d=d||pad.buttons[1].pressed||pad.buttons[5].pressed; a=a||pad.buttons[7].pressed||pad.buttons[2].pressed; u=u||pad.buttons[3].pressed; r=r||pad.buttons[2].pressed; s=s||pad.buttons[6].pressed; }
+
+        return { mX, mY, lX, lY, j, d, a, u, r, s };
     }
 }
 
-// ★ 天守閣間距離は50,000。
 const RULES = { MAP_LIMIT: 40000, BASE_POS_X: 25000, GRAVITY: 800, JUMP_FORCE: 500, PLAYER_SPEED: 850, GROUND_Y: 20, STEALTH_HEIGHT: 80 };
 const SKINS = { kogetsu: { colors: { hat: '#f2ebda', body: '#e64a45', glow: '#92c75a' } }, default: { colors: { hat: '#222222', body: '#0088ff', glow: '#00ffff' } }, crimson: { colors: { hat: '#110000', body: '#aa0000', glow: '#ff0000' } }, forest: { colors: { hat: '#001100', body: '#004400', glow: '#00ff44' } } };
 const ENEMY_COLS = { colors: { hat: '#330000', body: '#660000', glow: '#ff0055' } };
-const BOSS_COLS = { colors: { hat: '#222200', body: '#444400', glow: '#ffaa00' } };
-
-// ★ 武器バランスの完全調整 (全武器DPS約150ベース)
-const WEAPON_STATS = { 
-    gun: { damage: 15, ammo: 30, reload: 1.5, cooldown: 0.1 }, 
-    bow: { damage: 75, ammo: 10, reload: 1.0, cooldown: 0.5 }, 
-    hammer: { damage: 120, ammo: Infinity, reload: 0, cooldown: 0.8 }, 
-    kanabo: { damage: 225, ammo: Infinity, reload: 0, cooldown: 1.5 }, 
-    dual_swords: { damage: 25, ammo: Infinity, reload: 0, cooldown: 0.33 }, 
-    fan: { damage: 20, ammo: Infinity, reload: 0, cooldown: 0.4 } 
-};
+const WEAPON_STATS = { gun: { damage: 15, ammo: 30, reload: 1.5, cooldown: 0.1 }, bow: { damage: 75, ammo: 10, reload: 1.0, cooldown: 0.5 }, hammer: { damage: 120, ammo: Infinity, reload: 0, cooldown: 0.8 }, kanabo: { damage: 225, ammo: Infinity, reload: 0, cooldown: 1.5 }, dual_swords: { damage: 25, ammo: Infinity, reload: 0, cooldown: 0.33 }, fan: { damage: 20, ammo: Infinity, reload: 0, cooldown: 0.4 } };
 
 const particles = [];
 function createExplosion(scene, pos, color, count, size=20, spread=600) {
@@ -592,6 +618,42 @@ function createBoxAvatar(colors, scale=1.0, weaponType='bow') {
     group.position.y = 4.5 * scale; group.scale.set(scale, scale, scale); return group;
 }
 
+// ★ ブーメラン (盾モード中の攻撃)
+class Boomerang {
+    constructor(scene, pos, dir, glowColor, weaponType, damage, owner) {
+        this.scene = scene; this.owner = owner; this.damage = damage; this.weaponType = weaponType;
+        this.active = true; this.returning = false; this.speed = 4000; this.maxDist = 6000;
+        this.startPos = pos.clone(); this.dir = dir.clone().normalize();
+        
+        this.mesh = createViewmodel(weaponType, glowColor);
+        this.mesh.scale.set(2, 2, 2);
+        this.mesh.position.copy(pos);
+        this.scene.add(this.mesh);
+    }
+    update(dt, playerPos) {
+        if (!this.active) return;
+        this.mesh.rotation.y += dt * 20;
+        this.mesh.rotation.x += dt * 15;
+
+        if (!this.returning) {
+            this.mesh.position.addScaledVector(this.dir, this.speed * dt);
+            if (this.mesh.position.distanceTo(this.startPos) > this.maxDist) {
+                this.returning = true;
+            }
+        } else {
+            const toPlayer = playerPos.clone().sub(this.mesh.position).normalize();
+            this.mesh.position.addScaledVector(toPlayer, (this.speed * 1.5) * dt);
+            if (this.mesh.position.distanceTo(playerPos) < 200) {
+                this.destroy(); 
+            }
+        }
+    }
+    destroy() {
+        this.active = false;
+        this.scene.remove(this.mesh);
+    }
+}
+
 class RemotePlayer {
     constructor(scene, data) {
         const sData = SKINS[data.skin] || SKINS['default']; this.mesh = createBoxAvatar(sData.colors, 1.0, data.weapon); this.scene = scene; this.scene.add(this.mesh);
@@ -605,6 +667,111 @@ class RemotePlayer {
         if (screenPos.z < 1) { this.uiElem.style.left = `${(screenPos.x * .5 + .5) * window.innerWidth}px`; this.uiElem.style.top = `${(screenPos.y * -.5 + .5) * window.innerHeight}px`; this.uiElem.style.display = 'flex'; } else { this.uiElem.style.display = 'none'; }
     }
     destroy() { this.scene.remove(this.mesh); if(this.uiElem && this.uiElem.parentNode) this.uiElem.parentNode.removeChild(this.uiElem); }
+}
+
+// ★ AIヒーロー
+class HeroAI {
+    constructor(scene, team, spawnX, skinName, weaponType, name) {
+        this.scene = scene; this.team = team; this.weaponType = weaponType; this.name = name;
+        this.active = true; this.hp = 450; this.maxHp = 450;
+        this.position = new THREE.Vector3(spawnX, RULES.GROUND_Y, (Math.random()-0.5)*10000);
+        this.spawnX = spawnX;
+        
+        const skinData = SKINS[skinName] || SKINS['default'];
+        this.mesh = createBoxAvatar(skinData.colors, 1.2, weaponType);
+        this.mesh.position.copy(this.position);
+        this.scene.add(this.mesh);
+        
+        this.uiElem = document.createElement('div');
+        this.uiElem.className = 'enemy-label';
+        const color = this.team === 0 ? '#0ff' : '#f05';
+        this.uiElem.innerHTML = `<div class="enemy-name" style="color:${color}; border-color:${color};">${name}</div><div class="enemy-hp-bg"><div class="enemy-hp-fill" style="background:${color};"></div></div>`;
+        this.hpFillElem = this.uiElem.querySelector('.enemy-hp-fill');
+        document.getElementById('enemy-hp-container').appendChild(this.uiElem);
+        
+        this.atkCooldown = 0;
+        this.weaponStats = WEAPON_STATS[weaponType];
+        this.target = null;
+        this.thinkTimer = 0;
+    }
+    takeDamage(v) {
+        if(!this.active) return;
+        this.hp -= v;
+        if(this.hp <= 0) {
+            this.active = false; this.mesh.visible = false; this.uiElem.style.display = 'none';
+            createExplosion(this.scene, this.position, this.team===0?'#0ff':'#f05', 50, 15);
+            setTimeout(() => {
+                this.hp = this.maxHp; this.active = true; this.mesh.visible = true;
+                this.position.set(this.spawnX, RULES.GROUND_Y, (Math.random()-0.5)*10000);
+            }, 5000);
+        }
+    }
+    update(dt, engine, camera) {
+        if(!this.active) return;
+        if(this.atkCooldown > 0) this.atkCooldown -= dt;
+        
+        this.thinkTimer -= dt;
+        if(this.thinkTimer <= 0) {
+            this.thinkTimer = 1.0;
+            let minDist = Infinity;
+            this.target = null;
+            
+            if (this.team !== engine.myTeam && engine.player.spawnPhase === 1) {
+                const d = this.position.distanceTo(engine.player.position);
+                if (d < 8000) { minDist = d; this.target = engine.player.position; }
+            }
+            engine.aiPlayers.forEach(ai => {
+                if (ai.active && ai.team !== this.team) {
+                    const d = this.position.distanceTo(ai.position);
+                    if (d < 8000 && d < minDist) { minDist = d; this.target = ai.position; }
+                }
+            });
+            engine.enemies.forEach(e => {
+                if (e.active && ((this.team === 0 && e.isBoss) || e.team !== this.team)) { 
+                    const d = this.position.distanceTo(e.mesh.position);
+                    if (d < 8000 && d < minDist) { minDist = d; this.target = e.mesh.position; }
+                }
+            });
+            engine.yaguras.forEach(y => {
+                if (y.owner !== this.team && y.owner !== 0) { 
+                    const d = this.position.distanceTo(y.mesh.position);
+                    if (d < 15000 && d < minDist) { minDist = d; this.target = y.mesh.position; }
+                }
+            });
+        }
+        
+        let speed = 0;
+        if (this.target) {
+            const dir = this.target.clone().sub(this.position); dir.y = 0;
+            const dist = dir.length(); dir.normalize();
+            const range = (this.weaponType === 'bow' || this.weaponType === 'gun') ? 3000 : 400;
+            
+            if (dist > range) {
+                speed = RULES.PLAYER_SPEED * 0.8;
+                this.position.addScaledVector(dir, speed * dt);
+                this.mesh.lookAt(this.target);
+            } else {
+                this.mesh.lookAt(this.target);
+                if (this.atkCooldown <= 0) {
+                    this.atkCooldown = this.weaponStats.cooldown * 2.0;
+                    engine.projectiles.push(new Projectile(this.scene, this.position.clone().setY(200), dir, this.team===0?'#0ff':'#f05', this.team, this.weaponType, false, this.weaponStats.damage));
+                }
+            }
+        } else {
+            const dirX = this.team === 0 ? 1 : -1;
+            speed = RULES.PLAYER_SPEED * 0.5;
+            this.position.x += dirX * speed * dt;
+            this.mesh.rotation.y = this.team === 0 ? Math.PI/2 : -Math.PI/2;
+        }
+        
+        const gy = engine.getGroundY(this.position.x, this.position.z);
+        this.position.y = gy;
+        this.mesh.position.copy(this.position);
+        updateAvatarAnimation(this.mesh, speed, true, false, this.weaponType, dt);
+        
+        const screenPos = this.mesh.position.clone(); screenPos.y += 150; screenPos.project(camera);
+        if (screenPos.z < 1) { this.uiElem.style.left = `${(screenPos.x * .5 + .5) * window.innerWidth}px`; this.uiElem.style.top = `${(screenPos.y * -.5 + .5) * window.innerHeight}px`; this.uiElem.style.display = 'flex'; this.hpFillElem.style.width = `${(this.hp/this.maxHp)*100}%`; } else { this.uiElem.style.display = 'none'; }
+    }
 }
 
 function createUshiOniModel(scale) {
@@ -621,36 +788,25 @@ function createUshiOniModel(scale) {
         const lPivot = new THREE.Group(); lPivot.position.set(-10, 15, z); group.add(lPivot); const legL = new THREE.Mesh(legGeo, legMat); legL.position.set(-10, -5, 0); legL.rotation.set(0, 0, Math.PI/3); lPivot.add(legL); legs.push({pivot: lPivot, offset: i, isLeft: true});
         const rPivot = new THREE.Group(); rPivot.position.set(10, 15, z); group.add(rPivot); const legR = new THREE.Mesh(legGeo, legMat); legR.position.set(10, -5, 0); legR.rotation.set(0, 0, -Math.PI/3); rPivot.add(legR); legs.push({pivot: rPivot, offset: i, isLeft: false});
     }
-    group.userData = { legs: legs, attackTimer: 0, originalY: 0 }; group.scale.set(scale, scale, scale); return group;
+    // 原点を足元に調整
+    group.userData = { legs: legs, attackTimer: 0 }; group.scale.set(scale, scale, scale); return group;
 }
 
-// ★ 天守閣: Aチーム(左)は赤系、Bチーム(右)は青系に
 function createJapaneseCastle(x, z, isEnemy) {
-    const castleGroup = new THREE.Group(); 
-    const mainColor = isEnemy ? 0x001133 : 0x220000; 
-    const roofColor = 0x111111;
-    const base = new THREE.Mesh(new THREE.BoxGeometry(2400, 800, 2400), new THREE.MeshBasicMaterial({color: 0x333333, wireframe: true})); base.position.y = 400; castleGroup.add(base);
-    const f1 = new THREE.Mesh(new THREE.BoxGeometry(2000, 600, 2000), new THREE.MeshBasicMaterial({color: mainColor})); f1.position.y = 1100; castleGroup.add(f1);
-    const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshBasicMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
-    const f2 = new THREE.Mesh(new THREE.BoxGeometry(1200, 600, 1200), new THREE.MeshBasicMaterial({color: mainColor})); f2.position.y = 2100; castleGroup.add(f2);
-    const r2 = new THREE.Mesh(new THREE.ConeGeometry(1000, 320, 4), new THREE.MeshBasicMaterial({color: roofColor})); r2.position.y = 2560; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
+    const castleGroup = new THREE.Group(); const mainColor = isEnemy ? 0x220000 : 0x001133; const roofColor = 0x111111;
+    const base = new THREE.Mesh(new THREE.BoxGeometry(2400, 800, 2400), new THREE.MeshStandardMaterial({color: 0x555555})); base.position.y = 400; castleGroup.add(base);
+    const f1 = new THREE.Mesh(new THREE.BoxGeometry(2000, 600, 2000), new THREE.MeshStandardMaterial({color: mainColor})); f1.position.y = 1100; castleGroup.add(f1);
+    const r1 = new THREE.Mesh(new THREE.ConeGeometry(1600, 400, 4), new THREE.MeshStandardMaterial({color: roofColor})); r1.position.y = 1600; r1.rotation.y = Math.PI/4; castleGroup.add(r1);
+    const f2 = new THREE.Mesh(new THREE.BoxGeometry(1200, 600, 1200), new THREE.MeshStandardMaterial({color: mainColor})); f2.position.y = 2100; castleGroup.add(f2);
+    const r2 = new THREE.Mesh(new THREE.ConeGeometry(1000, 320, 4), new THREE.MeshStandardMaterial({color: roofColor})); r2.position.y = 2560; r2.rotation.y = Math.PI/4; castleGroup.add(r2);
     
     castleGroup.scale.set(10, 10, 10);
     castleGroup.position.set(x, 0, z); return castleGroup;
 }
 
-// 桜の配置 (デフォルトで1000本)
-function distToSegmentSquared(px, pz, vx, vz, wx, wz) {
-    let l2 = (vx - wx)**2 + (vz - wz)**2;
-    if (l2 === 0) return (px - vx)**2 + (pz - vz)**2;
-    let t = ((px - vx) * (wx - vx) + (pz - vz) * (wz - vz)) / l2;
-    t = Math.max(0, Math.min(1, t));
-    return (px - (vx + t * (wx - vx)))**2 + (pz - (vz + t * (wz - vz)))**2;
-}
-
 function createNature(scene, engine) {
     engine.treeGrid = {};
-    const treeCount = 1000; // ★ デフォルトで超軽いモードと同じ本数
+    const treeCount = engine.isLowSpec ? 1000 : 8000;
     
     const sakuraMat = new THREE.MeshBasicMaterial({color: 0xffb7c5}); const trunkMat = new THREE.MeshBasicMaterial({color: 0x332211});
     const trunkGeo = new THREE.CylinderGeometry(15, 20, 100); const leavesGeo = new THREE.DodecahedronGeometry(60, 1);
@@ -670,21 +826,18 @@ function createNature(scene, engine) {
         const x = (Math.random()-0.5)*RULES.MAP_LIMIT*2; const z = (Math.random()-0.5)*RULES.MAP_LIMIT*2;
         let validPos = true;
 
-        // ★ レーンと川を避ける
         for (let seg of pathSegments) {
             if (Math.sqrt(distToSegmentSquared(x, z, seg.vx, seg.vz, seg.wx, seg.wz)) < 1500) { validPos = false; break; }
         }
         if (Math.abs(x) < 2000) validPos = false;
 
-        // ★ 櫓の周辺を避ける
-        const yaguraZs = [-15000, 15000];
+        const yaguraZs = [0]; // この世に2つになったのでZ=0のみ
         for(let yz of yaguraZs) {
-            const distToYagura = Math.sqrt(Math.pow(x - 0, 2) + Math.pow(z - yz, 2));
-            if (distToYagura < 4000) { validPos = false; break; }
+            const distToYagura = Math.sqrt(Math.pow(x - 8000, 2) + Math.pow(z - yz, 2));
+            if (distToYagura < 5000) { validPos = false; break; }
         }
 
-        // 拠点を避ける
-        if (Math.abs(x - (-25000)) < 3000 || Math.abs(x - 25000) < 3000) validPos = false;
+        if (Math.abs(x - (-25000)) < 4000 || Math.abs(x - 25000) < 4000) validPos = false;
 
         if (validPos) {
             dummy.scale.set(5, 5, 5);
@@ -700,16 +853,55 @@ function createNature(scene, engine) {
     trunkMesh.count = addedCount; leavesMesh.count = addedCount; scene.add(trunkMesh); scene.add(leavesMesh);
 }
 
+function distToSegmentSquared(px, pz, vx, vz, wx, wz) {
+    let l2 = (vx - wx)**2 + (vz - wz)**2;
+    if (l2 === 0) return (px - vx)**2 + (pz - vz)**2;
+    let t = ((px - vx) * (wx - vx) + (pz - vz) * (wz - vz)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return (px - (vx + t * (wx - vx)))**2 + (pz - (vz + t * (wz - vz)))**2;
+}
+
 class PlayerLocal {
     constructor(scene, camera, skinData, weaponType, spawnX) { 
         this.scene = scene; this.camera = camera; this.weaponType = weaponType; 
+        
+        this.spawnPhase = 0; 
+        this.spawnTimer = 3.0; 
+        
         this.position = new THREE.Vector3(spawnX, RULES.GROUND_Y, 0); this.velocity = new THREE.Vector3(); this.yaw = spawnX > 0 ? Math.PI/2 : -Math.PI/2; this.pitch = 0; 
         this.maxHp = 450; this.hp = 450; this.maxSp = 150; this.sp = 150; this.ult = 0; this.lives = 3; this.isGrounded = true; this.glowColor = skinData.colors.glow; 
         this.weaponStats = WEAPON_STATS[weaponType]; this.ammo = this.weaponStats.ammo; this.isReloading = false; this.reloadTimer = 0; this.atkCooldown = 0;
-        this.viewmodel = createViewmodel(weaponType, this.glowColor); this.camera.add(this.viewmodel); this.scene.add(this.camera); this.bobTimer = 0; this.spawnX = spawnX;
+        
+        // 盾とブーメラン
+        this.shieldActive = false;
+        this.boomerang = null;
+        
+        this.viewmodel = createViewmodel(weaponType, this.glowColor); 
+        this.camera.add(this.viewmodel); this.scene.add(this.camera); this.bobTimer = 0; this.spawnX = spawnX;
+        
+        const shieldGeo = new THREE.SphereGeometry(15, 16, 16);
+        const shieldMat = new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true});
+        this.shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+        this.shieldMesh.position.set(0, 0, -10);
+        this.shieldMesh.visible = false;
+        this.viewmodel.add(this.shieldMesh);
+        
+        const geo = new THREE.SphereGeometry(30, 32, 32); geo.scale(1, 1.1, 1);
+        const mat = new THREE.MeshStandardMaterial({color: 0xffaacc, roughness: 0.3});
+        this.momoMesh = new THREE.Mesh(geo, mat);
+        this.scene.add(this.momoMesh);
+        this.momoMesh.position.set(this.spawnX, 10000, 0);
     }
     takeDamage(v) { 
-        if(window.gameEngine.isGameOver) return; this.hp -= v; const ol = document.getElementById('damage-overlay'); ol.style.opacity = '1'; setTimeout(()=>ol.style.opacity='0', 100);
+        if(window.gameEngine.isGameOver || this.spawnPhase === 0) return; 
+        
+        if(this.shieldActive) {
+            this.shieldMesh.material.opacity = 0.8;
+            setTimeout(() => { if(this.shieldMesh) this.shieldMesh.material.opacity = 0.3; }, 100);
+            return; // 盾中はダメージ無効
+        }
+
+        this.hp -= v; const ol = document.getElementById('damage-overlay'); ol.style.opacity = '1'; setTimeout(()=>ol.style.opacity='0', 100);
         if(this.hp <= 0) { 
             this.lives--; 
             if(this.lives > 0) { 
@@ -717,10 +909,52 @@ class PlayerLocal {
                 this.position.set(this.spawnX, RULES.GROUND_Y, 0); this.velocity.set(0,0,0); 
                 this.yaw = this.spawnX > 0 ? Math.PI/2 : -Math.PI/2; this.pitch = 0;
                 window.gameEngine.announce("残機減少", "再出撃します", "#ff0000"); this.ammo = this.weaponStats.ammo; this.isReloading = false; 
+                this.shieldActive = false; this.shieldMesh.visible = false;
+                
+                this.spawnPhase = 0; this.spawnTimer = 3.0;
+                this.scene.add(this.momoMesh);
+                this.momoMesh.position.set(this.spawnX, 10000, 0);
             } else { window.gameEngine.gameOver(false, "SYSTEM OFFLINE\n\nYOU DIED"); } 
         } 
     }
     update(dt, input, groundY) {
+        if (this.spawnPhase === 0) {
+            this.spawnTimer -= dt;
+            const p = 1.0 - (this.spawnTimer / 3.0); 
+            const easeP = p * p * p; 
+            const currentY = 10000 - (10000 - groundY) * easeP;
+            
+            this.momoMesh.position.set(this.spawnX, currentY + 30, 0);
+            this.momoMesh.rotation.y += dt * 10;
+            
+            this.camera.position.set(this.spawnX + (this.spawnX > 0 ? 500 : -500), currentY + 300, 500);
+            this.camera.lookAt(this.momoMesh.position);
+            
+            if (this.spawnTimer <= 0) {
+                this.spawnPhase = 1;
+                this.scene.remove(this.momoMesh);
+                createExplosion(this.scene, this.momoMesh.position, 0xffaacc, 1000, 50, 1000); 
+                window.gameEngine.shakeTimer = 1.0;
+                this.position.set(this.spawnX, groundY, 0); 
+            }
+            return; 
+        }
+
+        // ★ 盾モード更新
+        this.shieldActive = input.s;
+        if (this.shieldMesh) this.shieldMesh.visible = this.shieldActive;
+
+        // ★ ブーメラン更新
+        if (this.boomerang) {
+            this.boomerang.update(dt, this.position);
+            if (!this.boomerang.active) {
+                this.boomerang = null;
+                this.viewmodel.children.forEach(c => {
+                    if (c !== this.shieldMesh) c.visible = true; // 手持ち武器復活
+                });
+            }
+        }
+
         if (this.atkCooldown > 0) this.atkCooldown -= dt;
         if (this.isReloading) { this.reloadTimer -= dt; if (this.reloadTimer <= 0) { this.isReloading = false; this.ammo = this.weaponStats.ammo; } } 
         else if (input.r && this.ammo < this.weaponStats.ammo) { this.isReloading = true; this.reloadTimer = this.weaponStats.reload; }
@@ -754,6 +988,22 @@ class PlayerLocal {
                 }
             }
         }
+        
+        if (window.gameEngine && window.gameEngine.yaguras) {
+            window.gameEngine.yaguras.forEach(yag => {
+                const bellPos = new THREE.Vector3(); yag.bell.getWorldPosition(bellPos);
+                if (this.position.y > 450 && this.position.y < 1500) {
+                    const dx = pX - bellPos.x; const dz = pZ - bellPos.z; const distSq = dx*dx + dz*dz;
+                    const bellRadius = 200; 
+                    const minDist = pRadius + bellRadius + 20; 
+                    if (distSq < minDist * minDist) {
+                        const dist = Math.sqrt(distSq) || 1; const overlap = minDist - dist;
+                        pX += (dx/dist) * overlap; pZ += (dz/dist) * overlap;
+                    }
+                }
+            });
+        }
+
         this.position.x = pX; this.position.z = pZ;
 
         if (this.position.y <= groundY) { this.position.y = groundY; this.velocity.y = Math.max(0, this.velocity.y); this.isGrounded = true; } else { this.isGrounded = false; }
@@ -764,12 +1014,12 @@ class PlayerLocal {
         if (this.isGrounded && spd > 10) { this.bobTimer += dt * (isDashing?20:10); this.camera.position.y += Math.sin(this.bobTimer) * 1.5; }
         
         const vd = this.viewmodel.userData;
-        if(vd.attackTimer > 0) {
+        if(vd.attackTimer > 0 && !this.boomerang) { // ブーメラン中はアニメーションなし
             vd.attackTimer -= dt; const p = vd.attackTimer / this.weaponStats.cooldown; const ease = p * p * (3 - 2 * p); const heavyEase = Math.pow(p, 4);
             if(this.weaponType === 'gun' || this.weaponType === 'bow') { this.viewmodel.position.z = vd.originalPos.z + ease * 3.0; this.viewmodel.rotation.x = vd.originalRot.x + ease * 0.5; } 
             else if (this.weaponType === 'kanabo') { this.viewmodel.position.z = vd.originalPos.z - heavyEase * 6.0; this.viewmodel.rotation.x = vd.originalRot.x - heavyEase * 2.5; this.viewmodel.rotation.z = vd.originalRot.z + heavyEase * 0.5; }
             else { this.viewmodel.position.z = vd.originalPos.z - ease * 4.0; this.viewmodel.rotation.x = vd.originalRot.x - ease * 2.0; this.viewmodel.rotation.z = vd.originalRot.z - ease * 2.0; }
-        } else { 
+        } else if(!this.boomerang) { 
             const breathe = Math.sin(Date.now() * 0.002) * 0.05; const targetPos = vd.originalPos.clone(); targetPos.y += breathe;
             this.viewmodel.position.lerp(targetPos, 0.1); this.viewmodel.quaternion.slerp(new THREE.Quaternion().setFromEuler(vd.originalRot), 0.1); 
         }
@@ -810,7 +1060,7 @@ class DarumaTower {
             let hitCastle = false;
             for(let i = 0; i < this.blockCount; i++) { 
                 let b = this.blocks[i]; b.vel.y -= RULES.GRAVITY * 4 * dt; b.mesh.position.addScaledVector(b.vel, dt); b.mesh.rotation.x += b.rot.x * dt; b.mesh.rotation.y += b.rot.y * dt; b.mesh.rotation.z += b.rot.z * dt; 
-                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 4000) { hitCastle = true; }
+                if (this.isEnemy && b.mesh.position.x > RULES.BASE_POS_X + 13000) { hitCastle = true; }
             }
             if (hitCastle) {
                 this.castleDestroyed = true; if(this.castleRef) this.castleRef.visible = false;
@@ -821,39 +1071,27 @@ class DarumaTower {
     }
 }
 
-// ★ 左右対称の階段（両チームから登れる）を備えた櫓
 class Yagura {
     constructor(scene, pos, name) {
         this.name = name; this.scene = scene; this.owner = -1; this.isBossDead = false; this.mesh = new THREE.Group(); this.mesh.position.copy(pos);
+        const sign = pos.x > 0 ? 1 : -1;
         
-        const base = new THREE.Mesh(new THREE.BoxGeometry(1000, 200, 1000), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
-        const platform = new THREE.Mesh(new THREE.BoxGeometry(1200, 20, 1200), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(0, 505, 0); this.mesh.add(platform);
+        const base = new THREE.Mesh(new THREE.BoxGeometry(600, 200, 600), new THREE.MeshBasicMaterial({color: 0x221111})); base.position.y = 100; this.mesh.add(base);
+        const platform = new THREE.Mesh(new THREE.BoxGeometry(800, 20, 800), new THREE.MeshBasicMaterial({color: 0x221111})); platform.position.set(-sign * 250, 505, 0); this.mesh.add(platform);
         
         const stepCount = 100; const stepWidth = 600; 
-        for(let i=0; i<stepCount; i++) { 
-            // 左(A陣営)側の階段
-            const stepL = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); 
-            stepL.position.set(-2500 + i*20, i*5 + 5, 0); this.mesh.add(stepL); 
-            // 右(B陣営)側の階段
-            const stepR = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); 
-            stepR.position.set(2500 - i*20, i*5 + 5, 0); this.mesh.add(stepR); 
-        }
+        for(let i=0; i<stepCount; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(80, 10, stepWidth), new THREE.MeshBasicMaterial({color: 0x444444})); step.position.set(-sign * (2500 - i*22), i*5 + 5, 0); this.mesh.add(step); }
         
-        // 手すり(左右)
-        const railL_F = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL_F.position.set(-1500, 300, -stepWidth/2 + 15); railL_F.rotation.z = Math.atan2(500, 2000); this.mesh.add(railL_F);
-        const railL_B = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL_B.position.set(-1500, 300, stepWidth/2 - 15); railL_B.rotation.z = Math.atan2(500, 2000); this.mesh.add(railL_B);
-        const railR_F = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR_F.position.set(1500, 300, -stepWidth/2 + 15); railR_F.rotation.z = -Math.atan2(500, 2000); this.mesh.add(railR_F);
-        const railR_B = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR_B.position.set(1500, 300, stepWidth/2 - 15); railR_B.rotation.z = -Math.atan2(500, 2000); this.mesh.add(railR_B);
+        const railL = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railL.position.set(-sign * 1400, 300, -stepWidth/2 + 15); railL.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railL);
+        const railR = new THREE.Mesh(new THREE.BoxGeometry(2250, 15, 15), new THREE.MeshBasicMaterial({color: 0x882222})); railR.position.set(-sign * 1400, 300, stepWidth/2 - 15); railR.rotation.z = sign * Math.atan2(500, 2200); this.mesh.add(railR);
         
         for(let i=0; i<stepCount; i+=10) {
-            const pLF = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pLF.position.set(-2500 + i*20, i*5 + 30, -stepWidth/2 + 15); this.mesh.add(pLF);
-            const pLB = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pLB.position.set(-2500 + i*20, i*5 + 30, stepWidth/2 - 15); this.mesh.add(pLB);
-            const pRF = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pRF.position.set(2500 - i*20, i*5 + 30, -stepWidth/2 + 15); this.mesh.add(pRF);
-            const pRB = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); pRB.position.set(2500 - i*20, i*5 + 30, stepWidth/2 - 15); this.mesh.add(pRB);
+            const poleL = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleL.position.set(-sign * (2500 - i*22), i*5 + 30, -stepWidth/2 + 15); this.mesh.add(poleL);
+            const poleR = new THREE.Mesh(new THREE.BoxGeometry(15, 60, 15), new THREE.MeshBasicMaterial({color: 0x882222})); poleR.position.set(-sign * (2500 - i*22), i*5 + 30, stepWidth/2 - 15); this.mesh.add(poleR);
         }
         
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(800, 400, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(0, 1200, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
-        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(0, 750, 0); this.mesh.add(this.bell);
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(600, 300, 4), new THREE.MeshBasicMaterial({color: 0x111111})); roof.position.set(-sign * 250, 1000, 0); roof.rotation.y = Math.PI/4; this.mesh.add(roof);
+        this.bell = new THREE.Mesh(new THREE.CylinderGeometry(200, 250, 400), new THREE.MeshBasicMaterial({color: 0xFFD700})); this.bell.position.set(-sign * 250, 750, 0); this.mesh.add(this.bell);
         scene.add(this.mesh);
     }
     takeHit(projectilePos) {
@@ -932,9 +1170,10 @@ class EnemyBase {
                     l.pivot.rotation.x = Math.sin(time + l.offset) * 0.6; 
                     l.pivot.position.y = 15 + Math.abs(Math.cos(time + l.offset)) * 5;
                 }); 
-                const gy = window.gameEngine ? window.gameEngine.getGroundY(this.mesh.position.x, this.mesh.position.z) : RULES.GROUND_Y;
-                this.mesh.position.y = gy + (this.scale * 10) + Math.abs(Math.sin(time * 2)) * 10;
             } 
+            // 牛鬼のY座標を修正 (足が地面に接するように)
+            const gy = window.gameEngine ? window.gameEngine.getGroundY(this.mesh.position.x, this.mesh.position.z) : RULES.GROUND_Y;
+            this.mesh.position.y = gy + (this.scale * 4.5); 
         } else {
             const gy = window.gameEngine ? window.gameEngine.getGroundY(this.mesh.position.x, this.mesh.position.z) : RULES.GROUND_Y;
             this.mesh.position.y = gy + (this.scale * 4.5);
@@ -973,22 +1212,37 @@ class Minion extends EnemyBase {
     } 
     update(dt, playerPos, camera, playerHeight) { 
         this.currentSpeed = 0; super.update(dt, playerPos, camera, playerHeight); if (!this.active || playerHeight > RULES.STEALTH_HEIGHT) return; 
+        
+        // ★ ランダムに自由に動くように変更
+        this.moveTimer -= dt;
+        if (this.moveTimer <= 0) {
+            this.moveAngle = Math.random() * Math.PI * 2;
+            this.moveTimer = 1.0 + Math.random() * 2.0;
+        }
+
         const dist = this.mesh.position.distanceTo(playerPos);
-        if (dist < 4000) { 
-            this.moveTimer += dt;
-            if (this.moveTimer > 1.5) { this.moveAngle = (Math.random() - 0.5) * Math.PI; this.moveTimer = 0; }
+        if (dist < 8000) { 
             const dirToPlayer = playerPos.clone().sub(this.mesh.position).normalize(); dirToPlayer.y = 0;
-            let moveDir = dirToPlayer.clone().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle);
-            if (dist < 800) { moveDir = dirToPlayer.clone().negate().applyAxisAngle(new THREE.Vector3(0,1,0), this.moveAngle); } 
-            else if (dist > 1500) { moveDir.lerp(dirToPlayer, 0.5).normalize(); }
+            let moveDir = new THREE.Vector3(Math.cos(this.moveAngle), 0, Math.sin(this.moveAngle));
+
+            if (dist > 3000) { moveDir.lerp(dirToPlayer, 0.5).normalize(); }
+            
             this.currentSpeed = 350; this.mesh.position.addScaledVector(moveDir, this.currentSpeed * dt);
+            
+            this.mesh.lookAt(playerPos);
+
             this.fireTimer -= dt; 
             if (this.fireTimer <= 0) { 
                 const shootDir = playerPos.clone().sub(this.mesh.position).normalize(); 
                 window.gameEngine.projectiles.push(new Projectile(this.scene, this.mesh.position.clone().setY(20), shootDir, '#ff0055', 1, 'bow', false, 8.0)); 
                 this.fireTimer = 2.0; 
             } 
-        } 
+        } else {
+            // プレイヤーから遠い場合はランダムウォーク
+            let moveDir = new THREE.Vector3(Math.cos(this.moveAngle), 0, Math.sin(this.moveAngle));
+            this.currentSpeed = 150; this.mesh.position.addScaledVector(moveDir, this.currentSpeed * dt);
+            this.mesh.rotation.y = -this.moveAngle;
+        }
     } 
 }
 
@@ -1021,9 +1275,12 @@ class Engine {
         this.skinData = skinData; this.weaponType = weaponType; this.myTeam = myTeam; this.allPlayersData = allPlayersData; 
         this.score = 0; this.kills = 0; this.startTime = Date.now(); this.isGameOver = false; this.shakeTimer = 0; 
         window.gameEngine = this; 
+        
+        this.projectiles = []; this.enemies = []; this.yaguras = []; this.boomerangs = []; this.aiPlayers = [];
+        this.remotePlayers = {}; this.processedActions = {}; this.lastSyncTime = 0;
+        
         this.initThree(); this.inputMgr = new InputManager(); this.buildWorld(); 
         
-        this.remotePlayers = {}; this.processedActions = {}; this.lastSyncTime = 0;
         if (!isOfflineMode) this.startNetworkSync();
         
         this.animate(); 
@@ -1056,38 +1313,40 @@ class Engine {
         }); 
     }
     
-    // ★ 直線と円を組み合わせた滑らかな地形判定 (画像ベースのMOBAマップ)
     getGroundY(x, z) {
         let gy = RULES.GROUND_Y;
-        // 上下の櫓の判定
+        if (Math.abs(x) < 1500) { gy = -80; }
+        
         const yaguraPositions = [
             {x: 0, z: -15000},
-            {x: 0, z: 15000}
+            {x: 0, z: 15000},
+            {x: 8000, z: 0},
+            {x: -8000, z: 0}
         ];
         
         for(let p of yaguraPositions) {
             const dx = x - p.x; const dz = z - p.z;
-            
             if (Math.abs(dx) < 500 && Math.abs(dz) < 500) { gy = Math.max(gy, 100); } 
             if (Math.abs(dx) < 600 && Math.abs(dz) < 600) { gy = Math.max(gy, 515); } 
             
-            // 左階段 (味方側から)
             if (dx >= -2540 && dx < -500 && Math.abs(dz) < 300) { 
                 const ratio = (dx - (-2500)) / (-500 - (-2500)); 
                 gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500)); 
             }
-            // 右階段 (敵側から)
             if (dx <= 2540 && dx > 500 && Math.abs(dz) < 300) {
                 const ratio = (2500 - dx) / (2500 - 500);
                 gy = Math.max(gy, Math.max(RULES.GROUND_Y, 5 + ratio * 500));
             }
         }
         
-        // 中央レーンの橋 (X=0, Z=0)
-        if (Math.abs(x) < 2000 && Math.abs(z) < 500) {
-            const ratio = x / 2000; 
-            const sy = Math.cos(ratio * Math.PI/2) * 500;
-            gy = Math.max(gy, sy);
+        const bzArr = [-15000, 0, 15000];
+        for(let bz of bzArr) {
+            const dx = x - 0; const dz = z - bz;
+            if (Math.abs(dx) < 2000 && Math.abs(dz) < 500) {
+                const ratio = dx / 2000; 
+                const sy = Math.cos(ratio * Math.PI/2) * 500;
+                gy = Math.max(gy, sy);
+            }
         }
         return gy;
     }
@@ -1103,7 +1362,26 @@ class Engine {
         }
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(120000, 120000), groundMat); ground.rotation.x = -Math.PI/2; this.scene.add(ground); 
 
-        // ★ MOBAスタイルの美しいルート生成
+        // 雲
+        if (!this.isLowSpec) {
+            this.clouds = [];
+            const cloudGeo = new THREE.SphereGeometry(1000, 16, 16);
+            const cloudMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.6, fog: false});
+            for (let i = 0; i < 50; i++) {
+                const cloud = new THREE.Group();
+                const parts = 3 + Math.random() * 5;
+                for (let j = 0; j < parts; j++) {
+                    const part = new THREE.Mesh(cloudGeo, cloudMat);
+                    part.position.set((Math.random() - 0.5) * 3000, (Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 3000);
+                    part.scale.set(1 + Math.random(), 0.5 + Math.random() * 0.5, 1 + Math.random());
+                    cloud.add(part);
+                }
+                cloud.position.set((Math.random() - 0.5) * 80000, 10000 + Math.random() * 10000, (Math.random() - 0.5) * 80000);
+                this.scene.add(cloud);
+                this.clouds.push(cloud);
+            }
+        }
+
         const pathMat = new THREE.MeshBasicMaterial({ color: 0x4a3c31 }); 
         const addPath = (x1, z1, x2, z2) => {
             const length = Math.sqrt((x2-x1)**2 + (z2-z1)**2);
@@ -1115,28 +1393,41 @@ class Engine {
             this.scene.add(path);
         };
         
-        // ミッドレーン
         addPath(-25000, 0, 25000, 0);
-        // トップレーン
-        addPath(-25000, 0, 0, -15000);
-        addPath(0, -15000, 25000, 0);
-        // ボットレーン
-        addPath(-25000, 0, 0, 15000);
-        addPath(0, 15000, 25000, 0);
+        addPath(-25000, 0, 0, -15000); addPath(0, -15000, 25000, 0);
+        addPath(-25000, 0, 0, 15000); addPath(0, 15000, 25000, 0);
 
-        // 中央の川
-        const riverMat = new THREE.MeshBasicMaterial({color: 0x44aaff, transparent: true, opacity: 0.8});
-        const river = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), riverMat);
-        river.rotation.x = -Math.PI / 2; river.position.set(0, 10, 0); this.scene.add(river);
+        this.riverMat = new THREE.MeshStandardMaterial({map: waterTex, color: 0x44aaff, transparent: true, opacity: 0.8, roughness: 0.1, metalness: 0.8});
+        const river = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), this.riverMat);
+        river.rotation.x = -Math.PI / 2; river.position.set(0, -10, 0); this.scene.add(river);
+        
+        const riverBedMat = new THREE.MeshStandardMaterial({color: 0x223322, roughness: 1.0});
+        const riverBed = new THREE.Mesh(new THREE.PlaneGeometry(3000, 80000), riverBedMat);
+        riverBed.rotation.x = -Math.PI / 2; riverBed.position.set(0, -80, 0); this.scene.add(riverBed);
 
-        // 中央の橋
-        const bridgeGroup = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
-        for(let i=-20; i<=20; i++) {
-            const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
-            const step = new THREE.Mesh(new THREE.BoxGeometry(100, 20, 1000), bMat);
-            step.position.set(i * 100, h, 0); step.rotation.z = -Math.sin(ratio * Math.PI/2) * Math.PI/4; bridgeGroup.add(step);
-        }
-        bridgeGroup.position.set(0, 0, 0); this.scene.add(bridgeGroup);
+        // 手すり付き和風橋
+        [-15000, 0, 15000].forEach(z => {
+            const bridgeGroup = new THREE.Group(); const bMat = new THREE.MeshBasicMaterial({color: 0x882222});
+            const railMat = new THREE.MeshBasicMaterial({color: 0xaa3333});
+            const giboshiMat = new THREE.MeshBasicMaterial({color: 0xFFD700}); 
+            
+            for(let i=-20; i<=20; i++) {
+                const ratio = i/20; const h = Math.cos(ratio * Math.PI/2) * 500;
+                const step = new THREE.Mesh(new THREE.BoxGeometry(100, 20, 1000), bMat);
+                step.position.set(i * 100, h, 0); step.rotation.z = -Math.sin(ratio * Math.PI/2) * Math.PI/4; bridgeGroup.add(step);
+                
+                if (i % 2 === 0) {
+                    const poleL = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 100), railMat); poleL.position.set(0, 50, 480); step.add(poleL);
+                    const giboshiL = new THREE.Mesh(new THREE.SphereGeometry(15), giboshiMat); giboshiL.position.set(0, 100, 480); step.add(giboshiL);
+                    
+                    const poleR = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 100), railMat); poleR.position.set(0, 50, -480); step.add(poleR);
+                    const giboshiR = new THREE.Mesh(new THREE.SphereGeometry(15), giboshiMat); giboshiR.position.set(0, 100, -480); step.add(giboshiR);
+                }
+                const railBarL = new THREE.Mesh(new THREE.BoxGeometry(105, 15, 15), railMat); railBarL.position.set(0, 80, 480); step.add(railBarL);
+                const railBarR = new THREE.Mesh(new THREE.BoxGeometry(105, 15, 15), railMat); railBarR.position.set(0, 80, -480); step.add(railBarR);
+            }
+            bridgeGroup.position.set(0, 0, z); this.scene.add(bridgeGroup);
+        });
 
         createNature(this.scene, this);
 
@@ -1149,26 +1440,39 @@ class Engine {
         const spawnX = this.myTeam === 0 ? -RULES.BASE_POS_X + 4000 : RULES.BASE_POS_X - 4000;
         this.player = new PlayerLocal(this.scene, this.camera, this.skinData, this.weaponType, spawnX); 
         
-        this.enemies = []; this.projectiles = []; this.yaguras = [];
-        
-        const myUid = currentUser ? currentUser.uid : "local-user";
-        if(this.allPlayersData && Array.isArray(this.allPlayersData)) { this.allPlayersData.forEach(p => { if (p.uid !== myUid) { this.remotePlayers[p.uid] = new RemotePlayer(this.scene, p); } }); }
+        // ★ AIプレイヤーの配置 (ソロの場合、味方2人、敵3人を生成して3v3にする)
+        const teamA_X = -RULES.BASE_POS_X + 4000;
+        const teamB_X = RULES.BASE_POS_X - 4000;
+
+        if (this.myTeam === 0) {
+            this.aiPlayers.push(new HeroAI(this.scene, 0, teamA_X, 'kogetsu', 'kanabo', "味方武将 A"));
+            this.aiPlayers.push(new HeroAI(this.scene, 0, teamA_X, 'forest', 'gun', "味方武将 B"));
+            
+            this.aiPlayers.push(new HeroAI(this.scene, 1, teamB_X, 'crimson', 'hammer', "敵将 X"));
+            this.aiPlayers.push(new HeroAI(this.scene, 1, teamB_X, 'default', 'bow', "敵将 Y"));
+            this.aiPlayers.push(new HeroAI(this.scene, 1, teamB_X, 'kogetsu', 'dual_swords', "敵将 Z")); 
+        } else {
+            this.aiPlayers.push(new HeroAI(this.scene, 0, teamA_X, 'default', 'bow', "敵将 X"));
+            this.aiPlayers.push(new HeroAI(this.scene, 0, teamA_X, 'kogetsu', 'dual_swords', "敵将 Y"));
+            this.aiPlayers.push(new HeroAI(this.scene, 0, teamA_X, 'forest', 'gun', "敵将 Z"));
+
+            this.aiPlayers.push(new HeroAI(this.scene, 1, teamB_X, 'crimson', 'kanabo', "味方武将 A"));
+            this.aiPlayers.push(new HeroAI(this.scene, 1, teamB_X, 'default', 'hammer', "味方武将 B"));
+        }
 
         const spawnSq = (cx, cz, n, r) => { for(let i=0; i<n; i++) { const a=Math.random()*Math.PI*2; const d=Math.random()*r; this.enemies.push(new Minion(this.scene, new THREE.Vector3(cx+Math.cos(a)*d, RULES.GROUND_Y, cz+Math.sin(a)*d))); } };
         
-        // ★ 櫓と牛鬼は「この世に2つ」 (トップとボット)
-        const yagTop = new Yagura(this.scene, new THREE.Vector3(0, 0, -15000), "TOP"); this.yaguras.push(yagTop); 
-        this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(0, 515, -14000), yagTop)); 
-        spawnSq(-5000, -12000, 20, 600); spawnSq(5000, -12000, 20, 600);
+        const cLane = (z) => { 
+            const yag = new Yagura(this.scene, new THREE.Vector3(0, 0, z), z>0?"BOTTOM":"TOP"); this.yaguras.push(yag); 
+            this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(0, RULES.GROUND_Y + 150, z>0?z-400:z+400), yag)); 
+            
+            spawnSq(-4000, z, 30, 600); spawnSq(4000, z, 30, 600); 
+        };
         
-        const yagBot = new Yagura(this.scene, new THREE.Vector3(0, 0, 15000), "BOTTOM"); this.yaguras.push(yagBot);
-        this.enemies.push(new UshiOni(this.scene, new THREE.Vector3(0, 515, 14000), yagBot)); 
-        spawnSq(-5000, 12000, 20, 600); spawnSq(5000, 12000, 20, 600);
+        // 鐘は中央レーン（この世に2つ）のみ
+        cLane(-15000); cLane(15000); 
         
-        // ミッドのミニオン
-        spawnSq(-6000, 0, 30, 800); spawnSq(6000, 0, 30, 800);
-        
-        setTimeout(() => { this.announce("合戦開始", "敵陣を制圧せよ！", "#0ff"); }, 500);
+        spawnSq(-4000, 0, 45, 800); spawnSq(4000, 0, 45, 800);
     }
     
     startNetworkSync() {
@@ -1198,24 +1502,54 @@ class Engine {
         this.enemies.forEach(e => { if(e.active) drawPt(e.mesh.position, e.isBoss?'#fa0':'#f05', e.isBoss?5:3); });
         
         Object.values(this.remotePlayers).forEach(rp => { drawPt(rp.mesh.position, rp.team === this.myTeam ? '#0f0' : '#f00', 6); });
+        this.aiPlayers.forEach(ai => { if (ai.active) drawPt(ai.position, ai.team === this.myTeam ? '#0f0' : '#f00', 5); });
 
         const px = cx + this.player.position.x * scale; const pz = cy + this.player.position.z * scale;
         if(Math.sqrt((px-cx)**2 + (pz-cy)**2) < w/2 - 4) { ctx.save(); ctx.translate(px, pz); ctx.rotate(this.player.yaw); ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(6, 6); ctx.lineTo(-6, 6); ctx.closePath(); ctx.fillStyle = '#0ff'; ctx.fill(); ctx.restore(); }
     }
     
     animate() {
-        requestAnimationFrame(() => this.animate()); if(this.isGameOver) return; const dt = 0.016; this.allyBase.update(dt); this.enemyBase.update(dt); const input = this.inputMgr.update(); 
+        requestAnimationFrame(() => this.animate()); if(this.isGameOver) return; const dt = 0.016; 
+        
+        if (this.clouds) {
+            this.clouds.forEach(cloud => {
+                cloud.position.x += dt * 200;
+                if (cloud.position.x > 50000) cloud.position.x = -50000;
+            });
+        }
+        if (this.riverMat && this.riverMat.map) {
+            this.riverMat.map.offset.y += dt * 0.5;
+        }
+
+        this.allyBase.update(dt); this.enemyBase.update(dt); const input = this.inputMgr.update(); 
         
         const groundY = this.getGroundY(this.player.position.x, this.player.position.z);
         this.player.update(dt, input, groundY);
         Object.values(this.remotePlayers).forEach(rp => rp.update(dt, this.camera));
+
+        // AIの更新
+        this.aiPlayers.forEach(ai => ai.update(dt, this, this.camera));
 
         if (!isOfflineMode && Date.now() - this.lastSyncTime > 200 && currentLobbyId && currentUser) {
             this.lastSyncTime = Date.now();
             setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'game_' + currentLobbyId + '_players', currentUser.uid), { x: this.player.position.x, y: this.player.position.y, z: this.player.position.z, yaw: this.player.yaw, timestamp: Date.now() }).catch(()=>{});
         }
 
-        if(input.a && this.player.atkCooldown <= 0 && !this.player.isReloading && this.player.ammo > 0) { 
+        // ★ 盾モード中のブーメラン投擲：シールドボタン(右クリック)を押しながら攻撃ボタン
+        if(input.s && input.a && this.player.atkCooldown <= 0 && this.player.spawnPhase === 1) {
+            if (!this.player.boomerang) {
+                this.player.atkCooldown = 1.0; 
+                const dir = new THREE.Vector3(0,0,-1).applyQuaternion(this.camera.quaternion);
+                const spawnPos = new THREE.Vector3().copy(this.camera.position).add(dir.clone().multiplyScalar(10)).setY(this.camera.position.y - 10);
+                
+                this.player.boomerang = new Boomerang(this.scene, spawnPos, dir, this.player.glowColor, this.weaponType, this.player.weaponStats.damage * 2, this.player);
+                this.player.viewmodel.children.forEach(c => {
+                    if(c !== this.player.shieldMesh) c.visible = false;
+                });
+            }
+        }
+        // 通常射撃
+        else if(input.a && !input.s && this.player.atkCooldown <= 0 && !this.player.isReloading && this.player.ammo > 0 && this.player.spawnPhase === 1 && !this.player.boomerang) { 
             this.player.atkCooldown = this.player.weaponStats.cooldown; 
             if (this.player.weaponStats.ammo !== Infinity) { this.player.ammo--; if (this.player.ammo <= 0) { this.player.isReloading = true; this.player.reloadTimer = this.player.weaponStats.reload; } }
             
@@ -1245,6 +1579,12 @@ class Engine {
                     const baseHitRad = (p.type === 'hammer' ? 70 : (p.type === 'kanabo' ? 100 : (p.type === 'dual_swords' || p.type === 'fan' ? 40 : 25)));
                     if(e.active && p.mesh.position.distanceTo(e.mesh.position) < baseHitRad * e.scale) { e.takeDamage(p.damage); p.destroy(); if(!e.active) { this.player.ult = Math.min(100, this.player.ult + (e.isBoss?30:10)); this.score += (e.isBoss?100:10); this.kills++; } } 
                 }); 
+                this.aiPlayers.forEach(ai => {
+                    if (ai.team !== this.myTeam && ai.active && p.mesh.position.distanceTo(ai.position) < 120) {
+                        ai.takeDamage(p.damage); p.destroy();
+                    }
+                });
+
                 if (this.enemyBase.vulnerable && this.enemyBase.isSpawned && !this.enemyBase.blown) { 
                     const distToCenter = new THREE.Vector2(p.mesh.position.x, p.mesh.position.z).distanceTo(new THREE.Vector2(this.enemyBase.mesh.position.x, this.enemyBase.mesh.position.z));
                     const relY = p.mesh.position.y - this.enemyBase.mesh.position.y;
@@ -1262,6 +1602,12 @@ class Engine {
                 let hitDist = 30;
                 if (p.type === 'ushi_hammer') hitDist = 200;
                 if (p.mesh.position.distanceTo(this.player.position) < hitDist) { this.player.takeDamage(p.damage); p.destroy(); } 
+                
+                this.aiPlayers.forEach(ai => {
+                    if (ai.team === this.myTeam && ai.active && p.mesh.position.distanceTo(ai.position) < 120) {
+                        ai.takeDamage(p.damage); p.destroy();
+                    }
+                });
             }
         });
         
@@ -1281,6 +1627,13 @@ class Engine {
         document.getElementById('player-sp-bar').style.width = `${(this.player.sp / this.player.maxSp) * 100}%`; 
         document.getElementById('player-ult-bar').style.width = `${this.player.ult}%`; document.getElementById('hud-score').innerText = this.score;
         
+        const shieldHud = document.getElementById('shield-hud');
+        if (this.player.shieldActive) {
+            shieldHud.innerText = `SHIELD ACTIVE | ATK: BOOMERANG`; shieldHud.style.color = '#0ff';
+        } else {
+            shieldHud.innerText = `SHIELD (HOLD R-CLICK/BTN)`; shieldHud.style.color = '#ff0';
+        }
+
         const ammoText = document.getElementById('ammo-text');
         if (this.player.isReloading) { ammoText.innerText = "RELOADING"; ammoText.parentElement.classList.add('reloading-text'); } 
         else { ammoText.innerText = this.player.weaponStats.ammo === Infinity ? '∞' : this.player.ammo; ammoText.parentElement.classList.remove('reloading-text'); }
