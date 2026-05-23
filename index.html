@@ -686,7 +686,7 @@
             { id: 'seimarotuyoi', type: 'char', name: '創世神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 100, isEvolved: true, },
             { id: 'kaguya_ssr', type: 'char', name: 'かぐや', icon: '🌙', rarity: 'SSR', isEX: true, info: 'スキル: 私はわたしのことが好き。', rate: 16.8, skillName: '私はわたしのことが好き。' },
             { id: 'yachiyo_uz', type: 'char', name: 'やちよ', icon: '🥞', rarity: 'UZ', isEX: true, isEvolved: true, info: 'スキル: Remember', rate: 80.00, skillName: 'Remember' },
-            { id: 'irohasakayori', type: 'char', name: 'いろは', icon: '🦊', rarity: 'OG', isEX: true, isEvolved: true, info: 'スキル: reply', rate: 168, skillName: 'Remember' },
+            { id: 'irohasakayori', type: 'char', name: 'いろは', icon: '🦊', rarity: 'OG', isEX: true, isEvolved: true, info: 'スキル: reply', rate: 168, skillName: 'reply' },
             { id: 'sei_god', type: 'char', name: '究極膳神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OG', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 35, isEvolved: true, },
     　      { id: 'tuyoban', type: 'char', name: 'ギガントバーン', icon: '🏐', owned: false, rarity: 'OG', info: '強すぎる', rate: 50, isEvolved: true, },
             { id: 'vector_kinguini', type: 'char', name: 'ベクター・キンギーニ', icon: '🌌', owned: false, rarity: 'OG', info: '全技から卵排除/月牙天衝', rate: 40, isEvolved: true, },
@@ -1699,7 +1699,7 @@ if (equipped.char.image) {
                 } else if(kazuChars.includes(id)) {
                     popText(egg.style.left, egg.style.top, "卵排除!", "gold");
                     egg.remove();
-                } else if(id === 'c_rampage_venom' || id === 'ven_ket') { 
+                } else if(id === 'c_rampage_venom' || id === 'ven_ket' || id === 'kazusan') { 
                     let randomGain = BigInt(Math.floor(Math.random() * (1000 - 100 + 1)) + 100); 
                     money += randomGain; missionStats.earned = (parseBigInt(missionStats.earned) + randomGain).toString(); 
                     popText(egg.style.left, egg.style.top, `+${formatMoney(randomGain)}`, "white"); updateUI(); egg.remove(); 
@@ -1707,14 +1707,6 @@ if (equipped.char.image) {
                     let b = (equipped.char.isEvolved || equipped.char.rarity==='X' || equipped.char.rarity==='OG' || equipped.char.rarity.includes('BOSS'))?1000n:0n; 
                     if(b>0n){ money+=b; missionStats.earned = (parseBigInt(missionStats.earned) + b).toString(); updateUI(); } 
                     egg.remove(); 
-                } else if(id === 'c_kazusan' || id === 'ven_ket') { 
-                    let randomGain = BigInt(Math.floor(Math.random() * (1000 - 100 + 1)) + 100); 
-                    money += randomGain; missionStats.earned = (parseBigInt(missionStats.earned) + randomGain).toString(); 
-                    popText(egg.style.left, egg.style.top, `+${formatMoney(randomGain)}`, "white"); updateUI(); egg.remove(); 
-                } else if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X'||equipped.char.rarity==='OG'||equipped.char.rarity.includes('BOSS')) { 
-                    let b = (equipped.char.isEvolved || equipped.char.rarity==='X' || equipped.char.rarity==='OG' || equipped.char.rarity.includes('BOSS'))?1000n:0n; 
-                    if(b>0n){ money+=b; missionStats.earned = (parseBigInt(missionStats.earned) + b).toString(); updateUI(); } 
-                    egg.remove();
                 } else { endGame("卵だ！"); } 
             }; field.appendChild(egg);
         }
@@ -1748,7 +1740,7 @@ if (equipped.char.image) {
 
             if(equipped.char.id === 'vector_kinguini') { const slash = document.createElement('div'); slash.className = 'getsuga'; field.appendChild(slash); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); document.querySelectorAll('.egg').forEach(e => e.remove()); setTimeout(() => { isSkillActive = false; slash.remove(); }, 1000); return; }
             if(['c_scarlet_ham', 'c_scarlet_ham_uz', 'ham_pork', 'zen_omelette'].includes(equipped.char.id)) { field.classList.add('skill-active-field'); document.querySelectorAll('.grass:not(.plucking)').forEach(g => pluck(g)); document.querySelectorAll('.egg').forEach(e => { popText(e.style.left, e.style.top, "消去！", "white"); e.remove(); }); setTimeout(() => { isSkillActive = false; field.classList.remove('skill-active-field'); }, 1000); return; }
-            if(['c_rampage_venom', 'ven_kazu', 'ven_seimaro', 'ven_ket'].includes(equipped.char.id)) { field.classList.add('ultimate-field-bg'); startFever(); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) { for(let i=0; i<10; i++) if(ts[i]) pluck(ts[i]); } document.querySelectorAll('.egg').forEach(e => e.remove()); }, 20); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('ultimate-field-bg'); }, 5000); return; }
+            if(['c_rampage_venom', 'ven_kazu', 'ven_seimaro', 'ven_ket', 'kazusan'].includes(equipped.char.id)) { field.classList.add('ultimate-field-bg'); startFever(); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) { for(let i=0; i<10; i++) if(ts[i]) pluck(ts[i]); } document.querySelectorAll('.egg').forEach(e => e.remove()); }, 20); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.classList.remove('ultimate-field-bg'); }, 5000); return; }
             if(equipped.char.id === 'c_seimaro' && equipped.skill.id === 's1') { field.style.animation = "skill-shake 0.05s infinite, lightning-flash 0.1s infinite alternate"; const style = document.createElement('style'); style.id = "lightning-effect"; style.innerHTML = `@keyframes lightning-flash { from { filter: brightness(1) contrast(1); } to { filter: brightness(3) contrast(1.5); background: #fff; } }`; document.head.appendChild(style); const interval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length > 0) pluck(ts[0]); }, 50); setTimeout(() => { isSkillActive = false; clearInterval(interval); field.style.animation = ""; document.getElementById('lightning-effect')?.remove(); }, 3000); return; }
             if(equipped.skill.id === 's3') { field.style.filter = "grayscale(1) invert(1) contrast(1.5)"; field.classList.add('skill-active-field'); const worldInterval = setInterval(() => { const ts = document.querySelectorAll('.grass:not(.plucking)'); if(ts.length>0) pluck(ts[0]); }, 30); setTimeout(() => { isSkillActive = false; clearInterval(worldInterval); field.style.filter = "none"; field.classList.remove('skill-active-field'); }, 4000); return; }
             if(equipped.skill.id === 's2') { startFever(); isSkillActive = false; return; }
