@@ -73,6 +73,7 @@
         .lane-border {
             background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.15) 100%);
             border-left: 2px solid rgba(255, 255, 255, 0.1); border-right: 2px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.08s ease-out;
         }
         .lane-border:active, .lane-active { background: linear-gradient(180deg, rgba(0, 242, 254, 0.02) 0%, rgba(0, 242, 254, 0.4) 100%); }
         .lane-laser {
@@ -99,20 +100,7 @@
         }
         @keyframes flickPulse { 0% { opacity: 0.8; transform: translateY(1px) scaleY(1.2); } 100% { opacity: 1; transform: translateY(-4px) scaleY(1.4); } }
 
-        .note-hold-head {
-            background: linear-gradient(180deg, #ffffff 20%, #ecfdf5 60%, #10b981 100%);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.9), 0 0 30px rgba(16, 185, 129, 0.5);
-        }
-        .hold-trail {
-            position: absolute; left: 5%; width: 90%; background: rgba(16, 185, 129, 0.45);
-            border-left: 3px solid rgba(16, 185, 129, 0.8); border-right: 3px solid rgba(16, 185, 129, 0.8);
-            pointer-events: none; transition: filter 0.1s ease-out, background 0.1s ease-out; z-index: 15;
-        }
-        .active-hold-trail {
-            background: rgba(52, 211, 153, 0.65) !important;
-            box-shadow: 0 0 30px rgba(52, 211, 153, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
-            filter: brightness(1.3);
-        }
+        /* Sync Simultaneous-Line connection */
         .sync-line {
             position: absolute; height: 5px; background: #ffffff;
             box-shadow: 0 0 15px #fde047, 0 0 5px #fde047; transform-origin: left center; z-index: 18; border-radius: 5px;
@@ -155,6 +143,12 @@
         .target-box-2 { border: 3px solid #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
         .target-box-3 { border: 3px solid #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.6); }
         .target-diamond { width: 12px; height: 12px; background: currentColor; transform: rotate(45deg); margin: auto; box-shadow: 0 0 12px currentColor; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 242, 254, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 254, 0.6); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
@@ -188,8 +182,8 @@
                 <span class="text-[9px] text-cyan-400 uppercase tracking-widest font-bold"><i class="fa-solid fa-pen mr-1"></i>プロフィール</span>
                 <span id="player-username" class="text-sm font-bold text-slate-100">Player_#8921</span>
             </div>
-            <div class="w-10 h-10 rounded-full border-2 border-cyan-500/50 bg-slate-800 flex items-center justify-center overflow-hidden">
-                <img id="player-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Player8921" class="w-full h-full object-cover">
+            <div class="w-10 h-10 rounded-full border-2 border-cyan-500/50 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                <img id="player-avatar" src="" class="w-full h-full object-cover">
             </div>
         </div>
     </header>
@@ -201,28 +195,31 @@
         <section id="lobby-panel" class="w-full lg:w-1/3 flex flex-col gap-4 transition-all duration-500">
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-lg backdrop-blur-md">
                 <div class="flex items-center gap-3">
-                    <img id="lobby-profile-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Player8921" class="w-12 h-12 rounded-xl bg-slate-800 border border-cyan-500/30 object-cover">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-cyan-500/30 overflow-hidden shrink-0">
+                        <img id="lobby-profile-avatar" src="" class="w-full h-full object-cover">
+                    </div>
                     <div>
                         <div id="lobby-profile-name" class="font-bold text-sm text-slate-200">Player_#8921</div>
                         <div class="text-[10px] text-slate-500">自作の楽曲を完全新規譜面でプレイ！</div>
                     </div>
                 </div>
-                <button onclick="openProfileModal()" class="bg-slate-800 hover:bg-cyan-950 hover:text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-all font-bold">編集</button>
+                <button onclick="openProfileModal()" class="bg-slate-800 hover:bg-cyan-950 hover:text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-all font-bold shrink-0">編集</button>
             </div>
 
-            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col flex-grow backdrop-blur-md">
+            <!-- Scrollable Song List Box -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col flex-grow backdrop-blur-md min-h-[220px]">
                 <h2 class="text-sm font-bold text-slate-400 mb-3 tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-compact-disc text-cyan-400 animate-spin" style="animation-duration: 4s;"></i>楽曲リスト
                 </h2>
-                <!-- Scrollable Song List -->
-                <div id="song-list" class="flex-grow overflow-y-auto space-y-2 pr-1 h-0 min-h-[160px] lg:min-h-0"></div>
+                <!-- overflow-y-auto enables scrolling -->
+                <div id="song-list" class="flex-grow overflow-y-auto space-y-2 pr-2 h-0"></div>
             </div>
         </section>
 
         <!-- GAME ARENA PANEL -->
         <section id="game-arena-panel" class="flex-grow lg:w-2/3 flex flex-col bg-slate-950/20 border border-slate-800/80 rounded-3xl overflow-hidden relative backdrop-blur-xs transition-all duration-500">
             
-            <!-- Setup Overlay -->
+            <!-- Setup Overlay (ゲーム外時は表示される。スタートで確実に隠れる) -->
             <div id="game-lobby-overlay" class="absolute inset-0 bg-slate-950/95 z-[60] flex flex-col justify-center items-center p-6 text-center transition-opacity duration-300">
                 <div class="max-w-md w-full">
                     <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-4">
@@ -231,15 +228,15 @@
                     <h3 class="text-2xl font-bold mb-2 tracking-wide neon-text-cyan">LIVE ARENA</h3>
                     <p class="text-xs text-slate-400 mb-6">曲の最後に長押しギミックが登場！オンラインの募集で世界中のスコアに挑め！</p>
 
-                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 text-left space-y-4">
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 text-left space-y-4 shadow-xl">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1.5">選択中の楽曲</label>
                             <div class="flex items-center gap-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                                 <div class="w-10 h-10 rounded bg-cyan-950 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-music"></i></div>
                                 <div class="flex-grow min-w-0">
-                                    <div id="lobby-selected-song-title" class="font-bold text-sm truncate">Track</div>
+                                    <div id="lobby-selected-song-title" class="font-bold text-sm truncate text-white">Track</div>
                                 </div>
-                                <div class="text-right">
+                                <div class="text-right shrink-0">
                                     <span id="lobby-selected-song-bpm" class="text-xs font-mono text-cyan-400 block">BPM 120</span>
                                     <span id="lobby-high-score" class="text-[10px] font-mono text-yellow-400 font-bold block mt-0.5">HIGH SCORE: 0</span>
                                 </div>
@@ -248,8 +245,8 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-400 mb-1.5">難易度</label>
-                                <select id="player-difficulty" onchange="updateHighScoreDisplay();" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-cyan-400 focus:outline-none focus:border-cyan-500">
-                                    <option value="easy" selected>EASY (★5)</option>
+                                <select id="player-difficulty" onchange="saveSettings();" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-cyan-400 focus:outline-none focus:border-cyan-500">
+                                    <option value="easy">EASY (★5)</option>
                                     <option value="normal">NORMAL (★10)</option>
                                     <option value="hard">HARD (★25)</option>
                                     <option value="expert">EXPERT (★36+)</option>
@@ -259,6 +256,8 @@
                                 <label class="block text-xs font-semibold text-slate-400 mb-1.5">対戦相手 (モード)</label>
                                 <select id="opponent-level" onchange="handleOpponentModeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-pink-400 focus:outline-none">
                                     <option value="solo" selected>ソロプレイ</option>
+                                    <option value="friend1">Rin_Melo (Lv.12)</option>
+                                    <option value="friend2">Leon (Lv.35)</option>
                                     <option value="pro">Pro_Botと対戦</option>
                                 </select>
                             </div>
@@ -267,7 +266,7 @@
                         <!-- Online High scores list container -->
                         <div class="border-t border-slate-800 pt-3">
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-globe text-cyan-400 mr-1"></i>世界ランキング (オンライン)</span>
-                            <div id="online-ranking-list" class="space-y-1.5 max-h-32 overflow-y-auto text-xs font-mono">
+                            <div id="online-ranking-list" class="space-y-1.5 max-h-28 overflow-y-auto pr-2 text-xs font-mono">
                                 <div class="text-slate-500 text-center py-2">ロード中...</div>
                             </div>
                         </div>
@@ -276,7 +275,7 @@
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-users text-pink-400 mr-1"></i>オンライン対戦待機ルーム</span>
                                 <div class="flex gap-2">
-                                    <button onclick="openAddFriendModal()" class="text-[10px] text-pink-400 hover:text-pink-300 font-bold"><i class="fa-solid fa-user-plus"></i> フレンド追加</button>
+                                    <button onclick="openAddFriendModal()" class="text-[10px] text-pink-400 hover:text-pink-300 font-bold"><i class="fa-solid fa-user-plus text-[10px]"></i> 追加</button>
                                 </div>
                             </div>
                             
@@ -284,14 +283,14 @@
                                 <button id="tab-friends" onclick="switchFriendTab('friends')" class="flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold">フレンド</button>
                                 <button id="tab-online" onclick="switchFriendTab('online')" class="flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold">募集中ルーム</button>
                             </div>
-                            <div id="friend-tab-content" class="space-y-1.5 max-h-28 overflow-y-auto text-xs font-mono">
-                                <!-- Dynamic content -->
+                            <div id="friend-tab-content" class="space-y-1.5 max-h-24 overflow-y-auto pr-2 text-xs font-mono">
+                                <!-- Dynamic Friend content -->
                             </div>
                         </div>
                     </div>
 
                     <button id="live-start-btn" onclick="startLocalMatch()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_0_15px_rgba(0,242,254,0.4)] transform active:scale-95 transition-all text-sm tracking-widest">
-                        ライブスタート (ソロ/BOT)
+                        ライブスタート
                     </button>
                 </div>
             </div>
@@ -324,7 +323,7 @@
                             <div id="game-score-self" class="text-lg font-bold font-mono text-cyan-300">0000000</div>
                         </div>
                     </div>
-                    <div id="vs-progress-bar-container" class="flex-grow mx-4 max-w-xs flex flex-col items-center">
+                    <div id="vs-progress-bar-container" class="flex-grow mx-4 max-w-xs flex flex-col items-center opacity-0 transition-opacity duration-200">
                         <div class="flex justify-between w-full text-[9px] text-slate-400 font-mono mb-1">
                             <span>YOU</span><span id="vs-leading-status" class="text-yellow-400 font-bold">DRAW</span><span>OPPONENT</span>
                         </div>
@@ -333,7 +332,7 @@
                             <div id="versus-progress-opponent" class="h-full bg-pink-500" style="width: 50%;"></div>
                         </div>
                     </div>
-                    <div id="opponent-score-header" class="flex items-center gap-2 text-right">
+                    <div id="opponent-score-header" class="flex items-center gap-2 text-right opacity-0 transition-opacity duration-200">
                         <div>
                             <div class="text-[10px] text-slate-400 leading-none">OPPONENT</div>
                             <div id="game-score-opponent" class="text-lg font-bold font-mono text-pink-300">0000000</div>
@@ -384,7 +383,7 @@
                         <span id="combo-count" class="text-6xl font-black font-mono tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">0</span>
                     </div>
 
-                    <!-- SUPER MOBILE HITBOXES: ゲーム中のみ表示される画面下半分の巨大な透明タップエリア -->
+                    <!-- SUPER MOBILE HITBOXES -->
                     <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden">
                         <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 0)" ontouchstart="handleTouchTap(event, 0)" onmouseup="handleMouseRelease(event, 0)" ontouchend="handleTouchRelease(event, 0)" onmouseleave="handleMouseRelease(event, 0)" ontouchcancel="handleTouchRelease(event, 0)"></div>
                         <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 1)" ontouchstart="handleTouchTap(event, 1)" onmouseup="handleMouseRelease(event, 1)" ontouchend="handleTouchRelease(event, 1)" onmouseleave="handleMouseRelease(event, 1)" ontouchcancel="handleTouchRelease(event, 1)"></div>
@@ -398,7 +397,7 @@
                             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <img id="opponent-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Opp" class="w-8 h-8 rounded-full border border-pink-500/50 bg-slate-800">
+                            <img id="opponent-avatar" src="" class="w-8 h-8 rounded-full border border-pink-500/50 bg-slate-800 object-cover">
                             <div class="min-w-0">
                                 <div id="opponent-name-tag" class="text-xs font-bold truncate text-white">Rival</div>
                                 <div id="opponent-difficulty-tag" class="text-[9px] text-pink-400">HARD (★25)</div>
@@ -460,7 +459,7 @@
 
                     <div class="flex gap-4">
                         <button onclick="closeResults()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-6 rounded-xl text-sm transition-all border border-slate-700">ロビーへ</button>
-                        <button onclick="startLocalMatch()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg">もう一度</button>
+                        <button onclick="restartMatchWithSameSetup()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg">もう一度</button>
                     </div>
                 </div>
             </div>
@@ -548,31 +547,44 @@
             appId: "1:419833510947:web:4c3d898a648dba026ec596"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let app, auth, db;
+        let firebaseUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        let firebaseUser = null;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            const initAuth = async () => {
+                try { 
+                    await signInAnonymously(auth); 
+                } catch (err) { 
+                    console.warn("Firebase Auth disabled or running offline."); 
+                    window.renderOfflineFallback();
+                }
+            };
+            initAuth();
 
-        const initAuth = async () => {
-            try { await signInAnonymously(auth); } catch (err) { console.error("Firebase auth failed", err); }
-        };
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            firebaseUser = user;
-            if (user) {
-                setupGlobalScoreListener();
-                setupFriendListener();
-            }
-        });
+            onAuthStateChanged(auth, (user) => {
+                firebaseUser = user;
+                if (user) {
+                    setupGlobalScoreListener();
+                    setupFriendListener();
+                } else {
+                    window.renderOfflineFallback();
+                }
+            });
+        } catch(e) {
+            console.warn("Firebase initialization skipped. Running entirely offline.");
+            setTimeout(() => { if(window.renderOfflineFallback) window.renderOfflineFallback(); }, 500);
+        }
 
         // --- Online Ranking (Score Sync) ---
         let globalOnlineScores = [];
 
         function setupGlobalScoreListener() {
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) return;
             const scoreCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'highscores');
             onSnapshot(scoreCollectionRef, (snapshot) => {
                 let list = [];
@@ -583,8 +595,11 @@
         }
 
         window.updateRankingUI = function() {
-            if(!window.originalSongs || window.currentSongIndex === undefined) return;
-            const song = window.originalSongs[window.currentSongIndex];
+            const container = document.getElementById('online-ranking-list');
+            if(!container) return;
+            if(!originalSongs || currentSongIndex === undefined) return;
+            
+            const song = originalSongs[currentSongIndex];
             const diff = document.getElementById('player-difficulty').value;
             
             const filtered = globalOnlineScores.filter(s => s.songId === song.id && s.difficulty === diff);
@@ -599,22 +614,21 @@
                 }
             }
             
-            const container = document.getElementById('online-ranking-list');
             if (topScores.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 text-center py-2">スコア記録がありません。一番乗りを目指そう！</div>`;
+                container.innerHTML = `<div class="text-slate-500 text-center py-2 text-[10px]">記録がありません。一番乗りを目指そう！</div>`;
                 return;
             }
             
             container.innerHTML = topScores.map((scoreObj, index) => {
                 const diffBadgeColor = scoreObj.difficulty === 'expert' ? 'text-purple-400' : scoreObj.difficulty === 'hard' ? 'text-pink-400' : scoreObj.difficulty === 'normal' ? 'text-emerald-400' : 'text-cyan-400';
                 return `
-                    <div class="flex justify-between items-center p-1.5 bg-slate-900/60 border border-slate-800/80 rounded-lg">
-                        <div class="flex items-center gap-2 truncate">
-                            <span class="font-black text-slate-500 w-4 text-center">${index + 1}</span>
-                            <span class="text-slate-200 font-bold truncate max-w-[90px]">${escapeHTML(scoreObj.username)}</span>
+                    <div class="flex justify-between items-center p-1 bg-slate-900/60 border border-slate-800/80 rounded-lg text-[10px]">
+                        <div class="flex items-center gap-1 truncate">
+                            <span class="font-black text-slate-500 w-3 text-center">${index + 1}</span>
+                            <span class="text-slate-200 font-bold truncate max-w-[80px]">${escapeHTML(scoreObj.username)}</span>
                         </div>
                         <div class="text-right shrink-0">
-                            <span class="text-[9px] font-bold uppercase ${diffBadgeColor} mr-1.5">${scoreObj.difficulty}</span>
+                            <span class="text-[8px] font-bold uppercase ${diffBadgeColor} mr-1">${scoreObj.difficulty}</span>
                             <span class="text-yellow-400 font-bold font-mono">${scoreObj.score.toLocaleString()}</span>
                         </div>
                     </div>
@@ -628,7 +642,7 @@
         }
 
         window.publishScoreToOnline = async function(songId, difficulty, score, combo, username) {
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) return;
             try {
                 const recordId = `${firebaseUser.uid}_${songId}_${difficulty}`;
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'highscores', recordId);
@@ -648,11 +662,14 @@
         let roomsUnsubscribe = null;
         window.listenRooms = function() {
             if (roomsUnsubscribe) roomsUnsubscribe();
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) {
+                window.renderOfflineRooms();
+                return;
+            }
             
             const roomsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'rooms');
             roomsUnsubscribe = onSnapshot(roomsColRef, (snapshot) => {
-                if (window.currentFriendTab !== 'online') return; 
+                if (currentFriendTab !== 'online') return; 
                 
                 let rooms = [];
                 snapshot.forEach(doc => {
@@ -671,19 +688,19 @@
                 }
                 
                 container.innerHTML = rooms.map(room => {
-                    const song = window.originalSongs.find(s => s.id === room.songId);
+                    const song = originalSongs.find(s => s.id === room.songId);
                     const songTitle = song ? song.title : 'Unknown';
                     const diffColor = room.difficulty === 'expert' ? 'text-purple-400' : room.difficulty === 'hard' ? 'text-pink-400' : room.difficulty === 'normal' ? 'text-emerald-400' : 'text-cyan-400';
                     
                     return `
-                        <div class="flex justify-between items-center p-2 bg-slate-900/60 border border-slate-700/50 rounded-lg hover:border-pink-500/50 transition-all">
+                        <div class="flex justify-between items-center p-1.5 bg-slate-900/60 border border-slate-700/50 rounded-lg hover:border-pink-500/50 transition-all text-[11px]">
                             <div class="min-w-0 flex-1 pr-2">
                                 <div class="text-[10px] font-bold text-slate-200 truncate">${escapeHTML(room.hostName)}のルーム</div>
                                 <div class="text-[9px] text-slate-400 truncate">${songTitle}</div>
                             </div>
-                            <div class="flex items-center gap-2 shrink-0">
+                            <div class="flex items-center gap-1.5 shrink-0">
                                 <span class="text-[9px] font-bold uppercase ${diffColor}">${room.difficulty}</span>
-                                <button onclick="window.joinRoom('${room.roomId}')" class="bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 text-[9px] py-1 px-2 rounded font-bold">参加</button>
+                                <button onclick="joinRoom('${room.roomId}')" class="bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 text-[9px] py-0.5 px-1.5 rounded font-bold">参加</button>
                             </div>
                         </div>
                     `;
@@ -692,16 +709,16 @@
         };
 
         window.createRoomOnline = async function() {
-            if (!firebaseUser) return;
-            const song = window.originalSongs[window.currentSongIndex];
+            if (!firebaseUser || !db) return;
+            const song = originalSongs[currentSongIndex];
             const diff = document.getElementById('player-difficulty').value;
             const roomId = "room_" + Date.now();
-            window.currentRoomId = roomId;
-            window.isHost = true;
+            currentRoomId = roomId;
+            isHost = true;
             
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
             await setDoc(roomRef, {
-                roomId: roomId, hostUid: firebaseUser.uid, hostName: window.playerProfile.username,
+                roomId: roomId, hostUid: firebaseUser.uid, hostName: playerProfile.username,
                 guestUid: null, guestName: null, songId: song.id, difficulty: diff,
                 status: 'waiting', hostScore: 0, hostCombo: 0, guestScore: 0, guestCombo: 0,
                 createdAt: Date.now()
@@ -713,17 +730,18 @@
         };
 
         window.joinRoom = async function(roomId) {
-            if (!firebaseUser) return;
-            window.currentRoomId = roomId;
-            window.isHost = false;
+            if (!firebaseUser || !db) return;
+            currentRoomId = roomId;
+            isHost = false;
             
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-            await setDoc(roomRef, { guestUid: firebaseUser.uid, guestName: window.playerProfile.username, status: 'ready' }, { merge: true });
+            await setDoc(roomRef, { guestUid: firebaseUser.uid, guestName: playerProfile.username, status: 'ready' }, { merge: true });
             window.listenCurrentRoom(roomId);
         };
 
         let roomUnsubscribe = null;
         window.listenCurrentRoom = function(roomId) {
+            if(!db) return;
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
             if(roomUnsubscribe) roomUnsubscribe();
             
@@ -731,55 +749,55 @@
                 if (!docSnap.exists()) return;
                 const data = docSnap.data();
                 
-                if (data.status === 'ready' && !window.gameActive) {
-                    const songIndex = window.originalSongs.findIndex(s => s.id === data.songId);
-                    if(songIndex !== -1) window.currentSongIndex = songIndex;
+                if (data.status === 'ready' && !gameActive) {
+                    const songIndex = originalSongs.findIndex(s => s.id === data.songId);
+                    if(songIndex !== -1) currentSongIndex = songIndex;
                     document.getElementById('player-difficulty').value = data.difficulty;
-                    window.selectedOpponentPreset = 'online'; 
+                    selectedOpponentPreset = 'online'; 
                     
-                    const oppName = window.isHost ? data.guestName : data.hostName;
+                    const oppName = isHost ? data.guestName : data.hostName;
                     document.getElementById('waiting-room-overlay').classList.add('hidden');
                     document.getElementById('waiting-room-overlay').classList.remove('flex');
                     
-                    if (window.isHost) setDoc(roomRef, { status: 'playing' }, { merge: true });
-                    window.startOnlineMatchReal(oppName); 
+                    if (isHost) setDoc(roomRef, { status: 'playing' }, { merge: true });
+                    startOnlineMatchReal(oppName); 
                 }
                 
-                if (data.status === 'playing' && window.gameActive) {
-                    if (window.isHost) {
-                        window.scoreOpponent = data.guestScore || 0;
-                        window.comboOpponent = data.guestCombo || 0;
+                if (data.status === 'playing' && gameActive) {
+                    if (isHost) {
+                        scoreOpponent = data.guestScore || 0;
+                        comboOpponent = data.guestCombo || 0;
                     } else {
-                        window.scoreOpponent = data.hostScore || 0;
-                        window.comboOpponent = data.hostCombo || 0;
+                        scoreOpponent = data.hostScore || 0;
+                        comboOpponent = data.hostCombo || 0;
                     }
-                    if(window.updateScoreboard) window.updateScoreboard();
+                    updateScoreboard();
                 }
 
                 if (data.status === 'cancelled') {
-                    window.cancelRoomLocal();
+                    cancelRoomLocal();
                 }
             });
         };
 
         let syncInterval = null;
         window.startScoreSync = function() {
-            if (!window.currentRoomId || window.selectedOpponentPreset !== 'online') return;
+            if (!currentRoomId || selectedOpponentPreset !== 'online' || !db) return;
             syncInterval = setInterval(() => {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', window.currentRoomId);
-                if (window.isHost) setDoc(roomRef, { hostScore: window.scoreSelf, hostCombo: window.comboSelf }, { merge: true });
-                else setDoc(roomRef, { guestScore: window.scoreSelf, guestCombo: window.comboSelf }, { merge: true });
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+                if (isHost) setDoc(roomRef, { hostScore: scoreSelf, hostCombo: comboSelf }, { merge: true });
+                else setDoc(roomRef, { guestScore: scoreSelf, guestCombo: comboSelf }, { merge: true });
             }, 1000); 
         };
 
         window.stopScoreSync = function() {
             if(syncInterval) clearInterval(syncInterval);
             if(roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
-            if(window.isHost && window.currentRoomId) {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', window.currentRoomId);
+            if(isHost && currentRoomId && db) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
                 deleteDoc(roomRef).catch(e=>console.log(e));
             }
-            window.currentRoomId = null;
+            currentRoomId = null;
         };
 
         window.cancelRoomLocal = function() {
@@ -789,8 +807,8 @@
         };
 
         window.cancelRoom = function() {
-            if (window.currentRoomId && window.isHost) {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', window.currentRoomId);
+            if (currentRoomId && isHost && db) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
                 setDoc(roomRef, { status: 'cancelled' }, { merge: true }).then(()=> { window.cancelRoomLocal(); });
             } else {
                 window.cancelRoomLocal();
@@ -799,17 +817,17 @@
 
         // --- Firebase Friend System ---
         function setupFriendListener() {
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) return;
             const friendColRef = collection(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends');
             onSnapshot(friendColRef, (snapshot) => {
-                window.firebaseFriends = [];
-                snapshot.forEach(doc => { window.firebaseFriends.push({ id: doc.id, ...doc.data() }); });
-                if(window.renderFriendsList && window.currentFriendTab === 'friends') window.renderFriendsList();
+                firebaseFriends = [];
+                snapshot.forEach(doc => { firebaseFriends.push({ id: doc.id, ...doc.data() }); });
+                if(currentFriendTab === 'friends') renderFriendsList();
             }, (error) => {});
         }
 
         window.addFriendToOnline = async function(friendName) {
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) return;
             try {
                 const friendId = "f_" + Date.now();
                 const docRef = doc(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends', friendId);
@@ -818,34 +836,100 @@
         };
         
         window.removeFriendFromOnline = async function(friendId) {
-            if (!firebaseUser) return;
+            if (!firebaseUser || !db) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends', friendId);
                 await deleteDoc(docRef);
             } catch (err) {}
         };
+
+        // Fallbacks for local / sandbox offline plays
+        window.renderOfflineFallback = function() {
+            const listEl = document.getElementById('online-ranking-list');
+            if(listEl) listEl.innerHTML = `<div class="text-slate-500 text-center py-2 text-[10px]"><i class="fa-solid fa-wifi-slash mr-1"></i>現在オフライン動作中です。</div>`;
+            window.renderOfflineRooms();
+        };
+
+        window.renderOfflineRooms = function() {
+            const container = document.getElementById('friend-tab-content');
+            if (container && currentFriendTab === 'online') {
+                container.innerHTML = `<div class="text-slate-500 text-center py-3 text-[10px]"><i class="fa-solid fa-cloud-slash mr-1"></i>オフラインのため<br>対戦募集・参加はできません。</div>`;
+            }
+        };
     </script>
 
-    <!-- GAMEPLAY LOGIC & LOCAL STORAGE -->
+    <!-- MAIN GAME ENGINE & INITIALIZATION -->
     <script>
-        window.originalSongs = [
-            { id: 'track_tanarebo', title: 'tanarebo', bpm: 140, audioFile: 'tanarebo.mp3', staticDuration: 65, previewTime: 40 },
-            { id: 'track_hizen', title: '緋善のセカイ', bpm: 155, audioFile: '緋善のセカイ.mp3', staticDuration: 216, previewTime: 65 },
-            { id: 'track_happyend', title: 'ハッピーエンド', bpm: 120, audioFile: 'ハッピーエンド.mp3', staticDuration: 265, previewTime: 50 },
-            { id: 'track_kazuking', title: 'カズキングあ', bpm: 160, audioFile: 'カズキングあ.mp3', staticDuration: 238, previewTime: 45 },
-            { id: 'track_rampage_v', title: 'ランペイジ・イットヴェノム', bpm: 150, audioFile: 'ランペイジ・イットヴェノム.mp3', staticDuration: 166, previewTime: 40 },
-            { id: 'track_rampage_i', title: 'ランペイジ・イット', bpm: 145, audioFile: 'ランペイジ・イット.mp3', staticDuration: 172, previewTime: 45 },
-            { id: 'track_hiiro', title: '緋色のサーガ', bpm: 150, audioFile: '緋色のサーガ.mp3', staticDuration: 193, previewTime: 60 },
-            { id: 'track_shien', title: '紫煙にむせぶ 路地裏の果て2', bpm: 130, audioFile: '紫煙（しえん）にむせぶ　路地裏の果て2.mp3', staticDuration: 238, previewTime: 70 },
-            { id: 'track_kazuking_t', title: 'カズキングタイジュウフエターネキンギーニ', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
-            { id: 'track_asayake', title: '朝焼けの街を走り抜けてく', bpm: 110, audioFile: '朝焼けの街を走り抜けてく  .mp3', staticDuration: 280, previewTime: 80 }
+        // Data Base 
+        const originalSongs = [
+            { id: 'track_tanarebo', title: 'tanarebo', artist: 'You (Original)', bpm: 140, audioFile: 'tanarebo.mp3', staticDuration: 65, previewTime: 40 },
+            { id: 'track_hizen', title: '緋善のセカイ', artist: 'You (Original)', bpm: 155, audioFile: '緋善のセカイ.mp3', staticDuration: 216, previewTime: 65 },
+            { id: 'track_happyend', title: 'ハッピーエンド', artist: 'You (Original)', bpm: 120, audioFile: 'ハッピーエンド.mp3', staticDuration: 265, previewTime: 50 },
+            { id: 'track_kazuking', title: 'カズキングあ', artist: 'You (Original)', bpm: 160, audioFile: 'カズキングあ.mp3', staticDuration: 238, previewTime: 45 },
+            { id: 'track_rampage_v', title: 'ランペイジ・イットヴェノム', artist: 'You (Original)', bpm: 150, audioFile: 'ランペイジ・イットヴェノム.mp3', staticDuration: 166, previewTime: 40 },
+            { id: 'track_rampage_i', title: 'ランペイジ・イット', artist: 'You (Original)', bpm: 145, audioFile: 'ランペイジ・イット.mp3', staticDuration: 172, previewTime: 45 },
+            { id: 'track_hiiro', title: '緋色のサーガ', artist: 'You (Original)', bpm: 150, audioFile: '緋色のサーガ.mp3', staticDuration: 193, previewTime: 60 },
+            { id: 'track_shien', title: '紫煙にむせぶ 路地裏の果て2', artist: 'You (Original)', bpm: 130, audioFile: '紫煙（しえん）にむせぶ　路地裏の果て2.mp3', staticDuration: 238, previewTime: 70 },
+            { id: 'track_kazuking_t', title: 'カズキングタイジュウフエターネキンギーニ', artist: 'You (Original)', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
+            { id: 'track_asayake', title: '朝焼けの街を走り抜けてく', artist: 'You (Original)', bpm: 110, audioFile: '朝焼けの街を走り抜けてく  .mp3', staticDuration: 280, previewTime: 80 }
         ];
 
-        let saveData = { profile: { username: "Player_#8921", avatarSeed: "Player8921", customAvatarUrl: "", isCustomImage: false }, lastDifficulty: "easy", highScores: {} };
+        let playerProfile = { username: "Player_#8921", avatarSeed: "Player8921", customAvatarUrl: "", isCustomImage: false };
+        let saveData = { profile: playerProfile, lastDifficulty: "easy", highScores: {} };
+        let tempProfile = {};
+        let currentSongIndex = 0;
+        let firebaseFriends = []; 
+        
+        let gameActive = false;
+        let activeNotes = [];
+        let scoreSelf = 0, comboSelf = 0, maxComboSelf = 0, perfectsSelf = 0, totalPlayableNotes = 0; 
+        let activeHoldsSelf = [null, null, null, null]; 
+        let scoreOpponent = 0, comboOpponent = 0, maxComboOpponent = 0;
+        
+        let gameTime = 0, gameInterval = null, countdownInterval = null, bpmIntervalId = null;
+        let nextNoteIndex = 0;
+        let currentAudio = null, playbackLength = 26; 
+        let selectedOpponentPreset = 'solo';
+        let currentFriendTab = 'friends';
+        let currentRoomId = null;
+        let isHost = false;
+
+        const hitLinePercentage = 95; 
+        const leadTime = 1.3; 
+
+        let previewAudio = new Audio();
+        previewAudio.loop = true;
+
+        function playPreview(song) {
+            try {
+                previewAudio.pause();
+                previewAudio.src = song.audioFile;
+                previewAudio.volume = 0.4;
+                
+                previewAudio.onloadedmetadata = () => {
+                    previewAudio.currentTime = song.previewTime;
+                    const playPromise = previewAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => { /* Autoplay block catch */ });
+                    }
+                };
+            } catch(e) {}
+        }
+
+        const opponentPresets = {
+            friend1: { name: 'Rin_Melo', missProbability: 0.12, perfectProbability: 0.70, scoreMultiplier: 0.95, avatar: 'Rin' },
+            friend2: { name: 'Leon_Kun', missProbability: 0.06, perfectProbability: 0.80, scoreMultiplier: 1.10, avatar: 'Leon' },
+            pro: { name: 'Pro_Bot', missProbability: 0.01, perfectProbability: 0.93, scoreMultiplier: 1.35, avatar: 'Miku' }
+        };
 
         function loadData() {
             const saved = localStorage.getItem('songverseData');
-            if (saved) { try { const parsed = JSON.parse(saved); saveData = { ...saveData, ...parsed }; } catch(e) {} }
+            if (saved) {
+                try { 
+                    const parsed = JSON.parse(saved);
+                    saveData = { ...saveData, ...parsed }; 
+                } catch(e) {}
+            }
         }
 
         function saveSettings() {
@@ -855,74 +939,107 @@
         }
 
         function saveDataToStorage() {
-            window.playerProfile = window.playerProfile || saveData.profile;
-            saveData.profile = window.playerProfile;
+            saveData.profile = playerProfile;
             localStorage.setItem('songverseData', JSON.stringify(saveData));
         }
 
         function updateHighScoreDisplay() {
-            const song = window.originalSongs[window.currentSongIndex];
+            if(!originalSongs || currentSongIndex === undefined) return;
+            const song = originalSongs[currentSongIndex];
             const diff = document.getElementById('player-difficulty').value;
             const key = `${song.id}_${diff}`;
             const hs = saveData.highScores[key] || 0;
-            document.getElementById('lobby-high-score').innerText = `HIGH SCORE: ${hs.toLocaleString()}`;
+            const targetEl = document.getElementById('lobby-high-score');
+            if(targetEl) targetEl.innerText = `HIGH SCORE: ${hs.toLocaleString()}`;
             saveDataToStorage();
             if(window.updateRankingUI) window.updateRankingUI();
         }
 
-        window.playerProfile = {};
-        window.tempProfile = {};
-        window.currentSongIndex = 0;
-        window.firebaseFriends = []; 
-        
-        window.gameActive = false; window.activeNotes = [];
-        window.scoreSelf = 0; window.comboSelf = 0; window.maxComboSelf = 0; window.perfectsSelf = 0; window.totalPlayableNotes = 0; 
-        window.activeHoldsSelf = [null, null, null, null]; 
-        window.scoreOpponent = 0; window.comboOpponent = 0; window.maxComboOpponent = 0;
-        
-        window.gameTime = 0; window.gameInterval = null; window.countdownInterval = null; window.bpmIntervalId = null;
-        window.nextNoteIndex = 0;
-        window.currentAudio = null; window.playbackLength = 26; 
-        window.selectedOpponentPreset = 'solo';
-        window.currentFriendTab = 'friends';
-
-        let previewAudio = new Audio();
-        previewAudio.loop = true;
-
-        function playPreview(song) {
-            previewAudio.pause();
-            previewAudio.src = song.audioFile;
-            previewAudio.volume = 0.4;
-            previewAudio.onloadedmetadata = () => {
-                previewAudio.currentTime = song.previewTime;
-                const playPromise = previewAudio.play();
-                if (playPromise !== undefined) { playPromise.catch(e => {  }); }
-            };
+        function syncProfileUI() {
+            const avatarUrl = playerProfile.isCustomImage ? playerProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${playerProfile.avatarSeed}`;
+            document.getElementById('player-username').innerText = playerProfile.username;
+            document.getElementById('player-avatar').src = avatarUrl;
+            document.getElementById('lobby-profile-name').innerText = playerProfile.username;
+            document.getElementById('lobby-profile-avatar').src = avatarUrl;
         }
 
-        const hitLinePercentage = 95; 
-        const leadTime = 1.3; 
+        function openProfileModal() { 
+            tempProfile = { ...playerProfile };
+            document.getElementById('profile-input-name').value = tempProfile.username;
+            document.getElementById('profile-input-avatar-seed').value = tempProfile.isCustomImage ? '【画像設定済み】' : tempProfile.avatarSeed;
+            const previewUrl = tempProfile.isCustomImage ? tempProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${tempProfile.avatarSeed}`;
+            document.getElementById('profile-preview-avatar').src = previewUrl;
+            document.getElementById('profile-modal').classList.remove('hidden'); 
+        }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            window.playerProfile = { ...saveData.profile };
-            document.getElementById('player-difficulty').value = saveData.lastDifficulty || 'easy';
+        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
+
+        function generateRandomAvatar() {
+            const randomSeed = "User_" + Math.floor(Math.random() * 99999);
+            tempProfile.avatarSeed = randomSeed;
+            tempProfile.isCustomImage = false;
+            document.getElementById('profile-input-avatar-seed').value = randomSeed;
+            document.getElementById('profile-preview-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${randomSeed}`;
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempProfile.customAvatarUrl = e.target.result;
+                    tempProfile.isCustomImage = true;
+                    document.getElementById('profile-preview-avatar').src = tempProfile.customAvatarUrl;
+                    document.getElementById('profile-input-avatar-seed').value = '【画像設定済み】';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('profile-input-name').value.trim();
+            if (name) tempProfile.username = name;
+            playerProfile = { ...tempProfile };
+            saveDataToStorage();
             syncProfileUI();
-            renderSongList();
-            updateSelectedSong(0);
-        });
+            closeProfileModal();
+            if(window.updateRankingUI) window.updateRankingUI(); 
+        }
 
-        // Profile methods are bridged to global scope above
-        
+        function renderSongList() {
+            const container = document.getElementById('song-list');
+            if(!container) return;
+            container.innerHTML = '';
+            originalSongs.forEach((song, idx) => {
+                const activeClass = idx === currentSongIndex ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-800 hover:border-slate-700';
+                container.innerHTML += `
+                    <div onclick="updateSelectedSong(${idx})" class="p-3 border rounded-xl flex items-center gap-3 cursor-pointer transition-all ${activeClass}">
+                        <div class="w-8 h-8 rounded-lg bg-slate-950 flex justify-center items-center border border-slate-800"><i class="fa-solid fa-play text-[10px] ${idx === currentSongIndex ? 'text-cyan-400' : 'text-slate-500'}"></i></div>
+                        <div class="min-w-0 flex-1"><div class="font-bold text-xs truncate ${idx === currentSongIndex ? 'text-cyan-300' : 'text-slate-300'}">${song.title}</div><div class="text-[9px] text-slate-500 truncate">${song.artist}</div></div>
+                        <div class="text-[9px] text-cyan-400 font-mono">BPM ${song.bpm}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateSelectedSong(index) {
+            currentSongIndex = index; 
+            renderSongList();
+            const song = originalSongs[index];
+            document.getElementById('lobby-selected-song-title').innerText = song.title;
+            updateHighScoreDisplay();
+            playPreview(song); 
+        }
+
         function handleOpponentModeChange() {
-            window.selectedOpponentPreset = document.getElementById('opponent-level').value;
+            selectedOpponentPreset = document.getElementById('opponent-level').value;
             const vsBar = document.getElementById('vs-progress-bar-container');
-            if(window.selectedOpponentPreset === 'solo') vsBar.classList.add('opacity-0');
+            if(selectedOpponentPreset === 'solo') vsBar.classList.add('opacity-0');
             else vsBar.classList.remove('opacity-0');
         }
 
-        window.switchFriendTab = function(tab) {
-            window.currentFriendTab = tab;
+        function switchFriendTab(tab) {
+            currentFriendTab = tab;
             const tabFriends = document.getElementById('tab-friends');
             const tabOnline = document.getElementById('tab-online');
             const content = document.getElementById('friend-tab-content');
@@ -930,14 +1047,14 @@
             if (tab === 'friends') {
                 tabFriends.className = "flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold";
                 tabOnline.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
-                if(window.renderFriendsList) window.renderFriendsList();
+                renderFriendsList();
             } else {
                 tabFriends.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
                 tabOnline.className = "flex-1 py-1 rounded bg-slate-800 text-pink-300 border border-pink-500/30 font-bold";
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-bold text-slate-300">募集中のルーム</span>
-                        <button onclick="window.createRoomOnline()" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-300 border border-pink-500/50 text-[10px] py-1 px-2 rounded transition-all">ルーム作成</button>
+                        <button onclick="window.createRoomOnline()" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-300 border border-pink-500/50 text-[10px] py-1 px-2 rounded transition-all font-bold">ルーム作成</button>
                     </div>
                     <div id="room-list-container" class="space-y-1.5 max-h-24 overflow-y-auto">
                         <div class="text-slate-500 text-center py-2 text-xs">ロード中...</div>
@@ -945,15 +1062,15 @@
                 `;
                 if(window.listenRooms) window.listenRooms();
             }
-        };
+        }
 
-        window.renderFriendsList = function() {
+        function renderFriendsList() {
             const container = document.getElementById('friend-tab-content');
-            if (window.firebaseFriends.length === 0) {
+            if (firebaseFriends.length === 0) {
                 container.innerHTML = `<div class="text-slate-500 text-center py-2">フレンドがいません。追加してみよう！</div>`;
                 return;
             }
-            container.innerHTML = window.firebaseFriends.map(friend => `
+            container.innerHTML = firebaseFriends.map(friend => `
                 <div class="flex items-center justify-between p-2 bg-slate-900/50 rounded-xl border border-slate-800/80">
                     <div class="flex items-center gap-2.5">
                         <div class="relative">
@@ -965,20 +1082,21 @@
                     <button onclick="window.removeFriendFromOnline('${friend.id}')" class="text-slate-600 hover:text-red-400 p-1 transition-all"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
-        };
+        }
 
-        // --- GAME CONTROLS ---
+        function openAddFriendModal() { document.getElementById('add-friend-modal').classList.remove('hidden'); }
+        function closeAddFriendModal() { document.getElementById('add-friend-modal').classList.add('hidden'); }
+        
+        function submitAddFriend() { 
+            const name = document.getElementById('friend-input-name').value.trim();
+            if(name && window.addFriendToOnline) window.addFriendToOnline(name);
+            closeAddFriendModal(); 
+        }
+
+        // KEYBOARD/TOUCH BINDINGS
         const KEY_LANES = ['KeyD', 'KeyF', 'KeyJ', 'KeyK'];
-
-        document.addEventListener('keydown', (e) => {
-            if (e.repeat) return; 
-            const idx = KEY_LANES.indexOf(e.code);
-            if (idx !== -1) { triggerTap(idx); }
-        });
-        document.addEventListener('keyup', (e) => {
-            const idx = KEY_LANES.indexOf(e.code);
-            if (idx !== -1) { triggerRelease(idx); }
-        });
+        document.addEventListener('keydown', (e) => { if (e.repeat) return; const idx = KEY_LANES.indexOf(e.code); if (idx !== -1) { triggerTap(idx); } });
+        document.addEventListener('keyup', (e) => { const idx = KEY_LANES.indexOf(e.code); if (idx !== -1) { triggerRelease(idx); } });
 
         function handleTouchTap(event, lane) { event.preventDefault(); triggerTap(lane); }
         function handleTouchRelease(event, lane) { event.preventDefault(); triggerRelease(lane); }
@@ -1022,18 +1140,17 @@
         function triggerTap(lane) {
             const target = document.getElementById(`lane-target-${lane}`);
             if (target) { target.classList.add('hit-active'); setTimeout(() => target.classList.remove('hit-active'), 150); }
-            if (!window.gameActive) return;
+            if (!gameActive) return;
 
             let bestDiff = 999, hitNote = null;
-
-            window.activeNotes.forEach(note => {
+            activeNotes.forEach(note => {
                 if (note.type === 'slide') {
                     if(!note.active && note.nodes[0].lane === lane) {
-                        let diff = Math.abs(window.gameTime - note.nodes[0].time);
+                        let diff = Math.abs(gameTime - note.nodes[0].time);
                         if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
                     }
                 } else if (note.lane === lane && !note.hit) {
-                    let diff = Math.abs(window.gameTime - note.time);
+                    let diff = Math.abs(gameTime - note.time);
                     if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
                 }
             });
@@ -1044,10 +1161,10 @@
 
                 if (hitNote.type === 'flick') {
                     pColor = 'pink';
-                    if (bestDiff < 0.08) { rating = 'PERFECT FLICK'; scoreEarned = 400; cClass = 'text-pink-400 neon-text-pink'; window.perfectsSelf++; } 
+                    if (bestDiff < 0.08) { rating = 'PERFECT FLICK'; scoreEarned = 400; cClass = 'text-pink-400 neon-text-pink'; perfectsSelf++; } 
                     else if (bestDiff < 0.15) { rating = 'GREAT FLICK'; scoreEarned = 280; cClass = 'text-purple-400'; }
                 } else {
-                    if (bestDiff < 0.06) { rating = 'PERFECT'; scoreEarned = 350; cClass = 'text-cyan-400 neon-text-cyan'; window.perfectsSelf++; } 
+                    if (bestDiff < 0.06) { rating = 'PERFECT'; scoreEarned = 350; cClass = 'text-cyan-400 neon-text-cyan'; perfectsSelf++; } 
                     else if (bestDiff < 0.12) { rating = 'GREAT'; scoreEarned = 250; cClass = 'text-emerald-400'; }
                 }
 
@@ -1058,37 +1175,34 @@
                 } else { hitNote.cleanup = true; }
 
                 spawnParticles(lane, pColor);
-                window.comboSelf++; if (window.comboSelf > window.maxComboSelf) window.maxComboSelf = window.comboSelf;
-                window.scoreSelf += scoreEarned;
+                comboSelf++; if (comboSelf > maxComboSelf) maxComboSelf = comboSelf;
+                scoreSelf += scoreEarned;
 
                 displayRating(rating, cClass);
-                window.updateScoreboard();
+                updateScoreboard();
             }
         }
 
         function triggerRelease(lane) {
-            if (!window.gameActive) return;
+            if (!gameActive) return;
             
-            let activeSlide = window.activeNotes.find(n => n.type === 'slide' && n.active);
+            let activeSlide = activeNotes.find(n => n.type === 'slide' && n.active);
             if (activeSlide) {
                 const endTime = activeSlide.nodes[activeSlide.nodes.length-1].time;
-                const diff = Math.abs(window.gameTime - endTime);
+                const diff = Math.abs(gameTime - endTime);
 
-                activeSlide.active = false;
-                activeSlide.cleanup = true;
-
+                activeSlide.active = false; activeSlide.cleanup = true;
                 let rating = 'MISS', scoreEarned = 0, cClass = 'text-red-500';
 
                 if (diff < 0.25) {
-                    if (diff < 0.1) { rating = 'PERFECT'; scoreEarned = 300; cClass = 'text-emerald-400 neon-text-cyan'; window.perfectsSelf++; }
+                    if (diff < 0.1) { rating = 'PERFECT'; scoreEarned = 300; cClass = 'text-emerald-400 neon-text-cyan'; perfectsSelf++; }
                     else { rating = 'GREAT'; scoreEarned = 200; cClass = 'text-teal-400'; }
-                    window.comboSelf++; window.scoreSelf += scoreEarned; spawnParticles(lane, 'green');
+                    comboSelf++; scoreSelf += scoreEarned; spawnParticles(lane, 'green');
                 } else {
-                    window.comboSelf = 0;
+                    comboSelf = 0;
                 }
-
                 displayRating(rating, cClass);
-                window.updateScoreboard();
+                updateScoreboard();
             }
         }
 
@@ -1098,8 +1212,8 @@
             popup.className = `absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider font-mono ${colorClass} z-30 pointer-events-none rating-pop-anim`;
             
             const comboContainer = document.getElementById('combo-popup');
-            if (window.comboSelf > 0) {
-                document.getElementById('combo-count').innerText = window.comboSelf;
+            if (comboSelf > 0) {
+                document.getElementById('combo-count').innerText = comboSelf;
                 comboContainer.classList.remove('hidden'); comboContainer.classList.add('flex');
                 comboContainer.classList.remove('combo-bounce'); void comboContainer.offsetWidth;
                 comboContainer.classList.add('combo-bounce');
@@ -1108,23 +1222,23 @@
             }
         }
 
-        window.updateScoreboard = function() {
-            document.getElementById('game-score-self').innerText = window.scoreSelf.toLocaleString('ja-JP', { minimumIntegerDigits: 7 }).replace(/,/g, '');
-            if (window.selectedOpponentPreset === 'solo') return;
+        function updateScoreboard() {
+            document.getElementById('game-score-self').innerText = scoreSelf.toLocaleString('ja-JP', { minimumIntegerDigits: 7 }).replace(/,/g, '');
+            if (selectedOpponentPreset === 'solo') return;
 
-            document.getElementById('opponent-combo').innerText = window.comboOpponent;
+            document.getElementById('opponent-combo').innerText = comboOpponent;
 
-            const sum = (window.scoreSelf + window.scoreOpponent) || 1;
-            const selfPercent = Math.max(10, Math.min(90, (window.scoreSelf / sum) * 100));
+            const sum = (scoreSelf + scoreOpponent) || 1;
+            const selfPercent = Math.max(10, Math.min(90, (scoreSelf / sum) * 100));
             const oppPercent = 100 - selfPercent;
 
             document.getElementById('versus-progress-self').style.width = `${selfPercent}%`;
             document.getElementById('versus-progress-opponent').style.width = `${oppPercent}%`;
 
             const statusText = document.getElementById('vs-leading-status');
-            if (Math.abs(window.scoreSelf - window.scoreOpponent) < 500) {
+            if (Math.abs(scoreSelf - scoreOpponent) < 500) {
                 statusText.innerText = "DRAW"; statusText.className = "text-yellow-400 font-bold uppercase tracking-wider";
-            } else if (window.scoreSelf > window.scoreOpponent) {
+            } else if (scoreSelf > scoreOpponent) {
                 statusText.innerText = "YOU LEAD!"; statusText.className = "text-cyan-400 font-bold uppercase tracking-wider neon-text-cyan";
             } else {
                 statusText.innerText = "RIVAL LEADS"; statusText.className = "text-pink-400 font-bold uppercase tracking-wider neon-text-pink";
@@ -1132,15 +1246,14 @@
         }
 
         function startLocalMatch() {
-            window.selectedOpponentPreset = document.getElementById('opponent-level').value;
-            if(window.selectedOpponentPreset === 'online') { window.selectedOpponentPreset = 'solo'; }
+            selectedOpponentPreset = document.getElementById('opponent-level').value;
+            if(selectedOpponentPreset === 'online') { selectedOpponentPreset = 'solo'; }
             const diffSelector = document.getElementById('player-difficulty');
             const diffName = diffSelector.options[diffSelector.selectedIndex].text;
             
-            let oppName = "Rival";
-            let oppAvatar = "Opp";
-            if (window.selectedOpponentPreset !== 'solo') {
-                const oppData = opponentPresets[window.selectedOpponentPreset];
+            let oppName = "Rival", oppAvatar = "Opp";
+            if (selectedOpponentPreset !== 'solo') {
+                const oppData = opponentPresets[selectedOpponentPreset];
                 oppName = oppData.name; oppAvatar = oppData.avatar;
             }
             document.getElementById('opponent-name-tag').innerText = oppName;
@@ -1166,7 +1279,6 @@
 
         function startMatchCommon(isOnlineSync = false) {
             previewAudio.pause(); 
-            
             const overlay = document.getElementById('game-lobby-overlay');
             overlay.classList.add('opacity-0');
             
@@ -1181,26 +1293,26 @@
                 const cdOverlay = document.getElementById('countdown-overlay');
                 cdOverlay.classList.remove('hidden'); cdOverlay.classList.add('flex');
 
-                const song = window.originalSongs[window.currentSongIndex];
-                window.playbackLength = song.staticDuration;
+                const song = originalSongs[currentSongIndex];
+                playbackLength = song.staticDuration;
 
-                if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio = null; }
-                window.currentAudio = new Audio(song.audioFile);
-                window.currentAudio.preload = 'auto';
-                const unlockPlay = window.currentAudio.play();
-                if (unlockPlay !== undefined) unlockPlay.then(() => { window.currentAudio.pause(); window.currentAudio.currentTime = 0; }).catch(e=>{});
-                window.currentAudio.load();
+                if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+                currentAudio = new Audio(song.audioFile);
+                currentAudio.preload = 'auto';
+                const unlockPlay = currentAudio.play();
+                if (unlockPlay !== undefined) unlockPlay.then(() => { currentAudio.pause(); currentAudio.currentTime = 0; }).catch(e=>{});
+                currentAudio.load();
 
                 let count = 3;
                 const num = document.getElementById('countdown-number');
-                window.countdownInterval = setInterval(() => {
+                countdownInterval = setInterval(() => {
                     count--;
                     if (count > 0) { num.innerText = count; } 
                     else if (count === 0) { num.innerText = "START!"; } 
                     else {
-                        clearInterval(window.countdownInterval);
+                        clearInterval(countdownInterval);
                         cdOverlay.classList.add('hidden'); cdOverlay.classList.remove('flex');
-                        window.currentAudio.play().then(() => {
+                        currentAudio.play().then(() => {
                             launchMatchCore();
                             if(isOnlineSync && window.startScoreSync) window.startScoreSync();
                         }).catch(() => {
@@ -1213,18 +1325,18 @@
         }
 
         function launchMatchCore() {
-            window.gameActive = true;
-            window.scoreSelf = 0; window.comboSelf = 0; window.maxComboSelf = 0; window.perfectsSelf = 0;
-            window.gameTime = 0; window.nextNoteIndex = 0; window.activeNotes = [];
+            gameActive = true;
+            scoreSelf = 0; comboSelf = 0; maxComboSelf = 0; perfectsSelf = 0;
+            gameTime = 0; nextNoteIndex = 0; activeNotes = [];
             
             document.getElementById('game-score-self').innerText = "0000000";
             document.getElementById('combo-popup').classList.add('hidden');
             document.getElementById('notes-container').innerHTML = '';
 
-            const song = window.originalSongs[window.currentSongIndex];
+            const song = originalSongs[currentSongIndex];
             const difficulty = document.getElementById('player-difficulty').value;
             let playbackNotes = [];
-            const activeLimit = window.playbackLength - 2.0; 
+            const activeLimit = playbackLength - 2.0; 
             const beatGap = 60 / song.bpm;
             
             let tempTime = 0.5, nIndex = 0;
@@ -1237,7 +1349,7 @@
             }
 
             const totalSeq = notesSequence.length;
-            const slideIndices = [totalSeq - 2, totalSeq - 1]; // Slides appear ONLY on the last 2 notes
+            const slideIndices = [totalSeq - 2, totalSeq - 1]; 
 
             let lastLane = -1, lastLastLane = -1;
 
@@ -1245,7 +1357,7 @@
                 const targetTime = noteSeq.time;
                 let baseLane;
                 
-                // Spread notes for easier play, especially on EASY
+                // Optimized lane spreading for EASY
                 do { baseLane = Math.floor(Math.random() * 4); } 
                 while (baseLane === lastLane || (difficulty === 'easy' && baseLane === lastLastLane));
                 lastLastLane = lastLane; lastLane = baseLane;
@@ -1255,24 +1367,12 @@
                 if (isLastTwoSlides) {
                     let nodes = [];
                     const shapeType = Math.floor(Math.random() * 5); 
-                    
                     switch(shapeType) {
-                        case 0: // Straight
-                            nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
-                        case 1: // Diagonal
-                            let endLane = baseLane < 2 ? 3 : 0;
-                            nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 3, lane: endLane }]; break;
-                        case 2: // V-Shape
-                            let midLane = baseLane === 0 ? 3 : (baseLane === 3 ? 0 : (baseLane === 1 ? 3 : 0));
-                            nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 1.5, lane: midLane }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
-                        case 3: // W-Shape
-                            let shift = baseLane < 2 ? 1 : -1;
-                            nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 0.75, lane: baseLane + shift }, { time: targetTime + beatGap * 1.5, lane: baseLane }, { time: targetTime + beatGap * 2.25, lane: baseLane + shift }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
-                        case 4: // Stairs
-                            let stepDir = baseLane < 2 ? 1 : -1;
-                            nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 1, lane: baseLane + stepDir }, { time: targetTime + beatGap * 2, lane: baseLane + stepDir * 2 }, { time: targetTime + beatGap * 3, lane: baseLane + stepDir * 3 }];
-                            nodes.forEach(n => n.lane = Math.max(0, Math.min(3, n.lane))); 
-                            break;
+                        case 0: nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
+                        case 1: let endLane = baseLane < 2 ? 3 : 0; nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 3, lane: endLane }]; break;
+                        case 2: let midLane = baseLane === 0 ? 3 : (baseLane === 3 ? 0 : (baseLane === 1 ? 3 : 0)); nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 1.5, lane: midLane }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
+                        case 3: let shift = baseLane < 2 ? 1 : -1; nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 0.75, lane: baseLane + shift }, { time: targetTime + beatGap * 1.5, lane: baseLane }, { time: targetTime + beatGap * 2.25, lane: baseLane + shift }, { time: targetTime + beatGap * 3, lane: baseLane }]; break;
+                        case 4: let stepDir = baseLane < 2 ? 1 : -1; nodes = [{ time: targetTime, lane: baseLane }, { time: targetTime + beatGap * 1, lane: baseLane + stepDir }, { time: targetTime + beatGap * 2, lane: baseLane + stepDir * 2 }, { time: targetTime + beatGap * 3, lane: baseLane + stepDir * 3 }]; nodes.forEach(n => n.lane = Math.max(0, Math.min(3, n.lane))); break;
                     }
                     playbackNotes.push({ time: targetTime, type: 'slide', nodes: nodes, hit: false, active: false });
                 } else {
@@ -1295,12 +1395,12 @@
             });
             
             playbackNotes.sort((a, b) => a.time - b.time);
-            window.totalPlayableNotes = playbackNotes.length;
+            totalPlayableNotes = playbackNotes.length;
 
             const updateIntervalMs = 1000 / 60;
 
-            window.bpmIntervalId = setInterval(() => {
-                const notesSubBeat = Math.floor(window.gameTime * (song.bpm / 60));
+            bpmIntervalId = setInterval(() => {
+                const notesSubBeat = Math.floor(gameTime * (song.bpm / 60));
                 if (notesSubBeat % 2 === 0) {
                     const ring = document.getElementById('sound-ring');
                     if (ring) {
@@ -1310,30 +1410,30 @@
                 }
             }, 60000 / song.bpm);
 
-            window.gameInterval = setInterval(() => {
-                if (window.currentAudio && !window.currentAudio.paused) window.gameTime = window.currentAudio.currentTime;
-                else window.gameTime += updateIntervalMs / 1000;
+            gameInterval = setInterval(() => {
+                if (currentAudio && !currentAudio.paused) gameTime = currentAudio.currentTime;
+                else gameTime += updateIntervalMs / 1000;
 
-                while (window.nextNoteIndex < playbackNotes.length && playbackNotes[window.nextNoteIndex].time <= window.gameTime + leadTime) {
-                    spawnNote(playbackNotes[window.nextNoteIndex]);
-                    window.nextNoteIndex++;
+                while (nextNoteIndex < playbackNotes.length && playbackNotes[nextNoteIndex].time <= gameTime + leadTime) {
+                    spawnNote(playbackNotes[nextNoteIndex]);
+                    nextNoteIndex++;
                 }
 
                 updateNotesPositions();
 
-                if (window.selectedOpponentPreset !== 'solo' && window.selectedOpponentPreset !== 'online') {
+                if (selectedOpponentPreset !== 'solo' && selectedOpponentPreset !== 'online') {
                     simulateOpponentTurn();
                 }
 
-                if (window.currentAudio) { if (window.currentAudio.ended || window.gameTime >= window.playbackLength) finishGameMatch(); } 
-                else { if (window.gameTime > window.playbackLength) finishGameMatch(); }
+                if (currentAudio) { if (currentAudio.ended || gameTime >= playbackLength) finishGameMatch(); } 
+                else { if (gameTime > playbackLength) finishGameMatch(); }
             }, updateIntervalMs);
         }
 
         function spawnNote(noteData) {
             if (noteData.type === 'slide') {
-                noteData.spawnTime = window.gameTime;
-                window.activeNotes.push(noteData);
+                noteData.spawnTime = gameTime;
+                activeNotes.push(noteData);
             } else {
                 const container = document.getElementById('notes-container');
                 const noteDiv = document.createElement('div');
@@ -1343,8 +1443,8 @@
                 noteDiv.style.width = `21%`;
                 container.appendChild(noteDiv);
                 noteData.element = noteDiv;
-                noteData.spawnTime = window.gameTime;
-                window.activeNotes.push(noteData);
+                noteData.spawnTime = gameTime;
+                activeNotes.push(noteData);
             }
         }
 
@@ -1352,11 +1452,11 @@
             const slideLayer = document.getElementById('slide-layer');
             let svgHTML = '';
 
-            for (let i = window.activeNotes.length - 1; i >= 0; i--) {
-                const note = window.activeNotes[i];
+            for (let i = activeNotes.length - 1; i >= 0; i--) {
+                const note = activeNotes[i];
                 if (note.cleanup) {
                     if (note.element) note.element.remove();
-                    window.activeNotes.splice(i, 1);
+                    activeNotes.splice(i, 1);
                     continue;
                 }
 
@@ -1365,14 +1465,14 @@
                     let headY = 0, headX = 0;
                     for (let j = 0; j < note.nodes.length; j++) {
                         let n = note.nodes[j];
-                        let y = hitLinePercentage - ((n.time - window.gameTime) / leadTime) * hitLinePercentage;
+                        let y = hitLinePercentage - ((n.time - gameTime) / leadTime) * hitLinePercentage;
                         let x = n.lane * 250 + 125; 
                         
                         if (y > hitLinePercentage) {
                             if (note.active) {
                                 let next = note.nodes[j+1];
                                 if (next) {
-                                    let nextY = hitLinePercentage - ((next.time - window.gameTime) / leadTime) * hitLinePercentage;
+                                    let nextY = hitLinePercentage - ((next.time - gameTime) / leadTime) * hitLinePercentage;
                                     if (nextY <= hitLinePercentage) {
                                         let ratio = (hitLinePercentage - y) / (nextY - y);
                                         let clipX = x + (next.lane * 250 + 125 - x) * ratio;
@@ -1403,15 +1503,15 @@
                     }
 
                     let lastNode = note.nodes[note.nodes.length-1];
-                    let lastY = hitLinePercentage - ((lastNode.time - window.gameTime) / leadTime) * hitLinePercentage;
+                    let lastY = hitLinePercentage - ((lastNode.time - gameTime) / leadTime) * hitLinePercentage;
                     if (lastY > hitLinePercentage + 10 && !note.hit) {
-                        window.comboSelf = 0; displayRating('MISS', 'text-red-500'); note.cleanup = true;
+                        comboSelf = 0; displayRating('MISS', 'text-red-500'); note.cleanup = true;
                     }
                 } else {
-                    const elapsed = window.gameTime - note.spawnTime;
+                    const elapsed = gameTime - note.spawnTime;
                     const positionY = (elapsed / leadTime) * hitLinePercentage;
                     if (positionY > hitLinePercentage + 10) {
-                        if (!note.hit) { window.comboSelf = 0; displayRating('MISS', 'text-red-500'); }
+                        if (!note.hit) { comboSelf = 0; displayRating('MISS', 'text-red-500'); }
                         note.cleanup = true;
                     } else {
                         if (note.element) note.element.style.top = `${positionY}%`;
@@ -1422,41 +1522,41 @@
         }
 
         function simulateOpponentTurn() {
-            const oppData = opponentPresets[window.selectedOpponentPreset];
+            const oppData = opponentPresets[selectedOpponentPreset];
             if (Math.random() < 0.14) { 
                 const isMiss = Math.random() < oppData.missProbability;
                 
                 if (isMiss) {
-                    window.comboOpponent = 0;
+                    comboOpponent = 0;
                     document.getElementById('opponent-last-judge').innerText = "MISS";
                     document.getElementById('opponent-last-judge').className = "text-red-500 font-bold text-[10px]";
                 } else {
-                    window.comboOpponent++;
-                    if (window.comboOpponent > window.maxComboOpponent) window.maxComboOpponent = window.comboOpponent;
+                    comboOpponent++;
+                    if (comboOpponent > maxComboOpponent) maxComboOpponent = comboOpponent;
 
                     const isPerfect = Math.random() < oppData.perfectProbability;
                     const scoreBase = isPerfect ? 350 : 250;
                     
-                    window.scoreOpponent += Math.floor(scoreBase * oppData.scoreMultiplier);
+                    scoreOpponent += Math.floor(scoreBase * oppData.scoreMultiplier);
                     
                     document.getElementById('opponent-last-judge').innerText = isPerfect ? "PERFECT" : "GREAT";
                     document.getElementById('opponent-last-judge').className = isPerfect ? "text-cyan-400 font-bold text-[10px]" : "text-emerald-400 font-bold text-[10px]";
                 }
-                window.updateScoreboard();
+                updateScoreboard();
             }
         }
 
         function abortGame() {
-            clearInterval(window.gameInterval); clearInterval(window.bpmIntervalId);
-            if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio = null; }
+            clearInterval(gameInterval); clearInterval(bpmIntervalId);
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
             if (window.stopScoreSync) window.stopScoreSync();
             
             document.getElementById('game-hitboxes').classList.add('hidden'); 
             document.getElementById('notes-container').innerHTML = '';
             document.getElementById('slide-layer').innerHTML = '';
             restoreLobbyUI();
-            window.gameActive = false;
-            playPreview(window.originalSongs[window.currentSongIndex]); 
+            gameActive = false;
+            playPreview(originalSongs[currentSongIndex]); 
         }
 
         function restoreLobbyUI() {
@@ -1471,18 +1571,18 @@
         }
 
         function finishGameMatch() {
-            clearInterval(window.gameInterval); clearInterval(window.bpmIntervalId);
-            window.gameActive = false;
-            if (window.currentAudio) window.currentAudio.pause();
+            clearInterval(gameInterval); clearInterval(bpmIntervalId);
+            gameActive = false;
+            if (currentAudio) currentAudio.pause();
             if (window.stopScoreSync) window.stopScoreSync();
             
             document.getElementById('game-hitboxes').classList.add('hidden');
             const overlay = document.getElementById('results-overlay');
             overlay.classList.remove('hidden'); overlay.classList.add('flex');
 
-            const perfectRate = window.totalPlayableNotes > 0 ? Math.floor((window.perfectsSelf / window.totalPlayableNotes) * 100) : 0;
-            document.getElementById('results-solo-score').innerText = window.scoreSelf.toLocaleString();
-            document.getElementById('results-solo-combo').innerText = window.maxComboSelf;
+            const perfectRate = totalPlayableNotes > 0 ? Math.floor((perfectsSelf / totalPlayableNotes) * 100) : 0;
+            document.getElementById('results-solo-score').innerText = scoreSelf.toLocaleString();
+            document.getElementById('results-solo-combo').innerText = maxComboSelf;
             document.getElementById('results-solo-perfect-rate').innerText = `${perfectRate}%`;
 
             let rank = "D", color = "text-slate-500", icon = "⭐";
@@ -1495,22 +1595,22 @@
             document.getElementById('win-lose-icon').innerText = icon;
 
             // Online Score sync
-            const song = window.originalSongs[window.currentSongIndex];
+            const song = originalSongs[currentSongIndex];
             const diff = document.getElementById('player-difficulty').value;
             const key = `${song.id}_${diff}`;
             const prevHigh = saveData.highScores[key] || 0;
             
             const badges = [document.getElementById('new-record-badge'), document.getElementById('new-record-badge-solo')];
-            if (window.scoreSelf > prevHigh) {
-                saveData.highScores[key] = window.scoreSelf;
+            if (scoreSelf > prevHigh) {
+                saveData.highScores[key] = scoreSelf;
                 saveDataToStorage();
                 badges.forEach(b => { if(b) b.classList.remove('hidden'); });
             } else {
                 badges.forEach(b => { if(b) b.classList.add('hidden'); });
             }
 
-            if (window.publishScoreToOnline && window.scoreSelf > 0) {
-                window.publishScoreToOnline(song.id, diff, window.scoreSelf, window.maxComboSelf, window.playerProfile.username);
+            if (window.publishScoreToOnline && scoreSelf > 0) {
+                window.publishScoreToOnline(song.id, diff, scoreSelf, maxComboSelf, playerProfile.username);
             }
         }
 
@@ -1523,11 +1623,32 @@
         function restartMatchWithSameSetup() { 
             document.getElementById('results-overlay').classList.add('hidden'); 
             document.getElementById('results-overlay').classList.remove('flex'); 
-            if(window.selectedOpponentPreset === 'online') {
-                window.createRoomOnline(); // 再募集
+            if(selectedOpponentPreset === 'online') {
+                window.createRoomOnline(); 
             } else {
                 startLocalMatch(); 
             }
+        }
+
+        // INIT TRIGGER
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", () => {
+                loadData();
+                playerProfile = { ...saveData.profile };
+                const diffElem = document.getElementById('player-difficulty');
+                if(diffElem) diffElem.value = saveData.lastDifficulty || 'easy';
+                syncProfileUI();
+                renderSongList();
+                updateSelectedSong(0);
+            });
+        } else {
+            loadData();
+            playerProfile = { ...saveData.profile };
+            const diffElem = document.getElementById('player-difficulty');
+            if(diffElem) diffElem.value = saveData.lastDifficulty || 'easy';
+            syncProfileUI();
+            renderSongList();
+            updateSelectedSong(0);
         }
     </script>
 </body>
