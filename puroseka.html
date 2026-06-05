@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>プロジェクト・トマト - 究極のライブ</title>
-    <!-- Tailwind CSS -->
+    <title>PROJECT TOMATO - 究極のライブ</title>
+    <!-- Tailwind CSS (CDN版は開発用のためコンソールに警告が出ますが動作に問題はありません) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,20 +17,16 @@
             color: #e2e8f0;
             overflow: hidden;
             user-select: none;
-            touch-action: none;
+            touch-action: none; /* スマホのスワイプを完全防止 */
             -webkit-user-select: none;
         }
 
-        /* 3D Stage Background */
+        /* --- 3D Stage Background --- */
         .stage-bg {
             background: radial-gradient(circle at 50% 25%, #0d0c36 0%, #02040a 90%);
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
+            position: absolute; inset: 0; overflow: hidden; pointer-events: none;
         }
 
-        /* Cyber Spotlight beams */
         .laser-beam-left {
             position: absolute; bottom: -50px; left: -10%; width: 450px; height: 180%;
             background: linear-gradient(40deg, rgba(0, 242, 254, 0.18) 0%, rgba(0, 242, 254, 0) 75%);
@@ -44,7 +40,6 @@
         @keyframes swingBeamLeft { 0% { transform: rotate(-18deg); } 100% { transform: rotate(12deg); } }
         @keyframes swingBeamRight { 0% { transform: rotate(18deg); } 100% { transform: rotate(-12deg); } }
 
-        /* Far Center Hologram Monitor */
         .far-hologram-monitor {
             position: absolute; top: 5%; left: 50%; transform: translateX(-50%);
             width: 420px; height: 320px;
@@ -54,14 +49,13 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 0;
         }
 
-        /* Cyber Stage Grid Floor */
         .grid-floor {
             position: absolute; bottom: 0; width: 100%; height: 60%;
             background-image: linear-gradient(rgba(0, 242, 254, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 254, 0.08) 1px, transparent 1px);
             background-size: 60px 60px; transform: perspective(300px) rotateX(78deg); transform-origin: bottom center; opacity: 0.6;
         }
 
-        /* Extreme 3D Perspective Board */
+        /* --- Extreme 3D Perspective Board --- */
         .game-board-container { perspective: 200px; perspective-origin: 50% 30%; }
         .game-board {
             transform: rotateX(50deg); transform-origin: bottom center;
@@ -82,7 +76,7 @@
             box-shadow: 0 0 12px rgba(0, 242, 254, 0.8);
         }
 
-        /* Rounded Capsule Notes */
+        /* --- Rounded Capsule Notes --- */
         .note {
             position: absolute; left: 2%; width: 96%; height: 20px; border-radius: 999px; 
             background: linear-gradient(180deg, #ffffff 20%, #e1fcff 60%, #00f2fe 100%);
@@ -100,13 +94,26 @@
         }
         @keyframes flickPulse { 0% { opacity: 0.8; transform: translateY(1px) scaleY(1.2); } 100% { opacity: 1; transform: translateY(-4px) scaleY(1.4); } }
 
-        /* Sync Simultaneous-Line connection */
+        .note-hold-head {
+            background: linear-gradient(180deg, #ffffff 20%, #ecfdf5 60%, #10b981 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.9), 0 0 30px rgba(16, 185, 129, 0.5);
+        }
+        .hold-trail {
+            position: absolute; left: 5%; width: 90%; background: rgba(16, 185, 129, 0.45);
+            border-left: 3px solid rgba(16, 185, 129, 0.8); border-right: 3px solid rgba(16, 185, 129, 0.8);
+            pointer-events: none; transition: filter 0.1s ease-out, background 0.1s ease-out; z-index: 15;
+        }
+        .active-hold-trail {
+            background: rgba(52, 211, 153, 0.65) !important;
+            box-shadow: 0 0 30px rgba(52, 211, 153, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
+            filter: brightness(1.3);
+        }
         .sync-line {
             position: absolute; height: 5px; background: #ffffff;
             box-shadow: 0 0 15px #fde047, 0 0 5px #fde047; transform-origin: left center; z-index: 18; border-radius: 5px;
         }
 
-        /* Hit & Flash Effects */
+        /* --- Hit & Flash Effects --- */
         @keyframes pulse-hit {
             0% { background: linear-gradient(90deg, rgba(0, 242, 254, 0.9) 0%, rgba(255, 0, 127, 0.9) 50%, rgba(0, 242, 254, 0.9) 100%); box-shadow: 0 0 60px rgba(0, 242, 254, 1), 0 0 30px rgba(255, 0, 127, 1); }
             100% { background: linear-gradient(90deg, rgba(0, 242, 254, 0.1) 0%, rgba(255, 0, 127, 0.1) 50%, rgba(0, 242, 254, 0.1) 100%); box-shadow: 0 0 8px rgba(0, 242, 254, 0.3); }
@@ -127,7 +134,7 @@
         .particle-flick { background: #ffeafe; box-shadow: 0 0 15px #ff007f; }
         @keyframes particleFly { 0% { transform: scale(1) rotate(45deg) translate(0, 0); opacity: 1; } 100% { transform: scale(0) rotate(225deg) translate(var(--dx), var(--dy)); opacity: 0; } }
 
-        /* Popup Animations */
+        /* --- Popup Animations --- */
         @keyframes textPop {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
             40% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; text-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
@@ -147,8 +154,8 @@
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 242, 254, 0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 254, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 242, 254, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 254, 0.8); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
@@ -160,7 +167,7 @@
         <div class="far-hologram-monitor">
             <div class="w-full h-full border border-cyan-500/30 flex flex-col items-center justify-center p-4 bg-black/60 shadow-[inset_0_0_50px_rgba(0,242,254,0.2)]">
                 <i class="fa-solid fa-compact-disc text-cyan-400/40 text-7xl animate-spin" style="animation-duration: 8s;"></i>
-                <div class="mt-6 text-sm font-bold font-mono text-cyan-400/60 tracking-[0.4em]">SONGVERSE</div>
+                <div class="mt-6 text-sm font-bold font-mono text-cyan-400/60 tracking-[0.4em]">PROJECT TOMATO</div>
             </div>
         </div>
         <div class="grid-floor"></div>
@@ -173,14 +180,14 @@
                 <i class="fa-solid fa-music text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-wider font-mono text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400">SONGVERSE ONLINE</h1>
+                <h1 class="text-xl font-bold tracking-wider font-mono text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400">PROJECT TOMATO</h1>
                 <p class="text-[10px] text-slate-400 tracking-widest uppercase">Self-Created Music Arena</p>
             </div>
         </div>
-        <div onclick="openProfileModal()" class="flex items-center gap-4 cursor-pointer hover:bg-slate-800/40 p-2 rounded-xl transition-all border border-transparent hover:border-slate-800">
+        <div onclick="window.openProfileModal()" class="flex items-center gap-4 cursor-pointer hover:bg-slate-800/40 p-2 rounded-xl transition-all border border-transparent hover:border-slate-800">
             <div class="hidden sm:flex flex-col text-right">
                 <span class="text-[9px] text-cyan-400 uppercase tracking-widest font-bold"><i class="fa-solid fa-pen mr-1"></i>プロフィール</span>
-                <span id="player-username" class="text-sm font-bold text-slate-100">Player_#8921</span>
+                <span id="player-username" class="text-sm font-bold text-slate-100">Player</span>
             </div>
             <div class="w-10 h-10 rounded-full border-2 border-cyan-500/50 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
                 <img id="player-avatar" src="" class="w-full h-full object-cover">
@@ -199,97 +206,102 @@
                         <img id="lobby-profile-avatar" src="" class="w-full h-full object-cover">
                     </div>
                     <div>
-                        <div id="lobby-profile-name" class="font-bold text-sm text-slate-200">Player_#8921</div>
+                        <div id="lobby-profile-name" class="font-bold text-sm text-slate-200">Player</div>
                         <div class="text-[10px] text-slate-500">自作の楽曲を完全新規譜面でプレイ！</div>
                     </div>
                 </div>
-                <button onclick="openProfileModal()" class="bg-slate-800 hover:bg-cyan-950 hover:text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-all font-bold shrink-0">編集</button>
+                <button onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-cyan-950 hover:text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-all font-bold shrink-0">編集</button>
             </div>
 
-            <!-- Scrollable Song List Box -->
             <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col flex-grow backdrop-blur-md min-h-[220px]">
                 <h2 class="text-sm font-bold text-slate-400 mb-3 tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-compact-disc text-cyan-400 animate-spin" style="animation-duration: 4s;"></i>楽曲リスト
                 </h2>
-                <!-- overflow-y-auto enables scrolling -->
-                <div id="song-list" class="flex-grow overflow-y-auto space-y-2 pr-2 h-0"></div>
+                <!-- Scrollable Song List -->
+                <div id="song-list" class="flex-grow overflow-y-auto space-y-2 pr-1 h-0 min-h-[160px] lg:min-h-0"></div>
             </div>
         </section>
 
         <!-- GAME ARENA PANEL -->
         <section id="game-arena-panel" class="flex-grow lg:w-2/3 flex flex-col bg-slate-950/20 border border-slate-800/80 rounded-3xl overflow-hidden relative backdrop-blur-xs transition-all duration-500">
             
-            <!-- Setup Overlay (ゲーム外時は表示される。スタートで確実に隠れる) -->
-            <div id="game-lobby-overlay" class="absolute inset-0 bg-slate-950/95 z-[60] flex flex-col justify-center items-center p-6 text-center transition-opacity duration-300">
-                <div class="max-w-md w-full">
+            <!-- Setup Overlay -->
+            <div id="game-lobby-overlay" class="absolute inset-0 bg-slate-950/95 z-[60] flex flex-col justify-start items-center p-6 text-center transition-opacity duration-300 overflow-y-auto">
+                
+                <button onclick="location.href='index.html'" class="absolute top-4 left-4 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all z-10 border border-slate-700">
+                    <i class="fa-solid fa-arrow-left"></i> ホームへ戻る
+                </button>
+
+                <div class="max-w-md w-full mt-8">
                     <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-4">
                         <i class="fa-solid fa-gamepad text-cyan-400 text-3xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold mb-2 tracking-wide neon-text-cyan">LIVE ARENA</h3>
-                    <p class="text-xs text-slate-400 mb-6">曲の最後に長押しギミックが登場！オンラインの募集で世界中のスコアに挑め！</p>
+                    <p class="text-xs text-slate-400 mb-6">曲を選択するとサビが流れます！音量を上げて挑め！</p>
 
                     <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 text-left space-y-4 shadow-xl">
+                        
+                        <!-- 曲選択スクロールエリア -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">選択中の楽曲</label>
-                            <div class="flex items-center gap-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                                <div class="w-10 h-10 rounded bg-cyan-950 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-music"></i></div>
-                                <div class="flex-grow min-w-0">
-                                    <div id="lobby-selected-song-title" class="font-bold text-sm truncate text-white">Track</div>
-                                </div>
-                                <div class="text-right shrink-0">
-                                    <span id="lobby-selected-song-bpm" class="text-xs font-mono text-cyan-400 block">BPM 120</span>
-                                    <span id="lobby-high-score" class="text-[10px] font-mono text-yellow-400 font-bold block mt-0.5">HIGH SCORE: 0</span>
-                                </div>
+                            <label class="flex justify-between items-center text-xs font-semibold text-slate-400 mb-1.5">
+                                <span>楽曲を選択</span>
+                                <span id="lobby-high-score" class="text-[10px] font-mono text-yellow-400 font-bold">HIGH SCORE: 0</span>
+                            </label>
+                            <div id="center-song-list" class="max-h-40 overflow-y-auto space-y-1.5 border border-slate-800 rounded-lg p-1.5 bg-slate-950/50">
+                                <!-- JSで動的生成 -->
                             </div>
                         </div>
+
+                        <!-- 難易度と音量 -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-400 mb-1.5">難易度</label>
-                                <select id="player-difficulty" onchange="saveSettings();" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-cyan-400 focus:outline-none focus:border-cyan-500">
+                                <select id="player-difficulty" onchange="window.saveSettings()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-cyan-400 focus:outline-none focus:border-cyan-500">
                                     <option value="easy">EASY (★5)</option>
                                     <option value="normal">NORMAL (★10)</option>
                                     <option value="hard">HARD (★25)</option>
-                                    <option value="expert">EXPERT (★36+)</option>
+                                    <option value="expert">EXPERT (★36+ 神話級)</option>
                                 </select>
                             </div>
                             <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1.5">音量: <span id="volume-label" class="text-cyan-400 font-mono">40%</span></label>
+                                <input type="range" id="volume-slider" min="0" max="100" value="40" class="w-full accent-cyan-500 mt-2" oninput="window.changeVolume()">
+                            </div>
+                        </div>
+
+                        <!-- モードとフレンド -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
                                 <label class="block text-xs font-semibold text-slate-400 mb-1.5">対戦相手 (モード)</label>
-                                <select id="opponent-level" onchange="handleOpponentModeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-pink-400 focus:outline-none">
+                                <select id="opponent-level" onchange="window.handleOpponentModeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-pink-400 focus:outline-none">
                                     <option value="solo" selected>ソロプレイ</option>
                                     <option value="friend1">Rin_Melo (Lv.12)</option>
                                     <option value="friend2">Leon (Lv.35)</option>
                                     <option value="pro">Pro_Botと対戦</option>
                                 </select>
                             </div>
+                            <div class="flex flex-col justify-end">
+                                <button onclick="window.openAddFriendModal()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-pink-400 hover:bg-slate-900 transition-all text-left">
+                                    <i class="fa-solid fa-user-plus mr-1"></i>フレンド追加
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Online High scores list container -->
+                        <!-- ランキングと待機ルーム -->
                         <div class="border-t border-slate-800 pt-3">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-globe text-cyan-400 mr-1"></i>世界ランキング (オンライン)</span>
-                            <div id="online-ranking-list" class="space-y-1.5 max-h-28 overflow-y-auto pr-2 text-xs font-mono">
-                                <div class="text-slate-500 text-center py-2">ロード中...</div>
-                            </div>
-                        </div>
-                        <!-- Friends list container / Online matching -->
-                        <div class="border-t border-slate-800 pt-3">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-users text-pink-400 mr-1"></i>オンライン対戦待機ルーム</span>
-                                <div class="flex gap-2">
-                                    <button onclick="openAddFriendModal()" class="text-[10px] text-pink-400 hover:text-pink-300 font-bold"><i class="fa-solid fa-user-plus text-[10px]"></i> 追加</button>
-                                </div>
-                            </div>
-                            
                             <div class="flex gap-2 mb-2 text-xs">
-                                <button id="tab-friends" onclick="switchFriendTab('friends')" class="flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold">フレンド</button>
-                                <button id="tab-online" onclick="switchFriendTab('online')" class="flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold">募集中ルーム</button>
+                                <button id="tab-ranking" onclick="window.switchBottomTab('ranking')" class="flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold">世界ランキング</button>
+                                <button id="tab-online" onclick="window.switchBottomTab('online')" class="flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold">募集中ルーム</button>
                             </div>
-                            <div id="friend-tab-content" class="space-y-1.5 max-h-24 overflow-y-auto pr-2 text-xs font-mono">
-                                <!-- Dynamic Friend content -->
+                            <div id="bottom-tab-content" class="space-y-1.5 max-h-32 overflow-y-auto pr-2 text-xs font-mono">
+                                <!-- Ranking is default -->
+                                <div id="online-ranking-list" class="space-y-1.5"><div class="text-slate-500 text-center py-2">ロード中...</div></div>
                             </div>
                         </div>
                     </div>
 
-                    <button id="live-start-btn" onclick="startLocalMatch()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_0_15px_rgba(0,242,254,0.4)] transform active:scale-95 transition-all text-sm tracking-widest">
+                    <!-- エラーを修正したライブスタートボタン -->
+                    <button onclick="window.startLocalMatch()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_0_15px_rgba(0,242,254,0.4)] transform active:scale-95 transition-all text-sm tracking-widest">
                         ライブスタート
                     </button>
                 </div>
@@ -301,8 +313,8 @@
                     <i class="fa-solid fa-tower-broadcast text-pink-400 text-3xl animate-ping"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-2 tracking-wide text-white">対戦相手を待機中...</h3>
-                <p class="text-slate-400 mb-6 text-xs" id="waiting-room-text">フレンドや他のプレイヤーが参加するのを待っています。</p>
-                <button onclick="cancelRoom()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 px-6 rounded-xl text-xs font-bold transition-all border border-slate-700">募集をキャンセル</button>
+                <p class="text-slate-400 mb-6 text-xs" id="waiting-room-text">他のプレイヤーが参加するのを待っています。</p>
+                <button onclick="window.cancelRoom()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 px-6 rounded-xl text-xs font-bold transition-all border border-slate-700">募集をキャンセル</button>
             </div>
 
             <!-- Countdown Overlay -->
@@ -343,10 +355,10 @@
 
                 <!-- GAMEPLAY FIELD: 3D Board and SVG Slide Layer -->
                 <div class="flex-grow relative overflow-hidden flex flex-col justify-end">
-                    
                     <div class="game-board-container w-full h-full absolute inset-0 flex justify-center">
                         <div class="game-board h-full flex relative border-x border-cyan-500/20">
                             
+                            <!-- Lane lasers -->
                             <div class="lane-laser" style="left: 25%"></div>
                             <div class="lane-laser" style="left: 50%"></div>
                             <div class="lane-laser" style="left: 75%"></div>
@@ -357,15 +369,13 @@
                             <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-3"></div>
 
                             <!-- SVG Layer for drawing curvy Slide Notes -->
-                            <svg id="slide-layer" viewBox="0 0 1000 1000" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none z-15" style="overflow: visible;">
-                                <!-- Polygons will be injected here -->
-                            </svg>
+                            <svg id="slide-layer" viewBox="0 0 1000 1000" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none z-15" style="overflow: visible;"></svg>
 
                             <!-- Tap Notes container -->
                             <div id="notes-container" class="absolute inset-0 pointer-events-none z-20"></div>
 
                             <!-- HIT LINE -->
-                            <div id="hit-baseline" class="absolute left-0 right-0 h-4 flex justify-between pointer-events-none shadow-[0_0_20px_rgba(0,242,254,0.4)] z-20" style="bottom: 5%;">
+                            <div id="hit-baseline" class="absolute left-0 right-0 h-4 flex justify-between pointer-events-none shadow-[0_0_20px_rgba(0,242,254,0.4)] z-20" style="bottom: 10%;">
                                 <div id="lane-target-0" class="flex-1 h-full flex items-center justify-center transition-all target-box-0 text-yellow-400 bg-black/40"><div class="target-diamond"></div></div>
                                 <div id="lane-target-1" class="flex-1 h-full border-l border-slate-700/50 flex items-center justify-center transition-all target-box-1 text-cyan-400 bg-black/40"><div class="target-diamond"></div></div>
                                 <div id="lane-target-2" class="flex-1 h-full border-l border-slate-700/50 flex items-center justify-center transition-all target-box-2 text-emerald-400 bg-black/40"><div class="target-diamond"></div></div>
@@ -374,27 +384,26 @@
                         </div>
                     </div>
 
-                    <!-- PERFECT Rating Popup (Centered) -->
+                    <!-- PERFECT Rating Popup -->
                     <div id="rating-popup" class="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider opacity-0 font-mono text-cyan-400 z-30 pointer-events-none"></div>
                     
-                    <!-- Combo Popup (Right Side) -->
+                    <!-- Combo Popup -->
                     <div id="combo-popup" class="absolute right-[5%] top-[40%] hidden flex-col items-center z-30 pointer-events-none">
                         <span class="text-sm tracking-widest text-slate-300 uppercase font-bold leading-none mb-1">COMBO</span>
                         <span id="combo-count" class="text-6xl font-black font-mono tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">0</span>
                     </div>
 
-                    <!-- SUPER MOBILE HITBOXES -->
+                    <!-- SUPER MOBILE HITBOXES: ゲーム中のみ表示される画面下半分の巨大な透明タップエリア -->
                     <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden">
-                        <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 0)" ontouchstart="handleTouchTap(event, 0)" onmouseup="handleMouseRelease(event, 0)" ontouchend="handleTouchRelease(event, 0)" onmouseleave="handleMouseRelease(event, 0)" ontouchcancel="handleTouchRelease(event, 0)"></div>
-                        <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 1)" ontouchstart="handleTouchTap(event, 1)" onmouseup="handleMouseRelease(event, 1)" ontouchend="handleTouchRelease(event, 1)" onmouseleave="handleMouseRelease(event, 1)" ontouchcancel="handleTouchRelease(event, 1)"></div>
-                        <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 2)" ontouchstart="handleTouchTap(event, 2)" onmouseup="handleMouseRelease(event, 2)" ontouchend="handleTouchRelease(event, 2)" onmouseleave="handleMouseRelease(event, 2)" ontouchcancel="handleTouchRelease(event, 2)"></div>
-                        <div class="flex-1 cursor-pointer" onmousedown="handleMouseTap(event, 3)" ontouchstart="handleTouchTap(event, 3)" onmouseup="handleMouseRelease(event, 3)" ontouchend="handleTouchRelease(event, 3)" onmouseleave="handleMouseRelease(event, 3)" ontouchcancel="handleTouchRelease(event, 3)"></div>
+                        <div id="hitbox-0" class="flex-1 cursor-pointer"></div>
+                        <div id="hitbox-1" class="flex-1 cursor-pointer"></div>
+                        <div id="hitbox-2" class="flex-1 cursor-pointer"></div>
+                        <div id="hitbox-3" class="flex-1 cursor-pointer"></div>
                     </div>
 
                     <div id="rival-side-widget" class="absolute right-4 top-20 bg-slate-950/90 border border-pink-500/30 rounded-xl p-3 w-40 flex flex-col gap-2 z-30 shadow-lg hidden">
                         <div class="text-[10px] text-pink-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                            <span>OPPONENT</span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></span>
+                            <span>OPPONENT</span><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></span>
                         </div>
                         <div class="flex items-center gap-2">
                             <img id="opponent-avatar" src="" class="w-8 h-8 rounded-full border border-pink-500/50 bg-slate-800 object-cover">
@@ -405,17 +414,15 @@
                         </div>
                         <div class="h-[1px] bg-slate-800 my-1"></div>
                         <div class="flex justify-between items-center text-xs font-mono">
-                            <span class="text-slate-500">COMBO:</span>
-                            <span id="opponent-combo" class="text-white font-bold font-mono">0</span>
+                            <span class="text-slate-500">COMBO:</span><span id="opponent-combo" class="text-white font-bold font-mono">0</span>
                         </div>
                         <div class="flex justify-between items-center text-xs font-mono">
-                            <span class="text-slate-500">JUDGE:</span>
-                            <span id="opponent-last-judge" class="text-yellow-400 font-bold text-[10px]">READY</span>
+                            <span class="text-slate-500">JUDGE:</span><span id="opponent-last-judge" class="text-yellow-400 font-bold text-[10px]">READY</span>
                         </div>
                     </div>
 
                     <div class="absolute left-4 top-20 z-50">
-                        <button onclick="abortGame()" class="bg-slate-950/80 hover:bg-red-950 border border-slate-800 text-slate-400 hover:text-red-400 rounded-lg p-2 text-xs shadow-lg">
+                        <button onclick="window.abortGame()" class="bg-slate-950/80 hover:bg-red-950 border border-slate-800 text-slate-400 hover:text-red-400 rounded-lg p-2 text-xs shadow-lg">
                             <i class="fa-solid fa-pause"></i> 離脱
                         </button>
                     </div>
@@ -458,8 +465,8 @@
                     </div>
 
                     <div class="flex gap-4">
-                        <button onclick="closeResults()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-6 rounded-xl text-sm transition-all border border-slate-700">ロビーへ</button>
-                        <button onclick="restartMatchWithSameSetup()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg">もう一度</button>
+                        <button onclick="window.closeResults()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-6 rounded-xl text-sm transition-all border border-slate-700">ロビーへ</button>
+                        <button onclick="window.restartMatchWithSameSetup()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg">もう一度</button>
                     </div>
                 </div>
             </div>
@@ -470,17 +477,17 @@
     <!-- FOOTER -->
     <footer class="border-t border-slate-900 bg-slate-950 px-6 py-3 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 z-20 gap-2 font-mono">
         <div class="flex items-center gap-2">
-            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">D</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">F</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">J</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> または レーンを直接タッチ</span>
+            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">D</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">F</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">J</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> または 下半分をタッチ</span>
             <span class="text-slate-800 hidden md:inline">|</span>
             <span class="hidden md:inline">長押し: 終点で離す | フリック: 画面を弾く</span>
         </div>
-        <div><span>&copy; 2026 TOMATO Project.  TANAKA music. </span></div>
+        <div><span>&copy; 2026  PROHECT-TOMATO.TANAKA music.</span></div>
     </footer>
 
     <!-- PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[100] hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 relative">
-            <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <button onclick="window.closeProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
             <h3 class="text-lg font-bold mb-4 text-cyan-300 flex items-center gap-2"><i class="fa-solid fa-user-gear"></i> プロフィール編集</h3>
             <div class="space-y-4 mb-6">
                 <div>
@@ -496,21 +503,21 @@
                         <div class="flex-grow flex flex-col gap-2">
                             <input type="text" id="profile-input-avatar-seed" placeholder="シード値" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-cyan-500" readonly>
                             <div class="flex gap-2">
-                                <button onclick="generateRandomAvatar()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-white text-[10px] py-1.5 px-2 rounded-md transition-all font-bold flex items-center justify-center gap-1">
+                                <button onclick="window.generateRandomAvatar()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-white text-[10px] py-1.5 px-2 rounded-md transition-all font-bold flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-arrows-rotate"></i> 生成
                                 </button>
                                 <button onclick="document.getElementById('profile-upload').click()" class="flex-1 bg-cyan-900 hover:bg-cyan-800 text-cyan-300 border border-cyan-500/50 text-[10px] py-1.5 px-2 rounded-md transition-all font-bold flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-upload"></i> 画像選択
                                 </button>
-                                <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+                                <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="window.handleImageUpload(event)">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="closeProfileModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold">キャンセル</button>
-                <button onclick="saveProfile()" class="flex-1 bg-cyan-500 text-slate-950 py-2.5 rounded-xl text-xs font-bold">保存する</button>
+                <button onclick="window.closeProfileModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold">キャンセル</button>
+                <button onclick="window.saveProfile()" class="flex-1 bg-cyan-500 text-slate-950 py-2.5 rounded-xl text-xs font-bold">保存する</button>
             </div>
         </div>
     </div>
@@ -518,25 +525,26 @@
     <!-- MODAL: Add Friend Modal -->
     <div id="add-friend-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[100] hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
-            <button onclick="closeAddFriendModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <button onclick="window.closeAddFriendModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
             <h3 class="text-lg font-bold mb-4 text-cyan-300 flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> フレンドを追加</h3>
             <p class="text-xs text-slate-400 mb-4">フレンドの名前を入力してクラウドリストに追加します。</p>
             <div class="space-y-3 mb-6">
                 <input type="text" id="friend-input-name" placeholder="フレンド名を入力" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500">
             </div>
             <div class="flex gap-2">
-                <button onclick="closeAddFriendModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition-all">キャンセル</button>
-                <button onclick="submitAddFriend()" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 py-2.5 rounded-xl text-xs font-bold transition-all">フレンド追加</button>
+                <button onclick="window.closeAddFriendModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition-all">キャンセル</button>
+                <button onclick="window.submitAddFriend()" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 py-2.5 rounded-xl text-xs font-bold transition-all">フレンド追加</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK & Database Integration -->
+    <!-- FIREBASE MODULE (Offline Fallback Handled Securely) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Setting
         const firebaseConfig = {
             apiKey: "AIzaSyC74b-33rjqnysLOgVEbtAKsrqJSfaWZEE",
             authDomain: "supura-8f064.firebaseapp.com",
@@ -547,71 +555,310 @@
             appId: "1:419833510947:web:4c3d898a648dba026ec596"
         };
 
-        let app, auth, db;
-        let firebaseUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let db = null; 
+        let firebaseUser = null;
+
+        // Bridge Firebase logic to window object for main script to access safely
+        window.firebaseManager = {
+            publishScore: async (songId, difficulty, score, combo, username) => {
+                if (!firebaseUser || !db) return;
+                try {
+                    const recordId = `${firebaseUser.uid}_${songId}_${difficulty}`;
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'highscores', recordId), {
+                        uid: firebaseUser.uid, username: username || "Unknown", songId: songId, difficulty: difficulty,
+                        score: score, maxCombo: combo, timestamp: Date.now()
+                    });
+                } catch (e) {}
+            },
+            createRoom: async (songId, difficulty, hostName) => {
+                if (!firebaseUser || !db) return null;
+                const roomId = "room_" + Date.now();
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), {
+                    roomId, hostUid: firebaseUser.uid, hostName, guestUid: null, guestName: null, songId, difficulty,
+                    status: 'waiting', hostScore: 0, hostCombo: 0, guestScore: 0, guestCombo: 0, createdAt: Date.now()
+                });
+                return roomId;
+            },
+            joinRoom: async (roomId, guestName) => {
+                if (!firebaseUser || !db) return;
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), { guestUid: firebaseUser.uid, guestName, status: 'ready' }, { merge: true });
+            },
+            updateRoomStatus: async (roomId, status) => {
+                if (!db) return;
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), { status }, { merge: true });
+            },
+            updateRoomScore: async (roomId, isHost, score, combo) => {
+                if (!db) return;
+                if (isHost) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), { hostScore: score, hostCombo: combo }, { merge: true });
+                else await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), { guestScore: score, guestCombo: combo }, { merge: true });
+            },
+            deleteRoom: async (roomId) => {
+                if (!db) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId));
+            },
+            listenRoom: (roomId, callback) => {
+                if (!db) return () => {};
+                return onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId), callback);
+            },
+            listenRooms: (callback) => {
+                if (!firebaseUser || !db) { callback(null); return () => {}; }
+                return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'rooms'), callback);
+            },
+            listenScores: (callback) => {
+                if (!firebaseUser || !db) return () => {};
+                return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'highscores'), callback);
+            }
+        };
 
         try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
             db = getFirestore(app);
             
-            const initAuth = async () => {
-                try { 
-                    await signInAnonymously(auth); 
-                } catch (err) { 
-                    console.warn("Firebase Auth disabled or running offline."); 
-                    window.renderOfflineFallback();
-                }
-            };
-            initAuth();
+            signInAnonymously(auth).catch(e => {
+                console.warn("Firebase Auth blocked. Running Offline mode.");
+                if(window.renderOfflineFallback) window.renderOfflineFallback();
+            });
 
             onAuthStateChanged(auth, (user) => {
                 firebaseUser = user;
                 if (user) {
-                    setupGlobalScoreListener();
-                    setupFriendListener();
+                    if(window.initOnlineListeners) window.initOnlineListeners();
                 } else {
-                    window.renderOfflineFallback();
+                    if(window.renderOfflineFallback) window.renderOfflineFallback();
                 }
             });
         } catch(e) {
-            console.warn("Firebase initialization skipped. Running entirely offline.");
+            console.warn("Firebase skipped. Offline mode.");
             setTimeout(() => { if(window.renderOfflineFallback) window.renderOfflineFallback(); }, 500);
         }
+    </script>
 
-        // --- Online Ranking (Score Sync) ---
-        let globalOnlineScores = [];
+    <!-- MAIN GAME LOGIC (Global Scope isolated for stability) -->
+    <script>
+        // --- Configuration & State ---
+        window.originalSongs = [
+            { id: 'track_tanarebo', title: 'TANAKA Revolution', artist: 'You (Original)', bpm: 140, audioFile: 'tanarebo.mp3', staticDuration: 65, previewTime: 40 },
+            { id: 'track_hizen', title: '緋善のセカイ', artist: 'You (Original)', bpm: 155, audioFile: '緋善のセカイ.mp3', staticDuration: 216, previewTime: 65 },
+            { id: 'track_happyend', title: 'ハッピーエンド', artist: 'You (Original)', bpm: 120, audioFile: 'ハッピーエンド.mp3', staticDuration: 265, previewTime: 50 },
+            { id: 'track_kazuking', title: 'カズキングー爆食のその先へ', artist: 'You (Original)', bpm: 160, audioFile: 'カズキングあ.mp3', staticDuration: 238, previewTime: 45 },
+            { id: 'track_rampage_v', title: 'ランペイジ（ヴェノム）', artist: 'You (Original)', bpm: 150, audioFile: 'ランペイジ・イットヴェノム.mp3', staticDuration: 166, previewTime: 40 },
+            { id: 'track_rampage_i', title: 'ランペイジ', artist: 'You (Original)', bpm: 145, audioFile: 'ランペイジ・イット.mp3', staticDuration: 172, previewTime: 45 },
+            { id: 'track_hiiro', title: '緋色のサーガ', artist: 'You (Original)', bpm: 150, audioFile: '緋色のサーガ.mp3', staticDuration: 193, previewTime: 60 },
+            { id: 'track_shien', title: 'せいまろのテーマ', artist: 'You (Original)', bpm: 130, audioFile: '紫煙（しえん）にむせぶ　路地裏の果て2.mp3', staticDuration: 238, previewTime: 70 },
+            { id: 'track_kazuking_t', title: 'カズキング国家', artist: 'You (Original)', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
+            { id: 'track_asayake', title: 'ありがとうサービス', artist: 'You (Original)', bpm: 110, audioFile: '朝焼けの街を走り抜けてく  .mp3', staticDuration: 280, previewTime: 80 }
+        ];
 
-        function setupGlobalScoreListener() {
-            if (!firebaseUser || !db) return;
-            const scoreCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'highscores');
-            onSnapshot(scoreCollectionRef, (snapshot) => {
-                let list = [];
-                snapshot.forEach(doc => list.push(doc.data()));
-                globalOnlineScores = list;
-                if(window.updateRankingUI) window.updateRankingUI();
-            }, (error) => {});
+        const opponentPresets = {
+            friend1: { name: 'Rin_Melo', missProbability: 0.12, perfectProbability: 0.70, scoreMultiplier: 0.95, avatar: 'Rin' },
+            friend2: { name: 'Leon_Kun', missProbability: 0.06, perfectProbability: 0.80, scoreMultiplier: 1.10, avatar: 'Leon' },
+            pro: { name: 'Pro_Bot', missProbability: 0.01, perfectProbability: 0.93, scoreMultiplier: 1.35, avatar: 'Miku' }
+        };
+
+        const state = {
+            currentSongIndex: 0,
+            gameActive: false,
+            score: 0, combo: 0, maxCombo: 0, perfects: 0, totalNotes: 0, opponentScore: 0, opponentCombo: 0,
+            activeNotes: [], activeHolds: [null, null, null, null],
+            gameTime: 0, animationFrameId: null, audioContext: null, playbackLength: 0,
+            nextNoteIndex: 0,
+            isOnline: false, roomId: null, isHost: false,
+            globalOnlineScores: [], roomsUnsubscribe: null, scoresUnsubscribe: null, roomSyncUnsubscribe: null, scoreSyncInterval: null
+        };
+
+        window.playerProfile = { username: "Player", avatarSeed: "Player", customAvatarUrl: "", isCustomImage: false };
+        window.tempProfile = {};
+        window.globalVolume = 0.4;
+        const previewAudio = new Audio();
+        previewAudio.loop = true;
+
+        const hitLinePercentage = 90; // 少し下げて判定枠を見やすく
+        const leadTime = 1.3; 
+
+        // --- Helper & Storage Functions ---
+        function escapeHTML(str) { return str ? str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
+
+        window.loadData = function() {
+            const saved = localStorage.getItem('songverseData');
+            if (saved) {
+                try { 
+                    const parsed = JSON.parse(saved);
+                    window.playerProfile = parsed.profile || window.playerProfile;
+                    document.getElementById('player-difficulty').value = parsed.lastDifficulty || 'easy';
+                    window.globalVolume = (parsed.volume !== undefined ? parsed.volume : 40) / 100;
+                    const slider = document.getElementById('volume-slider');
+                    if (slider) slider.value = parsed.volume || 40;
+                    const lbl = document.getElementById('volume-label');
+                    if (lbl) lbl.innerText = (parsed.volume || 40) + '%';
+                } catch(e) {}
+            }
         }
 
-        window.updateRankingUI = function() {
+        window.saveSettings = function() {
+            const currentSaved = JSON.parse(localStorage.getItem('songverseData')) || { highScores: {} };
+            const dataToSave = {
+                profile: window.playerProfile,
+                lastDifficulty: document.getElementById('player-difficulty').value,
+                volume: document.getElementById('volume-slider').value,
+                highScores: currentSaved.highScores || {}
+            };
+            localStorage.setItem('songverseData', JSON.stringify(dataToSave));
+            window.updateHighScoreDisplay();
+        };
+
+        window.changeVolume = function() {
+            const val = document.getElementById('volume-slider').value;
+            window.globalVolume = val / 100;
+            document.getElementById('volume-label').innerText = val + '%';
+            previewAudio.volume = window.globalVolume;
+            if(state.audioContext) state.audioContext.volume = window.globalVolume;
+            window.saveSettings();
+        };
+
+        window.updateHighScoreDisplay = function() {
+            if(!window.originalSongs || state.currentSongIndex === undefined) return;
+            const song = window.originalSongs[state.currentSongIndex];
+            const diff = document.getElementById('player-difficulty').value;
+            const key = `${song.id}_${diff}`;
+            const saved = JSON.parse(localStorage.getItem('songverseData'));
+            const hs = saved?.highScores?.[key] || 0;
+            const targetEl = document.getElementById('lobby-high-score');
+            if(targetEl) targetEl.innerText = `HIGH SCORE: ${hs.toLocaleString()}`;
+            if(window.renderRankingUI) window.renderRankingUI();
+        }
+
+        window.syncProfileUI = function() {
+            const avatarUrl = window.playerProfile.isCustomImage ? window.playerProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${window.playerProfile.avatarSeed}`;
+            document.getElementById('player-username').innerText = window.playerProfile.username;
+            document.getElementById('player-avatar').src = avatarUrl;
+            document.getElementById('lobby-profile-name').innerText = window.playerProfile.username;
+            document.getElementById('lobby-profile-avatar').src = avatarUrl;
+        }
+
+        window.openProfileModal = function() { 
+            window.tempProfile = { ...window.playerProfile };
+            document.getElementById('profile-input-name').value = window.tempProfile.username;
+            document.getElementById('profile-input-avatar-seed').value = window.tempProfile.isCustomImage ? '【画像設定済み】' : window.tempProfile.avatarSeed;
+            const previewUrl = window.tempProfile.isCustomImage ? window.tempProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${window.tempProfile.avatarSeed}`;
+            document.getElementById('profile-preview-avatar').src = previewUrl;
+            document.getElementById('profile-modal').classList.remove('hidden'); 
+        };
+        window.closeProfileModal = function() { document.getElementById('profile-modal').classList.add('hidden'); };
+
+        window.generateRandomAvatar = function() {
+            const randomSeed = "User_" + Math.floor(Math.random() * 99999);
+            window.tempProfile.avatarSeed = randomSeed;
+            window.tempProfile.isCustomImage = false;
+            document.getElementById('profile-input-avatar-seed').value = randomSeed;
+            document.getElementById('profile-preview-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${randomSeed}`;
+        };
+
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.tempProfile.customAvatarUrl = e.target.result;
+                    window.tempProfile.isCustomImage = true;
+                    document.getElementById('profile-preview-avatar').src = window.tempProfile.customAvatarUrl;
+                    document.getElementById('profile-input-avatar-seed').value = '【画像設定済み】';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.saveProfile = function() {
+            const name = document.getElementById('profile-input-name').value.trim();
+            if (name) window.tempProfile.username = name;
+            window.playerProfile = { ...window.tempProfile };
+            window.saveSettings();
+            window.syncProfileUI();
+            window.closeProfileModal();
+            if(window.renderRankingUI) window.renderRankingUI(); 
+        };
+
+        function renderSongList() {
+            const renderTo = (containerId) => {
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                container.innerHTML = '';
+                window.originalSongs.forEach((song, idx) => {
+                    const activeClass = idx === state.currentSongIndex ? 'border-cyan-500 bg-cyan-950/20 shadow-[0_0_15px_rgba(0,242,254,0.15)]' : 'border-slate-800 hover:border-slate-700';
+                    container.innerHTML += `
+                        <div onclick="window.updateSelectedSong(${idx})" class="p-2 border rounded-xl flex items-center gap-3 cursor-pointer transition-all ${activeClass}">
+                            <div class="w-8 h-8 rounded-lg bg-slate-950 flex justify-center items-center border border-slate-800 shrink-0"><i class="fa-solid fa-play text-[10px] ${idx === state.currentSongIndex ? 'text-cyan-400' : 'text-slate-500'}"></i></div>
+                            <div class="min-w-0 flex-1"><div class="font-bold text-xs truncate ${idx === state.currentSongIndex ? 'text-cyan-300' : 'text-slate-300'}">${song.title}</div><div class="text-[9px] text-slate-500 truncate">${song.artist}</div></div>
+                            <div class="text-[9px] text-cyan-400 font-mono shrink-0">BPM ${song.bpm}</div>
+                        </div>
+                    `;
+                });
+            };
+            renderTo('song-list');
+            renderTo('center-song-list');
+        }
+
+        window.updateSelectedSong = function(index) {
+            state.currentSongIndex = index; 
+            renderSongList();
+            const song = window.originalSongs[index];
+            const titleEl = document.getElementById('lobby-selected-song-title');
+            if(titleEl) titleEl.innerText = song.title;
+            window.updateHighScoreDisplay();
+            
+            // Preview BGM
+            try {
+                previewAudio.pause();
+                previewAudio.src = song.audioFile;
+                previewAudio.volume = window.globalVolume;
+                previewAudio.onloadedmetadata = () => {
+                    previewAudio.currentTime = song.previewTime;
+                    const playPromise = previewAudio.play();
+                    if (playPromise !== undefined) playPromise.catch(e => {});
+                };
+            } catch(e) {}
+        };
+
+        window.handleOpponentModeChange = function() {
+            const val = document.getElementById('opponent-level').value;
+            const vsBar = document.getElementById('vs-progress-bar-container');
+            if(val === 'solo') vsBar.classList.add('opacity-0');
+            else vsBar.classList.remove('opacity-0');
+        };
+
+        // --- Online Functions ---
+        window.initOnlineListeners = function() {
+            if (window.firebaseManager) {
+                state.scoresUnsubscribe = window.firebaseManager.listenScores((snapshot) => {
+                    let list = []; snapshot.forEach(doc => list.push(doc.data()));
+                    state.globalOnlineScores = list;
+                    window.renderRankingUI();
+                });
+            }
+        };
+
+        window.renderOfflineFallback = function() {
+            const listEl = document.getElementById('online-ranking-list');
+            if(listEl) listEl.innerHTML = `<div class="text-slate-500 text-center py-2 text-[10px]"><i class="fa-solid fa-wifi-slash mr-1"></i>ランキング（オフライン動作中）<br>Firebase「匿名認証」を有効にすると反映されます。</div>`;
+            const roomEl = document.getElementById('room-list-container');
+            if (roomEl) roomEl.innerHTML = `<div class="text-slate-500 text-center py-3 text-[10px]"><i class="fa-solid fa-cloud-slash mr-1"></i>オフラインのため対戦はできません。</div>`;
+        };
+
+        window.renderRankingUI = function() {
             const container = document.getElementById('online-ranking-list');
             if(!container) return;
-            if(!originalSongs || currentSongIndex === undefined) return;
-            
-            const song = originalSongs[currentSongIndex];
+            if(!window.originalSongs || state.currentSongIndex === undefined) return;
+
+            const song = window.originalSongs[state.currentSongIndex];
             const diff = document.getElementById('player-difficulty').value;
             
-            const filtered = globalOnlineScores.filter(s => s.songId === song.id && s.difficulty === diff);
+            const filtered = state.globalOnlineScores.filter(s => s.songId === song.id && s.difficulty === diff);
             filtered.sort((a, b) => b.score - a.score);
             
-            const seen = new Set();
-            const topScores = [];
+            const seen = new Set(); const topScores = [];
             for (const s of filtered) {
-                if (!seen.has(s.username)) {
-                    seen.add(s.username); topScores.push(s);
-                    if(topScores.length === 5) break;
-                }
+                if (!seen.has(s.username)) { seen.add(s.username); topScores.push(s); if(topScores.length === 5) break; }
             }
             
             if (topScores.length === 0) {
@@ -634,656 +881,150 @@
                     </div>
                 `;
             }).join('');
-        };
-
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
-        window.publishScoreToOnline = async function(songId, difficulty, score, combo, username) {
-            if (!firebaseUser || !db) return;
-            try {
-                const recordId = `${firebaseUser.uid}_${songId}_${difficulty}`;
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'highscores', recordId);
-                await setDoc(docRef, {
-                    uid: firebaseUser.uid,
-                    username: username || "Unknown",
-                    songId: songId,
-                    difficulty: difficulty,
-                    score: score,
-                    maxCombo: combo,
-                    timestamp: Date.now()
-                });
-            } catch (err) {}
-        };
+        window.switchBottomTab = function(tab) {
+            const btnRanking = document.getElementById('tab-ranking');
+            const btnOnline = document.getElementById('tab-online');
+            const content = document.getElementById('bottom-tab-content');
 
-        // --- Realtime Rooms (Matchmaking) ---
-        let roomsUnsubscribe = null;
-        window.listenRooms = function() {
-            if (roomsUnsubscribe) roomsUnsubscribe();
-            if (!firebaseUser || !db) {
-                window.renderOfflineRooms();
-                return;
-            }
-            
-            const roomsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'rooms');
-            roomsUnsubscribe = onSnapshot(roomsColRef, (snapshot) => {
-                if (currentFriendTab !== 'online') return; 
-                
-                let rooms = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.status === 'waiting' && data.createdAt > Date.now() - 1000 * 60 * 10) {
-                        rooms.push(data);
-                    }
-                });
-                
-                const container = document.getElementById('friend-tab-content');
-                if (!container) return;
-                
-                if (rooms.length === 0) {
-                    container.innerHTML = `<div class="text-slate-500 text-center py-4 text-[10px]">募集中のルームはありません。<br>「ルーム作成」から募集してみよう！</div>`;
-                    return;
-                }
-                
-                container.innerHTML = rooms.map(room => {
-                    const song = originalSongs.find(s => s.id === room.songId);
-                    const songTitle = song ? song.title : 'Unknown';
-                    const diffColor = room.difficulty === 'expert' ? 'text-purple-400' : room.difficulty === 'hard' ? 'text-pink-400' : room.difficulty === 'normal' ? 'text-emerald-400' : 'text-cyan-400';
-                    
-                    return `
-                        <div class="flex justify-between items-center p-1.5 bg-slate-900/60 border border-slate-700/50 rounded-lg hover:border-pink-500/50 transition-all text-[11px]">
-                            <div class="min-w-0 flex-1 pr-2">
-                                <div class="text-[10px] font-bold text-slate-200 truncate">${escapeHTML(room.hostName)}のルーム</div>
-                                <div class="text-[9px] text-slate-400 truncate">${songTitle}</div>
-                            </div>
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                <span class="text-[9px] font-bold uppercase ${diffColor}">${room.difficulty}</span>
-                                <button onclick="joinRoom('${room.roomId}')" class="bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 text-[9px] py-0.5 px-1.5 rounded font-bold">参加</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            });
-        };
-
-        window.createRoomOnline = async function() {
-            if (!firebaseUser || !db) return;
-            const song = originalSongs[currentSongIndex];
-            const diff = document.getElementById('player-difficulty').value;
-            const roomId = "room_" + Date.now();
-            currentRoomId = roomId;
-            isHost = true;
-            
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-            await setDoc(roomRef, {
-                roomId: roomId, hostUid: firebaseUser.uid, hostName: playerProfile.username,
-                guestUid: null, guestName: null, songId: song.id, difficulty: diff,
-                status: 'waiting', hostScore: 0, hostCombo: 0, guestScore: 0, guestCombo: 0,
-                createdAt: Date.now()
-            });
-
-            document.getElementById('waiting-room-overlay').classList.remove('hidden');
-            document.getElementById('waiting-room-overlay').classList.add('flex');
-            window.listenCurrentRoom(roomId);
-        };
-
-        window.joinRoom = async function(roomId) {
-            if (!firebaseUser || !db) return;
-            currentRoomId = roomId;
-            isHost = false;
-            
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-            await setDoc(roomRef, { guestUid: firebaseUser.uid, guestName: playerProfile.username, status: 'ready' }, { merge: true });
-            window.listenCurrentRoom(roomId);
-        };
-
-        let roomUnsubscribe = null;
-        window.listenCurrentRoom = function(roomId) {
-            if(!db) return;
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-            if(roomUnsubscribe) roomUnsubscribe();
-            
-            roomUnsubscribe = onSnapshot(roomRef, (docSnap) => {
-                if (!docSnap.exists()) return;
-                const data = docSnap.data();
-                
-                if (data.status === 'ready' && !gameActive) {
-                    const songIndex = originalSongs.findIndex(s => s.id === data.songId);
-                    if(songIndex !== -1) currentSongIndex = songIndex;
-                    document.getElementById('player-difficulty').value = data.difficulty;
-                    selectedOpponentPreset = 'online'; 
-                    
-                    const oppName = isHost ? data.guestName : data.hostName;
-                    document.getElementById('waiting-room-overlay').classList.add('hidden');
-                    document.getElementById('waiting-room-overlay').classList.remove('flex');
-                    
-                    if (isHost) setDoc(roomRef, { status: 'playing' }, { merge: true });
-                    startOnlineMatchReal(oppName); 
-                }
-                
-                if (data.status === 'playing' && gameActive) {
-                    if (isHost) {
-                        scoreOpponent = data.guestScore || 0;
-                        comboOpponent = data.guestCombo || 0;
-                    } else {
-                        scoreOpponent = data.hostScore || 0;
-                        comboOpponent = data.hostCombo || 0;
-                    }
-                    updateScoreboard();
-                }
-
-                if (data.status === 'cancelled') {
-                    cancelRoomLocal();
-                }
-            });
-        };
-
-        let syncInterval = null;
-        window.startScoreSync = function() {
-            if (!currentRoomId || selectedOpponentPreset !== 'online' || !db) return;
-            syncInterval = setInterval(() => {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                if (isHost) setDoc(roomRef, { hostScore: scoreSelf, hostCombo: comboSelf }, { merge: true });
-                else setDoc(roomRef, { guestScore: scoreSelf, guestCombo: comboSelf }, { merge: true });
-            }, 1000); 
-        };
-
-        window.stopScoreSync = function() {
-            if(syncInterval) clearInterval(syncInterval);
-            if(roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
-            if(isHost && currentRoomId && db) {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                deleteDoc(roomRef).catch(e=>console.log(e));
-            }
-            currentRoomId = null;
-        };
-
-        window.cancelRoomLocal = function() {
-            document.getElementById('waiting-room-overlay').classList.add('hidden');
-            document.getElementById('waiting-room-overlay').classList.remove('flex');
-            window.stopScoreSync();
-        };
-
-        window.cancelRoom = function() {
-            if (currentRoomId && isHost && db) {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                setDoc(roomRef, { status: 'cancelled' }, { merge: true }).then(()=> { window.cancelRoomLocal(); });
+            if (tab === 'ranking') {
+                btnRanking.className = "flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold";
+                btnOnline.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
+                content.innerHTML = `<div id="online-ranking-list" class="space-y-1.5"><div class="text-slate-500 text-center py-2 text-[10px]">ロード中...</div></div>`;
+                window.renderRankingUI();
+                if(state.roomsUnsubscribe) { state.roomsUnsubscribe(); state.roomsUnsubscribe = null; }
             } else {
-                window.cancelRoomLocal();
-            }
-        };
-
-        // --- Firebase Friend System ---
-        function setupFriendListener() {
-            if (!firebaseUser || !db) return;
-            const friendColRef = collection(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends');
-            onSnapshot(friendColRef, (snapshot) => {
-                firebaseFriends = [];
-                snapshot.forEach(doc => { firebaseFriends.push({ id: doc.id, ...doc.data() }); });
-                if(currentFriendTab === 'friends') renderFriendsList();
-            }, (error) => {});
-        }
-
-        window.addFriendToOnline = async function(friendName) {
-            if (!firebaseUser || !db) return;
-            try {
-                const friendId = "f_" + Date.now();
-                const docRef = doc(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends', friendId);
-                await setDoc(docRef, { name: friendName, addedAt: Date.now() });
-            } catch (err) {}
-        };
-        
-        window.removeFriendFromOnline = async function(friendId) {
-            if (!firebaseUser || !db) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', firebaseUser.uid, 'friends', friendId);
-                await deleteDoc(docRef);
-            } catch (err) {}
-        };
-
-        // Fallbacks for local / sandbox offline plays
-        window.renderOfflineFallback = function() {
-            const listEl = document.getElementById('online-ranking-list');
-            if(listEl) listEl.innerHTML = `<div class="text-slate-500 text-center py-2 text-[10px]"><i class="fa-solid fa-wifi-slash mr-1"></i>現在オフライン動作中です。</div>`;
-            window.renderOfflineRooms();
-        };
-
-        window.renderOfflineRooms = function() {
-            const container = document.getElementById('friend-tab-content');
-            if (container && currentFriendTab === 'online') {
-                container.innerHTML = `<div class="text-slate-500 text-center py-3 text-[10px]"><i class="fa-solid fa-cloud-slash mr-1"></i>オフラインのため<br>対戦募集・参加はできません。</div>`;
-            }
-        };
-    </script>
-
-    <!-- MAIN GAME ENGINE & INITIALIZATION -->
-    <script>
-        // Data Base 
-        const originalSongs = [
-            { id: 'track_tanarebo', title: 'TANAKA Revolution', artist: 'ZEN(Original)', bpm: 140, audioFile: 'tanarebo.mp3', staticDuration: 65, previewTime: 40 },
-            { id: 'track_hizen', title: '緋善のセカイ', artist: '緋色の金権覇者・ハム＆ZEN(Original)', bpm: 155, audioFile: '緋善のセカイ.mp3', staticDuration: 216, previewTime: 65 },
-            { id: 'track_happyend', title: 'ハッピーエンド', artist: 'ケチャップ(Original)', bpm: 168, audioFile: 'ハッピーエンド.mp3', staticDuration: 265, previewTime: 50 },
-            { id: 'track_kazuking', title: 'カズキング-爆食のその先へ', artist: 'カズキングタイジュウフエターネキンギーニ(Original)', bpm: 160, audioFile: 'カズキングあ.mp3', staticDuration: 238, previewTime: 45 },
-            { id: 'track_rampage_v', title: 'ランペイジ（ヴェノム）', artist: 'ランペイジ・イット(Original)', bpm: 150, audioFile: 'ランペイジ・イットヴェノム.mp3', staticDuration: 166, previewTime: 40 },
-            { id: 'track_rampage_i', title: 'ランペイジ', artist: 'ランペイジ・イット(Original)', bpm: 145, audioFile: 'ランペイジ・イット.mp3', staticDuration: 172, previewTime: 45 },
-            { id: 'track_hiiro', title: '緋色のサーガ', artist: '緋色の金権覇者・ハム(Original)', bpm: 150, audioFile: '緋色のサーガ.mp3', staticDuration: 193, previewTime: 60 },
-            { id: 'track_shien', title: 'せいまろのテーマ', artist: 'せいまろ(Original)', bpm: 130, audioFile: '紫煙（しえん）にむせぶ　路地裏の果て2.mp3', staticDuration: 238, previewTime: 70 },
-            { id: 'track_kazuking_t', title: 'カズキング国歌', artist: 'カズキングタイジュウフエターネキンギーニ(Original)', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
-            { id: 'track_asayake', title: 'ありがとうサービス', artist: 'huh翔(Original)', bpm: 110, audioFile: '朝焼けの街を走り抜けてく  .mp3', staticDuration: 280, previewTime: 80 }
-        ];
-
-        let playerProfile = { username: "Player_#8921", avatarSeed: "Player8921", customAvatarUrl: "", isCustomImage: false };
-        let saveData = { profile: playerProfile, lastDifficulty: "easy", highScores: {} };
-        let tempProfile = {};
-        let currentSongIndex = 0;
-        let firebaseFriends = []; 
-        
-        let gameActive = false;
-        let activeNotes = [];
-        let scoreSelf = 0, comboSelf = 0, maxComboSelf = 0, perfectsSelf = 0, totalPlayableNotes = 0; 
-        let activeHoldsSelf = [null, null, null, null]; 
-        let scoreOpponent = 0, comboOpponent = 0, maxComboOpponent = 0;
-        
-        let gameTime = 0, gameInterval = null, countdownInterval = null, bpmIntervalId = null;
-        let nextNoteIndex = 0;
-        let currentAudio = null, playbackLength = 26; 
-        let selectedOpponentPreset = 'solo';
-        let currentFriendTab = 'friends';
-        let currentRoomId = null;
-        let isHost = false;
-
-        const hitLinePercentage = 95; 
-        const leadTime = 1.3; 
-
-        let previewAudio = new Audio();
-        previewAudio.loop = true;
-
-        function playPreview(song) {
-            try {
-                previewAudio.pause();
-                previewAudio.src = song.audioFile;
-                previewAudio.volume = 0.4;
-                
-                previewAudio.onloadedmetadata = () => {
-                    previewAudio.currentTime = song.previewTime;
-                    const playPromise = previewAudio.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(e => { /* Autoplay block catch */ });
-                    }
-                };
-            } catch(e) {}
-        }
-
-        const opponentPresets = {
-            friend1: { name: 'Rin_Melo', missProbability: 0.12, perfectProbability: 0.70, scoreMultiplier: 0.95, avatar: 'Rin' },
-            friend2: { name: 'Leon_Kun', missProbability: 0.06, perfectProbability: 0.80, scoreMultiplier: 1.10, avatar: 'Leon' },
-            pro: { name: 'Pro_Bot', missProbability: 0.01, perfectProbability: 0.93, scoreMultiplier: 1.35, avatar: 'Miku' }
-        };
-
-        function loadData() {
-            const saved = localStorage.getItem('songverseData');
-            if (saved) {
-                try { 
-                    const parsed = JSON.parse(saved);
-                    saveData = { ...saveData, ...parsed }; 
-                } catch(e) {}
-            }
-        }
-
-        function saveSettings() {
-            saveData.lastDifficulty = document.getElementById('player-difficulty').value;
-            saveDataToStorage();
-            updateHighScoreDisplay();
-        }
-
-        function saveDataToStorage() {
-            saveData.profile = playerProfile;
-            localStorage.setItem('songverseData', JSON.stringify(saveData));
-        }
-
-        function updateHighScoreDisplay() {
-            if(!originalSongs || currentSongIndex === undefined) return;
-            const song = originalSongs[currentSongIndex];
-            const diff = document.getElementById('player-difficulty').value;
-            const key = `${song.id}_${diff}`;
-            const hs = saveData.highScores[key] || 0;
-            const targetEl = document.getElementById('lobby-high-score');
-            if(targetEl) targetEl.innerText = `HIGH SCORE: ${hs.toLocaleString()}`;
-            saveDataToStorage();
-            if(window.updateRankingUI) window.updateRankingUI();
-        }
-
-        function syncProfileUI() {
-            const avatarUrl = playerProfile.isCustomImage ? playerProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${playerProfile.avatarSeed}`;
-            document.getElementById('player-username').innerText = playerProfile.username;
-            document.getElementById('player-avatar').src = avatarUrl;
-            document.getElementById('lobby-profile-name').innerText = playerProfile.username;
-            document.getElementById('lobby-profile-avatar').src = avatarUrl;
-        }
-
-        function openProfileModal() { 
-            tempProfile = { ...playerProfile };
-            document.getElementById('profile-input-name').value = tempProfile.username;
-            document.getElementById('profile-input-avatar-seed').value = tempProfile.isCustomImage ? '【画像設定済み】' : tempProfile.avatarSeed;
-            const previewUrl = tempProfile.isCustomImage ? tempProfile.customAvatarUrl : `https://api.dicebear.com/7.x/pixel-art/svg?seed=${tempProfile.avatarSeed}`;
-            document.getElementById('profile-preview-avatar').src = previewUrl;
-            document.getElementById('profile-modal').classList.remove('hidden'); 
-        }
-
-        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
-
-        function generateRandomAvatar() {
-            const randomSeed = "User_" + Math.floor(Math.random() * 99999);
-            tempProfile.avatarSeed = randomSeed;
-            tempProfile.isCustomImage = false;
-            document.getElementById('profile-input-avatar-seed').value = randomSeed;
-            document.getElementById('profile-preview-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${randomSeed}`;
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    tempProfile.customAvatarUrl = e.target.result;
-                    tempProfile.isCustomImage = true;
-                    document.getElementById('profile-preview-avatar').src = tempProfile.customAvatarUrl;
-                    document.getElementById('profile-input-avatar-seed').value = '【画像設定済み】';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function saveProfile() {
-            const name = document.getElementById('profile-input-name').value.trim();
-            if (name) tempProfile.username = name;
-            playerProfile = { ...tempProfile };
-            saveDataToStorage();
-            syncProfileUI();
-            closeProfileModal();
-            if(window.updateRankingUI) window.updateRankingUI(); 
-        }
-
-        function renderSongList() {
-            const container = document.getElementById('song-list');
-            if(!container) return;
-            container.innerHTML = '';
-            originalSongs.forEach((song, idx) => {
-                const activeClass = idx === currentSongIndex ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-800 hover:border-slate-700';
-                container.innerHTML += `
-                    <div onclick="updateSelectedSong(${idx})" class="p-3 border rounded-xl flex items-center gap-3 cursor-pointer transition-all ${activeClass}">
-                        <div class="w-8 h-8 rounded-lg bg-slate-950 flex justify-center items-center border border-slate-800"><i class="fa-solid fa-play text-[10px] ${idx === currentSongIndex ? 'text-cyan-400' : 'text-slate-500'}"></i></div>
-                        <div class="min-w-0 flex-1"><div class="font-bold text-xs truncate ${idx === currentSongIndex ? 'text-cyan-300' : 'text-slate-300'}">${song.title}</div><div class="text-[9px] text-slate-500 truncate">${song.artist}</div></div>
-                        <div class="text-[9px] text-cyan-400 font-mono">BPM ${song.bpm}</div>
-                    </div>
-                `;
-            });
-        }
-
-        function updateSelectedSong(index) {
-            currentSongIndex = index; 
-            renderSongList();
-            const song = originalSongs[index];
-            document.getElementById('lobby-selected-song-title').innerText = song.title;
-            updateHighScoreDisplay();
-            playPreview(song); 
-        }
-
-        function handleOpponentModeChange() {
-            selectedOpponentPreset = document.getElementById('opponent-level').value;
-            const vsBar = document.getElementById('vs-progress-bar-container');
-            if(selectedOpponentPreset === 'solo') vsBar.classList.add('opacity-0');
-            else vsBar.classList.remove('opacity-0');
-        }
-
-        function switchFriendTab(tab) {
-            currentFriendTab = tab;
-            const tabFriends = document.getElementById('tab-friends');
-            const tabOnline = document.getElementById('tab-online');
-            const content = document.getElementById('friend-tab-content');
-
-            if (tab === 'friends') {
-                tabFriends.className = "flex-1 py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold";
-                tabOnline.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
-                renderFriendsList();
-            } else {
-                tabFriends.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
-                tabOnline.className = "flex-1 py-1 rounded bg-slate-800 text-pink-300 border border-pink-500/30 font-bold";
+                btnRanking.className = "flex-1 py-1 rounded bg-slate-900 text-slate-400 border border-transparent hover:bg-slate-800 font-bold";
+                btnOnline.className = "flex-1 py-1 rounded bg-slate-800 text-pink-300 border border-pink-500/30 font-bold";
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-bold text-slate-300">募集中のルーム</span>
-                        <button onclick="window.createRoomOnline()" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-300 border border-pink-500/50 text-[10px] py-1 px-2 rounded transition-all font-bold">ルーム作成</button>
+                        <button onclick="window.createRoom()" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-300 border border-pink-500/50 text-[10px] py-1 px-2 rounded transition-all font-bold">ルーム作成</button>
                     </div>
-                    <div id="room-list-container" class="space-y-1.5 max-h-24 overflow-y-auto">
-                        <div class="text-slate-500 text-center py-2 text-xs">ロード中...</div>
-                    </div>
+                    <div id="room-list-container" class="space-y-1.5 max-h-24 overflow-y-auto"></div>
                 `;
-                if(window.listenRooms) window.listenRooms();
-            }
-        }
-
-        function renderFriendsList() {
-            const container = document.getElementById('friend-tab-content');
-            if (firebaseFriends.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 text-center py-2">フレンドがいません。追加してみよう！</div>`;
-                return;
-            }
-            container.innerHTML = firebaseFriends.map(friend => `
-                <div class="flex items-center justify-between p-2 bg-slate-900/50 rounded-xl border border-slate-800/80">
-                    <div class="flex items-center gap-2.5">
-                        <div class="relative">
-                            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${friend.name}" class="w-8 h-8 rounded-full bg-slate-800" alt="">
-                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-900 bg-green-500"></span>
-                        </div>
-                        <div class="text-xs font-bold flex items-center gap-1.5"><span>${escapeHTML(friend.name)}</span></div>
-                    </div>
-                    <button onclick="window.removeFriendFromOnline('${friend.id}')" class="text-slate-600 hover:text-red-400 p-1 transition-all"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `).join('');
-        }
-
-        function openAddFriendModal() { document.getElementById('add-friend-modal').classList.remove('hidden'); }
-        function closeAddFriendModal() { document.getElementById('add-friend-modal').classList.add('hidden'); }
-        
-        function submitAddFriend() { 
-            const name = document.getElementById('friend-input-name').value.trim();
-            if(name && window.addFriendToOnline) window.addFriendToOnline(name);
-            closeAddFriendModal(); 
-        }
-
-        // KEYBOARD/TOUCH BINDINGS
-        const KEY_LANES = ['KeyD', 'KeyF', 'KeyJ', 'KeyK'];
-        document.addEventListener('keydown', (e) => { if (e.repeat) return; const idx = KEY_LANES.indexOf(e.code); if (idx !== -1) { triggerTap(idx); } });
-        document.addEventListener('keyup', (e) => { const idx = KEY_LANES.indexOf(e.code); if (idx !== -1) { triggerRelease(idx); } });
-
-        function handleTouchTap(event, lane) { event.preventDefault(); triggerTap(lane); }
-        function handleTouchRelease(event, lane) { event.preventDefault(); triggerRelease(lane); }
-        function handleMouseTap(event, lane) { event.preventDefault(); triggerTap(lane); }
-        function handleMouseRelease(event, lane) { event.preventDefault(); triggerRelease(lane); }
-
-        function spawnParticles(lane, colorType) {
-            const target = document.getElementById(`lane-target-${lane}`);
-            if (!target) return;
-            const rect = target.getBoundingClientRect();
-            const board = document.querySelector('.game-board');
-            const boardRect = board.getBoundingClientRect();
-
-            let pColor = '#00f2fe';
-            if(colorType === 'pink') pColor = '#ff007f';
-            if(colorType === 'green') pColor = '#10b981';
-
-            const flash = document.createElement('div');
-            flash.className = 'lane-flash';
-            flash.style.left = `${lane * 25}%`; flash.style.width = `25%`;
-            board.appendChild(flash);
-            setTimeout(() => flash.remove(), 250);
-
-            for (let i = 0; i < 18; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle'; p.style.setProperty('--p-color', pColor);
-                const x = (rect.left + rect.width / 2) - boardRect.left;
-                const y = (rect.top + rect.height / 2) - boardRect.top;
-                p.style.left = `${x}px`; p.style.top = `${y}px`;
-                
-                const angle = (Math.random() * Math.PI) + Math.PI; 
-                const speed = Math.random() * 250 + 50;
-                p.style.setProperty('--dx', `${Math.cos(angle) * speed}px`);
-                p.style.setProperty('--dy', `${Math.sin(angle) * speed - 150}px`); 
-                
-                board.appendChild(p);
-                setTimeout(() => p.remove(), 500);
-            }
-        }
-
-        function triggerTap(lane) {
-            const target = document.getElementById(`lane-target-${lane}`);
-            if (target) { target.classList.add('hit-active'); setTimeout(() => target.classList.remove('hit-active'), 150); }
-            if (!gameActive) return;
-
-            let bestDiff = 999, hitNote = null;
-            activeNotes.forEach(note => {
-                if (note.type === 'slide') {
-                    if(!note.active && note.nodes[0].lane === lane) {
-                        let diff = Math.abs(gameTime - note.nodes[0].time);
-                        if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
-                    }
-                } else if (note.lane === lane && !note.hit) {
-                    let diff = Math.abs(gameTime - note.time);
-                    if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
+                if(window.firebaseManager) {
+                    state.roomsUnsubscribe = window.firebaseManager.listenRooms((snapshot) => {
+                        if(!snapshot) return; // offline
+                        let rooms = [];
+                        snapshot.forEach(doc => { const d=doc.data(); if(d.status==='waiting' && d.createdAt > Date.now() - 600000) rooms.push(d); });
+                        const rc = document.getElementById('room-list-container');
+                        if(!rc) return;
+                        if(rooms.length === 0) { rc.innerHTML = `<div class="text-slate-500 text-center py-4 text-[10px]">募集中のルームはありません。</div>`; return; }
+                        rc.innerHTML = rooms.map(room => {
+                            const song = window.originalSongs.find(s => s.id === room.songId);
+                            const diffColor = room.difficulty === 'expert' ? 'text-purple-400' : room.difficulty === 'hard' ? 'text-pink-400' : room.difficulty === 'normal' ? 'text-emerald-400' : 'text-cyan-400';
+                            return `
+                                <div class="flex justify-between items-center p-1.5 bg-slate-900/60 border border-slate-700/50 rounded-lg hover:border-pink-500/50 transition-all text-[11px]">
+                                    <div class="min-w-0 flex-1 pr-2">
+                                        <div class="text-[10px] font-bold text-slate-200 truncate">${escapeHTML(room.hostName)}のルーム</div>
+                                        <div class="text-[9px] text-slate-400 truncate">${song ? song.title : 'Unknown'}</div>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <span class="text-[9px] font-bold uppercase ${diffColor}">${room.difficulty}</span>
+                                        <button onclick="window.joinOnlineRoom('${room.roomId}')" class="bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 text-[9px] py-0.5 px-1.5 rounded font-bold">参加</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    });
                 }
+            }
+        };
+
+        window.createRoom = async function() {
+            if(!window.firebaseManager) return;
+            const song = window.originalSongs[state.currentSongIndex];
+            const diff = document.getElementById('player-difficulty').value;
+            const roomId = await window.firebaseManager.createRoom(song.id, diff, window.playerProfile.username);
+            if(roomId) {
+                state.roomId = roomId; state.isHost = true;
+                document.getElementById('waiting-room-overlay').classList.remove('hidden'); document.getElementById('waiting-room-overlay').classList.add('flex');
+                setupRoomListener(roomId);
+            }
+        };
+
+        window.joinOnlineRoom = async function(roomId) {
+            if(!window.firebaseManager) return;
+            state.roomId = roomId; state.isHost = false;
+            await window.firebaseManager.joinRoom(roomId, window.playerProfile.username);
+            setupRoomListener(roomId);
+        };
+
+        function setupRoomListener(roomId) {
+            if(state.roomSyncUnsubscribe) state.roomSyncUnsubscribe();
+            state.roomSyncUnsubscribe = window.firebaseManager.listenRoom(roomId, (docSnap) => {
+                if(!docSnap.exists()) return;
+                const data = docSnap.data();
+                
+                if (data.status === 'ready' && !state.gameActive) {
+                    const songIndex = window.originalSongs.findIndex(s => s.id === data.songId);
+                    if(songIndex !== -1) state.currentSongIndex = songIndex;
+                    document.getElementById('player-difficulty').value = data.difficulty;
+                    state.isOnline = true; 
+                    const oppName = state.isHost ? data.guestName : data.hostName;
+                    
+                    document.getElementById('waiting-room-overlay').classList.add('hidden'); document.getElementById('waiting-room-overlay').classList.remove('flex');
+                    if (state.isHost) window.firebaseManager.updateRoomStatus(roomId, 'playing');
+                    
+                    startMatchPreparation(oppName, oppName, true);
+                }
+                
+                if (data.status === 'playing' && state.gameActive) {
+                    if (state.isHost) { state.opponentScore = data.guestScore || 0; state.opponentCombo = data.guestCombo || 0; } 
+                    else { state.opponentScore = data.hostScore || 0; state.opponentCombo = data.hostCombo || 0; }
+                    updateScoreboard();
+                }
+                if (data.status === 'cancelled') window.cancelRoom();
             });
-
-            if (hitNote && bestDiff < 0.25) {
-                hitNote.hit = true;
-                let rating = 'GOOD', scoreEarned = 150, cClass = 'text-amber-400', pColor = 'cyan';
-
-                if (hitNote.type === 'flick') {
-                    pColor = 'pink';
-                    if (bestDiff < 0.08) { rating = 'PERFECT FLICK'; scoreEarned = 400; cClass = 'text-pink-400 neon-text-pink'; perfectsSelf++; } 
-                    else if (bestDiff < 0.15) { rating = 'GREAT FLICK'; scoreEarned = 280; cClass = 'text-purple-400'; }
-                } else {
-                    if (bestDiff < 0.06) { rating = 'PERFECT'; scoreEarned = 350; cClass = 'text-cyan-400 neon-text-cyan'; perfectsSelf++; } 
-                    else if (bestDiff < 0.12) { rating = 'GREAT'; scoreEarned = 250; cClass = 'text-emerald-400'; }
-                }
-
-                if (hitNote.type === 'slide') {
-                    pColor = 'green'; hitNote.active = true; 
-                    if (hitNote.element) hitNote.element.style.opacity = '0';
-                    if (hitNote.trailElement) hitNote.trailElement.classList.add('active-hold-trail');
-                } else { hitNote.cleanup = true; }
-
-                spawnParticles(lane, pColor);
-                comboSelf++; if (comboSelf > maxComboSelf) maxComboSelf = comboSelf;
-                scoreSelf += scoreEarned;
-
-                displayRating(rating, cClass);
-                updateScoreboard();
-            }
         }
 
-        function triggerRelease(lane) {
-            if (!gameActive) return;
-            
-            let activeSlide = activeNotes.find(n => n.type === 'slide' && n.active);
-            if (activeSlide) {
-                const endTime = activeSlide.nodes[activeSlide.nodes.length-1].time;
-                const diff = Math.abs(gameTime - endTime);
+        window.cancelRoom = function() {
+            document.getElementById('waiting-room-overlay').classList.add('hidden'); document.getElementById('waiting-room-overlay').classList.remove('flex');
+            if (state.roomId && state.isHost && window.firebaseManager) window.firebaseManager.updateRoomStatus(state.roomId, 'cancelled');
+            if (state.roomSyncUnsubscribe) { state.roomSyncUnsubscribe(); state.roomSyncUnsubscribe = null; }
+            state.roomId = null;
+        };
 
-                activeSlide.active = false; activeSlide.cleanup = true;
-                let rating = 'MISS', scoreEarned = 0, cClass = 'text-red-500';
+        window.openAddFriendModal = function() { document.getElementById('add-friend-modal').classList.remove('hidden'); };
+        window.closeAddFriendModal = function() { document.getElementById('add-friend-modal').classList.add('hidden'); };
+        window.submitAddFriend = function() { window.closeAddFriendModal(); }; // Placeholder as requested
 
-                if (diff < 0.25) {
-                    if (diff < 0.1) { rating = 'PERFECT'; scoreEarned = 300; cClass = 'text-emerald-400 neon-text-cyan'; perfectsSelf++; }
-                    else { rating = 'GREAT'; scoreEarned = 200; cClass = 'text-teal-400'; }
-                    comboSelf++; scoreSelf += scoreEarned; spawnParticles(lane, 'green');
-                } else {
-                    comboSelf = 0;
-                }
-                displayRating(rating, cClass);
-                updateScoreboard();
-            }
-        }
-
-        function displayRating(text, colorClass) {
-            const popup = document.getElementById('rating-popup');
-            popup.innerText = text; popup.classList.remove('rating-pop-anim'); void popup.offsetWidth; 
-            popup.className = `absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider font-mono ${colorClass} z-30 pointer-events-none rating-pop-anim`;
-            
-            const comboContainer = document.getElementById('combo-popup');
-            if (comboSelf > 0) {
-                document.getElementById('combo-count').innerText = comboSelf;
-                comboContainer.classList.remove('hidden'); comboContainer.classList.add('flex');
-                comboContainer.classList.remove('combo-bounce'); void comboContainer.offsetWidth;
-                comboContainer.classList.add('combo-bounce');
-            } else {
-                comboContainer.classList.add('hidden'); comboContainer.classList.remove('flex');
-            }
-        }
-
-        function updateScoreboard() {
-            document.getElementById('game-score-self').innerText = scoreSelf.toLocaleString('ja-JP', { minimumIntegerDigits: 7 }).replace(/,/g, '');
-            if (selectedOpponentPreset === 'solo') return;
-
-            document.getElementById('opponent-combo').innerText = comboOpponent;
-
-            const sum = (scoreSelf + scoreOpponent) || 1;
-            const selfPercent = Math.max(10, Math.min(90, (scoreSelf / sum) * 100));
-            const oppPercent = 100 - selfPercent;
-
-            document.getElementById('versus-progress-self').style.width = `${selfPercent}%`;
-            document.getElementById('versus-progress-opponent').style.width = `${oppPercent}%`;
-
-            const statusText = document.getElementById('vs-leading-status');
-            if (Math.abs(scoreSelf - scoreOpponent) < 500) {
-                statusText.innerText = "DRAW"; statusText.className = "text-yellow-400 font-bold uppercase tracking-wider";
-            } else if (scoreSelf > scoreOpponent) {
-                statusText.innerText = "YOU LEAD!"; statusText.className = "text-cyan-400 font-bold uppercase tracking-wider neon-text-cyan";
-            } else {
-                statusText.innerText = "RIVAL LEADS"; statusText.className = "text-pink-400 font-bold uppercase tracking-wider neon-text-pink";
-            }
-        }
-
-        function startLocalMatch() {
-            selectedOpponentPreset = document.getElementById('opponent-level').value;
-            if(selectedOpponentPreset === 'online') { selectedOpponentPreset = 'solo'; }
-            const diffSelector = document.getElementById('player-difficulty');
-            const diffName = diffSelector.options[diffSelector.selectedIndex].text;
-            
+        // --- GAME ENGINE ---
+        window.startLocalMatch = function() {
+            const oppVal = document.getElementById('opponent-level').value;
             let oppName = "Rival", oppAvatar = "Opp";
-            if (selectedOpponentPreset !== 'solo') {
-                const oppData = opponentPresets[selectedOpponentPreset];
+            state.isOnline = false;
+            
+            if (oppVal !== 'solo') {
+                const oppData = opponentPresets[oppVal] || opponentPresets.pro;
                 oppName = oppData.name; oppAvatar = oppData.avatar;
             }
-            document.getElementById('opponent-name-tag').innerText = oppName;
-            document.getElementById('opponent-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${oppAvatar}`;
-            document.getElementById('opponent-difficulty-tag').innerText = `OPPONENT: ${diffName}`;
-            
-            startMatchCommon();
-        }
+            startMatchPreparation(oppName, oppAvatar, oppVal !== 'solo');
+        };
 
-        window.startOnlineMatchReal = function(oppName) {
+        function startMatchPreparation(oppName, oppAvatarSeed, showRival) {
+            previewAudio.pause();
+            document.getElementById('game-lobby-overlay').classList.add('opacity-0');
+            
             const diffSelector = document.getElementById('player-difficulty');
-            const diffName = diffSelector.options[diffSelector.selectedIndex].text;
             document.getElementById('opponent-name-tag').innerText = oppName;
-            document.getElementById('opponent-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${oppName}`;
-            document.getElementById('opponent-difficulty-tag').innerText = `OPPONENT: ${diffName}`;
+            document.getElementById('opponent-avatar').src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${oppAvatarSeed}`;
+            document.getElementById('opponent-difficulty-tag').innerText = `OPPONENT: ${diffSelector.options[diffSelector.selectedIndex].text}`;
             
-            document.getElementById('vs-progress-bar-container').classList.remove('opacity-0');
-            document.getElementById('opponent-score-header').classList.remove('opacity-0');
-            document.getElementById('rival-side-widget').classList.remove('hidden');
-            
-            startMatchCommon(true);
-        }
+            if(showRival) {
+                document.getElementById('vs-progress-bar-container').classList.remove('opacity-0');
+                document.getElementById('opponent-score-header').classList.remove('opacity-0');
+                document.getElementById('rival-side-widget').classList.remove('hidden');
+            } else {
+                document.getElementById('vs-progress-bar-container').classList.add('opacity-0');
+                document.getElementById('opponent-score-header').classList.add('opacity-0');
+                document.getElementById('rival-side-widget').classList.add('hidden');
+            }
 
-        function startMatchCommon(isOnlineSync = false) {
-            previewAudio.pause(); 
-            const overlay = document.getElementById('game-lobby-overlay');
-            overlay.classList.add('opacity-0');
-            
             setTimeout(() => {
-                overlay.classList.add('hidden');
+                document.getElementById('game-lobby-overlay').classList.add('hidden');
                 document.getElementById('lobby-panel').classList.add('hidden');
                 document.getElementById('main-header').classList.add('hidden');
                 document.getElementById('game-arena-panel').classList.remove('lg:w-2/3');
@@ -1293,50 +1034,51 @@
                 const cdOverlay = document.getElementById('countdown-overlay');
                 cdOverlay.classList.remove('hidden'); cdOverlay.classList.add('flex');
 
-                const song = originalSongs[currentSongIndex];
-                playbackLength = song.staticDuration;
+                const song = window.originalSongs[state.currentSongIndex];
+                state.playbackLength = song.staticDuration;
 
-                if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-                currentAudio = new Audio(song.audioFile);
-                currentAudio.preload = 'auto';
-                const unlockPlay = currentAudio.play();
-                if (unlockPlay !== undefined) unlockPlay.then(() => { currentAudio.pause(); currentAudio.currentTime = 0; }).catch(e=>{});
-                currentAudio.load();
+                if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
+                state.audioContext = new Audio(song.audioFile);
+                state.audioContext.preload = 'auto'; state.audioContext.volume = window.globalVolume;
+                state.audioContext.load();
 
-                let count = 3;
-                const num = document.getElementById('countdown-number');
-                countdownInterval = setInterval(() => {
+                let count = 3; const num = document.getElementById('countdown-number');
+                num.innerText = count;
+                state.countdownInterval = setInterval(() => {
                     count--;
                     if (count > 0) { num.innerText = count; } 
                     else if (count === 0) { num.innerText = "START!"; } 
                     else {
-                        clearInterval(countdownInterval);
+                        clearInterval(state.countdownInterval);
                         cdOverlay.classList.add('hidden'); cdOverlay.classList.remove('flex');
-                        currentAudio.play().then(() => {
+                        state.audioContext.play().then(() => {
                             launchMatchCore();
-                            if(isOnlineSync && window.startScoreSync) window.startScoreSync();
+                            if(state.isOnline) startScoreSync();
                         }).catch(() => {
-                            launchMatchCore();
-                            if(isOnlineSync && window.startScoreSync) window.startScoreSync();
+                            launchMatchCore(); // Fallback if audio fails
+                            if(state.isOnline) startScoreSync();
                         });
                     }
                 }, 1000);
-            }, 300); 
+            }, 300);
         }
 
         function launchMatchCore() {
-            gameActive = true;
-            scoreSelf = 0; comboSelf = 0; maxComboSelf = 0; perfectsSelf = 0;
-            gameTime = 0; nextNoteIndex = 0; activeNotes = [];
+            state.gameActive = true;
+            state.score = 0; state.combo = 0; state.maxCombo = 0; state.perfects = 0;
+            state.opponentScore = 0; state.opponentCombo = 0; state.maxOpponentCombo = 0;
+            state.gameTime = 0; state.nextNoteIndex = 0; state.activeNotes = [];
+            state.activeHolds = [null, null, null, null];
             
             document.getElementById('game-score-self').innerText = "0000000";
             document.getElementById('combo-popup').classList.add('hidden');
             document.getElementById('notes-container').innerHTML = '';
+            document.getElementById('slide-layer').innerHTML = '';
 
-            const song = originalSongs[currentSongIndex];
+            const song = window.originalSongs[state.currentSongIndex];
             const difficulty = document.getElementById('player-difficulty').value;
             let playbackNotes = [];
-            const activeLimit = playbackLength - 2.0; 
+            const activeLimit = state.playbackLength - 2.0; 
             const beatGap = 60 / song.bpm;
             
             let tempTime = 0.5, nIndex = 0;
@@ -1344,27 +1086,27 @@
             
             while (tempTime < activeLimit) {
                 notesSequence.push({ time: tempTime, index: nIndex });
-                tempTime += beatGap * 2;
-                nIndex++;
+                tempTime += beatGap * 2; nIndex++;
             }
 
             const totalSeq = notesSequence.length;
             const slideIndices = [totalSeq - 2, totalSeq - 1]; 
-
             let lastLane = -1, lastLastLane = -1;
 
             notesSequence.forEach((noteSeq, seqIdx) => {
                 const targetTime = noteSeq.time;
                 let baseLane;
                 
-                // Optimized lane spreading for EASY
+                // Spread notes for better flow (critical for EASY)
                 do { baseLane = Math.floor(Math.random() * 4); } 
                 while (baseLane === lastLane || (difficulty === 'easy' && baseLane === lastLastLane));
                 lastLastLane = lastLane; lastLane = baseLane;
 
                 const isLastTwoSlides = slideIndices.includes(seqIdx);
+                // Also add a small random chance for slides in Normal/Hard/Expert
+                const isRandomSlide = (difficulty !== 'easy' && !isLastTwoSlides && Math.random() < 0.15 && noteSeq.index % 4 !== 0);
 
-                if (isLastTwoSlides) {
+                if (isLastTwoSlides || isRandomSlide) {
                     let nodes = [];
                     const shapeType = Math.floor(Math.random() * 5); 
                     switch(shapeType) {
@@ -1378,16 +1120,27 @@
                 } else {
                     if (difficulty === 'easy') {
                         playbackNotes.push({ time: targetTime, lane: baseLane, type: 'tap', hit: false });
+                    } else if (difficulty === 'expert') {
+                        // EXPERT: Extremely dense 16th streams and flick combos
+                        playbackNotes.push({ time: targetTime, lane: baseLane, type: 'flick', hit: false });
+                        playbackNotes.push({ time: targetTime, lane: (baseLane+2)%4, type: 'tap', hit: false });
+                        playbackNotes.push({ time: targetTime + beatGap * 0.25, lane: (baseLane+1)%4, type: 'tap', hit: false });
+                        playbackNotes.push({ time: targetTime + beatGap * 0.50, lane: (baseLane+3)%4, type: 'tap', hit: false });
+                        playbackNotes.push({ time: targetTime + beatGap * 0.75, lane: baseLane, type: 'flick', hit: false });
+                        if (Math.random() < 0.6) {
+                            playbackNotes.push({ time: targetTime + beatGap * 1.0, lane: (baseLane + 1) % 4, type: 'flick', hit: false });
+                            playbackNotes.push({ time: targetTime + beatGap * 1.0, lane: (baseLane + 2) % 4, type: 'flick', hit: false });
+                        }
+                        playbackNotes.push({ time: targetTime + beatGap * 1.25, lane: baseLane, type: 'tap', hit: false });
+                        playbackNotes.push({ time: targetTime + beatGap * 1.5, lane: (baseLane+3)%4, type: 'tap', hit: false });
+                        playbackNotes.push({ time: targetTime + beatGap * 1.75, lane: (baseLane+1)%4, type: 'tap', hit: false });
                     } else {
                         if (noteSeq.index % 4 === 3) {
                             playbackNotes.push({ time: targetTime, lane: baseLane, type: 'flick', hit: false });
                         } else {
                             playbackNotes.push({ time: targetTime, lane: baseLane, type: 'tap', hit: false });
-                            if (difficulty === 'hard' || difficulty === 'expert') {
+                            if (difficulty === 'hard') {
                                 playbackNotes.push({ time: targetTime + beatGap, lane: (baseLane + 2) % 4, type: 'tap', hit: false });
-                            }
-                            if (difficulty === 'expert') {
-                                playbackNotes.push({ time: targetTime + beatGap * 1.5, lane: (baseLane + 1) % 4, type: 'flick', hit: false });
                             }
                         }
                     }
@@ -1395,99 +1148,114 @@
             });
             
             playbackNotes.sort((a, b) => a.time - b.time);
-            totalPlayableNotes = playbackNotes.length;
+            state.totalNotes = playbackNotes.length;
+            state.playbackNotes = playbackNotes;
+            state.lastTime = Date.now();
 
-            const updateIntervalMs = 1000 / 60;
-
-            bpmIntervalId = setInterval(() => {
-                const notesSubBeat = Math.floor(gameTime * (song.bpm / 60));
-                if (notesSubBeat % 2 === 0) {
-                    const ring = document.getElementById('sound-ring');
-                    if (ring) {
-                        ring.style.transform = 'scale(1.25)'; ring.style.opacity = '0.35';
-                        setTimeout(() => { ring.style.transform = 'scale(1)'; ring.style.opacity = '0.1'; }, 150);
-                    }
-                }
-            }, 60000 / song.bpm);
-
-            gameInterval = setInterval(() => {
-                if (currentAudio && !currentAudio.paused) gameTime = currentAudio.currentTime;
-                else gameTime += updateIntervalMs / 1000;
-
-                while (nextNoteIndex < playbackNotes.length && playbackNotes[nextNoteIndex].time <= gameTime + leadTime) {
-                    spawnNote(playbackNotes[nextNoteIndex]);
-                    nextNoteIndex++;
-                }
-
-                updateNotesPositions();
-
-                if (selectedOpponentPreset !== 'solo' && selectedOpponentPreset !== 'online') {
-                    simulateOpponentTurn();
-                }
-
-                if (currentAudio) { if (currentAudio.ended || gameTime >= playbackLength) finishGameMatch(); } 
-                else { if (gameTime > playbackLength) finishGameMatch(); }
-            }, updateIntervalMs);
+            window.gameLoop();
         }
 
-        function spawnNote(noteData) {
+        window.gameLoop = function() {
+            if (!state.gameActive) return;
+
+            let now = Date.now();
+            let dt = (now - state.lastTime) / 1000;
+            state.lastTime = now;
+
+            if (state.audioContext && !state.audioContext.paused) {
+                state.gameTime = state.audioContext.currentTime;
+            } else {
+                state.gameTime += dt;
+            }
+
+            // Spawn notes
+            while (state.nextNoteIndex < state.playbackNotes.length && state.playbackNotes[state.nextNoteIndex].time <= state.gameTime + leadTime) {
+                window.spawnNote(state.playbackNotes[state.nextNoteIndex]);
+                state.nextNoteIndex++;
+            }
+
+            window.updateNotesPositions();
+
+            // Opponent Simulation (if offline bot)
+            if (!state.isOnline && document.getElementById('opponent-level').value !== 'solo') {
+                window.simulateOpponentTurn(dt);
+            }
+
+            // Check End Condition
+            if (state.audioContext) { 
+                if (state.audioContext.ended || state.gameTime >= state.playbackLength) return window.finishGameMatch(); 
+            } else { 
+                if (state.gameTime > state.playbackLength) return window.finishGameMatch(); 
+            }
+
+            state.animationFrameId = requestAnimationFrame(window.gameLoop);
+        };
+
+        window.spawnNote = function(noteData) {
             if (noteData.type === 'slide') {
-                noteData.spawnTime = gameTime;
-                activeNotes.push(noteData);
+                noteData.spawnTime = state.gameTime;
+                state.activeNotes.push(noteData);
             } else {
                 const container = document.getElementById('notes-container');
                 const noteDiv = document.createElement('div');
                 noteDiv.className = `note ${noteData.type === 'flick' ? 'note-flick' : ''}`;
-                noteDiv.style.top = '0%';
-                noteDiv.style.left = `${noteData.lane * 25 + 2}%`;
-                noteDiv.style.width = `21%`;
+                noteDiv.style.top = '0%'; noteDiv.style.left = `${noteData.lane * 25 + 2}%`; noteDiv.style.width = `21%`;
                 container.appendChild(noteDiv);
-                noteData.element = noteDiv;
-                noteData.spawnTime = gameTime;
-                activeNotes.push(noteData);
+                noteData.element = noteDiv; noteData.spawnTime = state.gameTime;
+                state.activeNotes.push(noteData);
             }
+        };
+
+        function getSlideXAtTime(note, time) {
+            if (time <= note.nodes[0].time) return note.nodes[0].lane * 250 + 125;
+            if (time >= note.nodes[note.nodes.length - 1].time) return note.nodes[note.nodes.length - 1].lane * 250 + 125;
+            for (let j = 0; j < note.nodes.length - 1; j++) {
+                let curr = note.nodes[j], next = note.nodes[j+1];
+                if (time >= curr.time && time <= next.time) {
+                    let ratio = (time - curr.time) / (next.time - curr.time);
+                    let currX = curr.lane * 250 + 125, nextX = next.lane * 250 + 125;
+                    return currX + (nextX - currX) * ratio;
+                }
+            }
+            return note.nodes[0].lane * 250 + 125;
         }
 
-        function updateNotesPositions() {
+        window.updateNotesPositions = function() {
             const slideLayer = document.getElementById('slide-layer');
             let svgHTML = '';
 
-            for (let i = activeNotes.length - 1; i >= 0; i--) {
-                const note = activeNotes[i];
+            for (let i = state.activeNotes.length - 1; i >= 0; i--) {
+                const note = state.activeNotes[i];
                 if (note.cleanup) {
                     if (note.element) note.element.remove();
-                    activeNotes.splice(i, 1);
+                    state.activeNotes.splice(i, 1);
                     continue;
                 }
 
                 if (note.type === 'slide') {
-                    let leftPoints = [], rightPoints = [];
-                    let headY = 0, headX = 0;
-                    for (let j = 0; j < note.nodes.length; j++) {
-                        let n = note.nodes[j];
-                        let y = hitLinePercentage - ((n.time - gameTime) / leadTime) * hitLinePercentage;
-                        let x = n.lane * 250 + 125; 
+                    let leftPoints = [], rightPoints = [], headY = 0, headX = 0;
+                    
+                    if (note.active) {
+                        let startX = getSlideXAtTime(note, state.gameTime);
+                        let startY = hitLinePercentage * 10; 
+                        leftPoints.push(`${startX - 75},${startY}`); rightPoints.unshift(`${startX + 75},${startY}`);
                         
-                        if (y > hitLinePercentage) {
-                            if (note.active) {
-                                let next = note.nodes[j+1];
-                                if (next) {
-                                    let nextY = hitLinePercentage - ((next.time - gameTime) / leadTime) * hitLinePercentage;
-                                    if (nextY <= hitLinePercentage) {
-                                        let ratio = (hitLinePercentage - y) / (nextY - y);
-                                        let clipX = x + (next.lane * 250 + 125 - x) * ratio;
-                                        leftPoints.push(`${clipX - 90},${hitLinePercentage*10}`); 
-                                        rightPoints.unshift(`${clipX + 90},${hitLinePercentage*10}`);
-                                        svgHTML += `<polygon points="${clipX-30},${hitLinePercentage*10} ${clipX},${hitLinePercentage*10-30} ${clipX+30},${hitLinePercentage*10} ${clipX},${hitLinePercentage*10+30}" fill="#ffffff" filter="drop-shadow(0 0 15px #00f2fe)" />`;
-                                    }
-                                }
+                        for (let j = 0; j < note.nodes.length; j++) {
+                            let n = note.nodes[j];
+                            if (n.time > state.gameTime) {
+                                let y = hitLinePercentage - ((n.time - state.gameTime) / leadTime) * hitLinePercentage;
+                                let x = n.lane * 250 + 125; let vy = y * 10;
+                                leftPoints.push(`${x - 75},${vy}`); rightPoints.unshift(`${x + 75},${vy}`);
                             }
-                            continue;
                         }
-                        if (y < 0) continue; 
-                        let vy = y * 10; 
-                        leftPoints.push(`${x - 90},${vy}`); rightPoints.unshift(`${x + 90},${vy}`);
-                        if (j === 0) { headY = y; headX = x / 10; }
+                    } else {
+                        for (let j = 0; j < note.nodes.length; j++) {
+                            let n = note.nodes[j];
+                            let y = hitLinePercentage - ((n.time - state.gameTime) / leadTime) * hitLinePercentage;
+                            let x = n.lane * 250 + 125; let vy = y * 10;
+                            leftPoints.push(`${x - 75},${vy}`); rightPoints.unshift(`${x + 75},${vy}`);
+                            if (j === 0) { headY = y; headX = x / 10; }
+                        }
                     }
 
                     if (leftPoints.length > 0) {
@@ -1497,21 +1265,29 @@
                         let shadow = note.active ? 'drop-shadow(0 0 15px rgba(0, 242, 254, 0.8))' : 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.6))';
                         svgHTML += `<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="8" style="filter: ${shadow};" />`;
                         
-                        if (!note.active && headY > 0 && headY <= hitLinePercentage) {
-                            svgHTML += `<rect x="${headX*10 - 95}" y="${headY*10 - 20}" width="190" height="40" rx="20" fill="#10b981" stroke="#ffffff" stroke-width="4" filter="drop-shadow(0 0 10px #10b981)" />`;
+                        if (note.active) {
+                            let curX = getSlideXAtTime(note, state.gameTime); let curY = hitLinePercentage * 10;
+                            svgHTML += `<polygon points="${curX-40},${curY} ${curX},${curY-30} ${curX+40},${curY} ${curX},${curY+30}" fill="#ffffff" filter="drop-shadow(0 0 15px #10b981)" />`;
+                        } else {
+                            let firstNode = note.nodes[0];
+                            let hY = hitLinePercentage - ((firstNode.time - state.gameTime) / leadTime) * hitLinePercentage;
+                            if (hY >= 0 && hY <= hitLinePercentage) {
+                                let hX = firstNode.lane * 250 + 125;
+                                svgHTML += `<rect x="${hX - 85}" y="${hY * 10 - 20}" width="170" height="40" rx="20" fill="#10b981" stroke="#ffffff" stroke-width="4" filter="drop-shadow(0 0 10px #10b981)" />`;
+                            }
                         }
                     }
 
                     let lastNode = note.nodes[note.nodes.length-1];
-                    let lastY = hitLinePercentage - ((lastNode.time - gameTime) / leadTime) * hitLinePercentage;
+                    let lastY = hitLinePercentage - ((lastNode.time - state.gameTime) / leadTime) * hitLinePercentage;
                     if (lastY > hitLinePercentage + 10 && !note.hit) {
-                        comboSelf = 0; displayRating('MISS', 'text-red-500'); note.cleanup = true;
+                        state.combo = 0; window.displayRating('MISS', 'text-red-500'); note.cleanup = true;
                     }
                 } else {
-                    const elapsed = gameTime - note.spawnTime;
+                    const elapsed = state.gameTime - note.spawnTime;
                     const positionY = (elapsed / leadTime) * hitLinePercentage;
                     if (positionY > hitLinePercentage + 10) {
-                        if (!note.hit) { comboSelf = 0; displayRating('MISS', 'text-red-500'); }
+                        if (!note.hit) { state.combo = 0; window.displayRating('MISS', 'text-red-500'); }
                         note.cleanup = true;
                     } else {
                         if (note.element) note.element.style.top = `${positionY}%`;
@@ -1519,70 +1295,186 @@
                 }
             }
             slideLayer.innerHTML = svgHTML;
-        }
+        };
 
-        function simulateOpponentTurn() {
-            const oppData = opponentPresets[selectedOpponentPreset];
-            if (Math.random() < 0.14) { 
-                const isMiss = Math.random() < oppData.missProbability;
-                
-                if (isMiss) {
-                    comboOpponent = 0;
-                    document.getElementById('opponent-last-judge').innerText = "MISS";
-                    document.getElementById('opponent-last-judge').className = "text-red-500 font-bold text-[10px]";
-                } else {
-                    comboOpponent++;
-                    if (comboOpponent > maxComboOpponent) maxComboOpponent = comboOpponent;
+        // --- Interaction Logic ---
+        window.spawnParticles = function(lane, colorType) {
+            const target = document.getElementById(`lane-target-${lane}`);
+            if (!target) return;
+            const rect = target.getBoundingClientRect();
+            const board = document.querySelector('.game-board');
+            const boardRect = board.getBoundingClientRect();
 
-                    const isPerfect = Math.random() < oppData.perfectProbability;
-                    const scoreBase = isPerfect ? 350 : 250;
-                    
-                    scoreOpponent += Math.floor(scoreBase * oppData.scoreMultiplier);
-                    
-                    document.getElementById('opponent-last-judge').innerText = isPerfect ? "PERFECT" : "GREAT";
-                    document.getElementById('opponent-last-judge').className = isPerfect ? "text-cyan-400 font-bold text-[10px]" : "text-emerald-400 font-bold text-[10px]";
-                }
-                updateScoreboard();
+            let pColor = '#00f2fe';
+            if(colorType === 'pink') pColor = '#ff007f';
+            if(colorType === 'green') pColor = '#10b981';
+
+            const flash = document.createElement('div');
+            flash.className = 'lane-flash'; flash.style.left = `${lane * 25}%`; flash.style.width = `25%`;
+            board.appendChild(flash); setTimeout(() => flash.remove(), 250);
+
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div'); p.className = 'particle'; p.style.setProperty('--p-color', pColor);
+                const x = (rect.left + rect.width / 2) - boardRect.left; const y = (rect.top + rect.height / 2) - boardRect.top;
+                p.style.left = `${x}px`; p.style.top = `${y}px`;
+                const angle = (Math.random() * Math.PI) + Math.PI; const speed = Math.random() * 250 + 50;
+                p.style.setProperty('--dx', `${Math.cos(angle) * speed}px`); p.style.setProperty('--dy', `${Math.sin(angle) * speed - 150}px`); 
+                board.appendChild(p); setTimeout(() => p.remove(), 500);
             }
-        }
+        };
 
-        function abortGame() {
-            clearInterval(gameInterval); clearInterval(bpmIntervalId);
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-            if (window.stopScoreSync) window.stopScoreSync();
+        window.triggerTap = function(lane) {
+            const target = document.getElementById(`lane-target-${lane}`);
+            if (target) { 
+                target.classList.remove('hit-active'); 
+                void target.offsetWidth; // 強制リフロー
+                target.classList.add('hit-active'); 
+            }
+            if (!state.gameActive) return;
+
+            let bestDiff = 999, hitNote = null;
+            state.activeNotes.forEach(note => {
+                if (note.type === 'slide') {
+                    if(!note.active && note.nodes[0].lane === lane) {
+                        let diff = Math.abs(state.gameTime - note.nodes[0].time);
+                        if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
+                    }
+                } else if (note.lane === lane && !note.hit) {
+                    let diff = Math.abs(state.gameTime - note.time);
+                    if (diff < bestDiff) { bestDiff = diff; hitNote = note; }
+                }
+            });
+
+            if (hitNote && bestDiff < 0.25) {
+                hitNote.hit = true;
+                let rating = 'GOOD', scoreEarned = 150, cClass = 'text-amber-400', pColor = 'cyan';
+
+                if (hitNote.type === 'flick') {
+                    pColor = 'pink';
+                    if (bestDiff < 0.08) { rating = 'PERFECT FLICK'; scoreEarned = 400; cClass = 'text-pink-400 neon-text-pink'; state.perfects++; } 
+                    else if (bestDiff < 0.15) { rating = 'GREAT FLICK'; scoreEarned = 280; cClass = 'text-purple-400'; }
+                } else {
+                    if (bestDiff < 0.06) { rating = 'PERFECT'; scoreEarned = 350; cClass = 'text-cyan-400 neon-text-cyan'; state.perfects++; } 
+                    else if (bestDiff < 0.12) { rating = 'GREAT'; scoreEarned = 250; cClass = 'text-emerald-400'; }
+                }
+
+                if (hitNote.type === 'slide') {
+                    pColor = 'green'; hitNote.active = true; state.activeHolds[lane] = hitNote;
+                } else { hitNote.cleanup = true; }
+
+                window.spawnParticles(lane, pColor);
+                state.combo++; if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+                state.score += scoreEarned;
+                window.displayRating(rating, cClass); window.updateScoreboard();
+            }
+        };
+
+        window.triggerRelease = function(lane) {
+            if (!state.gameActive) return;
+            let activeSlide = state.activeHolds[lane];
+            if (activeSlide) {
+                const endTime = activeSlide.nodes[activeSlide.nodes.length-1].time;
+                const diff = Math.abs(state.gameTime - endTime);
+
+                activeSlide.active = false; activeSlide.cleanup = true; state.activeHolds[lane] = null;
+                let rating = 'MISS', scoreEarned = 0, cClass = 'text-red-500';
+
+                if (diff < 0.25) {
+                    if (diff < 0.1) { rating = 'PERFECT'; scoreEarned = 300; cClass = 'text-emerald-400 neon-text-cyan'; state.perfects++; }
+                    else { rating = 'GREAT'; scoreEarned = 200; cClass = 'text-teal-400'; }
+                    state.combo++; state.score += scoreEarned; window.spawnParticles(lane, 'green');
+                } else { state.combo = 0; }
+                window.displayRating(rating, cClass); window.updateScoreboard();
+            }
+        };
+
+        window.displayRating = function(text, colorClass) {
+            const popup = document.getElementById('rating-popup');
+            popup.innerText = text; popup.classList.remove('rating-pop-anim'); void popup.offsetWidth; 
+            popup.className = `absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider font-mono ${colorClass} z-30 pointer-events-none rating-pop-anim`;
+            
+            const comboContainer = document.getElementById('combo-popup');
+            if (state.combo > 0) {
+                document.getElementById('combo-count').innerText = state.combo;
+                comboContainer.classList.remove('hidden'); comboContainer.classList.add('flex');
+                comboContainer.classList.remove('combo-bounce'); void comboContainer.offsetWidth; comboContainer.classList.add('combo-bounce');
+            } else {
+                comboContainer.classList.add('hidden'); comboContainer.classList.remove('flex');
+            }
+        };
+
+        window.updateScoreboard = function() {
+            document.getElementById('game-score-self').innerText = state.score.toLocaleString('ja-JP', { minimumIntegerDigits: 7 }).replace(/,/g, '');
+            const oppVal = document.getElementById('opponent-level').value;
+            if (oppVal === 'solo' && !state.isOnline) return;
+
+            document.getElementById('opponent-combo').innerText = state.opponentCombo;
+            const sum = (state.score + state.opponentScore) || 1;
+            const selfPercent = Math.max(10, Math.min(90, (state.score / sum) * 100));
+            document.getElementById('versus-progress-self').style.width = `${selfPercent}%`;
+            document.getElementById('versus-progress-opponent').style.width = `${100 - selfPercent}%`;
+
+            const statusText = document.getElementById('vs-leading-status');
+            if (Math.abs(state.score - state.opponentScore) < 500) { statusText.innerText = "DRAW"; statusText.className = "text-yellow-400 font-bold uppercase tracking-wider"; } 
+            else if (state.score > state.opponentScore) { statusText.innerText = "YOU LEAD!"; statusText.className = "text-cyan-400 font-bold uppercase tracking-wider neon-text-cyan"; } 
+            else { statusText.innerText = "RIVAL LEADS"; statusText.className = "text-pink-400 font-bold uppercase tracking-wider neon-text-pink"; }
+        };
+
+        let oppSimTimer = 0;
+        window.simulateOpponentTurn = function(dt) {
+            oppSimTimer += dt;
+            if (oppSimTimer > 0.15) {
+                oppSimTimer = 0;
+                const oppData = opponentPresets[document.getElementById('opponent-level').value] || opponentPresets.pro;
+                if (Math.random() < 0.2) { 
+                    const isMiss = Math.random() < oppData.missProbability;
+                    if (isMiss) { state.opponentCombo = 0; document.getElementById('opponent-last-judge').innerText = "MISS"; document.getElementById('opponent-last-judge').className = "text-red-500 font-bold text-[10px]"; } 
+                    else {
+                        state.opponentCombo++; if (state.opponentCombo > state.maxOpponentCombo) state.maxOpponentCombo = state.opponentCombo;
+                        const isPerfect = Math.random() < oppData.perfectProbability; const scoreBase = isPerfect ? 350 : 250;
+                        state.opponentScore += Math.floor(scoreBase * oppData.scoreMultiplier);
+                        document.getElementById('opponent-last-judge').innerText = isPerfect ? "PERFECT" : "GREAT"; document.getElementById('opponent-last-judge').className = isPerfect ? "text-cyan-400 font-bold text-[10px]" : "text-emerald-400 font-bold text-[10px]";
+                    }
+                    window.updateScoreboard();
+                }
+            }
+        };
+
+        window.startScoreSync = function() {
+            if (!state.roomId || !window.firebaseManager) return;
+            state.scoreSyncInterval = setInterval(() => {
+                window.firebaseManager.updateRoomScore(state.roomId, state.isHost, state.score, state.combo);
+            }, 1000); 
+        };
+
+        window.abortGame = function() {
+            state.gameActive = false;
+            cancelAnimationFrame(state.animationFrameId);
+            if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
+            if (state.scoreSyncInterval) { clearInterval(state.scoreSyncInterval); state.scoreSyncInterval = null; }
             
             document.getElementById('game-hitboxes').classList.add('hidden'); 
-            document.getElementById('notes-container').innerHTML = '';
-            document.getElementById('slide-layer').innerHTML = '';
-            restoreLobbyUI();
-            gameActive = false;
-            playPreview(originalSongs[currentSongIndex]); 
-        }
+            document.getElementById('notes-container').innerHTML = ''; document.getElementById('slide-layer').innerHTML = '';
+            
+            const overlay = document.getElementById('game-lobby-overlay'); overlay.classList.remove('hidden'); setTimeout(()=> overlay.classList.remove('opacity-0'), 50);
+            document.getElementById('lobby-panel').classList.remove('hidden'); document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('game-arena-panel').classList.remove('w-full'); document.getElementById('game-arena-panel').classList.add('lg:w-2/3');
+            
+            window.playPreview(window.originalSongs[state.currentSongIndex]); 
+        };
 
-        function restoreLobbyUI() {
-            const overlay = document.getElementById('game-lobby-overlay');
-            overlay.classList.remove('hidden');
-            setTimeout(()=> overlay.classList.remove('opacity-0'), 50);
-
-            document.getElementById('lobby-panel').classList.remove('hidden');
-            document.getElementById('main-header').classList.remove('hidden');
-            document.getElementById('game-arena-panel').classList.remove('w-full');
-            document.getElementById('game-arena-panel').classList.add('lg:w-2/3');
-        }
-
-        function finishGameMatch() {
-            clearInterval(gameInterval); clearInterval(bpmIntervalId);
-            gameActive = false;
-            if (currentAudio) currentAudio.pause();
-            if (window.stopScoreSync) window.stopScoreSync();
+        window.finishGameMatch = function() {
+            state.gameActive = false;
+            cancelAnimationFrame(state.animationFrameId);
+            if (state.audioContext) state.audioContext.pause();
+            if (state.scoreSyncInterval) { clearInterval(state.scoreSyncInterval); state.scoreSyncInterval = null; }
             
             document.getElementById('game-hitboxes').classList.add('hidden');
-            const overlay = document.getElementById('results-overlay');
-            overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            const overlay = document.getElementById('results-overlay'); overlay.classList.remove('hidden'); overlay.classList.add('flex');
 
-            const perfectRate = totalPlayableNotes > 0 ? Math.floor((perfectsSelf / totalPlayableNotes) * 100) : 0;
-            document.getElementById('results-solo-score').innerText = scoreSelf.toLocaleString();
-            document.getElementById('results-solo-combo').innerText = maxComboSelf;
+            const perfectRate = state.totalNotes > 0 ? Math.floor((state.perfects / state.totalNotes) * 100) : 0;
+            document.getElementById('results-solo-score').innerText = state.score.toLocaleString();
+            document.getElementById('results-solo-combo').innerText = state.maxCombo;
             document.getElementById('results-solo-perfect-rate').innerText = `${perfectRate}%`;
 
             let rank = "D", color = "text-slate-500", icon = "⭐";
@@ -1590,66 +1482,66 @@
             else if(perfectRate >= 70) { rank = "A RANK"; color = "text-emerald-400"; icon = "🔥"; }
             else if(perfectRate >= 50) { rank = "B RANK"; color = "text-yellow-400"; icon = "👍"; }
 
-            document.getElementById('results-solo-rank').innerText = rank;
-            document.getElementById('results-solo-rank').className = `font-extrabold text-sm tracking-widest ${color}`;
+            document.getElementById('results-solo-rank').innerText = rank; document.getElementById('results-solo-rank').className = `font-extrabold text-sm tracking-widest ${color}`;
             document.getElementById('win-lose-icon').innerText = icon;
 
-            // Online Score sync
-            const song = originalSongs[currentSongIndex];
-            const diff = document.getElementById('player-difficulty').value;
-            const key = `${song.id}_${diff}`;
-            const prevHigh = saveData.highScores[key] || 0;
+            // Save High Score
+            const song = window.originalSongs[state.currentSongIndex]; const diff = document.getElementById('player-difficulty').value; const key = `${song.id}_${diff}`;
+            const saved = JSON.parse(localStorage.getItem('songverseData'));
+            const prevHigh = saved?.highScores?.[key] || 0;
             
             const badges = [document.getElementById('new-record-badge'), document.getElementById('new-record-badge-solo')];
-            if (scoreSelf > prevHigh) {
-                saveData.highScores[key] = scoreSelf;
-                saveDataToStorage();
+            if (state.score > prevHigh) {
+                let currentSaved = JSON.parse(localStorage.getItem('songverseData')) || window.saveData;
+                if(!currentSaved.highScores) currentSaved.highScores = {};
+                currentSaved.highScores[key] = state.score;
+                localStorage.setItem('songverseData', JSON.stringify(currentSaved));
                 badges.forEach(b => { if(b) b.classList.remove('hidden'); });
             } else {
                 badges.forEach(b => { if(b) b.classList.add('hidden'); });
             }
 
-            if (window.publishScoreToOnline && scoreSelf > 0) {
-                window.publishScoreToOnline(song.id, diff, scoreSelf, maxComboSelf, playerProfile.username);
+            if (window.firebaseManager && state.score > 0) {
+                window.firebaseManager.publishScore(song.id, diff, state.score, state.maxCombo, window.playerProfile.username);
             }
+        };
+
+        window.closeResults = function() { window.abortGame(); document.getElementById('results-overlay').classList.add('hidden'); document.getElementById('results-overlay').classList.remove('flex'); }
+        window.restartMatchWithSameSetup = function() { 
+            document.getElementById('results-overlay').classList.add('hidden'); document.getElementById('results-overlay').classList.remove('flex'); 
+            if(state.isOnline) { window.createRoomOnline(); } else { window.startLocalMatch(); }
         }
 
-        function closeResults() { 
-            abortGame(); 
-            document.getElementById('results-overlay').classList.add('hidden'); 
-            document.getElementById('results-overlay').classList.remove('flex'); 
-        }
-
-        function restartMatchWithSameSetup() { 
-            document.getElementById('results-overlay').classList.add('hidden'); 
-            document.getElementById('results-overlay').classList.remove('flex'); 
-            if(selectedOpponentPreset === 'online') {
-                window.createRoomOnline(); 
-            } else {
-                startLocalMatch(); 
-            }
-        }
-
-        // INIT TRIGGER
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", () => {
-                loadData();
-                playerProfile = { ...saveData.profile };
+        // Apply Input Listeners to Hitboxes explicitly
+        document.addEventListener("DOMContentLoaded", () => {
+            const bindTouch = (id, lane) => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.addEventListener('mousedown', (e) => { e.preventDefault(); window.triggerTap(lane); });
+                    el.addEventListener('touchstart', (e) => { e.preventDefault(); window.triggerTap(lane); }, {passive: false});
+                    el.addEventListener('mouseup', (e) => { e.preventDefault(); window.triggerRelease(lane); });
+                    el.addEventListener('touchend', (e) => { e.preventDefault(); window.triggerRelease(lane); });
+                    el.addEventListener('mouseleave', (e) => { e.preventDefault(); window.triggerRelease(lane); });
+                    el.addEventListener('touchcancel', (e) => { e.preventDefault(); window.triggerRelease(lane); });
+                }
+            };
+            for(let i=0; i<4; i++) bindTouch(`hitbox-${i}`, i);
+            
+            // Safe Load sequence
+            setTimeout(() => {
+                window.loadData();
+                window.syncProfileUI();
+                
                 const diffElem = document.getElementById('player-difficulty');
-                if(diffElem) diffElem.value = saveData.lastDifficulty || 'easy';
-                syncProfileUI();
-                renderSongList();
-                updateSelectedSong(0);
-            });
-        } else {
-            loadData();
-            playerProfile = { ...saveData.profile };
-            const diffElem = document.getElementById('player-difficulty');
-            if(diffElem) diffElem.value = saveData.lastDifficulty || 'easy';
-            syncProfileUI();
-            renderSongList();
-            updateSelectedSong(0);
-        }
+                if(diffElem) {
+                    const savedData = JSON.parse(localStorage.getItem('songverseData'));
+                    diffElem.value = savedData?.lastDifficulty || 'easy';
+                }
+                
+                window.renderSongList();
+                window.updateSelectedSong(0);
+            }, 100);
+        });
     </script>
 </body>
 </html>
