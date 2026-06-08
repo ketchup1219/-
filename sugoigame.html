@@ -2,28 +2,20 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- 📱 スマホの画面の横幅にピッタリ合わせるための魔法の設定だよ！ -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="すごいゲーム">
-    <link rel="apple-touch-icon" href="kusanukiaikon.png">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>おれたちの最強RPG - ホーム</title>
     <style>
         /* =========================================================
-           🎨 ゲーム全体のデザイン（超リッチなテクスチャに強化！）
+           🎨 ゲーム全体のデザイン
            ========================================================= */
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
             background-color: #050508; 
-            
             background-image: url('kazinhakei.png'); 
             background-size: cover; 
             background-position: center; 
             background-repeat: no-repeat; 
             background-attachment: fixed; 
-            
             color: #e0e0e0; 
             margin: 0;
             padding: 0;
@@ -81,17 +73,8 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 5px rgba(0,0,0,0.5);
         }
 
-        .back-btn { 
-            background: linear-gradient(to bottom, #e43f5a, #1b1b2f); 
-            color: #ffffff;
-            border-color: #ff416c;
-        }
-
-        .story-btn { 
-            background: linear-gradient(to bottom, #4ecca3, #232931); 
-            color: #ffffff;
-            border-color: #38ef7d;
-        }
+        .back-btn { background: linear-gradient(to bottom, #e43f5a, #1b1b2f); color: #ffffff; border-color: #ff416c; }
+        .story-btn { background: linear-gradient(to bottom, #4ecca3, #232931); color: #ffffff; border-color: #38ef7d; }
 
         .status-box {
             background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(15, 15, 25, 0.9));
@@ -102,39 +85,18 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
         }
 
-        .status-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 10px 0;
-            font-size: 16px;
-        }
+        .status-item { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; font-size: 16px; }
 
-        .fossil-icon {
-            width: 72px; 
-            height: 72px; 
-            vertical-align: middle;
-            margin-right: 12px;
-            object-fit: contain;
-            border-radius: 8px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
+        .fossil-icon { width: 72px; height: 72px; vertical-align: middle; margin-right: 12px; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
         .item-list { list-style: none; padding: 0; }
         .item-list li {
             background: linear-gradient(to right, rgba(22, 36, 71, 0.9), rgba(15, 25, 50, 0.9));
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border-left: 5px solid #66fcf1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            cursor: pointer;
+            padding: 12px; margin: 10px 0; border-radius: 8px; border-left: 5px solid #66fcf1;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4); cursor: pointer;
         }
 
-        /* ✨ 選択したキャラクターが水色に点滅する特別なアニメーション！ */
         @keyframes blink-cyan {
             0% { box-shadow: 0 0 5px #00b4db, inset 0 0 5px #00b4db; border-color: #00b4db; }
             50% { box-shadow: 0 0 20px #66fcf1, inset 0 0 15px #66fcf1; border-color: #66fcf1; }
@@ -146,96 +108,47 @@
             border-left-width: 8px !important;
         }
 
-        /* 👥 パーティ編成用の4つのスロットデザイン */
-        .party-slots-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            gap: 5px;
-        }
+        .party-slots-container { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px; }
         .party-slot {
-            flex: 1;
-            aspect-ratio: 1 / 1.1;
-            background: rgba(10, 15, 30, 0.8);
-            border: 2px dashed #45f3ff;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            text-align: center;
-            padding: 5px;
-            box-sizing: border-box;
-            transition: all 0.2s;
+            flex: 1; aspect-ratio: 1 / 1.1; background: rgba(10, 15, 30, 0.8);
+            border: 2px dashed #45f3ff; border-radius: 10px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; cursor: pointer; text-align: center;
+            padding: 5px; box-sizing: border-box; transition: all 0.2s;
         }
         .party-slot:active { transform: scale(0.95); }
         .party-slot.filled {
-            border-style: solid;
-            background: linear-gradient(135deg, rgba(22, 36, 71, 0.9), rgba(15, 25, 50, 0.9));
+            border-style: solid; background: linear-gradient(135deg, rgba(22, 36, 71, 0.9), rgba(15, 25, 50, 0.9));
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
 
         #custom-alert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%;
-            max-width: 380px;
-            background: linear-gradient(135deg, #1f2833, #0b0c10);
-            border: 2px solid #66fcf1;
-            border-radius: 15px;
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(102, 252, 241, 0.2);
-            text-align: center;
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 380px; background: linear-gradient(135deg, #1f2833, #0b0c10);
+            border: 2px solid #66fcf1; border-radius: 15px; padding: 20px; z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(102, 252, 241, 0.2); text-align: center;
         }
         #alert-message-box {
-            max-height: 280px;
-            overflow-y: auto;
-            margin: 15px 0;
-            padding: 10px;
-            text-align: left;
-            background: rgba(0,0,0,0.4);
-            border-radius: 8px;
-            border: 1px inset #45f3ff;
+            max-height: 280px; overflow-y: auto; margin: 15px 0; padding: 10px; text-align: left;
+            background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px inset #45f3ff;
         }
         #alert-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(3px); 
-            z-index: 999;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); z-index: 999;
         }
 
         #weapon-select-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            background: linear-gradient(135deg, #1f2833, #0b0c10);
-            border: 2px solid #f8b500;
-            border-radius: 15px;
-            padding: 20px;
-            z-index: 1001;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(248, 181, 0, 0.2);
-            text-align: center;
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 400px; background: linear-gradient(135deg, #1f2833, #0b0c10);
+            border: 2px solid #f8b500; border-radius: 15px; padding: 20px; z-index: 1001;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(248, 181, 0, 0.2); text-align: center;
         }
-
         .material-item {
             display: flex; justify-content: space-between; align-items: center; 
             background: rgba(22, 36, 71, 0.9); margin: 5px 0; padding: 10px; 
             border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s;
         }
         .material-item.selected {
-            background: rgba(248, 181, 0, 0.2); border-color: #f8b500; 
-            box-shadow: inset 0 0 10px rgba(248, 181, 0, 0.5);
+            background: rgba(248, 181, 0, 0.2); border-color: #f8b500; box-shadow: inset 0 0 10px rgba(248, 181, 0, 0.5);
         }
 
         .probability-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px dashed #444; }
@@ -278,88 +191,68 @@
             flex-direction: column; justify-content: center; align-items: center;
             padding: 30px; box-sizing: border-box; text-align: center; overflow: hidden;
         }
-        
         .magic-circle {
-            position: absolute;
-            width: 280px; height: 280px;
-            border: 4px dashed rgba(78, 204, 163, 0.5);
-            border-radius: 50%;
-            animation: spin 6s linear infinite;
-            z-index: 100;
+            position: absolute; width: 280px; height: 280px; border: 4px dashed rgba(78, 204, 163, 0.5);
+            border-radius: 50%; animation: spin 6s linear infinite; z-index: 100;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
         .gacha-orb {
             width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle, #4ecca3 0%, rgba(78,204,163,0) 70%);
-            box-shadow: 0 0 30px #4ecca3;
-            animation: orbPulse 1.5s infinite alternate;
+            box-shadow: 0 0 30px #4ecca3; animation: orbPulse 1.5s infinite alternate;
             margin-bottom: 30px; position: relative; z-index: 101;
         }
-        @keyframes orbPulse {
-            0% { transform: scale(0.9); box-shadow: 0 0 20px #4ecca3; }
-            100% { transform: scale(1.1); box-shadow: 0 0 55px #4ecca3; }
-        }
-
-        .magic-circle.rainbow {
-            border: 6px dashed #ff007f;
-            box-shadow: 0 0 30px #ffeb3b, inset 0 0 30px #00b4db;
-            animation: spin 1.5s linear infinite reverse; 
-        }
+        @keyframes orbPulse { 0% { transform: scale(0.9); box-shadow: 0 0 20px #4ecca3; } 100% { transform: scale(1.1); box-shadow: 0 0 55px #4ecca3; } }
+        .magic-circle.rainbow { border: 6px dashed #ff007f; box-shadow: 0 0 30px #ffeb3b, inset 0 0 30px #00b4db; animation: spin 1.5s linear infinite reverse; }
         .gacha-orb.rainbow {
             background: radial-gradient(circle, #ffffff 0%, #ffeb3b 30%, #ff007f 60%, rgba(0,180,219,0.8) 100%);
-            box-shadow: 0 0 80px #ff007f, 0 0 50px #ffeb3b;
-            animation: orbRainbowPulse 0.25s infinite alternate;
+            box-shadow: 0 0 80px #ff007f, 0 0 50px #ffeb3b; animation: orbRainbowPulse 0.25s infinite alternate;
         }
         @keyframes orbRainbowPulse {
             0% { transform: scale(1.0) rotate(0deg); box-shadow: 0 0 60px #ff007f, 0 0 30px #ffeb3b; filter: hue-rotate(0deg); }
             100% { transform: scale(1.6) rotate(360deg); box-shadow: 0 0 150px #ffeb3b, 0 0 100px #00b4db, 0 0 200px #ff007f; filter: hue-rotate(360deg); }
         }
-
         .gacha-orb.explode { animation: orbExplode 0.6s forwards !important; }
-        @keyframes orbExplode {
-            0% { transform: scale(1.5); filter: brightness(1); opacity: 1; }
-            50% { transform: scale(30); filter: brightness(3); opacity: 1; }
-            100% { transform: scale(50); filter: brightness(5); opacity: 0; background: white;} 
-        }
-
+        @keyframes orbExplode { 0% { transform: scale(1.5); filter: brightness(1); opacity: 1; } 50% { transform: scale(30); filter: brightness(3); opacity: 1; } 100% { transform: scale(50); filter: brightness(5); opacity: 0; background: white;} }
         .flash-bg { animation: flashScreen 0.1s infinite alternate !important; }
-        @keyframes flashScreen {
-            0% { background-color: #0b0c10; }
-            100% { background-color: rgba(255, 255, 255, 0.5); } 
-        }
-
+        @keyframes flashScreen { 0% { background-color: #0b0c10; } 100% { background-color: rgba(255, 255, 255, 0.5); } }
         .screen-shake { animation: heavyShake 0.1s infinite !important; }
         @keyframes heavyShake {
-            0% { transform: translate(6px, 6px) rotate(0deg); }
-            20% { transform: translate(-6px, -6px) rotate(-1deg); }
-            40% { transform: translate(-6px, 6px) rotate(1deg); }
-            60% { transform: translate(6px, -6px) rotate(-2deg); }
-            80% { transform: translate(6px, 6px) rotate(2deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
+            0% { transform: translate(6px, 6px) rotate(0deg); } 20% { transform: translate(-6px, -6px) rotate(-1deg); }
+            40% { transform: translate(-6px, 6px) rotate(1deg); } 60% { transform: translate(6px, -6px) rotate(-2deg); }
+            80% { transform: translate(6px, 6px) rotate(2deg); } 100% { transform: translate(0, 0) rotate(0deg); }
         }
-
-        .shake-text {
-            animation: textShake 0.1s infinite;
-            text-shadow: 0 0 20px #ffeb3b, 0 0 10px #ff007f !important;
-        }
+        .shake-text { animation: textShake 0.1s infinite; text-shadow: 0 0 20px #ffeb3b, 0 0 10px #ff007f !important; }
         @keyframes textShake {
-            0% { transform: translate(3px, 1px) scale(1.2); }
-            25% { transform: translate(-3px, -2px) scale(1.2); }
-            50% { transform: translate(0px, 3px) scale(1.2); }
-            75% { transform: translate(-2px, -1px) scale(1.2); }
+            0% { transform: translate(3px, 1px) scale(1.2); } 25% { transform: translate(-3px, -2px) scale(1.2); }
+            50% { transform: translate(0px, 3px) scale(1.2); } 75% { transform: translate(-2px, -1px) scale(1.2); }
             100% { transform: translate(2px, 2px) scale(1.2); }
         }
-
         .gacha-progress-bar { width: 80%; height: 12px; background-color: #111; border-radius: 6px; overflow: hidden; border: 1px solid #66fcf1; margin-top: 15px; z-index: 101; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
         .gacha-progress-fill { height: 100%; width: 0%; background: linear-gradient(45deg, #66fcf1, #4ecca3); transition: width 0.1s linear; }
         .gacha-progress-fill.rainbow { background: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db, #38ef7d); }
 
+        /* =========================================================
+           🔨 合体演出画面（2秒間のドキドキ限界突破！）
+           ========================================================= */
+        #combine-animation-screen {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(5, 5, 10, 0.95); border-radius: 17px; z-index: 105;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .combine-spark {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: radial-gradient(circle, #f8b500 0%, rgba(248, 181, 0, 0) 70%);
+            box-shadow: 0 0 30px #f8b500; animation: combinePulse 0.4s infinite alternate; margin-bottom: 20px;
+        }
+        @keyframes combinePulse { 
+            0% { transform: scale(0.8) rotate(0deg); box-shadow: 0 0 15px #f8b500; } 
+            100% { transform: scale(1.3) rotate(180deg); box-shadow: 0 0 60px #ff007f, 0 0 30px #f8b500; } 
+        }
     </style>
 </head>
 <body>
 
-<!-- 💬 ポップアップ -->
 <div id="alert-overlay"></div>
 <div id="custom-alert">
     <h3 id="alert-title" style="margin-top: 0;">おしらせ</h3>
@@ -373,7 +266,7 @@
 <div id="weapon-select-modal">
     <h3 style="color: #ffeb3b; margin-top: 0;">合体する素材をえらぶ</h3>
     <p id="combine-info-text" style="font-size: 13px; color: #66fcf1; margin-bottom: 5px; font-weight: bold;">あと ◯ 個 選べるよ！</p>
-    <p style="font-size: 11px; color: #ccc; margin-top:0; margin-bottom: 10px;">※タップして素材を選んでね。<span style="color:#ff5555;">選んだ装備は消えてなくなります！</span></p>
+    <p style="font-size: 11px; color: #ccc; margin-top:0; margin-bottom: 10px;">※タップして素材を選んでね。<span style="color:#ff5555;">選んだ装備は消えます！</span></p>
     <ul id="material-list" class="item-list" style="max-height: 200px; overflow-y: auto; text-align: left; padding: 5px;"></ul>
     <button id="btn-execute-combine" onclick="confirmCombineSelection()" style="margin-top: 15px; background: linear-gradient(45deg, #ffeb3b, #f8b500); border-color: #ffeb3b; color: #1f2833; padding: 12px; font-size: 16px;">✅ 決定して合体！</button>
     <button onclick="closeCombineSelectModal()" style="margin-top: 5px; background: #333; border-color: #555; color: #aaa; padding: 8px;">やめる</button>
@@ -385,14 +278,20 @@
     <div id="gacha-animation-screen" style="display: none;">
         <h2 id="gacha-anim-title" style="color: #66fcf1; margin-bottom: 10px; transition: all 0.3s; z-index: 101;">草核の祈り...</h2>
         <p id="gacha-anim-text" style="color: #ccc; font-size: 14px; margin-bottom: 30px; z-index: 101;">大自然のエネルギーが集まっています</p>
-        
         <div id="gacha-magic-circle" class="magic-circle"></div>
         <div id="gacha-orb" class="gacha-orb"></div>
-        
         <div class="gacha-progress-bar">
             <div id="gacha-progress-fill" class="gacha-progress-fill"></div>
         </div>
         <p style="font-size: 11px; color: #888; margin-top: 10px; z-index: 101;">※ガチャを引いています。ページを閉じないでね</p>
+    </div>
+
+    <!-- 🔨 合体演出画面 -->
+    <div id="combine-animation-screen" style="display: none;">
+        <h2 style="color: #f8b500; text-shadow: 0 0 10px #f8b500;">🌀 装備合体中... 🌀</h2>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">限界を突破して新しい力を引き出しています！</p>
+        <div class="combine-spark"></div>
+        <p style="font-size: 12px; color: #66fcf1; animation: blink-cyan 0.8s infinite alternate;">SPARKING!!!</p>
     </div>
 
     <!-- =========================================================
@@ -476,21 +375,20 @@
     </div>
 
     <!-- =========================================================
-       ③ キャラクター一覧画面（最大4人のパーティ編成ができるよ！）
+       ③ キャラクター一覧画面
        ========================================================= -->
     <div id="screen-party" class="screen">
         <h2>👥 キャラクター一覧</h2>
         
         <h3 style="font-size: 14px; text-align: left; margin-bottom: 5px;">現在のパーティ (最大4人)</h3>
-        <div class="party-slots-container" id="party-slots-container">
-        </div>
+        <div class="party-slots-container" id="party-slots-container"></div>
         
         <div class="status-box" id="char-detail-box" style="border-color: #00b4db; background: linear-gradient(135deg, rgba(15, 25, 40, 0.9), rgba(5, 10, 20, 0.9)); min-height: 100px;">
             <p style="text-align: center; color: #777; font-size: 12px; margin-top: 30px;">キャラをタップして詳細を確認しよう！</p>
         </div>
         
         <h3 style="font-size: 14px; text-align: left; margin-bottom: 5px;">持っているキャラ一覧</h3>
-        <p style="font-size: 11px; color: #aaa; margin-top: 0;">※キャラをタップして詳細を見るか、空き枠に編成しよう！</p>
+        <p style="font-size: 11px; color: #aaa; margin-top: 0;">※キャラをタップして詳細画面から進化させよう！</p>
         <ul id="character-list" class="item-list"></ul>
         <button class="back-btn" onclick="changeScreen('home')">ホームへ戻る</button>
     </div>
@@ -501,7 +399,6 @@
     <div id="screen-equip" class="screen">
         <h2>🛡️ 装備の変更・合体</h2>
         
-        <!-- 装備状態一覧 -->
         <div class="status-box" style="font-size: 12px; padding: 10px;">
             <p style="margin: 0 0 5px 0; color: #66fcf1; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px;">現在のそうび一覧</p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
@@ -657,10 +554,9 @@
 // 🎵 効果音（サウンド）の準備！
 // ---------------------------------------------------------
 const clickSound = new Audio('4.mp3');
-const startSound = new Audio('始まるよ～.mp3'); // 🎮 「ゲームをはじめる」を押したときの音
-const jackpotSound = new Audio('大当たり～.mp3'); // 🌟 星5が出たときの確定演出の音
+const startSound = new Audio('始まるよ～.mp3'); 
+const jackpotSound = new Audio('大当たり～.mp3'); 
 
-// 画面のどこでも、ボタンなどを押したら基本のクリック音（4.mp3）が鳴る魔法！
 document.addEventListener('click', function(e) {
     if(e.target.closest('button') || e.target.closest('.gacha-banner') || e.target.closest('.party-slot') || e.target.closest('.item-list li')) {
         clickSound.currentTime = 0; 
@@ -668,9 +564,8 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 🎮 「ゲームをはじめる」ボタン専用の機能
 function startGame(event) {
-    if(event) event.stopPropagation(); // 基本のクリック音が重なって鳴るのを防ぐよ
+    if(event) event.stopPropagation(); 
     startSound.currentTime = 0;
     startSound.play().catch(err => { console.log('開始音の再生がブロックされました', err); });
     changeScreen('home');
@@ -690,7 +585,30 @@ const categoryNames = {
 };
 
 // =========================================================================
-// 📂 キャラクターマスターデータ（ストーリーで仲間になるキャラたち！）
+// 👥 キャラクターの進化ルート（別のキャラへ進化する設定！）
+// =========================================================================
+const evolutionPaths = {
+    "c_hero": { nextId: "c_tona", cost: 10, hp: 550, attack: 55, defense: 35 },
+    "c_tona": { nextId: "c_seimaro", cost: 15, hp: 600, attack: 60, defense: 40 },
+    "c_seimaro": { nextId: "c_kazuking", cost: 20, hp: 650, attack: 65, defense: 45 },
+    "c_kazuking": { nextId: "c_gigant", cost: 25, hp: 700, attack: 70, defense: 50 },
+    "c_gigant": { nextId: "c_rampage", cost: 30, hp: 750, attack: 75, defense: 55 },
+    "c_rampage": { nextId: "c_zen", cost: 35, hp: 800, attack: 80, defense: 60 },
+    "c_zen": { nextId: "c_hiiro", cost: 40, hp: 850, attack: 85, defense: 65 },
+    "c_hiiro": { nextId: "c_ketchup", cost: 45, hp: 900, attack: 90, defense: 70 },
+    "c_ketchup": { nextId: "c_contra", cost: 50, hp: 950, attack: 95, defense: 75 },
+    "c_contra": { nextId: "c_takaking", cost: 55, hp: 1000, attack: 100, defense: 80 },
+    "c_takaking": { nextId: "c_huh", cost: 60, hp: 1100, attack: 110, defense: 90 }
+};
+
+function getCharNameById(id) {
+    if (id === "c_hero") return "勇者";
+    let found = characterMaster.find(c => c.id === id);
+    return found ? found.name : "未知の存在";
+}
+
+// =========================================================================
+// 📂 キャラクターマスターデータ
 // =========================================================================
 let characterMaster = [
     { id: "c_tona", name: "とな", hp: 500, attack: 50, defense: 30 },
@@ -707,27 +625,20 @@ let characterMaster = [
 ];
 
 // =========================================================================
-// 📂 武器マスターデータ
+// 📂 武器マスターデータ（星から上限レベルを計算するよ！）
 // =========================================================================
 let weaponMaster = [
-    // 🟩 星1武器
     { id: "w_hino", name: "★1 ひのきの棒", category: "weapon", bonus: 10, isGacha: true, weight: 200 },
     { id: "w_wood", name: "★1 木の剣", category: "weapon", bonus: 15, isGacha: true, weight: 150 },
     { id: "w_bronze", name: "★1 銅のつるぎ", category: "weapon", bonus: 22, isGacha: true, weight: 120 },
     { id: "w_iron", name: "★1 鉄のつるぎ", category: "weapon", bonus: 32, isGacha: true, weight: 80 },
     { id: "w_gold_mu", name: "★1 金のつるぎ", category: "weapon", bonus: 45, isGacha: false },
     { id: "w_stone", name: "★1 石のつるぎ", category: "weapon", bonus: 25, isGacha: true, weight: 100 },
-
-    // 🟨 星2武器
     { id: "w_steel", name: "★2 鋼のつるぎ", category: "weapon", bonus: 60, isGacha: true, weight: 40 },
     { id: "w_plat", name: "★2 プラチナソード", category: "weapon", bonus: 85, isGacha: true, weight: 25 },
     { id: "w_soldier_mu", name: "★2 戦士の剣", category: "weapon", bonus: 100, isGacha: false },
-
-    // 🟦 星3武器
     { id: "w_dia", name: "★3 ダイヤのつるぎ", category: "weapon", bonus: 150, isGacha: true, weight: 10 },
     { id: "w_obs", name: "★3 黒曜石のつるぎ", category: "weapon", bonus: 180, isGacha: true, weight: 8 },
-
-    // 🟧 星4武器
     { id: "w_fire_mu", name: "★4 火のつるぎ", category: "weapon", bonus: 210, isGacha: false },
     { id: "w_ice_mu", name: "★4 氷のつるぎ", category: "weapon", bonus: 210, isGacha: false },
     { id: "w_wind_mu", name: "★4 風のつるぎ", category: "weapon", bonus: 210, isGacha: false },
@@ -736,8 +647,6 @@ let weaponMaster = [
     { id: "w_star_mu", name: "★4 星のつるぎ", category: "weapon", bonus: 230, isGacha: false },
     { id: "w_shining_mu", name: "★4 ひかりのつるぎ", category: "weapon", bonus: 250, isGacha: false },
     { id: "w_dark_mu", name: "★4 やみのつるぎ", category: "weapon", bonus: 250, isGacha: false },
-
-    // 🟥 星5武器
     { id: "w_excal", name: "★5 エクスカリバー", category: "weapon", bonus: 300, isGacha: true, weight: 2 },
     { id: "w_blaze_mu", name: "★5 炎のつるぎ", category: "weapon", bonus: 320, isGacha: false },
     { id: "w_frost_mu", name: "★5 氷花のつるぎ", category: "weapon", bonus: 320, isGacha: false },
@@ -753,8 +662,6 @@ let weaponMaster = [
     { id: "w_miracle_mu", name: "★5 きせきのつるぎ", category: "weapon", bonus: 380, isGacha: false },
     { id: "w_gold_sword_mu", name: "★5 黄金のつるぎ", category: "weapon", bonus: 370, isGacha: false },
     { id: "w_life_mu", name: "★5 命のつるぎ", category: "weapon", bonus: 400, isGacha: false },
-
-    // 🟪 星6武器
     { id: "w_cross_mu", name: "★6 覇王剣クロスセイバー", category: "weapon", bonus: 500, isGacha: false },
     { id: "w_firedrag_mu", name: "★6 炎龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
     { id: "w_icedrag_mu", name: "★6 氷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
@@ -764,8 +671,6 @@ let weaponMaster = [
     { id: "w_black_mu", name: "★6 漆黒のつるぎ", category: "weapon", bonus: 580, isGacha: false },
     { id: "w_champ_kai_mu", name: "★6 王者の剣改", category: "weapon", bonus: 600, isGacha: false },
     { id: "w_lifedrag_mu", name: "★6 命竜のつるぎ", category: "weapon", bonus: 620, isGacha: false },
-
-    // 👑 星7武器
     { id: "w_firedrag_god_mu", name: "★7 炎龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
     { id: "w_icedrag_god_mu", name: "★7 氷龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
     { id: "w_winddrag_god_mu", name: "★7 風龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
@@ -840,6 +745,25 @@ function isSameWeaponType(weap1, weap2) {
     return getBaseName(weap1.name) === getBaseName(weap2.name);
 }
 
+// 🛡️ 星の数を調べて、最大レベルを計算する魔法！
+function getWeaponStar(name) {
+    let match = name.match(/★(\d)/);
+    if (match) return parseInt(match[1]);
+    return 1; 
+}
+
+// 🛡️ 星に応じて最大レベルを制限するよ！
+function getMaxWeaponLevel(star) {
+    if (star >= 7) return 70;
+    if (star === 6) return 60;
+    return 50; 
+}
+
+// 🌾 レベルに応じて草の化石のコストが少しずつ上がる計算式
+function getUpgradeCost(level) {
+    return 5 + Math.floor(level / 2);
+}
+
 const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2366fcf1" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2366fcf1" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2366fcf1"/></svg>';
 
 // 💾 セーブデータ「sugoigame」
@@ -857,8 +781,9 @@ let saveStatus = {
     ],
     party: ["char_init", null, null, null],
 
+    // ✨ 武器の「レベル(level)」と「限界突破(limitBreak)」を分けた新システム！
     equipments: [
-        { id: "init_weap_1", name: "★1 ひのきの棒", level: 0, bonus: 10, category: "weapon" }
+        { id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" }
     ],
     equipped: {
         weapon: "init_weap_1",
@@ -870,13 +795,16 @@ let tempIconBase64 = "";
 let currentCategoryTab = "weapon"; 
 let selectedCharIndex = 0; 
 
+// =========================================================================
+// 💾 【超安全版】セーブ機能
+// =========================================================================
 function saveGame() {
     try {
         localStorage.setItem('sugoigame', JSON.stringify(saveStatus));
     } catch (e) {
         if (e.name === 'QuotaExceededError') {
             console.warn('容量オーバー！アイコン画像を削除して再試行します。');
-            saveStatus.playerIcon = defaultAvatar; // デフォルトに戻して軽くする！
+            saveStatus.playerIcon = defaultAvatar; 
             try {
                 localStorage.setItem('sugoigame', JSON.stringify(saveStatus));
                 alert('⚠️ スマホのセーブ容量がいっぱいになったため、プロフィール画像を初期化して大切なデータを保存しました！画像は「150KB」くらいまでの軽いものを選んでね。');
@@ -901,12 +829,20 @@ function loadGame() {
         if (saveStatus.lastFreeGachaDate === undefined) saveStatus.lastFreeGachaDate = ""; 
         
         if (saveStatus.equipments === undefined) {
-            saveStatus.equipments = [{ id: "init_weap_1", name: "★1 ひのきの棒", level: 0, bonus: 10, category: "weapon" }];
+            saveStatus.equipments = [{ id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" }];
         }
         if (saveStatus.equipped === undefined || typeof saveStatus.equipped === "string" || typeof saveStatus.equipped === "number") {
             saveStatus.equipped = { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
         }
         
+        // ✨ 古いセーブデータを「新しい武器レベルシステム」に自動で変換して守る魔法！
+        saveStatus.equipments.forEach(eq => {
+            if (eq.limitBreak === undefined) {
+                eq.limitBreak = eq.level || 0; 
+                eq.level = 1; 
+            }
+        });
+
         saveStatus.equipments = saveStatus.equipments.filter(e => e.id !== "init_heart_1");
         if (saveStatus.equipped.heart === "init_heart_1") saveStatus.equipped.heart = null;
         
@@ -1006,7 +942,7 @@ function updateUI() {
             if (eqItem) {
                 eqBonusTotal += eqItem.bonus;
                 let safeName = getBaseName(eqItem.name);
-                if (elCatDisplay) elCatDisplay.innerText = `${safeName} (+${eqItem.level})`;
+                if (elCatDisplay) elCatDisplay.innerHTML = `${safeName} <span style="color:#ffeb3b;">+${eqItem.limitBreak}</span>`;
             } else {
                 if (elCatDisplay) elCatDisplay.innerText = "なし";
             }
@@ -1206,10 +1142,12 @@ function updatePartyScreenUI() {
         let partyIndex = saveStatus.party.indexOf(char.uid);
         let inParty = partyIndex !== -1;
         
-        let btnText = inParty ? "編成中" : "＋編成";
+        let btnText = inParty ? (partyIndex === 0 ? "👑リーダー" : "外す") : "＋編成";
         let btnStyle = inParty 
-            ? "background:rgba(80,80,80,0.8); border-color:#555; color:#aaa; cursor:default;" 
+            ? (partyIndex === 0 ? "background:rgba(248,181,0,0.8); border-color:#f8b500; color:#fff;" : "background:rgba(255,65,108,0.8); border-color:#ff416c; color:#fff;") 
             : "background:linear-gradient(to bottom, #00b4db, #0083b0); border-color:#00b4db; color:#fff;";
+            
+        let onClickAction = inParty ? (partyIndex === 0 ? `showGameAlert('⚠️ 外せません', 'リーダー（1枠目）は絶対に編成から外せないよ！')` : `removeFromParty(${partyIndex})`) : `addToParty('${char.uid}')`;
 
         list.innerHTML += `
             <li class="${itemClass}" style="cursor:pointer;" onclick="selectChar(${index})">
@@ -1218,7 +1156,7 @@ function updatePartyScreenUI() {
                     <span style="font-size: 11px; color: #aaa;">HP:${char.hp} / 攻撃:${totalAtk} / 守備:${totalDef}</span>
                 </div>
                 <div>
-                    <button style="width:70px; margin:2px; padding:8px 6px; font-size:11px; display:inline-block; ${btnStyle}" onclick="event.stopPropagation(); ${inParty ? '' : 'addToParty(\'' + char.uid + '\')'}">${btnText}</button>
+                    <button style="width:70px; margin:2px; padding:8px 6px; font-size:11px; display:inline-block; ${btnStyle}" onclick="event.stopPropagation(); ${onClickAction}">${btnText}</button>
                 </div>
             </li>`;
     });
@@ -1230,6 +1168,13 @@ function updatePartyScreenUI() {
         let isLeader = saveStatus.party[0] === sChar.uid;
         let leaderBadge = isLeader ? '<span style="color:#f8b500; font-weight:bold; font-size:12px; border:1px solid #f8b500; padding:2px 4px; border-radius:4px;">👑リーダー</span>' : '';
         
+        let evoButtonHTML = `
+            <div style="margin-top: 15px; padding: 10px; background: rgba(102, 252, 241, 0.05); border-radius: 10px; border: 1px dashed rgba(102, 252, 241, 0.3); text-align: center;">
+                <p style="margin: 0 0 5px 0; font-size: 13px; color: #66fcf1; font-weight: bold;">🌱 クラスチェンジ進化（準備中）</p>
+                <p style="margin: 0; font-size: 11px; color: #ccc;">キャラクター進化システムは今後のアップデートまで準備中だよ！今のうちに「草の化石」をたくさん貯めておこう！</p>
+            </div>
+        `;
+
         document.getElementById('char-detail-box').innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:12px;">
                 <h3 style="margin:0; color:#ffffff; font-size:18px;">${sChar.name} <span style="font-size:14px; color:#66fcf1;">Lv.${sChar.level}</span></h3>
@@ -1250,6 +1195,7 @@ function updatePartyScreenUI() {
                 </div>
             </div>
             <p style="font-size:10px; color:#777; margin:10px 0 0 0; text-align:right;">(そうびボーナス +${eqBonusTotal} を含む)</p>
+            ${evoButtonHTML}
         `;
     }
 }
@@ -1277,7 +1223,7 @@ function removeFromParty(slotIndex) {
     if (!uid) return;
 
     if (slotIndex === 0) {
-        showGameAlert("⚠️ 外せません", "一番左の「リーダー枠」は外すことができないよ！");
+        showGameAlert("⚠️ 外せません", "リーダー（1枠目）は絶対に編成から外せないよ！");
         return;
     }
 
@@ -1293,7 +1239,7 @@ function removeFromParty(slotIndex) {
 }
 
 // =========================================================
-// 🛡️ 装備管理
+// 🛡️ 装備管理（強化レベル上限機能 ＋ 合体システム！）
 // =========================================================
 function openEquipScreen(category) {
     currentCategoryTab = category;
@@ -1315,7 +1261,10 @@ function openEquipScreen(category) {
     }
     
     filteredEquips.forEach((weap) => {
-        let isEquipped = (saveStatus.equipped[category] === weap.id);
+        let isEquipped = false;
+        for (let cat in saveStatus.equipped) {
+            if (saveStatus.equipped[cat] === weap.id) isEquipped = true;
+        }
         
         let equipBtnText = isEquipped ? "❌はずす" : "装備";
         let equipBtnStyle = isEquipped 
@@ -1324,54 +1273,124 @@ function openEquipScreen(category) {
 
         let sameWeaponsCount = 0;
         saveStatus.equipments.forEach((otherWeap) => {
-            if (otherWeap.id !== weap.id && isSameWeaponType(otherWeap, weap)) {
+            let isOtherEquipped = false;
+            for (let cat in saveStatus.equipped) {
+                if (saveStatus.equipped[cat] === otherWeap.id) isOtherEquipped = true;
+            }
+            if (otherWeap.id !== weap.id && isSameWeaponType(otherWeap, weap) && otherWeap.limitBreak === 0 && !isOtherEquipped) {
                 sameWeaponsCount++;
             }
         });
 
-        let isMaxCombined = (weap.level >= 4);
-        
+        // 限界突破（limitBreak）上限チェック（最大+4）
+        let isMaxCombined = (weap.limitBreak >= 4);
         let combineBtnStyle = (sameWeaponsCount > 0 && !isMaxCombined)
             ? "background: linear-gradient(45deg, #ffeb3b, #f8b500); border-color:#ffeb3b; color:#1f2833;"
             : "background: rgba(50,50,50,0.8); border-color: #444; color: #777; cursor: not-allowed;";
+        let combineAction = isMaxCombined 
+            ? "showGameAlert('👑最大限界突破です', 'この装備はすでに最高ランクの+4まで限界突破しています！')" 
+            : `openCombineSelectModal('${weap.id}')`;
+
+        // 🌾 武器のレベルアップ（草の化石消費）チェック
+        let star = getWeaponStar(weap.name);
+        let maxLevel = getMaxWeaponLevel(star);
+        let isMaxLevel = (weap.level >= maxLevel);
+        
+        // 変動コストの計算！
+        let currentCost = getUpgradeCost(weap.level);
+        
+        let levelUpBtnStyle = isMaxLevel
+            ? "background: rgba(50,50,50,0.8); border-color: #444; color: #777; cursor: not-allowed;"
+            : "";
+        let levelUpAction = isMaxLevel
+            ? "showGameAlert('👑レベルMAX', 'この装備のレベルはすでに上限に達しているよ！')"
+            : `levelUpWeapon('${weap.id}')`;
         
         let safeName = getBaseName(weap.name);
-        let levelText = isMaxCombined ? "最大強化！" : `+${weap.level}`;
+        let levelText = isMaxLevel ? "MAX" : `${weap.level}/${maxLevel}`;
+        let levelCostText = isMaxLevel ? "MAX" : `🌾${currentCost}個`;
         
         list.innerHTML += `
             <li>
                 <div>
-                    <strong>${safeName} <span style="color:#ffeb3b;">${levelText}</span></strong><br>
+                    <strong>${safeName} <span style="color:#ffeb3b;">+${weap.limitBreak}</span></strong> <span style="color:#66fcf1; font-size:12px;">Lv.${levelText}</span><br>
                     効果: 攻撃・守備UP +${weap.bonus}<br>
-                    <span style="font-size:10px; color:#aaa;">(ダブり予備: ${sameWeaponsCount}個)</span>
+                    <span style="font-size:10px; color:#aaa;">(素材にできるダブり: ${sameWeaponsCount}個)</span>
                 </div>
                 <div style="text-align: right;">
-                    <button style="width:110px; margin:2px; padding:6px; font-size:11px; display:inline-block; ${combineBtnStyle}" onclick="${isMaxCombined ? "showGameAlert('👑最大強化状態です', 'この装備はすでに最高ランクの+4まで限界突破しています！')" : `openCombineSelectModal('${weap.id}')`}">🌀装備合体</button>
+                    <!-- 限界突破ボタン -->
+                    <button style="width:110px; margin:2px; padding:6px; font-size:11px; display:inline-block; ${combineBtnStyle}" onclick="${combineAction}">🌀装備合体</button>
+                    <!-- 強化レベルアップボタン（Lvに応じて変動コスト！） -->
+                    <button style="width:110px; margin:2px; padding:6px; font-size:11px; display:inline-block; ${levelUpBtnStyle}" onclick="${levelUpAction}">強化(${levelCostText})</button>
+                    <!-- 装備ボタン -->
                     <button style="width:70px; margin:2px; padding:6px; font-size:11px; display:inline-block; ${equipBtnStyle}" onclick="setWeapon('${weap.id}', '${category}')">${equipBtnText}</button>
                 </div>
             </li>`;
     });
 }
 
+// 🔨 装備のレベルアップ（草の化石を使って強化！）
+function levelUpWeapon(id) {
+    let weap = saveStatus.equipments.find(e => e.id === id);
+    if (!weap) return;
+
+    let star = getWeaponStar(weap.name);
+    let maxLevel = getMaxWeaponLevel(star);
+
+    if (weap.level >= maxLevel) {
+        showGameAlert("👑 最大レベルです", `この装備はレベル${maxLevel}の上限に達しているよ！`);
+        return;
+    }
+
+    // 変動コストを計算！
+    let currentCost = getUpgradeCost(weap.level);
+
+    if (saveStatus.materials < currentCost) {
+        showGameAlert("❌ 素材不足", `「草の化石」が足りないよ！ミッション等で集めよう！<br>(強化には草の化石が <strong>${currentCost}個</strong> 必要だよ)`);
+        return;
+    }
+
+    saveStatus.materials -= currentCost; 
+    weap.level += 1; 
+    weap.bonus += 10; 
+    
+    let safeName = getBaseName(weap.name);
+    showGameAlert("🔨 強化せいこう！", `<strong>${safeName}</strong> を強化して <span style="color:#66fcf1; font-weight:bold;">Lv.${weap.level}</span> にした！ステータスが 10 上がったぞ！`);
+    saveGame();
+    openEquipScreen(currentCategoryTab);
+}
+
+// 🌀 ===========================================
+//    合体素材の【複数選択システム】(バグ修正版！)
+// ==============================================
 let currentCombineBaseId = ""; 
 let selectedMaterials = []; 
 let maxSelectableCount = 0; 
+let materialsToCombine = []; // 合体本番用の避難所
 
 function openCombineSelectModal(baseId) {
     let baseWeap = saveStatus.equipments.find(e => e.id === baseId);
     if (!baseWeap) return;
 
-    let materials = saveStatus.equipments.filter(e => e.id !== baseId && isSameWeaponType(e, baseWeap));
+    // 自分自身ではなく、全く同じ種類の武器だけを「素材候補リスト」に集めるよ！
+    let materials = saveStatus.equipments.filter(e => {
+        let isEquipped = false;
+        for (let cat in saveStatus.equipped) {
+            if (saveStatus.equipped[cat] === e.id) isEquipped = true;
+        }
+        return e.id !== baseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquipped;
+    });
 
     if (materials.length === 0) {
-        showGameAlert("🌀 合体できないよ", "合体させるには、同じ種類の装備をもう1つ手に入れる必要があるよ！");
+        showGameAlert("🌀 合体できないよ", "合体させるには、同じ種類の限界突破（+0）および未装備の装備をもう1つ手に入れる必要があるよ！");
         return;
     }
 
     currentCombineBaseId = baseId;
     selectedMaterials = [];
-    maxSelectableCount = 4 - baseWeap.level; 
+    maxSelectableCount = 4 - baseWeap.limitBreak; 
 
+    // 画面にリストを作る関数を呼ぶ！
     updateCombineModalUI(materials, baseWeap);
 
     document.getElementById('alert-overlay').style.display = 'block';
@@ -1398,7 +1417,13 @@ function toggleMaterialSelection(matId) {
     }
 
     let baseWeap = saveStatus.equipments.find(e => e.id === currentCombineBaseId);
-    let materials = saveStatus.equipments.filter(e => e.id !== currentCombineBaseId && isSameWeaponType(e, baseWeap));
+    let materials = saveStatus.equipments.filter(e => {
+        let isEquipped = false;
+        for (let cat in saveStatus.equipped) {
+            if (saveStatus.equipped[cat] === e.id) isEquipped = true;
+        }
+        return e.id !== currentCombineBaseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquipped;
+    });
     updateCombineModalUI(materials, baseWeap);
 }
 
@@ -1428,16 +1453,22 @@ function updateCombineModalUI(materials, baseWeap) {
             if (saveStatus.equipped[cat] === mat.id) isEquipped = true;
         }
         let equipText = isEquipped ? "<span style='color:#ff416c; font-size:11px;'>(装備中)</span>" : "";
-        let warnText = mat.level > 0 ? "<span style='color:#f8b500; font-size:11px; font-weight:bold;'>⚠️進化済</span>" : "";
+        
+        // ⚠️ 超安心設計！すでに進化（+1以上）している武器はグレーアウトして選べなくするよ！
+        let isEvolved = (mat.limitBreak > 0);
+        let warnText = isEvolved ? "<span style='color:#f8b500; font-size:11px; font-weight:bold;'>⚠️限界突破済 (素材不可)</span>" : "";
 
         let isSelected = selectedMaterials.includes(mat.id);
         let itemClass = isSelected ? "material-item selected" : "material-item";
         let checkMark = isSelected ? "✅" : "⬜";
 
+        let onClickAction = isEvolved ? `alert('すでに限界突破している大切な装備は素材にできません！')` : `toggleMaterialSelection('${mat.id}')`;
+        let opacity = isEvolved ? "opacity: 0.5;" : "opacity: 1;";
+
         list.innerHTML += `
-            <li class="${itemClass}" onclick="toggleMaterialSelection('${mat.id}')">
+            <li class="${itemClass}" style="${opacity}" onclick="${onClickAction}">
                 <div style="flex-grow: 1;">
-                    <strong>${safeName} <span style="color:#ffeb3b;">+${mat.level}</span></strong><br>
+                    <strong>${safeName} <span style="color:#ffeb3b;">+${mat.limitBreak}</span></strong><br>
                     ${warnText} ${equipText} <span style="font-size:11px; color:#aaa;">(効果: +${mat.bonus})</span>
                 </div>
                 <div style="font-size: 20px;">${checkMark}</div>
@@ -1450,37 +1481,52 @@ function confirmCombineSelection() {
     if (selectedMaterials.length === 0) {
         return; 
     }
-
-    let hasEvolvedMaterial = false;
-    selectedMaterials.forEach(matId => {
-        let mat = saveStatus.equipments.find(e => e.id === matId);
-        if (mat && mat.level > 0) hasEvolvedMaterial = true;
-    });
-
-    if (hasEvolvedMaterial) {
-        let ok = confirm(`⚠️ストップ！⚠️\n\nえらんだ素材の中に、すでに進化している大切な装備が含まれています！\n\n本当に素材にして（消去して）しまっていいですか？`);
-        if (!ok) return; 
-    }
+    
+    // 実際に合体する素材IDのコピーをとっておく！（これでモーダルを閉じてもデータが消えない！）
+    materialsToCombine = [...selectedMaterials];
 
     closeCombineSelectModal();
-    executeMultiCombine();
+    startCombineAnimation();
+}
+
+function startCombineAnimation() {
+    const combineScreen = document.getElementById('combine-animation-screen');
+    combineScreen.style.display = 'flex';
+
+    // 🔨 合体アニメーション中に音が鳴るようにしたよ！
+    try {
+        startSound.currentTime = 0; 
+        startSound.play().catch(e=>{});
+        if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
+    } catch(e) {}
+
+    setTimeout(() => {
+        combineScreen.style.display = 'none';
+        executeMultiCombine();
+    }, 2000); 
 }
 
 function executeMultiCombine() {
     let targetWeapon = saveStatus.equipments.find(e => e.id === currentCombineBaseId);
-    if (!targetWeapon) return;
+    if (!targetWeapon) {
+        materialsToCombine = []; 
+        return;
+    }
 
-    let combineCount = selectedMaterials.length;
+    let combineCount = materialsToCombine.length;
 
-    targetWeapon.level += combineCount; 
+    // 「limitBreak（限界突破）」を増やす！
+    targetWeapon.limitBreak += combineCount; 
     targetWeapon.bonus += (25 * combineCount); 
 
-    selectedMaterials.forEach(matId => {
-        let matIndex = saveStatus.equipments.findIndex(e => e.id === matId);
-        if (matIndex !== -1) saveStatus.equipments.splice(matIndex, 1);
+    // 素材に使った武器をセーブデータから一度にまとめて安全に削除！（filter方式）
+    saveStatus.equipments = saveStatus.equipments.filter(e => !materialsToCombine.includes(e.id));
 
+    materialsToCombine.forEach(matId => {
         for (let cat in saveStatus.equipped) {
-            if (saveStatus.equipped[cat] === matId) saveStatus.equipped[cat] = targetWeapon.id;
+            if (saveStatus.equipped[cat] === matId) {
+                saveStatus.equipped[cat] = targetWeapon.id;
+            }
         }
     });
 
@@ -1488,15 +1534,16 @@ function executeMultiCombine() {
     
     let successMessage = `
         <strong>${safeName}</strong> に ${combineCount}個の素材を合体させた！<br>
-        限界突破して <strong style="color:#ffeb3b;">+${targetWeapon.level}</strong> に進化し、ステータスが一気に <span style="color:#ffeb3b; font-weight:bold;">${25 * combineCount}</span> 上がったぞ！
+        限界を突破して <strong style="color:#ffeb3b;">+${targetWeapon.limitBreak}</strong> に進化し、ステータスが一気に <span style="color:#ffeb3b; font-weight:bold;">${25 * combineCount}</span> 上がったぞ！
     `;
     
-    if (targetWeapon.level === 4) {
-        successMessage += `<br><br><span style="color:#66fcf1; font-weight:bold; font-size:18px;">👑 最大強化（+4）を達成したぞ！ 👑</span>`;
+    if (targetWeapon.limitBreak >= 4) {
+        successMessage += `<br><br><span style="color:#66fcf1; font-weight:bold; font-size:18px;">👑 最大限界突破（+4）を達成したぞ！ 👑</span>`;
     }
 
     showGameAlert("🔥 装備合体 大成功！！", successMessage);
 
+    materialsToCombine = []; // 使い終わったらリセット！
     saveGame();
     openEquipScreen(currentCategoryTab);
 }
@@ -1652,7 +1699,7 @@ function startGachaProcess(count, isFree = false) {
 
     let startTime = Date.now();
     let duration = 5000; 
-    let hasPlayedJackpotSound = false; // 🌟 確定演出の音を1回だけ鳴らすためのフラグ
+    let hasPlayedJackpotSound = false; 
     
     let interval = setInterval(() => {
         let elapsed = Date.now() - startTime;
@@ -1677,7 +1724,6 @@ function startGachaProcess(count, isFree = false) {
                 animTitle.innerText = "🌟 確定演出発生 🌟";
                 animText.innerText = "星5超激レアが確定！！！";
                 
-                // 🌟 ここで「大当たり〜.mp3」を鳴らすよ！
                 if (!hasPlayedJackpotSound) {
                     jackpotSound.currentTime = 0;
                     jackpotSound.play().catch(e => console.log('大当たりの音がブロックされました', e));
@@ -1726,7 +1772,8 @@ function executeGachaResults(count, results, isFree) {
         saveStatus.equipments.push({ 
             id: prize.uniqueId, 
             name: prize.name, 
-            level: 0, 
+            level: 1, 
+            limitBreak: 0, 
             bonus: prize.bonus, 
             category: prize.category 
         });
