@@ -169,6 +169,20 @@
         @keyframes startBgMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes startPulse { 0% { transform: scale(1); box-shadow: 0 10px 30px rgba(255, 0, 127, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5); } 100% { transform: scale(1.08); box-shadow: 0 15px 50px rgba(0, 180, 219, 1), inset 0 0 30px rgba(255, 255, 255, 0.9); } }
 
+        /* 🎚️ 音量スライダーのおしゃれなデザイン */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
+            background: #66fcf1; cursor: pointer; margin-top: -8px; 
+            box-shadow: 0 0 10px #66fcf1, inset 0 0 5px #fff; border: 2px solid #162238;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer; background: #162447;
+            border-radius: 3px; border: 1px solid #45f3ff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+        }
+
         /* =========================================================
            💳 リッチカードデザイン（超本格的なアプリ風！）
            ========================================================= */
@@ -217,11 +231,6 @@
         .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
 
         .card-body { display: flex; padding: 10px; padding-left: 45px; align-items: center; gap: 10px; }
-        .card-icon-area {
-            font-size: 38px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.4));
-            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
-            width: 50px; height: 50px; display:flex; justify-content:center; align-items:center; border-radius:50%;
-        }
         
         .card-name { font-size: 16px; font-weight: 900; flex: 1; text-shadow: 1px 1px 2px #000; letter-spacing: 0.5px; }
         .card-stats { font-size: 11px; color: #ddd; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; }
@@ -394,7 +403,7 @@
         
         .gacha-banner {
             background: linear-gradient(135deg, rgba(22, 36, 71, 0.9), rgba(15, 20, 30, 0.9));
-            padding: 15px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            border-radius: 12px; margin-bottom: 15px; cursor: pointer;
             transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2);
             text-align: left; box-shadow: 0 5px 10px rgba(0,0,0,0.5); position: relative; overflow: hidden;
         }
@@ -429,9 +438,7 @@
     <h3 style="color: #ff007f; margin-top: 0; text-shadow: 0 0 10px rgba(255,0,127,0.5);">🎁 プレミアム装備交換所</h3>
     <p style="font-size: 13px; color: #fff; margin-bottom: 5px; font-weight: bold;">スタンプ20個達成報酬！</p>
     <p style="font-size: 11px; color: #ccc; margin-top:0; margin-bottom: 10px;">最高レアリティ（★5以上）の好きな装備を1つ選んで獲得できるよ！</p>
-    <div style="max-height: 240px; overflow-y: auto; text-align: left; padding: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" id="exchange-weapon-list">
-        <!-- 好きな武器選択リストが並びます -->
-    </div>
+    <div style="max-height: 240px; overflow-y: auto; text-align: left; padding: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" id="exchange-weapon-list"></div>
     <button id="btn-execute-exchange" onclick="executeWeaponExchange()" class="btn-gold" style="margin: 0; padding: 12px; font-size: 16px; font-weight: bold;">✅ これを受け取る！</button>
 </div>
 
@@ -483,14 +490,14 @@
 
     <div id="main-content">
         <!-- =========================================================
-           ① タイトル画面
+           ① タイトル画面（KAZIN.pngを大迫力に！）
            ========================================================= -->
         <div id="screen-title" class="screen active">
             <br><br><br>
             <div style="text-align: center; display: flex; justify-content: center; gap: 15px;">
-                <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 250px; height: 100px; filter: drop-shadow(0 0 15px #66fcf1); object-fit: contain;">
+                <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 320px; height: 128px; filter: drop-shadow(0 0 20px #66fcf1); object-fit: contain;">
             </div>
-            <h1 style="font-size: 28px; margin-bottom: 0;">おれたちの最強RPG</h1>
+            <h1 style="font-size: 32px; margin-bottom: 0;">おれたちの最強RPG</h1>
             <p style="text-align: center; color: #45f3ff; font-size: 12px;">~ セーブデータ: sugoigame ~</p>
             <br><br><br>
             <button class="btn-start" onclick="startGame(event)">TAP TO START</button>
@@ -498,7 +505,7 @@
         </div>
 
         <!-- =========================================================
-           ② ホーム画面
+           ② ホーム画面 (設定とタイトルへ戻るボタン追加！)
            ========================================================= -->
         <div id="screen-home" class="screen">
             <h2>🏠 ホーム</h2>
@@ -529,6 +536,40 @@
             </div>
 
             <button class="story-btn" onclick="goToStory()" style="padding: 20px; font-size: 18px;">⚔️ 冒険に出る (Story)</button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button style="margin:0;" onclick="openPartyScreen()">👥 キャラ一覧</button>
+                <button style="margin:0;" onclick="openEquipScreen('weapon')">🛡️ 装備・合体</button>
+            </div>
+            
+            <button onclick="changeScreen('gacha')" style="margin-top: 10px; background: linear-gradient(to bottom, #d53369, #cbad6d); border-color: #ffb6b9;">✨ ガチャを引く</button>
+            
+            <!-- ⚙️ 設定とタイトルへ戻るボタン！ -->
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button style="margin:0; background: linear-gradient(to bottom, #4b6cb7, #182848); border-color: #8f94fb;" onclick="changeScreen('settings')">⚙️ 設定</button>
+                <button style="margin:0; background: linear-gradient(to bottom, #e43f5a, #1b1b2f); border-color: #ff416c;" onclick="goToTitle()">🚪 タイトルへ</button>
+            </div>
+        </div>
+
+        <!-- =========================================================
+           ⚙️ 設定画面（BGMとSEの音量調整！）
+           ========================================================= -->
+        <div id="screen-settings" class="screen">
+            <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">⚙️ 設定</h2>
+            
+            <div class="status-box" style="border-color: #8f94fb;">
+                <label style="display: block; font-size: 16px; color: #66fcf1; font-weight: bold;">BGM 音量: <span id="bgm-vol-text" style="color:#fff;">50%</span></label>
+                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">※現在BGMは準備中です（機能は完成しています）</p>
+                <input type="range" id="bgm-volume" min="0" max="100" value="50" onchange="updateVolume()">
+                
+                <div style="margin-top: 25px;"></div>
+                
+                <label style="display: block; font-size: 16px; color: #66fcf1; font-weight: bold;">効果音 音量: <span id="se-vol-text" style="color:#fff;">50%</span></label>
+                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">ガチャやボタンをタップしたときの音量です。</p>
+                <input type="range" id="se-volume" min="0" max="100" value="50" onchange="updateVolume()">
+            </div>
+
+            <button class="back-btn" onclick="changeScreen('home')">ホームへ戻る</button>
         </div>
 
         <!-- =========================================================
@@ -570,22 +611,28 @@
         <div id="screen-gacha" class="screen">
             <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">ガチャ</h2>
 
-            <div class="gacha-banner" style="border-color: #f8b500;" onclick="openGachaDetail('free')">
-                <h3 style="color:#f8b500; margin-top:0; border:none; font-size:18px; text-align: left;">🎁 1日1回 無料ガチャ</h3>
-                <p style="font-size:12px; color:#ccc; margin:0;">毎日1回だけ無料で引ける！運試し！</p>
+            <div class="gacha-banner" style="border-color: #f8b500; padding: 0;" onclick="openGachaDetail('free')">
+                <img src="1日1回無料ガチャ.png" alt="1日1回無料ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="padding: 15px; display: none;">
+                    <h3 style="color:#f8b500; margin-top:0; border:none; font-size:18px; text-align: left;">🎁 1日1回 無料ガチャ</h3>
+                    <p style="font-size:12px; color:#ccc; margin:0;">毎日1回だけ無料で引ける！運試し！</p>
+                </div>
             </div>
 
-            <div class="gacha-banner" style="border-color: #4ecca3;" onclick="openGachaDetail('normal')">
-                <h3 style="color:#4ecca3; margin-top:0; border:none; font-size:18px; text-align: left;">✨ 通常武器ガチャ</h3>
-                <p style="font-size:12px; color:#ccc; margin:0;">草核を使って強力な武器を手に入れよう！</p>
+            <div class="gacha-banner" style="border-color: #4ecca3; padding: 0;" onclick="openGachaDetail('normal')">
+                <img src="通常ガチャ.png" alt="通常ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="padding: 15px; display: none;">
+                    <h3 style="color:#4ecca3; margin-top:0; border:none; font-size:18px; text-align: left;">✨ 通常武器ガチャ</h3>
+                    <p style="font-size:12px; color:#ccc; margin:0;">草核を使って強力な武器を手に入れよう！</p>
+                </div>
             </div>
 
-            <div class="gacha-banner" style="border-color: #ff416c;" onclick="openGachaDetail('new')">
+            <div class="gacha-banner" style="border-color: #ff416c; padding: 15px;" onclick="openGachaDetail('new')">
                 <h3 style="color:#ff416c; margin-top:0; border:none; font-size:18px; text-align: left;">🆕 新武器ピックアップ</h3>
                 <p style="font-size:12px; color:#ccc; margin:0;">強力な新武器の出現率UP！（準備中）</p>
             </div>
 
-            <div class="gacha-banner" style="border-color: #00b4db;" onclick="openGachaDetail('revival')">
+            <div class="gacha-banner" style="border-color: #00b4db; padding: 15px;" onclick="openGachaDetail('revival')">
                 <h3 style="color:#00b4db; margin-top:0; border:none; font-size:18px; text-align: left;">🔄 復刻武器ガチャ</h3>
                 <p style="font-size:12px; color:#ccc; margin:0;">過去の限定武器が復活！？（準備中）</p>
             </div>
@@ -597,9 +644,8 @@
         <div id="screen-gacha-detail" class="screen">
             <button class="back-btn" style="width: auto; padding: 8px 15px; font-size: 12px; margin-bottom: 10px;" onclick="changeScreen('gacha')">◀ 戻る</button>
             <h2 id="gacha-detail-title" style="margin-bottom: 5px; border:none; text-align:left;">✨ 運命のガチャ</h2>
-            <p id="gacha-detail-desc" style="font-size:13px; color:#ccc; margin-top:0; margin-bottom: 15px;">ガチャの説明</p>
+            <p id="gacha-detail-desc" style="font-size:13px; color:#ccc; margin-top:0; margin-bottom: 20px;">ガチャの説明</p>
             
-            <!-- 🎫 ガチャごとのスタンプカード！ -->
             <div class="stamp-card-container" id="detail-stamp-container" style="display:none;">
                 <div class="stamp-header">
                     <span>🎫 天井スタンプカード</span>
@@ -680,7 +726,7 @@
             <span class="icon">👥</span><span>キャラ</span>
         </button>
         <button class="nav-btn" id="nav-equip" onclick="openEquipScreen('weapon')">
-            <span class="icon">🛡️</span><span>工房</span>
+            <span class="icon">⚔️</span><span>工房</span>
         </button>
         <button class="nav-btn" id="nav-gacha" onclick="changeScreen('gacha')">
             <span class="icon">✨</span><span>ガチャ</span>
@@ -697,12 +743,17 @@
    ========================================================= -->
 <script>
 
+// ---------------------------------------------------------
+// 🎵 効果音（サウンド）とBGMの準備
+// ---------------------------------------------------------
 const clickSound = new Audio('4.mp3');
 const startSound = new Audio('始まるよ～.mp3'); 
 const jackpotSound = new Audio('大当たり～.mp3'); 
+// ※将来的にBGMを追加する場合はここに設定します
+// const bgm = new Audio('bgm.mp3'); bgm.loop = true;
 
 document.addEventListener('click', function(e) {
-    if(e.target.closest('button') || e.target.closest('.gacha-banner') || e.target.closest('.party-slot') || e.target.closest('.rich-card')) {
+    if(e.target.closest('button') || e.target.closest('.gacha-banner') || e.target.closest('.party-slot') || e.target.closest('.rich-card') || e.target.closest('input[type="range"]')) {
         clickSound.currentTime = 0; 
         clickSound.play().catch(err => {});
     }
@@ -714,7 +765,39 @@ function startGame(event) {
     startSound.play().catch(err => {});
     document.getElementById('header-bar').style.display = 'flex';
     document.getElementById('footer-nav').style.display = 'flex';
+    // if (saveStatus.bgmVolume > 0) bgm.play().catch(e=>{});
     changeScreen('home');
+}
+
+// 🚪 タイトル画面へ戻る処理
+function goToTitle() {
+    document.getElementById('header-bar').style.display = 'none';
+    document.getElementById('footer-nav').style.display = 'none';
+    // bgm.pause(); bgm.currentTime = 0;
+    changeScreen('title');
+}
+
+// ⚙️ 音量設定の反映
+function applyVolume() {
+    const bgmVol = (saveStatus.bgmVolume !== undefined ? saveStatus.bgmVolume : 50) / 100;
+    const seVol = (saveStatus.seVolume !== undefined ? saveStatus.seVolume : 50) / 100;
+    
+    // bgm.volume = bgmVol;
+    clickSound.volume = seVol;
+    startSound.volume = seVol;
+    jackpotSound.volume = seVol;
+
+    const elBgm = document.getElementById('bgm-volume');
+    const elSe = document.getElementById('se-volume');
+    if(elBgm) { elBgm.value = saveStatus.bgmVolume; document.getElementById('bgm-vol-text').innerText = saveStatus.bgmVolume + "%"; }
+    if(elSe) { elSe.value = saveStatus.seVolume; document.getElementById('se-vol-text').innerText = saveStatus.seVolume + "%"; }
+}
+
+function updateVolume() {
+    saveStatus.bgmVolume = document.getElementById('bgm-volume').value;
+    saveStatus.seVolume = document.getElementById('se-volume').value;
+    applyVolume();
+    saveGame();
 }
 
 const categoryNames = {
@@ -886,7 +969,10 @@ let saveStatus = {
         normal: { draws: 0, stamps: 0, guaranteed: false },
         new: { draws: 0, stamps: 0, guaranteed: false },
         revival: { draws: 0, stamps: 0, guaranteed: false }
-    }
+    },
+    // ⚙️ 音量設定
+    bgmVolume: 50,
+    seVolume: 50
 };
 
 let tempIconBase64 = "";
@@ -918,15 +1004,12 @@ function loadGame() {
         if (saveStatus.claimedMissions === undefined) saveStatus.claimedMissions = []; 
         if (saveStatus.lastLoginDate === undefined) saveStatus.lastLoginDate = ""; 
         if (saveStatus.lastFreeGachaDate === undefined) saveStatus.lastFreeGachaDate = ""; 
+        if (saveStatus.bgmVolume === undefined) saveStatus.bgmVolume = 50;
+        if (saveStatus.seVolume === undefined) saveStatus.seVolume = 50;
 
-        // データ移行
         if (saveStatus.gachaData === undefined) {
             saveStatus.gachaData = {
-                normal: { 
-                    draws: saveStatus.totalGachaDraws || 0, 
-                    stamps: saveStatus.gachaStamps || 0, 
-                    guaranteed: saveStatus.isNextGachaGuaranteed || false 
-                },
+                normal: { draws: saveStatus.totalGachaDraws || 0, stamps: saveStatus.gachaStamps || 0, guaranteed: saveStatus.isNextGachaGuaranteed || false },
                 new: { draws: 0, stamps: 0, guaranteed: false },
                 revival: { draws: 0, stamps: 0, guaranteed: false }
             };
@@ -958,10 +1041,10 @@ function loadGame() {
             if (saveStatus.characters[leaderIndex]) saveStatus.party[0] = saveStatus.characters[leaderIndex].uid;
         }
     } else { 
-        // 初回プレイ時のボーナス
         showGameAlert("🎁 ゲーム開始ボーナス！", "ゲームを始めてくれてありがとう！<br>初回プレゼントとして<strong style='color:#66fcf1;'>草核 1000個</strong>をプレゼント！");
         saveGame(); 
     }
+    applyVolume(); // 音量設定を反映
     checkLoginBonus();
 }
 
@@ -999,10 +1082,10 @@ function changeScreen(screenId) {
     if(navMap[screenId]) document.getElementById(navMap[screenId]).classList.add('active-nav');
     
     if (screenId === 'gacha-detail') { drawStampCard(); }
+    if (screenId === 'settings') { applyVolume(); } // 設定画面を開くときにスライダーを更新
     updateUI();
 }
 
-// 🎫 スタンプカード描画（ガチャごとに独立！）
 function drawStampCard() {
     const stampContainer = document.getElementById('detail-stamp-container');
     const stampGrid = document.getElementById('stamp-grid');
@@ -1040,7 +1123,6 @@ function drawStampCard() {
     }
 }
 
-// 🎁 天井交換所を開く
 function openExchangeModal() {
     const modal = document.getElementById('weapon-exchange-modal');
     const list = document.getElementById('exchange-weapon-list');
@@ -1048,7 +1130,6 @@ function openExchangeModal() {
 
     list.innerHTML = ""; selectedExchangeWeaponId = "";
     
-    // ガチャ種類に応じて交換プールを変えられる（今回はとりあえず星5以上全部）
     let exchangePool = weaponMaster.filter(w => getWeaponStar(w.name) >= 5);
 
     exchangePool.forEach(w => {
@@ -1230,7 +1311,7 @@ function claimMissionReward(missionId, rewardAmount, isFossil) {
 }
 
 // =========================================================
-// 👥 キャラクター（リッチカード描画）
+// 👥 キャラクター
 // =========================================================
 function openPartyScreen() {
     changeScreen('party');
@@ -1332,7 +1413,7 @@ function removeFromParty(slotIndex) {
 }
 
 // =========================================================
-// 🛡️ 装備管理（リッチカード描画）
+// 🛡️ 装備管理
 // =========================================================
 function openEquipScreen(category) {
     currentCategoryTab = category;
@@ -1421,7 +1502,6 @@ function levelUpWeapon(id) {
     saveGame(); openEquipScreen(currentCategoryTab);
 }
 
-// 🌀 複数選択合体システム
 let currentCombineBaseId = ""; let selectedMaterials = []; let maxSelectableCount = 0; 
 let materialsToCombine = []; 
 
@@ -1586,7 +1666,7 @@ function startGachaProcess(count, isFree = false) {
     let temporaryResults = []; let highestStar = 1; let totalWeight = 0;
     activePool.forEach(item => totalWeight += item.weight);
 
-    // 🎫 天井特典チェック！（スタンプ機能は独立）
+    // 🎫 天井特典チェック
     let isGuaranteedGacha = false;
     if (!isFree) {
         let gData = saveStatus.gachaData[currentGachaType];
@@ -1595,7 +1675,6 @@ function startGachaProcess(count, isFree = false) {
 
     for (let i = 0; i < count; i++) {
         let prize;
-
         if (isGuaranteedGacha && i === 0 && !isFree) {
             let guaranteedPool = activePool.filter(item => getWeaponStar(item.name) >= 5);
             if (guaranteedPool.length > 0) prize = guaranteedPool[Math.floor(Math.random() * guaranteedPool.length)];
@@ -1608,7 +1687,6 @@ function startGachaProcess(count, isFree = false) {
                 if (randomNum <= currentSum) { prize = activePool[j]; break; }
             }
         }
-
         let generatedItem = JSON.parse(JSON.stringify(prize)); 
         generatedItem.uniqueId = "eq_" + Date.now().toString(36) + "_" + Math.floor(Math.random() * 100000);
         temporaryResults.push(generatedItem);
@@ -1692,8 +1770,6 @@ function executeGachaResults(count, results, isFree) {
         saveStatus.lastFreeGachaDate = today; 
     } else { 
         saveStatus.stones -= (count * 100); 
-        
-        // 🎫 ガチャごとのスタンプ機能の更新
         let gData = saveStatus.gachaData[currentGachaType];
         gData.draws += count;
         let newStamps = Math.floor(gData.draws / 10);
