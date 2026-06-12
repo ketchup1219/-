@@ -13,10 +13,9 @@
         body {
             font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
             background-color: #000; 
-            background-image: url('kazinhakei.png'); 
+            background-image: url('KAZIN背景.png'); /* 初期画面の背景 */
             background-size: cover; 
             background-position: center; 
-            background-repeat: no-repeat; 
             background-attachment: fixed; 
             color: #fff; 
             margin: 0;
@@ -132,11 +131,14 @@
             width: 20%; height: 100%; padding: 0; margin: 0; box-shadow: none; border-radius: 0; transition: all 0.2s; cursor: pointer;
         }
         .nav-btn .icon { font-size: 26px; margin-bottom: 3px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: all 0.2s; }
+        .nav-icon-img { width: 26px; height: 26px; margin-bottom: 3px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: all 0.2s; object-fit: contain; }
+        
         .nav-btn.active-nav { color: #66fcf1; }
         .nav-btn.active-nav .icon { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 10px #66fcf1); }
+        .nav-btn.active-nav .nav-icon-img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 10px #66fcf1); }
 
         /* =========================================================
-           👆 ボタンデザイン（ド派手メタリック＆光沢）
+           👆 ボタンデザイン
            ========================================================= */
         button {
             display: block; width: 100%; padding: 14px; margin: 10px 0;
@@ -170,10 +172,8 @@
         @keyframes startBgMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes startPulse { 0% { transform: scale(1); box-shadow: 0 10px 30px rgba(255, 0, 127, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5); } 100% { transform: scale(1.08); box-shadow: 0 15px 50px rgba(0, 180, 219, 1), inset 0 0 30px rgba(255, 255, 255, 0.9); } }
 
-        /* 🎚️ 音量スライダーのおしゃれなデザイン */
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px;
-        }
+        /* 🎚️ 音量スライダー */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
             background: #66fcf1; cursor: pointer; margin-top: -8px; 
@@ -185,7 +185,7 @@
         }
 
         /* =========================================================
-           💳 リッチカードデザイン（超本格的なアプリ風！）
+           💳 リッチカードデザイン
            ========================================================= */
         .item-list { list-style: none; padding: 0; margin: 0; }
         .rich-card {
@@ -240,10 +240,7 @@
 
         .stars { color: #ffeb3b; font-size: 12px; letter-spacing: 2px; text-shadow: 0 0 5px #ffeb3b; margin-left: auto; }
 
-        .selected-char {
-            animation: blink-cyan 1.2s infinite alternate !important;
-            transform: scale(1.02); z-index: 10;
-        }
+        .selected-char { animation: blink-cyan 1.2s infinite alternate !important; transform: scale(1.02); z-index: 10; }
 
         /* 📊 ステータスボックス */
         .status-box {
@@ -270,7 +267,7 @@
         }
 
         /* =========================================================
-           🎫 スタンプカード（天井システムデザイン）
+           🎫 スタンプカード
            ========================================================= */
         .stamp-card-container {
             background: linear-gradient(135deg, #1d2538, #0d1220);
@@ -302,7 +299,7 @@
         }
 
         /* =========================================================
-           🎰 ガチャ演出画面
+           🎰 ガチャ演出画面（宝箱復活＆超豪華バージョン！）
            ========================================================= */
         #gacha-animation-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -337,31 +334,139 @@
         .particle { position: absolute; border-radius: 50%; opacity: 0; animation: warpEffect 1s cubic-bezier(0.1, 0.8, 0.3, 1) infinite; }
         @keyframes warpEffect { 0% { transform: scale(0) translate(0, 0) rotate(0deg); opacity: 0; } 20% { opacity: 1; } 100% { transform: scale(3) translate(var(--mx), var(--my)) rotate(270deg); opacity: 0; } }
 
+        /* SFガチャ装置（ポータル） */
+        .portal-device {
+            position: absolute; top: 35%; width: 220px; height: 220px; z-index: 10;
+            display: flex; justify-content: center; align-items: center; perspective: 600px;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .outer-gear {
+            position: absolute; width: 200px; height: 200px; border: 6px dashed #45f3ff;
+            border-radius: 50%; animation: rotateGear 12s linear infinite;
+            box-shadow: 0 0 20px rgba(69, 243, 255, 0.5);
+        }
+        .inner-ring {
+            position: absolute; width: 150px; height: 150px; border: 4px double #f8b500;
+            border-radius: 50%; animation: rotateGear 6s linear infinite reverse;
+            box-shadow: 0 0 15px rgba(248, 181, 0, 0.4);
+        }
+        .core-sphere {
+            position: absolute; width: 90px; height: 90px;
+            background: radial-gradient(circle, rgba(102, 252, 241, 0.9) 0%, rgba(0, 180, 219, 0.1) 75%);
+            border-radius: 50%; box-shadow: 0 0 30px #66fcf1;
+            animation: spherePulse 1.2s infinite alternate;
+        }
+        @keyframes rotateGear { 100% { transform: rotate(360deg); } }
+        @keyframes spherePulse { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 1; } }
+
         .magic-circle {
             position: absolute; width: 300px; height: 300px; border: 4px dashed rgba(78, 204, 163, 0.7);
-            border-radius: 50%; animation: spin 4s linear infinite; z-index: 100; transition: border-color 0.5s, box-shadow 0.5s;
+            border-radius: 50%; animation: spin 4s linear infinite; z-index: 8; transition: border-color 0.5s, box-shadow 0.5s;
         }
         .magic-circle.gold { border: 5px dashed #f8b500; box-shadow: 0 0 25px #f8b500, inset 0 0 25px #f8b500; animation: spin 2s linear infinite; }
         .magic-circle.rainbow { border: 7px dashed #ff007f; box-shadow: 0 0 45px #ffeb3b, inset 0 0 40px #00b4db; animation: spin 0.8s linear infinite reverse; }
 
-        .gacha-orb {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: radial-gradient(circle, #4ecca3 0%, rgba(78,204,163,0) 70%);
-            box-shadow: 0 0 35px #4ecca3; animation: orbPulse 1.2s infinite alternate;
-            margin-bottom: 30px; position: relative; z-index: 101; transition: background 0.5s, box-shadow 0.5s;
+        /* 召喚宝箱 */
+        .summoned-chest-container {
+            position: absolute; top: 32%; width: 170px; height: 170px; z-index: 25;
+            display: none; justify-content: center; align-items: center;
+            transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .gacha-orb.gold { background: radial-gradient(circle, #fff7c2 0%, #f8b500 45%, rgba(248,181,0,0) 75%); box-shadow: 0 0 60px #f8b500; }
-        .gacha-orb.rainbow {
-            background: radial-gradient(circle, #ffffff 0%, #ffeb3b 30%, #ff007f 60%, rgba(0,180,219,0.85) 100%);
-            box-shadow: 0 0 100px #ff007f, 0 0 70px #ffeb3b; animation: orbRainbowPulse 0.15s infinite alternate; 
+        .summoned-chest-container.active { display: flex; transform: scale(1); }
+        .summoned-chest {
+            position: relative; width: 130px; height: 100px;
+            background: linear-gradient(to bottom, #1d3557, #1f2833);
+            border: 4px solid #b0c4de; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: transform 0.1s;
         }
-        @keyframes orbRainbowPulse {
-            0% { transform: scale(0.9) rotate(0deg); box-shadow: 0 0 80px #ff007f, 0 0 40px #ffeb3b; filter: hue-rotate(0deg); }
-            100% { transform: scale(1.5) rotate(360deg); box-shadow: 0 0 180px #ffeb3b, 0 0 120px #00b4db, 0 0 250px #ff007f; filter: hue-rotate(360deg); }
+        .summoned-chest.gold {
+            background: linear-gradient(135deg, #ffe259, #ffa751); border-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 25px #f8b500;
+        }
+        .summoned-chest.rainbow {
+            background: linear-gradient(135deg, #ff007f 0%, #ffeb3b 50%, #00b4db 100%); border-color: #ffffff;
+            box-shadow: 0 10px 40px rgba(255, 0, 127, 0.6), 0 0 35px rgba(102, 252, 241, 0.8);
+        }
+        .chest-lid {
+            position: absolute; top: -32px; left: -4px; width: 130px; height: 42px;
+            background: inherit; border: 4px solid inherit; border-color: inherit;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; box-shadow: inset 0 5px 10px rgba(255,255,255,0.3);
+            transform-origin: bottom; transition: transform 0.5s;
+        }
+        .summoned-chest.open .chest-lid { transform: rotateX(-110deg) translateY(-10px); }
+        .star-lock {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            font-size: 26px; color: #66fcf1; text-shadow: 0 0 10px #66fcf1;
+            animation: starBlink 0.8s infinite alternate; font-weight: bold;
+        }
+        .summoned-chest.rainbow .star-lock { color: #ffffff; text-shadow: 0 0 15px #ff007f, 0 0 10px #ffeb3b; }
+        @keyframes starBlink { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+        
+        .chest-shake-heavy { animation: chestShake 0.1s infinite alternate; }
+        @keyframes chestShake { 0% { transform: translate(4px, 4px) rotate(-2deg); } 100% { transform: translate(-4px, -4px) rotate(2deg); } }
+
+        /* タッチボタンプロンプト */
+        .gacha-tap-prompt {
+            position: absolute; bottom: 18%; z-index: 100;
+            display: none; flex-direction: column; align-items: center;
+            cursor: pointer; animation: tapPulse 0.8s infinite alternate;
+        }
+        .gacha-tap-prompt.active { display: flex; }
+        .tap-circle {
+            width: 80px; height: 80px; border-radius: 50%; border: 4px solid #ffeb3b;
+            background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 25px #ffeb3b;
+            display: flex; justify-content: center; align-items: center; animation: tapRing 1s infinite;
+        }
+        .tap-text {
+            margin-top: 10px; font-size: 24px; font-weight: 900; color: #ffeb3b;
+            text-shadow: 0 2px 6px #000, 0 0 15px #f8b500; letter-spacing: 3px;
+        }
+        @keyframes tapPulse { 0% { transform: scale(0.92); } 100% { transform: scale(1.08); } }
+        @keyframes tapRing { 0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.8); } 100% { box-shadow: 0 0 0 35px rgba(255, 235, 59, 0); } }
+
+        /* 飛び出すお星様マスコット */
+        .mascot-container {
+            position: absolute; top: 22%; width: 140px; height: 140px; z-index: 35;
+            display: none; justify-content: center; align-items: center; transform: scale(0);
+        }
+        .mascot-container.active { display: flex; animation: mascotJump 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .mascot-star {
+            position: relative; width: 90px; height: 90px; background: #ffeb3b;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px #ffeb3b;
+        }
+        .mascot-wings-left, .mascot-wings-right {
+            position: absolute; width: 45px; height: 25px; background: #ffffff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: -1; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .mascot-wings-left { left: -32px; top: 15px; transform: rotate(-35deg); animation: wingFlapLeft 0.15s infinite alternate; transform-origin: right bottom; }
+        .mascot-wings-right { right: -32px; top: 15px; transform: rotate(35deg); animation: wingFlapRight 0.15s infinite alternate; transform-origin: left bottom; }
+        @keyframes wingFlapLeft { 0% { transform: rotate(-35deg); } 100% { transform: rotate(-10deg); } }
+        @keyframes wingFlapRight { 0% { transform: rotate(35deg); } 100% { transform: rotate(10deg); } }
+        .mascot-face { font-size: 26px; user-select: none; }
+        @keyframes mascotJump {
+            0% { transform: translateY(80px) scale(0) rotate(0deg); }
+            50% { transform: translateY(-100px) scale(1.5) rotate(360deg); }
+            100% { transform: translateY(-50px) scale(1.3) rotate(360deg); }
         }
 
-        .gacha-orb.explode { animation: orbExplode 0.5s cubic-bezier(0.08, 0.82, 0.17, 1) forwards !important; }
-        @keyframes orbExplode { 0% { transform: scale(1.2); opacity: 1; filter: brightness(1); } 35% { transform: scale(40); opacity: 1; filter: brightness(3); } 100% { transform: scale(100); opacity: 1; filter: brightness(15); background: #ffffff; } }
+        /* 雷／極太エネルギー大爆発 */
+        .beam-explosion {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            z-index: 15; display: none; pointer-events: none;
+        }
+        .beam-explosion.active-rainbow {
+            display: block; background: radial-gradient(circle, #ffffff 0%, #ffeb3b 20%, #ff007f 50%, #00b4db 70%, rgba(255,255,255,0.9) 90%, rgba(0,0,0,0) 100%);
+            animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        .beam-explosion.active-gold {
+            display: block; background: radial-gradient(circle, #ffffff 0%, #fff7c2 30%, #f8b500 65%, rgba(248,181,0,0.8) 85%, rgba(0,0,0,0) 100%);
+            animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes beamExpand {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px #fff; }
+            100% { transform: scale(65); opacity: 0; box-shadow: 0 0 150px #fff; }
+        }
 
         #gacha-whiteout-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 210; pointer-events: none; opacity: 1; }
         .whiteout-fade-out { animation: whiteoutFade 1s ease-out forwards; }
@@ -373,6 +478,9 @@
             40% { transform: translate(-8px, 8px) rotate(1deg); } 60% { transform: translate(8px, -8px) rotate(-1.5deg); }
             80% { transform: translate(8px, 8px) rotate(1.5deg); } 100% { transform: translate(0, 0) rotate(0deg); }
         }
+
+        .gacha-progress-bar { width: 80%; height: 12px; background-color: #111; border-radius: 6px; overflow: hidden; border: 1px solid #66fcf1; z-index: 101; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
+        .gacha-progress-fill { height: 100%; width: 0%; background: linear-gradient(45deg, #66fcf1, #4ecca3); transition: width 0.1s linear; }
 
         /* =========================================================
            🔨 合体演出画面
@@ -451,12 +559,47 @@
 
     <h2 id="gacha-anim-title" style="color: #66fcf1; margin-bottom: 10px; z-index: 101;">草核の祈り...</h2>
     <p id="gacha-anim-text" style="color: #ccc; font-size: 14px; margin-bottom: 30px; z-index: 101;">大自然のエネルギーが集まっています</p>
-    <div id="gacha-magic-circle" class="magic-circle"></div>
-    <div id="gacha-orb" class="gacha-orb"></div>
-    <div class="gacha-progress-bar">
-        <div id="gacha-progress-fill" class="gacha-progress-fill"></div>
+    
+    <!-- 召喚装置 & 魔法陣 -->
+    <div id="gacha-portal-device" class="portal-device">
+        <div class="outer-gear"></div>
+        <div class="inner-ring"></div>
+        <div class="core-sphere"></div>
     </div>
-    <p style="font-size: 11px; color: #888; margin-top: 10px; z-index: 101;">※ガチャを引いています。ページを閉じないでね</p>
+    <div id="gacha-magic-circle" class="magic-circle"></div>
+
+    <!-- 宝箱 -->
+    <div id="summoned-chest-container" class="summoned-chest-container">
+        <div id="summoned-chest" class="summoned-chest">
+            <div class="chest-lid"></div>
+            <div class="star-lock">★</div>
+        </div>
+    </div>
+
+    <!-- 点滅タッププロンプト -->
+    <div id="gacha-tap-prompt" class="gacha-tap-prompt" onclick="triggerGachaTap()">
+        <div class="tap-circle"></div>
+        <div class="tap-text">タッチ！</div>
+    </div>
+
+    <!-- 飛び出すマスコット -->
+    <div id="mascot-container" class="mascot-container">
+        <div class="mascot-star">
+            <div class="mascot-wings-left"></div>
+            <div class="mascot-wings-right"></div>
+            <div class="mascot-face">😃</div>
+        </div>
+    </div>
+
+    <!-- 雷ビーム大爆発 -->
+    <div id="beam-eruption" class="beam-explosion"></div>
+
+    <div style="margin-top: auto; margin-bottom: 10px; width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 101;">
+        <div class="gacha-progress-bar">
+            <div id="gacha-progress-fill" class="gacha-progress-fill"></div>
+        </div>
+        <p style="font-size: 11px; color: #888; margin-top: 5px; margin-bottom: 10px;">※ガチャを引いています。ページを閉じないでね</p>
+    </div>
 </div>
 <div id="gacha-whiteout-overlay"></div>
 
@@ -559,7 +702,7 @@
             
             <div class="status-box" style="border-color: #8f94fb;">
                 <label style="display: block; font-size: 16px; color: #66fcf1; font-weight: bold;">BGM 音量: <span id="bgm-vol-text" style="color:#fff;">50%</span></label>
-                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">BGM（BitCastle / KAZINテーマ）の音量調整です。</p>
+                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">BGM（BitCastle / KAZINテーマ）の音量調整です。（2倍強化機能搭載！）</p>
                 <input type="range" id="bgm-volume" min="0" max="100" value="50" onchange="updateVolume()">
                 
                 <div style="margin-top: 25px;"></div>
@@ -726,19 +869,19 @@
        ========================================================= -->
     <div id="footer-nav">
         <button class="nav-btn" id="nav-home" onclick="changeScreen('home')">
-            <span class="icon">🏠</span><span>ホーム</span>
+            <img src="ホームボタン.png" alt="ホーム" class="nav-icon-img" onerror="this.outerHTML='<span class=\\'icon\\'>🏠</span>'"><span>ホーム</span>
         </button>
         <button class="nav-btn" id="nav-party" onclick="openPartyScreen()">
-            <span class="icon">👥</span><span>キャラ</span>
+            <img src="キャラ一覧.png" alt="キャラ" class="nav-icon-img" onerror="this.outerHTML='<span class=\\'icon\\'>👥</span>'"><span>キャラ</span>
         </button>
         <button class="nav-btn" id="nav-equip" onclick="openEquipScreen('weapon')">
             <span class="icon">⚔️</span><span>工房</span>
         </button>
         <button class="nav-btn" id="nav-gacha" onclick="changeScreen('gacha')">
-            <span class="icon">✨</span><span>ガチャ</span>
+            <img src="ガチャボタン.png" alt="ガチャ" class="nav-icon-img" onerror="this.outerHTML='<span class=\\'icon\\'>✨</span>'"><span>ガチャ</span>
         </button>
         <button class="nav-btn" id="nav-mission" onclick="openMissionScreen()">
-            <span class="icon">🏆</span><span>ミッション</span>
+            <img src="ミッション.png" alt="ミッション" class="nav-icon-img" onerror="this.outerHTML='<span class=\\'icon\\'>🏆</span>'"><span>ミッション</span>
         </button>
     </div>
 
@@ -804,9 +947,13 @@ function goToTitle() {
     changeScreen('title');
 }
 
+// 🔊 音量設定の反映
 function applyVolume() {
-    const bgmVol = (saveStatus.bgmVolume !== undefined ? saveStatus.bgmVolume : 50) / 100;
-    const seVol = (saveStatus.seVolume !== undefined ? saveStatus.seVolume : 50) / 100;
+    const rawBgmVolume = saveStatus.bgmVolume !== undefined ? saveStatus.bgmVolume : 50;
+    const rawSeVolume = saveStatus.seVolume !== undefined ? saveStatus.seVolume : 50;
+    
+    const bgmVol = Math.min((rawBgmVolume / 100) * 2, 1.0);
+    const seVol = rawSeVolume / 100;
     
     titleBgm.volume = bgmVol;
     gameBgm.volume = bgmVol;
@@ -817,8 +964,8 @@ function applyVolume() {
 
     const elBgm = document.getElementById('bgm-volume');
     const elSe = document.getElementById('se-volume');
-    if(elBgm) { elBgm.value = saveStatus.bgmVolume; document.getElementById('bgm-vol-text').innerText = saveStatus.bgmVolume + "%"; }
-    if(elSe) { elSe.value = saveStatus.seVolume; document.getElementById('se-vol-text').innerText = saveStatus.seVolume + "%"; }
+    if(elBgm) { elBgm.value = rawBgmVolume; document.getElementById('bgm-vol-text').innerText = rawBgmVolume + "%"; }
+    if(elSe) { elSe.value = rawSeVolume; document.getElementById('se-vol-text').innerText = rawSeVolume + "%"; }
 }
 
 function updateVolume() {
@@ -905,7 +1052,7 @@ let weaponMaster = [
     { id: "w_firedrag_mu", name: "★6 炎龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
     { id: "w_icedrag_mu", name: "★6 氷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
     { id: "w_winddrag_mu", name: "★6 風龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_lightdrag_mu", name: "★6 雷龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
+    { id: "w_lightdrag_mu", name: "★6 雷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
     { id: "w_flash_mu", name: "★6 閃光のつるぎ", category: "weapon", bonus: 580, isGacha: false },
     { id: "w_black_mu", name: "★6 漆黒のつるぎ", category: "weapon", bonus: 580, isGacha: false },
     { id: "w_champ_kai_mu", name: "★6 王者の剣改", category: "weapon", bonus: 600, isGacha: false },
@@ -1109,6 +1256,13 @@ function changeScreen(screenId) {
     
     if (screenId === 'gacha-detail') { drawStampCard(); }
     if (screenId === 'settings') { applyVolume(); } 
+    
+    if (screenId === 'title') {
+        document.body.style.backgroundImage = "url('KAZIN背景.png')";
+    } else {
+        document.body.style.backgroundImage = "url('kazinhakei.png')";
+    }
+
     updateUI();
 }
 
@@ -1678,6 +1832,9 @@ function showProbabilities() {
     htmlContent += "</div>"; showGameAlert("🔍 ガチャ提供割合", htmlContent);
 }
 
+// ---------------------------------------------------------
+// 🎰 新・ド派手ガチャ演出コントロールシステム
+// ---------------------------------------------------------
 function startGachaProcess(count, isFree = false) {
     let activePool = gachaConfig[currentGachaType].pool;
     if (activePool.length === 0) { showGameAlert("🔮 ガチャは準備中だよ！", "コードの「設定ゾーン①」に装備を追加してね！"); return; }
@@ -1690,10 +1847,14 @@ function startGachaProcess(count, isFree = false) {
         if (saveStatus.stones < neededStones) { showGameAlert("🔮 草核が足りない！", `ガチャを引くための「草核」が足りないよ！<br>あと <strong>${neededStones - saveStatus.stones}個</strong> 必要です。`); return; }
     }
 
-    let temporaryResults = []; let highestStar = 1; let totalWeight = 0;
+    gachaTempResults = [];
+    gachaIsFree = isFree;
+    gachaCount = count;
+    gachaHighestStar = 1;
+
+    let totalWeight = 0;
     activePool.forEach(item => totalWeight += item.weight);
 
-    // 🎫 天井特典チェック
     let isGuaranteedGacha = false;
     if (!isFree) {
         let gData = saveStatus.gachaData[currentGachaType];
@@ -1716,79 +1877,159 @@ function startGachaProcess(count, isFree = false) {
         }
         let generatedItem = JSON.parse(JSON.stringify(prize)); 
         generatedItem.uniqueId = "eq_" + Date.now().toString(36) + "_" + Math.floor(Math.random() * 100000);
-        temporaryResults.push(generatedItem);
-        let star = getWeaponStar(prize.name); if (star > highestStar) highestStar = star;
+        gachaTempResults.push(generatedItem);
+        let star = getWeaponStar(prize.name); if (star > gachaHighestStar) gachaHighestStar = star;
     }
 
     const animContainer = document.getElementById('game-container'); 
     const animScreen = document.getElementById('gacha-animation-screen');
-    const orb = document.getElementById('gacha-orb');
     const fill = document.getElementById('gacha-progress-fill');
     const animTitle = document.getElementById('gacha-anim-title');
     const animText = document.getElementById('gacha-anim-text');
-    const magicCircle = document.getElementById('gacha-magic-circle');
     const whiteoutOverlay = document.getElementById('gacha-whiteout-overlay');
     const speedLines = document.getElementById('gacha-speed-lines');
     const cutIn = document.getElementById('gacha-cut-in');
 
+    const portalDevice = document.getElementById('gacha-portal-device');
+    const chestContainer = document.getElementById('summoned-chest-container');
+    const chest = document.getElementById('summoned-chest');
+    const tapPrompt = document.getElementById('gacha-tap-prompt');
+    const mascot = document.getElementById('mascot-container');
+    const eruption = document.getElementById('beam-eruption');
+
+    if(portalDevice) { portalDevice.style.display = 'flex'; portalDevice.style.opacity = '1'; }
+    if(chestContainer) chestContainer.classList.remove('active');
+    if(chest) chest.className = 'summoned-chest';
+    if(tapPrompt) tapPrompt.classList.remove('active');
+    if(mascot) mascot.classList.remove('active');
+    if(eruption) eruption.className = 'beam-explosion';
+
     animScreen.style.display = 'flex'; fill.style.width = '0%'; whiteoutOverlay.style.display = 'none'; whiteoutOverlay.className = '';
-    orb.className = 'gacha-orb'; fill.className = 'gacha-progress-fill'; magicCircle.className = 'magic-circle';
     animScreen.className = ''; animTitle.classList.remove('shake-text'); animContainer.classList.remove('screen-shake');
     animTitle.style.fontSize = "24px"; animTitle.style.color = "#66fcf1";
     speedLines.style.display = 'block'; speedLines.style.opacity = '0'; cutIn.classList.remove('active');
 
     createParticles();
 
-    let startTime = Date.now(); let duration = 5000; 
+    let startTime = Date.now(); 
+    let duration = 2500; 
     let hasPlayedJackpotSound = false; let hasUpgradedToGold = false; let hasUpgradedToRainbow = false;
     
-    let interval = setInterval(() => {
+    gachaInterval = setInterval(() => {
         let elapsed = Date.now() - startTime;
         let progress = Math.min((elapsed / duration) * 100, 100);
-        fill.style.width = progress + '%';
+        fill.style.width = (progress * 0.5) + '%'; 
 
-        if (progress < 30) {
-            animTitle.innerText = "草核の祈り..."; animText.innerText = "大自然のエネルギーが集まっています...";
-            speedLines.style.opacity = (progress / 30) * 0.3; 
-        } else if (progress >= 30 && progress < 60) {
-            if (highestStar >= 5 && !hasUpgradedToRainbow) {
-                orb.className = 'gacha-orb rainbow'; fill.className = 'gacha-progress-fill rainbow'; magicCircle.className = 'magic-circle rainbow';
+        if (progress < 40) {
+            animTitle.innerText = "草核の祈り..."; animText.innerText = "ゲートが解放され、エネルギーが流入中...";
+            speedLines.style.opacity = (progress / 40) * 0.3; 
+        } 
+        else if (progress >= 40 && progress < 100) {
+            if (gachaHighestStar >= 5 && !hasUpgradedToRainbow) {
                 animScreen.className = 'flash-bg rainbow-aura'; animTitle.classList.add('shake-text'); 
                 animTitle.style.fontSize = "32px"; animTitle.style.color = "#ffeb3b";
                 animTitle.innerText = "🚨 限界突破感知 🚨"; animText.innerHTML = "<span style='color:#ff007f; font-weight:bold; font-size:16px;'>⚠️ WARNING!! 伝説の星5武器を検知！！！ ⚠️</span>";
                 speedLines.style.opacity = '0.8'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(255, 0, 127, 0.2) 10deg 20deg)';
                 cutIn.classList.add('active'); 
+                
                 if (!hasPlayedJackpotSound) { jackpotSound.currentTime = 0; jackpotSound.play().catch(e=>{}); hasPlayedJackpotSound = true; }
                 hasUpgradedToRainbow = true; hasUpgradedToGold = true; 
                 try { if (navigator.vibrate) navigator.vibrate([50, 50, 50]); } catch(e){}
-            } else if (highestStar === 4 && !hasUpgradedToGold) {
-                orb.classList.add('gold'); magicCircle.classList.add('gold'); animScreen.classList.add('gold-aura');
-                animTitle.innerText = "⚡ エネルギーが超活性化！ ⚡"; animText.innerText = "魔法陣がまばゆい金色に変化する！高レア確定！";
+            } else if (gachaHighestStar === 4 && !hasUpgradedToGold) {
+                animScreen.classList.add('gold-aura');
+                animTitle.innerText = "⚡ エネルギー活性化！ ⚡"; animText.innerText = "魔法陣がまばゆい金色に変化する！高レア確定！";
                 speedLines.style.opacity = '0.5'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(248, 181, 0, 0.2) 10deg 20deg)';
                 try { if (navigator.vibrate) navigator.vibrate([100, 100]); } catch(e){}
                 hasUpgradedToGold = true;
             } else if (!hasUpgradedToGold && !hasUpgradedToRainbow) {
-                animTitle.innerText = "草核の光が激しく変化する！"; animText.innerText = "エネルギーがまばゆく輝き出しました！"; speedLines.style.opacity = '0.3';
+                animTitle.innerText = "草核の光が変化する！"; animText.innerText = "輝きがさらに強まっています！"; speedLines.style.opacity = '0.3';
             }
-        } else if (progress >= 60 && progress < 90) {
-            if (highestStar >= 5) { animTitle.innerText = "✨ 伝説の光に包まれる ✨"; animText.innerText = "神の武器が姿を現そうとしています！"; } 
-            else if (highestStar === 4) { animTitle.innerText = "✨ 強力な武器の波動 ✨"; animText.innerText = "かなり強力なレア武器を感知しています！"; } 
-            else { animTitle.innerText = "光が集結する！"; animText.innerText = "まもなく新しい武器が現れます！"; }
-        } else if (progress >= 90 && progress < 100) {
-            if (!orb.classList.contains('explode')) {
-                orb.classList.add('explode'); animContainer.classList.add('screen-shake'); 
-                try { if (navigator.vibrate) navigator.vibrate([150, 150, 250]); } catch(e){}
+        } 
+        
+        if (progress >= 100) {
+            clearInterval(gachaInterval);
+            
+            if(portalDevice) {
+                portalDevice.style.opacity = '0';
+                setTimeout(() => { portalDevice.style.display = 'none'; }, 500);
             }
-            animTitle.innerText = "エネルギー、限界突破ーーー！！！";
-        } else if (progress >= 100) {
-            clearInterval(interval);
-            whiteoutOverlay.style.display = 'block'; whiteoutOverlay.className = '';
-            animScreen.style.display = 'none'; animScreen.className = ''; animTitle.classList.remove('shake-text');
-            animContainer.classList.remove('screen-shake'); speedLines.style.display = 'none';
-            executeGachaResults(count, temporaryResults, isFree);
-            setTimeout(() => { whiteoutOverlay.classList.add('whiteout-fade-out'); setTimeout(() => { whiteoutOverlay.style.display = 'none'; }, 1200); }, 100);
+
+            if(chestContainer && chest && tapPrompt) {
+                if (gachaHighestStar >= 5) { chest.classList.add('rainbow'); }
+                else if (gachaHighestStar === 4) { chest.classList.add('gold'); }
+                
+                chestContainer.classList.add('active');
+                animTitle.innerText = "🔮 召喚完了 🔮";
+                animText.innerText = "画面をタッチして、宝箱を開けよう！";
+                tapPrompt.classList.add('active');
+            } else {
+                executeGachaResults(count, temporaryResults, isFree);
+            }
         }
     }, 100);
+}
+
+function triggerGachaTap() {
+    const tapPrompt = document.getElementById('gacha-tap-prompt');
+    if(tapPrompt) tapPrompt.classList.remove('active');
+
+    const animContainer = document.getElementById('game-container'); 
+    const chest = document.getElementById('summoned-chest');
+    const mascot = document.getElementById('mascot-container');
+    const eruption = document.getElementById('beam-eruption');
+    const whiteoutOverlay = document.getElementById('gacha-whiteout-overlay');
+    const animTitle = document.getElementById('gacha-anim-title');
+    const animText = document.getElementById('gacha-anim-text');
+    const fill = document.getElementById('gacha-progress-fill');
+
+    if(chest) chest.classList.add('chest-shake-heavy');
+    if(animTitle) animTitle.innerText = "開け、真実の扉！";
+    if(animText) animText.innerText = "エネルギーが限界値に達します！！";
+
+    try { clickSound.currentTime = 0; clickSound.play(); } catch(e){}
+
+    setTimeout(() => {
+        if(chest) {
+            chest.classList.remove('chest-shake-heavy');
+            chest.classList.add('open');
+        }
+        if(mascot) mascot.classList.add('active');
+
+        if (gachaHighestStar >= 5) {
+            if(eruption) eruption.className = 'beam-explosion active-rainbow';
+            if(animContainer) animContainer.classList.add('screen-shake');
+            try { if (navigator.vibrate) navigator.vibrate([200, 100, 300]); } catch(e){}
+        } else {
+            if(eruption) eruption.className = 'beam-explosion active-gold';
+            try { if (navigator.vibrate) navigator.vibrate([150, 150]); } catch(e){}
+        }
+
+        if(fill) fill.style.width = '100%';
+
+        setTimeout(() => {
+            if(whiteoutOverlay) {
+                whiteoutOverlay.style.display = 'block';
+                whiteoutOverlay.className = '';
+            }
+            
+            const animScreen = document.getElementById('gacha-animation-screen');
+            if(animScreen) animScreen.style.display = 'none';
+            if(animContainer) animContainer.classList.remove('screen-shake');
+
+            executeGachaResults(gachaCount, gachaTempResults, gachaIsFree);
+
+            setTimeout(() => {
+                if(whiteoutOverlay) {
+                    whiteoutOverlay.classList.add('whiteout-fade-out');
+                    setTimeout(() => {
+                        whiteoutOverlay.style.display = 'none';
+                    }, 1000);
+                }
+            }, 100);
+
+        }, 1500);
+
+    }, 1200); 
 }
 
 function executeGachaResults(count, results, isFree) {
