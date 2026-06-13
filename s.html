@@ -6,17 +6,13 @@
     <title>おれたちの最強RPG</title>
     <style>
         /* =========================================================
-           🎨 ゲーム全体＆背景（大手アプリ風の究極リッチテクスチャ！）
+           🎨 ゲーム全体＆背景（サイバーシアン×ディープパープル！）
            ========================================================= */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
 
         body {
             font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
             background-color: #000; 
-            background-image: url('KAZIN背景.png'); /* 初期画面の背景 */
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
             color: #fff; 
             margin: 0;
             padding: 0;
@@ -32,64 +28,76 @@
             width: 100%;
             max-width: 450px;
             height: 100vh; 
-            background: linear-gradient(180deg, rgba(8, 15, 30, 0.95) 0%, rgba(2, 5, 10, 0.98) 100%);
             position: relative;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,255,255,0.1), inset 0 0 30px rgba(0,0,0,1);
+            box-shadow: 0 0 50px rgba(0, 180, 219, 0.15), inset 0 0 30px rgba(0,0,0,1);
             overflow: hidden;
-            border-left: 2px solid rgba(102, 252, 241, 0.3);
-            border-right: 2px solid rgba(102, 252, 241, 0.3);
+            border-left: 2px solid rgba(0, 242, 254, 0.4);
+            border-right: 2px solid rgba(0, 242, 254, 0.4);
+            background-color: #000;
         }
 
-        /* サイバーグリッド＆宇宙空間背景アニメーション */
+        /* 🌠 背景の切り替えレイヤーたち */
+        .bg-image-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            z-index: 0; transition: background-image 0.5s ease;
+        }
+
+        /* サイバーグリッド＆宇宙空間背景アニメーション（正方形が動くところ！） */
         .bg-grid {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
-                radial-gradient(circle at center, rgba(102, 252, 241, 0.1) 0%, transparent 60%),
-                linear-gradient(rgba(102, 252, 241, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(102, 252, 241, 0.05) 1px, transparent 1px);
+                radial-gradient(circle at center, rgba(0, 242, 254, 0.1) 0%, transparent 60%),
+                linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
             animation: gridScroll 15s linear infinite;
-            pointer-events: none;
-            z-index: 0;
+            pointer-events: none; z-index: 1;
         }
         @keyframes gridScroll { 0% { background-position: 0 0, 0 0, 0 0; } 100% { background-position: 0 0, 0 300px, 0 0; } }
+
+        /* 背景を少し暗くするグラデーションフィルター（深みのあるパープル） */
+        .bg-gradient-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(15, 5, 30, 0.85) 0%, rgba(5, 2, 15, 0.98) 100%);
+            pointer-events: none; z-index: 2; transition: opacity 0.5s ease;
+        }
 
         /* =========================================================
            🔝 ヘッダー（上部固定ステータスバー）
            ========================================================= */
         #header-bar {
             height: 60px;
-            background: linear-gradient(to bottom, #1a2a4a, #0a1122);
-            border-bottom: 2px solid #f8b500;
+            background: linear-gradient(to bottom, #1a0a3a, #0a0216);
+            border-bottom: 2px solid #00b4db;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 10px;
             z-index: 50;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.2);
+            box-shadow: 0 5px 20px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.2);
             display: none; 
         }
         .header-status { display: flex; gap: 8px; }
         .resource-pill {
-            background: linear-gradient(to bottom, rgba(30,30,30,0.8), rgba(0,0,0,0.9));
-            border: 1px solid rgba(255,255,255,0.3);
+            background: linear-gradient(to bottom, rgba(30,10,50,0.8), rgba(10,0,20,0.9));
+            border: 1px solid rgba(0, 242, 254, 0.4);
             border-radius: 20px;
             padding: 2px 10px 2px 2px;
             display: flex; align-items: center; font-size: 14px; font-weight: 900;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,1), inset 0 0 10px rgba(0, 180, 219, 0.3);
         }
         .resource-pill img {
             width: 26px; height: 26px; border-radius: 50%; margin-right: 5px;
-            border: 1px solid #fff; background: #222; box-shadow: 0 0 5px rgba(255,255,255,0.5);
+            border: 1px solid #00f2fe; background: #111; box-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
         }
         .player-info-pill { display: flex; align-items: center; }
         .player-info-pill img {
             width: 40px; height: 40px; border-radius: 50%;
-            border: 2px solid #66fcf1; object-fit: cover; margin-right: 8px;
-            box-shadow: 0 0 8px #66fcf1;
+            border: 2px solid #00f2fe; object-fit: cover; margin-right: 8px;
+            box-shadow: 0 0 10px #00f2fe;
         }
 
         /* =========================================================
@@ -107,46 +115,53 @@
 
         h2 { 
             color: #ffffff; text-align: left;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(102, 252, 241, 0.6);
-            border-bottom: 2px solid rgba(102, 252, 241, 0.5);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.8), 2px 2px 4px rgba(0,0,0,0.9);
+            border-bottom: 2px solid rgba(0, 242, 254, 0.5);
             padding-bottom: 5px; margin-top: 5px; margin-bottom: 15px;
             font-size: 20px; letter-spacing: 1px;
+            box-shadow: 0 5px 5px -5px rgba(0, 180, 219, 0.5);
         }
-        h3 { color: #f8b500; font-size: 14px; margin-top: 0; }
+        h3 { color: #00f2fe; font-size: 14px; margin-top: 0; text-shadow: 0 0 8px rgba(0, 242, 254, 0.5); }
 
         /* =========================================================
            👇 フッター（下部固定ナビゲーションバー）
            ========================================================= */
         #footer-nav {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
-            background: linear-gradient(to top, #050a14, #1a2a4a);
-            border-top: 2px solid #66fcf1;
+            background: linear-gradient(to top, #0a0216, #1a0a3a);
+            border-top: 2px solid #00f2fe;
             display: flex; justify-content: space-around; align-items: center;
-            z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.9); display: none; 
+            z-index: 50; box-shadow: 0 -5px 25px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.1);
+            display: none; 
         }
         .nav-btn {
-            background: none; border: none; color: #7a8b9e;
+            background: none; border: none; color: #6b5b95;
             font-size: 10px; font-weight: bold; font-family: 'Noto Sans JP', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             width: 20%; height: 100%; padding: 0; margin: 0; box-shadow: none; border-radius: 0; transition: all 0.2s; cursor: pointer;
         }
-        .nav-btn .icon { font-size: 26px; margin-bottom: 3px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: all 0.2s; }
-        .nav-icon-img { width: 26px; height: 26px; margin-bottom: 3px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: all 0.2s; object-fit: contain; }
         
-        .nav-btn.active-nav { color: #66fcf1; }
-        .nav-btn.active-nav .icon { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 10px #66fcf1); }
-        .nav-btn.active-nav .nav-icon-img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 10px #66fcf1); }
+        .nav-btn .icon { font-size: 32px; margin-bottom: 3px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); transition: all 0.2s; }
+        .nav-icon-img { width: 32px; height: 32px; margin-bottom: 3px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); transition: all 0.2s; object-fit: contain; }
+        
+        .nav-btn.active-nav { color: #00f2fe; text-shadow: 0 0 8px rgba(0, 242, 254, 0.8); }
+        .nav-btn.active-nav .icon { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)); }
+        .nav-btn.active-nav .nav-icon-img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)); }
 
         /* =========================================================
-           👆 ボタンデザイン
+           👆 ボタンデザイン（内側発光サイバーグロー効果！）
            ========================================================= */
         button {
             display: block; width: 100%; padding: 14px; margin: 10px 0;
-            background: linear-gradient(to bottom, #2d4b7a, #101a30);
-            color: #66fcf1; border: 1px solid #45f3ff; border-radius: 8px;
+            background: linear-gradient(to bottom, #2c0b5c, #0d0221);
+            color: #00f2fe; border: 1px solid #00b4db; border-radius: 8px;
             font-size: 15px; font-weight: 900; cursor: pointer; position: relative; overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.3);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); letter-spacing: 1px;
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.8), 
+                inset 0 0 15px rgba(0, 180, 219, 0.5), /* 内側からのシアン発光 */
+                inset 0 1px 2px rgba(255,255,255,0.3); /* 上部のハイライト */
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.8), 1px 1px 2px rgba(0,0,0,0.9); letter-spacing: 1px;
+            transition: all 0.1s ease;
         }
         button::after {
             content: ''; position: absolute; top: -50%; left: -60%; width: 20%; height: 200%;
@@ -154,59 +169,71 @@
             animation: buttonShine 4s ease-in-out infinite; pointer-events: none;
         }
         @keyframes buttonShine { 0% { left: -60%; } 20% { left: 150%; } 100% { left: 150%; } }
-        button:active { transform: scale(0.96); box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); }
-
-        .btn-gold { background: linear-gradient(to bottom, #ffe259, #ffa751); color: #111; border: 1px solid #fff; text-shadow: none; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.8); }
-        .btn-red { background: linear-gradient(to bottom, #ff416c, #8a0029); color: #fff; border: 1px solid #ffb6b9; }
-        .btn-green { background: linear-gradient(to bottom, #4ecca3, #1a523e); color: #fff; border: 1px solid #a8ff78; }
-
-        .btn-start {
-            position: relative; display: block; width: 80%; margin: 20px auto; padding: 22px;
-            background: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db, #4ecca3, #ff007f);
-            background-size: 400% 400%; color: #ffffff; font-size: 28px; font-weight: 900; text-align: center;
-            border: 4px solid #ffffff; border-radius: 50px;
-            text-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.8);
-            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.5);
-            animation: startBgMove 3s ease infinite, startPulse 1.5s infinite alternate; letter-spacing: 3px;
+        button:active { 
+            transform: scale(0.96); 
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), inset 0 0 25px rgba(0, 180, 219, 0.8); 
         }
-        @keyframes startBgMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes startPulse { 0% { transform: scale(1); box-shadow: 0 10px 30px rgba(255, 0, 127, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5); } 100% { transform: scale(1.08); box-shadow: 0 15px 50px rgba(0, 180, 219, 1), inset 0 0 30px rgba(255, 255, 255, 0.9); } }
+
+        .btn-gold { 
+            background: linear-gradient(to bottom, #4a2c00, #1a0f00); color: #ffeb3b; border-color: #f8b500; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 15px rgba(248, 181, 0, 0.5), inset 0 1px 2px rgba(255,255,255,0.3); 
+            text-shadow: 0 0 8px rgba(248, 181, 0, 0.8), 1px 1px 2px rgba(0,0,0,0.9);
+        }
+        .btn-red { 
+            background: linear-gradient(to bottom, #4a0014, #1a0007); color: #ff416c; border-color: #ff007f; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 15px rgba(255, 0, 127, 0.5), inset 0 1px 2px rgba(255,255,255,0.3);
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.8), 1px 1px 2px rgba(0,0,0,0.9);
+        }
+        .btn-green { 
+            background: linear-gradient(to bottom, #003a20, #00150b); color: #4ecca3; border-color: #38ef7d; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 15px rgba(56, 239, 125, 0.5), inset 0 1px 2px rgba(255,255,255,0.3);
+            text-shadow: 0 0 8px rgba(56, 239, 125, 0.8), 1px 1px 2px rgba(0,0,0,0.9);
+        }
 
         /* 🎚️ 音量スライダー */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
-            background: #66fcf1; cursor: pointer; margin-top: -8px; 
-            box-shadow: 0 0 10px #66fcf1, inset 0 0 5px #fff; border: 2px solid #162238;
+            -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+            background: #00f2fe; cursor: pointer; margin-top: -8px; 
+            box-shadow: 0 0 15px #00f2fe, inset 0 0 8px #fff; border: 2px solid #0d0221;
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; cursor: pointer; background: #162447;
-            border-radius: 3px; border: 1px solid #45f3ff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+            width: 100%; height: 8px; cursor: pointer; background: #160a2b;
+            border-radius: 4px; border: 1px solid #00b4db; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);
         }
 
         /* =========================================================
-           💳 リッチカードデザイン
+           💳 リッチカードデザイン＆各種パネル
            ========================================================= */
         .item-list { list-style: none; padding: 0; margin: 0; }
-        .rich-card {
-            background: 
-                linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, rgba(0,0,0,0.5) 100%),
-                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px),
-                linear-gradient(135deg, #1e283c, #0a0f19);
-            margin: 12px 0; border-radius: 12px; position: relative;
-            display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3);
-            border: 2px solid; transition: transform 0.2s;
-        }
-        .rich-card:active { transform: scale(0.98); }
         
-        .rarity-1 { border-color: #b0c4de; } 
-        .rarity-2 { border-color: #8fbc8f; } 
-        .rarity-3 { border-color: #ffeb3b; box-shadow: 0 0 10px rgba(255,235,59,0.3), inset 0 1px 1px rgba(255,255,255,0.5); } 
-        .rarity-4 { border-color: #ff4500; box-shadow: 0 0 12px rgba(255,69,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); } 
-        .rarity-5 { border-image: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db) 1; box-shadow: 0 0 15px rgba(255,0,127,0.5); } 
-        .rarity-6 { border-color: #cc00ff; box-shadow: 0 0 20px rgba(204,0,255,0.6); } 
-        .rarity-7 { border-color: #00ffff; box-shadow: 0 0 25px rgba(0,255,255,0.8); } 
+        .rich-card, .status-box {
+            background: 
+                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.6) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.15) 10px, rgba(0,0,0,0.15) 20px),
+                linear-gradient(135deg, #1c0f38, #0a0316); /* 深いパープル */
+            border-radius: 12px; position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
+            border: 2px solid rgba(0, 180, 219, 0.4); 
+            box-shadow: 
+                0 8px 16px rgba(0,0,0,0.8), 
+                inset 0 0 25px rgba(0, 180, 219, 0.15), /* 内側発光 */
+                inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: transform 0.2s;
+        }
+        
+        .rich-card { margin: 12px 0; }
+        .rich-card:active { transform: scale(0.98); }
+        .status-box { padding: 15px; margin-bottom: 20px; }
+        
+        /* レアリティごとの枠色＆内側発光 */
+        .rarity-1 { border-color: #b0c4de; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 15px rgba(176,196,222,0.2); } 
+        .rarity-2 { border-color: #8fbc8f; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 15px rgba(143,188,143,0.2); } 
+        .rarity-3 { border-color: #ffeb3b; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,235,59,0.3); } 
+        .rarity-4 { border-color: #ff4500; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 25px rgba(255,69,0,0.4); } 
+        .rarity-5 { border-image: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db) 1; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,0,127,0.4); } 
+        .rarity-6 { border-color: #cc00ff; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 35px rgba(204,0,255,0.5); } 
+        .rarity-7 { border-color: #00ffff; box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,255,255,0.6); } 
 
         .card-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -234,45 +261,37 @@
         .card-body { display: flex; padding: 10px; padding-left: 45px; align-items: center; gap: 10px; }
         
         .card-name { font-size: 16px; font-weight: 900; flex: 1; text-shadow: 1px 1px 2px #000; letter-spacing: 0.5px; }
-        .card-stats { font-size: 11px; color: #ddd; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        .card-stats { font-size: 11px; color: #ddd; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9); }
         .card-actions { display: flex; flex-direction: column; gap: 6px; width: 90px; }
-        .card-actions button { margin: 0; padding: 6px; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .card-actions button { margin: 0; padding: 6px; font-size: 11px; }
 
         .stars { color: #ffeb3b; font-size: 12px; letter-spacing: 2px; text-shadow: 0 0 5px #ffeb3b; margin-left: auto; }
 
         .selected-char { animation: blink-cyan 1.2s infinite alternate !important; transform: scale(1.02); z-index: 10; }
 
-        /* 📊 ステータスボックス */
-        .status-box {
-            background: linear-gradient(135deg, rgba(26, 30, 46, 0.9), rgba(10, 12, 20, 0.95));
-            padding: 15px; border-radius: 12px; margin-bottom: 20px;
-            border: 1px solid rgba(102, 252, 241, 0.3);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
-        }
-
         /* 👥 パーティ編成枠 */
         .party-slots-container { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 6px; }
         .party-slot {
-            flex: 1; aspect-ratio: 1 / 1.2; background: rgba(0, 0, 0, 0.8);
-            border: 2px dashed rgba(102, 252, 241, 0.3); border-radius: 8px;
+            flex: 1; aspect-ratio: 1 / 1.2; background: rgba(5, 2, 15, 0.8);
+            border: 2px dashed rgba(0, 242, 254, 0.4); border-radius: 8px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; text-align: center; padding: 4px; box-sizing: border-box;
             transition: all 0.2s; position: relative; overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,1);
+            box-shadow: inset 0 0 15px rgba(0, 180, 219, 0.2);
         }
         .party-slot.filled {
             border-style: solid;
-            background: linear-gradient(to bottom, rgba(30,60,90,0.9), rgba(10,20,40,0.9));
-            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.2);
+            background: linear-gradient(to bottom, rgba(40, 20, 80, 0.9), rgba(10, 5, 20, 0.9));
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 20px rgba(0, 242, 254, 0.3), inset 0 1px 2px rgba(255,255,255,0.2);
         }
 
         /* =========================================================
            🎫 スタンプカード
            ========================================================= */
         .stamp-card-container {
-            background: linear-gradient(135deg, #1d2538, #0d1220);
+            background: linear-gradient(135deg, #1c0f38, #0a0316);
             border: 2px solid #f8b500; border-radius: 12px; padding: 12px; margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(248,181,0,0.2);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.9), inset 0 0 20px rgba(248,181,0,0.25);
         }
         .stamp-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -281,14 +300,14 @@
         }
         .stamp-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
         .stamp-slot {
-            aspect-ratio: 1/1; border-radius: 50%; background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
+            aspect-ratio: 1/1; border-radius: 50%; background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
             font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.3); position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,1);
         }
         .stamp-slot.active-stamp {
             background: radial-gradient(circle, #ffeb3b, #f8b500); border-color: #ffffff; color: #111111;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.8); box-shadow: 0 0 8px #f8b500;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8); box-shadow: 0 0 10px #f8b500;
             animation: stampBounce 0.3s ease-out;
         }
         @keyframes stampBounce { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
@@ -299,7 +318,7 @@
         }
 
         /* =========================================================
-           🎰 ガチャ演出画面（宝箱復活＆超豪華バージョン！）
+           🎰 ガチャ演出画面
            ========================================================= */
         #gacha-animation-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -341,30 +360,30 @@
             transition: opacity 0.5s, transform 0.5s;
         }
         .outer-gear {
-            position: absolute; width: 200px; height: 200px; border: 6px dashed #45f3ff;
+            position: absolute; width: 200px; height: 200px; border: 6px dashed #00f2fe;
             border-radius: 50%; animation: rotateGear 12s linear infinite;
-            box-shadow: 0 0 20px rgba(69, 243, 255, 0.5);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.5);
         }
         .inner-ring {
             position: absolute; width: 150px; height: 150px; border: 4px double #f8b500;
             border-radius: 50%; animation: rotateGear 6s linear infinite reverse;
-            box-shadow: 0 0 15px rgba(248, 181, 0, 0.4);
+            box-shadow: 0 0 20px rgba(248, 181, 0, 0.5);
         }
         .core-sphere {
             position: absolute; width: 90px; height: 90px;
-            background: radial-gradient(circle, rgba(102, 252, 241, 0.9) 0%, rgba(0, 180, 219, 0.1) 75%);
-            border-radius: 50%; box-shadow: 0 0 30px #66fcf1;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.9) 0%, rgba(0, 180, 219, 0.1) 75%);
+            border-radius: 50%; box-shadow: 0 0 35px #00f2fe;
             animation: spherePulse 1.2s infinite alternate;
         }
         @keyframes rotateGear { 100% { transform: rotate(360deg); } }
         @keyframes spherePulse { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 1; } }
 
         .magic-circle {
-            position: absolute; width: 300px; height: 300px; border: 4px dashed rgba(78, 204, 163, 0.7);
+            position: absolute; width: 300px; height: 300px; border: 4px dashed rgba(0, 242, 254, 0.5);
             border-radius: 50%; animation: spin 4s linear infinite; z-index: 8; transition: border-color 0.5s, box-shadow 0.5s;
         }
-        .magic-circle.gold { border: 5px dashed #f8b500; box-shadow: 0 0 25px #f8b500, inset 0 0 25px #f8b500; animation: spin 2s linear infinite; }
-        .magic-circle.rainbow { border: 7px dashed #ff007f; box-shadow: 0 0 45px #ffeb3b, inset 0 0 40px #00b4db; animation: spin 0.8s linear infinite reverse; }
+        .magic-circle.gold { border: 5px dashed #f8b500; box-shadow: 0 0 30px #f8b500, inset 0 0 30px #f8b500; animation: spin 2s linear infinite; }
+        .magic-circle.rainbow { border: 7px dashed #ff007f; box-shadow: 0 0 50px #ffeb3b, inset 0 0 45px #00b4db; animation: spin 0.8s linear infinite reverse; }
 
         /* 召喚宝箱 */
         .summoned-chest-container {
@@ -385,7 +404,7 @@
         }
         .summoned-chest.rainbow {
             background: linear-gradient(135deg, #ff007f 0%, #ffeb3b 50%, #00b4db 100%); border-color: #ffffff;
-            box-shadow: 0 10px 40px rgba(255, 0, 127, 0.6), 0 0 35px rgba(102, 252, 241, 0.8);
+            box-shadow: 0 10px 40px rgba(255, 0, 127, 0.6), 0 0 35px rgba(0, 242, 254, 0.8);
         }
         .chest-lid {
             position: absolute; top: -32px; left: -4px; width: 130px; height: 42px;
@@ -396,7 +415,7 @@
         .summoned-chest.open .chest-lid { transform: rotateX(-110deg) translateY(-10px); }
         .star-lock {
             position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-            font-size: 26px; color: #66fcf1; text-shadow: 0 0 10px #66fcf1;
+            font-size: 26px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe;
             animation: starBlink 0.8s infinite alternate; font-weight: bold;
         }
         .summoned-chest.rainbow .star-lock { color: #ffffff; text-shadow: 0 0 15px #ff007f, 0 0 10px #ffeb3b; }
@@ -479,46 +498,47 @@
             80% { transform: translate(8px, 8px) rotate(1.5deg); } 100% { transform: translate(0, 0) rotate(0deg); }
         }
 
-        .gacha-progress-bar { width: 80%; height: 12px; background-color: #111; border-radius: 6px; overflow: hidden; border: 1px solid #66fcf1; z-index: 101; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-        .gacha-progress-fill { height: 100%; width: 0%; background: linear-gradient(45deg, #66fcf1, #4ecca3); transition: width 0.1s linear; }
+        .gacha-progress-bar { width: 80%; height: 12px; background-color: #111; border-radius: 6px; overflow: hidden; border: 1px solid #00f2fe; z-index: 101; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); }
+        .gacha-progress-fill { height: 100%; width: 0%; background: linear-gradient(45deg, #00f2fe, #4ecca3); transition: width 0.1s linear; }
 
         /* =========================================================
            🔨 合体演出画面
            ========================================================= */
         #combine-animation-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(5, 5, 10, 0.95); z-index: 205;
+            background-color: rgba(5, 2, 15, 0.95); z-index: 205;
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
         .combine-spark {
             width: 100px; height: 100px; border-radius: 50%;
-            background: radial-gradient(circle, #f8b500 0%, rgba(248, 181, 0, 0) 70%);
-            box-shadow: 0 0 40px #f8b500; animation: combinePulse 0.3s infinite alternate; margin-bottom: 20px;
+            background: radial-gradient(circle, #00f2fe 0%, rgba(0, 242, 254, 0) 70%);
+            box-shadow: 0 0 50px #00f2fe; animation: combinePulse 0.3s infinite alternate; margin-bottom: 20px;
         }
-        @keyframes combinePulse { 0% { transform: scale(0.8) rotate(0deg); box-shadow: 0 0 20px #f8b500; } 100% { transform: scale(1.4) rotate(180deg); box-shadow: 0 0 80px #ff007f, 0 0 40px #f8b500; filter: hue-rotate(90deg); } }
+        @keyframes combinePulse { 0% { transform: scale(0.8) rotate(0deg); box-shadow: 0 0 20px #00f2fe; } 100% { transform: scale(1.4) rotate(180deg); box-shadow: 0 0 80px #00b4db, 0 0 40px #00f2fe; filter: hue-rotate(90deg); } }
 
         /* 💬 アラート＆モーダル類 */
-        #custom-alert, #weapon-select-modal, #weapon-exchange-modal {
+        #custom-alert, #weapon-select-modal, #weapon-exchange-modal, #title-confirm-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 380px; background: linear-gradient(135deg, #1f2833, #0b0c10);
-            border: 2px solid #66fcf1; border-radius: 15px; padding: 20px; z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(102, 252, 241, 0.2); text-align: center;
+            width: 85%; max-width: 380px; background: linear-gradient(135deg, #1c0f38, #0a0316);
+            border: 2px solid #00f2fe; border-radius: 15px; padding: 20px; z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(0, 242, 254, 0.2); text-align: center;
         }
         #weapon-select-modal { border-color: #f8b500; z-index: 1001; }
-        #weapon-exchange-modal { border: 3px solid #ff007f; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(255, 0, 127, 0.2); z-index: 1002; }
+        #weapon-exchange-modal { border: 3px solid #ff007f; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(255, 0, 127, 0.2); z-index: 1002; }
+        #title-confirm-modal { border-color: #ff416c; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(255, 65, 108, 0.2); z-index: 1003; }
         
-        #alert-message-box { max-height: 280px; overflow-y: auto; margin: 15px 0; padding: 10px; text-align: left; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px inset #45f3ff; }
-        #alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 999; }
+        #alert-message-box { max-height: 280px; overflow-y: auto; margin: 15px 0; padding: 10px; text-align: left; background: rgba(0,0,0,0.6); border-radius: 8px; border: 1px inset #00f2fe; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        #alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 999; }
         
         .gacha-banner {
-            background: linear-gradient(135deg, rgba(22, 36, 71, 0.9), rgba(15, 20, 30, 0.9));
+            background: linear-gradient(135deg, rgba(30, 20, 50, 0.9), rgba(10, 5, 20, 0.9));
             border-radius: 12px; margin-bottom: 15px; cursor: pointer;
             transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2);
-            text-align: left; box-shadow: 0 5px 10px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+            text-align: left; box-shadow: 0 8px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0, 180, 219, 0.2); position: relative; overflow: hidden;
         }
         .gacha-banner::after {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
             transform: skewX(-25deg); animation: bannerShine 5s infinite;
         }
     </style>
@@ -532,22 +552,32 @@
     <button onclick="closeAlert()" style="margin-top: 5px; padding: 10px;">とじる</button>
 </div>
 
+<!-- タイトルへ戻る確認ポップアップ -->
+<div id="title-confirm-modal">
+    <h3 style="color: #ff416c; margin-top: 0; text-shadow: 0 0 10px rgba(255,65,108,0.8);">確認</h3>
+    <p style="color: #fff; font-size: 14px; margin-bottom: 20px;">タイトル画面に戻りますか？</p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="btn-red" style="margin: 0; padding: 10px; width: 45%;" onclick="executeGoToTitle()">はい</button>
+        <button style="margin: 0; padding: 10px; width: 45%; background: linear-gradient(to bottom, #333, #111); border-color: #555; color: #aaa;" onclick="closeTitleConfirm()">いいえ</button>
+    </div>
+</div>
+
 <!-- ⚔️ 武器素材選択ポップアップ -->
 <div id="weapon-select-modal">
     <h3 style="color: #ffeb3b; margin-top: 0;">合体する素材をえらぶ</h3>
-    <p id="combine-info-text" style="font-size: 13px; color: #66fcf1; margin-bottom: 5px; font-weight: bold;">あと ◯ 個 選べるよ！</p>
+    <p id="combine-info-text" style="font-size: 13px; color: #00f2fe; margin-bottom: 5px; font-weight: bold;">あと ◯ 個 選べるよ！</p>
     <p style="font-size: 11px; color: #ccc; margin-top:0; margin-bottom: 10px;">※タップして素材を選んでね。<span style="color:#ff5555;">選んだ装備は消えます！</span></p>
     <ul id="material-list" class="item-list" style="max-height: 200px; overflow-y: auto; text-align: left; padding: 5px;"></ul>
     <button id="btn-execute-combine" onclick="confirmCombineSelection()" class="btn-gold" style="margin-top: 15px; padding: 12px;">✅ 決定して合体！</button>
-    <button onclick="closeCombineSelectModal()" style="margin-top: 5px; background: #333; border-color: #555; color: #aaa; padding: 8px;">やめる</button>
+    <button onclick="closeCombineSelectModal()" style="margin-top: 5px; background: linear-gradient(to bottom, #333, #111); border-color: #555; color: #aaa; padding: 8px;">やめる</button>
 </div>
 
 <!-- 👑 スタンプ20個特典：好きな武器交換所モーダル -->
 <div id="weapon-exchange-modal">
-    <h3 style="color: #ff007f; margin-top: 0; text-shadow: 0 0 10px rgba(255,0,127,0.5);">🎁 プレミアム装備交換所</h3>
+    <h3 style="color: #ff007f; margin-top: 0; text-shadow: 0 0 15px rgba(255,0,127,0.8);">🎁 プレミアム装備交換所</h3>
     <p style="font-size: 13px; color: #fff; margin-bottom: 5px; font-weight: bold;">スタンプ20個達成報酬！</p>
     <p style="font-size: 11px; color: #ccc; margin-top:0; margin-bottom: 10px;">最高レアリティ（★5以上）の好きな装備を1つ選んで獲得できるよ！</p>
-    <div style="max-height: 240px; overflow-y: auto; text-align: left; padding: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" id="exchange-weapon-list"></div>
+    <div style="max-height: 240px; overflow-y: auto; text-align: left; padding: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.6); border-radius: 8px; border: 1px inset rgba(255,0,127,0.5); box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);" id="exchange-weapon-list"></div>
     <button id="btn-execute-exchange" onclick="executeWeaponExchange()" class="btn-gold" style="margin: 0; padding: 12px; font-size: 16px; font-weight: bold;">✅ これを受け取る！</button>
 </div>
 
@@ -557,7 +587,7 @@
     <div class="gacha-particles" id="gacha-particles"></div>
     <div id="gacha-cut-in" class="cut-in-text">✨ 伝説級 限界突破 ✨</div>
 
-    <h2 id="gacha-anim-title" style="color: #66fcf1; margin-bottom: 10px; z-index: 101;">草核の祈り...</h2>
+    <h2 id="gacha-anim-title" style="color: #00f2fe; margin-bottom: 10px; z-index: 101;">草核の祈り...</h2>
     <p id="gacha-anim-text" style="color: #ccc; font-size: 14px; margin-bottom: 30px; z-index: 101;">大自然のエネルギーが集まっています</p>
     
     <!-- 召喚装置 & 魔法陣 -->
@@ -605,14 +635,21 @@
 
 <!-- 🔨 合体演出画面 -->
 <div id="combine-animation-screen">
-    <h2 style="color: #f8b500; text-shadow: 0 0 10px #f8b500;">🌀 装備合体中... 🌀</h2>
+    <h2 style="color: #00f2fe; text-shadow: 0 0 15px #00f2fe;">🌀 装備合体中... 🌀</h2>
     <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">限界を突破して新しい力を引き出しています！</p>
     <div class="combine-spark"></div>
-    <p style="font-size: 12px; color: #66fcf1; animation: blink-cyan 0.8s infinite alternate;">SPARKING!!!</p>
+    <p style="font-size: 12px; color: #00f2fe; animation: blink-cyan 0.8s infinite alternate;">SPARKING!!!</p>
 </div>
 
 <div id="game-container">
-    <div class="bg-grid"></div>
+    <!-- 🖼️ 背景画像のレイヤー（KAZIN背景.png と kazinhakei.png がここで切り替わります） -->
+    <div class="bg-image-layer" id="bg-image-layer" style="background-image: url('KAZIN背景.png');"></div>
+    
+    <!-- 🟦 アニメーションする正方形のグリッドレイヤー -->
+    <div class="bg-grid" id="bg-grid" style="display: none;"></div>
+    
+    <!-- 🌑 少し暗くするフィルターレイヤー -->
+    <div class="bg-gradient-overlay" id="bg-gradient-overlay" style="opacity: 0.1;"></div>
 
     <!-- 🔝 上部ステータスバー -->
     <div id="header-bar">
@@ -625,243 +662,251 @@
                 <img src="草の化石.png" onerror="this.src='草の化石.jpg'; this.onerror=function(){this.src='https://img.icons8.com/color/48/000000/fossil.png'}">
                 <span id="header-materials">0</span>
             </div>
-            <div class="resource-pill" style="color: #66fcf1; border-color: #66fcf1;">
+            <div class="resource-pill" style="color: #00f2fe; border-color: #00f2fe;">
                 <img src="草核.jpg" onerror="this.src='草核.png'; this.onerror=function(){this.src='https://img.icons8.com/color/48/000000/emerald.png'}">
                 <span id="header-stones">0</span>
             </div>
         </div>
     </div>
 
-    <div id="main-content">
+    <div id="main-content" style="padding: 0; height: 100%;">
         <!-- =========================================================
            ① タイトル画面
            ========================================================= -->
-        <div id="screen-title" class="screen active">
-            <br><br><br>
-            <div style="text-align: center; display: flex; justify-content: center; gap: 15px;">
-                <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 320px; height: 128px; filter: drop-shadow(0 0 20px #66fcf1); object-fit: contain;">
-            </div>
-            <h1 style="font-size: 28px; margin-bottom: 0;">おれたちの最強RPG</h1>
-            <p style="text-align: center; color: #45f3ff; font-size: 12px;">~ セーブデータ: sugoigame ~</p>
-            <br><br><br>
-            <button class="btn-start" onclick="startGame(event)">TAP TO START</button>
-            <button style="background: transparent; border: none; box-shadow: none; color: #777; font-weight: normal; margin-top: 30px;" onclick="resetGame()">データを初期化する</button>
-        </div>
-
-        <!-- =========================================================
-           ② ホーム画面
-           ========================================================= -->
-        <div id="screen-home" class="screen">
-            <h2>🏠 ホーム</h2>
-
-            <div class="status-box" style="display: flex; align-items: center; gap: 20px; padding: 20px; border-color: #66fcf1; background: linear-gradient(135deg, rgba(10, 20, 40, 0.9), rgba(5, 10, 20, 0.95));">
-                <img id="home-player-icon" src="" alt="👤" style="width: 90px; height: 90px; border-radius: 12px; object-fit: cover; border: 3px solid #66fcf1; box-shadow: 0 0 15px rgba(102, 252, 241, 0.5);">
-                <div style="flex-grow: 1;">
-                    <span style="font-size: 11px; color: #45f3ff;">プレイヤー</span>
-                    <h3 id="home-player-name" style="margin: 3px 0 0 0; text-align: left; font-size: 22px; color: #ffffff;">勇者</h3>
-                    <div style="margin-top: 5px; font-size: 12px; color: #f8b500;">★パーティ総合攻撃力: <span id="home-power" style="font-size: 16px; font-weight: bold;">0</span></div>
-                </div>
-                <button onclick="openProfileScreen()" style="width: auto; margin: 0; padding: 8px 12px; font-size: 12px; background: rgba(42, 67, 101, 0.8); border-color: #8f94fb;">📝設定</button>
+        <div id="screen-title" class="screen active" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;">
+            
+            <!-- 🌟 KAZINロゴ（もっと上へ配置、サイズを以前の半分＝約425pxに） -->
+            <div style="position: absolute; top: 5%; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; pointer-events: none; width: 100%;">
+                <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 425px; max-width: 95%; filter: drop-shadow(0 0 20px #00f2fe); object-fit: contain; margin-left: auto; margin-right: auto;">
             </div>
             
-            <div class="status-box" style="font-size: 12px;">
-                <p style="margin-top: 0; color: #66fcf1; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">🛡️ 現在のそうび一覧</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⚔️ <strong id="eq-display-weapon" style="color:#fff;">なし</strong></div>
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👤 <strong id="eq-display-head" style="color:#fff;">なし</strong></div>
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👕 <strong id="eq-display-body_top" style="color:#fff;">なし</strong></div>
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👖 <strong id="eq-display-body_bottom" style="color:#fff;">なし</strong></div>
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🛡️ <strong id="eq-display-shield" style="color:#fff;">なし</strong></div>
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">💍 <strong id="eq-display-accessory" style="color:#fff;">なし</strong></div>
-                </div>
-                <div style="margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ❤️ こころ: <strong id="eq-display-heart" style="color:#ff79c6;">なし</strong>
-                </div>
-            </div>
-
-            <button class="story-btn" onclick="goToStory()" style="padding: 20px; font-size: 18px;">⚔️ 冒険に出る (Story)</button>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button style="margin:0;" onclick="openPartyScreen()">👥 キャラ一覧</button>
-                <button style="margin:0;" onclick="openEquipScreen('weapon')">🛡️ 装備・合体</button>
-            </div>
-            
-            <button onclick="changeScreen('gacha')" style="margin-top: 10px; background: linear-gradient(to bottom, #d53369, #cbad6d); border-color: #ffb6b9;">✨ ガチャを引く</button>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button style="margin:0; background: linear-gradient(to bottom, #4b6cb7, #182848); border-color: #8f94fb;" onclick="changeScreen('settings')">⚙️ 設定</button>
-                <button style="margin:0; background: linear-gradient(to bottom, #e43f5a, #1b1b2f); border-color: #ff416c;" onclick="goToTitle()">🚪 タイトルへ</button>
-            </div>
-        </div>
-
-        <!-- =========================================================
-           ⚙️ 設定画面
-           ========================================================= -->
-        <div id="screen-settings" class="screen">
-            <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">⚙️ 設定</h2>
-            
-            <div class="status-box" style="border-color: #8f94fb;">
-                <label style="display: block; font-size: 16px; color: #66fcf1; font-weight: bold;">BGM 音量: <span id="bgm-vol-text" style="color:#fff;">50%</span></label>
-                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">BGM（BitCastle / KAZINテーマ）の音量調整です。（2倍強化機能搭載！）</p>
-                <input type="range" id="bgm-volume" min="0" max="100" value="50" onchange="updateVolume()">
+            <!-- 🌟 スタートボタン（背景のTAP TO STARTの位置に合わせる）と初期化ボタン -->
+            <div style="position: absolute; bottom: 1%; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; z-index: 30;">
                 
-                <div style="margin-top: 25px;"></div>
+                <button style="background: transparent; border: none; box-shadow: none; color: #aaa; font-weight: normal; margin-bottom: 5px; width: auto; font-size: 12px; text-shadow: 0 0 5px #000;" onclick="resetGame()">データを初期化する</button>
+
+                <!-- 透明なスタートボタン（高さを1.5倍にして押しやすく、背景の文字に合わせました！） -->
+                <button onclick="startGame(event)" style="width: 100%; height: 100px; margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; cursor: pointer; -webkit-tap-highlight-color: transparent; outline: none;"></button>
+            </div>
+        </div>
+
+        <!-- 以下の画面は padding を戻すためのラッパー -->
+        <div style="padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto;" id="inner-content-wrapper">
+            <!-- =========================================================
+               ② ホーム画面
+               ========================================================= -->
+            <div id="screen-home" class="screen">
+                <h2>🏠 ホーム</h2>
+
+                <div class="status-box" style="display: flex; align-items: center; gap: 20px;">
+                    <img id="home-player-icon" src="" alt="👤" style="width: 90px; height: 90px; border-radius: 12px; object-fit: cover; border: 3px solid #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);">
+                    <div style="flex-grow: 1;">
+                        <span style="font-size: 11px; color: #45f3ff;">プレイヤー</span>
+                        <h3 id="home-player-name" style="margin: 3px 0 0 0; text-align: left; font-size: 22px; color: #ffffff; text-shadow: 0 0 10px rgba(0, 180, 219, 0.8);">勇者</h3>
+                        <div style="margin-top: 5px; font-size: 12px; color: #f8b500; text-shadow: 0 0 5px rgba(248, 181, 0, 0.8);">★パーティ総合攻撃力: <span id="home-power" style="font-size: 16px; font-weight: bold;">0</span></div>
+                    </div>
+                    <button onclick="openProfileScreen()" style="width: auto; margin: 0; padding: 8px 12px; font-size: 12px;">📝設定</button>
+                </div>
                 
-                <label style="display: block; font-size: 16px; color: #66fcf1; font-weight: bold;">効果音 音量: <span id="se-vol-text" style="color:#fff;">50%</span></label>
-                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">ガチャやボタンをタップしたときの音量です。</p>
-                <input type="range" id="se-volume" min="0" max="100" value="50" onchange="updateVolume()">
-            </div>
+                <div class="status-box" style="font-size: 12px;">
+                    <p style="margin-top: 0; color: #00f2fe; font-weight: bold; border-bottom: 1px solid rgba(0, 242, 254, 0.3); padding-bottom: 5px;">🛡️ 現在のそうび一覧</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⚔️ <strong id="eq-display-weapon" style="color:#fff;">なし</strong></div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👤 <strong id="eq-display-head" style="color:#fff;">なし</strong></div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👕 <strong id="eq-display-body_top" style="color:#fff;">なし</strong></div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👖 <strong id="eq-display-body_bottom" style="color:#fff;">なし</strong></div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🛡️ <strong id="eq-display-shield" style="color:#fff;">なし</strong></div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">💍 <strong id="eq-display-accessory" style="color:#fff;">なし</strong></div>
+                    </div>
+                    <div style="margin-top: 8px; border-top: 1px dashed rgba(0, 242, 254, 0.3); padding-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ❤️ こころ: <strong id="eq-display-heart" style="color:#ff79c6;">なし</strong>
+                    </div>
+                </div>
 
-            <button class="back-btn" onclick="changeScreen('home')">ホームへ戻る</button>
-        </div>
-
-        <!-- =========================================================
-           ③ キャラクター一覧画面
-           ========================================================= -->
-        <div id="screen-party" class="screen">
-            <h2 style="text-align: left; border-bottom: none; margin-bottom: 0;">編成・キャラ一覧</h2>
-            
-            <h3 style="font-size: 13px; text-align: left; margin-bottom: 5px; color: #ffeb3b; border: none;">現在のパーティ (最大4人)</h3>
-            <div class="party-slots-container" id="party-slots-container"></div>
-            
-            <h3 style="font-size: 13px; text-align: left; margin-bottom: 5px; color: #66fcf1; border: none;">所持キャラクター</h3>
-            <div id="character-grid" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-
-        <!-- =========================================================
-           ④ 装備変更・合体画面
-           ========================================================= -->
-        <div id="screen-equip" class="screen">
-            <h2 style="text-align: left; border-bottom: none; margin-bottom: 10px;">装備・工房</h2>
-            
-            <div class="category-tabs">
-                <button class="tab-btn active-tab" id="tab-weapon" onclick="openEquipScreen('weapon')">⚔️ 武器</button>
-                <button class="tab-btn" id="tab-head" onclick="openEquipScreen('head')">👤 頭</button>
-                <button class="tab-btn" id="tab-body_top" onclick="openEquipScreen('body_top')">👕 鎧上</button>
-                <button class="tab-btn" id="tab-body_bottom" onclick="openEquipScreen('body_bottom')">👖 鎧下</button>
-                <button class="tab-btn" id="tab-shield" onclick="openEquipScreen('shield')">🛡️ 盾</button>
-                <button class="tab-btn" id="tab-accessory" onclick="openEquipScreen('accessory')">💍 アクセ</button>
-                <button class="tab-btn" id="tab-heart" onclick="openEquipScreen('heart')">❤️ こころ</button>
-            </div>
-
-            <p style="font-size: 11px; color: #aaa; margin: 0 0 10px 0;">※装備をタップして「強化」や「限界突破」を行おう！</p>
-            <div id="weapon-grid" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-
-        <!-- =========================================================
-           ⑤-1 ガチャ一覧画面
-           ========================================================= -->
-        <div id="screen-gacha" class="screen">
-            <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">ガチャ</h2>
-
-            <div class="gacha-banner" style="border-color: #f8b500; padding: 0;" onclick="openGachaDetail('free')">
-                <img src="1日1回無料ガチャ.png" alt="1日1回無料ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div style="padding: 15px; display: none;">
-                    <h3 style="color:#f8b500; margin-top:0; border:none; font-size:18px; text-align: left;">🎁 1日1回 無料ガチャ</h3>
-                    <p style="font-size:12px; color:#ccc; margin:0;">毎日1回だけ無料で引ける！運試し！</p>
+                <button class="story-btn" onclick="goToStory()" style="padding: 20px; font-size: 18px; box-shadow: inset 0 0 15px rgba(56, 239, 125, 0.5);">⚔️ 冒険に出る (Story)</button>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button style="margin:0;" onclick="openPartyScreen()">👥 キャラ一覧</button>
+                    <button style="margin:0;" onclick="openEquipScreen('weapon')">⚔️ 装備・合体</button>
+                </div>
+                
+                <button onclick="changeScreen('gacha')" style="margin-top: 10px; background: linear-gradient(to bottom, #4a0014, #1a0007); border-color: #ff007f; color: #ffeb3b; box-shadow: inset 0 0 20px rgba(255, 0, 127, 0.5);">✨ ガチャを引く</button>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button style="margin:0; background: linear-gradient(to bottom, #160a2b, #05010f); border-color: #8a2be2; color: #d8b4e2;" onclick="changeScreen('settings')">⚙️ 設定</button>
+                    <button style="margin:0; background: linear-gradient(to bottom, #330000, #110000); border-color: #ff416c; color: #ffb6b9;" onclick="goToTitleConfirm()">🚪 タイトルへ</button>
                 </div>
             </div>
 
-            <div class="gacha-banner" style="border-color: #4ecca3; padding: 0;" onclick="openGachaDetail('normal')">
-                <img src="通常ガチャ.png" alt="通常ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div style="padding: 15px; display: none;">
-                    <h3 style="color:#4ecca3; margin-top:0; border:none; font-size:18px; text-align: left;">✨ 通常武器ガチャ</h3>
-                    <p style="font-size:12px; color:#ccc; margin:0;">草核を使って強力な武器を手に入れよう！</p>
+            <!-- =========================================================
+               ⚙️ 設定画面
+               ========================================================= -->
+            <div id="screen-settings" class="screen">
+                <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">⚙️ 設定</h2>
+                
+                <div class="status-box" style="border-color: #8a2be2;">
+                    <label style="display: block; font-size: 16px; color: #00f2fe; font-weight: bold;">BGM 音量: <span id="bgm-vol-text" style="color:#fff;">50%</span></label>
+                    <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">BGM（BitCastle / KAZINテーマ）の音量調整です。（2倍強化機能搭載！）</p>
+                    <input type="range" id="bgm-volume" min="0" max="100" value="50" onchange="updateVolume()">
+                    
+                    <div style="margin-top: 25px;"></div>
+                    
+                    <label style="display: block; font-size: 16px; color: #00f2fe; font-weight: bold;">効果音 音量: <span id="se-vol-text" style="color:#fff;">50%</span></label>
+                    <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">ガチャやボタンをタップしたときの音量です。</p>
+                    <input type="range" id="se-volume" min="0" max="100" value="50" onchange="updateVolume()">
+                </div>
+
+                <button class="back-btn" onclick="changeScreen('home')">ホームへ戻る</button>
+            </div>
+
+            <!-- =========================================================
+               ③ キャラクター一覧画面
+               ========================================================= -->
+            <div id="screen-party" class="screen">
+                <h2 style="text-align: left; border-bottom: none; margin-bottom: 0;">編成・キャラ一覧</h2>
+                
+                <h3 style="font-size: 13px; text-align: left; margin-bottom: 5px; color: #ffeb3b; border: none;">現在のパーティ (最大4人)</h3>
+                <div class="party-slots-container" id="party-slots-container"></div>
+                
+                <h3 style="font-size: 13px; text-align: left; margin-bottom: 5px; color: #00f2fe; border: none;">所持キャラクター</h3>
+                <div id="character-grid" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <!-- =========================================================
+               ④ 装備変更・合体画面
+               ========================================================= -->
+            <div id="screen-equip" class="screen">
+                <h2 style="text-align: left; border-bottom: none; margin-bottom: 10px;">装備・工房</h2>
+                
+                <div class="category-tabs">
+                    <button class="tab-btn active-tab" id="tab-weapon" onclick="openEquipScreen('weapon')">⚔️ 武器</button>
+                    <button class="tab-btn" id="tab-head" onclick="openEquipScreen('head')">👤 頭</button>
+                    <button class="tab-btn" id="tab-body_top" onclick="openEquipScreen('body_top')">👕 鎧上</button>
+                    <button class="tab-btn" id="tab-body_bottom" onclick="openEquipScreen('body_bottom')">👖 鎧下</button>
+                    <button class="tab-btn" id="tab-shield" onclick="openEquipScreen('shield')">🛡️ 盾</button>
+                    <button class="tab-btn" id="tab-accessory" onclick="openEquipScreen('accessory')">💍 アクセ</button>
+                    <button class="tab-btn" id="tab-heart" onclick="openEquipScreen('heart')">❤️ こころ</button>
+                </div>
+
+                <p style="font-size: 11px; color: #aaa; margin: 0 0 10px 0;">※装備をタップして「強化」や「限界突破」を行おう！</p>
+                <div id="weapon-grid" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <!-- =========================================================
+               ⑤-1 ガチャ一覧画面
+               ========================================================= -->
+            <div id="screen-gacha" class="screen">
+                <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">ガチャ</h2>
+
+                <div class="gacha-banner" style="border-color: #f8b500; padding: 0;" onclick="openGachaDetail('free')">
+                    <img src="1日1回無料ガチャ.png" alt="1日1回無料ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="padding: 15px; display: none;">
+                        <h3 style="color:#f8b500; margin-top:0; border:none; font-size:18px; text-align: left;">🎁 1日1回 無料ガチャ</h3>
+                        <p style="font-size:12px; color:#ccc; margin:0;">毎日1回だけ無料で引ける！運試し！</p>
+                    </div>
+                </div>
+
+                <div class="gacha-banner" style="border-color: #4ecca3; padding: 0;" onclick="openGachaDetail('normal')">
+                    <img src="通常ガチャ.png" alt="通常ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="padding: 15px; display: none;">
+                        <h3 style="color:#4ecca3; margin-top:0; border:none; font-size:18px; text-align: left;">✨ 通常武器ガチャ</h3>
+                        <p style="font-size:12px; color:#ccc; margin:0;">草核を使って強力な武器を手に入れよう！</p>
+                    </div>
+                </div>
+
+                <div class="gacha-banner" style="border-color: #ff416c; padding: 0;" onclick="openGachaDetail('new')">
+                    <img src="新装備ピックアップガチャ.png" alt="新装備ピックアップガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="padding: 15px; display: none;">
+                        <h3 style="color:#ff416c; margin-top:0; border:none; font-size:18px; text-align: left;">🆕 新武器ピックアップ</h3>
+                        <p style="font-size:12px; color:#ccc; margin:0;">強力な新武器の出現率UP！（準備中）</p>
+                    </div>
+                </div>
+
+                <div class="gacha-banner" style="border-color: #00b4db; padding: 0;" onclick="openGachaDetail('revival')">
+                    <img src="復刻装備ガチャ.png" alt="復刻装備ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="padding: 15px; display: none;">
+                        <h3 style="color:#00b4db; margin-top:0; border:none; font-size:18px; text-align: left;">🔄 復刻武器ガチャ</h3>
+                        <p style="font-size:12px; color:#ccc; margin:0;">過去の限定武器が復活！？（準備中）</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="gacha-banner" style="border-color: #ff416c; padding: 0;" onclick="openGachaDetail('new')">
-                <img src="新装備ピックアップガチャ.png" alt="新装備ピックアップガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div style="padding: 15px; display: none;">
-                    <h3 style="color:#ff416c; margin-top:0; border:none; font-size:18px; text-align: left;">🆕 新武器ピックアップ</h3>
-                    <p style="font-size:12px; color:#ccc; margin:0;">強力な新武器の出現率UP！（準備中）</p>
+            <!-- =========================================================
+               ⑤-2 ガチャ詳細画面
+               ========================================================= -->
+            <div id="screen-gacha-detail" class="screen">
+                <button class="back-btn" style="width: auto; padding: 8px 15px; font-size: 12px; margin-bottom: 10px;" onclick="changeScreen('gacha')">◀ 戻る</button>
+                <h2 id="gacha-detail-title" style="margin-bottom: 5px; border:none; text-align:left;">✨ 運命のガチャ</h2>
+                <p id="gacha-detail-desc" style="font-size:13px; color:#ccc; margin-top:0; margin-bottom: 20px;">ガチャの説明</p>
+                
+                <div class="stamp-card-container" id="detail-stamp-container" style="display:none;">
+                    <div class="stamp-header">
+                        <span>🎫 天井スタンプカード</span>
+                        <span id="stamp-counter-text" style="color: #fff;">0 / 20</span>
+                    </div>
+                    <div class="stamp-grid" id="stamp-grid"></div>
+                    <div id="stamp-reward-info" style="font-size: 10px; color: #ffeb3b; margin-top: 10px; text-align: left; line-height: 1.4;">
+                        ※ 10スタンプ（100回）: 星5確定！<br>
+                        ※ 20スタンプ（200回）: <strong>好きな装備を自由に1つ選んで獲得！</strong>
+                    </div>
+                    <button id="btn-open-exchange" class="btn-gold" style="display: none; margin-top: 10px; padding: 10px;" onclick="openExchangeModal()">🎁 プレミアム装備交換所を開く！</button>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                    <button style="background: transparent; border: 1px solid #00f2fe; color: #00f2fe; padding: 8px; font-size: 13px; width: 100%; margin: 0; box-shadow: none;" onclick="showProbabilities()">🔍 ガチャ提供割合</button>
+                </div>
+
+                <div id="gacha-detail-buttons"></div>
+
+                <div class="status-box" style="margin-top: 20px; padding: 10px; border-color: rgba(255,255,255,0.15);">
+                    <p style="color: #00f2fe; font-weight: bold; margin: 0 0 5px 0; font-size: 13px;">最新の獲得履歴</p>
+                    <div id="gacha-result-list" style="max-height: 150px; overflow-y: auto; font-size: 13px; color: #ccc;">
+                        履歴はまだありません。
+                    </div>
                 </div>
             </div>
 
-            <div class="gacha-banner" style="border-color: #00b4db; padding: 0;" onclick="openGachaDetail('revival')">
-                <img src="復刻装備ガチャ.png" alt="復刻装備ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div style="padding: 15px; display: none;">
-                    <h3 style="color:#00b4db; margin-top:0; border:none; font-size:18px; text-align: left;">🔄 復刻武器ガチャ</h3>
-                    <p style="font-size:12px; color:#ccc; margin:0;">過去の限定武器が復活！？（準備中）</p>
+            <!-- =========================================================
+               ⑥ 👤 プロフィール編集画面
+               ========================================================= -->
+            <div id="screen-profile" class="screen">
+                <h2 style="text-align: left; border:none;">プロフィール編集</h2>
+                
+                <div class="status-box" style="text-align: center;">
+                    <p style="margin-top: 0; color: #00f2fe; font-size: 14px;">アイコン画像を設定しよう！</p>
+                    <div style="position: relative; display: inline-block; margin-bottom: 12px;">
+                        <img id="profile-icon-preview" src="" alt="👤" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #00f2fe; background-color: #111; box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);">
+                    </div>
+                    <br>
+                    <input type="file" id="profile-icon-input" accept="image/*" style="display: none;" onchange="handleIconSelect(event)">
+                    <button type="button" style="width: 80%; margin: 0 auto; display: inline-block; padding: 10px; font-size: 14px; background: rgba(42, 67, 101, 0.8); border-color: #8f94fb;" onclick="document.getElementById('profile-icon-input').click()">📷 写真をえらぶ</button>
                 </div>
-            </div>
-        </div>
 
-        <!-- =========================================================
-           ⑤-2 ガチャ詳細画面
-           ========================================================= -->
-        <div id="screen-gacha-detail" class="screen">
-            <button class="back-btn" style="width: auto; padding: 8px 15px; font-size: 12px; margin-bottom: 10px;" onclick="changeScreen('gacha')">◀ 戻る</button>
-            <h2 id="gacha-detail-title" style="margin-bottom: 5px; border:none; text-align:left;">✨ 運命のガチャ</h2>
-            <p id="gacha-detail-desc" style="font-size:13px; color:#ccc; margin-top:0; margin-bottom: 20px;">ガチャの説明</p>
-            
-            <div class="stamp-card-container" id="detail-stamp-container" style="display:none;">
-                <div class="stamp-header">
-                    <span>🎫 天井スタンプカード</span>
-                    <span id="stamp-counter-text" style="color: #fff;">0 / 20</span>
+                <div class="status-box" style="border-color: rgba(255,255,255,0.15);">
+                    <label style="display: block; font-size: 14px; color: #00f2fe; font-weight: bold;">プレイヤーの名前 (10文字まで)</label>
+                    <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">※主人公キャラクターの名前も連動して変わるよ！</p>
+                    <input type="text" id="profile-name-input" class="profile-input" maxlength="10" placeholder="なまえを入力してね">
                 </div>
-                <div class="stamp-grid" id="stamp-grid"></div>
-                <div id="stamp-reward-info" style="font-size: 10px; color: #ffeb3b; margin-top: 10px; text-align: left; line-height: 1.4;">
-                    ※ 10スタンプ（100回）: 星5確定！<br>
-                    ※ 20スタンプ（200回）: <strong>好きな装備を自由に1つ選んで獲得！</strong>
+
+                <button class="btn-green" onclick="saveProfile()">💾 設定をほぞんする</button>
+            </div>
+
+            <!-- =========================================================
+               ⑦ 🏆 ミッション画面
+               ========================================================= -->
+            <div id="screen-mission" class="screen">
+                <h2 style="text-align: left; border:none;">ミッション</h2>
+                
+                <div class="status-box" style="border-color: #f8b500; background: linear-gradient(135deg, rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95)); box-shadow: inset 0 0 20px rgba(248, 181, 0, 0.2);">
+                    <p style="text-align: center; color: #ffeb3b; font-weight: bold; margin-top: 0; font-size: 16px; text-shadow: 0 0 5px rgba(248, 181, 0, 0.8);">🔥 ミッションをクリアして報酬ゲット！</p>
+                    <p style="font-size: 12px; line-height: 1.5; color: #ddd; margin-bottom: 0;">
+                        ミッションの内容はまだ仮のものだよ！コードの中にある「ミッションのリスト」を書き換えて、オリジナルミッションを作ってね！
+                    </p>
                 </div>
-                <button id="btn-open-exchange" class="btn-gold" style="display: none; margin-top: 10px; padding: 10px;" onclick="openExchangeModal()">🎁 プレミアム装備交換所を開く！</button>
+
+                <ul id="mission-list" class="item-list"></ul>
             </div>
-            
-            <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                <button style="background: transparent; border: 1px solid #8f94fb; color: #8f94fb; padding: 8px; font-size: 13px; width: 100%; margin: 0; box-shadow: none;" onclick="showProbabilities()">🔍 ガチャ提供割合</button>
-            </div>
-
-            <div id="gacha-detail-buttons"></div>
-
-            <div class="status-box" style="margin-top: 20px; padding: 10px; border-color: rgba(255,255,255,0.15);">
-                <p style="color: #66fcf1; font-weight: bold; margin: 0 0 5px 0; font-size: 13px;">最新の獲得履歴</p>
-                <div id="gacha-result-list" style="max-height: 150px; overflow-y: auto; font-size: 13px; color: #ccc;">
-                    履歴はまだありません。
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================================
-           ⑥ 👤 プロフィール編集画面
-           ========================================================= -->
-        <div id="screen-profile" class="screen">
-            <h2 style="text-align: left; border:none;">プロフィール編集</h2>
-            
-            <div class="status-box" style="text-align: center; border-color: #66fcf1;">
-                <p style="margin-top: 0; color: #66fcf1; font-size: 14px;">アイコン画像を設定しよう！</p>
-                <div style="position: relative; display: inline-block; margin-bottom: 12px;">
-                    <img id="profile-icon-preview" src="" alt="👤" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #66fcf1; background-color: #111;">
-                </div>
-                <br>
-                <input type="file" id="profile-icon-input" accept="image/*" style="display: none;" onchange="handleIconSelect(event)">
-                <button type="button" style="width: 80%; margin: 0 auto; display: inline-block; padding: 10px; font-size: 14px; background: rgba(42, 67, 101, 0.8); border-color: #8f94fb;" onclick="document.getElementById('profile-icon-input').click()">📷 写真をえらぶ</button>
-            </div>
-
-            <div class="status-box" style="border-color: rgba(255,255,255,0.15);">
-                <label style="display: block; font-size: 14px; color: #66fcf1; font-weight: bold;">プレイヤーの名前 (10文字まで)</label>
-                <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">※主人公キャラクターの名前も連動して変わるよ！</p>
-                <input type="text" id="profile-name-input" class="profile-input" maxlength="10" placeholder="なまえを入力してね">
-            </div>
-
-            <button class="btn-green" onclick="saveProfile()">💾 設定をほぞんする</button>
-        </div>
-
-        <!-- =========================================================
-           ⑦ 🏆 ミッション画面
-           ========================================================= -->
-        <div id="screen-mission" class="screen">
-            <h2 style="text-align: left; border:none;">ミッション</h2>
-            
-            <div class="status-box" style="border-color: #f8b500; background: linear-gradient(135deg, rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95));">
-                <p style="text-align: center; color: #ffeb3b; font-weight: bold; margin-top: 0; font-size: 16px;">🔥 ミッションをクリアして報酬ゲット！</p>
-                <p style="font-size: 12px; line-height: 1.5; color: #ddd; margin-bottom: 0;">
-                    ミッションの内容はまだ仮のものだよ！コードの中にある「ミッションのリスト」を書き換えて、オリジナルミッションを作ってね！
-                </p>
-            </div>
-
-            <ul id="mission-list" class="item-list"></ul>
-        </div>
+        </div> <!-- end of inner-content-wrapper -->
     </div> <!-- end of main-content -->
 
     <!-- =========================================================
@@ -937,7 +982,19 @@ function startGame(event) {
     changeScreen('home');
 }
 
-function goToTitle() {
+// 🚪 タイトル画面へ戻る確認ポップアップを開く
+function goToTitleConfirm() {
+    document.getElementById('alert-overlay').style.display = 'block';
+    document.getElementById('title-confirm-modal').style.display = 'block';
+}
+
+function closeTitleConfirm() {
+    document.getElementById('alert-overlay').style.display = 'none';
+    document.getElementById('title-confirm-modal').style.display = 'none';
+}
+
+function executeGoToTitle() {
+    closeTitleConfirm();
     gameBgm.pause();
     gameBgm.currentTime = 0;
     titleBgm.play().catch(e => {});
@@ -1078,9 +1135,9 @@ const gachaConfig = {
         pool: commonGachaPool 
     },
     normal: { 
-        title: "✨ 通常武器ガチャ", desc: "草核を使って引こう！(スタンプ対象)", color: "#4ecca3", 
+        title: "✨ 通常武器ガチャ", desc: "草核を使って引こう！(スタンプ対象)", color: "#00f2fe", 
         buttons: [ 
-            { text: "🎲 1回引く（草核 100）", count: 1, isFree: false, color1: "#4ecca3", color2: "#1f2833", textColor: "#ffffff" }, 
+            { text: "🎲 1回引く（草核 100）", count: 1, isFree: false, color1: "#00f2fe", color2: "#0a0316", textColor: "#ffffff" }, 
             { text: "🍀 10回引く（草核 1000）", count: 10, isFree: false, color1: "#38ef7d", color2: "#11998e", textColor: "#ffffff" }
         ], 
         pool: commonGachaPool 
@@ -1122,14 +1179,14 @@ function createParticles() {
         particle.style.width = (2 + Math.random() * 5) + 'px';
         particle.style.height = particle.style.width;
         particle.style.animationDelay = (Math.random() * 1.5) + 's';
-        const colors = ['#ffffff', '#66fcf1', '#ffeb3b', '#ff007f', '#00f2fe'];
+        const colors = ['#ffffff', '#00f2fe', '#ffeb3b', '#ff007f', '#a8ff78'];
         particle.style.background = colors[Math.floor(Math.random() * colors.length)];
         particle.style.boxShadow = `0 0 10px ${particle.style.background}`; 
         container.appendChild(particle);
     }
 }
 
-const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2366fcf1" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2366fcf1" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2366fcf1"/></svg>';
+const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300f2fe" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2300f2fe" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2300f2fe"/></svg>';
 
 let saveStatus = {
     stones: 1000, 
@@ -1214,7 +1271,7 @@ function loadGame() {
             if (saveStatus.characters[leaderIndex]) saveStatus.party[0] = saveStatus.characters[leaderIndex].uid;
         }
     } else { 
-        showGameAlert("🎁 ゲーム開始ボーナス！", "ゲームを始めてくれてありがとう！<br>初回プレゼントとして<strong style='color:#66fcf1;'>草核 1000個</strong>をプレゼント！");
+        showGameAlert("🎁 ゲーム開始ボーナス！", "ゲームを始めてくれてありがとう！<br>初回プレゼントとして<strong style='color:#00f2fe;'>草核 1000個</strong>をプレゼント！");
         saveGame(); 
     }
     applyVolume(); 
@@ -1229,7 +1286,7 @@ function checkLoginBonus() {
         saveStatus.materials += 10; 
         saveGame();
         setTimeout(() => {
-            showGameAlert("🎁 ログインボーナス！", `今日も遊んでくれてありがとう！<br><br><span style="color:#66fcf1; font-weight:bold;">🟢草核 × 500個</span><br><span style="color:#4ecca3; font-weight:bold;">🌾草の化石 × 10個</span><br><br>をプレゼントしたよ！`);
+            showGameAlert("🎁 ログインボーナス！", `今日も遊んでくれてありがとう！<br><br><span style="color:#00f2fe; font-weight:bold;">🟢草核 × 500個</span><br><span style="color:#4ecca3; font-weight:bold;">🌾草の化石 × 10個</span><br><br>をプレゼントしたよ！`);
             updateUI();
         }, 500);
     }
@@ -1257,10 +1314,15 @@ function changeScreen(screenId) {
     if (screenId === 'gacha-detail') { drawStampCard(); }
     if (screenId === 'settings') { applyVolume(); } 
     
+    // 背景の切り替え（KAZIN背景.png と kazinhakei.png）
     if (screenId === 'title') {
-        document.body.style.backgroundImage = "url('KAZIN背景.png')";
+        document.getElementById('bg-image-layer').style.backgroundImage = "url('KAZIN背景.png')";
+        document.getElementById('bg-grid').style.display = 'none';
+        document.getElementById('bg-gradient-overlay').style.opacity = '0.1'; // より明るく綺麗に見せる！
     } else {
-        document.body.style.backgroundImage = "url('kazinhakei.png')";
+        document.getElementById('bg-image-layer').style.backgroundImage = "url('kazinhakei.png')";
+        document.getElementById('bg-grid').style.display = 'block';
+        document.getElementById('bg-gradient-overlay').style.opacity = '1';
     }
 
     updateUI();
@@ -1318,7 +1380,7 @@ function openExchangeModal() {
         list.innerHTML += `
             <div class="material-item" id="ex-item-${w.id}" onclick="selectExchangeWeapon('${w.id}')" style="margin: 6px 0;">
                 <div>
-                    <strong style="color: #66fcf1;">${w.name}</strong><br>
+                    <strong style="color: #00f2fe;">${w.name}</strong><br>
                     <span style="font-size:11px; color:#aaa;">基本ボーナス: +${w.bonus} (${categoryNames[w.category] || "装備"})</span><br>
                     <span style="color:#ffeb3b; font-size:10px;">${starsHTML}</span>
                 </div>
@@ -1468,7 +1530,7 @@ function openMissionScreen() {
                     <div style="flex-grow: 1;">
                         <strong style="color: #ffeb3b; font-size: 14px;">${m.title}</strong><br>
                         <span style="font-size:11px; color:#aaa;">${m.desc}</span><br>
-                        <span style="font-size:11px; color:#66fcf1; font-weight: bold;">報酬: ${rewardName} ${m.reward}個</span>
+                        <span style="font-size:11px; color:#00f2fe; font-weight: bold;">報酬: ${rewardName} ${m.reward}個</span>
                     </div>
                     <button style="width: 70px; margin: 0; padding: 6px; font-size: 11px; ${btnStyle}" onclick="${isClaimed ? '' : `claimMissionReward(${m.id}, ${m.reward}, ${m.isFossil})`}">${btnText}</button>
                 </div>
@@ -1518,7 +1580,7 @@ function updatePartyScreenUI() {
             let leaderIcon = (i === 0) ? '<div style="position:absolute; top:-8px; left:-8px; font-size:20px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));">👑</div>' : '';
             let elementBadge = `<span class="char-element-badge el-${pChar.element || 'grass'}" style="position:absolute; top:4px; right:4px; font-size:8px;">${pChar.typeText || '超知'}</span>`;
             slotsContainer.innerHTML += `
-                <div class="party-slot filled" onclick="removeFromParty(${i})" style="position:relative; border-color: ${i===0 ? '#f8b500':'#66fcf1'};">
+                <div class="party-slot filled" onclick="removeFromParty(${i})" style="position:relative; border-color: ${i===0 ? '#f8b500':'#00f2fe'};">
                     ${leaderIcon}
                     ${elementBadge}
                     <div style="font-size:28px; margin-top:5px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3));">👤</div>
@@ -1556,7 +1618,7 @@ function updatePartyScreenUI() {
                 <div class="card-body">
                     <div style="font-size:40px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.2));">👤</div>
                     <div style="flex-grow:1;">
-                        <div class="card-name">${char.name} <span style="color:#66fcf1; font-size:12px;">Lv.${char.level}</span></div>
+                        <div class="card-name">${char.name} <span style="color:#00f2fe; font-size:12px;">Lv.${char.level}</span></div>
                         <div class="card-stats">
                             HP: <span style="color:#4ecca3">${char.hp}</span><br>
                             攻撃: <span style="color:#ff416c">${totalAtk}</span> / 守備: <span style="color:#00b4db">${totalDef}</span>
@@ -1652,7 +1714,7 @@ function openEquipScreen(category) {
                     <div style="flex-grow:1;">
                         <div class="card-name">${safeName} <span style="color:#ffeb3b; font-size:14px;">+${weap.limitBreak}</span></div>
                         <div class="card-stats">
-                            <span style="color:#66fcf1; font-weight:bold;">Lv.${levelText}</span><br>
+                            <span style="color:#00f2fe; font-weight:bold;">Lv.${levelText}</span><br>
                             ボーナス: <span style="color:#ff416c; font-weight:bold;">+${weap.bonus}</span><br>
                             <span style="font-size:9px;">(素材可: ${sameWeaponsCount}個)</span>
                         </div>
@@ -1678,7 +1740,7 @@ function levelUpWeapon(id) {
     saveStatus.materials -= currentCost; 
     weap.level += 1; weap.bonus += 10; 
     let safeName = getBaseName(weap.name);
-    showGameAlert("🔨 強化せいこう！", `<strong>${safeName}</strong> を強化して <span style="color:#66fcf1; font-weight:bold;">Lv.${weap.level}</span> にした！ステータスが 10 上がったぞ！`);
+    showGameAlert("🔨 強化せいこう！", `<strong>${safeName}</strong> を強化して <span style="color:#00f2fe; font-weight:bold;">Lv.${weap.level}</span> にした！ステータスが 10 上がったぞ！`);
     saveGame(); openEquipScreen(currentCategoryTab);
 }
 
@@ -1771,7 +1833,7 @@ function executeMultiCombine() {
 
     let safeName = getBaseName(targetWeapon.name);
     let successMessage = `<strong>${safeName}</strong> に ${combineCount}個の素材を合体させた！<br>限界を突破して <strong style="color:#ffeb3b;">+${targetWeapon.limitBreak}</strong> に進化！`;
-    if (targetWeapon.limitBreak >= 4) { successMessage += `<br><br><span style="color:#66fcf1; font-weight:bold; font-size:18px;">👑 最大限界突破（+4）達成！ 👑</span>`; }
+    if (targetWeapon.limitBreak >= 4) { successMessage += `<br><br><span style="color:#00f2fe; font-weight:bold; font-size:18px;">👑 最大限界突破（+4）達成！ 👑</span>`; }
     showGameAlert("🔥 装備合体 大成功！！", successMessage);
     materialsToCombine = []; saveGame(); openEquipScreen(currentCategoryTab);
 }
@@ -1817,7 +1879,7 @@ function showProbabilities() {
     if (activePool.length === 0) { showGameAlert("🔍 ガチャ提供割合", "<p style='color:#ff5555; text-align:center;'>現在、ガチャの中身は空っぽだよ！</p>"); return; }
     let totalWeight = 0; activePool.forEach(item => totalWeight += item.weight);
     let htmlContent = "<div style='line-height:1.6;'>";
-    htmlContent += "<p style='color:#66fcf1; font-weight:bold; border-bottom:1px solid #66fcf1; padding-bottom:8px; margin-bottom:10px;'>ガチャ出現確率（提供割合）</p>";
+    htmlContent += "<p style='color:#00f2fe; font-weight:bold; border-bottom:1px solid #00f2fe; padding-bottom:8px; margin-bottom:10px;'>ガチャ出現確率（提供割合）</p>";
     activePool.forEach(item => {
         let percent = ((item.weight / totalWeight) * 100).toFixed(1);
         let categoryName = item.type === "character" ? "👥キャラ" : "🛡️" + (categoryNames[item.category] || "装備");
@@ -1835,6 +1897,12 @@ function showProbabilities() {
 // ---------------------------------------------------------
 // 🎰 新・ド派手ガチャ演出コントロールシステム
 // ---------------------------------------------------------
+let gachaInterval = null;
+let gachaTempResults = [];
+let gachaIsFree = false;
+let gachaCount = 0;
+let gachaHighestStar = 1;
+
 function startGachaProcess(count, isFree = false) {
     let activePool = gachaConfig[currentGachaType].pool;
     if (activePool.length === 0) { showGameAlert("🔮 ガチャは準備中だよ！", "コードの「設定ゾーン①」に装備を追加してね！"); return; }
@@ -1906,7 +1974,7 @@ function startGachaProcess(count, isFree = false) {
 
     animScreen.style.display = 'flex'; fill.style.width = '0%'; whiteoutOverlay.style.display = 'none'; whiteoutOverlay.className = '';
     animScreen.className = ''; animTitle.classList.remove('shake-text'); animContainer.classList.remove('screen-shake');
-    animTitle.style.fontSize = "24px"; animTitle.style.color = "#66fcf1";
+    animTitle.style.fontSize = "24px"; animTitle.style.color = "#00f2fe";
     speedLines.style.display = 'block'; speedLines.style.opacity = '0'; cutIn.classList.remove('active');
 
     createParticles();
