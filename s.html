@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KAZIN</title>
+    <title>おれたちの最強RPG</title>
     <style>
         /* =========================================================
            🎨 ゲーム全体＆背景
@@ -715,8 +715,8 @@ function closeAlert() {
 // 🎵 効果音（サウンド）とBGMの準備
 // ---------------------------------------------------------
 const clickSound = new Audio('4.mp3');
-const startSound = new Audio('「始まるよ～」.mp3'); 
-const jackpotSound = new Audio('「大当たり～」.mp3'); 
+const startSound = new Audio('始まるよ～.mp3'); 
+const jackpotSound = new Audio('大当たり～.mp3'); 
 
 const titleBgm = new Audio('KAZINテーマ.mp3');
 titleBgm.loop = true;
@@ -828,7 +828,15 @@ let characterMaster = [
     { id: "c_ban2", name: "コントラ・バーン", hp: 100, attack: 50, defense: 30, element: "light", typeText: "反転" }
 ];
 
+// 🌟 冒険家セット（初期装備）を追加！
 let weaponMaster = [
+    { id: "eq_head_1", name: "★1 冒険家の帽子", category: "head", bonus: 5, isGacha: true, weight: 200 },
+    { id: "eq_body_top_1", name: "★1 冒険家の服", category: "body_top", bonus: 8, isGacha: true, weight: 200 },
+    { id: "eq_body_bottom_1", name: "★1 冒険家のズボン", category: "body_bottom", bonus: 8, isGacha: true, weight: 200 },
+    { id: "eq_shield_1", name: "★1 冒険家の盾", category: "shield", bonus: 6, isGacha: true, weight: 200 },
+    { id: "eq_acc_1", name: "★1 冒険家のリュック", category: "accessory", bonus: 3, isGacha: true, weight: 200 },
+    { id: "eq_heart_1", name: "★1 冒険家のこころ", category: "heart", bonus: 10, isGacha: true, weight: 200 },
+
 　　{ id: "w_hino", name: "★1 ひのきの棒", category: "weapon", bonus: 10, isGacha: true, weight: 200 },
     { id: "w_wood", name: "★1 木の剣", category: "weapon", bonus: 15, isGacha: true, weight: 150 },
     { id: "w_bronze", name: "★1 銅のつるぎ", category: "weapon", bonus: 22, isGacha: true, weight: 120 },
@@ -935,10 +943,25 @@ let saveStatus = {
     bingoCells: [], bingoClaimedLines: [],
     unlockedAchievements: [], selectedAchievement: "",
     lastLoginDate: "", lastFreeGachaDate: "", 
-    characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 500, attack: 50, defense: 30, isProtagonist: true, element: "grass", typeText: "勇者" } ],
+    flags: { openedEquip: false, openedGacha: false },
+    characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 500, attack: 50, defense: 30, isProtagonist: true, element: "grass", typeText: "超知" } ],
     party: ["char_init", null, null, null],
-    equipments: [ { id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" } ],
-    equipped: { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null },
+    
+    // 🌟 初期装備セット
+    equipments: [ 
+        { id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" },
+        { id: "init_head_1", name: "★1 冒険家の帽子", level: 1, limitBreak: 0, bonus: 5, category: "head" },
+        { id: "init_body_top_1", name: "★1 冒険家の服", level: 1, limitBreak: 0, bonus: 8, category: "body_top" },
+        { id: "init_body_bottom_1", name: "★1 冒険家のズボン", level: 1, limitBreak: 0, bonus: 8, category: "body_bottom" },
+        { id: "init_shield_1", name: "★1 冒険家の盾", level: 1, limitBreak: 0, bonus: 6, category: "shield" },
+        { id: "init_acc_1", name: "★1 冒険家のリュック", level: 1, limitBreak: 0, bonus: 3, category: "accessory" },
+        { id: "init_heart_1", name: "★1 冒険家のこころ", level: 1, limitBreak: 0, bonus: 10, category: "heart" }
+    ],
+    equipped: { 
+        weapon: "init_weap_1", head: "init_head_1", body_top: "init_body_top_1", 
+        body_bottom: "init_body_bottom_1", shield: "init_shield_1", accessory: "init_acc_1", heart: "init_heart_1" 
+    },
+    
     gachaData: { normal: { draws: 0, stamps: 0, guaranteed: false }, new: { draws: 0, stamps: 0, guaranteed: false }, revival: { draws: 0, stamps: 0, guaranteed: false } },
     bgmVolume: 50, seVolume: 50
 };
@@ -975,6 +998,8 @@ function loadGame() {
         if (!saveStatus.bingoClaimedLines) saveStatus.bingoClaimedLines = [];
         if (!saveStatus.unlockedAchievements) saveStatus.unlockedAchievements = [];
         if (saveStatus.selectedAchievement === undefined) saveStatus.selectedAchievement = "";
+        
+        if (!saveStatus.flags) saveStatus.flags = { openedEquip: false, openedGacha: false };
 
         if (saveStatus.lastLoginDate === undefined) saveStatus.lastLoginDate = ""; 
         if (saveStatus.lastFreeGachaDate === undefined) saveStatus.lastFreeGachaDate = ""; 
@@ -994,9 +1019,24 @@ function loadGame() {
             saveStatus.equipped = { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
         }
         
+        // 🌟 古いデータに初期セットがなければ追加！
+        if (!saveStatus.equipments.some(e => e.id === "init_head_1")) {
+            saveStatus.equipments.push({ id: "init_head_1", name: "★1 冒険家の帽子", level: 1, limitBreak: 0, bonus: 5, category: "head" });
+            saveStatus.equipments.push({ id: "init_body_top_1", name: "★1 冒険家の服", level: 1, limitBreak: 0, bonus: 8, category: "body_top" });
+            saveStatus.equipments.push({ id: "init_body_bottom_1", name: "★1 冒険家のズボン", level: 1, limitBreak: 0, bonus: 8, category: "body_bottom" });
+            saveStatus.equipments.push({ id: "init_shield_1", name: "★1 冒険家の盾", level: 1, limitBreak: 0, bonus: 6, category: "shield" });
+            saveStatus.equipments.push({ id: "init_acc_1", name: "★1 冒険家のリュック", level: 1, limitBreak: 0, bonus: 3, category: "accessory" });
+            saveStatus.equipments.push({ id: "init_heart_1", name: "★1 冒険家のこころ", level: 1, limitBreak: 0, bonus: 10, category: "heart" });
+            
+            if (!saveStatus.equipped.head) saveStatus.equipped.head = "init_head_1";
+            if (!saveStatus.equipped.body_top) saveStatus.equipped.body_top = "init_body_top_1";
+            if (!saveStatus.equipped.body_bottom) saveStatus.equipped.body_bottom = "init_body_bottom_1";
+            if (!saveStatus.equipped.shield) saveStatus.equipped.shield = "init_shield_1";
+            if (!saveStatus.equipped.accessory) saveStatus.equipped.accessory = "init_acc_1";
+            if (!saveStatus.equipped.heart) saveStatus.equipped.heart = "init_heart_1";
+        }
+        
         saveStatus.equipments.forEach(eq => { if (eq.limitBreak === undefined) { eq.limitBreak = eq.level || 0; eq.level = 1; } });
-        saveStatus.equipments = saveStatus.equipments.filter(e => e.id !== "init_heart_1");
-        if (saveStatus.equipped.heart === "init_heart_1") saveStatus.equipped.heart = null;
         
         let protagonist = saveStatus.characters.find(c => c.isProtagonist);
         if (protagonist) { protagonist.name = saveStatus.playerName; } 
@@ -1048,14 +1088,23 @@ function changeScreen(screenId) {
     let navMap = { "home":"nav-home", "party":"nav-party", "equip":"nav-equip", "gacha":"nav-gacha", "mission":"nav-mission" };
     if(navMap[screenId]) document.getElementById(navMap[screenId])?.classList.add('active-nav');
     
-    if (screenId === 'gacha') { switchGachaTab(currentGachaType); }
+    if(!saveStatus.flags) saveStatus.flags = {};
+
+    if (screenId === 'gacha') { 
+        saveStatus.flags.openedGacha = true; 
+        saveGame();
+        switchGachaTab(currentGachaType); 
+    }
+    if (screenId === 'equip') {
+        saveStatus.flags.openedEquip = true;
+        saveGame();
+    }
     if (screenId === 'settings') { applyVolume(); } 
     if (screenId === 'mission') { openMissionTab(currentMissionTab); }
     
     const wrapper = document.getElementById('inner-content-wrapper');
     if (wrapper) wrapper.scrollTop = 0;
     
-    // 🌟 タイトル画面の場合はスクロールを完全にロック！
     let bgImageLayer = document.getElementById('bg-image-layer');
     let bgGrid = document.getElementById('bg-grid');
     let bgGradientOverlay = document.getElementById('bg-gradient-overlay');
@@ -1064,16 +1113,12 @@ function changeScreen(screenId) {
         if(bgImageLayer) bgImageLayer.style.backgroundImage = "url('KAZIN背景.png')";
         if(bgGrid) bgGrid.style.display = 'none';
         if(bgGradientOverlay) bgGradientOverlay.style.opacity = '0.1';
-        if (wrapper) {
-            wrapper.style.display = 'none'; 
-        }
+        if (wrapper) wrapper.style.display = 'none'; 
     } else {
         if(bgImageLayer) bgImageLayer.style.backgroundImage = "url('kazinhakei.png')";
         if(bgGrid) bgGrid.style.display = 'block';
         if(bgGradientOverlay) bgGradientOverlay.style.opacity = '1';
-        if (wrapper) {
-            wrapper.style.display = 'block'; 
-        }
+        if (wrapper) wrapper.style.display = 'block'; 
     }
 
     updateUI();
@@ -1159,6 +1204,23 @@ const bingoData = [
 ];
 const bingoLines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
 
+// 🌟 クリア条件判定ロジック！
+function checkMissionClear(id) {
+    if(!saveStatus.flags) saveStatus.flags = {};
+    switch(id) {
+        case 'd1': return true; // ログイン
+        case 'd2': return !!saveStatus.flags.openedEquip; 
+        case 'd3': return !!saveStatus.flags.openedGacha; 
+        case 'e1': return true; // スタートダッシュ
+        case 'e2': return saveStatus.equipments.some(e => getWeaponStar(e.name) >= 5);
+        case 'a1': return true;
+        case 'a2': return saveStatus.equipments.some(e => e.level > 1 || e.limitBreak > 0);
+        case 'a3': return Object.values(saveStatus.gachaData).some(d => d.draws > 0);
+        case 'a4': return saveStatus.bingoClaimedLines && saveStatus.bingoClaimedLines.length > 0;
+        default: return false;
+    }
+}
+
 function openMissionScreen() {
     changeScreen('mission');
 }
@@ -1186,9 +1248,21 @@ function renderMissionsList(dataList, type, savedArray) {
     
     dataList.forEach(m => {
         let isClaimed = savedArray.includes(m.id);
-        let btnText = isClaimed ? "獲得済" : (type === 'achieve' ? "解放する" : "うけとる");
-        let btnStyle = isClaimed ? "background: #333; border-color: #555; color: #aaa; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transform: none; cursor: default;" : "background: linear-gradient(to bottom, #ffea70, #ffb860); border-color: #fff; color: #111;";
+        let isCleared = checkMissionClear(m.id);
         
+        let btnText = isClaimed ? "獲得済" : (isCleared ? (type === 'achieve' ? "解放する" : "うけとる") : "未達成");
+        let btnStyle = "";
+        
+        if (isClaimed) {
+            btnStyle = "background: #333; border-color: #555; color: #aaa; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transform: none; cursor: default;";
+        } else if (isCleared) {
+            btnStyle = "background: linear-gradient(to bottom, #ffea70, #ffb860); border-color: #fff; color: #111;";
+        } else {
+            btnStyle = "background: #555; border-color: #777; color: #999; box-shadow: none; transform: none; cursor: not-allowed;";
+        }
+        
+        let onClickEvent = (isCleared && !isClaimed) ? `claimMissionReward('${m.id}', '${type}')` : ``;
+
         let rewardText = "";
         if (m.rewardCoins) rewardText += `🪙${m.rewardCoins} `;
         if (m.rewardStones) rewardText += `🟢${m.rewardStones} `;
@@ -1202,7 +1276,7 @@ function renderMissionsList(dataList, type, savedArray) {
                         <span style="font-size:11px; color:#aaa;">${m.desc}</span><br>
                         <span style="font-size:11px; color:#ffeb3b; font-weight: bold;">報酬: ${rewardText}</span>
                     </div>
-                    <button style="width: 75px; margin: 0; padding: 8px 4px; font-size: 11px; ${btnStyle}" onclick="${isClaimed ? '' : `claimMissionReward('${m.id}', '${type}')`}">${btnText}</button>
+                    <button style="width: 75px; margin: 0; padding: 8px 4px; font-size: 11px; ${btnStyle}" onclick="${onClickEvent}">${btnText}</button>
                 </div>
             </li>`;
     });
