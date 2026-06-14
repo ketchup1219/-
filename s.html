@@ -6,59 +6,41 @@
     <title>おれたちの最強RPG</title>
     <style>
         /* =========================================================
-           🎨 ゲーム全体＆背景（サイバーシアン×明るめのパープル！）
+           🎨 ゲーム全体＆背景
            ========================================================= */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
 
         body {
             font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
-            background-color: #000; 
-            color: #fff; 
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden; 
+            background-color: #000; color: #fff; margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden; 
         }
 
-        /* 📱 スマホゲーム枠：立体感と奥行きを持たせたガラス風デザイン */
         #game-container {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh; 
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 50px rgba(0, 180, 219, 0.15), inset 0 0 30px rgba(0,0,0,1);
-            overflow: hidden;
-            border-left: 2px solid rgba(0, 242, 254, 0.4);
-            border-right: 2px solid rgba(0, 242, 254, 0.4);
-            background-color: #000;
+            width: 100%; max-width: 450px; height: 100vh; position: relative;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0, 180, 219, 0.15), inset 0 0 30px rgba(0,0,0,0.8);
+            overflow: hidden; border-left: 2px solid rgba(0, 242, 254, 0.6);
+            border-right: 2px solid rgba(0, 242, 254, 0.6); background: linear-gradient(180deg, rgba(40, 30, 80, 0.95) 0%, rgba(20, 15, 50, 0.98) 100%);
         }
 
-        /* 🌠 背景の切り替えレイヤーたち */
         .bg-image-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            z-index: 0; transition: background-image 0.5s ease;
+            background-size: cover; background-position: center; z-index: 0; transition: background-image 0.5s ease;
         }
 
-        /* サイバーグリッド＆宇宙空間背景アニメーション（正方形が動くところ！） */
         .bg-grid {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
-                radial-gradient(circle at center, rgba(0, 242, 254, 0.1) 0%, transparent 60%),
-                linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+                radial-gradient(circle at center, rgba(0, 242, 254, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(0, 242, 254, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.1) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
-            animation: gridScroll 15s linear infinite;
-            pointer-events: none; z-index: 1;
+            animation: gridScroll 15s linear infinite; pointer-events: none; z-index: 1;
         }
         @keyframes gridScroll { 0% { background-position: 0 0, 0 0, 0 0; } 100% { background-position: 0 0, 0 300px, 0 0; } }
 
-        /* 背景を少し暗くするグラデーションフィルター（全体的に明るく調整！） */
         .bg-gradient-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, rgba(35, 20, 60, 0.7) 0%, rgba(20, 10, 40, 0.85) 100%);
@@ -66,48 +48,32 @@
         }
 
         /* =========================================================
-           🔝 ヘッダー（上部固定ステータスバー）
+           🔝 ヘッダー
            ========================================================= */
         #header-bar {
-            height: 60px;
-            background: linear-gradient(to bottom, #301b5e, #150a2b);
-            border-bottom: 2px solid #00b4db;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 5px;
-            z-index: 50;
-            box-shadow: 0 5px 20px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.2);
-            display: none; 
+            height: 70px; background: linear-gradient(to bottom, #40287a, #201045);
+            border-bottom: 2px solid #00b4db; display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5px; z-index: 50; box-shadow: 0 5px 20px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.2); display: none; 
         }
         .header-status { display: flex; gap: 4px; }
         .resource-pill {
-            background: linear-gradient(to bottom, rgba(50,20,80,0.8), rgba(20,0,40,0.9));
-            border: 1px solid rgba(0, 242, 254, 0.4);
-            border-radius: 20px;
-            padding: 2px 6px 2px 2px;
-            display: flex; align-items: center; font-size: 11px; font-weight: 900;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,1), inset 0 0 10px rgba(0, 180, 219, 0.3);
-            white-space: nowrap;
+            background: linear-gradient(to bottom, rgba(70,40,110,0.8), rgba(30,10,60,0.9));
+            border: 1px solid rgba(0, 242, 254, 0.5); border-radius: 20px; padding: 4px 10px 4px 4px;
+            display: flex; align-items: center; font-size: 13px; font-weight: 900;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,1), inset 0 0 10px rgba(0, 180, 219, 0.4); white-space: nowrap;
         }
-        .resource-pill img {
-            width: 20px; height: 20px; border-radius: 50%; margin-right: 3px;
-            border: 1px solid #00f2fe; background: #111; box-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
-            object-fit: contain;
-        }
+        .resource-pill img { width: 38px; height: 38px; border-radius: 50%; margin-right: 4px; border: 1px solid #00f2fe; background: #111; box-shadow: 0 0 8px rgba(0, 242, 254, 0.6); object-fit: contain; }
         .player-info-pill { display: flex; align-items: center; }
-        .player-info-pill img {
-            width: 36px; height: 36px; border-radius: 50%;
-            border: 2px solid #00f2fe; object-fit: cover; margin-right: 5px;
-            box-shadow: 0 0 10px #00f2fe;
-        }
+        .player-info-pill img { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #00f2fe; object-fit: cover; margin-right: 5px; box-shadow: 0 0 10px #00f2fe; }
 
         /* =========================================================
-           📜 メインコンテンツ領域
+           📜 メインコンテンツ＆フッター
            ========================================================= */
-        #inner-content-wrapper {
-            padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto;
-        }
+        #main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; z-index: 10; position: relative; }
+        #main-content::-webkit-scrollbar { display: none; }
+        
+        /* スクロール用ラッパー */
+        #inner-content-wrapper { padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto; box-sizing: border-box; }
         #inner-content-wrapper::-webkit-scrollbar { display: none; }
 
         .screen { display: none; animation: fadeIn 0.3s ease; }
@@ -115,300 +81,134 @@
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
         h2 { 
-            color: #ffffff; text-align: left;
-            text-shadow: 0 0 10px rgba(0, 242, 254, 0.8), 2px 2px 4px rgba(0,0,0,0.9);
-            border-bottom: 2px solid rgba(0, 242, 254, 0.5);
-            padding-bottom: 5px; margin-top: 5px; margin-bottom: 15px;
-            font-size: 20px; letter-spacing: 1px;
-            box-shadow: 0 5px 5px -5px rgba(0, 180, 219, 0.5);
+            color: #ffffff; text-align: left; text-shadow: 0 0 10px rgba(0, 242, 254, 0.8), 2px 2px 4px rgba(0,0,0,0.9);
+            border-bottom: 2px solid rgba(0, 242, 254, 0.5); padding-bottom: 5px; margin-top: 5px; margin-bottom: 15px;
+            font-size: 20px; letter-spacing: 1px; box-shadow: 0 5px 5px -5px rgba(0, 180, 219, 0.5);
         }
-        h3 { color: #00f2fe; font-size: 14px; margin-top: 0; text-shadow: 0 0 8px rgba(0, 242, 254, 0.5); }
 
-        /* =========================================================
-           👇 フッター（下部固定ナビゲーションバー）
-           ========================================================= */
         #footer-nav {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
-            background: linear-gradient(to top, #150a2b, #2a1b54);
-            border-top: 2px solid #00f2fe;
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 50; box-shadow: 0 -5px 25px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.1);
-            display: none; 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background: linear-gradient(to top, #1a0f35, #352266);
+            border-top: 2px solid #00f2fe; display: flex; justify-content: space-around; align-items: center; z-index: 50; 
+            box-shadow: 0 -5px 25px rgba(0, 180, 219, 0.3), inset 0 1px 2px rgba(255,255,255,0.2); display: none; 
         }
         .nav-btn {
-            background: none; border: none; color: #a19bb8;
-            font-size: 10px; font-weight: bold; font-family: 'Noto Sans JP', sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 20%; height: 100%; padding: 0; margin: 0; box-shadow: none; border-radius: 0; transition: all 0.2s; cursor: pointer;
+            background: none; border: none; color: #bbaee0; font-size: 10px; font-weight: bold; font-family: 'Noto Sans JP', sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 20%; height: 100%; padding: 0; margin: 0; cursor: pointer;
         }
-        
         .nav-btn .icon { font-size: 32px; margin-bottom: 3px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); transition: all 0.2s; }
         .nav-icon-img { width: 32px; height: 32px; margin-bottom: 3px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); transition: all 0.2s; object-fit: contain; }
-        
         .nav-btn.active-nav { color: #00f2fe; text-shadow: 0 0 8px rgba(0, 242, 254, 0.8); }
-        .nav-btn.active-nav .icon { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)); }
-        .nav-btn.active-nav .nav-icon-img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)); }
+        .nav-btn.active-nav .icon, .nav-btn.active-nav .nav-icon-img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.8)); }
 
         /* =========================================================
-           👆 ボタンデザイン（厚みのある超立体発光ボタン！）
+           👆 ボタンデザイン
            ========================================================= */
         button {
             display: block; width: 100%; padding: 14px; margin: 10px 0;
-            background: linear-gradient(to bottom, #385b96, #1c2e5c);
-            color: #00f2fe; border: 1px solid #00b4db; border-radius: 8px;
+            background: linear-gradient(to bottom, #446eb2, #213770); color: #00f2fe; border: 1px solid #00b4db; border-radius: 8px;
             font-size: 15px; font-weight: 900; cursor: pointer; position: relative; overflow: hidden;
-            box-shadow: 
-                0 6px 0 #0d152e, 
-                0 10px 15px rgba(0,0,0,0.6), 
-                inset 0 0 15px rgba(0, 180, 219, 0.5), 
-                inset 0 2px 3px rgba(255,255,255,0.4); 
-            text-shadow: 0 0 8px rgba(0, 242, 254, 0.8), 1px 1px 2px rgba(0,0,0,0.9); letter-spacing: 1px;
-            transition: all 0.1s ease;
+            box-shadow: 0 8px 0 #0d152e, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(0, 180, 219, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); 
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.8), 1px 1px 2px rgba(0,0,0,0.9); letter-spacing: 1px; transition: all 0.1s ease; transform: translateY(-2px);
         }
-        button:disabled {
-            opacity: 0.6; cursor: not-allowed;
-            transform: translateY(4px); 
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-        }
-        button::after {
-            content: ''; position: absolute; top: -50%; left: -60%; width: 20%; height: 200%;
-            background: rgba(255, 255, 255, 0.3); transform: rotate(30deg);
-            animation: buttonShine 4s ease-in-out infinite; pointer-events: none;
-        }
-        @keyframes buttonShine { 0% { left: -60%; } 20% { left: 150%; } 100% { left: 150%; } }
-        button:not(:disabled):active { 
-            transform: translateY(4px); 
-            box-shadow: 
-                0 2px 0 #0d152e, 
-                0 4px 6px rgba(0,0,0,0.6), 
-                inset 0 0 25px rgba(0, 180, 219, 0.8),
-                inset 0 1px 2px rgba(255,255,255,0.2); 
-        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: translateY(6px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        button:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #0d152e, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(0, 180, 219, 0.8), inset 0 1px 2px rgba(255,255,255,0.2); }
+        .btn-gold { background: linear-gradient(to bottom, #ffea70, #ffb860); color: #111; border-color: #fff; text-shadow: none; box-shadow: 0 8px 0 #996200, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(248, 181, 0, 0.5), inset 0 2px 3px rgba(255,255,255,0.5); }
+        .btn-gold:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #996200, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(248, 181, 0, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-red { background: linear-gradient(to bottom, #ff5c82, #a60032); color: #fff; border-color: #ffb6b9; box-shadow: 0 8px 0 #5c001a, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(255, 0, 127, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-red:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-green { background: linear-gradient(to bottom, #5fe6bb, #216a50); color: #fff; border-color: #a8ff78; box-shadow: 0 8px 0 #0f3627, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(56, 239, 125, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-green:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #0f3627, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(56, 239, 125, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-story { background: linear-gradient(to bottom, #5fe6bb, #216a50); border-color: #a8ff78; color: #fff; box-shadow: 0 8px 0 #0f3627, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(56, 239, 125, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-story:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #0f3627, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(56, 239, 125, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-gacha-go { background: linear-gradient(to bottom, #ff5c82, #a60032); border-color: #ff007f; color: #fff; box-shadow: 0 8px 0 #5c001a, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 20px rgba(255, 0, 127, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-gacha-go:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-setting { background: linear-gradient(to bottom, #6086d6, #283e70); border-color: #8f94fb; color: #fff; box-shadow: 0 8px 0 #131e38, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(143, 148, 251, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-setting:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #131e38, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(143, 148, 251, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
 
-        /* 各種カラーボタンの立体版 */
-        .btn-gold { 
-            background: linear-gradient(to bottom, #ffea70, #ffb860); color: #111; border-color: #fff; text-shadow: none; 
-            box-shadow: 0 6px 0 #996200, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(248, 181, 0, 0.5), inset 0 2px 3px rgba(255,255,255,0.5); 
-        }
-        .btn-gold:not(:disabled):active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #996200, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(248, 181, 0, 0.7), inset 0 1px 2px rgba(255,255,255,0.3);
-        }
+        .btn-title-back { background: linear-gradient(to bottom, #661111, #330000); border-color: #ff416c; color: #ffb6b9; box-shadow: 0 8px 0 #1a0000, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(255, 65, 108, 0.5), inset 0 2px 3px rgba(255,255,255,0.2); }
+        .btn-title-back:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #1a0000, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 65, 108, 0.7), inset 0 1px 2px rgba(255,255,255,0.1); }
 
-        .btn-red { 
-            background: linear-gradient(to bottom, #ff5c82, #a60032); color: #fff; border-color: #ffb6b9; 
-            box-shadow: 0 6px 0 #5c001a, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(255, 0, 127, 0.5), inset 0 2px 3px rgba(255,255,255,0.4);
-        }
-        .btn-red:not(:disabled):active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3);
-        }
+        .btn-start-img { position: relative; display: block; width: 100%; margin: 0 auto; padding: 0; background: transparent; border: none; box-shadow: none; cursor: pointer; animation: none; transform: none; -webkit-tap-highlight-color: transparent; outline: none; }
+        .btn-start-img:active { transform: scale(0.95); box-shadow: none; }
 
-        .btn-green { 
-            background: linear-gradient(to bottom, #5fe6bb, #216a50); color: #fff; border-color: #a8ff78; 
-            box-shadow: 0 6px 0 #0f3627, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(56, 239, 125, 0.5), inset 0 2px 3px rgba(255,255,255,0.4);
-        }
-        .btn-green:not(:disabled):active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #0f3627, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(56, 239, 125, 0.7), inset 0 1px 2px rgba(255,255,255,0.3);
-        }
-        
-        .btn-story {
-            background: linear-gradient(to bottom, #5fe6bb, #216a50); border-color: #a8ff78; color: #fff;
-            box-shadow: 0 6px 0 #0f3627, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(56, 239, 125, 0.5), inset 0 2px 3px rgba(255,255,255,0.4);
-        }
-        .btn-story:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 #0f3627, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(56, 239, 125, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
-
-        .btn-gacha-go {
-            background: linear-gradient(to bottom, #ff5c82, #a60032); border-color: #ff007f; color: #fff;
-            box-shadow: 0 6px 0 #5c001a, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 20px rgba(255, 0, 127, 0.5), inset 0 2px 3px rgba(255,255,255,0.4);
-        }
-        .btn-gacha-go:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
-
-        .btn-setting {
-            background: linear-gradient(to bottom, #6086d6, #283e70); border-color: #8f94fb; color: #fff;
-            box-shadow: 0 6px 0 #131e38, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(143, 148, 251, 0.5), inset 0 2px 3px rgba(255,255,255,0.4);
-        }
-        .btn-setting:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 #131e38, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(143, 148, 251, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
-
-        .btn-title-back {
-            background: linear-gradient(to bottom, #661111, #330000); border-color: #ff416c; color: #ffb6b9;
-            box-shadow: 0 6px 0 #1a0000, 0 10px 15px rgba(0,0,0,0.6), inset 0 0 15px rgba(255, 65, 108, 0.5), inset 0 2px 3px rgba(255,255,255,0.2);
-        }
-        .btn-title-back:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 #1a0000, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 65, 108, 0.7), inset 0 1px 2px rgba(255,255,255,0.1); }
-
-
-        /* 🎚️ 音量スライダー */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px; }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
-            background: #00f2fe; cursor: pointer; margin-top: -8px; 
-            box-shadow: 0 0 15px #00f2fe, inset 0 0 8px #fff; border: 2px solid #0d0221;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 8px; cursor: pointer; background: #160a2b;
-            border-radius: 4px; border: 1px solid #00b4db; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);
-        }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #00f2fe; cursor: pointer; margin-top: -8px; box-shadow: 0 0 15px #00f2fe, inset 0 0 8px #fff; border: 2px solid #0d0221; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #160a2b; border-radius: 4px; border: 1px solid #00b4db; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); }
 
         /* =========================================================
-           💳 リッチカードデザイン
+           💳 カードデザイン
            ========================================================= */
         .item-list { list-style: none; padding: 0; margin: 0; }
         .rich-card {
-            background: 
-                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.6) 100%),
-                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.15) 10px, rgba(0,0,0,0.15) 20px),
-                linear-gradient(135deg, #2d1b54, #1a0a3a); 
-            margin: 12px 0; border-radius: 12px; position: relative;
-            display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3);
-            border: 2px solid; transition: transform 0.2s;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.3) 100%), linear-gradient(135deg, #463475, #2a1a4a); 
+            margin: 12px 0; border-radius: 12px; position: relative; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.4); border: 2px solid; transition: transform 0.2s;
         }
         .rich-card:active { transform: scale(0.98); }
-        
-        .rarity-1 { border-color: #b0c4de; } 
-        .rarity-2 { border-color: #8fbc8f; } 
-        .rarity-3 { border-color: #ffeb3b; box-shadow: 0 0 10px rgba(255,235,59,0.3), inset 0 1px 1px rgba(255,255,255,0.5); } 
-        .rarity-4 { border-color: #ff4500; box-shadow: 0 0 12px rgba(255,69,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); } 
-        .rarity-5 { border-image: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db) 1; box-shadow: 0 0 15px rgba(255,0,127,0.5); } 
-        .rarity-6 { border-color: #cc00ff; box-shadow: 0 0 20px rgba(204,0,255,0.6); } 
-        .rarity-7 { border-color: #00ffff; box-shadow: 0 0 25px rgba(0,255,255,0.8); } 
-
-        .card-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(to right, rgba(0,0,0,0.8), transparent); 
-            padding: 4px 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-        }
-        
-        .element-badge {
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            width: 32px; height: 36px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 10px; font-weight: 900;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.8);
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            position: absolute; top: -5px; left: 5px; z-index: 5;
-        }
-        .el-fire { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
-        .el-water { background: linear-gradient(135deg, #00b4db, #0083b0); }
-        .el-grass { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #111; text-shadow: none; }
-        .el-light { background: linear-gradient(135deg, #ffeb3b, #f8b500); color: #111; text-shadow: none; }
-        .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
-
+        .rarity-1 { border-color: #b0c4de; } .rarity-2 { border-color: #8fbc8f; } .rarity-3 { border-color: #ffeb3b; box-shadow: 0 0 10px rgba(255,235,59,0.3), inset 0 1px 1px rgba(255,255,255,0.5); } .rarity-4 { border-color: #ff4500; box-shadow: 0 0 12px rgba(255,69,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); } .rarity-5 { border-image: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db) 1; box-shadow: 0 0 15px rgba(255,0,127,0.5); } .rarity-6 { border-color: #cc00ff; box-shadow: 0 0 20px rgba(204,0,255,0.6); } .rarity-7 { border-color: #00ffff; box-shadow: 0 0 25px rgba(0,255,255,0.8); } 
+        .card-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, rgba(0,0,0,0.6), transparent); padding: 4px 10px; border-bottom: 1px solid rgba(255,255,255,0.2); position: relative; }
+        .element-badge { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); width: 32px; height: 36px; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; text-shadow: 1px 1px 1px rgba(0,0,0,0.8); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.5); position: absolute; top: -5px; left: 5px; z-index: 5; }
+        .el-fire { background: linear-gradient(135deg, #ff416c, #ff4b2b); } .el-water { background: linear-gradient(135deg, #00b4db, #0083b0); } .el-grass { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #111; text-shadow: none; } .el-light { background: linear-gradient(135deg, #ffeb3b, #f8b500); color: #111; text-shadow: none; } .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
         .card-body { display: flex; padding: 10px; padding-left: 45px; align-items: center; gap: 10px; }
-        
         .card-name { font-size: 16px; font-weight: 900; flex: 1; text-shadow: 1px 1px 2px #000; letter-spacing: 0.5px; }
-        .card-stats { font-size: 11px; color: #ddd; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9); }
+        .card-stats { font-size: 11px; color: #eee; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.6); }
         .card-actions { display: flex; flex-direction: column; gap: 6px; width: 90px; }
-        .card-actions button { margin: 0; padding: 6px; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-
         .stars { color: #ffeb3b; font-size: 12px; letter-spacing: 2px; text-shadow: 0 0 5px #ffeb3b; margin-left: auto; }
-
         .selected-char { animation: blink-cyan 1.2s infinite alternate !important; transform: scale(1.02); z-index: 10; }
 
-        /* 📊 ステータスボックス（明るく！） */
         .status-box {
-            background: linear-gradient(135deg, rgba(46, 50, 76, 0.95), rgba(30, 32, 50, 0.95));
-            padding: 15px; border-radius: 12px; margin-bottom: 20px;
-            border: 1px solid rgba(102, 252, 241, 0.3);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, rgba(60, 65, 100, 0.95), rgba(40, 45, 80, 0.95)); padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            border: 1px solid rgba(0, 242, 254, 0.5); box-shadow: 0 5px 15px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
         }
 
-        /* 👥 パーティ編成枠 */
         .party-slots-container { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 6px; }
         .party-slot {
-            flex: 1; aspect-ratio: 1 / 1.2; background: rgba(5, 2, 15, 0.8);
-            border: 2px dashed rgba(0, 242, 254, 0.3); border-radius: 8px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; text-align: center; padding: 4px; box-sizing: border-box;
-            transition: all 0.2s; position: relative; overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,1);
+            flex: 1; aspect-ratio: 1 / 1.2; background: rgba(20, 15, 45, 0.8); border: 2px dashed rgba(0, 242, 254, 0.4); border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; text-align: center; padding: 4px; box-sizing: border-box; transition: all 0.2s; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,1);
         }
         .party-slot.filled {
-            border-style: solid;
-            background: linear-gradient(to bottom, rgba(40, 20, 80, 0.9), rgba(10, 5, 20, 0.9));
-            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.2);
+            border-style: solid; background: linear-gradient(to bottom, rgba(60, 40, 100, 0.9), rgba(30, 15, 50, 0.9));
+            box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 0 20px rgba(0, 242, 254, 0.3), inset 0 1px 2px rgba(255,255,255,0.2);
         }
 
-        /* タブボタン立体化 */
+        .category-tabs { display:flex; gap:5px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px; }
+        .category-tabs::-webkit-scrollbar { display:none; }
         .tab-btn {
-            background: linear-gradient(to bottom, #304a7a, #1a294a);
-            border: 1px solid #45f3ff; color: #aaa;
-            box-shadow: 0 4px 0 #0d152e;
-            padding: 8px 14px; font-size: 12px; border-radius: 15px; white-space: nowrap; width: auto; margin: 0; flex-shrink: 0;
-            transition: all 0.1s ease;
+            background: linear-gradient(to bottom, #3a5b9c, #1f3366); border: 1px solid #45f3ff; color: #ddd; box-shadow: 0 4px 0 #0d152e;
+            padding: 8px 14px; font-size: 12px; border-radius: 15px; white-space: nowrap; width: auto; margin: 0; flex-shrink: 0; transition: all 0.1s ease; transform: translateY(-2px);
         }
-        .tab-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0d152e; }
+        .tab-btn:active { transform: translateY(2px); box-shadow: 0 0px 0 #0d152e; }
         .tab-btn.active-tab {
-            background: linear-gradient(to bottom, #00f2fe, #4facfe); color: #111;
-            box-shadow: 0 4px 0 #00767c, inset 0 2px 3px rgba(255,255,255,0.5);
-            border-color: #66fcf1; font-weight: bold; transform: translateY(0);
+            background: linear-gradient(to bottom, #00f2fe, #4facfe); color: #111; box-shadow: 0 4px 0 #00767c, inset 0 2px 3px rgba(255,255,255,0.5); border-color: #fff; font-weight: bold; transform: translateY(-2px);
         }
-        .tab-btn.active-tab:active { transform: translateY(2px); box-shadow: 0 2px 0 #00767c, inset 0 2px 3px rgba(255,255,255,0.5); }
+        .tab-btn.active-tab:active { transform: translateY(2px); box-shadow: 0 0px 0 #00767c, inset 0 2px 3px rgba(255,255,255,0.5); }
 
         /* =========================================================
-           🎫 スタンプカード
+           🎫 ビンゴミッション＆スタンプカード
            ========================================================= */
         .stamp-card-container {
-            background: linear-gradient(135deg, #1d2538, #0d1220);
-            border: 2px solid #f8b500; border-radius: 12px; padding: 12px; margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(248,181,0,0.2);
+            background: linear-gradient(135deg, #2d1b54, #1a0a3a); border: 2px solid #f8b500; border-radius: 12px; padding: 12px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(248,181,0,0.2);
         }
-        .stamp-header {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 14px; font-weight: 900; color: #ffeb3b;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;
-        }
+        .stamp-header { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 900; color: #ffeb3b; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px; }
         .stamp-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
         .stamp-slot {
-            aspect-ratio: 1/1; border-radius: 50%; background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
-            font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.3); position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            aspect-ratio: 1/1; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.5); position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
         }
-        .stamp-slot.active-stamp {
-            background: radial-gradient(circle, #ffeb3b, #f8b500); border-color: #ffffff; color: #111111;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.8); box-shadow: 0 0 8px #f8b500;
-            animation: stampBounce 0.3s ease-out;
-        }
+        .stamp-slot.active-stamp { background: radial-gradient(circle, #ffeb3b, #f8b500); border-color: #ffffff; color: #111111; text-shadow: 0 1px 1px rgba(255,255,255,0.8); box-shadow: 0 0 8px #f8b500; animation: stampBounce 0.3s ease-out; }
         @keyframes stampBounce { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
         .stamp-slot.special-stamp { border-color: #ff007f; }
-        .stamp-slot.special-stamp.active-stamp {
-            background: radial-gradient(circle, #ff007f, #ff416c); color: #ffffff;
-            box-shadow: 0 0 15px #ff007f; text-shadow: none;
-        }
+        .stamp-slot.special-stamp.active-stamp { background: radial-gradient(circle, #ff007f, #ff416c); color: #ffffff; box-shadow: 0 0 15px #ff007f; text-shadow: none; }
 
         /* =========================================================
-           🎰 ガチャ演出画面
+           🎰 ガチャ＆演出画面
            ========================================================= */
-        #gacha-animation-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000; z-index: 200; 
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; overflow: hidden; transition: background 0.5s;
-        }
-
+        #gacha-animation-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 200; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden; transition: background 0.5s; }
         .gold-aura { background: radial-gradient(circle, #443000 0%, #000 80%) !important; }
         .rainbow-aura { background: radial-gradient(circle, #5a002c 0%, #000 80%) !important; }
-
-        .speed-lines {
-            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: repeating-conic-gradient(from 0deg, transparent 0deg 8deg, rgba(255, 255, 255, 0.08) 8deg 16deg);
-            animation: rotateLines 4s linear infinite; z-index: 1; display: none; opacity: 0; transition: opacity 0.5s;
-        }
+        .speed-lines { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: repeating-conic-gradient(from 0deg, transparent 0deg 8deg, rgba(255, 255, 255, 0.08) 8deg 16deg); animation: rotateLines 4s linear infinite; z-index: 1; display: none; opacity: 0; transition: opacity 0.5s; }
         @keyframes rotateLines { 100% { transform: rotate(360deg); } }
 
-        .cut-in-text {
-            position: absolute; top: 38%; left: -150%; width: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 0, 127, 0.95), rgba(255, 235, 59, 0.95), transparent);
-            color: #ffffff; font-size: 32px; font-style: italic; font-weight: 900;
-            padding: 20px 0; transform: rotate(-10deg); z-index: 200;
-            text-shadow: 0 0 10px #ff007f, 0 0 25px #ffffff;
-            box-shadow: 0 -5px 25px rgba(255,0,127,0.6), 0 5px 25px rgba(255,0,127,0.6);
-            opacity: 0; pointer-events: none; text-align: center; letter-spacing: 6px;
-        }
+        .cut-in-text { position: absolute; top: 38%; left: -150%; width: 200%; background: linear-gradient(90deg, transparent, rgba(255, 0, 127, 0.95), rgba(255, 235, 59, 0.95), transparent); color: #ffffff; font-size: 32px; font-style: italic; font-weight: 900; padding: 20px 0; transform: rotate(-10deg); z-index: 200; text-shadow: 0 0 10px #ff007f, 0 0 25px #ffffff; box-shadow: 0 -5px 25px rgba(255,0,127,0.6), 0 5px 25px rgba(255,0,127,0.6); opacity: 0; pointer-events: none; text-align: center; letter-spacing: 6px; }
         .cut-in-text.active { animation: cutInAnim 1.6s cubic-bezier(0.15, 0.85, 0.35, 1) forwards; }
         @keyframes cutInAnim { 0% { left: -120%; opacity: 1; } 25% { left: -10%; opacity: 1; } 75% { left: -10%; opacity: 1; } 100% { left: 120%; opacity: 0; } }
 
@@ -416,150 +216,59 @@
         .particle { position: absolute; border-radius: 50%; opacity: 0; animation: warpEffect 1s cubic-bezier(0.1, 0.8, 0.3, 1) infinite; }
         @keyframes warpEffect { 0% { transform: scale(0) translate(0, 0) rotate(0deg); opacity: 0; } 20% { opacity: 1; } 100% { transform: scale(3) translate(var(--mx), var(--my)) rotate(270deg); opacity: 0; } }
 
-        /* SFガチャ装置（ポータル） */
-        .portal-device {
-            position: absolute; top: 35%; width: 220px; height: 220px; z-index: 10;
-            display: flex; justify-content: center; align-items: center; perspective: 600px;
-            transition: opacity 0.5s, transform 0.5s;
-        }
-        .outer-gear {
-            position: absolute; width: 200px; height: 200px; border: 6px dashed #00f2fe;
-            border-radius: 50%; animation: rotateGear 12s linear infinite;
-            box-shadow: 0 0 25px rgba(0, 242, 254, 0.5);
-        }
-        .inner-ring {
-            position: absolute; width: 150px; height: 150px; border: 4px double #f8b500;
-            border-radius: 50%; animation: rotateGear 6s linear infinite reverse;
-            box-shadow: 0 0 20px rgba(248, 181, 0, 0.5);
-        }
-        .core-sphere {
-            position: absolute; width: 90px; height: 90px;
-            background: radial-gradient(circle, rgba(0, 242, 254, 0.9) 0%, rgba(0, 180, 219, 0.1) 75%);
-            border-radius: 50%; box-shadow: 0 0 35px #00f2fe;
-            animation: spherePulse 1.2s infinite alternate;
-        }
+        .portal-device { position: absolute; top: 35%; width: 220px; height: 220px; z-index: 10; display: flex; justify-content: center; align-items: center; perspective: 600px; transition: opacity 0.5s, transform 0.5s; }
+        .outer-gear { position: absolute; width: 200px; height: 200px; border: 6px dashed #00f2fe; border-radius: 50%; animation: rotateGear 12s linear infinite; box-shadow: 0 0 25px rgba(0, 242, 254, 0.5); }
+        .inner-ring { position: absolute; width: 150px; height: 150px; border: 4px double #f8b500; border-radius: 50%; animation: rotateGear 6s linear infinite reverse; box-shadow: 0 0 20px rgba(248, 181, 0, 0.5); }
+        .core-sphere { position: absolute; width: 90px; height: 90px; background: radial-gradient(circle, rgba(0, 242, 254, 0.9) 0%, rgba(0, 180, 219, 0.1) 75%); border-radius: 50%; box-shadow: 0 0 35px #00f2fe; animation: spherePulse 1.2s infinite alternate; }
         @keyframes rotateGear { 100% { transform: rotate(360deg); } }
         @keyframes spherePulse { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 1; } }
 
-        .magic-circle {
-            position: absolute; width: 300px; height: 300px; border: 4px dashed rgba(0, 242, 254, 0.5);
-            border-radius: 50%; animation: spin 4s linear infinite; z-index: 8; transition: border-color 0.5s, box-shadow 0.5s;
-        }
-        .magic-circle.gold { border: 5px dashed #f8b500; box-shadow: 0 0 25px #f8b500, inset 0 0 25px #f8b500; animation: spin 2s linear infinite; }
-        .magic-circle.rainbow { border: 7px dashed #ff007f; box-shadow: 0 0 45px #ffeb3b, inset 0 0 40px #00b4db; animation: spin 0.8s linear infinite reverse; }
+        .magic-circle { position: absolute; width: 300px; height: 300px; border: 4px dashed rgba(0, 242, 254, 0.5); border-radius: 50%; animation: spin 4s linear infinite; z-index: 8; transition: border-color 0.5s, box-shadow 0.5s; }
+        .magic-circle.gold { border: 5px dashed #f8b500; box-shadow: 0 0 30px #f8b500, inset 0 0 30px #f8b500; animation: spin 2s linear infinite; }
+        .magic-circle.rainbow { border: 7px dashed #ff007f; box-shadow: 0 0 50px #ffeb3b, inset 0 0 45px #00b4db; animation: spin 0.8s linear infinite reverse; }
 
-        /* 召喚宝箱 */
-        .summoned-chest-container {
-            position: absolute; top: 32%; width: 170px; height: 170px; z-index: 25;
-            display: none; justify-content: center; align-items: center;
-            transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .summoned-chest-container { position: absolute; top: 32%; width: 170px; height: 170px; z-index: 25; display: none; justify-content: center; align-items: center; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .summoned-chest-container.active { display: flex; transform: scale(1); }
-        .summoned-chest {
-            position: relative; width: 130px; height: 100px;
-            background: linear-gradient(to bottom, #1d3557, #1f2833);
-            border: 4px solid #b0c4de; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: transform 0.1s;
-        }
-        .summoned-chest.gold {
-            background: linear-gradient(135deg, #ffe259, #ffa751); border-color: #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 25px #f8b500;
-        }
-        .summoned-chest.rainbow {
-            background: linear-gradient(135deg, #ff007f 0%, #ffeb3b 50%, #00b4db 100%); border-color: #ffffff;
-            box-shadow: 0 10px 40px rgba(255, 0, 127, 0.6), 0 0 35px rgba(0, 242, 254, 0.8);
-        }
-        .chest-lid {
-            position: absolute; top: -32px; left: -4px; width: 130px; height: 42px;
-            background: inherit; border: 4px solid inherit; border-color: inherit;
-            border-radius: 50% 50% 0 0 / 100% 100% 0 0; box-shadow: inset 0 5px 10px rgba(255,255,255,0.3);
-            transform-origin: bottom; transition: transform 0.5s;
-        }
+        .summoned-chest { position: relative; width: 130px; height: 100px; background: linear-gradient(to bottom, #1d3557, #1f2833); border: 4px solid #b0c4de; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: transform 0.1s; }
+        .summoned-chest.gold { background: linear-gradient(135deg, #ffe259, #ffa751); border-color: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 25px #f8b500; }
+        .summoned-chest.rainbow { background: linear-gradient(135deg, #ff007f 0%, #ffeb3b 50%, #00b4db 100%); border-color: #ffffff; box-shadow: 0 10px 40px rgba(255, 0, 127, 0.6), 0 0 35px rgba(0, 242, 254, 0.8); }
+        .chest-lid { position: absolute; top: -32px; left: -4px; width: 130px; height: 42px; background: inherit; border: 4px solid inherit; border-color: inherit; border-radius: 50% 50% 0 0 / 100% 100% 0 0; box-shadow: inset 0 5px 10px rgba(255,255,255,0.3); transform-origin: bottom; transition: transform 0.5s; }
         .summoned-chest.open .chest-lid { transform: rotateX(-110deg) translateY(-10px); }
-        .star-lock {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-            font-size: 26px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe;
-            animation: starBlink 0.8s infinite alternate; font-weight: bold;
-        }
+        .star-lock { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #00f2fe; text-shadow: 0 0 10px #00f2fe; animation: starBlink 0.8s infinite alternate; font-weight: bold; }
         .summoned-chest.rainbow .star-lock { color: #ffffff; text-shadow: 0 0 15px #ff007f, 0 0 10px #ffeb3b; }
         @keyframes starBlink { 0% { opacity: 0.4; } 100% { opacity: 1; } }
-        
         .chest-shake-heavy { animation: chestShake 0.1s infinite alternate; }
         @keyframes chestShake { 0% { transform: translate(4px, 4px) rotate(-2deg); } 100% { transform: translate(-4px, -4px) rotate(2deg); } }
 
-        /* タッチボタンプロンプト */
-        .gacha-tap-prompt {
-            position: absolute; bottom: 18%; z-index: 100;
-            display: none; flex-direction: column; align-items: center;
-            cursor: pointer; animation: tapPulse 0.8s infinite alternate;
-        }
+        .gacha-tap-prompt { position: absolute; bottom: 18%; z-index: 100; display: none; flex-direction: column; align-items: center; cursor: pointer; animation: tapPulse 0.8s infinite alternate; }
         .gacha-tap-prompt.active { display: flex; }
-        .tap-circle {
-            width: 80px; height: 80px; border-radius: 50%; border: 4px solid #ffeb3b;
-            background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 25px #ffeb3b;
-            display: flex; justify-content: center; align-items: center; animation: tapRing 1s infinite;
-        }
-        .tap-text {
-            margin-top: 10px; font-size: 24px; font-weight: 900; color: #ffeb3b;
-            text-shadow: 0 2px 6px #000, 0 0 15px #f8b500; letter-spacing: 3px;
-        }
+        .tap-circle { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #ffeb3b; background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 25px #ffeb3b; display: flex; justify-content: center; align-items: center; animation: tapRing 1s infinite; }
+        .tap-text { margin-top: 10px; font-size: 24px; font-weight: 900; color: #ffeb3b; text-shadow: 0 2px 6px #000, 0 0 15px #f8b500; letter-spacing: 3px; }
         @keyframes tapPulse { 0% { transform: scale(0.92); } 100% { transform: scale(1.08); } }
         @keyframes tapRing { 0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.8); } 100% { box-shadow: 0 0 0 35px rgba(255, 235, 59, 0); } }
 
-        /* 飛び出すお星様マスコット */
-        .mascot-container {
-            position: absolute; top: 22%; width: 140px; height: 140px; z-index: 35;
-            display: none; justify-content: center; align-items: center; transform: scale(0);
-        }
+        .mascot-container { position: absolute; top: 22%; width: 140px; height: 140px; z-index: 35; display: none; justify-content: center; align-items: center; transform: scale(0); }
         .mascot-container.active { display: flex; animation: mascotJump 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .mascot-star {
-            position: relative; width: 90px; height: 90px; background: #ffeb3b;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px #ffeb3b;
-        }
-        .mascot-wings-left, .mascot-wings-right {
-            position: absolute; width: 45px; height: 25px; background: #ffffff;
-            border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: -1; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
+        .mascot-star { position: relative; width: 90px; height: 90px; background: #ffeb3b; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px #ffeb3b; }
+        .mascot-wings-left, .mascot-wings-right { position: absolute; width: 45px; height: 25px; background: #ffffff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: -1; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .mascot-wings-left { left: -32px; top: 15px; transform: rotate(-35deg); animation: wingFlapLeft 0.15s infinite alternate; transform-origin: right bottom; }
         .mascot-wings-right { right: -32px; top: 15px; transform: rotate(35deg); animation: wingFlapRight 0.15s infinite alternate; transform-origin: left bottom; }
         @keyframes wingFlapLeft { 0% { transform: rotate(-35deg); } 100% { transform: rotate(-10deg); } }
         @keyframes wingFlapRight { 0% { transform: rotate(35deg); } 100% { transform: rotate(10deg); } }
         .mascot-face { font-size: 26px; user-select: none; }
-        @keyframes mascotJump {
-            0% { transform: translateY(80px) scale(0) rotate(0deg); }
-            50% { transform: translateY(-100px) scale(1.5) rotate(360deg); }
-            100% { transform: translateY(-50px) scale(1.3) rotate(360deg); }
-        }
+        @keyframes mascotJump { 0% { transform: translateY(80px) scale(0) rotate(0deg); } 50% { transform: translateY(-100px) scale(1.5) rotate(360deg); } 100% { transform: translateY(-50px) scale(1.3) rotate(360deg); } }
 
-        /* 雷／極太エネルギー大爆発 */
-        .beam-explosion {
-            position: absolute; width: 10px; height: 10px; border-radius: 50%;
-            z-index: 15; display: none; pointer-events: none;
-        }
-        .beam-explosion.active-rainbow {
-            display: block; background: radial-gradient(circle, #ffffff 0%, #ffeb3b 20%, #ff007f 50%, #00b4db 70%, rgba(255,255,255,0.9) 90%, rgba(0,0,0,0) 100%);
-            animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-        }
-        .beam-explosion.active-gold {
-            display: block; background: radial-gradient(circle, #ffffff 0%, #fff7c2 30%, #f8b500 65%, rgba(248,181,0,0.8) 85%, rgba(0,0,0,0) 100%);
-            animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-        }
-        @keyframes beamExpand {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px #fff; }
-            100% { transform: scale(65); opacity: 0; box-shadow: 0 0 150px #fff; }
-        }
+        .beam-explosion { position: absolute; width: 10px; height: 10px; border-radius: 50%; z-index: 15; display: none; pointer-events: none; }
+        .beam-explosion.active-rainbow { display: block; background: radial-gradient(circle, #ffffff 0%, #ffeb3b 20%, #ff007f 50%, #00b4db 70%, rgba(255,255,255,0.9) 90%, rgba(0,0,0,0) 100%); animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        .beam-explosion.active-gold { display: block; background: radial-gradient(circle, #ffffff 0%, #fff7c2 30%, #f8b500 65%, rgba(248,181,0,0.8) 85%, rgba(0,0,0,0) 100%); animation: beamExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        @keyframes beamExpand { 0% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px #fff; } 100% { transform: scale(65); opacity: 0; box-shadow: 0 0 150px #fff; } }
 
         #gacha-whiteout-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 210; pointer-events: none; opacity: 1; }
         .whiteout-fade-out { animation: whiteoutFade 1s ease-out forwards; }
         @keyframes whiteoutFade { 0% { opacity: 1; } 100% { opacity: 0; } }
 
         .screen-shake { animation: heavyShake 0.05s infinite !important; }
-        @keyframes heavyShake {
-            0% { transform: translate(8px, 8px) rotate(0deg); } 20% { transform: translate(-8px, -8px) rotate(-1deg); }
-            40% { transform: translate(-8px, 8px) rotate(1deg); } 60% { transform: translate(8px, -8px) rotate(-1.5deg); }
-            80% { transform: translate(8px, 8px) rotate(1.5deg); } 100% { transform: translate(0, 0) rotate(0deg); }
-        }
+        @keyframes heavyShake { 0% { transform: translate(8px, 8px) rotate(0deg); } 20% { transform: translate(-8px, -8px) rotate(-1deg); } 40% { transform: translate(-8px, 8px) rotate(1deg); } 60% { transform: translate(8px, -8px) rotate(-1.5deg); } 80% { transform: translate(8px, 8px) rotate(1.5deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
 
         .gacha-progress-bar { width: 80%; height: 12px; background-color: #111; border-radius: 6px; overflow: hidden; border: 1px solid #00f2fe; z-index: 101; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); }
         .gacha-progress-fill { height: 100%; width: 0%; background: linear-gradient(45deg, #00f2fe, #4ecca3); transition: width 0.1s linear; }
@@ -567,25 +276,12 @@
         /* =========================================================
            🔨 合体演出画面
            ========================================================= */
-        #combine-animation-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(5, 2, 15, 0.95); z-index: 205;
-            flex-direction: column; justify-content: center; align-items: center; text-align: center;
-        }
-        .combine-spark {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: radial-gradient(circle, #00f2fe 0%, rgba(0, 242, 254, 0) 70%);
-            box-shadow: 0 0 50px #00f2fe; animation: combinePulse 0.3s infinite alternate; margin-bottom: 20px;
-        }
+        #combine-animation-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(5, 2, 15, 0.95); z-index: 205; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .combine-spark { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #00f2fe 0%, rgba(0, 242, 254, 0) 70%); box-shadow: 0 0 50px #00f2fe; animation: combinePulse 0.3s infinite alternate; margin-bottom: 20px; }
         @keyframes combinePulse { 0% { transform: scale(0.8) rotate(0deg); box-shadow: 0 0 20px #00f2fe; } 100% { transform: scale(1.4) rotate(180deg); box-shadow: 0 0 80px #00b4db, 0 0 40px #00f2fe; filter: hue-rotate(90deg); } }
 
         /* 💬 アラート＆モーダル類 */
-        #custom-alert, #weapon-select-modal, #weapon-exchange-modal, #title-confirm-modal {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 380px; background: linear-gradient(135deg, #1c0f38, #0a0316);
-            border: 2px solid #00f2fe; border-radius: 15px; padding: 20px; z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(0, 242, 254, 0.2); text-align: center;
-        }
+        #custom-alert, #weapon-select-modal, #weapon-exchange-modal, #title-confirm-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 380px; background: linear-gradient(135deg, #1c0f38, #0a0316); border: 2px solid #00f2fe; border-radius: 15px; padding: 20px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(0, 242, 254, 0.2); text-align: center; }
         #weapon-select-modal { border-color: #f8b500; z-index: 1001; }
         #weapon-exchange-modal { border: 3px solid #ff007f; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(255, 0, 127, 0.2); z-index: 1002; }
         #title-confirm-modal { border-color: #ff416c; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(255, 65, 108, 0.2); z-index: 1003; }
@@ -593,17 +289,8 @@
         #alert-message-box { max-height: 280px; overflow-y: auto; margin: 15px 0; padding: 10px; text-align: left; background: rgba(0,0,0,0.6); border-radius: 8px; border: 1px inset #00f2fe; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
         #alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 999; }
         
-        .gacha-banner {
-            background: linear-gradient(135deg, rgba(30, 20, 50, 0.9), rgba(10, 5, 20, 0.9));
-            border-radius: 12px; margin-bottom: 15px; cursor: pointer;
-            transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2);
-            text-align: left; box-shadow: 0 8px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0, 180, 219, 0.2); position: relative; overflow: hidden;
-        }
-        .gacha-banner::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transform: skewX(-25deg); animation: bannerShine 5s infinite;
-        }
+        .gacha-banner { background: linear-gradient(135deg, rgba(30, 20, 50, 0.9), rgba(10, 5, 20, 0.9)); border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2); text-align: left; box-shadow: 0 8px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0, 180, 219, 0.2); position: relative; overflow: hidden; }
+        .gacha-banner::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent); transform: skewX(-25deg); animation: bannerShine 5s infinite; }
     </style>
 </head>
 <body>
@@ -612,7 +299,7 @@
 <div id="custom-alert">
     <h3 id="alert-title" style="margin-top: 0;">おしらせ</h3>
     <div id="alert-message-box"><p id="alert-message" style="margin: 0; line-height: 1.5;"></p></div>
-    <button onclick="closeAlert()" style="margin-top: 5px; padding: 10px;" class="btn-green">とじる</button>
+    <button class="btn-green" onclick="closeAlert()" style="margin-top: 5px; padding: 10px;">とじる</button>
 </div>
 
 <!-- タイトルへ戻る確認ポップアップ -->
@@ -705,7 +392,7 @@
 </div>
 
 <div id="game-container">
-    <!-- 🖼️ 背景画像のレイヤー（KAZIN背景.png と kazinhakei.png がここで切り替わります） -->
+    <!-- 🖼️ 背景画像のレイヤー -->
     <div class="bg-image-layer" id="bg-image-layer" style="background-image: url('KAZIN背景.png');"></div>
     
     <!-- 🟦 アニメーションする正方形のグリッドレイヤー -->
@@ -721,7 +408,6 @@
             <span id="header-player-name" style="font-size: 12px; font-weight: bold;">勇者</span>
         </div>
         <div class="header-status">
-            <!-- 🪙 新規追加：草コイン -->
             <div class="resource-pill" style="color: #ffd700; border-color: #ffd700;">
                 <img src="草コイン.png" onerror="this.src='https://img.icons8.com/color/48/000000/coin.png'">
                 <span id="header-coins">0</span>
@@ -737,48 +423,47 @@
         </div>
     </div>
 
-    <div id="main-content" style="padding: 0; height: 100%;">
+    <!-- 🌟 スクロール完全制御！ -->
+    <div id="main-content" style="padding: 0; overflow-y: hidden;">
         <!-- =========================================================
            ① タイトル画面
            ========================================================= -->
         <div id="screen-title" class="screen active" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;">
-            
             <div style="position: absolute; top: 1%; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; pointer-events: none; width: 100%;">
                 <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 425px; max-width: 95%; filter: drop-shadow(0 0 20px #00f2fe); object-fit: contain; margin-left: auto; margin-right: auto;">
             </div>
             
             <div style="position: absolute; bottom: 4.5%; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; z-index: 30;">
-                
-                <button style="background: transparent; border: none; box-shadow: none; color: #fff; font-weight: bold; margin-bottom: 10px; width: auto; font-size: 12px; text-shadow: 0 0 5px #000;" onclick="resetGame()">データを初期化する</button>
+                <button style="background: transparent; border: none; box-shadow: none; color: #fff; font-weight: bold; margin-bottom: 10px; width: auto; font-size: 12px; text-shadow: 0 0 5px #000; transform: none;" onclick="resetGame()">データを初期化する</button>
 
-                <button onclick="startGame(event)" style="width: 100%; height: 100px; margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; cursor: pointer; -webkit-tap-highlight-color: transparent; outline: none;"></button>
+                <button onclick="startGame(event)" style="width: 100%; height: 150px; margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; cursor: pointer; -webkit-tap-highlight-color: transparent; outline: none; transform: none;"></button>
             </div>
         </div>
 
-        <!-- 以下の画面は padding を戻すためのラッパー -->
-        <div style="padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto;" id="inner-content-wrapper">
+        <!-- スクロール可能なラッパー -->
+        <div style="display: none; padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto;" id="inner-content-wrapper">
             <!-- =========================================================
                ② ホーム画面
                ========================================================= -->
             <div id="screen-home" class="screen">
                 <h2>🏠 ホーム</h2>
 
-                <div class="status-box" style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(30, 45, 75, 0.9), rgba(15, 25, 45, 0.95));">
+                <div class="status-box" style="display: flex; align-items: center; gap: 20px;">
                     <img id="home-player-icon" src="" alt="👤" style="width: 90px; height: 90px; border-radius: 12px; object-fit: cover; border: 3px solid #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);">
                     <div style="flex-grow: 1;">
+                        <span id="home-player-title" style="font-size: 12px; color: #ffeb3b; font-weight:bold; text-shadow: 0 0 5px rgba(248, 181, 0, 0.8);">初心者</span><br>
                         <span style="font-size: 11px; color: #45f3ff;">プレイヤー</span>
-                        <h3 id="home-player-name" style="margin: 3px 0 0 0; text-align: left; font-size: 22px; color: #ffffff; text-shadow: 0 0 10px rgba(0, 180, 219, 0.8);">勇者</h3>
+                        <h3 id="home-player-name" style="margin: 0; text-align: left; font-size: 22px; color: #ffffff; text-shadow: 0 0 10px rgba(0, 180, 219, 0.8);">勇者</h3>
                         <div style="margin-top: 5px; font-size: 12px; color: #f8b500; text-shadow: 0 0 5px rgba(248, 181, 0, 0.8);">★パーティ総合攻撃力: <span id="home-power" style="font-size: 16px; font-weight: bold;">0</span></div>
                     </div>
                     <button class="btn-setting" onclick="openProfileScreen()" style="width: auto; margin: 0; padding: 8px 12px; font-size: 12px;">📝設定</button>
                 </div>
                 
                 <div class="status-box" style="font-size: 12px;">
-                    <!-- 🪙 新規追加：草コイン -->
                     <div class="status-item" style="margin-bottom: 10px; border-bottom: 1px dashed rgba(0, 242, 254, 0.3); padding-bottom: 5px;">
                         <span style="display: flex; align-items: center;">
-                            <img class="fossil-icon" src="草コイン.png" onerror="this.src='https://img.icons8.com/color/48/000000/coin.png'" style="width: 30px; height: 30px;"> 
-                            <strong style="margin-left: 5px;">草コイン:</strong>
+                            <img class="fossil-icon" src="草コイン.png" onerror="this.src='https://img.icons8.com/color/48/000000/coin.png'" style="width: 38px; height: 38px; margin-right: 5px; border-radius:50%;"> 
+                            <strong style="font-size: 14px; margin-left: 5px;">草コイン:</strong>
                         </span>
                         <span id="home-coins" style="color: #ffd700; font-weight: bold; font-size: 20px;">0</span>
                     </div>
@@ -867,53 +552,27 @@
             </div>
 
             <!-- =========================================================
-               ⑤-1 ガチャ一覧画面
+               ⑤ ガチャ画面
                ========================================================= -->
             <div id="screen-gacha" class="screen">
-                <h2 style="text-align: left; border-bottom: none; margin-bottom: 15px;">ガチャ</h2>
+                <h2 style="text-align: left; border-bottom: none; margin-bottom: 10px;">ガチャ</h2>
 
-                <div class="gacha-banner" style="border-color: #f8b500; padding: 0;" onclick="openGachaDetail('free')">
-                    <img src="1日1回無料ガチャ.png" alt="1日1回無料ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="padding: 15px; display: none;">
-                        <h3 style="color:#f8b500; margin-top:0; border:none; font-size:18px; text-align: left;">🎁 1日1回 無料ガチャ</h3>
-                        <p style="font-size:12px; color:#ccc; margin:0;">毎日1回だけ無料で引ける！運試し！</p>
-                    </div>
+                <!-- ガチャ切り替えタブ -->
+                <div class="category-tabs" id="gacha-tabs">
+                    <button class="tab-btn active-tab" id="gacha-tab-normal" onclick="switchGachaTab('normal')">✨ 通常武器</button>
+                    <button class="tab-btn" id="gacha-tab-free" onclick="switchGachaTab('free')">🎁 1日1回無料</button>
+                    <button class="tab-btn" id="gacha-tab-new" onclick="switchGachaTab('new')">🆕 新武器PU</button>
+                    <button class="tab-btn" id="gacha-tab-revival" onclick="switchGachaTab('revival')">🔄 復刻</button>
                 </div>
 
-                <div class="gacha-banner" style="border-color: #4ecca3; padding: 0;" onclick="openGachaDetail('normal')">
-                    <img src="通常ガチャ.png" alt="通常ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="padding: 15px; display: none;">
-                        <h3 style="color:#4ecca3; margin-top:0; border:none; font-size:18px; text-align: left;">✨ 通常武器ガチャ</h3>
-                        <p style="font-size:12px; color:#ccc; margin:0;">草核を使って強力な武器を手に入れよう！</p>
-                    </div>
+                <!-- バナー画像と説明 -->
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <img id="gacha-banner-img" src="通常ガチャ.png" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border: 2px solid #00f2fe;" onerror="this.style.display='none'">
+                    <p id="gacha-desc-text" style="font-size: 13px; color: #ccc; margin-top: 8px; margin-bottom: 0; font-weight: bold;"></p>
                 </div>
 
-                <div class="gacha-banner" style="border-color: #ff416c; padding: 0;" onclick="openGachaDetail('new')">
-                    <img src="新装備ピックアップガチャ.png" alt="新装備ピックアップガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="padding: 15px; display: none;">
-                        <h3 style="color:#ff416c; margin-top:0; border:none; font-size:18px; text-align: left;">🆕 新武器ピックアップ</h3>
-                        <p style="font-size:12px; color:#ccc; margin:0;">強力な新武器の出現率UP！（準備中）</p>
-                    </div>
-                </div>
-
-                <div class="gacha-banner" style="border-color: #00b4db; padding: 0;" onclick="openGachaDetail('revival')">
-                    <img src="復刻装備ガチャ.png" alt="復刻装備ガチャ" style="width: 100%; height: auto; min-height: 80px; object-fit: cover; border-radius: 10px; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="padding: 15px; display: none;">
-                        <h3 style="color:#00b4db; margin-top:0; border:none; font-size:18px; text-align: left;">🔄 復刻武器ガチャ</h3>
-                        <p style="font-size:12px; color:#ccc; margin:0;">過去の限定武器が復活！？（準備中）</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- =========================================================
-               ⑤-2 ガチャ詳細画面
-               ========================================================= -->
-            <div id="screen-gacha-detail" class="screen">
-                <button class="btn-setting" style="width: auto; padding: 8px 15px; font-size: 12px; margin-bottom: 10px;" onclick="changeScreen('gacha')">◀ 戻る</button>
-                <h2 id="gacha-detail-title" style="margin-bottom: 5px; border:none; text-align:left;">✨ 運命のガチャ</h2>
-                <p id="gacha-detail-desc" style="font-size:13px; color:#ccc; margin-top:0; margin-bottom: 20px;">ガチャの説明</p>
-                
-                <div class="stamp-card-container" id="detail-stamp-container" style="display:none;">
+                <!-- 🎫 スタンプカード -->
+                <div class="stamp-card-container" id="gacha-stamp-container" style="display:none;">
                     <div class="stamp-header">
                         <span>🎫 天井スタンプカード</span>
                         <span id="stamp-counter-text" style="color: #fff;">0 / 20</span>
@@ -925,13 +584,16 @@
                     </div>
                     <button id="btn-open-exchange" class="btn-gold" style="display: none; margin-top: 10px; padding: 10px;" onclick="openExchangeModal()">🎁 プレミアム装備交換所を開く！</button>
                 </div>
-                
+
+                <!-- 提供割合ボタン -->
                 <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                    <button style="background: transparent; border: 1px solid #00f2fe; color: #00f2fe; padding: 8px; font-size: 13px; width: 100%; margin: 0; box-shadow: none;" onclick="showProbabilities()">🔍 ガチャ提供割合</button>
+                    <button style="background: transparent; border: 1px solid #00f2fe; color: #00f2fe; padding: 8px; font-size: 13px; width: 100%; margin: 0; box-shadow: none; transform: none;" onclick="showProbabilities()">🔍 ガチャ提供割合</button>
                 </div>
 
-                <div id="gacha-detail-buttons"></div>
+                <!-- 🎲 ガチャを引くボタン表示エリア -->
+                <div id="gacha-action-buttons"></div>
 
+                <!-- 獲得履歴 -->
                 <div class="status-box" style="margin-top: 20px; padding: 10px; border-color: rgba(255,255,255,0.15);">
                     <p style="color: #00f2fe; font-weight: bold; margin: 0 0 5px 0; font-size: 13px;">最新の獲得履歴</p>
                     <div id="gacha-result-list" style="max-height: 150px; overflow-y: auto; font-size: 13px; color: #ccc;">
@@ -959,26 +621,34 @@
                 <div class="status-box" style="border-color: rgba(255,255,255,0.15);">
                     <label style="display: block; font-size: 14px; color: #00f2fe; font-weight: bold;">プレイヤーの名前 (10文字まで)</label>
                     <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">※主人公キャラクターの名前も連動して変わるよ！</p>
-                    <input type="text" id="profile-name-input" class="profile-input" maxlength="10" placeholder="なまえを入力してね">
+                    <input type="text" id="profile-name-input" class="profile-input" maxlength="10" placeholder="なまえを入力してね" style="width: 100%; padding: 10px; background: #111; color: #fff; border: 1px solid #00f2fe; border-radius: 5px; box-sizing: border-box;">
+                </div>
+
+                <div class="status-box" style="border-color: #ffeb3b;">
+                    <label style="display: block; font-size: 14px; color: #ffeb3b; font-weight: bold;">称号（実績）の設定</label>
+                    <p style="font-size: 11px; color:#aaa; margin: 2px 0 8px 0;">ミッション画面で「実績」を達成すると、ここに称号が追加されます！</p>
+                    <select id="profile-title-select" style="width: 100%; padding: 10px; background: #111; color: #fff; border: 1px solid #ffeb3b; border-radius: 5px; box-sizing: border-box;">
+                        <option value="">設定しない</option>
+                    </select>
                 </div>
 
                 <button class="btn-green" onclick="saveProfile()">💾 設定をほぞんする</button>
             </div>
 
             <!-- =========================================================
-               ⑦ 🏆 ミッション画面
+               ⑦ 🏆 大規模ミッション＆実績システム画面！
                ========================================================= -->
             <div id="screen-mission" class="screen">
-                <h2 style="text-align: left; border:none;">ミッション</h2>
+                <h2 style="text-align: left; border:none; margin-bottom: 5px;">ミッション＆実績</h2>
                 
-                <div class="status-box" style="border-color: #f8b500; background: linear-gradient(135deg, rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95)); box-shadow: inset 0 0 20px rgba(248, 181, 0, 0.2);">
-                    <p style="text-align: center; color: #ffeb3b; font-weight: bold; margin-top: 0; font-size: 16px; text-shadow: 0 0 5px rgba(248, 181, 0, 0.8);">🔥 ミッションをクリアして報酬ゲット！</p>
-                    <p style="font-size: 12px; line-height: 1.5; color: #ddd; margin-bottom: 0;">
-                        ミッションの内容はまだ仮のものだよ！コードの中にある「ミッションのリスト」を書き換えて、オリジナルミッションを作ってね！
-                    </p>
+                <div class="category-tabs" style="display:flex; gap:5px; margin-bottom:15px; overflow-x:auto;">
+                    <button class="tab-btn active-tab" id="tab-mission-daily" onclick="openMissionTab('daily')">デイリー</button>
+                    <button class="tab-btn" id="tab-mission-event" onclick="openMissionTab('event')">イベント</button>
+                    <button class="tab-btn" id="tab-mission-bingo" onclick="openMissionTab('bingo')">ビンゴ</button>
+                    <button class="tab-btn" id="tab-mission-achieve" onclick="openMissionTab('achieve')">実績(称号)</button>
                 </div>
 
-                <ul id="mission-list" class="item-list"></ul>
+                <div id="mission-content-area"></div>
             </div>
         </div> <!-- end of inner-content-wrapper -->
     </div> <!-- end of main-content -->
@@ -1012,11 +682,41 @@
 <script>
 
 // ---------------------------------------------------------
+// 🛠️ 必須関数（アラート関連など）
+// ---------------------------------------------------------
+function showGameAlert(title, textHTML) {
+    let titleEl = document.getElementById('alert-title');
+    let msgEl = document.getElementById('alert-message');
+    let overlay = document.getElementById('alert-overlay');
+    let modal = document.getElementById('custom-alert');
+    
+    if(titleEl) titleEl.innerText = title;
+    if(msgEl) msgEl.innerHTML = textHTML;
+    if(overlay) overlay.style.display = 'block';
+    if(modal) modal.style.display = 'block';
+}
+
+function closeAlert() {
+    let overlay = document.getElementById('alert-overlay');
+    let modal = document.getElementById('custom-alert');
+    
+    if(overlay) overlay.style.display = 'none';
+    if(modal) modal.style.display = 'none';
+    
+    // ガチャ後のホワイトアウトが残るバグをここで確実に防ぐ！
+    const whiteoutOverlay = document.getElementById('gacha-whiteout-overlay');
+    if(whiteoutOverlay) {
+        whiteoutOverlay.style.display = 'none';
+        whiteoutOverlay.style.opacity = '0';
+    }
+}
+
+// ---------------------------------------------------------
 // 🎵 効果音（サウンド）とBGMの準備
 // ---------------------------------------------------------
 const clickSound = new Audio('4.mp3');
 const startSound = new Audio('「始まるよ～」.mp3'); 
-const jackpotSound = new Audio('「大当たり～」.mp3'); 
+const jackpotSound = new Audio(「'大当たり～」.mp3'); 
 
 const titleBgm = new Audio('KAZINテーマ.mp3');
 titleBgm.loop = true;
@@ -1026,17 +726,16 @@ gameBgm.loop = true;
 let hasInteractedForBgm = false;
 
 document.addEventListener('click', function(e) {
-    if(e.target.closest('button') || e.target.closest('.gacha-banner') || e.target.closest('.party-slot') || e.target.closest('.rich-card') || e.target.closest('input[type="range"]')) {
-        clickSound.currentTime = 0; 
-        clickSound.play().catch(err => {});
+    if(e.target.closest('button') || e.target.closest('.gacha-banner') || e.target.closest('.party-slot') || e.target.closest('.rich-card') || e.target.closest('.bingo-cell') || e.target.closest('input[type="range"]')) {
+        try { clickSound.currentTime = 0; clickSound.play().catch(err => {}); } catch(e) {}
     }
 
     if (!hasInteractedForBgm) {
         const titleScreen = document.getElementById('screen-title');
         if (titleScreen && titleScreen.classList.contains('active')) {
-            titleBgm.play().catch(err => { console.log('BGMブロック', err); });
+            try { titleBgm.play().catch(err => {}); } catch(e) {}
         } else {
-            gameBgm.play().catch(err => { console.log('BGMブロック', err); });
+            try { gameBgm.play().catch(err => {}); } catch(e) {}
         }
         hasInteractedForBgm = true;
     }
@@ -1044,41 +743,42 @@ document.addEventListener('click', function(e) {
 
 function startGame(event) {
     if(event) event.stopPropagation(); 
-    startSound.currentTime = 0;
-    startSound.play().catch(err => { console.error('Start sound playback failed', err); });
+    try { startSound.currentTime = 0; startSound.play().catch(err => {}); } catch(e) {}
     
-    titleBgm.pause();
-    titleBgm.currentTime = 0;
-    gameBgm.play().catch(e => {});
+    try { titleBgm.pause(); titleBgm.currentTime = 0; gameBgm.play().catch(e => {}); } catch(e) {}
 
-    document.getElementById('header-bar').style.display = 'flex';
-    document.getElementById('footer-nav').style.display = 'flex';
+    let headerBar = document.getElementById('header-bar');
+    let footerNav = document.getElementById('footer-nav');
+    if(headerBar) headerBar.style.display = 'flex';
+    if(footerNav) footerNav.style.display = 'flex';
     changeScreen('home');
 }
 
-// 🚪 タイトル画面へ戻る確認ポップアップを開く
 function goToTitleConfirm() {
-    document.getElementById('alert-overlay').style.display = 'block';
-    document.getElementById('title-confirm-modal').style.display = 'block';
+    let overlay = document.getElementById('alert-overlay');
+    let modal = document.getElementById('title-confirm-modal');
+    if(overlay) overlay.style.display = 'block';
+    if(modal) modal.style.display = 'block';
 }
 
 function closeTitleConfirm() {
-    document.getElementById('alert-overlay').style.display = 'none';
-    document.getElementById('title-confirm-modal').style.display = 'none';
+    let overlay = document.getElementById('alert-overlay');
+    let modal = document.getElementById('title-confirm-modal');
+    if(overlay) overlay.style.display = 'none';
+    if(modal) modal.style.display = 'none';
 }
 
 function executeGoToTitle() {
     closeTitleConfirm();
-    gameBgm.pause();
-    gameBgm.currentTime = 0;
-    titleBgm.play().catch(e => {});
+    try { gameBgm.pause(); gameBgm.currentTime = 0; titleBgm.play().catch(e => {}); } catch(e) {}
 
-    document.getElementById('header-bar').style.display = 'none';
-    document.getElementById('footer-nav').style.display = 'none';
+    let headerBar = document.getElementById('header-bar');
+    let footerNav = document.getElementById('footer-nav');
+    if(headerBar) headerBar.style.display = 'none';
+    if(footerNav) footerNav.style.display = 'none';
     changeScreen('title');
 }
 
-// 🔊 音量設定の反映
 function applyVolume() {
     const rawBgmVolume = saveStatus.bgmVolume !== undefined ? saveStatus.bgmVolume : 50;
     const rawSeVolume = saveStatus.seVolume !== undefined ? saveStatus.seVolume : 50;
@@ -1100,100 +800,34 @@ function applyVolume() {
 }
 
 function updateVolume() {
-    saveStatus.bgmVolume = document.getElementById('bgm-volume').value;
-    saveStatus.seVolume = document.getElementById('se-volume').value;
+    let elBgm = document.getElementById('bgm-volume');
+    let elSe = document.getElementById('se-volume');
+    if(elBgm) saveStatus.bgmVolume = elBgm.value;
+    if(elSe) saveStatus.seVolume = elSe.value;
     applyVolume();
     saveGame();
 }
 
-const categoryNames = {
-    weapon: "武器 ⚔️", head: "頭 👤", body_top: "鎧上 👕", body_bottom: "鎧下 👖", shield: "盾 🛡️", accessory: "アクセ 💍", heart: "こころ ❤️"
-};
-
-const evolutionPaths = {
-    "c_hero": { nextId: "c_tona", cost: 10, hp: 550, attack: 55, defense: 35 },
-    "c_tona": { nextId: "c_seimaro", cost: 15, hp: 600, attack: 60, defense: 40 },
-    "c_seimaro": { nextId: "c_kazuking", cost: 20, hp: 650, attack: 65, defense: 45 },
-    "c_kazuking": { nextId: "c_gigant", cost: 25, hp: 700, attack: 70, defense: 50 },
-    "c_gigant": { nextId: "c_rampage", cost: 30, hp: 750, attack: 75, defense: 55 },
-    "c_rampage": { nextId: "c_zen", cost: 35, hp: 800, attack: 80, defense: 60 },
-    "c_zen": { nextId: "c_hiiro", cost: 40, hp: 850, attack: 85, defense: 65 },
-    "c_hiiro": { nextId: "c_ketchup", cost: 45, hp: 900, attack: 90, defense: 70 },
-    "c_ketchup": { nextId: "c_contra", cost: 50, hp: 950, attack: 95, defense: 75 },
-    "c_contra": { nextId: "c_takaking", cost: 55, hp: 1000, attack: 100, defense: 80 },
-    "c_takaking": { nextId: "c_huh", cost: 60, hp: 1100, attack: 110, defense: 90 }
-};
-
-function getCharNameById(id) {
-    if (id === "c_hero") return "勇者";
-    let found = characterMaster.find(c => c.id === id);
-    return found ? found.name : "未知の存在";
-}
+const categoryNames = { weapon: "武器 ⚔️", head: "頭 👤", body_top: "鎧上 👕", body_bottom: "鎧下 👖", shield: "盾 🛡️", accessory: "アクセ 💍", heart: "こころ ❤️" };
 
 let characterMaster = [
+    { id: "c_hero", name: "勇者", hp: 500, attack: 50, defense: 30, element: "grass", typeText: "超知" },
     { id: "c_tona", name: "とな", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "影" },
     { id: "c_seimaro", name: "せいまろ", hp: 500, attack: 50, defense: 30, element: "water", typeText: "夜" },
     { id: "c_kazuking", name: "カズキングタイジュウフエターネキンギーニ", hp: 500, attack: 50, defense: 30, element: "grass", typeText: "行" },
-    { id: "c_gigant", name: "ギガント・バーン", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "極速" },
-    { id: "c_rampage", name: "ランペイジ・イット", hp: 500, attack: 50, defense: 30, element: "water", typeText: "極体" },
-    { id: "c_zen", name: "ぜん", hp: 500, attack: 50, defense: 30, element: "grass", typeText: "超体" },
-    { id: "c_hiiro", name: "緋色・ハム", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "超力" },
-    { id: "c_ketchup", name: "ケチャップ", hp: 500, attack: 50, defense: 30, element: "water", typeText: "超知" },
-    { id: "c_contra", name: "コントラバーン", hp: 500, attack: 50, defense: 30, element: "light", typeText: "極力" },
-    { id: "c_takaking", name: "タカキング", hp: 500, attack: 50, defense: 30, element: "light", typeText: "極知" },
-    { id: "c_huh", name: "huh翔", hp: 500, attack: 50, defense: 30, element: "light", typeText: "超技" }
+    { id: "c_gigant", name: "ギガント・バーン", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "極速" }
 ];
 
 let weaponMaster = [
     { id: "w_hino", name: "★1 ひのきの棒", category: "weapon", bonus: 10, isGacha: true, weight: 200 },
     { id: "w_wood", name: "★1 木の剣", category: "weapon", bonus: 15, isGacha: true, weight: 150 },
     { id: "w_bronze", name: "★1 銅のつるぎ", category: "weapon", bonus: 22, isGacha: true, weight: 120 },
-    { id: "w_iron", name: "★1 鉄のつるぎ", category: "weapon", bonus: 32, isGacha: true, weight: 80 },
-    { id: "w_gold_mu", name: "★1 金のつるぎ", category: "weapon", bonus: 45, isGacha: false },
     { id: "w_stone", name: "★1 石のつるぎ", category: "weapon", bonus: 25, isGacha: true, weight: 100 },
     { id: "w_steel", name: "★2 鋼のつるぎ", category: "weapon", bonus: 60, isGacha: true, weight: 40 },
     { id: "w_plat", name: "★2 プラチナソード", category: "weapon", bonus: 85, isGacha: true, weight: 25 },
-    { id: "w_soldier_mu", name: "★2 戦士の剣", category: "weapon", bonus: 100, isGacha: false },
     { id: "w_dia", name: "★3 ダイヤのつるぎ", category: "weapon", bonus: 150, isGacha: true, weight: 10 },
     { id: "w_obs", name: "★3 黒曜石のつるぎ", category: "weapon", bonus: 180, isGacha: true, weight: 8 },
-    { id: "w_fire_mu", name: "★4 火のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_ice_mu", name: "★4 氷のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_wind_mu", name: "★4 風のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_light_mu", name: "★4 雷のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_water_mu", name: "★4 水のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_star_mu", name: "★4 星のつるぎ", category: "weapon", bonus: 230, isGacha: false },
-    { id: "w_shining_mu", name: "★4 ひかりのつるぎ", category: "weapon", bonus: 250, isGacha: false },
-    { id: "w_dark_mu", name: "★4 やみのつるぎ", category: "weapon", bonus: 250, isGacha: false },
     { id: "w_excal", name: "★5 エクスカリバー", category: "weapon", bonus: 300, isGacha: true, weight: 2 },
-    { id: "w_blaze_mu", name: "★5 炎のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_frost_mu", name: "★5 氷花のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_gale_mu", name: "★5 疾風のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_bolt_mu", name: "★5 稲妻のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_galaxy_mu", name: "★5 銀河のつるぎ", category: "weapon", bonus: 350, isGacha: false },
-    { id: "w_aurora_mu", name: "★5 光明のつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_eclipse_mu", name: "★5 暗闇のつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_destroy_mu", name: "★5 破壊のつるぎ", category: "weapon", bonus: 400, isGacha: false },
-    { id: "w_angel_mu", name: "★5 天使のつるぎ", category: "weapon", bonus: 390, isGacha: false },
-    { id: "w_devil_mu", name: "★5 悪魔のつるぎ", category: "weapon", bonus: 390, isGacha: false },
-    { id: "w_champion_mu", name: "★5 王者の剣", category: "weapon", bonus: 410, isGacha: false },
-    { id: "w_miracle_mu", name: "★5 きせきのつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_gold_sword_mu", name: "★5 黄金のつるぎ", category: "weapon", bonus: 370, isGacha: false },
-    { id: "w_life_mu", name: "★5 命のつるぎ", category: "weapon", bonus: 400, isGacha: false },
-    { id: "w_cross_mu", name: "★6 覇王剣クロスセイバー", category: "weapon", bonus: 500, isGacha: false },
-    { id: "w_firedrag_mu", name: "★6 炎龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_icedrag_mu", name: "★6 氷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_winddrag_mu", name: "★6 風龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_lightdrag_mu", name: "★6 雷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_flash_mu", name: "★6 閃光のつるぎ", category: "weapon", bonus: 580, isGacha: false },
-    { id: "w_black_mu", name: "★6 漆黒のつるぎ", category: "weapon", bonus: 580, isGacha: false },
-    { id: "w_champ_kai_mu", name: "★6 王者の剣改", category: "weapon", bonus: 600, isGacha: false },
-    { id: "w_lifedrag_mu", name: "★6 命竜のつるぎ", category: "weapon", bonus: 620, isGacha: false },
-    { id: "w_firedrag_god_mu", name: "★7 炎龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_icedrag_god_mu", name: "★7 氷龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_winddrag_god_mu", name: "★7 風龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_lightdrag_god_mu", name: "★7 雷龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_genesis_mu", name: "★7 創生のつるぎ", category: "weapon", bonus: 900, isGacha: false },
-    { id: "w_oblivion_mu", name: "★7 創失のつるぎ", category: "weapon", bonus: 950, isGacha: false },
     { id: "w_champ_red_mu", name: "★7 王者の剣紅", category: "weapon", bonus: 1000, isGacha: false },
     { id: "w_lifedrag_god_mu", name: "★7 命竜神 of つるぎ", category: "weapon", bonus: 1050, isGacha: false }
 ];
@@ -1203,29 +837,10 @@ let commonGachaPool = weaponMaster.filter(item => item.isGacha === true).map(ite
 });
 
 const gachaConfig = {
-    free: { 
-        title: "🎁 1日1回 無料ガチャ", desc: "毎日1回だけ無料で引ける！", color: "#f8b500", 
-        buttons: [ { text: "無料で1回引く！", count: 1, isFree: true, color1: "#ffeb3b", color2: "#f8b500", textColor: "#1f2833" } ], 
-        pool: commonGachaPool 
-    },
-    normal: { 
-        title: "✨ 通常武器ガチャ", desc: "草核を使って引こう！(スタンプ対象)", color: "#00f2fe", 
-        buttons: [ 
-            { text: "🎲 1回引く（草核 100）", count: 1, isFree: false, color1: "#00f2fe", color2: "#0a0316", textColor: "#ffffff" }, 
-            { text: "🍀 10回引く（草核 1000）", count: 10, isFree: false, color1: "#38ef7d", color2: "#11998e", textColor: "#ffffff" }
-        ], 
-        pool: commonGachaPool 
-    },
-    new: { 
-        title: "🆕 新武器ピックアップ", desc: "準備中です", color: "#ff416c", 
-        buttons: [ { text: "準備中", count: 0, isFree: false, isComingSoon: true, color1: "#333", color2: "#555", textColor: "#777" } ], 
-        pool: [] 
-    },
-    revival: { 
-        title: "🔄 復刻武器ガチャ", desc: "準備中です", color: "#00b4db", 
-        buttons: [ { text: "準備中", count: 0, isFree: false, isComingSoon: true, color1: "#333", color2: "#555", textColor: "#777" } ], 
-        pool: [] 
-    }
+    free: { title: "🎁 1日1回 無料ガチャ", desc: "毎日1回だけ無料で引ける！", color: "#f8b500", buttons: [ { text: "無料で1回引く！", count: 1, isFree: true, color1: "#ffeb3b", color2: "#f8b500", textColor: "#1f2833" } ], pool: commonGachaPool },
+    normal: { title: "✨ 通常武器ガチャ", desc: "草核を使って引こう！(スタンプ対象)", color: "#00f2fe", buttons: [ { text: "🎲 1回引く（草核 100）", count: 1, isFree: false, color1: "#00f2fe", color2: "#0a0316", textColor: "#ffffff" }, { text: "🍀 10回引く（草核 1000）", count: 10, isFree: false, color1: "#38ef7d", color2: "#11998e", textColor: "#ffffff" } ], pool: commonGachaPool },
+    new: { title: "🆕 新武器ピックアップ", desc: "準備中です", color: "#ff416c", buttons: [ { text: "準備中", count: 0, isFree: false, isComingSoon: true, color1: "#333", color2: "#555", textColor: "#777" } ], pool: [] },
+    revival: { title: "🔄 復刻武器ガチャ", desc: "準備中です", color: "#00b4db", buttons: [ { text: "準備中", count: 0, isFree: false, isComingSoon: true, color1: "#333", color2: "#555", textColor: "#777" } ], pool: [] }
 };
 
 let currentGachaType = 'normal'; 
@@ -1235,12 +850,7 @@ function isSameWeaponType(weap1, weap2) { return getBaseName(weap1.name) === get
 function getWeaponStar(name) { let match = name.match(/★(\d)/); return match ? parseInt(match[1]) : 1; }
 function getMaxWeaponLevel(star) { if (star >= 7) return 70; if (star === 6) return 60; return 50; }
 function getUpgradeCost(level) { return 5 + Math.floor(level / 2); }
-
-// 🪙 合体に必要な草コインのコスト計算（レアリティ×1000×個数）
-function getCombineCost(baseWeapName, count) {
-    let star = getWeaponStar(baseWeapName);
-    return star * 1000 * count;
-}
+function getCombineCost(baseWeapName, count) { let star = getWeaponStar(baseWeapName); return star * 1000 * count; }
 
 function createParticles() {
     const container = document.getElementById('gacha-particles');
@@ -1269,28 +879,25 @@ function createParticles() {
 const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300f2fe" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2300f2fe" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2300f2fe"/></svg>';
 
 let saveStatus = {
-    stones: 1000, 
-    materials: 20, 
-    coins: 50000, // 🪙 新リソース：草コイン（ゴールド）
-    playerName: "勇者", playerIcon: defaultAvatar, claimedMissions: [], lastLoginDate: "", lastFreeGachaDate: "", 
+    stones: 1000, materials: 20, coins: 50000, 
+    playerName: "勇者", playerIcon: defaultAvatar, 
+    claimedMissions: [], dailyMissions: [], eventMissions: [], 
+    bingoCells: [], bingoClaimedLines: [],
+    unlockedAchievements: [], selectedAchievement: "",
+    lastLoginDate: "", lastFreeGachaDate: "", 
     characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 500, attack: 50, defense: 30, isProtagonist: true, element: "grass", typeText: "超知" } ],
     party: ["char_init", null, null, null],
     equipments: [ { id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" } ],
     equipped: { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null },
-    
-    gachaData: {
-        normal: { draws: 0, stamps: 0, guaranteed: false },
-        new: { draws: 0, stamps: 0, guaranteed: false },
-        revival: { draws: 0, stamps: 0, guaranteed: false }
-    },
-    bgmVolume: 50,
-    seVolume: 50
+    gachaData: { normal: { draws: 0, stamps: 0, guaranteed: false }, new: { draws: 0, stamps: 0, guaranteed: false }, revival: { draws: 0, stamps: 0, guaranteed: false } },
+    bgmVolume: 50, seVolume: 50
 };
 
 let tempIconBase64 = "";
 let currentCategoryTab = "weapon"; 
 let selectedCharIndex = 0; 
 let selectedExchangeWeaponId = ""; 
+let currentMissionTab = "daily";
 
 function saveGame() {
     try {
@@ -1298,10 +905,7 @@ function saveGame() {
     } catch (e) {
         if (e.name === 'QuotaExceededError') {
             saveStatus.playerIcon = defaultAvatar; 
-            try {
-                localStorage.setItem('sugoigame', JSON.stringify(saveStatus));
-                alert('⚠️ 容量オーバーのため画像を初期化してデータを保存しました！');
-            } catch (e2) {}
+            try { localStorage.setItem('sugoigame', JSON.stringify(saveStatus)); alert('⚠️ 容量オーバーのため画像を初期化してデータを保存しました！'); } catch (e2) {}
         }
     }
 }
@@ -1311,10 +915,17 @@ function loadGame() {
     if (savedData) {
         saveStatus = JSON.parse(savedData);
         if (saveStatus.materials === undefined) saveStatus.materials = 0;
-        if (saveStatus.coins === undefined) saveStatus.coins = 50000; // 🪙 既存プレイヤーへの付与
+        if (saveStatus.coins === undefined) saveStatus.coins = 50000; 
         if (saveStatus.playerName === undefined) saveStatus.playerName = "勇者";
         if (saveStatus.playerIcon === undefined) saveStatus.playerIcon = defaultAvatar;
-        if (saveStatus.claimedMissions === undefined) saveStatus.claimedMissions = []; 
+        
+        if (!saveStatus.dailyMissions) saveStatus.dailyMissions = [];
+        if (!saveStatus.eventMissions) saveStatus.eventMissions = [];
+        if (!saveStatus.bingoCells) saveStatus.bingoCells = [];
+        if (!saveStatus.bingoClaimedLines) saveStatus.bingoClaimedLines = [];
+        if (!saveStatus.unlockedAchievements) saveStatus.unlockedAchievements = [];
+        if (saveStatus.selectedAchievement === undefined) saveStatus.selectedAchievement = "";
+
         if (saveStatus.lastLoginDate === undefined) saveStatus.lastLoginDate = ""; 
         if (saveStatus.lastFreeGachaDate === undefined) saveStatus.lastFreeGachaDate = ""; 
         if (saveStatus.bgmVolume === undefined) saveStatus.bgmVolume = 50;
@@ -1343,7 +954,6 @@ function loadGame() {
 
         saveStatus.characters.forEach((c, index) => {
             if (c.level <= 0) c.level = 1;
-            if (c.power !== undefined) { c.attack = c.power; c.hp = c.power * 10; c.defense = Math.floor(c.power * 0.6); delete c.power; }
             if (!c.uid) c.uid = "c_old_" + index + "_" + Date.now(); 
             if (!c.element) c.element = "grass"; if (!c.typeText) c.typeText = "超知";
         });
@@ -1359,6 +969,7 @@ function loadGame() {
     }
     applyVolume(); 
     checkLoginBonus();
+    updateProfileTitleOptions();
 }
 
 function checkLoginBonus() {
@@ -1368,6 +979,9 @@ function checkLoginBonus() {
         saveStatus.stones += 500; 
         saveStatus.materials += 10; 
         saveStatus.coins += 5000;
+        
+        saveStatus.dailyMissions = []; 
+
         saveGame();
         setTimeout(() => {
             showGameAlert("🎁 ログインボーナス！", `今日も遊んでくれてありがとう！<br><br><span style="color:#00f2fe; font-weight:bold;">🟢草核 × 500個</span><br><span style="color:#4ecca3; font-weight:bold;">🌾草の化石 × 10個</span><br><span style="color:#ffd700; font-weight:bold;">🪙草コイン × 5000枚</span><br><br>をプレゼントしたよ！`);
@@ -1376,150 +990,43 @@ function checkLoginBonus() {
     }
 }
 
-function showGameAlert(title, textHTML) {
-    document.getElementById('alert-title').innerText = title;
-    document.getElementById('alert-message').innerHTML = textHTML;
-    document.getElementById('alert-overlay').style.display = 'block';
-    document.getElementById('custom-alert').style.display = 'block';
-}
-function closeAlert() {
-    document.getElementById('alert-overlay').style.display = 'none';
-    document.getElementById('custom-alert').style.display = 'none';
-}
-
 function changeScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + screenId).classList.add('active');
+    document.getElementById('screen-' + screenId)?.classList.add('active');
     
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-nav'));
-    let navMap = { "home":"nav-home", "party":"nav-party", "equip":"nav-equip", "gacha":"nav-gacha", "gacha-detail":"nav-gacha", "mission":"nav-mission" };
-    if(navMap[screenId]) document.getElementById(navMap[screenId]).classList.add('active-nav');
+    let navMap = { "home":"nav-home", "party":"nav-party", "equip":"nav-equip", "gacha":"nav-gacha", "mission":"nav-mission" };
+    if(navMap[screenId]) document.getElementById(navMap[screenId])?.classList.add('active-nav');
     
-    if (screenId === 'gacha-detail') { drawStampCard(); }
+    if (screenId === 'gacha') { switchGachaTab(currentGachaType); }
     if (screenId === 'settings') { applyVolume(); } 
+    if (screenId === 'mission') { openMissionTab(currentMissionTab); }
     
     const wrapper = document.getElementById('inner-content-wrapper');
     if (wrapper) wrapper.scrollTop = 0;
     
-    // 背景の切り替え（KAZIN背景.png と kazinhakei.png）
+    // 🌟 タイトル画面の場合はスクロールを完全にロック！
+    let bgImageLayer = document.getElementById('bg-image-layer');
+    let bgGrid = document.getElementById('bg-grid');
+    let bgGradientOverlay = document.getElementById('bg-gradient-overlay');
+    
     if (screenId === 'title') {
-        document.getElementById('bg-image-layer').style.backgroundImage = "url('KAZIN背景.png')";
-        document.getElementById('bg-grid').style.display = 'none';
-        document.getElementById('bg-gradient-overlay').style.opacity = '0.1'; // より明るく綺麗に見せる！
-        if (wrapper) wrapper.style.overflowY = 'hidden';
+        if(bgImageLayer) bgImageLayer.style.backgroundImage = "url('KAZIN背景.png')";
+        if(bgGrid) bgGrid.style.display = 'none';
+        if(bgGradientOverlay) bgGradientOverlay.style.opacity = '0.1';
+        if (wrapper) {
+            wrapper.style.display = 'none'; 
+        }
     } else {
-        document.getElementById('bg-image-layer').style.backgroundImage = "url('kazinhakei.png')";
-        document.getElementById('bg-grid').style.display = 'block';
-        document.getElementById('bg-gradient-overlay').style.opacity = '1';
-        if (wrapper) wrapper.style.overflowY = 'auto';
+        if(bgImageLayer) bgImageLayer.style.backgroundImage = "url('kazinhakei.png')";
+        if(bgGrid) bgGrid.style.display = 'block';
+        if(bgGradientOverlay) bgGradientOverlay.style.opacity = '1';
+        if (wrapper) {
+            wrapper.style.display = 'block'; 
+        }
     }
 
     updateUI();
-}
-
-function drawStampCard() {
-    const stampContainer = document.getElementById('detail-stamp-container');
-    const stampGrid = document.getElementById('stamp-grid');
-    if (!stampGrid || !stampContainer) return;
-    
-    if (currentGachaType === 'free') {
-        stampContainer.style.display = 'none';
-        return;
-    }
-    stampContainer.style.display = 'block';
-    stampGrid.innerHTML = "";
-
-    let gData = saveStatus.gachaData[currentGachaType];
-    if(!gData) return;
-    let currentStamps = gData.stamps || 0;
-    document.getElementById('stamp-counter-text').innerText = `${currentStamps} / 20`;
-
-    const exBtn = document.getElementById('btn-open-exchange');
-    if (currentStamps >= 20) { exBtn.style.display = 'block'; } else { exBtn.style.display = 'none'; }
-
-    let displayStamps = currentStamps % 20;
-    if (currentStamps > 0 && displayStamps === 0) displayStamps = 20;
-
-    for (let i = 1; i <= 20; i++) {
-        let isActive = i <= displayStamps;
-        let activeClass = isActive ? "active-stamp" : "";
-        let isSpecial = (i === 10 || i === 20); 
-        let specialClass = isSpecial ? "special-stamp" : "";
-        
-        let slotContent = i;
-        if (i === 10) slotContent = "★5";
-        if (i === 20) slotContent = "選択";
-
-        stampGrid.innerHTML += `<div class="stamp-slot ${activeClass} ${specialClass}" title="${i}スタンプ">${slotContent}</div>`;
-    }
-}
-
-function openExchangeModal() {
-    const modal = document.getElementById('weapon-exchange-modal');
-    const list = document.getElementById('exchange-weapon-list');
-    if (!modal || !list) return;
-
-    list.innerHTML = ""; selectedExchangeWeaponId = "";
-    
-    let exchangePool = weaponMaster.filter(w => getWeaponStar(w.name) >= 5);
-
-    exchangePool.forEach(w => {
-        let starCount = getWeaponStar(w.name);
-        let starsHTML = "★".repeat(starCount);
-        list.innerHTML += `
-            <div class="material-item" id="ex-item-${w.id}" onclick="selectExchangeWeapon('${w.id}')" style="margin: 6px 0;">
-                <div>
-                    <strong style="color: #00f2fe;">${w.name}</strong><br>
-                    <span style="font-size:11px; color:#aaa;">基本ボーナス: +${w.bonus} (${categoryNames[w.category] || "装備"})</span><br>
-                    <span style="color:#ffeb3b; font-size:10px;">${starsHTML}</span>
-                </div>
-                <div style="font-size: 18px;" id="ex-check-${w.id}">⬜</div>
-            </div>`;
-    });
-
-    document.getElementById('alert-overlay').style.display = 'block';
-    modal.style.display = 'block';
-}
-
-function selectExchangeWeapon(id) {
-    if (selectedExchangeWeaponId) {
-        const prevItem = document.getElementById(`ex-item-${selectedExchangeWeaponId}`);
-        const prevCheck = document.getElementById(`ex-check-${selectedExchangeWeaponId}`);
-        if (prevItem) prevItem.classList.remove('selected');
-        if (prevCheck) prevCheck.innerText = "⬜";
-    }
-    selectedExchangeWeaponId = id;
-    const curItem = document.getElementById(`ex-item-${id}`);
-    const curCheck = document.getElementById(`ex-check-${id}`);
-    if (curItem) curItem.classList.add('selected');
-    if (curCheck) curCheck.innerText = "✅";
-}
-
-function closeExchangeModal() {
-    document.getElementById('weapon-exchange-modal').style.display = 'none';
-    document.getElementById('alert-overlay').style.display = 'none';
-}
-
-function executeWeaponExchange() {
-    if (!selectedExchangeWeaponId) { alert("武器を選択してください！"); return; }
-    let weaponProto = weaponMaster.find(w => w.id === selectedExchangeWeaponId);
-    if (!weaponProto) return;
-
-    let uniqueId = "eq_" + Date.now().toString(36) + "_" + Math.floor(Math.random() * 100000);
-    saveStatus.equipments.push({
-        id: uniqueId, name: weaponProto.name, level: 1, limitBreak: 0, bonus: weaponProto.bonus, category: weaponProto.category
-    });
-
-    let gData = saveStatus.gachaData[currentGachaType];
-    gData.stamps = Math.max(0, gData.stamps - 20);
-    gData.draws = gData.stamps * 10;
-
-    saveGame(); closeExchangeModal(); drawStampCard(); updateUI();
-
-    showGameAlert("🎁 プレミアム配布完了！", `
-        <div style="text-align: center;">
-            プレミアム交換報酬として、<br><strong style="color: #ffeb3b; font-size: 18px;">${weaponProto.name}</strong><br>を特別に配布したよ！工房からさっそく装備してね！
-        </div>`);
 }
 
 function updateUI() {
@@ -1533,10 +1040,15 @@ function updateUI() {
     
     if (document.getElementById('gacha-stones')) document.getElementById('gacha-stones').innerText = saveStatus.stones;
     if (document.getElementById('gacha-detail-stones')) document.getElementById('gacha-detail-stones').innerText = saveStatus.stones;
+    
     if (document.getElementById('home-player-name')) document.getElementById('home-player-name').innerText = saveStatus.playerName;
     if (document.getElementById('header-player-name')) document.getElementById('header-player-name').innerText = saveStatus.playerName;
     if (document.getElementById('home-player-icon')) document.getElementById('home-player-icon').src = saveStatus.playerIcon;
     if (document.getElementById('header-player-icon')) document.getElementById('header-player-icon').src = saveStatus.playerIcon;
+    
+    let titleObj = achievementsData.find(a => a.id === saveStatus.selectedAchievement);
+    let titleText = titleObj ? `[${titleObj.title}]` : "初心者";
+    if (document.getElementById('home-player-title')) document.getElementById('home-player-title').innerText = titleText;
     
     let eqBonusTotal = 0;
     for (let cat in saveStatus.equipped) {
@@ -1562,11 +1074,229 @@ function updateUI() {
     if (document.getElementById('home-power')) document.getElementById('home-power').innerText = partyTotalAtk;
 }
 
+// =========================================================
+// 🏆 ミッション＆実績システム
+// =========================================================
+
+const dailyMissionsData = [
+    { id: "d1", title: "ログインボーナス", desc: "ゲームにログインする", rewardCoins: 1000, rewardStones: 50 },
+    { id: "d2", title: "冒険の準備", desc: "装備やキャラ画面をチェックする", rewardMaterials: 5 },
+    { id: "d3", title: "運試し", desc: "ガチャ画面を開く", rewardStones: 100 }
+];
+
+const eventMissionsData = [
+    { id: "e1", title: "スタートダッシュ！", desc: "ゲームを初めてプレイする", rewardCoins: 5000, rewardStones: 500 },
+    { id: "e2", title: "武器マニア", desc: "★5武器の強さを確かめる", rewardMaterials: 50 }
+];
+
+const achievementsData = [
+    { id: "a1", title: "始まりの勇者", desc: "ゲームを始めた証。初心者マーク卒業！", rewardStones: 300 },
+    { id: "a2", title: "歴戦の戦士", desc: "工房で武器を強化したり合体させた証。", rewardCoins: 10000 },
+    { id: "a3", title: "ガチャ愛好家", desc: "ガチャを引きまくっている運の持ち主。", rewardStones: 500 },
+    { id: "a4", title: "ビンゴマスター", desc: "ビンゴミッションでラインを揃えた！", rewardMaterials: 100 }
+];
+
+const bingoData = [
+    { id: 0, text: "ログイン", rewardCoins: 500 },
+    { id: 1, text: "ガチャ1回", rewardStones: 50 },
+    { id: 2, text: "強化1回", rewardMaterials: 5 },
+    { id: 3, text: "編成変更", rewardCoins: 500 },
+    { id: 4, text: "FREE", isFree: true }, 
+    { id: 5, text: "プロフ変更", rewardStones: 50 },
+    { id: 6, text: "合体1回", rewardMaterials: 5 },
+    { id: 7, text: "タイトルへ", rewardCoins: 500 },
+    { id: 8, text: "ガチャ10連", rewardStones: 100 }
+];
+const bingoLines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
+
+function openMissionScreen() {
+    changeScreen('mission');
+}
+
+function openMissionTab(tabName) {
+    currentMissionTab = tabName;
+    document.querySelectorAll('[id^="tab-mission-"]').forEach(t => t.classList.remove('active-tab'));
+    document.getElementById('tab-mission-' + tabName)?.classList.add('active-tab');
+    
+    let area = document.getElementById('mission-content-area');
+    if(!area) return;
+    area.innerHTML = "";
+    
+    if (tabName === 'daily') renderMissionsList(dailyMissionsData, 'daily', saveStatus.dailyMissions);
+    else if (tabName === 'event') renderMissionsList(eventMissionsData, 'event', saveStatus.eventMissions);
+    else if (tabName === 'achieve') renderMissionsList(achievementsData, 'achieve', saveStatus.unlockedAchievements);
+    else if (tabName === 'bingo') renderBingoBoard();
+}
+
+function renderMissionsList(dataList, type, savedArray) {
+    let area = document.getElementById('mission-content-area');
+    if(!area) return;
+    let ul = document.createElement('ul');
+    ul.className = 'item-list';
+    
+    dataList.forEach(m => {
+        let isClaimed = savedArray.includes(m.id);
+        let btnText = isClaimed ? "獲得済" : (type === 'achieve' ? "解放する" : "うけとる");
+        let btnStyle = isClaimed ? "background: #333; border-color: #555; color: #aaa; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transform: none; cursor: default;" : "background: linear-gradient(to bottom, #ffea70, #ffb860); border-color: #fff; color: #111;";
+        
+        let rewardText = "";
+        if (m.rewardCoins) rewardText += `🪙${m.rewardCoins} `;
+        if (m.rewardStones) rewardText += `🟢${m.rewardStones} `;
+        if (m.rewardMaterials) rewardText += `🌾${m.rewardMaterials} `;
+
+        ul.innerHTML += `
+            <li class="rich-card" style="border-color: ${type==='achieve' ? '#ff007f' : '#00f2fe'};">
+                <div class="card-body" style="padding: 10px;">
+                    <div style="flex-grow: 1;">
+                        <strong style="color: ${type==='achieve' ? '#ffeb3b' : '#00f2fe'}; font-size: 14px;">${m.title}</strong><br>
+                        <span style="font-size:11px; color:#aaa;">${m.desc}</span><br>
+                        <span style="font-size:11px; color:#ffeb3b; font-weight: bold;">報酬: ${rewardText}</span>
+                    </div>
+                    <button style="width: 75px; margin: 0; padding: 8px 4px; font-size: 11px; ${btnStyle}" onclick="${isClaimed ? '' : `claimMissionReward('${m.id}', '${type}')`}">${btnText}</button>
+                </div>
+            </li>`;
+    });
+    area.appendChild(ul);
+}
+
+function claimMissionReward(id, type) {
+    let m = null;
+    if (type === 'daily') { m = dailyMissionsData.find(x => x.id === id); saveStatus.dailyMissions.push(id); }
+    if (type === 'event') { m = eventMissionsData.find(x => x.id === id); saveStatus.eventMissions.push(id); }
+    if (type === 'achieve') { m = achievementsData.find(x => x.id === id); saveStatus.unlockedAchievements.push(id); }
+    
+    if (m) {
+        if(m.rewardCoins) saveStatus.coins += m.rewardCoins;
+        if(m.rewardStones) saveStatus.stones += m.rewardStones;
+        if(m.rewardMaterials) saveStatus.materials += m.rewardMaterials;
+        
+        let msg = ``;
+        if(m.rewardCoins) msg += `<strong style="color:#ffd700;">草コイン ${m.rewardCoins}枚</strong><br>`;
+        if(m.rewardStones) msg += `<strong style="color:#00f2fe;">草核 ${m.rewardStones}個</strong><br>`;
+        if(m.rewardMaterials) msg += `<strong style="color:#4ecca3;">草の化石 ${m.rewardMaterials}個</strong><br>`;
+        
+        if (type === 'achieve') {
+            msg += `<br><span style="color:#ffeb3b; font-weight:bold;">🏆 新しい称号「${m.title}」を解放しました！</span><br><span style="font-size:11px; color:#aaa;">(プロフィール画面から設定できます)</span>`;
+            updateProfileTitleOptions();
+        }
+
+        showGameAlert("✨ クリア！", `報酬を獲得しました！<br><br>${msg}`);
+        saveGame();
+        openMissionTab(type);
+        updateUI();
+    }
+}
+
+function renderBingoBoard() {
+    let area = document.getElementById('mission-content-area');
+    if(!area) return;
+    let container = document.createElement('div');
+    container.style.textAlign = "center";
+    
+    container.innerHTML = `
+        <div class="status-box" style="padding: 10px; margin-bottom: 15px; border-color: #ffeb3b; box-shadow: inset 0 0 15px rgba(248,181,0,0.3);">
+            <p style="color:#ffeb3b; font-weight:bold; margin: 0 0 5px 0; font-size:16px;">🌟 ビンゴミッション 🌟</p>
+            <p style="font-size:11px; color:#ddd; margin:0;">条件を満たしたマスをタップして報酬GET！<br>縦・横・斜めにラインが揃うとさらにボーナス！</p>
+        </div>`;
+                           
+    let grid = document.createElement('div');
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
+    grid.style.gap = "8px";
+    grid.style.marginBottom = "20px";
+    
+    bingoData.forEach((b, i) => {
+        let isOpened = saveStatus.bingoCells?.includes(i);
+        if (b.isFree) isOpened = true; 
+
+        let bg = isOpened ? "linear-gradient(135deg, #ffea70, #ffb860)" : "linear-gradient(135deg, rgba(46, 50, 76, 0.95), rgba(30, 32, 50, 0.95))";
+        let col = isOpened ? "#111" : "#00f2fe";
+        let border = isOpened ? "2px solid #fff" : "2px solid #00b4db";
+        let shadow = isOpened ? "0 0 15px rgba(248,181,0,0.8)" : "0 6px 8px rgba(0,0,0,0.8)";
+        let transform = isOpened ? "scale(0.95)" : "scale(1)";
+
+        grid.innerHTML += `
+            <div class="bingo-cell" style="aspect-ratio:1/1; background:${bg}; color:${col}; border:${border}; border-radius:8px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-size:12px; font-weight:bold; box-shadow:${shadow}; transform:${transform}; transition:all 0.2s; cursor:pointer;"
+                 onclick="${isOpened ? '' : `openBingoCell(${i})`}">
+                 ${b.text}
+                 ${b.isFree ? '<br><span style="font-size:10px; color:#555; margin-top:2px;">(FREE)</span>' : ''}
+                 ${!isOpened ? '<br><span style="font-size:9px; color:#aaa; margin-top:4px;">未達成</span>' : '<br><span style="font-size:10px; color:#c33; margin-top:4px;">CLEAR!</span>'}
+            </div>
+        `;
+    });
+    
+    container.appendChild(grid);
+    container.innerHTML += `<button class="btn-green" style="font-size: 16px; padding: 16px;" onclick="checkBingoLines()">🎁 ライン達成ボーナスを受け取る</button>`;
+    area.appendChild(container);
+}
+
+function openBingoCell(index) {
+    if(!saveStatus.bingoCells) saveStatus.bingoCells = [];
+    if(saveStatus.bingoCells.includes(index)) return;
+    saveStatus.bingoCells.push(index);
+    
+    let b = bingoData[index];
+    if(b.rewardCoins) saveStatus.coins += b.rewardCoins;
+    if(b.rewardStones) saveStatus.stones += b.rewardStones;
+    if(b.rewardMaterials) saveStatus.materials += b.rewardMaterials;
+    
+    showGameAlert("✨ マス解放！", `マスの報酬を獲得したよ！<br>ラインが揃ったら下部のボタンを押してね！`);
+    saveGame();
+    openMissionTab('bingo');
+    updateUI();
+}
+
+function checkBingoLines() {
+    if(!saveStatus.bingoCells) saveStatus.bingoCells = [];
+    if(!saveStatus.bingoClaimedLines) saveStatus.bingoClaimedLines = [];
+    
+    let opened = [...saveStatus.bingoCells, 4]; // 4はFREEマス
+    let newLines = 0;
+    
+    bingoLines.forEach((line, index) => {
+        if (line.every(val => opened.includes(val))) {
+            if (!saveStatus.bingoClaimedLines.includes(index)) {
+                saveStatus.bingoClaimedLines.push(index);
+                newLines++;
+            }
+        }
+    });
+    
+    if (newLines > 0) {
+        let rewardStones = newLines * 300;
+        saveStatus.stones += rewardStones;
+        showGameAlert("🎉 BINGO 達成！！", `<span style="font-size:24px; color:#ffeb3b; font-weight:bold;">${newLines} ライン達成！</span><br><br>ボーナスとして <strong style="color:#00f2fe;">草核 ${rewardStones}個</strong> を獲得したよ！`);
+        saveGame();
+        updateUI();
+    } else {
+        showGameAlert("ℹ️ おしらせ", "新しく揃ったラインはありませんでした。<br>マスをタップして開けていこう！");
+    }
+}
+
+// ---------------------------------------------------------
+// 👤 プロフィール画面
+// ---------------------------------------------------------
 function openProfileScreen() {
     changeScreen('profile');
     document.getElementById('profile-name-input').value = saveStatus.playerName;
     document.getElementById('profile-icon-preview').src = saveStatus.playerIcon;
     tempIconBase64 = saveStatus.playerIcon;
+    updateProfileTitleOptions();
+}
+
+function updateProfileTitleOptions() {
+    let select = document.getElementById('profile-title-select');
+    if (!select) return;
+    select.innerHTML = `<option value="">設定しない（初心者）</option>`;
+    
+    if (saveStatus.unlockedAchievements && saveStatus.unlockedAchievements.length > 0) {
+        achievementsData.forEach(a => {
+            if (saveStatus.unlockedAchievements.includes(a.id)) {
+                let selected = (saveStatus.selectedAchievement === a.id) ? "selected" : "";
+                select.innerHTML += `<option value="${a.id}" ${selected}>${a.title}</option>`;
+            }
+        });
+    }
 }
 
 function handleIconSelect(event) {
@@ -1596,58 +1326,21 @@ function saveProfile() {
     if (nameInput === "") { showGameAlert("❌ エラー", "名前を入力してね！"); return; }
     saveStatus.playerName = nameInput;
     saveStatus.playerIcon = tempIconBase64;
+    
+    let titleSelect = document.getElementById('profile-title-select');
+    if(titleSelect) saveStatus.selectedAchievement = titleSelect.value;
+    
     let protagonist = saveStatus.characters.find(c => c.isProtagonist);
     if (protagonist) protagonist.name = nameInput;
+    
     saveGame(); 
     showGameAlert("👤 保存完了", "プロフィールを変更したよ！");
     changeScreen('home'); 
 }
 
-function openMissionScreen() {
-    changeScreen('mission');
-    const list = document.getElementById('mission-list');
-    list.innerHTML = ""; 
-    let missionTemplate = [
-        { id: 1, title: "冒険のはじまり", desc: "ゲームをスタートしてホーム画面をひらく", reward: 30, isFossil: false },
-        { id: 2, title: "草の恵み", desc: "「草の化石」をミッションから受け取る", reward: 10, isFossil: true },
-        { id: 3, title: "大富豪への一歩", desc: "草核をたくさんあつめる準備をする", reward: 50, isFossil: false }
-    ];
-    missionTemplate.forEach(m => {
-        let isClaimed = saveStatus.claimedMissions.includes(m.id);
-        let btnText = isClaimed ? "獲得済" : "うけとる";
-        let btnStyle = isClaimed ? "background: #555; border-color: #555; color: #aaa; cursor: default;" : "background: linear-gradient(45deg, #ffeb3b, #f8b500); border-color: #ffeb3b; color: #1f2833;";
-        let rewardName = m.isFossil ? "🌾草の化石" : "🟢草核";
-        list.innerHTML += `
-            <li class="rich-card" style="border-color: #f8b500;">
-                <div class="card-body" style="padding: 10px;">
-                    <div style="flex-grow: 1;">
-                        <strong style="color: #ffeb3b; font-size: 14px;">${m.title}</strong><br>
-                        <span style="font-size:11px; color:#aaa;">${m.desc}</span><br>
-                        <span style="font-size:11px; color:#00f2fe; font-weight: bold;">報酬: ${rewardName} ${m.reward}個</span>
-                    </div>
-                    <button style="width: 70px; margin: 0; padding: 6px; font-size: 11px; ${btnStyle}" onclick="${isClaimed ? '' : `claimMissionReward(${m.id}, ${m.reward}, ${m.isFossil})`}">${btnText}</button>
-                </div>
-            </li>`;
-    });
-}
-
-function claimMissionReward(missionId, rewardAmount, isFossil) {
-    if (saveStatus.claimedMissions.includes(missionId)) return;
-    if (isFossil) {
-        saveStatus.materials += rewardAmount;
-        showGameAlert("🏆 ミッションクリア！", `報酬として「草の化石」を <strong>${rewardAmount}個</strong> ゲットしたよ！`);
-    } else {
-        saveStatus.stones += rewardAmount;
-        showGameAlert("🏆 ミッションクリア！", `報酬として「草核」を <strong>${rewardAmount}個</strong> ゲットしたよ！`);
-    }
-    saveStatus.claimedMissions.push(missionId);
-    saveGame();
-    openMissionScreen(); 
-}
-
-// =========================================================
-// 👥 キャラクター（リッチカード描画）
-// =========================================================
+// ---------------------------------------------------------
+// 👥 キャラクター
+// ---------------------------------------------------------
 function openPartyScreen() {
     changeScreen('party');
     selectedCharIndex = 0; 
@@ -1748,14 +1441,14 @@ function removeFromParty(slotIndex) {
 }
 
 // =========================================================
-// 🛡️ 装備管理（リッチカード描画）
+// 🛡️ 装備管理（一括強化対応！）
 // =========================================================
 function openEquipScreen(category) {
     currentCategoryTab = category;
     changeScreen('equip');
 
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
-    document.getElementById('tab-' + category).classList.add('active-tab');
+    document.getElementById('tab-' + category)?.classList.add('active-tab');
 
     const list = document.getElementById('weapon-grid');
     list.innerHTML = ""; 
@@ -1788,7 +1481,9 @@ function openEquipScreen(category) {
         let maxLevel = getMaxWeaponLevel(star);
         let isMaxLevel = (weap.level >= maxLevel);
         let currentCost = getUpgradeCost(weap.level);
-        let levelUpAction = isMaxLevel ? "showGameAlert('👑レベルMAX', 'この装備のレベルはすでに上限に達しているよ！')" : `levelUpWeapon('${weap.id}')`;
+        
+        let levelUpAction = isMaxLevel ? "showGameAlert('👑レベルMAX', 'この装備はすでにレベル上限です！')" : `levelUpWeapon('${weap.id}')`;
+        let levelUpMaxAction = isMaxLevel ? "showGameAlert('👑レベルMAX', 'この装備はすでにレベル上限です！')" : `levelUpWeaponMax('${weap.id}')`;
         let levelUpBtnStyle = isMaxLevel ? "background: rgba(50,50,50,0.8); color: #777;" : "background: linear-gradient(to bottom, #00b4db, #0083b0); color: #fff;";
         
         let safeName = getBaseName(weap.name);
@@ -1814,7 +1509,12 @@ function openEquipScreen(category) {
                     </div>
                     <div class="card-actions">
                         <button style="${combineBtnStyle}; padding:4px;" onclick="${combineAction}">合体</button>
-                        <button style="${levelUpBtnStyle}; padding:4px;" onclick="${levelUpAction}">強化(${levelCostText})</button>
+                        
+                        <div style="display: flex; gap: 4px;">
+                            <button style="${levelUpBtnStyle}; flex: 1; padding:4px;" onclick="${levelUpAction}">強化<br><span style="font-size:9px;">(${levelCostText})</span></button>
+                            <button style="${levelUpBtnStyle}; flex: 1; padding:4px; font-size:10px;" onclick="${levelUpMaxAction}">最大<br>強化</button>
+                        </div>
+                        
                         <button class="${equipBtnClass}" style="padding:4px;" onclick="setWeapon('${weap.id}', '${category}')">${equipBtnText}</button>
                     </div>
                 </div>
@@ -1837,7 +1537,44 @@ function levelUpWeapon(id) {
     saveGame(); openEquipScreen(currentCategoryTab);
 }
 
-// 🌀 複数選択合体システム（🪙草コイン対応！）
+// 🌟 新機能：一括最大強化
+function levelUpWeaponMax(id) {
+    let weap = saveStatus.equipments.find(e => e.id === id);
+    if (!weap) return;
+    let maxLevel = getMaxWeaponLevel(getWeaponStar(weap.name));
+    if (weap.level >= maxLevel) { showGameAlert("👑 最大レベルです", `この装備はレベル上限です！`); return; }
+    
+    let totalCost = 0;
+    let levelUps = 0;
+    let tempLevel = weap.level;
+    
+    // 素材が許す限り計算
+    while (tempLevel < maxLevel) {
+        let nextCost = getUpgradeCost(tempLevel);
+        if (saveStatus.materials < (totalCost + nextCost)) {
+            break; 
+        }
+        totalCost += nextCost;
+        tempLevel++;
+        levelUps++;
+    }
+    
+    if (levelUps === 0) {
+        let currentCost = getUpgradeCost(weap.level);
+        showGameAlert("❌ 素材不足", `「草の化石」が足りないよ！次の強化には ${currentCost} 個必要です。`); 
+        return;
+    }
+    
+    saveStatus.materials -= totalCost;
+    weap.level += levelUps;
+    weap.bonus += (10 * levelUps);
+    
+    let safeName = getBaseName(weap.name);
+    showGameAlert("🔨 連続強化せいこう！", `<strong>${safeName}</strong> を一気に <strong>${levelUps}回</strong> 強化して <span style="color:#00f2fe; font-weight:bold;">Lv.${weap.level}</span> にした！<br><span style="font-size:11px; color:#aaa;">（消費: 草の化石 ${totalCost}個）</span>`);
+    saveGame(); openEquipScreen(currentCategoryTab);
+}
+
+// 🌀 複数選択合体システム
 let currentCombineBaseId = ""; let selectedMaterials = []; let maxSelectableCount = 0; 
 let materialsToCombine = []; 
 
@@ -1938,9 +1675,9 @@ function confirmCombineSelection() {
 
 function startCombineAnimation() {
     const combineScreen = document.getElementById('combine-animation-screen');
-    combineScreen.style.display = 'flex';
+    if(combineScreen) combineScreen.style.display = 'flex';
     try { startSound.currentTime = 0; startSound.play().catch(e=>{}); if (navigator.vibrate) navigator.vibrate([100, 100, 100]); } catch(e) {}
-    setTimeout(() => { combineScreen.style.display = 'none'; executeMultiCombine(); }, 2000); 
+    setTimeout(() => { if(combineScreen) combineScreen.style.display = 'none'; executeMultiCombine(); }, 2000); 
 }
 
 function executeMultiCombine() {
@@ -1949,9 +1686,7 @@ function executeMultiCombine() {
     let combineCount = materialsToCombine.length;
     let cost = getCombineCost(targetWeapon.name, combineCount);
     
-    // 草コイン消費！
     saveStatus.coins -= cost;
-    
     targetWeapon.limitBreak += combineCount; targetWeapon.bonus += (25 * combineCount); 
 
     saveStatus.equipments = saveStatus.equipments.filter(e => !materialsToCombine.includes(e.id));
@@ -1980,31 +1715,50 @@ function setWeapon(id, category) {
 // =========================================================
 // ✨ ガチャシステム
 // =========================================================
-function openGachaDetail(type) {
+function switchGachaTab(type) {
     currentGachaType = type;
-    changeScreen('gacha-detail');
-    let config = gachaConfig[type];
-    document.getElementById('gacha-detail-title').innerText = config.title;
-    document.getElementById('gacha-detail-title').style.color = config.color;
-    document.getElementById('gacha-detail-desc').innerText = config.desc;
-    document.getElementById('gacha-result-list').innerHTML = "ここに結果がスクロールで表示されるよ！";
-    let btnContainer = document.getElementById('gacha-detail-buttons');
-    btnContainer.innerHTML = "";
-    config.buttons.forEach(btn => {
-        let btnHTML = btn.isComingSoon 
-            ? `<button style="background: ${btn.color1}; color:${btn.textColor}; border-color:${btn.color2}; margin: 8px 0;" onclick="showGameAlert('🔜 準備中！', '${config.title}は現在準備中だよ！追加をお楽しみに！')">${btn.text}</button>` 
-            : `<button style="background: linear-gradient(to bottom, ${btn.color1}, ${btn.color2}); color:${btn.textColor}; border-color:${btn.color1}; margin: 8px 0;" onclick="startGachaProcess(${btn.count}, ${btn.isFree})">${btn.text}</button>`;
-        btnContainer.innerHTML += btnHTML;
-    });
+    
+    document.querySelectorAll('#gacha-tabs .tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+    let activeTab = document.getElementById('gacha-tab-' + type);
+    if(activeTab) activeTab.classList.add('active-tab');
 
-    const stampContainer = document.getElementById('detail-stamp-container');
-    if (type === 'free') { stampContainer.style.display = 'none'; } 
-    else { stampContainer.style.display = 'block'; drawStampCard(); }
+    let config = gachaConfig[type];
+    if(!config) return;
+    
+    let imgEl = document.getElementById('gacha-banner-img');
+    if(imgEl) {
+        if (type === 'normal') { imgEl.src = "通常ガチャ.png"; imgEl.style.borderColor = "#00f2fe"; }
+        else if (type === 'free') { imgEl.src = "1日1回無料ガチャ.png"; imgEl.style.borderColor = "#f8b500"; }
+        else if (type === 'new') { imgEl.src = "新装備ピックアップガチャ.png"; imgEl.style.borderColor = "#ff416c"; }
+        else if (type === 'revival') { imgEl.src = "復刻装備ガチャ.png"; imgEl.style.borderColor = "#00b4db"; }
+    }
+    
+    let descEl = document.getElementById('gacha-desc-text');
+    if(descEl) descEl.innerText = config.desc;
+
+    let btnContainer = document.getElementById('gacha-action-buttons');
+    if(btnContainer) {
+        btnContainer.innerHTML = "";
+        config.buttons.forEach(btn => {
+            let btnHTML = btn.isComingSoon 
+                ? `<button style="background: ${btn.color1}; color:${btn.textColor}; border-color:${btn.color2}; margin: 8px 0;" disabled>${btn.text}</button>` 
+                : `<button style="background: linear-gradient(to bottom, ${btn.color1}, ${btn.color2}); color:${btn.textColor}; border-color:${btn.color1}; margin: 8px 0;" onclick="startGachaProcess(${btn.count}, ${btn.isFree})">${btn.text}</button>`;
+            btnContainer.innerHTML += btnHTML;
+        });
+    }
+
+    const stampContainer = document.getElementById('gacha-stamp-container');
+    if (type === 'free' || type === 'new' || type === 'revival') { 
+        if(stampContainer) stampContainer.style.display = 'none'; 
+    } else { 
+        if(stampContainer) stampContainer.style.display = 'block'; 
+        drawStampCard(); 
+    }
 }
 
 function showProbabilities() {
-    let activePool = gachaConfig[currentGachaType].pool;
-    if (activePool.length === 0) { showGameAlert("🔍 ガチャ提供割合", "<p style='color:#ff5555; text-align:center;'>現在、ガチャの中身は空っぽだよ！</p>"); return; }
+    let activePool = gachaConfig[currentGachaType]?.pool;
+    if (!activePool || activePool.length === 0) { showGameAlert("🔍 ガチャ提供割合", "<p style='color:#ff5555; text-align:center;'>現在、ガチャの中身は空っぽだよ！</p>"); return; }
     let totalWeight = 0; activePool.forEach(item => totalWeight += item.weight);
     let htmlContent = "<div style='line-height:1.6;'>";
     htmlContent += "<p style='color:#00f2fe; font-weight:bold; border-bottom:1px solid #00f2fe; padding-bottom:8px; margin-bottom:10px;'>ガチャ出現確率（提供割合）</p>";
@@ -2014,17 +1768,16 @@ function showProbabilities() {
         let barColor = item.type === "character" ? "#00b4db" : "#ffeb3b";
         let safeName = getBaseName(item.name);
         htmlContent += `
-            <div class="probability-item">
-                <div class="probability-header"><span><span style="color:${barColor}; font-size:11px;">[${categoryName}]</span> ${safeName}</span><span style="color:${barColor}; font-weight:bold;">${percent}%</span></div>
-                <div class="probability-bar-bg"><div class="probability-bar-fill" style="width: ${percent}%; background-color: ${barColor};"></div></div>
+            <div class="probability-item" style="display:flex; justify-content:space-between; margin-bottom:4px; border-bottom:1px solid #333;">
+                <span style="font-size:12px;">
+                    <span style="color:${barColor}; font-size:10px;">[${categoryName}]</span> ${safeName}
+                </span>
+                <span style="color:${barColor}; font-weight:bold; font-size:12px;">${percent}%</span>
             </div>`;
     });
     htmlContent += "</div>"; showGameAlert("🔍 ガチャ提供割合", htmlContent);
 }
 
-// ---------------------------------------------------------
-// 🎰 新・ド派手ガチャ演出コントロールシステム
-// ---------------------------------------------------------
 let gachaInterval = null;
 let gachaTempResults = [];
 let gachaIsFree = false;
@@ -2032,7 +1785,9 @@ let gachaCount = 0;
 let gachaHighestStar = 1;
 
 function startGachaProcess(count, isFree = false) {
-    let activePool = gachaConfig[currentGachaType].pool;
+    let config = gachaConfig[currentGachaType];
+    if (!config) return;
+    let activePool = config.pool;
     if (activePool.length === 0) { showGameAlert("🔮 ガチャは準備中だよ！", "コードの「設定ゾーン①」に装備を追加してね！"); return; }
     
     if (isFree) {
@@ -2052,9 +1807,8 @@ function startGachaProcess(count, isFree = false) {
     activePool.forEach(item => totalWeight += item.weight);
 
     let isGuaranteedGacha = false;
-    if (!isFree) {
-        let gData = saveStatus.gachaData[currentGachaType];
-        isGuaranteedGacha = gData.guaranteed;
+    if (!isFree && saveStatus.gachaData[currentGachaType]) {
+        isGuaranteedGacha = saveStatus.gachaData[currentGachaType].guaranteed;
     }
 
     for (let i = 0; i < count; i++) {
@@ -2063,7 +1817,7 @@ function startGachaProcess(count, isFree = false) {
             let guaranteedPool = activePool.filter(item => getWeaponStar(item.name) >= 5);
             if (guaranteedPool.length > 0) prize = guaranteedPool[Math.floor(Math.random() * guaranteedPool.length)];
             else prize = activePool[0]; 
-            saveStatus.gachaData[currentGachaType].guaranteed = false; 
+            if(saveStatus.gachaData[currentGachaType]) saveStatus.gachaData[currentGachaType].guaranteed = false; 
         } else {
             let randomNum = Math.random() * totalWeight; let currentSum = 0; prize = activePool[0]; 
             for (let j = 0; j < activePool.length; j++) {
@@ -2092,6 +1846,7 @@ function startGachaProcess(count, isFree = false) {
     const tapPrompt = document.getElementById('gacha-tap-prompt');
     const mascot = document.getElementById('mascot-container');
     const eruption = document.getElementById('beam-eruption');
+    const magicCircle = document.getElementById('gacha-magic-circle'); 
 
     if(portalDevice) { portalDevice.style.display = 'flex'; portalDevice.style.opacity = '1'; }
     if(chestContainer) chestContainer.classList.remove('active');
@@ -2099,11 +1854,19 @@ function startGachaProcess(count, isFree = false) {
     if(tapPrompt) tapPrompt.classList.remove('active');
     if(mascot) mascot.classList.remove('active');
     if(eruption) eruption.className = 'beam-explosion';
+    if(magicCircle) magicCircle.className = 'magic-circle';
 
-    animScreen.style.display = 'flex'; fill.style.width = '0%'; whiteoutOverlay.style.display = 'none'; whiteoutOverlay.className = '';
-    animScreen.className = ''; animTitle.classList.remove('shake-text'); animContainer.classList.remove('screen-shake');
-    animTitle.style.fontSize = "24px"; animTitle.style.color = "#00f2fe";
-    speedLines.style.display = 'block'; speedLines.style.opacity = '0'; cutIn.classList.remove('active');
+    if(animScreen) { animScreen.style.display = 'flex'; animScreen.className = ''; }
+    if(fill) { fill.style.width = '0%'; fill.className = 'gacha-progress-fill'; }
+    if(whiteoutOverlay) { 
+        whiteoutOverlay.style.display = 'none'; 
+        whiteoutOverlay.style.opacity = '0';
+        whiteoutOverlay.style.transition = 'none';
+    }
+    if(animTitle) { animTitle.classList.remove('shake-text'); animTitle.style.fontSize = "24px"; animTitle.style.color = "#00f2fe"; }
+    if(animContainer) animContainer.classList.remove('screen-shake');
+    if(speedLines) { speedLines.style.display = 'block'; speedLines.style.opacity = '0'; }
+    if(cutIn) cutIn.classList.remove('active');
 
     createParticles();
 
@@ -2114,31 +1877,38 @@ function startGachaProcess(count, isFree = false) {
     gachaInterval = setInterval(() => {
         let elapsed = Date.now() - startTime;
         let progress = Math.min((elapsed / duration) * 100, 100);
-        fill.style.width = (progress * 0.5) + '%'; 
+        if(fill) fill.style.width = (progress * 0.5) + '%'; 
 
         if (progress < 40) {
-            animTitle.innerText = "草核の祈り..."; animText.innerText = "ゲートが解放され、エネルギーが流入中...";
-            speedLines.style.opacity = (progress / 40) * 0.3; 
+            if(animTitle) animTitle.innerText = "草核の祈り..."; 
+            if(animText) animText.innerText = "ゲートが解放され、エネルギーが流入中...";
+            if(speedLines) speedLines.style.opacity = (progress / 40) * 0.3; 
         } 
         else if (progress >= 40 && progress < 100) {
             if (gachaHighestStar >= 5 && !hasUpgradedToRainbow) {
-                animScreen.className = 'flash-bg rainbow-aura'; animTitle.classList.add('shake-text'); 
-                animTitle.style.fontSize = "32px"; animTitle.style.color = "#ffeb3b";
-                animTitle.innerText = "🚨 限界突破感知 🚨"; animText.innerHTML = "<span style='color:#ff007f; font-weight:bold; font-size:16px;'>⚠️ WARNING!! 伝説の星5武器を検知！！！ ⚠️</span>";
-                speedLines.style.opacity = '0.8'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(255, 0, 127, 0.2) 10deg 20deg)';
-                cutIn.classList.add('active'); 
+                if(fill) fill.className = 'gacha-progress-fill rainbow'; 
+                if(magicCircle) magicCircle.className = 'magic-circle rainbow';
+                if(animScreen) animScreen.className = 'flash-bg rainbow-aura'; 
+                if(animTitle) { animTitle.classList.add('shake-text'); animTitle.style.fontSize = "32px"; animTitle.style.color = "#ffeb3b"; animTitle.innerText = "🚨 限界突破感知 🚨"; }
+                if(animText) animText.innerHTML = "<span style='color:#ff007f; font-weight:bold; font-size:16px;'>⚠️ WARNING!! 伝説の星5武器を検知！！！ ⚠️</span>";
+                if(speedLines) { speedLines.style.opacity = '0.8'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(255, 0, 127, 0.2) 10deg 20deg)'; }
+                if(cutIn) cutIn.classList.add('active'); 
                 
-                if (!hasPlayedJackpotSound) { jackpotSound.currentTime = 0; jackpotSound.play().catch(e=>{}); hasPlayedJackpotSound = true; }
+                if (!hasPlayedJackpotSound) { try{jackpotSound.currentTime = 0; jackpotSound.play().catch(e=>{});}catch(e){} hasPlayedJackpotSound = true; }
                 hasUpgradedToRainbow = true; hasUpgradedToGold = true; 
                 try { if (navigator.vibrate) navigator.vibrate([50, 50, 50]); } catch(e){}
             } else if (gachaHighestStar === 4 && !hasUpgradedToGold) {
-                animScreen.classList.add('gold-aura');
-                animTitle.innerText = "⚡ エネルギー活性化！ ⚡"; animText.innerText = "魔法陣がまばゆい金色に変化する！高レア確定！";
-                speedLines.style.opacity = '0.5'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(248, 181, 0, 0.2) 10deg 20deg)';
+                if(magicCircle) magicCircle.classList.add('gold'); 
+                if(animScreen) animScreen.classList.add('gold-aura');
+                if(animTitle) animTitle.innerText = "⚡ エネルギー活性化！ ⚡"; 
+                if(animText) animText.innerText = "魔法陣がまばゆい金色に変化する！高レア確定！";
+                if(speedLines) { speedLines.style.opacity = '0.5'; speedLines.style.background = 'repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(248, 181, 0, 0.2) 10deg 20deg)'; }
                 try { if (navigator.vibrate) navigator.vibrate([100, 100]); } catch(e){}
                 hasUpgradedToGold = true;
             } else if (!hasUpgradedToGold && !hasUpgradedToRainbow) {
-                animTitle.innerText = "草核の光が変化する！"; animText.innerText = "輝きがさらに強まっています！"; speedLines.style.opacity = '0.3';
+                if(animTitle) animTitle.innerText = "草核の光が変化する！"; 
+                if(animText) animText.innerText = "輝きがさらに強まっています！"; 
+                if(speedLines) speedLines.style.opacity = '0.3';
             }
         } 
         
@@ -2155,8 +1925,8 @@ function startGachaProcess(count, isFree = false) {
                 else if (gachaHighestStar === 4) { chest.classList.add('gold'); }
                 
                 chestContainer.classList.add('active');
-                animTitle.innerText = "🔮 召喚完了 🔮";
-                animText.innerText = "画面をタッチして、宝箱を開けよう！";
+                if(animTitle) animTitle.innerText = "🔮 召喚完了 🔮";
+                if(animText) animText.innerText = "画面をタッチして、宝箱を開けよう！";
                 tapPrompt.classList.add('active');
             } else {
                 executeGachaResults(count, temporaryResults, isFree);
@@ -2182,7 +1952,7 @@ function triggerGachaTap() {
     if(animTitle) animTitle.innerText = "開け、真実の扉！";
     if(animText) animText.innerText = "エネルギーが限界値に達します！！";
 
-    try { clickSound.currentTime = 0; clickSound.play(); } catch(e){}
+    try { clickSound.currentTime = 0; clickSound.play().catch(e=>{}); } catch(e){}
 
     setTimeout(() => {
         if(chest) {
@@ -2204,19 +1974,25 @@ function triggerGachaTap() {
 
         setTimeout(() => {
             if(whiteoutOverlay) {
+                whiteoutOverlay.style.transition = 'none';
                 whiteoutOverlay.style.display = 'block';
-                whiteoutOverlay.className = '';
+                whiteoutOverlay.style.opacity = '1';
             }
             
             const animScreen = document.getElementById('gacha-animation-screen');
             if(animScreen) animScreen.style.display = 'none';
             if(animContainer) animContainer.classList.remove('screen-shake');
 
-            executeGachaResults(gachaCount, gachaTempResults, gachaIsFree);
+            try {
+                executeGachaResults(gachaCount, gachaTempResults, gachaIsFree);
+            } catch (e) {
+                console.error("Gacha Result Error:", e);
+            }
 
             setTimeout(() => {
                 if(whiteoutOverlay) {
-                    whiteoutOverlay.classList.add('whiteout-fade-out');
+                    whiteoutOverlay.style.transition = 'opacity 1s ease-out';
+                    whiteoutOverlay.style.opacity = '0';
                     setTimeout(() => {
                         whiteoutOverlay.style.display = 'none';
                     }, 1000);
@@ -2235,11 +2011,13 @@ function executeGachaResults(count, results, isFree) {
     } else { 
         saveStatus.stones -= (count * 100); 
         let gData = saveStatus.gachaData[currentGachaType];
-        gData.draws += count;
-        let newStamps = Math.floor(gData.draws / 10);
-        if (newStamps > gData.stamps) {
-            gData.stamps = newStamps;
-            if (gData.stamps % 20 === 10) gData.guaranteed = true;
+        if (gData) {
+            gData.draws += count;
+            let newStamps = Math.floor(gData.draws / 10);
+            if (newStamps > gData.stamps) {
+                gData.stamps = newStamps;
+                if (gData.stamps % 20 === 10) gData.guaranteed = true;
+            }
         }
     }
     
@@ -2249,17 +2027,20 @@ function executeGachaResults(count, results, isFree) {
         weaponCount++;
     });
 
-    const resultBox = document.getElementById('gacha-result-list'); resultBox.innerHTML = ""; 
-    results.forEach((item, index) => {
-        let color = "#ffeb3b"; let safeName = getBaseName(item.name);
-        if(safeName.includes("★5")) { resultBox.innerHTML += `<div><strong>[${index + 1}回目]</strong> <span style="color:#ff007f; font-weight:bold; font-size:16px;">🌟${safeName}🌟</span> 獲得！</div>`; } 
-        else { resultBox.innerHTML += `<div><strong>[${index + 1}回目]</strong> <span style="color:${color};">${safeName}</span> 獲得！</div>`; }
-    });
+    const resultBox = document.getElementById('gacha-result-list'); 
+    if(resultBox) {
+        resultBox.innerHTML = ""; 
+        results.forEach((item, index) => {
+            let color = "#ffeb3b"; let safeName = getBaseName(item.name);
+            if(safeName.includes("★5")) { resultBox.innerHTML += `<div><strong>[${index + 1}回目]</strong> <span style="color:#ff007f; font-weight:bold; font-size:16px;">🌟${safeName}🌟</span> 獲得！</div>`; } 
+            else { resultBox.innerHTML += `<div><strong>[${index + 1}回目]</strong> <span style="color:${color};">${safeName}</span> 獲得！</div>`; }
+        });
+    }
 
     let summaryHTML = `<div style="text-align: left; line-height: 1.6;">`;
     summaryHTML += `<p style="color:#ffeb3b; font-weight:bold; font-size:16px; border-bottom:1px solid #ffeb3b; padding-bottom:5px;">🎉 ガチャ結果発表 (${count}連)</p>`;
     
-    if (!isFree) {
+    if (!isFree && saveStatus.gachaData[currentGachaType]) {
         let currentStamps = saveStatus.gachaData[currentGachaType].stamps;
         summaryHTML += `<p style="font-size:12px; color:#ffeb3b; margin: 0 0 10px 0; font-weight:bold;">🎫 現在の天井スタンプ数: ${currentStamps} 個</p>`;
     }
@@ -2267,7 +2048,7 @@ function executeGachaResults(count, results, isFree) {
     if (count <= 10) { 
         results.forEach(item => { let mark = "⚔️"; let safeName = getBaseName(item.name); summaryHTML += `• ${mark} <strong>${safeName}</strong><br>`; }); 
     } else { 
-        summaryHTML += `<p style="font-size:15px; color:#66fcf1;">一度に大量のアイテムを獲得しました！</p>• ⚔️ 新しい装備: <strong>${weaponCount}個</strong><br>`; 
+        summaryHTML += `<p style="font-size:15px; color:#00f2fe;">一度に大量のアイテムを獲得しました！</p>• ⚔️ 新しい装備: <strong>${weaponCount}個</strong><br>`; 
     }
     summaryHTML += `<p style="margin-top:15px; text-align:center; color:#38ef7d; font-weight:bold;">装備画面でさっそく確認してみよう！</p></div>`;
 
