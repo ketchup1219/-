@@ -148,7 +148,14 @@
         .rarity-1 { border-color: #b0c4de; } .rarity-2 { border-color: #8fbc8f; } .rarity-3 { border-color: #ffeb3b; box-shadow: 0 0 10px rgba(255,235,59,0.3), inset 0 1px 1px rgba(255,255,255,0.5); } .rarity-4 { border-color: #ff4500; box-shadow: 0 0 12px rgba(255,69,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); } .rarity-5 { border-image: linear-gradient(45deg, #ff007f, #ffeb3b, #00b4db) 1; box-shadow: 0 0 15px rgba(255,0,127,0.5); } .rarity-6 { border-color: #cc00ff; box-shadow: 0 0 20px rgba(204,0,255,0.6); } .rarity-7 { border-color: #00ffff; box-shadow: 0 0 25px rgba(0,255,255,0.8); } 
         .card-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, rgba(0,0,0,0.6), transparent); padding: 4px 10px; border-bottom: 1px solid rgba(255,255,255,0.2); position: relative; }
         .element-badge { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); width: 32px; height: 36px; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; text-shadow: 1px 1px 1px rgba(0,0,0,0.8); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.5); position: absolute; top: -5px; left: 5px; z-index: 5; }
-        .el-fire { background: linear-gradient(135deg, #ff416c, #ff4b2b); } .el-water { background: linear-gradient(135deg, #00b4db, #0083b0); } .el-grass { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #111; text-shadow: none; } .el-light { background: linear-gradient(135deg, #ffeb3b, #f8b500); color: #111; text-shadow: none; } .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
+        
+        .el-fire { background: linear-gradient(135deg, #ff416c, #ff4b2b); } 
+        .el-water { background: linear-gradient(135deg, #00b4db, #0083b0); } 
+        .el-grass { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #111; text-shadow: none; } 
+        .el-light { background: linear-gradient(135deg, #ffeb3b, #f8b500); color: #111; text-shadow: none; } 
+        .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
+        .el-none { background: linear-gradient(135deg, #bdc3c7, #7f8c8d); } /* 🌟 無属性カラー追加！ */
+
         .card-body { display: flex; padding: 10px; padding-left: 45px; align-items: center; gap: 10px; }
         .card-name { font-size: 16px; font-weight: 900; flex: 1; text-shadow: 1px 1px 2px #000; letter-spacing: 0.5px; }
         .card-stats { font-size: 11px; color: #eee; line-height: 1.5; font-weight: bold; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; display: inline-block; margin-top: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.6); }
@@ -636,7 +643,7 @@
             </div>
 
             <!-- =========================================================
-               ⑦ 🏆 大規模ミッション＆実績システム画面！
+               ⑦ 🏆 大規模ミッション＆実績システム画面
                ========================================================= -->
             <div id="screen-mission" class="screen">
                 <h2 style="text-align: left; border:none; margin-bottom: 5px;">ミッション＆実績</h2>
@@ -703,7 +710,6 @@ function closeAlert() {
     if(overlay) overlay.style.display = 'none';
     if(modal) modal.style.display = 'none';
     
-    // ガチャ後のホワイトアウトが残るバグをここで確実に防ぐ！
     const whiteoutOverlay = document.getElementById('gacha-whiteout-overlay');
     if(whiteoutOverlay) {
         whiteoutOverlay.style.display = 'none';
@@ -829,7 +835,6 @@ let characterMaster = [
     { id: "c_adomin", name: "Adomin", hp: 99999999, attack: 99999999, defense: 99999999, element: "light", typeText: "Adomin" }
 ];
 
-// 🌟 冒険家セット（初期装備）を追加！
 let weaponMaster = [
     { id: "eq_head_1", name: "★1 冒険家の帽子", category: "head", bonus: 5, isGacha: true, weight: 200 },
     { id: "eq_body_top_1", name: "★1 冒険家の服", category: "body_top", bonus: 8, isGacha: true, weight: 200 },
@@ -946,10 +951,9 @@ let saveStatus = {
     unlockedAchievements: [], selectedAchievement: "",
     lastLoginDate: "", lastFreeGachaDate: "", 
     flags: { openedEquip: false, openedGacha: false },
-    characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 500, attack: 50, defense: 30, isProtagonist: true, element: "grass", typeText: "超知" } ],
+    characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 100, attack: 50, defense: 30, isProtagonist: true, element: "none", typeText: "無" } ],
     party: ["char_init", null, null, null],
     
-    // 🌟 初期装備セット
     equipments: [ 
         { id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" },
         { id: "init_head_1", name: "★1 冒険家の帽子", level: 1, limitBreak: 0, bonus: 5, category: "head" },
@@ -1021,7 +1025,6 @@ function loadGame() {
             saveStatus.equipped = { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
         }
         
-        // 🌟 古いデータに初期セットがなければ追加！
         if (!saveStatus.equipments.some(e => e.id === "init_head_1")) {
             saveStatus.equipments.push({ id: "init_head_1", name: "★1 冒険家の帽子", level: 1, limitBreak: 0, bonus: 5, category: "head" });
             saveStatus.equipments.push({ id: "init_body_top_1", name: "★1 冒険家の服", level: 1, limitBreak: 0, bonus: 8, category: "body_top" });
@@ -1206,7 +1209,6 @@ const bingoData = [
 ];
 const bingoLines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
 
-// 🌟 クリア条件判定ロジック！
 function checkMissionClear(id) {
     if(!saveStatus.flags) saveStatus.flags = {};
     switch(id) {
