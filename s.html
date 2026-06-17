@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KAZIN">
-    <link rel="apple-touch-icon" href="KAZINaikon.png">
-    <link rel="manifest" href="manifest.json">
-    <title>KAZIN</title>
+    <title>おれたちの最強RPG</title>
     <style>
         /* =========================================================
            🎨 ゲーム全体＆背景
@@ -77,7 +72,6 @@
         #main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; z-index: 10; position: relative; }
         #main-content::-webkit-scrollbar { display: none; }
         
-        /* スクロール用ラッパー */
         #inner-content-wrapper { padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto; box-sizing: border-box; }
         #inner-content-wrapper::-webkit-scrollbar { display: none; }
 
@@ -129,7 +123,6 @@
         .btn-gacha-go:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
         .btn-setting { background: linear-gradient(to bottom, #6086d6, #283e70); border-color: #8f94fb; color: #fff; box-shadow: 0 8px 0 #131e38, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(143, 148, 251, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
         .btn-setting:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #131e38, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(143, 148, 251, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
-
         .btn-title-back { background: linear-gradient(to bottom, #661111, #330000); border-color: #ff416c; color: #ffb6b9; box-shadow: 0 8px 0 #1a0000, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(255, 65, 108, 0.5), inset 0 2px 3px rgba(255,255,255,0.2); }
         .btn-title-back:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #1a0000, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 65, 108, 0.7), inset 0 1px 2px rgba(255,255,255,0.1); }
 
@@ -159,7 +152,7 @@
         .el-grass { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #111; text-shadow: none; } 
         .el-light { background: linear-gradient(135deg, #ffeb3b, #f8b500); color: #111; text-shadow: none; } 
         .el-dark { background: linear-gradient(135deg, #8a2be2, #4a00e0); }
-        .el-none { background: linear-gradient(135deg, #bdc3c7, #7f8c8d); } /* 🌟 無属性カラー追加！ */
+        .el-none { background: linear-gradient(135deg, #bdc3c7, #7f8c8d); } 
 
         .card-body { display: flex; padding: 10px; padding-left: 45px; align-items: center; gap: 10px; }
         .card-name { font-size: 16px; font-weight: 900; flex: 1; text-shadow: 1px 1px 2px #000; letter-spacing: 0.5px; }
@@ -787,6 +780,12 @@ function executeGoToTitle() {
     let footerNav = document.getElementById('footer-nav');
     if(headerBar) headerBar.style.display = 'none';
     if(footerNav) footerNav.style.display = 'none';
+    
+    // 🌟 タイトルに戻ったフラグを保存
+    if(!saveStatus.flags) saveStatus.flags = {};
+    saveStatus.flags.wentToTitle = true;
+    saveGame();
+    
     changeScreen('title');
 }
 
@@ -822,22 +821,11 @@ function updateVolume() {
 const categoryNames = { weapon: "武器 ⚔️", head: "頭 👤", body_top: "鎧上 👕", body_bottom: "鎧下 👖", shield: "盾 🛡️", accessory: "アクセ 💍", heart: "こころ ❤️" };
 
 let characterMaster = [
-    { id: "c_hero", name: "勇者", hp: 100, attack: 50, defense: 30, element: "none", typeText: "勇者" },
-    { id: "c_tona", name: "とな", hp: 100, attack: 50, defense: 30, element: "none", typeText: "？" },
-    { id: "c_seimaro", name: "せいまろ", hp: 100, attack: 50, defense: 30, element: "water", typeText: "忍術犬" },
-    { id: "c_kazuking", name: "カズキングタイジュウフエターネキンギーニ", hp: 100, attack: 50, defense: 30, element: "grass", typeText: "デブ" },
-    { id: "c_gigant", name: "ギガント・バーン", hp: 100, attack: 50, defense: 30, element: "fire", typeText: "剣士" },
-    { id: "c_rampage", name: "ランペイジ・イット", hp: 100, attack: 50, defense: 30, element: "water", typeText: "極道" },
-    { id: "c_zen", name: "ぜん", hp: 100, attack: 50, defense: 30, element: "grass", typeText: "最高" },
-    { id: "c_hiiro", name: "緋色・ハム", hp: 100, attack: 50, defense: 30, element: "fire", typeText: "天才" },
-    { id: "c_ketchup", name: "ケチャップ", hp: 100, attack: 50, defense: 30, element: "water", typeText: "バカ" },
-    { id: "c_takaking", name: "タカキング", hp: 100, attack: 50, defense: 30, element: "light", typeText: "最強" },
-    { id: "c_nisi", name: "西村", hp: 100, attack: 50, defense: 30, element: "light", typeText: "ウエスト" },
-    { id: "c_higasi", name: "東村", hp: 100, attack: 50, defense: 30, element: "light", typeText: "イースト" },
-    { id: "c_kita", name: "北村", hp: 100, attack: 50, defense: 30, element: "light", typeText: "ノース" },
-    { id: "c_minami", name: "南村", hp: 100, attack: 50, defense: 30, element: "light", typeText: "サウス" },
-    { id: "c_ban2", name: "コントラ・バーン", hp: 100, attack: 50, defense: 30, element: "light", typeText: "反転" },
-    { id: "c_adomin", name: "Adomin", hp: 99999999, attack: 99999999, defense: 99999999, element: "light", typeText: "Adomin" }
+    { id: "c_hero", name: "勇者", hp: 100, attack: 50, defense: 30, element: "none", typeText: "無" },
+    { id: "c_tona", name: "とな", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "影" },
+    { id: "c_seimaro", name: "せいまろ", hp: 500, attack: 50, defense: 30, element: "water", typeText: "夜" },
+    { id: "c_kazuking", name: "カズキングタイジュウフエターネキンギーニ", hp: 500, attack: 50, defense: 30, element: "grass", typeText: "行" },
+    { id: "c_gigant", name: "ギガント・バーン", hp: 500, attack: 50, defense: 30, element: "fire", typeText: "極速" }
 ];
 
 let weaponMaster = [
@@ -845,61 +833,20 @@ let weaponMaster = [
     { id: "eq_body_top_1", name: "★1 冒険家の服", category: "body_top", bonus: 8, isGacha: true, weight: 200 },
     { id: "eq_body_bottom_1", name: "★1 冒険家のズボン", category: "body_bottom", bonus: 8, isGacha: true, weight: 200 },
     { id: "eq_shield_1", name: "★1 冒険家の盾", category: "shield", bonus: 6, isGacha: true, weight: 200 },
-    { id: "eq_acc_1", name: "★1 冒険家のリュック", category: "accessory", bonus: 3, isGacha: false, weight: 200 },
-    { id: "eq_heart_1", name: "★1 冒険家のこころ", category: "heart", bonus: 10, isGacha: false, weight: 200 },
+    { id: "eq_acc_1", name: "★1 冒険家のリュック", category: "accessory", bonus: 3, isGacha: true, weight: 200 },
+    { id: "eq_heart_1", name: "★1 冒険家のこころ", category: "heart", bonus: 10, isGacha: true, weight: 200 },
 
-　　{ id: "w_hino", name: "★1 ひのきの棒", category: "weapon", bonus: 10, isGacha: true, weight: 200 },
+    { id: "w_hino", name: "★1 ひのきの棒", category: "weapon", bonus: 10, isGacha: true, weight: 200 },
     { id: "w_wood", name: "★1 木の剣", category: "weapon", bonus: 15, isGacha: true, weight: 150 },
     { id: "w_bronze", name: "★1 銅のつるぎ", category: "weapon", bonus: 22, isGacha: true, weight: 120 },
-    { id: "w_iron", name: "★1 鉄のつるぎ", category: "weapon", bonus: 32, isGacha: true, weight: 80 },
-    { id: "w_gold_mu", name: "★1 金のつるぎ", category: "weapon", bonus: 45, isGacha: false },
     { id: "w_stone", name: "★1 石のつるぎ", category: "weapon", bonus: 25, isGacha: true, weight: 100 },
     { id: "w_steel", name: "★2 鋼のつるぎ", category: "weapon", bonus: 60, isGacha: true, weight: 40 },
     { id: "w_plat", name: "★2 プラチナソード", category: "weapon", bonus: 85, isGacha: true, weight: 25 },
-    { id: "w_soldier_mu", name: "★2 戦士の剣", category: "weapon", bonus: 100, isGacha: false },
     { id: "w_dia", name: "★3 ダイヤのつるぎ", category: "weapon", bonus: 150, isGacha: true, weight: 10 },
     { id: "w_obs", name: "★3 黒曜石のつるぎ", category: "weapon", bonus: 180, isGacha: true, weight: 8 },
-    { id: "w_fire_mu", name: "★4 火のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_ice_mu", name: "★4 氷のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_wind_mu", name: "★4 風のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_light_mu", name: "★4 雷のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_water_mu", name: "★4 水のつるぎ", category: "weapon", bonus: 210, isGacha: false },
-    { id: "w_star_mu", name: "★4 星のつるぎ", category: "weapon", bonus: 230, isGacha: false },
-    { id: "w_shining_mu", name: "★4 ひかりのつるぎ", category: "weapon", bonus: 250, isGacha: false },
-    { id: "w_dark_mu", name: "★4 やみのつるぎ", category: "weapon", bonus: 250, isGacha: false },
     { id: "w_excal", name: "★5 エクスカリバー", category: "weapon", bonus: 300, isGacha: true, weight: 2 },
-    { id: "w_blaze_mu", name: "★5 炎のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_frost_mu", name: "★5 氷花のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_gale_mu", name: "★5 疾風のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_bolt_mu", name: "★5 稲妻のつるぎ", category: "weapon", bonus: 320, isGacha: false },
-    { id: "w_galaxy_mu", name: "★5 銀河のつるぎ", category: "weapon", bonus: 350, isGacha: false },
-    { id: "w_aurora_mu", name: "★5 光明のつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_eclipse_mu", name: "★5 暗闇のつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_destroy_mu", name: "★5 破壊のつるぎ", category: "weapon", bonus: 400, isGacha: false },
-    { id: "w_angel_mu", name: "★5 天使のつるぎ", category: "weapon", bonus: 390, isGacha: false },
-    { id: "w_devil_mu", name: "★5 悪魔のつるぎ", category: "weapon", bonus: 390, isGacha: false },
-    { id: "w_champion_mu", name: "★5 王者の剣", category: "weapon", bonus: 410, isGacha: false },
-    { id: "w_miracle_mu", name: "★5 きせきのつるぎ", category: "weapon", bonus: 380, isGacha: false },
-    { id: "w_gold_sword_mu", name: "★5 黄金のつるぎ", category: "weapon", bonus: 370, isGacha: false },
-    { id: "w_life_mu", name: "★5 命のつるぎ", category: "weapon", bonus: 400, isGacha: false },
-    { id: "w_cross_mu", name: "★6 覇王剣クロスセイバー", category: "weapon", bonus: 500, isGacha: false },
-    { id: "w_firedrag_mu", name: "★6 炎龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_icedrag_mu", name: "★6 氷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_winddrag_mu", name: "★6 風龍のつるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_lightdrag_mu", name: "★6 雷龍 of つるぎ", category: "weapon", bonus: 550, isGacha: false },
-    { id: "w_flash_mu", name: "★6 閃光のつるぎ", category: "weapon", bonus: 580, isGacha: false },
-    { id: "w_black_mu", name: "★6 漆黒のつるぎ", category: "weapon", bonus: 580, isGacha: false },
-    { id: "w_champ_kai_mu", name: "★6 王者の剣改", category: "weapon", bonus: 600, isGacha: false },
-    { id: "w_lifedrag_mu", name: "★6 命竜のつるぎ", category: "weapon", bonus: 620, isGacha: false },
-    { id: "w_firedrag_god_mu", name: "★7 炎龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_icedrag_god_mu", name: "★7 氷龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_winddrag_god_mu", name: "★7 風龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_lightdrag_god_mu", name: "★7 雷龍神のつるぎ", category: "weapon", bonus: 800, isGacha: false },
-    { id: "w_genesis_mu", name: "★7 創生のつるぎ", category: "weapon", bonus: 900, isGacha: false },
-    { id: "w_oblivion_mu", name: "★7 創失のつるぎ", category: "weapon", bonus: 950, isGacha: false },
     { id: "w_champ_red_mu", name: "★7 王者の剣紅", category: "weapon", bonus: 1000, isGacha: false },
-    { id: "w_lifedrag_god_mu", name: "★7 命竜神 of つるぎ", category: "weapon", bonus: 1050, isGacha: false },
-    { id: "w_adomin", name: "★7 Adominソード", category: "weapon", bonus: 99999999, isGacha: false },
+    { id: "w_lifedrag_god_mu", name: "★7 命竜神 of つるぎ", category: "weapon", bonus: 1050, isGacha: false }
 ];
 
 let commonGachaPool = weaponMaster.filter(item => item.isGacha === true).map(item => {
@@ -952,10 +899,10 @@ let saveStatus = {
     stones: 1000, materials: 20, coins: 50000, 
     playerName: "勇者", playerIcon: defaultAvatar, 
     claimedMissions: [], dailyMissions: [], eventMissions: [], 
-    bingoCells: [], bingoClaimedLines: [],
+    bingoCells: [4], bingoClaimedLines: [],
     unlockedAchievements: [], selectedAchievement: "",
     lastLoginDate: "", lastFreeGachaDate: "", 
-    flags: { openedEquip: false, openedGacha: false },
+    flags: { openedEquip: false, openedGacha: false, openedParty: false, wentToTitle: false },
     characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 100, attack: 50, defense: 30, isProtagonist: true, element: "none", typeText: "無" } ],
     party: ["char_init", null, null, null],
     
@@ -1005,12 +952,18 @@ function loadGame() {
         
         if (!saveStatus.dailyMissions) saveStatus.dailyMissions = [];
         if (!saveStatus.eventMissions) saveStatus.eventMissions = [];
-        if (!saveStatus.bingoCells) saveStatus.bingoCells = [];
+        if (!saveStatus.bingoCells) saveStatus.bingoCells = [4];
+        else if (!saveStatus.bingoCells.includes(4)) saveStatus.bingoCells.push(4);
         if (!saveStatus.bingoClaimedLines) saveStatus.bingoClaimedLines = [];
         if (!saveStatus.unlockedAchievements) saveStatus.unlockedAchievements = [];
         if (saveStatus.selectedAchievement === undefined) saveStatus.selectedAchievement = "";
         
-        if (!saveStatus.flags) saveStatus.flags = { openedEquip: false, openedGacha: false };
+        if (!saveStatus.flags) {
+            saveStatus.flags = { openedEquip: false, openedGacha: false, openedParty: false, wentToTitle: false };
+        } else {
+            if (saveStatus.flags.openedParty === undefined) saveStatus.flags.openedParty = false;
+            if (saveStatus.flags.wentToTitle === undefined) saveStatus.flags.wentToTitle = false;
+        }
 
         if (saveStatus.lastLoginDate === undefined) saveStatus.lastLoginDate = ""; 
         if (saveStatus.lastFreeGachaDate === undefined) saveStatus.lastFreeGachaDate = ""; 
@@ -1098,7 +1051,7 @@ function changeScreen(screenId) {
     let navMap = { "home":"nav-home", "party":"nav-party", "equip":"nav-equip", "gacha":"nav-gacha", "mission":"nav-mission" };
     if(navMap[screenId]) document.getElementById(navMap[screenId])?.classList.add('active-nav');
     
-    if(!saveStatus.flags) saveStatus.flags = {};
+    if(!saveStatus.flags) saveStatus.flags = { openedEquip: false, openedGacha: false, openedParty: false, wentToTitle: false };
 
     if (screenId === 'gacha') { 
         saveStatus.flags.openedGacha = true; 
@@ -1214,9 +1167,11 @@ const bingoData = [
 ];
 const bingoLines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
 
+// 🌟 クリア条件判定ロジック！
 function checkMissionClear(id) {
     if(!saveStatus.flags) saveStatus.flags = {};
     switch(id) {
+        // 通常ミッション
         case 'd1': return true; // ログイン
         case 'd2': return !!saveStatus.flags.openedEquip; 
         case 'd3': return !!saveStatus.flags.openedGacha; 
@@ -1226,6 +1181,25 @@ function checkMissionClear(id) {
         case 'a2': return saveStatus.equipments.some(e => e.level > 1 || e.limitBreak > 0);
         case 'a3': return Object.values(saveStatus.gachaData).some(d => d.draws > 0);
         case 'a4': return saveStatus.bingoClaimedLines && saveStatus.bingoClaimedLines.length > 0;
+        
+        // ビンゴミッション
+        case 'b0': return true; // ログイン
+        case 'b1': {
+            let total = 0;
+            Object.values(saveStatus.gachaData).forEach(d => total += d.draws);
+            return total >= 1;
+        }
+        case 'b2': return saveStatus.equipments.some(e => e.level > 1);
+        case 'b3': return !!saveStatus.flags.openedParty;
+        case 'b4': return true; // FREEマス
+        case 'b5': return saveStatus.playerName !== "勇者" || saveStatus.playerIcon !== defaultAvatar;
+        case 'b6': return saveStatus.equipments.some(e => e.limitBreak > 0);
+        case 'b7': return !!saveStatus.flags.wentToTitle;
+        case 'b8': {
+            let total = 0;
+            Object.values(saveStatus.gachaData).forEach(d => total += d.draws);
+            return total >= 10;
+        }
         default: return false;
     }
 }
@@ -1341,19 +1315,31 @@ function renderBingoBoard() {
     bingoData.forEach((b, i) => {
         let isOpened = saveStatus.bingoCells?.includes(i);
         if (b.isFree) isOpened = true; 
+        
+        let isCleared = checkMissionClear('b' + i);
+        if (b.isFree) isCleared = true;
 
         let bg = isOpened ? "linear-gradient(135deg, #ffea70, #ffb860)" : "linear-gradient(135deg, rgba(46, 50, 76, 0.95), rgba(30, 32, 50, 0.95))";
         let col = isOpened ? "#111" : "#00f2fe";
-        let border = isOpened ? "2px solid #fff" : "2px solid #00b4db";
-        let shadow = isOpened ? "0 0 15px rgba(248,181,0,0.8)" : "0 6px 8px rgba(0,0,0,0.8)";
+        let border = isOpened ? "2px solid #fff" : (isCleared ? "2px solid #ffeb3b" : "2px solid #00b4db");
+        let shadow = isOpened ? "0 0 15px rgba(248,181,0,0.8)" : (isCleared ? "0 0 10px rgba(255,235,59,0.5)" : "0 6px 8px rgba(0,0,0,0.8)");
         let transform = isOpened ? "scale(0.95)" : "scale(1)";
+
+        let statusText = "";
+        if (isOpened) {
+            statusText = '<span style="font-size:10px; color:#c33; margin-top:4px;">CLEAR!</span>';
+        } else if (isCleared) {
+            statusText = '<span style="font-size:10px; color:#ffeb3b; margin-top:4px;">タップで解放！</span>';
+        } else {
+            statusText = '<span style="font-size:9px; color:#aaa; margin-top:4px;">未達成</span>';
+        }
 
         grid.innerHTML += `
             <div class="bingo-cell" style="aspect-ratio:1/1; background:${bg}; color:${col}; border:${border}; border-radius:8px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-size:12px; font-weight:bold; box-shadow:${shadow}; transform:${transform}; transition:all 0.2s; cursor:pointer;"
                  onclick="${isOpened ? '' : `openBingoCell(${i})`}">
                  ${b.text}
                  ${b.isFree ? '<br><span style="font-size:10px; color:#555; margin-top:2px;">(FREE)</span>' : ''}
-                 ${!isOpened ? '<br><span style="font-size:9px; color:#aaa; margin-top:4px;">未達成</span>' : '<br><span style="font-size:10px; color:#c33; margin-top:4px;">CLEAR!</span>'}
+                 <br>${statusText}
             </div>
         `;
     });
@@ -1366,6 +1352,13 @@ function renderBingoBoard() {
 function openBingoCell(index) {
     if(!saveStatus.bingoCells) saveStatus.bingoCells = [];
     if(saveStatus.bingoCells.includes(index)) return;
+    
+    let bingoId = 'b' + index;
+    if (!checkMissionClear(bingoId)) {
+        showGameAlert("❌ 未達成", `まだこのマスの条件をクリアしていません！<br><br>【条件】<br><strong style="color:#00f2fe;">${bingoData[index].text}</strong>`);
+        return;
+    }
+    
     saveStatus.bingoCells.push(index);
     
     let b = bingoData[index];
@@ -1475,6 +1468,9 @@ function saveProfile() {
 // 👥 キャラクター
 // ---------------------------------------------------------
 function openPartyScreen() {
+    if(!saveStatus.flags) saveStatus.flags = {};
+    saveStatus.flags.openedParty = true;
+    saveGame();
     changeScreen('party');
     selectedCharIndex = 0; 
     updatePartyScreenUI();
