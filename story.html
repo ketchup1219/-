@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>おれたちの最強RPG - ストーリーモード</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #040814;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 30%, #112244 0%, #040814 80%);
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 180, 219, 0.25), inset 0 0 20px rgba(0,0,0,0.9);
+            overflow: hidden;
+            background: #0b0f19;
+            border-left: 2px solid rgba(0, 180, 219, 0.3);
+            border-right: 2px solid rgba(0, 180, 219, 0.3);
+        }
+
+        /* ヘッダーエリア */
+        .game-header {
+            background: linear-gradient(180deg, #16222f 0%, #0d1622 100%);
+            border-bottom: 2px solid #00d2ff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            z-index: 10;
+        }
+
+        .header-left .player-name {
+            font-size: 15px;
+            font-weight: 900;
+            color: #00d2ff;
+            text-shadow: 0 0 5px rgba(0, 210, 255, 0.5);
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-right span {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        /* メイン描画エリア */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* 画面切替エリア */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* タイトル・セクション共通ヘッダー */
+        .section-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+            margin: 10px 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #00d2ff;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 25%;
+            width: 50%;
+            height: 2px;
+            background: #ffeb3b;
+        }
+
+        /* 章選択リスト */
+        .chapter-card {
+            background: linear-gradient(135deg, #182a44 0%, #0d182b 100%);
+            border: 2px solid #204060;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .chapter-card:hover {
+            border-color: #00d2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #ffeb3b;
+            margin-bottom: 5px;
+        }
+
+        .chapter-desc {
+            font-size: 12px;
+            color: #a0aec0;
+            line-height: 1.4;
+        }
+
+        /* ステージ選択リスト */
+        .stage-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stage-card {
+            background: #111c30;
+            border: 1px solid #254470;
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .stage-card:hover:not(.locked) {
+            background: #1a2d4c;
+            border-color: #00d2ff;
+        }
+
+        .stage-card.locked {
+            background: #141923;
+            border: 1px dashed #3a4454;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .stage-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stage-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stage-card.locked .stage-name {
+            color: #718096;
+        }
+
+        .stage-reward-preview {
+            font-size: 11px;
+            color: #a0bec0;
+            margin-top: 3px;
+        }
+
+        .stage-status-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .status-clear {
+            background: rgba(76, 209, 55, 0.2);
+            color: #4cd137;
+            border: 1px solid #4cd137;
+        }
+
+        .status-new {
+            background: rgba(255, 235, 59, 0.2);
+            color: #ffeb3b;
+            border: 1px solid #ffeb3b;
+        }
+
+        .status-locked {
+            background: rgba(113, 128, 150, 0.2);
+            color: #a0aec0;
+            border: 1px solid #718096;
+        }
+
+        /* 🎵 ポップアップ確認ダイアログ (はい/いいえ) */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .confirm-dialog {
+            background: linear-gradient(180deg, #1a2636 0%, #0b111a 100%);
+            border: 3px solid #ffeb3b;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255,235,59,0.2);
+            text-align: center;
+            animation: dialog-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes dialog-pop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .dialog-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #ffeb3b;
+            margin-bottom: 12px;
+        }
+
+        .dialog-msg {
+            font-size: 14px;
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* ストーリー進行テキストウィンドウ */
+        .dialogue-window {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00d2ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.1);
+        }
+
+        .speaker-name {
+            font-size: 16px;
+            font-weight: 900;
+            color: #ffeb3b;
+            border-bottom: 1px solid rgba(255,235,59,0.3);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .dialogue-text {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            flex: 1;
+        }
+
+        /* コマンドバトルエリア */
+        .battle-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .battle-scene {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(16,28,48,0.9) 0%, rgba(5,10,20,0.95) 100%);
+            border: 2px solid #e1b12c;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .enemy-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            min-height: 100px;
+        }
+
+        .enemy-sprite-box {
+            text-align: center;
+            transition: transform 0.1s ease;
+        }
+
+        .enemy-avatar {
+            font-size: 40px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            animation: bounce 2s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .enemy-hp-bar {
+            width: 80px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .enemy-hp-fill {
+            height: 100%;
+            background: #ff4757;
+            width: 100%;
+            transition: width 0.2s ease;
+        }
+
+        .enemy-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #ff9f43;
+            margin-top: 2px;
+        }
+
+        /* プレイヤーバトルUI */
+        .player-status-panel {
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #485e7d;
+        }
+
+        .player-stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .skill-ct-container {
+            margin-top: 10px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #ffeb3b;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .ct-bar-bg {
+            height: 12px;
+            background: #1e272e;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #485e7d;
+        }
+
+        .ct-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9f43, #ffeb3b);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .ct-bar-fill.ready {
+            background: linear-gradient(90deg, #4cd137, #9c88ff);
+            box-shadow: 0 0 8px rgba(76, 209, 55, 0.8);
+            animation: pulse-ready 1s infinite alternate;
+        }
+
+        @keyframes pulse-ready {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        /* コンボ表示 */
+        .combo-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 71, 87, 0.9);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 900;
+            box-shadow: 0 0 10px rgba(255,71,87,0.5);
+            animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* 報酬獲得リザルト */
+        .result-screen {
+            background: rgba(0,0,0,0.9);
+            border-radius: 12px;
+            border: 2px solid #ffeb3b;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255,235,59,0.3);
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255,235,59,0.5);
+            margin-bottom: 15px;
+        }
+
+        .reward-item-row {
+            display: flex;
+            justify-content: space-between;
+            background: #1a2230;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #ffeb3b;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* 汎用フッターボタン */
+        .footer-nav {
+            padding: 15px;
+            background: #0d1622;
+            border-top: 1px solid rgba(0, 180, 219, 0.2);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #00d2ff 0%, #0084ff 100%);
+            box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-disabled {
+            background: #2f3640;
+            color: #7f8c8d;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #485e7d 0%, #2f3640 100%);
+            border: 1px solid #7f8c8d;
+        }
+
+        /* トースト通知 */
+        .toast-msg {
+            position: absolute;
+            top: 70px;
+            left: 10%;
+            width: 80%;
+            background: rgba(46, 204, 113, 0.95);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            z-index: 100;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* バトルログ */
+        .battle-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            height: 60px;
+            overflow-y: auto;
+            color: #cbd5e0;
+            border: 1px solid #2d3748;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- 🎴 出発確認ダイアログ -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="confirm-dialog">
+            <div class="dialog-title" id="modal-stage-title">クエスト確認</div>
+            <div class="dialog-msg" id="modal-stage-msg">このステージを開始しますか？</div>
+            <div class="dialog-buttons">
+                <button class="btn-action btn-secondary" onclick="closeConfirmModal()">いいえ</button>
+                <button class="btn-action btn-primary" onclick="proceedToStage()">はい</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast" class="toast-msg">💾 セーブデータを同期しました！</div>
+
+    <!-- ゲームヘッダー -->
+    <div class="game-header">
+        <div class="header-left">
+            <div class="player-name" id="p-name">ロード中...</div>
+            <div id="p-job-lvl" style="color: #cbd5e0; font-size: 11px;">冒険者 | Lv.--</div>
+        </div>
+        <div class="header-right">
+            <div>🪙 <span id="p-gold">--</span> G</div>
+            <div>💎 <span id="p-mats">--</span> 個</div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ領域 -->
+    <div class="content-area">
+
+        <!-- ==========================================
+             🌐 画面1：章選択
+             ========================================== -->
+        <div id="chapter-screen" class="screen active">
+            <div class="section-title">🗺️ ワールド選択</div>
+            
+            <div class="chapter-card" onclick="selectChapter(1)">
+                <div class="chapter-title">第1章：旅立ちの始まりの村</div>
+                <div class="chapter-desc">（ゴゴゴゴゴ…！）朝霧に包まれた静かな「エコー・ビレッジ」。ここから少年トレジャーハンターとしての壮大な冒険の幕が開ける。</div>
+            </div>
+            
+            <div style="flex: 1;"></div>
+        </div>
+
+        <!-- ==========================================
+             📍 画面2：ステージ選択
+             ========================================== -->
+        <div id="stage-screen" class="screen">
+            <div class="section-title" id="stage-screen-title">第1章：ステージ一覧</div>
+            
+            <div class="stage-list" id="stage-list-container">
+                <!-- 動的に生成 -->
+            </div>
+            
+            <div style="flex: 1;"></div>
+        </div>
+
+        <!-- ==========================================
+             💬 画面3：ストーリー会話パート
+             ========================================== -->
+        <div id="story-screen" class="screen">
+            <div class="dialogue-window">
+                <div>
+                    <div class="speaker-name" id="talk-speaker">キャラクター</div>
+                    <div class="dialogue-text" id="talk-text">ストーリーを読み込んでいます...</div>
+                </div>
+                <div id="story-animation-effect" style="text-align: right; font-style: italic; color: #a0aec0; font-size: 11px; margin-top: 10px;">
+                    （タッ、タッ、タッ…）
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             ⚔️ 画面4：星ドラ風コマンドバトル
+             ========================================== -->
+        <div id="battle-screen" class="screen">
+            <div class="battle-window">
+                <div class="battle-scene">
+                    <!-- コンボインジケーター -->
+                    <div class="combo-counter" id="battle-combo-badge">2 Combo!</div>
+
+                    <!-- エネミーエリア -->
+                    <div class="enemy-container" id="enemy-container">
+                        <!-- 敵を表示 -->
+                    </div>
+
+                    <!-- バトルログ -->
+                    <div class="battle-log" id="battle-log-text">
+                        戦闘が開始された！
+                    </div>
+
+                    <!-- プレイヤー状況 -->
+                    <div class="player-status-panel">
+                        <div class="player-stats-row">
+                            <span id="btl-player-name">勇者</span>
+                            <span>❤️ HP <span id="btl-player-hp">100/100</span></span>
+                            <span>🧪 MP <span id="btl-player-mp">20/20</span></span>
+                        </div>
+                        
+                        <!-- スキルCT -->
+                        <div class="skill-ct-container">
+                            <div class="skill-header">
+                                <span id="skill-name-label">⚔️ スキル：ギガスラッシュ</span>
+                                <span id="skill-ct-percent">0%</span>
+                            </div>
+                            <div class="ct-bar-bg">
+                                <div class="ct-bar-fill" id="skill-ct-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             🎉 画面5：報酬獲得リザルト
+             ========================================== -->
+        <div id="result-screen" class="screen">
+            <div class="result-screen">
+                <div class="result-title">🎉 クエストクリア！</div>
+                <p style="font-size: 13px; color: #a0aec0; margin-bottom: 20px;">
+                    ステージの試練を乗り越え、また一歩夢に近づきました！
+                </p>
+                
+                <div id="rewards-container">
+                    <!-- 動的生成 -->
+                </div>
+
+                <div style="margin-top: 25px; color: #ffeb3b; font-size: 12px; font-weight: bold;">
+                    💾 ステータスを「sugoigame」にセーブしました！
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 永続ナビゲーションフッター -->
+    <div class="footer-nav" id="footer-nav">
+        <button class="btn-action btn-secondary" onclick="goBackToMainMenu()">🔙 拠点に戻る</button>
+    </div>
+</div>
+
+<script>
+// --- 💾 セーブデータ同期構造 (sugoigame) ---
+let saveStatus = {
+    "playerName": "勇者",
+    "job": "冒険者",
+    "level": 1,
+    "exp": 0,
+    "hp": 100,
+    "max_hp": 100,
+    "mp": 20,
+    "max_mp": 20,
+    "coins": 50000,
+    "stones": 1000,
+    "materials": 20,
+    "currentChapter": 1,
+    "currentStage": 1,
+    "equipped": {
+        "weapon": "★1 ひのきの棒",
+        "head": "★1 冒険家の帽子",
+        "body_top": "★1 冒険家の服",
+        "body_bottom": "★1 冒険家のズボン",
+        "shield": "★1 冒険家の盾",
+        "accessory": "★1 冒険家のリュック",
+        "heart": "★1 冒険家のこころ"
+    },
+    "inventory": [
+        "★1 ひのきの棒",
+        "★1 冒険家の帽子",
+        "★1 冒険家の服",
+        "★1 冒険家のズボン",
+        "★1 冒険家の盾",
+        "★1 冒険家のリュック",
+        "★1 冒険家のこころ"
+    ],
+    "clearedStages": [], // 進捗管理（"章ID-ステージID" を格納）
+    "questFlags": {
+        "chapter1_cleared": false,
+        "boss1_defeated": false
+    }
+};
+
+// --- 🗺️ ストーリー & ステージ構成データベース ---
+const storyChapters = {
+    1: {
+        title: "第1章：旅立ちの始まりの村",
+        stages: [
+            {
+                id: 1,
+                name: "1-1. 旅立ちの朝と",
+                rewards: { exp: 30, coins: 300, materials: 5 },
+                monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "朝霧に包まれた、自然豊かで静かな田舎町「エコー・ビレッジ」。" },
+                    { speaker: "ナレーション", text: "16歳になったあなたは、長年暮らした自宅の部屋で旅の支度を整えていました。" },
+                    { speaker: "主人公", text: "「よし、これで荷物は全部だな。あとはこれだ……」" },
+                    { speaker: "ナレーション", text: "（キラキラ…✨）\nあなたが革のリュックに最後に収めたのは、数年前に突然姿を消したお父さんの唯一の形見、「導きの魔導石」。" },
+                    { speaker: "主人公", text: "「今はただの綺麗な結晶だけど、いつかこれがお父さんの居場所を指し示してくれるはず…！」" },
+                    { speaker: "ナレーション", text: "若くして、子供のころからの夢であった「トレジャーハンターになる」と村のみんなに告げ、いよいよ出発です！" }
+                ]
+            },
+            {
+                id: 2,
+                name: "1-2. 村長への挨拶",
+                rewards: { exp: 60, coins: 500, materials: 8 },
+                monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "旅立つ前に、あなたは幼い頃から世話になっていた村長の家を訪ねました。" },
+                    { speaker: "村長", text: "「おお、お前か。本当に旅立つというのだな」" },
+                    { speaker: "主人公", text: "「はい。夢を叶えるために、世界中を冒険して宝物やお父さんの手がかりを探したいんです」" },
+                    { speaker: "村長", text: "「お前が旅立つというなら止めはせん。だが、プロのトレジャーハンターを名乗るなら、ひとつ言っておく」" },
+                    { speaker: "村長", text: "「……誰かの足跡をなぞるだけの旅に、価値などない。世界をひっくり返すのは、いつだって誰かにただ従うのではなく、己の直感を信じ抜いた、誇るべき馬鹿者だけじゃ」" },
+                    { speaker: "村長", text: "「誰かの意見を聞くのも悪くはないが、それに従うだけの人生じゃつまらんからな。お前自身の五感で、この世界を、もっと面白くこじ開けてこい」" },
+                    { speaker: "主人公", text: "「己の直感を信じ抜く……！はい、僕自身の力で世界を切り開いてみせます！」" }
+                ]
+            },
+            {
+                id: 3,
+                name: "1-3. 愛馬との合流",
+                rewards: { exp: 150, coins: 1500, materials: 20 },
+                monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "村の広場へ向かうと、そこにはあなたの最良の相棒である「愛馬」が待っていました。" },
+                    { speaker: "ナレーション", text: "幼い頃から一緒に育ったこの馬は、非常に賢く、あなたの言うことをよく理解してくれます。" },
+                    { speaker: "主人公", text: "「よし、待たせたな。今日から長い旅になるけど、よろしく頼むよ」" },
+                    { speaker: "愛馬", text: "「ブルルルッ…！」（優しく鼻を鳴らし、あなたの肩に顔を寄せて励ましている）" },
+                    { speaker: "ナレーション", text: "村の人々に温かく見送られながら、少年トレジャーハンターと愛馬は、ゆっくりとエコー・ビレッジのゲートへと歩みを進めます。" }
+                ]
+            }
+        ]
+    }
+};
+
+// --- 🛠️ 状態管理変数 ---
+let activeChapter = 1;
+let selectedStageData = null; // 出発前の選択ステージ
+let activeStage = null;       // 出発したアクティブステージ
+let currentDialogueIdx = 0;
+let btlEnemies = [];
+let playerBtlHp = 100;
+let playerBtlMp = 20;
+
+let ctInterval = null;
+let currentCT = 0;
+let currentCombo = 0;
+let comboTimeout = null;
+
+// --- ⚙️ 初期ロード & 同期処理 ---
+function loadData() {
+    const raw = localStorage.getItem('sugoigame');
+    if (raw) {
+        try {
+            const data = JSON.parse(raw);
+            saveStatus = { ...saveStatus, ...data };
+            if (!saveStatus.clearedStages) saveStatus.clearedStages = [];
+            if (!saveStatus.max_hp) saveStatus.max_hp = 100;
+            if (!saveStatus.max_mp) saveStatus.max_mp = 20;
+            if (saveStatus.hp === undefined) saveStatus.hp = saveStatus.max_hp;
+            if (saveStatus.mp === undefined) saveStatus.mp = saveStatus.max_mp;
+            console.log("セーブデータ「sugoigame」を完全に読み込みました:", saveStatus);
+        } catch(e) {
+            console.error("ロードエラー。デフォルト状態を開始します。", e);
+        }
+    }
+    syncHeader();
+}
+
+function saveData() {
+    localStorage.setItem('sugoigame', JSON.stringify(saveStatus));
+    syncHeader();
+    showToast();
+}
+
+function syncHeader() {
+    document.getElementById('p-name').innerText = saveStatus.playerName || "勇者";
+    document.getElementById('p-job-lvl').innerText = `${saveStatus.job || "冒険者"} | Lv.${saveStatus.level || 1}`;
+    document.getElementById('p-gold').innerText = saveStatus.coins;
+    document.getElementById('p-mats').innerText = saveStatus.materials;
+}
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+function goBackToMainMenu() {
+    saveData();
+    window.location.href = "sugoigame.html";
+}
+
+// --- 🗺️ 前のステージクリア状況チェックシステム ---
+function isStageAccessible(chapId, stageId) {
+    if (chapId === 1 && stageId === 1) return true; // 最初のステージは常に解放
+
+    if (stageId === 1) {
+        // 章の最初の場合、前章の最終ステージがクリアされているか
+        const prevChap = chapId - 1;
+        return saveStatus.clearedStages.includes(`${prevChap}-3`);
+    } else {
+        // 同章内の場合、1つ前のステージがクリアされているか
+        const prevStage = stageId - 1;
+        return saveStatus.clearedStages.includes(`${chapId}-${prevStage}`);
+    }
+}
+
+// --- 🖥️ 画面管理 ---
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+
+    const footer = document.getElementById('footer-nav');
+    if (screenId === 'chapter-screen') {
+        footer.innerHTML = `<button class="btn-action btn-secondary" onclick="goBackToMainMenu()">🔙 拠点に戻る</button>`;
+    } else if (screenId === 'stage-screen') {
+        footer.innerHTML = `<button class="btn-action btn-secondary" onclick="showScreen('chapter-screen')">🔙 ワールド選択に戻る</button>`;
+    } else if (screenId === 'story-screen') {
+        footer.innerHTML = `<button class="btn-action btn-primary" onclick="progressDialogue()">次へ進む ➔</button>`;
+    } else if (screenId === 'battle-screen') {
+        footer.innerHTML = `<button class="btn-action btn-disabled" id="btn-skill-trigger" onclick="triggerComboSkill()" disabled>チャージ中...</button>`;
+    } else if (screenId === 'result-screen') {
+        footer.innerHTML = `<button class="btn-action btn-primary" onclick="finishStageAndSave()">💾 クエストを終了してセーブ</button>`;
+    }
+}
+
+// --- 📍 ステージ一覧の動的描画 ---
+function selectChapter(chapId) {
+    activeChapter = chapId;
+    const chapData = storyChapters[chapId];
+    document.getElementById('stage-screen-title').innerText = `${chapData.title}`;
+    
+    const listContainer = document.getElementById('stage-list-container');
+    listContainer.innerHTML = '';
+    
+    chapData.stages.forEach(stg => {
+        const isClear = saveStatus.clearedStages.includes(`${chapId}-${stg.id}`);
+        const isLock = !isStageAccessible(chapId, stg.id);
+
+        const card = document.createElement('div');
+        card.className = `stage-card ${isLock ? 'locked' : ''}`;
+        
+        // ロックされていなければ出発確認ダイアログを開く
+        if (!isLock) {
+            card.onclick = () => openConfirmModal(stg);
+        }
+
+        let badge = `<span class="stage-status-badge status-new">NEW</span>`;
+        if (isLock) {
+            badge = `<span class="stage-status-badge status-locked">🔒 LOCK</span>`;
+        } else if (isClear) {
+            badge = `<span class="stage-status-badge status-clear">CLEAR</span>`;
+        }
+
+        card.innerHTML = `
+            <div class="stage-info">
+                <div class="stage-name">${isLock ? '🔒 ' : ''}${stg.name}</div>
+                <div class="stage-reward-preview">🎁 報酬: ${stg.rewards.coins}G / ${stg.rewards.materials}個の草の化石</div>
+            </div>
+            ${badge}
+        `;
+        listContainer.appendChild(card);
+    });
+
+    showScreen('stage-screen');
+}
+
+// --- ❓ 確認ダイアログ (はい/いいえ) ---
+function openConfirmModal(stage) {
+    selectedStageData = stage;
+    document.getElementById('modal-stage-title').innerText = `⚔️ クエスト出発確認`;
+    
+    let msg = `ステージ「<strong>${stage.name}</strong>」を開始しますか？<br><br>`;
+    
+    // 戦闘があるかどうかでメッセージを変える
+    if (stage.monsters && stage.monsters.length > 0) {
+        msg += `<span style="font-size:12px; color:#ffeb3b;">※テンポ良いストーリー会話劇と、星ドラ風コマンドバトルが始まります。</span>`;
+    } else {
+        msg += `<span style="font-size:12px; color:#a0aec0;">※このステージはストーリーパートのみです。</span>`;
+    }
+    
+    document.getElementById('modal-stage-msg').innerHTML = msg;
+    document.getElementById('confirm-modal').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').style.display = 'none';
+    selectedStageData = null;
+}
+
+function proceedToStage() {
+    if (!selectedStageData) return;
+    activeStage = selectedStageData;
+    closeConfirmModal();
+    
+    currentDialogueIdx = 0;
+    setupDialogue();
+    showScreen('story-screen');
+}
+
+// --- 💬 会話ストーリー進行 ---
+function setupDialogue() {
+    const dialogueList = activeStage.dialogue;
+    if (currentDialogueIdx < dialogueList.length) {
+        const item = dialogueList[currentDialogueIdx];
+        document.getElementById('talk-speaker').innerText = item.speaker;
+        document.getElementById('talk-text').innerText = item.text;
+        
+        const effectEl = document.getElementById('story-animation-effect');
+        if (item.text.includes("ゴゴゴゴ")) {
+            effectEl.innerText = "（ゴゴゴゴゴ…！ 大地が低く震動する）";
+        } else if (item.text.includes("キラキラ")) {
+            effectEl.innerText = "（キラキラ…✨ 導きを司る光線が差し込む）";
+        } else if (item.speaker === "村長") {
+            effectEl.innerText = "（村長が厳かに教えを説く）";
+        } else {
+            effectEl.innerText = "（夢への第一歩が刻まれる）";
+        }
+    }
+}
+
+function progressDialogue() {
+    currentDialogueIdx++;
+    if (currentDialogueIdx < activeStage.dialogue.length) {
+        setupDialogue();
+    } else {
+        // ストーリー読了後、モンスターが設定されていれば戦闘へ、設定されていなければそのままクリアへ
+        if (activeStage.monsters && activeStage.monsters.length > 0) {
+            startBattlePhase();
+        } else {
+            handleVictory();
+        }
+    }
+}
+
+// --- ⚔️ 星ドラ風コマンドバトル ---
+function startBattlePhase() {
+    showScreen('battle-screen');
+    btlEnemies = JSON.parse(JSON.stringify(activeStage.monsters));
+    playerBtlHp = saveStatus.hp || saveStatus.max_hp;
+    playerBtlMp = saveStatus.mp || saveStatus.max_mp;
+
+    currentCT = 0;
+    currentCombo = 0;
+    document.getElementById('battle-combo-badge').style.display = 'none';
+    document.getElementById('battle-log-text').innerHTML = `👿 <strong>${btlEnemies[0].name}</strong> が目の前に立ちふさがった！<br>「コマンドチャージを待て！」`;
+
+    renderBattleField();
+    startCTTimer();
+}
+
+function renderBattleField() {
+    const container = document.getElementById('enemy-container');
+    container.innerHTML = '';
+    
+    btlEnemies.forEach((enemy, index) => {
+        if (enemy.hp <= 0) return;
+        const percent = (enemy.hp / enemy.maxHp) * 100;
+        const box = document.createElement('div');
+        box.className = 'enemy-sprite-box';
+        box.id = `enemy-box-${index}`;
+        box.innerHTML = `
+            <div class="enemy-avatar">${enemy.emoji || "👾"}</div>
+            <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width: ${percent}%;"></div></div>
+            <div class="enemy-name">${enemy.name}</div>
+        `;
+        container.appendChild(box);
+    });
+
+    document.getElementById('btl-player-name').innerText = saveStatus.playerName;
+    document.getElementById('btl-player-hp').innerText = `${playerBtlHp}/${saveStatus.max_hp}`;
+    document.getElementById('btl-player-mp').innerText = `${playerBtlMp}/${saveStatus.max_mp}`;
+}
+
+// ⏱️ リアルタイム チャージタイム (CT) システム
+function startCTTimer() {
+    if (ctInterval) clearInterval(ctInterval);
+    const fill = document.getElementById('skill-ct-fill');
+    const label = document.getElementById('skill-ct-percent');
+    const btn = document.getElementById('btn-skill-trigger');
+
+    ctInterval = setInterval(() => {
+        if (currentCT < 100) {
+            // 1秒間に15%チャージ
+            currentCT += 15;
+            if (currentCT > 100) currentCT = 100;
+            
+            fill.style.width = `${currentCT}%`;
+            label.innerText = `${currentCT}%`;
+
+            if (currentCT === 100) {
+                fill.classList.add('ready');
+                btn.className = "btn-action btn-primary";
+                btn.innerText = "🔥 秘技：ギガスラッシュ！";
+                btn.removeAttribute('disabled');
+            }
+        }
+    }, 1000);
+}
+
+// ⚔️ コンボスキル発動！
+function triggerComboSkill() {
+    if (currentCT < 100) return;
+    let targetIdx = btlEnemies.findIndex(e => e.hp > 0);
+    if (targetIdx === -1) return;
+    let target = btlEnemies[targetIdx];
+
+    currentCombo++;
+    const comboBadge = document.getElementById('battle-combo-badge');
+    comboBadge.innerText = `🔥 ${currentCombo} Combo!!`;
+    comboBadge.style.display = 'block';
+
+    // 3.5秒コンボ受付タイマー
+    clearTimeout(comboTimeout);
+    comboTimeout = setTimeout(() => {
+        currentCombo = 0;
+        comboBadge.style.display = 'none';
+        logBattle("⚠️ スキルの発動間隔があき、コンボが途切れた！");
+    }, 3500);
+
+    // 星ドラ風コンボ補正 (1コンボ=100%, 2コンボ=125%, 3コンボ=150%...)
+    let comboMultiplier = 1.0 + (currentCombo - 1) * 0.25;
+    let baseDmg = 25 + (saveStatus.level * 3);
+    let finalDamage = Math.floor(baseDmg * comboMultiplier);
+
+    target.hp -= finalDamage;
+    if (target.hp < 0) target.hp = 0;
+
+    logBattle(`⚔️ ${saveStatus.playerName} の大技！<br>${target.name} に <strong>${finalDamage}</strong> の大ダメージ！ (補正: x${comboMultiplier.toFixed(2)})`);
+
+    // CTをリセット
+    currentCT = 0;
+    const fill = document.getElementById('skill-ct-fill');
+    const label = document.getElementById('skill-ct-percent');
+    const btn = document.getElementById('btn-skill-trigger');
+    fill.style.width = '0%';
+    fill.classList.remove('ready');
+    label.innerText = '0%';
+    btn.className = "btn-action btn-disabled";
+    btn.innerText = "チャージ中...";
+    btn.setAttribute('disabled', 'true');
+
+    // 被弾アニメーション
+    const enemyVisual = document.getElementById(`enemy-box-${targetIdx}`);
+    if (enemyVisual) {
+        enemyVisual.style.transform = "scale(0.8) translateY(10px)";
+        setTimeout(() => { enemyVisual.style.transform = "none"; }, 150);
+    }
+
+    renderBattleField();
+
+    // 決着判定
+    if (btlEnemies.every(e => e.hp <= 0)) {
+        clearInterval(ctInterval);
+        clearTimeout(comboTimeout);
+        setTimeout(handleVictory, 1000);
+    } else {
+        setTimeout(enemyCounterAttack, 800);
+    }
+}
+
+// 👿 敵の反撃ターン
+function enemyCounterAttack() {
+    let aliveEnemies = btlEnemies.filter(e => e.hp > 0);
+    if (aliveEnemies.length === 0) return;
+
+    let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+    let damage = Math.max(3, Math.floor(attacker.dmg * (0.85 + Math.random() * 0.3)));
+
+    playerBtlHp -= damage;
+    if (playerBtlHp < 0) playerBtlHp = 0;
+
+    logBattle(`💥 ${attacker.name} の反撃！<br>${saveStatus.playerName} は <strong>${damage}</strong> の痛手を受けた！`);
+    renderBattleField();
+
+    if (playerBtlHp <= 0) {
+        clearInterval(ctInterval);
+        clearTimeout(comboTimeout);
+        handleDefeat();
+    }
+}
+
+function logBattle(htmlText) {
+    const logBox = document.getElementById('battle-log-text');
+    logBox.innerHTML = htmlText;
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
+function handleDefeat() {
+    logBattle(`💀 無念！あなたは力尽きてしまった…！`);
+    document.getElementById('footer-nav').innerHTML = `
+        <button class="btn-action btn-danger" onclick="showScreen('stage-screen')">🔙 ステージ選択へ退却</button>
+    `;
+}
+
+// --- 🎉 リザルト＆報酬獲得同期システム ---
+function handleVictory() {
+    showScreen('result-screen');
+    const rewards = activeStage.rewards;
+    
+    saveStatus.coins += rewards.coins;
+    saveStatus.materials += rewards.materials;
+    saveStatus.exp += rewards.exp;
+
+    // 進捗（ロック解除キー）を完全セーブ
+    const stageKey = `${activeChapter}-${activeStage.id}`;
+    if (!saveStatus.clearedStages.includes(stageKey)) {
+        saveStatus.clearedStages.push(stageKey);
+    }
+
+    // チャプター1全クリアのフラグ判定
+    if (activeChapter === 1) {
+        saveStatus.questFlags.chapter1_cleared = true;
+        if (activeStage.id === 3) {
+            saveStatus.questFlags.boss1_defeated = true;
+        }
+    }
+
+    // レベルアップ計算
+    let levelUpMessage = "";
+    if (saveStatus.exp >= saveStatus.level * 100) {
+        saveStatus.level += 1;
+        saveStatus.exp = 0;
+        saveStatus.max_hp += 15;
+        saveStatus.max_mp += 5;
+        saveStatus.hp = saveStatus.max_hp;
+        saveStatus.mp = saveStatus.max_mp;
+        levelUpMessage = `<div style="color: #2ecc71; font-weight: 900; font-size: 18px; margin-top: 10px;">🔺 レベルアップ！ Lv.${saveStatus.level} になった！</div>`;
+    }
+
+    // 💾 瞬時にセーブデータを更新
+    saveData();
+
+    document.getElementById('rewards-container').innerHTML = `
+        <div class="reward-item-row"><span>🔸 獲得経験値</span><span style="color: #00d2ff;">+ ${rewards.exp} EXP</span></div>
+        <div class="reward-item-row"><span>🪙 獲得草コイン</span><span style="color: #ffeb3b;">+ ${rewards.coins} G</span></div>
+        <div class="reward-item-row"><span>💎 獲得草の化石(素材)</span><span style="color: #e056fd;">+ ${rewards.materials} 個</span></div>
+        ${levelUpMessage}
+    `;
+}
+
+function finishStageAndSave() {
+    // 街に戻る際にクリア状況を適用してステージ一覧を再描画
+    selectChapter(activeChapter);
+}
+
+// --- 🏁 起動ロード処理 ---
+window.onload = function() {
+    loadData();
+};
+</script>
+
+</body>
+</html>
