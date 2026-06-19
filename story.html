@@ -269,14 +269,14 @@
         /* 👤 立ち絵（全体）表示エリア */
         .character-stand-container {
             position: absolute;
-            bottom: 160px; /* テキストウィンドウの少し上くらいに配置 */
+            bottom: 160px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 240px); /* ヘッダー等を除いた高さ */
+            height: calc(100vh - 240px);
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* 下揃え */
-            pointer-events: none; /* タップの邪魔をしない */
+            align-items: flex-end;
+            pointer-events: none;
             z-index: 5;
         }
 
@@ -284,9 +284,9 @@
             max-height: 100%;
             max-width: 90%;
             object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8)); /* キャラを浮かび上がらせる */
+            filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
             animation: fadeInCharacter 0.3s ease-out;
-            display: none; /* 初期は非表示 */
+            display: none;
         }
 
         @keyframes fadeInCharacter {
@@ -307,13 +307,7 @@
             position: relative;
             z-index: 10;
             min-height: 130px;
-            margin-top: auto; /* これでテキストウィンドウが画面下部に固定される */
-        }
-
-        .dialogue-text-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            margin-top: auto;
         }
 
         .speaker-name {
@@ -333,56 +327,58 @@
             flex: 1;
         }
 
-        /* コマンドバトルエリア */
-        .battle-window {
+        /* ====================================================
+           ⚔️ 星ドラ風 本格バトルUI
+           ==================================================== */
+        .battle-window-modern {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .battle-scene {
-            flex: 1;
-            background: linear-gradient(180deg, rgba(16,28,48,0.9) 0%, rgba(5,10,20,0.95) 100%);
-            border: 2px solid #e1b12c;
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background-color: #000;
+            border: 2px solid #a29bfe;
+            border-radius: 8px;
+            overflow: hidden;
             position: relative;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
 
-        .enemy-container {
+        /* 敵エリア（上部） */
+        .enemy-stage {
+            flex: 1;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            min-height: 100px;
+            padding: 10px;
+            background: radial-gradient(circle at center, #2c3e50 0%, #111 100%);
+            position: relative;
+            overflow: hidden;
         }
 
         .enemy-sprite-box {
             text-align: center;
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, opacity 0.3s;
         }
 
         .enemy-avatar {
-            font-size: 40px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-            animation: bounce 2s infinite alternate;
+            font-size: 60px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+            animation: enemyFloat 2s infinite alternate;
         }
 
-        @keyframes bounce {
+        @keyframes enemyFloat {
             0% { transform: translateY(0); }
             100% { transform: translateY(-8px); }
         }
 
         .enemy-hp-bar {
             width: 80px;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
+            height: 8px;
+            background: #222;
+            border: 1px solid #000;
+            border-radius: 4px;
             overflow: hidden;
-            margin-top: 5px;
+            margin: 5px auto 0 auto;
         }
 
         .enemy-hp-fill {
@@ -393,89 +389,292 @@
         }
 
         .enemy-name {
-            font-size: 11px;
-            font-weight: bold;
-            color: #ff9f43;
-            margin-top: 2px;
-        }
-
-        /* プレイヤーバトルUI */
-        .player-status-panel {
-            background: rgba(0,0,0,0.5);
-            border-radius: 8px;
-            padding: 10px;
-            border: 1px solid #485e7d;
-        }
-
-        .player-stats-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .skill-ct-container {
-            margin-top: 10px;
-        }
-
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
             font-size: 12px;
-            color: #ffeb3b;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+            margin-top: 4px;
+        }
+
+        /* ログ・コンボ表示帯（中央） */
+        .battle-mid-bar {
+            height: 35px;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-top: 2px solid #555;
+            border-bottom: 2px solid #fff;
+            position: relative;
+            z-index: 5;
+        }
+
+        .battle-log {
+            flex: 1;
+            font-size: 11px;
+            color: #fff;
             font-weight: bold;
-            margin-bottom: 3px;
+            line-height: 1.4;
         }
 
-        .ct-bar-bg {
-            height: 12px;
-            background: #1e272e;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #485e7d;
-        }
-
-        .ct-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff9f43, #ffeb3b);
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        .ct-bar-fill.ready {
-            background: linear-gradient(90deg, #4cd137, #9c88ff);
-            box-shadow: 0 0 8px rgba(76, 209, 55, 0.8);
-            animation: pulse-ready 1s infinite alternate;
-        }
-
-        @keyframes pulse-ready {
-            0% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-
-        /* コンボ表示 */
         .combo-counter {
             position: absolute;
-            top: 10px;
             right: 10px;
-            background: rgba(255, 71, 87, 0.9);
+            top: -15px;
+            background: rgba(255, 71, 87, 0.95);
             color: #fff;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 900;
-            box-shadow: 0 0 10px rgba(255,71,87,0.5);
+            box-shadow: 0 0 10px rgba(255,71,87,0.8);
+            border: 1px solid #fff;
             animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: none;
         }
 
-        @keyframes pop-in {
-            0% { transform: scale(0.5); }
-            100% { transform: scale(1); }
+        /* パーティエリア（下部：4分割縦帯グリッド） */
+        .party-stage {
+            height: 280px; /* スクロール枠と防御ボタンのために高さを拡張 */
+            display: flex;
+            background: #000;
         }
 
-        /* 報酬獲得リザルト */
+        .party-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #2d3436;
+            background: linear-gradient(to bottom, #d35400, #e67e22); /* 星ドラ風のオレンジ帯背景 */
+            position: relative;
+            box-sizing: border-box;
+            transition: transform 0.1s;
+        }
+        .party-col:last-child {
+            border-right: none;
+        }
+        .party-col.empty-col {
+            background: #111; /* 空き枠 */
+        }
+
+        /* キャラクター情報プレート（上部） */
+        .char-plate {
+            background: #2c3e50;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            margin: 2px;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        .hp-gauge {
+            width: 90%;
+            height: 6px;
+            background: #111;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            border: 1px solid #000;
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            height: 100%;
+            background: #2ecc71;
+            width: 100%;
+            transition: width 0.2s, background-color 0.2s;
+        }
+
+        .char-name-row {
+            font-size: 10px;
+            color: #000;
+            background: #fff;
+            font-weight: 900;
+            border-radius: 6px;
+            padding: 0 4px;
+            margin-bottom: 2px;
+            width: 90%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .char-icon-box {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+        }
+
+        .char-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .char-lv {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            background: #000;
+            color: #fff;
+            font-size: 9px;
+            padding: 0 2px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid #fff;
+        }
+
+        /* スキルボタン スクロールエリア */
+        .skill-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE */
+        }
+        .skill-scroll-area::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+
+        .skill-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            gap: 15px;
+        }
+
+        /* 🔴 メインスキルボタン (大型化) */
+        .skill-btn {
+            width: 75px;
+            height: 75px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            border: 3px solid #f1c40f; /* 金枠 */
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 0 10px rgba(255,255,255,0.4);
+            cursor: pointer;
+            padding: 0;
+            outline: none;
+            transition: transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .skill-btn:active:not(:disabled) {
+            transform: scale(0.92);
+        }
+
+        .skill-btn:disabled {
+            cursor: not-allowed;
+            /* disabled時はマスクがかかるので、ボタン自体の色はそのままにしておく */
+        }
+
+        /* ⏳ CTゲージ表現（時計回りに増える円形グラデーションマスク） */
+        .skill-ct-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+            background: conic-gradient(transparent 0%, rgba(0,0,0,0.65) 0%);
+        }
+
+        .skill-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+            z-index: 2;
+            position: relative;
+            text-align: center;
+            line-height: 1.2;
+            padding: 0 2px;
+        }
+
+        .skill-lv {
+            font-size: 10px;
+            color: #f1c40f;
+            text-shadow: 1px 1px 1px #000;
+            pointer-events: none;
+            z-index: 2;
+            position: relative;
+            margin-top: 2px;
+        }
+
+        /* 発動可能時アニメーション */
+        .skill-ready-anim {
+            animation: skillReadyPulse 0.8s infinite alternate;
+        }
+        @keyframes skillReadyPulse {
+            0% { box-shadow: 0 0 5px #ffeb3b, inset 0 0 5px rgba(255,255,255,0.5); }
+            100% { box-shadow: 0 0 20px #ffeb3b, inset 0 0 20px rgba(255,255,255,1); border-color: #fff; }
+        }
+
+        /* 🛡️ ぼうぎょボタンエリア (最下部に固定) */
+        .def-btn-area {
+            height: 50px;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #555;
+            z-index: 2;
+        }
+
+        .def-btn {
+            width: 50px;
+            height: 40px;
+            position: relative;
+            background: linear-gradient(180deg, #2980b9, #2c3e50);
+            border: 2px solid #ecf0f1;
+            clip-path: polygon(50% 100%, 0 80%, 0 0, 100% 0, 100% 80%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .def-btn:active {
+            transform: scale(0.92);
+        }
+
+        .def-ct-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            transition: height 0.1s linear;
+            pointer-events: none;
+        }
+
+        .def-text { font-size: 10px; color: #fff; font-weight: bold; text-shadow: 1px 1px 1px #000; z-index: 2; pointer-events: none; }
+        .def-lv { font-size: 8px; color: #f1c40f; z-index: 2; pointer-events: none; }
+        
+        /* 防御中スタイル */
+        .def-active {
+            border-color: #3498db;
+            box-shadow: 0 0 10px #3498db, inset 0 0 10px #3498db;
+        }
+
+        /* 汎用リザルト・フッター */
         .result-screen {
             background: rgba(0,0,0,0.9);
             border-radius: 12px;
@@ -505,7 +704,6 @@
             font-size: 14px;
         }
 
-        /* 汎用フッターボタン */
         .footer-nav {
             padding: 15px;
             background: #0d1622;
@@ -529,31 +727,11 @@
             color: #fff;
         }
 
-        .btn-primary {
-            background: linear-gradient(180deg, #00d2ff 0%, #0084ff 100%);
-            box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-disabled {
-            background: #2f3640;
-            color: #7f8c8d;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .btn-danger {
-            background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
-            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(180deg, #485e7d 0%, #2f3640 100%);
-            border: 1px solid #7f8c8d;
-        }
+        .btn-primary { background: linear-gradient(180deg, #00d2ff 0%, #0084ff 100%); box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-disabled { background: #2f3640; color: #7f8c8d; cursor: not-allowed; }
+        .btn-danger { background: linear-gradient(180deg, #ff7675 0%, #d63031 100%); }
+        .btn-secondary { background: linear-gradient(180deg, #485e7d 0%, #2f3640 100%); border: 1px solid #7f8c8d; }
 
         /* トースト通知 */
         .toast-msg {
@@ -571,18 +749,6 @@
             font-weight: bold;
             display: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        /* バトルログ */
-        .battle-log {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 6px;
-            padding: 8px;
-            font-size: 12px;
-            height: 60px;
-            overflow-y: auto;
-            color: #cbd5e0;
-            border: 1px solid #2d3748;
         }
     </style>
 </head>
@@ -634,6 +800,11 @@
                 <div class="chapter-title">第2章：指名手配と地下道の死闘</div>
                 <div class="chapter-desc">隣国「ジュン・ルナリア」に到着したあなたを待ち受けていたのは身に覚えのない指名手配。謎の美少女「カグヤ」と共に、歪んだ地下道からの脱出を目指す！</div>
             </div>
+
+            <div class="chapter-card" onclick="selectChapter(3)">
+                <div class="chapter-title">第3章：せいまろ帝国と甘美なるバグ</div>
+                <div class="chapter-desc">パステルカラーの異国「せいまろ帝国」での出会いと、お菓子なダンジョンに潜む脅威。お父さんの足跡がここに…？</div>
+            </div>
             
             <div style="flex: 1;"></div>
         </div>
@@ -642,7 +813,7 @@
              📍 画面2：ステージ選択
              ========================================== -->
         <div id="stage-screen" class="screen">
-            <div class="section-title" id="stage-screen-title">第1章：ステージ一覧</div>
+            <div class="section-title" id="stage-screen-title">ステージ一覧</div>
             
             <div class="stage-list" id="stage-list-container">
                 <!-- 動的に生成 -->
@@ -652,7 +823,7 @@
         </div>
 
         <!-- ==========================================
-             💬 画面3：ストーリー会話パート (立ち絵表示連動)
+             💬 画面3：ストーリー会話パート
              ========================================== -->
         <div id="story-screen" class="screen" style="position: relative;">
             
@@ -661,7 +832,7 @@
                 <img id="talk-speaker-stand" src="" alt="character">
             </div>
 
-            <!-- テキストウィンドウ (画面下部に固定) -->
+            <!-- テキストウィンドウ -->
             <div class="dialogue-window">
                 <div class="dialogue-text-container">
                     <div class="speaker-name" id="talk-speaker">キャラクター</div>
@@ -674,43 +845,24 @@
         </div>
 
         <!-- ==========================================
-             ⚔️ 画面4：星ドラ風コマンドバトル
+             ⚔️ 画面4：星ドラ風 本格バトルUI
              ========================================== -->
         <div id="battle-screen" class="screen">
-            <div class="battle-window">
-                <div class="battle-scene">
-                    <!-- コンボインジケーター -->
+            <div class="battle-window-modern">
+                <!-- 敵エリア -->
+                <div class="enemy-stage" id="enemy-container">
+                    <!-- JSで初期化時に生成 -->
+                </div>
+                
+                <!-- コンボやログ表示 -->
+                <div class="battle-mid-bar">
                     <div class="combo-counter" id="battle-combo-badge">2 Combo!</div>
+                    <div class="battle-log" id="battle-log-text">戦闘が開始された！</div>
+                </div>
 
-                    <!-- エネミーエリア -->
-                    <div class="enemy-container" id="enemy-container">
-                        <!-- 敵を表示 -->
-                    </div>
-
-                    <!-- バトルログ -->
-                    <div class="battle-log" id="battle-log-text">
-                        戦闘が開始された！
-                    </div>
-
-                    <!-- プレイヤー状況 -->
-                    <div class="player-status-panel">
-                        <div class="player-stats-row">
-                            <span id="btl-player-name">勇者</span>
-                            <span>❤️ HP <span id="btl-player-hp">100/100</span></span>
-                            <span>🧪 MP <span id="btl-player-mp">20/20</span></span>
-                        </div>
-                        
-                        <!-- スキルCT -->
-                        <div class="skill-ct-container">
-                            <div class="skill-header">
-                                <span id="skill-name-label">⚔️ スキル：ギガスラッシュ</span>
-                                <span id="skill-ct-percent">0%</span>
-                            </div>
-                            <div class="ct-bar-bg">
-                                <div class="ct-bar-fill" id="skill-ct-fill"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- パーティエリア (4列グリッド スクロール対応) -->
+                <div class="party-stage" id="party-container">
+                    <!-- JSで初期化時に生成 -->
                 </div>
             </div>
         </div>
@@ -739,7 +891,7 @@
 
     <!-- 永続ナビゲーションフッター -->
     <div class="footer-nav" id="footer-nav">
-        <button class="btn-action btn-secondary" onclick="goBackToMainMenu()">🔙 拠点に戻る</button>
+        <!-- JSでボタン制御 -->
     </div>
 </div>
 
@@ -768,37 +920,34 @@ let saveStatus = {
         "accessory": "★1 冒険家のリュック",
         "heart": "★1 冒険家のこころ"
     },
-    "inventory": [
-        "★1 ひのきの棒",
-        "★1 冒険家の帽子",
-        "★1 冒険家の服",
-        "★1 冒険家のズボン",
-        "★1 冒険家の盾",
-        "★1 冒険家のリュック",
-        "★1 冒険家のこころ"
-    ],
-    "clearedStages": [], // 進捗管理（"章ID-ステージID" を格納）
-    "questFlags": {
-        "chapter1_cleared": false,
-        "boss1_defeated": false
-    }
+    "inventory": [],
+    "clearedStages": [], 
+    "questFlags": {}
 };
 
-// --- 🖼️ 立ち絵用画像データ設定 ---
-// デフォルトのシルエット
+// --- 🖼️ 画像データ設定 ---
 const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300f2fe" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2300f2fe" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2300f2fe"/></svg>';
 
-// 発言者ごとの立ち絵ファイル名（立ち絵として見栄えが良くなるよう、フリーアイコンも大きめのサイズに変更）
 const speakerIcons = {
-    "ナレーション": "", // ナレーション時は画像を非表示にするため空文字
-    "主人公": "主人公.png", // ★設定だけしておく主人公の画像
+    "ナレーション": "",
     "村長": "https://img.icons8.com/color/256/000000/old-man.png", 
-    "愛馬": "https://img.icons8.com/color/256/000000/horse.png", 
+    "愛馬": "愛馬.png", 
     "街の住人": "https://img.icons8.com/color/256/000000/user-group-man-man.png", 
     "衛兵のリーダー": "https://img.icons8.com/color/256/000000/guard.png", 
-    "カグヤ": "カグヤ.png", // ★アップロードされたカグヤの画像
+    "カグヤ": "カグヤ.png",
+    "獣人の警備兵": "https://img.icons8.com/color/256/000000/werewolf.png",
+    "獣人の隊長": "https://img.icons8.com/color/256/000000/lion.png",
+    "ボスグリッチ": "https://img.icons8.com/color/256/000000/monster-face.png",
     "default": "https://img.icons8.com/color/256/000000/user.png" 
 };
+
+// 🔴 スキルボタンの背景色（キャラごとに分ける）
+const skillColors = [
+    "radial-gradient(circle, #e74c3c, #c0392b)", // 1枠目：赤系（攻撃）
+    "radial-gradient(circle, #3498db, #2980b9)", // 2枠目：青系（魔法）
+    "radial-gradient(circle, #2ecc71, #27ae60)", // 3枠目：緑系（回復）
+    "radial-gradient(circle, #9b59b6, #8e44ad)"  // 4枠目：紫系（補助）
+];
 
 // --- 🗺️ ストーリー & ステージ構成データベース ---
 const storyChapters = {
@@ -806,10 +955,7 @@ const storyChapters = {
         title: "第1章：旅立ちの始まりの村",
         stages: [
             {
-                id: 1,
-                name: "1-1. 旅立ちの朝と",
-                rewards: { exp: 30, coins: 300, materials: 5 },
-                monsters: [],
+                id: 1, name: "1-1. 旅立ちの朝", rewards: { exp: 30, coins: 300, materials: 5 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "朝霧に包まれた、自然豊かで静かな田舎町「エコー・ビレッジ」。" },
                     { speaker: "ナレーション", text: "16歳になったあなたは、長年暮らした自宅の部屋で旅の支度を整えていました。" },
@@ -820,30 +966,22 @@ const storyChapters = {
                 ]
             },
             {
-                id: 2,
-                name: "1-2. 村長への挨拶",
-                rewards: { exp: 60, coins: 500, materials: 8 },
-                monsters: [],
+                id: 2, name: "1-2. 村長への挨拶", rewards: { exp: 60, coins: 500, materials: 8 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "旅立つ前に、あなたは幼い頃から世話になっていた村長の家を訪ねました。" },
                     { speaker: "村長", text: "「おお、お前か。本当に旅立つというのだな」" },
                     { speaker: "主人公", text: "「はい。夢を叶えるために、世界中を冒険して宝物やお父さんの手がかりを探したいんです」" },
                     { speaker: "村長", text: "「お前が旅立つというなら止めはせん。だが、プロのトレジャーハンターを名乗るなら、ひとつ言っておく」" },
                     { speaker: "村長", text: "「……誰かの足跡をなぞるだけの旅に、価値などない。世界をひっくり返すのは、いつだって誰かにただ従うのではなく、己の直感を信じ抜いた、誇るべき馬鹿者だけじゃ」" },
-                    { speaker: "村長", text: "「誰かの意見を聞くのも悪くはないが、それに従うだけの人生じゃつまらんからな。お前自身の五感で、この世界を、もっと面白くこじ開けてこい」" },
                     { speaker: "主人公", text: "「己の直感を信じ抜く……！はい、僕自身の力で世界を切り開いてみせます！」" }
                 ]
             },
             {
-                id: 3,
-                name: "1-3. 愛馬との合流",
-                rewards: { exp: 150, coins: 1500, materials: 20 },
-                monsters: [],
+                id: 3, name: "1-3. 愛馬との合流", rewards: { exp: 150, coins: 1500, materials: 20 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "村の広場へ向かうと、そこにはあなたの最良の相棒である「愛馬」が待っていました。" },
-                    { speaker: "ナレーション", text: "幼い頃から一緒に育ったこの馬は、非常に賢く、あなたの言うことをよく理解してくれます。" },
                     { speaker: "主人公", text: "「よし、待たせたな。今日から長い旅になるけど、よろしく頼むよ」" },
-                    { speaker: "愛馬", text: "「ブルルルッ…！」（優しく鼻を鳴らし、あなたの肩に顔を寄せて励ましている）" },
+                    { speaker: "愛馬", text: "「ブルルルッ…！」" },
                     { speaker: "ナレーション", text: "村の人々に温かく見送られながら、少年トレジャーハンターと愛馬は、ゆっくりとエコー・ビレッジのゲートへと歩みを進めます。" }
                 ]
             }
@@ -853,111 +991,152 @@ const storyChapters = {
         title: "第2章：指名手配と地下道の死闘",
         stages: [
             {
-                id: 1,
-                name: "2-1. ジュン・ルナリアへ",
-                rewards: { exp: 50, coins: 800, materials: 10 },
-                monsters: [],
+                id: 1, name: "2-1. ジュン・ルナリアへ", rewards: { exp: 50, coins: 800, materials: 10 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "村を出て愛馬に飛び乗ると、あなたは隣国「ジュン・ルナリア」を目指して街道を急ぎました。" },
-                    { speaker: "ナレーション", text: "地続きの街道をパカパカと進むにつれ、周囲の景色はのどかな森から、徐々に整備された石畳へと変わっていきます。" },
                     { speaker: "ナレーション", text: "やがて目の前に現れたのは、巨大な石壁に囲まれた、見上げるほど大きな国ジュン・ルナリア（王都）。" },
-                    { speaker: "主人公", text: "「うわあ…なんて大きな街なんだ。さすがは王都だね！」" },
-                    { speaker: "ナレーション", text: "トレジャーハンターとして各地を旅するため、あなたは活気あふれる城門をくぐり、この大都会へと足を踏み入れるのでした。" }
+                    { speaker: "主人公", text: "「うわあ…なんて大きな街なんだ。さすがは王都だね！」" }
                 ]
             },
             {
-                id: 2,
-                name: "2-2. 濡れ衣の指名手配",
-                rewards: { exp: 50, coins: 800, materials: 10 },
-                monsters: [],
+                id: 2, name: "2-2. 濡れ衣の指名手配", rewards: { exp: 50, coins: 800, materials: 10 }, monsters: [],
                 dialogue: [
-                    { speaker: "ナレーション", text: "ジュン・ルナリアへ到着したあなたと愛馬。しかし、街の中はなにやら騒然としていました。" },
                     { speaker: "街の住人", text: "「おい聞いたか？ 昨日の夜、王家の宝物庫から大事なネックレスが盗まれたらしいぞ！」" },
-                    { speaker: "ナレーション", text: "そんな噂を耳にしながら歩いていると、突然、厳しい顔をした衛兵たちがあなたを取り囲みました。" },
                     { speaker: "衛兵のリーダー", text: "「見慣れない旅のトレジャーハンターだな。お前がネックレスを盗んだ犯人に違いない！捕らえろ！」" },
                     { speaker: "主人公", text: "「えっ！？ ちょっと待って、僕じゃない！」" },
-                    { speaker: "ナレーション", text: "あっという間に衛兵たちに囲まれ、愛馬とも引き離されて路地裏へと追い詰められてしまいます。行き止まりの壁を背に、剣を構える衛兵の集団を前に絶体絶命のピンチです！" }
+                    { speaker: "ナレーション", text: "あっという間に衛兵たちに囲まれ、行き止まりの壁を背に絶体絶命のピンチです！" }
                 ]
             },
             {
-                id: 3,
-                name: "2-3. 不敵な美少女、乱入",
-                rewards: { exp: 80, coins: 1000, materials: 15 },
-                monsters: [],
+                id: 3, name: "2-3. 不敵な美少女、乱入", rewards: { exp: 80, coins: 1000, materials: 15 }, monsters: [],
                 dialogue: [
-                    { speaker: "ナレーション", text: "剣を構えた衛兵がにじり寄ってきた、まさにその時！" },
                     { speaker: "ナレーション", text: "（シュバッ！！✨）\n路地裏の屋根の上から、きらびやかな衣装をまとった美少女「カグヤ」が鮮やかに飛び降りてきました！" },
                     { speaker: "カグヤ", text: "「そこまでよ、堅物さんたち！」" },
                     { speaker: "ナレーション", text: "彼女は一切ためらうことなく、衛兵のリーダーに強烈な飛び蹴りを見舞って一撃で粉砕！" },
                     { speaker: "カグヤ", text: "「ぼさっとしないで、走るわよ！」" },
-                    { speaker: "ナレーション", text: "唖然とするあなたの手を掴むと、カグヤは不敵に笑って叫びます。二人は追っ手を振り切るため、入り組んだ路地裏を全力で駆け抜けます。" },
                     { speaker: "主人公", text: "（走る姿すらどこか優雅で美しい……この子、ただ者じゃない！）" }
                 ]
             },
             {
-                id: 4,
-                name: "2-4. 歪んだ地下水道の異形",
-                rewards: { exp: 200, coins: 2500, materials: 25 },
+                id: 4, name: "2-4. 歪んだ地下水道の異形", rewards: { exp: 200, coins: 2500, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 120, maxHp: 120, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 120, maxHp: 120, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。" },
-                    { speaker: "ナレーション", text: "（ジジジジ…！）\nしかしそこは普通の地下道ではなく、空間がノイズのように激しく歪んでいました。" },
                     { speaker: "カグヤ", text: "「気を付けて。世界の法則がバグったことで生まれた異形の化け物『グリッチ』が徘徊しているわ」" },
-                    { speaker: "主人公", text: "「未知の化け物……！」" },
-                    { speaker: "ナレーション", text: "初めて見る異形に足がすくむあなた。しかし、カグヤの堂々とした態度と、村長の「己の直感を信じ抜いた馬鹿者になれ」という言葉が脳裏をよぎります。" },
-                    { speaker: "主人公", text: "「やってやる！ 僕の直感を信じて剣を振るうんだ！」" },
-                    { speaker: "ナレーション", text: "恐怖を振り払い、剣を握り直したあなた。二人の息の合った連携で、迫り来る雑魚グリッチたちを迎え撃ちます！" }
+                    { speaker: "主人公", text: "「やってやる！ 僕の直感を信じて剣を振るうんだ！」" }
                 ]
             },
             {
-                id: 5,
-                name: "2-5. 激闘！デブグリッチ",
-                rewards: { exp: 400, coins: 5000, materials: 50 },
+                id: 5, name: "2-5. 激闘！デブグリッチ", rewards: { exp: 400, coins: 5000, materials: 50 },
+                monsters: [ { name: "デブグリッチ", hp: 150, maxHp: 150, emoji: "👹", dmg: 22 } ],
+                dialogue: [
+                    { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
+                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
+                    { speaker: "主人公", text: "「わかった！ そこだっ……！」" }
+                ]
+            },
+            {
+                id: 6, name: "2-6. 脱出と再会", rewards: { exp: 150, coins: 2000, materials: 15 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "いつもの剣で放った渾身の一撃が、デブグリッチの核心へと突き刺さります！" },
+                    { speaker: "カグヤ", text: "「崩れるわ！ あそこに地上へと繋がる縦穴が出現した、急いで！」" },
+                    { speaker: "主人公", text: "「お前も無事だったんだな、よかった！」" },
+                    { speaker: "ナレーション", text: "愛馬とも無事に再会を果たし、人間の国の衛兵たちを振り切った二人は、さらなる遠くを目指して荒野へと歩みを進めるのでした。" }
+                ]
+            }
+        ]
+    },
+    3: {
+        title: "第3章：せいまろ帝国と甘美なるバグ",
+        stages: [
+            {
+                id: 1, name: "3-1. 国境の衝突", rewards: { exp: 100, coins: 1500, materials: 20 },
                 monsters: [
-                    { name: "デブグリッチ", hp: 450, maxHp: 450, emoji: "👹", dmg: 22 }
+                    { name: "獣人の警備兵A", hp: 200, maxHp: 200, emoji: "🐺", dmg: 15 },
+                    { name: "獣人の警備兵B", hp: 200, maxHp: 200, emoji: "🐺", dmg: 15 }
                 ],
                 dialogue: [
-                    { speaker: "ナレーション", text: "地下水道の最深部へ進むと、ひときわ空間の歪みが激しくなりました。" },
-                    { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
-                    { speaker: "主人公", text: "「あいつの攻撃、喰らえばひとたまりもないぞ…！」" },
-                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
-                    { speaker: "主人公", text: "「わかった！ そこだっ……！」" },
-                    { speaker: "ナレーション", text: "カグヤが作った一瞬のチャンスを逃さず、あなたは渾身の一撃を叩き込むため剣を構えました！" }
+                    { speaker: "ナレーション", text: "荒野の険しい山脈を越え、ようやくパステルカラーの美しい異国「せいまろ帝国」を遠くに捉えた主人公たち。しかし、国境の門に近づいた瞬間、周囲の茂みから鋭い殺気が放たれました。" },
+                    { speaker: "獣人の警備兵", text: "「人間め、ここから先は通さん！」" },
+                    { speaker: "ナレーション", text: "現れたのは、鋭い爪と牙を持ち、巨大な槍を構えた獣人の警備兵たち。主人公たちを侵略者だと誤認して襲いかかってきたのです。" },
+                    { speaker: "カグヤ", text: "「挨拶代わりにしては、ちょっと手荒すぎじゃない？ ――まぁ、いいわ。旅の疲れを吹き飛ばすのに丁度いいわね！」" },
+                    { speaker: "主人公", text: "「カグヤ、命までは奪わないようにしよう！」" },
+                    { speaker: "ナレーション", text: "二人は息の合った動きで、獣人たちの攻撃をいなして立ち向かいます！" }
                 ]
             },
             {
-                id: 6,
-                name: "2-6. 脱出と再会",
-                rewards: { exp: 150, coins: 2000, materials: 15 },
-                monsters: [],
+                id: 2, name: "3-2. 工場潜入", rewards: { exp: 200, coins: 3000, materials: 30 },
+                monsters: [
+                    { name: "バグキャンディ", hp: 150, maxHp: 150, emoji: "🍬", dmg: 12 },
+                    { name: "グリッチケーキ", hp: 150, maxHp: 150, emoji: "🍰", dmg: 12 }
+                ],
                 dialogue: [
-                    { speaker: "ナレーション", text: "いつもの剣で放った渾身の一撃が、デブグリッチの核心へと突き刺さります！ボスは激しいノイズと共に完全に消滅しました。" },
-                    { speaker: "ナレーション", text: "（ゴゴゴゴゴ…！）\nしかし、ボスが消滅した衝撃で、地下水道の天井が大きな音を立てて崩落し始めました。" },
-                    { speaker: "カグヤ", text: "「崩れるわ！ あそこに地上へと繋がる縦穴が出現した、急いで！」" },
-                    { speaker: "ナレーション", text: "二人は崩れる瓦礫をかいくぐりながら縦穴を駆け上がり、無事に街の外へと脱出しました。" },
-                    { speaker: "愛馬", text: "「ヒヒーン！」" },
-                    { speaker: "主人公", text: "「お前も無事だったんだな、よかった！」" },
-                    { speaker: "ナレーション", text: "あらかじめ城門の外に預けておいた、賢い愛馬とも無事に再会を果たします。人間の国の衛兵たちを振り切り、異形の脅威を乗り越えた二人と一頭は、さらなる遠くを目指して荒野へと歩みを進めるのでした。" }
+                    { speaker: "ナレーション", text: "誤解が解け、二人はせいまろ帝国の危機を救うため、帝国の中枢「巨大スイーツ工場」へと潜入します。" },
+                    { speaker: "ナレーション", text: "しかし地下に広がる工場は、すでに世界の歪みに深く侵食されていました。" },
+                    { speaker: "主人公", text: "「なんだこれ…ケーキやキャンディが、化け物になってる！」" },
+                    { speaker: "カグヤ", text: "「ふん、お菓子になめられたものね！」" },
+                    { speaker: "ナレーション", text: "カグヤは不敵に笑い、両手の短剣をきらめかせながら歪んだ空間を駆け巡ります。" },
+                    { speaker: "主人公", text: "「僕も続くよ！」" },
+                    { speaker: "ナレーション", text: "バグの隙間を縫うような連携で、お菓子の異形たちに立ち向かいます！" }
+                ]
+            },
+            {
+                id: 3, name: "3-3. 決戦！ケーキグリッチ", rewards: { exp: 600, coins: 8000, materials: 60 },
+                monsters: [
+                    { name: "暴走デコレーションバグ", hp: 600, maxHp: 600, emoji: "🎂", dmg: 30 }
+                ],
+                dialogue: [
+                    { speaker: "ナレーション", text: "工場の最深部、神せいまろの祭壇の前で待ち受けていたのは、巨大なデコレーションケーキとおぞましいバグの触手が融合したボスグリッチでした。" },
+                    { speaker: "ボスグリッチ", text: "（ギギギ…ガガガ…！！）" },
+                    { speaker: "主人公", text: "「くっ…強力な範囲攻撃だ！ カグヤ、危ない！」" },
+                    { speaker: "獣人の隊長", text: "「加勢するぞ、人間たち！」" },
+                    { speaker: "ナレーション", text: "国を守るため奮起した獣人たちが合流し、盾となってボスの猛攻を防ぎます！" },
+                    { speaker: "主人公", text: "「カグヤ、そこだ！」" },
+                    { speaker: "カグヤ", text: "「もらったわ！！」" },
+                    { speaker: "ナレーション", text: "主人公の指示のもと、カグヤがボスの核へと一閃を叩き込みます！" }
+                ]
+            },
+            {
+                id: 4, name: "3-4. 大宴会と「あのパフェ」", rewards: { exp: 50, coins: 1000, materials: 10 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "バグの脅威が去り、帝国では人間と獣人の和解を祝う大宴会が開かれました。" },
+                    { speaker: "ナレーション", text: "獣人の王から感謝の印として、最高の聖菓が贈られます。一口食べた瞬間、主人公の動きが止まりました。" },
+                    { speaker: "主人公", text: "「……これ、知ってる。俺、懐かしいお父さんが作ってくれた『超メガストロベリーラブラブスターパフェ』だ……」" },
+                    { speaker: "ナレーション", text: "10年前に姿を消したお父さんの記憶が鮮烈に蘇り、主人公は器を握りしめました。" },
+                    { speaker: "カグヤ", text: "「……名前なげぇー。」" },
+                    { speaker: "ナレーション", text: "カグヤは呆れたように主人公の頭を小突き、自分のパフェを口に運びました。お父さんは確かにここにいた、という確かな足跡を主人公は胸に刻みました。" }
+                ]
+            },
+            {
+                id: 5, name: "3-5. 静寂の共鳴と追手の影", rewards: { exp: 100, coins: 2000, materials: 20 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "翌朝、せいまろ帝国の獣人たちに盛大に見送られ、旅立とうとする二人。" },
+                    { speaker: "ナレーション", text: "広場の「神せいまろの石像」の前にさしかかった時、主人公の魔導石と石像が青白い光を放って静かに共鳴を始めました。" },
+                    { speaker: "ナレーション", text: "周囲の獣人たちは誰もその光に気づいていません。光の先は、遥か彼方の空の一点――世界の最果てを指し示していました。" },
+                    { speaker: "主人公", text: "（お父さんは、あの方向に……）" },
+                    { speaker: "ナレーション", text: "（ズドーン！！）\nしかしその時、地響きとともに最初の国「ジュン・ルナリア」の追手がついに追いついてきました！" },
+                    { speaker: "獣人の隊長", text: "「ここは我らの恩人が通る道だ！ 人間の兵ども、一歩も通さん！」" },
+                    { speaker: "獣人の隊長", text: "「行け！ お前たちの旅を、こんなところで終わらせるな！」" },
+                    { speaker: "ナレーション", text: "主人公とカグヤは深く頷き、作ってくれた隙を突いて広大な外の世界へと駆け出しました。二人の旅は、いよいよ世界の核心へと迫っていきます！" }
                 ]
             }
         ]
     }
 };
 
-// --- 🛠️ 状態管理変数 ---
+// --- 🛠️ 状態・バトル管理変数 ---
 let activeChapter = 1;
 let selectedStageData = null; 
 let activeStage = null;       
 let currentDialogueIdx = 0;
+
 let btlEnemies = [];
-let playerBtlHp = 100;
-let playerBtlMp = 20;
+let battleParty = []; 
 
 let ctInterval = null;
-let currentCT = 0;
 let currentCombo = 0;
 let comboTimeout = null;
 
@@ -970,17 +1149,20 @@ function loadData() {
             saveStatus = { ...saveStatus, ...data };
             if (!saveStatus.clearedStages) saveStatus.clearedStages = [];
             if (!saveStatus.max_hp) saveStatus.max_hp = 100;
-            if (!saveStatus.max_mp) saveStatus.max_mp = 20;
-            if (saveStatus.hp === undefined) saveStatus.hp = saveStatus.max_hp;
-            if (saveStatus.mp === undefined) saveStatus.mp = saveStatus.max_mp;
-            // プレイヤー名が変更されていれば反映
-            if (saveStatus.playerName) {
-                document.getElementById('btl-player-name').innerText = saveStatus.playerName;
-            }
         } catch(e) {
-            console.error("ロードエラー。デフォルト状態を開始します。", e);
+            console.error("ロードエラー。", e);
         }
     }
+    
+    if (!saveStatus.characters) {
+        saveStatus.characters = [
+            { uid: "c_hero", name: saveStatus.playerName || "勇者", hp: saveStatus.max_hp || 100, attack: 50, isProtagonist: true }
+        ];
+    }
+    if (!saveStatus.party) {
+        saveStatus.party = ["c_hero", null, null, null];
+    }
+
     syncHeader();
 }
 
@@ -1010,20 +1192,15 @@ function goBackToMainMenu() {
 
 // --- 🗺️ 前のステージクリア状況チェックシステム ---
 function isStageAccessible(chapId, stageId) {
-    if (chapId === 1 && stageId === 1) return true; // 最初のステージは常に解放
+    if (chapId === 1 && stageId === 1) return true;
 
     if (stageId === 1) {
-        // 章の最初の場合、前章の最終ステージがクリアされているか
         const prevChap = chapId - 1;
         if (!storyChapters[prevChap]) return false;
-        
-        // 前のチャプターの最後のステージのIDを取得
         const prevStages = storyChapters[prevChap].stages;
         const lastStageId = prevStages[prevStages.length - 1].id;
-        
         return saveStatus.clearedStages.includes(`${prevChap}-${lastStageId}`);
     } else {
-        // 同章内の場合、1つ前のステージがクリアされているか
         const prevStage = stageId - 1;
         return saveStatus.clearedStages.includes(`${chapId}-${prevStage}`);
     }
@@ -1042,7 +1219,7 @@ function showScreen(screenId) {
     } else if (screenId === 'story-screen') {
         footer.innerHTML = `<button class="btn-action btn-primary" onclick="progressDialogue()">次へ進む ➔</button>`;
     } else if (screenId === 'battle-screen') {
-        footer.innerHTML = `<button class="btn-action btn-disabled" id="btn-skill-trigger" onclick="triggerComboSkill()" disabled>チャージ中...</button>`;
+        footer.innerHTML = `<button class="btn-action btn-danger" onclick="handleDefeat()">🏳️ 逃げる</button>`;
     } else if (screenId === 'result-screen') {
         footer.innerHTML = `<button class="btn-action btn-primary" onclick="finishStageAndSave()">💾 クエストを終了してセーブ</button>`;
     }
@@ -1064,22 +1241,16 @@ function selectChapter(chapId) {
         const card = document.createElement('div');
         card.className = `stage-card ${isLock ? 'locked' : ''}`;
         
-        // ロックされていなければ出発確認ダイアログを開く
-        if (!isLock) {
-            card.onclick = () => openConfirmModal(stg);
-        }
+        if (!isLock) card.onclick = () => openConfirmModal(stg);
 
         let badge = `<span class="stage-status-badge status-new">NEW</span>`;
-        if (isLock) {
-            badge = `<span class="stage-status-badge status-locked">🔒 LOCK</span>`;
-        } else if (isClear) {
-            badge = `<span class="stage-status-badge status-clear">CLEAR</span>`;
-        }
+        if (isLock) badge = `<span class="stage-status-badge status-locked">🔒 LOCK</span>`;
+        else if (isClear) badge = `<span class="stage-status-badge status-clear">CLEAR</span>`;
 
         card.innerHTML = `
             <div class="stage-info">
                 <div class="stage-name">${isLock ? '🔒 ' : ''}${stg.name}</div>
-                <div class="stage-reward-preview">🎁 報酬: ${stg.rewards.coins}G / ${stg.rewards.materials}個の草の化石</div>
+                <div class="stage-reward-preview">🎁 報酬: ${stg.rewards.coins}G / ${stg.rewards.materials}素材</div>
             </div>
             ${badge}
         `;
@@ -1089,20 +1260,16 @@ function selectChapter(chapId) {
     showScreen('stage-screen');
 }
 
-// --- ❓ 確認ダイアログ (はい/いいえ) ---
+// --- ❓ 確認ダイアログ ---
 function openConfirmModal(stage) {
     selectedStageData = stage;
     document.getElementById('modal-stage-title').innerText = `⚔️ クエスト出発確認`;
-    
     let msg = `ステージ「<strong>${stage.name}</strong>」を開始しますか？<br><br>`;
-    
-    // 戦闘があるかどうかでメッセージを変える
     if (stage.monsters && stage.monsters.length > 0) {
         msg += `<span style="font-size:12px; color:#ffeb3b;">※テンポ良いストーリー会話劇と、星ドラ風コマンドバトルが始まります。</span>`;
     } else {
         msg += `<span style="font-size:12px; color:#a0aec0;">※このステージはストーリーパートのみです。</span>`;
     }
-    
     document.getElementById('modal-stage-msg').innerHTML = msg;
     document.getElementById('confirm-modal').style.display = 'flex';
 }
@@ -1122,62 +1289,40 @@ function proceedToStage() {
     showScreen('story-screen');
 }
 
-// --- 💬 会話ストーリー進行 (立ち絵表示連動) ---
+// --- 💬 会話ストーリー進行 ---
 function setupDialogue() {
     const dialogueList = activeStage.dialogue;
     if (currentDialogueIdx < dialogueList.length) {
         const item = dialogueList[currentDialogueIdx];
         
-        // テキストの更新（主人公の表示名は、設定した名前に置き換える）
         let speakerName = item.speaker;
-        if (speakerName === "主人公") {
+        if (speakerName === "主人公" || speakerName === (saveStatus.playerName || "勇者")) {
             speakerName = saveStatus.playerName || "勇者";
         }
+        
         document.getElementById('talk-speaker').innerText = speakerName;
         document.getElementById('talk-text').innerText = item.text;
         
-        // 🖼️ キャラクターの立ち絵切り替え
         const standEl = document.getElementById('talk-speaker-stand');
-        
-        // アニメーションを一度リセットして再度フェードインさせる
         standEl.style.animation = 'none';
-        standEl.offsetHeight; // リフローを強制してアニメーションをリセット
+        standEl.offsetHeight; 
         standEl.style.animation = null; 
 
         if (item.speaker === "ナレーション") {
-            // ナレーション時は立ち絵を非表示にして自然に見せる
             standEl.style.display = "none";
         } else {
-            // キャラクター発言時は立ち絵を表示
             standEl.style.display = "block";
-            standEl.src = speakerIcons[item.speaker] || speakerIcons["default"];
-            
-            // 指定の画像が見つからない（404）場合のフォールバック処理
+            // ★主人公の場合は必ずセーブデータのプロフィール画像を使用
+            if (item.speaker === "主人公" || item.speaker === (saveStatus.playerName || "勇者")) {
+                standEl.src = saveStatus.playerIcon || defaultAvatar;
+            } else {
+                standEl.src = speakerIcons[item.speaker] || speakerIcons["default"];
+            }
+            // 画像が見つからなかった場合のフォールバック
             standEl.onerror = function() {
-                if (item.speaker === "主人公") {
-                    // `sugoigame.html`で設定したアイコンがあればそれを使用。なければシルエットSVG
-                    this.src = saveStatus.playerIcon || defaultAvatar;
-                } else {
-                    this.src = speakerIcons["default"];
-                }
-                this.onerror = null; // 無限ループ防止
+                this.src = speakerIcons["default"];
+                this.onerror = null; 
             };
-        }
-        
-        // ストーリー演出テキスト
-        const effectEl = document.getElementById('story-animation-effect');
-        if (item.text.includes("ゴゴゴゴ") || item.text.includes("ズズン")) {
-            effectEl.innerText = "（ゴゴゴゴゴ…！ 大地が低く震動する）";
-        } else if (item.text.includes("キラキラ") || item.text.includes("シュバッ")) {
-            effectEl.innerText = "（キラキラ…✨ 導きを司る光線が差し込む）";
-        } else if (item.text.includes("ノイズ") || item.text.includes("ジジジジ")) {
-            effectEl.innerText = "（ジジジジ…！ 空間の法則が乱れている）";
-        } else if (item.speaker === "村長") {
-            effectEl.innerText = "（村長が厳かに教えを説く）";
-        } else if (item.speaker === "カグヤ") {
-            effectEl.innerText = "（カグヤの華麗でしなやかな身のこなし！）";
-        } else {
-            effectEl.innerText = "（運命の歯車が回りだす）";
         }
     }
 }
@@ -1187,7 +1332,6 @@ function progressDialogue() {
     if (currentDialogueIdx < activeStage.dialogue.length) {
         setupDialogue();
     } else {
-        // ストーリー読了後、モンスターが設定されていれば戦闘へ、設定されていなければそのままクリアへ
         if (activeStage.monsters && activeStage.monsters.length > 0) {
             startBattlePhase();
         } else {
@@ -1196,74 +1340,241 @@ function progressDialogue() {
     }
 }
 
-// --- ⚔️ 星ドラ風コマンドバトル ---
+// ====================================================
+// ⚔️ 星ドラ風 モダンバトルシステム (スクロール＆防御対応)
+// ====================================================
+
 function startBattlePhase() {
     showScreen('battle-screen');
     btlEnemies = JSON.parse(JSON.stringify(activeStage.monsters));
-    playerBtlHp = saveStatus.hp || saveStatus.max_hp;
-    playerBtlMp = saveStatus.mp || saveStatus.max_mp;
+    
+    initBattleParty();
 
-    currentCT = 0;
     currentCombo = 0;
     document.getElementById('battle-combo-badge').style.display = 'none';
-    document.getElementById('battle-log-text').innerHTML = `👿 <strong>${btlEnemies[0].name}</strong> が目の前に立ちふさがった！<br>「コマンドチャージを待て！」`;
+    document.getElementById('battle-log-text').innerHTML = `👿 <strong>${btlEnemies[0].name}</strong> が現れた！<br>スキルのチャージを待て！`;
 
-    renderBattleField();
+    // バトル画面のDOMを初期生成（1回だけ行う）
+    initBattleField();
     startCTTimer();
 }
 
-function renderBattleField() {
-    const container = document.getElementById('enemy-container');
-    container.innerHTML = '';
-    
-    btlEnemies.forEach((enemy, index) => {
-        if (enemy.hp <= 0) return;
-        const percent = (enemy.hp / enemy.maxHp) * 100;
-        const box = document.createElement('div');
-        box.className = 'enemy-sprite-box';
-        box.id = `enemy-box-${index}`;
-        box.innerHTML = `
-            <div class="enemy-avatar">${enemy.emoji || "👾"}</div>
-            <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width: ${percent}%;"></div></div>
-            <div class="enemy-name">${enemy.name}</div>
-        `;
-        container.appendChild(box);
-    });
-
-    document.getElementById('btl-player-name').innerText = saveStatus.playerName || "勇者";
-    document.getElementById('btl-player-hp').innerText = `${playerBtlHp}/${saveStatus.max_hp}`;
-    document.getElementById('btl-player-mp').innerText = `${playerBtlMp}/${saveStatus.max_mp}`;
+function initBattleParty() {
+    battleParty = [];
+    if (saveStatus.party && saveStatus.characters) {
+        saveStatus.party.forEach(uid => {
+            if (uid) {
+                let c = saveStatus.characters.find(x => x.uid === uid);
+                if (c) {
+                    battleParty.push({
+                        uid: c.uid,
+                        name: c.isProtagonist ? (saveStatus.playerName || "勇者") : c.name,
+                        maxHp: c.hp || 100,
+                        currentHp: c.hp || 100, 
+                        attack: c.attack || 50,
+                        ct: 0,
+                        defCt: 100, // ★防御用のCT (初期は満タン)
+                        isDefending: false, // ★防御状態
+                        icon: c.isProtagonist ? (saveStatus.playerIcon || defaultAvatar) : speakerIcons["default"]
+                    });
+                }
+            }
+        });
+    }
+    if (battleParty.length === 0) {
+        battleParty.push({
+            uid: "hero", name: saveStatus.playerName || "勇者", 
+            maxHp: saveStatus.max_hp || 100, currentHp: saveStatus.max_hp || 100, 
+            attack: 50, ct: 0, defCt: 100, isDefending: false, icon: saveStatus.playerIcon || defaultAvatar
+        });
+    }
 }
 
-// ⏱️ リアルタイム チャージタイム (CT) システム
-function startCTTimer() {
-    if (ctInterval) clearInterval(ctInterval);
-    const fill = document.getElementById('skill-ct-fill');
-    const label = document.getElementById('skill-ct-percent');
-    const btn = document.getElementById('btn-skill-trigger');
+// 📌 DOM初期生成
+function initBattleField() {
+    const eContainer = document.getElementById('enemy-container');
+    eContainer.innerHTML = '';
+    btlEnemies.forEach((e, i) => {
+        eContainer.innerHTML += `
+            <div class="enemy-sprite-box" id="enemy-box-${i}">
+                <div class="enemy-avatar">${e.emoji || "👾"}</div>
+                <div class="enemy-hp-bar"><div class="enemy-hp-fill" id="enemy-hp-fill-${i}" style="width: 100%;"></div></div>
+                <div class="enemy-name">${e.name}</div>
+            </div>
+        `;
+    });
 
-    ctInterval = setInterval(() => {
-        if (currentCT < 100) {
-            // 1秒間に15%チャージ
-            currentCT += 15;
-            if (currentCT > 100) currentCT = 100;
-            
-            fill.style.width = `${currentCT}%`;
-            label.innerText = `${currentCT}%`;
+    const pContainer = document.getElementById('party-container');
+    pContainer.innerHTML = '';
+    
+    for (let i = 0; i < 4; i++) {
+        if (i < battleParty.length) {
+            let p = battleParty[i];
+            let skillName = (i === 0) ? "渾身の一撃" : "奥義";
+            let colorBg = skillColors[i % skillColors.length];
 
-            if (currentCT === 100) {
-                fill.classList.add('ready');
-                btn.className = "btn-action btn-primary";
-                btn.innerText = "🔥 秘技：ギガスラッシュ！";
-                btn.removeAttribute('disabled');
+            pContainer.innerHTML += `
+                <div class="party-col" id="party-col-${i}">
+                    <div class="char-plate">
+                        <div class="hp-gauge"><div class="hp-fill" id="party-hp-fill-${i}" style="width: 100%;"></div></div>
+                        <div class="char-name-row">${p.name}</div>
+                        <div class="char-icon-box">
+                            <img class="char-icon" src="${p.icon}" onerror="this.src='${defaultAvatar}'">
+                            <div class="char-lv">Lv1</div>
+                        </div>
+                    </div>
+                    
+                    <!-- ★ スクロール可能なスキルエリア -->
+                    <div class="skill-scroll-area">
+                        <div class="skill-container">
+                            <button class="skill-btn" id="skill-btn-${i}" onclick="triggerComboSkill(${i})" style="background: ${colorBg};">
+                                <div class="skill-ct-mask" id="skill-ct-mask-${i}"></div>
+                                <div class="skill-name">${skillName}</div>
+                                <div class="skill-lv">Lv1</div>
+                            </button>
+                            
+                            <!-- スクロール演出のためのダミー（未解放）スキル枠 -->
+                            <button class="skill-btn" style="background: radial-gradient(circle, #555, #222); cursor:not-allowed;" disabled>
+                                <div class="skill-ct-mask" style="background: rgba(0,0,0,0.5);"></div>
+                                <div class="skill-name">空き枠</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ★ 最下部固定の防御ボタン -->
+                    <div class="def-btn-area">
+                        <div class="def-btn" id="def-btn-${i}" onclick="triggerDefense(${i})">
+                            <!-- 防御ボタンも上からマスクが下がる表現 -->
+                            <div class="def-ct-mask" id="def-ct-mask-${i}"></div>
+                            <div class="def-text" id="def-text-${i}">ぼうぎょ</div>
+                            <div class="def-lv">Lv1</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            pContainer.innerHTML += `<div class="party-col empty-col"></div>`;
+        }
+    }
+    
+    updateBattleState();
+}
+
+// 📌 状態のUI反映
+function updateBattleState() {
+    // 敵の更新
+    btlEnemies.forEach((e, i) => {
+        let fill = document.getElementById(`enemy-hp-fill-${i}`);
+        let box = document.getElementById(`enemy-box-${i}`);
+        if(fill) {
+            let pct = Math.max(0, (e.hp / e.maxHp) * 100);
+            fill.style.width = `${pct}%`;
+        }
+        if(box && e.hp <= 0) {
+            box.style.opacity = '0.3';
+            box.style.transform = 'scale(0.8)';
+        }
+    });
+
+    // パーティの更新
+    battleParty.forEach((p, i) => {
+        let fill = document.getElementById(`party-hp-fill-${i}`);
+        let btn = document.getElementById(`skill-btn-${i}`);
+        let mask = document.getElementById(`skill-ct-mask-${i}`);
+        
+        // 防御用要素
+        let defBtn = document.getElementById(`def-btn-${i}`);
+        let defMask = document.getElementById(`def-ct-mask-${i}`);
+        let defText = document.getElementById(`def-text-${i}`);
+        
+        if(fill) {
+            let hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100);
+            fill.style.width = `${hpPct}%`;
+            fill.style.backgroundColor = hpPct > 25 ? "#2ecc71" : "#e74c3c";
+        }
+        
+        // メインスキルのCT管理
+        if(btn && mask) {
+            if (p.currentHp <= 0) {
+                btn.disabled = true;
+                btn.classList.remove('skill-ready-anim');
+                mask.style.background = `rgba(0,0,0,0.85)`;
+            } else if (p.ct >= 100) {
+                btn.disabled = false;
+                btn.classList.add('skill-ready-anim');
+                mask.style.background = 'transparent';
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('skill-ready-anim');
+                mask.style.background = `conic-gradient(transparent 0%, transparent ${p.ct}%, rgba(0,0,0,0.65) ${p.ct}%, rgba(0,0,0,0.65) 100%)`;
             }
         }
+
+        // 防御ボタンのCTと状態管理
+        if(defBtn && defMask && defText) {
+            if (p.currentHp <= 0) {
+                defMask.style.height = '100%';
+                defBtn.style.pointerEvents = 'none';
+            } else {
+                defBtn.style.pointerEvents = 'auto';
+                // 防御のCTゲージ（0から100に溜まる、黒いマスクが上から減る）
+                defMask.style.height = `${100 - p.defCt}%`;
+                
+                if (p.isDefending) {
+                    defBtn.classList.add('def-active');
+                    defText.innerText = "防御中";
+                } else {
+                    defBtn.classList.remove('def-active');
+                    defText.innerText = "ぼうぎょ";
+                }
+            }
+        }
+    });
+}
+
+// ⏱️ リアルタイム タイマー処理
+function startCTTimer() {
+    if (ctInterval) clearInterval(ctInterval);
+    ctInterval = setInterval(() => {
+        battleParty.forEach(p => {
+            if (p.currentHp > 0) {
+                // メインスキルのチャージ
+                if (p.ct < 100) { p.ct += 15; if (p.ct > 100) p.ct = 100; }
+                // 防御スキルのチャージ
+                if (p.defCt < 100) { p.defCt += 15; if (p.defCt > 100) p.defCt = 100; }
+            }
+        });
+        
+        updateBattleState();
     }, 1000);
 }
 
+// 🛡️ 防御スキル発動！
+function triggerDefense(charIdx) {
+    let p = battleParty[charIdx];
+    if (p.currentHp <= 0 || p.defCt < 100 || p.isDefending) return;
+    
+    p.isDefending = true;
+    p.defCt = 0; // 防御CTを消費
+    updateBattleState();
+    
+    logBattle(`🛡️ ${p.name} は <strong>ぼうぎょの体勢</strong> をとった！<br>（しばらく被ダメージが半減するぞ！）`);
+    
+    // 5秒間防御状態を持続
+    setTimeout(() => {
+        if (p.currentHp > 0) {
+            p.isDefending = false;
+            updateBattleState();
+            // logBattle(`🛡️ ${p.name} のぼうぎょの体勢が解けた。`); // ログが埋まるのでコメントアウト推奨
+        }
+    }, 5000); 
+}
+
 // ⚔️ コンボスキル発動！
-function triggerComboSkill() {
-    if (currentCT < 100) return;
+function triggerComboSkill(charIdx) {
+    let attacker = battleParty[charIdx];
+    if (attacker.ct < 100 || attacker.currentHp <= 0) return;
+
     let targetIdx = btlEnemies.findIndex(e => e.hp > 0);
     if (targetIdx === -1) return;
     let target = btlEnemies[targetIdx];
@@ -1273,7 +1584,6 @@ function triggerComboSkill() {
     comboBadge.innerText = `🔥 ${currentCombo} Combo!!`;
     comboBadge.style.display = 'block';
 
-    // 3.5秒コンボ受付タイマー
     clearTimeout(comboTimeout);
     comboTimeout = setTimeout(() => {
         currentCombo = 0;
@@ -1281,62 +1591,71 @@ function triggerComboSkill() {
         logBattle("⚠️ スキルの発動間隔があき、コンボが途切れた！");
     }, 3500);
 
-    // 星ドラ風コンボ補正 (1コンボ=100%, 2コンボ=125%, 3コンボ=150%...)
     let comboMultiplier = 1.0 + (currentCombo - 1) * 0.25;
-    let baseDmg = 25 + (saveStatus.level * 3);
+    let baseDmg = (attacker.attack || 30) * 0.5 + (saveStatus.level * 3);
     let finalDamage = Math.floor(baseDmg * comboMultiplier);
 
     target.hp -= finalDamage;
     if (target.hp < 0) target.hp = 0;
 
-    logBattle(`⚔️ ${saveStatus.playerName || "勇者"} の大技！<br>${target.name} に <strong>${finalDamage}</strong> の大ダメージ！ (補正: x${comboMultiplier.toFixed(2)})`);
+    let skillName = (charIdx === 0) ? "渾身の一撃" : "奥義";
+    logBattle(`⚔️ ${attacker.name} の ${skillName}！<br>${target.name} に <strong>${finalDamage}</strong> のダメージ！`);
 
     // CTをリセット
-    currentCT = 0;
-    const fill = document.getElementById('skill-ct-fill');
-    const label = document.getElementById('skill-ct-percent');
-    const btn = document.getElementById('btn-skill-trigger');
-    fill.style.width = '0%';
-    fill.classList.remove('ready');
-    label.innerText = '0%';
-    btn.className = "btn-action btn-disabled";
-    btn.innerText = "チャージ中...";
-    btn.setAttribute('disabled', 'true');
+    attacker.ct = 0;
 
-    // 被弾アニメーション
     const enemyVisual = document.getElementById(`enemy-box-${targetIdx}`);
     if (enemyVisual) {
-        enemyVisual.style.transform = "scale(0.8) translateY(10px)";
+        enemyVisual.style.transform = "scale(0.8) translateY(10px) rotate(-5deg)";
         setTimeout(() => { enemyVisual.style.transform = "none"; }, 150);
     }
 
-    renderBattleField();
+    updateBattleState();
 
-    // 決着判定
     if (btlEnemies.every(e => e.hp <= 0)) {
         clearInterval(ctInterval);
         clearTimeout(comboTimeout);
         setTimeout(handleVictory, 1000);
     } else {
-        setTimeout(enemyCounterAttack, 800);
+        if (Math.random() < 0.4) {
+            setTimeout(enemyCounterAttack, 600);
+        }
     }
 }
 
 // 👿 敵の反撃ターン
 function enemyCounterAttack() {
     let aliveEnemies = btlEnemies.filter(e => e.hp > 0);
-    if (aliveEnemies.length === 0) return;
+    let aliveParty = battleParty.filter(p => p.currentHp > 0);
+    
+    if (aliveEnemies.length === 0 || aliveParty.length === 0) return;
 
     let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+    let target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+
     let damage = Math.max(3, Math.floor(attacker.dmg * (0.85 + Math.random() * 0.3)));
 
-    playerBtlHp -= damage;
-    if (playerBtlHp < 0) playerBtlHp = 0;
+    // ★ 防御状態ならダメージを半減する
+    if (target.isDefending) {
+        damage = Math.floor(damage / 2);
+        logBattle(`💥 ${attacker.name} の攻撃！<br>🛡️ ${target.name} は防御して <strong>${damage}</strong> に抑えた！`);
+    } else {
+        logBattle(`💥 ${attacker.name} の攻撃！<br>${target.name} は <strong>${damage}</strong> の痛手を受けた！`);
+    }
 
-    logBattle(`💥 ${attacker.name} の反撃！<br>${saveStatus.playerName || "勇者"} は <strong>${damage}</strong> の痛手を受けた！`);
-    renderBattleField();
+    target.currentHp -= damage;
+    if (target.currentHp < 0) target.currentHp = 0;
+    
+    let colIdx = battleParty.indexOf(target);
+    let colEl = document.getElementById(`party-col-${colIdx}`);
+    if(colEl) {
+        colEl.style.transform = "translateX(5px)";
+        setTimeout(() => { colEl.style.transform = "none"; }, 100);
+    }
 
-    if (playerBtlHp <= 0) {
+    updateBattleState();
+
+    if (battleParty.every(p => p.currentHp <= 0)) {
         clearInterval(ctInterval);
         clearTimeout(comboTimeout);
         handleDefeat();
@@ -1350,7 +1669,7 @@ function logBattle(htmlText) {
 }
 
 function handleDefeat() {
-    logBattle(`💀 無念！あなたは力尽きてしまった…！`);
+    logBattle(`💀 パーティは全滅してしまった…！`);
     document.getElementById('footer-nav').innerHTML = `
         <button class="btn-action btn-danger" onclick="showScreen('stage-screen')">🔙 ステージ選択へ退却</button>
     `;
@@ -1365,22 +1684,21 @@ function handleVictory() {
     saveStatus.materials += rewards.materials;
     saveStatus.exp += rewards.exp;
 
-    // 進捗（ロック解除キー）を完全セーブ
     const stageKey = `${activeChapter}-${activeStage.id}`;
     if (!saveStatus.clearedStages.includes(stageKey)) {
         saveStatus.clearedStages.push(stageKey);
     }
 
-    // 各チャプターの全クリアフラグ判定
-    if (activeChapter === 1 && activeStage.id === 3) {
-        saveStatus.questFlags.chapter1_cleared = true;
-    }
+    if (activeChapter === 1 && activeStage.id === 3) saveStatus.questFlags.chapter1_cleared = true;
     if (activeChapter === 2 && activeStage.id === 6) {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
         saveStatus.questFlags.chapter2_cleared = true;
     }
+    if (activeChapter === 3 && activeStage.id === 5) {
+        if(!saveStatus.questFlags) saveStatus.questFlags = {};
+        saveStatus.questFlags.chapter3_cleared = true;
+    }
 
-    // レベルアップ計算
     let levelUpMessage = "";
     if (saveStatus.exp >= saveStatus.level * 100) {
         saveStatus.level += 1;
@@ -1392,7 +1710,6 @@ function handleVictory() {
         levelUpMessage = `<div style="color: #2ecc71; font-weight: 900; font-size: 18px; margin-top: 10px;">🔺 レベルアップ！ Lv.${saveStatus.level} になった！</div>`;
     }
 
-    // 💾 瞬時にセーブデータを更新
     saveData();
 
     document.getElementById('rewards-container').innerHTML = `
@@ -1404,7 +1721,6 @@ function handleVictory() {
 }
 
 function finishStageAndSave() {
-    // 街に戻る際にクリア状況を適用してステージ一覧を再描画
     selectChapter(activeChapter);
 }
 
