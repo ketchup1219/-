@@ -435,7 +435,7 @@
 
         /* パーティエリア（下部：4分割縦帯グリッド） */
         .party-stage {
-            height: 280px; /* スクロール枠と防御ボタンのために高さを拡張 */
+            height: 300px; /* スクロール枠と大きなスキルボタンのために高さを確保 */
             display: flex;
             background: #000;
         }
@@ -445,7 +445,7 @@
             display: flex;
             flex-direction: column;
             border-right: 2px solid #2d3436;
-            background: linear-gradient(to bottom, #d35400, #e67e22); /* 星ドラ風のオレンジ帯背景 */
+            background: linear-gradient(to bottom, #d35400, #e67e22);
             position: relative;
             box-sizing: border-box;
             transition: transform 0.1s;
@@ -454,7 +454,7 @@
             border-right: none;
         }
         .party-col.empty-col {
-            background: #111; /* 空き枠 */
+            background: #111;
         }
 
         /* キャラクター情報プレート（上部） */
@@ -531,13 +531,15 @@
             border: 1px solid #fff;
         }
 
-        /* スキルボタン スクロールエリア */
+        /* ✨ スキルボタン スクロールエリア（スナップ付き） */
         .skill-scroll-area {
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE */
+            scroll-snap-type: y mandatory; /* スクロールがピタッと止まる！ */
+            scroll-behavior: smooth;
         }
         .skill-scroll-area::-webkit-scrollbar {
             display: none; /* Chrome, Safari */
@@ -547,17 +549,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 0;
-            gap: 15px;
+            /* 最初と最後のボタンが中央にスナップするように上下の余白を大きく取る */
+            padding: 55px 0; 
+            gap: 20px;
         }
 
-        /* 🔴 メインスキルボタン (大型化) */
+        /* 🔴 メインスキルボタン (大幅に大型化) */
         .skill-btn {
-            width: 75px;
-            height: 75px;
+            width: 95px; /* サイズをさらに拡大！ */
+            height: 95px;
             flex-shrink: 0;
             border-radius: 50%;
-            border: 3px solid #f1c40f; /* 金枠 */
+            border: 3px solid #f1c40f;
             position: relative;
             box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 0 10px rgba(255,255,255,0.4);
             cursor: pointer;
@@ -568,6 +571,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            scroll-snap-align: center; /* 常に中央にスナップする！ */
+            scroll-snap-stop: always;
         }
 
         .skill-btn:active:not(:disabled) {
@@ -576,10 +581,9 @@
 
         .skill-btn:disabled {
             cursor: not-allowed;
-            /* disabled時はマスクがかかるので、ボタン自体の色はそのままにしておく */
         }
 
-        /* ⏳ CTゲージ表現（時計回りに増える円形グラデーションマスク） */
+        /* ⏳ CTゲージ表現 */
         .skill-ct-mask {
             position: absolute;
             top: 0;
@@ -592,7 +596,7 @@
         }
 
         .skill-name {
-            font-size: 11px;
+            font-size: 13px; /* 見やすく拡大 */
             font-weight: bold;
             color: #fff;
             text-shadow: 1px 1px 2px #000;
@@ -605,7 +609,7 @@
         }
 
         .skill-lv {
-            font-size: 10px;
+            font-size: 11px;
             color: #f1c40f;
             text-shadow: 1px 1px 1px #000;
             pointer-events: none;
@@ -955,7 +959,7 @@ const storyChapters = {
         title: "第1章：旅立ちの始まりの村",
         stages: [
             {
-                id: 1, name: "1-1. 旅立ちの朝", rewards: { exp: 30, coins: 300, materials: 5 }, monsters: [],
+                id: 1, name: "1-1. 旅立ちの朝と", rewards: { exp: 30, coins: 300, materials: 5 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "朝霧に包まれた、自然豊かで静かな田舎町「エコー・ビレッジ」。" },
                     { speaker: "ナレーション", text: "16歳になったあなたは、長年暮らした自宅の部屋で旅の支度を整えていました。" },
@@ -1020,8 +1024,8 @@ const storyChapters = {
             {
                 id: 4, name: "2-4. 歪んだ地下水道の異形", rewards: { exp: 200, coins: 2500, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 120, maxHp: 120, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 120, maxHp: 120, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。" },
@@ -1034,7 +1038,7 @@ const storyChapters = {
                 monsters: [ { name: "デブグリッチ", hp: 450, maxHp: 450, emoji: "👹", dmg: 22 } ],
                 dialogue: [
                     { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
-                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
+                    { speaker: "カグヤ", text: "「私 or 誰かが素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
                     { speaker: "主人公", text: "「わかった！ そこだっ……！」" }
                 ]
             },
@@ -1366,6 +1370,9 @@ function initBattleParty() {
             if (uid) {
                 let c = saveStatus.characters.find(x => x.uid === uid);
                 if (c) {
+                    let iconSrc = c.isProtagonist ? (saveStatus.playerIcon || defaultAvatar) : speakerIcons["default"];
+                    if (c.uid === "c_kaguya") iconSrc = "カグヤ.png"; // カグヤの場合
+
                     battleParty.push({
                         uid: c.uid,
                         name: c.isProtagonist ? (saveStatus.playerName || "勇者") : c.name,
@@ -1375,7 +1382,7 @@ function initBattleParty() {
                         ct: 0,
                         defCt: 100, // ★防御用のCT (初期は満タン)
                         isDefending: false, // ★防御状態
-                        icon: c.isProtagonist ? (saveStatus.playerIcon || defaultAvatar) : speakerIcons["default"]
+                        icon: iconSrc
                     });
                 }
             }
@@ -1433,6 +1440,11 @@ function initBattleField() {
                                 <div class="skill-lv">Lv1</div>
                             </button>
                             
+                            <!-- スクロール演出のためのダミー（未解放）スキル枠 -->
+                            <button class="skill-btn" style="background: radial-gradient(circle, #555, #222); cursor:not-allowed;" disabled>
+                                <div class="skill-ct-mask" style="background: rgba(0,0,0,0.5);"></div>
+                                <div class="skill-name">空き枠</div>
+                            </button>
                             <!-- スクロール演出のためのダミー（未解放）スキル枠 -->
                             <button class="skill-btn" style="background: radial-gradient(circle, #555, #222); cursor:not-allowed;" disabled>
                                 <div class="skill-ct-mask" style="background: rgba(0,0,0,0.5);"></div>
@@ -1565,7 +1577,6 @@ function triggerDefense(charIdx) {
         if (p.currentHp > 0) {
             p.isDefending = false;
             updateBattleState();
-            // logBattle(`🛡️ ${p.name} のぼうぎょの体勢が解けた。`); // ログが埋まるのでコメントアウト推奨
         }
     }, 5000); 
 }
@@ -1708,6 +1719,34 @@ function handleVictory() {
         saveStatus.hp = saveStatus.max_hp;
         saveStatus.mp = saveStatus.max_mp;
         levelUpMessage = `<div style="color: #2ecc71; font-weight: 900; font-size: 18px; margin-top: 10px;">🔺 レベルアップ！ Lv.${saveStatus.level} になった！</div>`;
+    }
+
+    // ★ 2-4クリア時に「カグヤ（c_kaguya）」を仲間に加える処理
+    if (activeChapter === 2 && activeStage.id === 4) {
+        if (!saveStatus.characters) {
+            saveStatus.characters = [];
+        }
+        // 重複して追加されないようにチェック
+        if (!saveStatus.characters.some(c => c.uid === "c_kaguya" || c.id === "c_kaguya")) {
+            saveStatus.characters.push({
+                uid: "c_kaguya",
+                id: "c_kaguya",
+                name: "カグヤ",
+                level: 1,
+                hp: 150,
+                attack: 60,
+                defense: 40,
+                element: "fire",
+                typeText: "極速",
+                isProtagonist: false
+            });
+            levelUpMessage += `
+                <div style="color: #ffeb3b; font-weight: 900; font-size: 16px; margin-top: 15px; text-shadow: 0 0 10px rgba(255, 235, 59, 0.5); animation: pulse 1s infinite alternate;">
+                    ✨ カグヤが仲間に加わりました！<br>
+                    「キャラ一覧でカグヤが編成できるようになった！」
+                </div>
+            `;
+        }
     }
 
     saveData();
