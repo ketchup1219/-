@@ -92,16 +92,14 @@ to{transform:rotate(360deg)}
 </div>
 
 <div class="reels">
-<div class="window"><div class="strip" id="strip0"></div></div>
-<div class="window"><div class="strip" id="strip1"></div></div>
-<div class="window"><div class="strip" id="strip2"></div></div>
+<div class="window" onclick="stopReelClick(0)" style="cursor:pointer"><div class="strip" id="strip0"></div></div>
+<div class="window" onclick="stopReelClick(1)" style="cursor:pointer"><div class="strip" id="strip1"></div></div>
+<div class="window" onclick="stopReelClick(2)" style="cursor:pointer"><div class="strip" id="strip2"></div></div>
 </div>
 
-<div class="controls">
-<button id="start">MAX BET</button>
-<button id="s0" disabled>STOP1</button>
-<button id="s1" disabled>STOP2</button>
-<button id="s2" disabled>STOP3</button>
+
+<div class="controls" style="text-align:center">
+  <button id="start" style="font-size:24px;padding:14px 30px">MAX BET</button>
 </div>
 <div id="result"></div>
 </div>
@@ -217,7 +215,7 @@ document.getElementById("start").onclick=()=>{
  for(let i=0;i<3;i++){
    strips[i].run=true;
    animate(i);
-   document.getElementById("s"+i).disabled=false;
+   
  }
 };
 
@@ -233,9 +231,25 @@ for(let i=0;i<3;i++){
    r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
    r.el.style.transform=`translateY(${-targetIndex*220}px)`;
    r.pos = targetIndex*220;
-   document.getElementById("s"+i).disabled=true;
+   
    if(strips.every(x=>!x.run)) setTimeout(judge,750);
  };
+}
+
+
+function stopReelClick(i){
+   if(!strips[i].run) return;
+   const r=strips[i];
+   clearInterval(r.id);
+   r.run=false;
+   r.result=symbols[Math.floor(Math.random()*symbols.length)];
+   const stopIndex = symbols.indexOf(r.result);
+   const baseCycle = 12 * symbols.length;
+   const targetIndex = baseCycle + stopIndex;
+   r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
+   r.el.style.transform=`translateY(${-targetIndex*220}px)`;
+   r.pos = targetIndex*220;
+   if(strips.every(x=>!x.run)) setTimeout(judge,750);
 }
 
 function judge(){
