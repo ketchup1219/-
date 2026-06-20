@@ -51,6 +51,29 @@ text-shadow:
 0 0 90px #00ffff;
 }
 
+
+.superjackpot{
+font-size:56px!important;
+letter-spacing:3px;
+animation:rb .15s linear infinite, pulse .4s infinite alternate;
+}
+@keyframes pulse{
+from{transform:scale(1)}
+to{transform:scale(1.15)}
+}
+.jackpot-aura{
+position:fixed;inset:-50%;
+background:conic-gradient(red,orange,yellow,lime,cyan,blue,violet,red);
+animation:spinAura 2s linear infinite;
+opacity:.35;
+z-index:9998;
+pointer-events:none;
+}
+@keyframes spinAura{
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
+}
+
 </style>
 </head>
 <body>
@@ -86,12 +109,18 @@ text-shadow:
 
 <audio id="jackpotBgm" src="ジャックポット.mp3"></audio>
 <script>
+
 function megaJackpot(win){
+
+ const aura=document.createElement('div');
+ aura.className='jackpot-aura';
+ document.body.appendChild(aura);
+
  const ov=document.createElement('div');
  ov.className='jackpot-rainbow';
  document.body.appendChild(ov);
 
- for(let i=0;i<250;i++){
+ for(let i=0;i<600;i++){
    const c=document.createElement('div');
    c.className='confetti';
    c.style.left=Math.random()*100+'vw';
@@ -112,7 +141,30 @@ function megaJackpot(win){
  🔥🔥🔥 MAX BONUS 🔥🔥🔥
  </div>`;
 
- setTimeout(()=>ov.remove(),4000);
+ 
+ document.body.animate(
+ [
+  {transform:'translateX(-12px)'},
+  {transform:'translateX(12px)'},
+  {transform:'translateX(-12px)'},
+  {transform:'translateX(12px)'},
+  {transform:'translateX(0px)'}
+ ],
+ {duration:120,repetitions:40}
+ );
+
+ result.innerHTML=`<div class="superjackpot">
+ 🌈👑⚡ 777 JACKPOT ⚡👑🌈<br>
+ 💎 ${win.toLocaleString()} 草コイン獲得 💎<br>
+ 🔥 ULTRA RAINBOW BONUS 🔥<br>
+ ✨ MAX MAX MAX ✨
+ </div>`;
+
+ setTimeout(()=>{
+   ov.remove();
+   aura.remove();
+ },7000);
+
 }
 
 const SAVE_NAME="sugoigame";
