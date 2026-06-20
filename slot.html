@@ -228,11 +228,11 @@ for(let i=0;i<3;i++){
    r.run=false;
    r.result=symbols[Math.floor(Math.random()*symbols.length)];
    const stopIndex = symbols.indexOf(r.result);
-   const currentCycle = Math.floor(r.pos / 220);
-   const target = currentCycle + 20 + stopIndex;
+   const baseCycle = 12 * symbols.length;
+   const targetIndex = baseCycle + stopIndex;
    r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
-   r.el.style.transform=`translateY(${-target*220}px)`;
-   r.pos = target*220;
+   r.el.style.transform=`translateY(${-targetIndex*220}px)`;
+   r.pos = targetIndex*220;
    document.getElementById("s"+i).disabled=true;
    if(strips.every(x=>!x.run)) setTimeout(judge,750);
  };
@@ -251,7 +251,7 @@ function judge(){
    if(a[0]==="777"){
       megaJackpot(win);
    }else{
-      result.textContent="WIN "+win.toLocaleString()+" 草コイン";
+      result.innerHTML="🎉 "+a[0]+" ×3<br>WIN "+win.toLocaleString()+" 草コイン";
    }
  }else{
    result.textContent="ハズレ";
