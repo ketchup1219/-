@@ -66,6 +66,14 @@
             font-weight: bold;
         }
 
+        .resource-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-top: -2px;
+            margin-right: 2px;
+        }
+
         /* メイン描画エリア */
         .content-area {
             flex: 1;
@@ -792,7 +800,7 @@
             <div class="dialog-title">⚡ スタミナ回復</div>
             <div class="dialog-msg">
                 クエストに出発するためのスタミナが足りません。<br><br>
-                <strong style="color:#ffeb3b;"><img src="草コイン.png" style="width:16px; vertical-align:middle; margin-top:-2px;"> 1000</strong> で<br>スタミナを <strong style="color:#00f2fe;">100 回復</strong> しますか？<br>
+                <strong style="color:#ffeb3b;"><img src="草コイン.png" class="resource-icon"> 1000</strong> で<br>スタミナを <strong style="color:#00f2fe;">100 回復</strong> しますか？<br>
                 <span style="font-size:11px; color:#aaa;">（所持: <span id="stamina-coins-val"></span>）</span>
             </div>
             <div class="dialog-buttons">
@@ -819,8 +827,8 @@
         </div>
         <div class="header-right">
             <div>⚡ <span id="p-stamina">--</span></div>
-            <div><img src="草コイン.png" style="width:14px; height:14px; vertical-align:middle; margin-top:-2px;"> <span id="p-gold">--</span></div>
-            <div><img src="草の化石.png" onerror="this.src='草の化石.jpg'" style="width:14px; height:14px; vertical-align:middle; margin-top:-2px;"> <span id="p-mats">--</span></div>
+            <div><img src="草コイン.png" class="resource-icon"> <span id="p-gold">--</span></div>
+            <div><img src="草の化石.png" onerror="this.src='草の化石.jpg'" class="resource-icon"> <span id="p-mats">--</span></div>
         </div>
     </div>
 
@@ -851,6 +859,11 @@
             <div class="chapter-card" onclick="selectChapter(3)">
                 <div class="chapter-title">第3章：せいまろ帝国と甘美なるバグ</div>
                 <div class="chapter-desc">パステルカラーの異国「せいまろ帝国」での出会いと、お菓子なダンジョンに潜む脅威。お父さんの足跡がここに…？</div>
+            </div>
+
+            <div class="chapter-card" onclick="selectChapter(4)">
+                <div class="chapter-title">第4章：めんどくさがりやと絆のテニス</div>
+                <div class="chapter-desc">魔法文明を持つ「ハム魔導国」へ！めんどくさがりの王様と、異次元のテニスバトルが幕を開ける！</div>
             </div>
             
             <div style="flex: 1;"></div>
@@ -1033,6 +1046,8 @@ function updateStoryBGM() {
         } else {
             playBGM("Small_World.mp3");
         }
+    } else if (activeChapter === 4) {
+        playBGM("Small_World.mp3"); 
     }
 }
 
@@ -1049,6 +1064,9 @@ const speakerIcons = {
     "獣人の警備兵": "https://img.icons8.com/color/256/000000/werewolf.png",
     "獣人の隊長": "https://img.icons8.com/color/256/000000/lion.png",
     "ボスグリッチ": "https://img.icons8.com/color/256/000000/monster-face.png",
+    "ハムスターの魔導師": "https://img.icons8.com/color/256/000000/hamster.png",
+    "緋色・ハム": "緋色の金権覇者ハム.png",
+    "側近ハム": "https://img.icons8.com/color/256/000000/hamster.png",
     "default": "https://img.icons8.com/color/256/000000/user.png" 
 };
 
@@ -1286,6 +1304,108 @@ const storyChapters = {
                 ]
             }
         ]
+    },
+    4: {
+        title: "第4章：めんどくさがりやと絆のテニス",
+        stages: [
+            {
+                id: 1, name: "4-1. 異次元のテニス", rewards: { exp: 50, coins: 1000, materials: 10 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "最初の国ジュン・ルナリア、そして獣人たちのせいまろ帝国を駆け抜けた主人公とカグヤ。石像の光が指し示した方向へひたすら走ると、そこには見渡す限りの広大なひまわり畑が広がっていました。" },
+                    { speaker: "ナレーション", text: "しかし、その国境を越えた瞬間、二人の頭上を「シュババババッ！」と凄まじい風切り音が通り抜けます。" },
+                    { speaker: "カグヤ", text: "「な、何事！？ 敵襲！？」" },
+                    { speaker: "ナレーション", text: "カグヤが咄嗟に二振りの短剣を構えて身構えますが、飛んできたのは矢でも魔法弾でもなく、黄色い球体――テニスボールでした。" },
+                    { speaker: "ナレーション", text: "見上げれば、巨大なひまわりの茎が複雑に絡み合い、空中には魔力で形成された幾何学的なテニスコートがいくつも浮かんでいます。そこでは、ちいさなラケットを持ったモフモフのハムスターたちが、信じられない速度でラリーを続けていたのです。" },
+                    { speaker: "ハムスターの魔導師", text: "「おいおい、そこは魔導サーブの着地点だから危ないの。どいてほしいの」" },
+                    { speaker: "ナレーション", text: "声をかけてきたのは、いっちょ前にテニスウェア（サイズは超ミニ）を着たハムスターの魔導師でした。この国こそが、世界トップクラスの魔法文明を持ち、あらゆる魔法をテニスのラリーで相殺・増幅させる競技を産んだ「ハム魔導国」だったのです。" }
+                ]
+            },
+            {
+                id: 2, name: "4-2. めんどくさがりな最高権力者", rewards: { exp: 80, coins: 1200, materials: 15 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "主人公の持つ「導きの魔導石」が強く輝き、案内されたのは国の中枢である『センターコート大宮殿』。" },
+                    { speaker: "ナレーション", text: "そこにいたのが、この国の頂点に君臨する国王――緋色（ひいろ）・ハムでした。\n緋色は気品ある美しい赤い毛並みをしていますが、豪華な玉座の上で完全に丸まって、お団子のようになって寝ています。" },
+                    { speaker: "主人公", text: "「あの……あなたがこの国のトップ、緋色・ハム様ですか？」" },
+                    { speaker: "緋色・ハム", text: "「むにゃ……なに？いま、魔力出量の計算中で忙しいの。……まぁ嘘なんだけど。ほんまはただ寝てたいだけ、用があるなら聞くけど……」" },
+                    { speaker: "カグヤ", text: "「あれほんとに国のトップ？」" },
+                    { speaker: "ナレーション", text: "カグヤが呆れたようにジト目を向けますが、緋色は「ふぇぇ、女の子が怒ってて怖いの……」と、さらにクッションの隙間に潜り込もうとします。絵に描いたようなめんどくさがり屋でした。" },
+                    { speaker: "ナレーション", text: "しかし、主人公が懐からお父さんの形見である「魔導石」を取り出した瞬間、緋色の細い目がピクッと動きました。次の瞬間、玉座から緋色の姿が消えます。" },
+                    { speaker: "ナレーション", text: "「――シュッ！」\n目にも留まらぬ速さで主人公の目の前に空間転移してきた緋色は、いつの間にか小さな木製ラケットを構え、主人公の魔導石から漏れ出ていた不気味なバグの残滓を、見事にスマッシュして消滅させてしまいました。" },
+                    { speaker: "カグヤ", text: "「（速い……！ 私の短剣の目撃すら超えてる……！？）」" },
+                    { speaker: "緋色・ハム", text: "「ふぅ、危ないの。その石、世界のバグを引き寄せる危険な回路が組み込まれてるの。……ふーん、お主、あいつの息子なの。道理で、妙なものを持ってるわけなの」" },
+                    { speaker: "主人公", text: "「あいつ……って、俺のお父さんのことを知っているんですか！？」" },
+                    { speaker: "緋色・ハム", text: "「知ってるも何も俺さ、あいつと長い仲なんやけど」" },
+                    { speaker: "カグヤ", text: "「えーそうなの、だったら話は早いね、あなたお父さんがどこにいるか知らないの？」" },
+                    { speaker: "緋色・ハム", text: "「ごめんけど、それは俺にもわからん、もう10年もあってないしな、てかなんかあったん？」" },
+                    { speaker: "主人公", text: "「え……。実は、10年前に急に姿を消しちゃって。俺、この魔導石を頼りにお父さんを探す旅をしてるんだ」" },
+                    { speaker: "カグヤ", text: "「ちょっと、あなた知り合いじゃなかったの？ 10年も連絡なしってどういうことよ。……あ、もしかして、あなたがめんどくさがって連絡無視してただけじゃないでしょうね？」" },
+                    { speaker: "緋色・ハム", text: "「人聞きが悪いの。あいつが急に『世界のグリッジをどうにかしてくる』って言ったのを最後に会ってないんよ。……あー、でもそうか。あいつ、帰ってないんやなぁ……」" },
+                    { speaker: "ナレーション", text: "緋色・ハムが少し寂しそうに視線を落とすと、宮殿の空気は一瞬だけしんみりとしたものに変わりました。\nその瞬間、宮殿の床に敷かれた魔導回路が真っ赤に点滅し、けたたましい警告音が鳴り響きました。" },
+                    { speaker: "カグヤ", text: "「な、何事！？ また敵襲！？」" },
+                    { speaker: "側近ハム", text: "「緋色様！ 大変です！ 国境のひまわり畑の結界が破られました！ 黒いノイズをまとった『グリッジの軍勢』が、押し寄せてきています！」" },
+                    { speaker: "ナレーション", text: "スクリーンに映し出されたのは、空間をバリバリと引き裂きながら、紫色のバグノイズをまとった異形のモンスターたち。その数は数千、数万。" },
+                    { speaker: "カグヤ", text: "「嘘でしょ……！ なによあの数！ さすがにあのモフモフたちじゃ一溜まりも――」" }
+                ]
+            },
+            {
+                id: 3, name: "4-3. ハム魔導国の総力戦", rewards: { exp: 250, coins: 3000, materials: 25 },
+                monsters: [
+                    { name: "雑魚グリッジA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッジB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッジC", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
+                ],
+                dialogue: [
+                    { speaker: "ナレーション", text: "不安に顔を曇らせるカグヤ。しかし、横にいる緋色・ハムの雰囲気がガラリと変わります。" },
+                    { speaker: "緋色・ハム", text: "「……はぁ、本当にタイミングが悪いの。せっかくあいつの話をしてたのに、邪魔が入ったんやけど」" },
+                    { speaker: "ナレーション", text: "緋色・ハムがゆっくりと立ち上がると、その小さな体から、空間がひび割れるほどの圧倒的な魔力が膨れ上がりました。寝ぼけ眼は完全に消え去り、その瞳は鋭く輝いています。" },
+                    { speaker: "緋色・ハム", text: "「全魔導師のみんな。ラケットを持って。ハム魔導国の力グリッジどもに見せてあげよ」" },
+                    { speaker: "ナレーション", text: "緋色の一声で、何万匹ものハムスターたちが一斉に魔導ラケットを構えました。\n国境のひまわりコート。グリッジの軍勢が放つ不気味なバグ魔法の弾道が、雨あられのように空を埋め尽くします。" },
+                    { speaker: "ナレーション", text: "しかし、前衛に立ったハムスター魔導師たちが一斉にラケットをスイングし、敵の放った魔法を弾き返し、倍の威力を持った光のテニスボールとなって敵のど真ん中に突き刺さります！" },
+                    { speaker: "カグヤ", text: "「う、嘘でしょ！？ 敵の攻撃を全部ラリーで打ち返してる……！？」" },
+                    { speaker: "緋色・ハム", text: "「ふん、これが世界トップクラスの魔法文明『魔導テニス』なの。攻撃が激しければ激しいほど、こちらのラリーの威力も上がるんよ」" },
+                    { speaker: "ナレーション", text: "迫り来るグリッジの第2波。テニスボールでは軌道が読みづらい変幻自在なバグの散弾が降り注ぎ、ハムスターたちの頭上へ！" },
+                    { speaker: "カグヤ", text: "「させるかっての……！ ハッ！！」" },
+                    { speaker: "ナレーション", text: "カグヤが空中でバグ弾を綺麗に切り裂き相殺します！\nその時、主人公の持つ「魔導石」が激しく脈動し始めました。" },
+                    { speaker: "緋色・ハム", text: "「ふーん、お主の魔導石、周りの魔力を吸収して増幅する特性があるの。……だったら、それを使ってみるといいの！」" },
+                    { speaker: "ナレーション", text: "主人公が魔導石を強く握り締めると、純白のエネルギーが凝縮され、眩しく輝く「光の魔導ラケット」の形を成しました！" },
+                    { speaker: "主人公", text: "「これが……魔導石の力……。よし、いくぞ！」" }
+                ]
+            },
+            {
+                id: 4, name: "4-4. 絆のツインズラリー", rewards: { exp: 800, coins: 10000, materials: 80 },
+                monsters: [
+                    { name: "グリッジ・サーヴァント", hp: 1000, maxHp: 1000, emoji: "🦖", dmg: 40 }
+                ],
+                dialogue: [
+                    { speaker: "ナレーション", text: "地響きと共に、軍勢の奥からラケットの何十倍もの大きさがある巨大な『グリッジ・サーヴァント（バグの巨獣）』が姿を現しました！" },
+                    { speaker: "ナレーション", text: "巨獣がその口を開き、国全体を吹き飛ばしかねない、禍々しい紫色の超巨大魔導砲をチャージします。" },
+                    { speaker: "緋色・ハム", text: "「全員、下がって！ あれのレシーブは、並の魔力じゃラケットごと吹き飛ばされるの！」" },
+                    { speaker: "カグヤ", text: "「下がれって言われても、あれが直撃したら国ごと終わりでしょ！ 主人公、やるわよ！」" },
+                    { speaker: "主人公", text: "「ああ、カグヤ！ 俺たちの力を合わせよう！」" },
+                    { speaker: "ナレーション", text: "カグヤが主人公の前に走り込み、短剣をクロスさせて巨獣の放った一撃を全力で受け止めます！\n「くっ……あーーーっ！！」\n完全に押し切られる寸前、カグヤは魔力を爆発させ、主人公のほうへと「トス」を上げました！" },
+                    { speaker: "主人公", text: "「カグヤが繋いでくれた……これで、決める！！」" },
+                    { speaker: "ナレーション", text: "主人公は大きくバックスイングを取り、光のラケットに全魔力を集中。カグヤが上げた最高のトスに向かって、渾身の力でジャンピングスマッシュを叩き込みます！" }
+                ]
+            },
+            {
+                id: 5, name: "4-5. 賢者の贈り物", rewards: { exp: 100, coins: 2000, materials: 20 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "ドーーーン！！！という爆音と共に、主人公の放ったレシーブは、ハム魔導国すべてのひまわりの魔力を巻き込んだ黄金の光の弾丸となり、巨獣の胸のコアへと真っ直ぐ突き刺さりました！\n巨獣が爆発すると、軍勢は一斉に霧散していきました。" },
+                    { speaker: "ナレーション", text: "静まり返るひまわりコート。主人公の手の中で、光のラケットが静かに魔導石の姿に戻ります。\n宮殿の奥から、元の脱力した雰囲気に戻った緋色・ハムが歩いてやってきました。その手には、少し大きめの古びた「旅のかばん」が握られています。" },
+                    { speaker: "カグヤ", text: "「ふぅ……なんとかなったわね。あんたたちの魔導テニス、めちゃくちゃ破天荒だけど凄かったわ」" },
+                    { speaker: "緋色・ハム", text: "「やるやん。まさかあいつの魔導石の力をそんな風に武器に変えるなんて、俺の計算にもなかったの。お主、あいつ以上の大物になるかもしれないの」" },
+                    { speaker: "主人公", text: "「ありがとうございます。……あの、そのかばんは？」" },
+                    { speaker: "緋色・ハム", text: "「これ？ ……あいつが10年前に旅立つ前さ、次にこの国に来たときにプレゼントしようと思って、俺が用意してたかばんなんよね。結局、あいつは戻ってこんかったから、ずっと宮殿の奥に眠ってたんやけど」" },
+                    { speaker: "ナレーション", text: "緋色・ハムはそう言うと、かばんを主人公の前に差し出しました。\n「あいつにはもう渡せんし、息子の君が持っていき。頑丈につくってあるから、これからの旅にきっと役立つんよ」" },
+                    { speaker: "主人公", text: "「いいんですか……？ ありがとうございます。大切に使います！」" },
+                    { speaker: "カグヤ", text: "「へえ、あんたにしては粋なことするじゃない。めんどくさがって横流ししたわけじゃないわよね？」" },
+                    { speaker: "緋色・ハム", text: "「人聞きが悪いの。せっかくの感動シーンなんやから、水差さんといてほしいの」" },
+                    { speaker: "ナレーション", text: "緋色・ハムはふいっと顔をそむけましたが、その表情はどこか嬉しそうです。\n「そのかばんの中には、この国の最先端の魔導地図も入れといたから。……さ、俺はもう魔力使って眠いから、寝室に戻るの。君たちも休んでな」" },
+                    { speaker: "ナレーション", text: "そう言い残すと、緋色・ハムは「シュッ」と玉座へと戻り、すぐに寝息を立て始めました。" },
+                    { speaker: "カグヤ", text: "「最後はやっぱりそれかーい！ ……でも、これで次の手がかりと、良い相棒（かばん）が手に入ったわね。いきましょう、主人公！」" }
+                ]
+            }
+        ]
     }
 };
 
@@ -1393,7 +1513,7 @@ function isStageAccessible(chapId, stageId) {
 
     if (stageId === 1) {
         // 現在の章のインデックスを取得
-        const chapterOrder = [1, 2, 2.5, 3];
+        const chapterOrder = [1, 2, 2.5, 3, 4];
         const currentIdx = chapterOrder.indexOf(chapId);
         if (currentIdx <= 0) return false;
         
@@ -1616,6 +1736,7 @@ function initBattleParty() {
                 if (c) {
                     let iconSrc = c.isProtagonist ? (saveStatus.playerIcon || defaultAvatar) : speakerIcons["default"];
                     if (c.uid === "c_kaguya") iconSrc = "カグヤ.png"; 
+                    if (c.uid === "c_hiiro") iconSrc = "緋色の金権覇者ハム.png";
 
                     battleParty.push({
                         uid: c.uid,
@@ -1640,6 +1761,28 @@ function initBattleParty() {
             attack: 50, ct: 0, defCt: 100, isDefending: false, icon: saveStatus.playerIcon || defaultAvatar
         });
     }
+
+    // ★ 第4章の戦闘限定：編成に空きがあれば「緋色・ハム」がゲストとして参戦！
+    if (activeChapter === 4) {
+        let hasHiiro = battleParty.some(p => p.uid === "c_hiiro" || p.uid === "c_hiiro_guest");
+        if (!hasHiiro && battleParty.length < 4) {
+            battleParty.push({
+                uid: "c_hiiro_guest",
+                name: "緋色・ハム",
+                level: 99,
+                maxHp: 999,
+                currentHp: 999,
+                attack: 250, // ゲストなので強めに設定
+                ct: 0,
+                defCt: 100,
+                isDefending: false,
+                icon: "緋色の金権覇者ハム.png"
+            });
+            setTimeout(() => {
+                showToastMsg("緋色・ハム がゲストとして戦闘に参加！");
+            }, 1000);
+        }
+    }
 }
 
 // 📌 DOM初期生成
@@ -1663,6 +1806,9 @@ function initBattleField() {
         if (i < battleParty.length) {
             let p = battleParty[i];
             let skillName = (i === 0) ? "渾身の一撃" : "奥義";
+            // 緋色・ハムの専用スキル名演出
+            if (p.uid === "c_hiiro" || p.uid === "c_hiiro_guest") skillName = "魔導スマッシュ";
+
             let colorBg = skillColors[i % skillColors.length];
 
             pContainer.innerHTML += `
@@ -1850,6 +1996,8 @@ function triggerComboSkill(charIdx) {
     if (target.hp < 0) target.hp = 0;
 
     let skillName = (charIdx === 0) ? "渾身の一撃" : "奥義";
+    if (attacker.uid === "c_hiiro_guest" || attacker.uid === "c_hiiro") skillName = "魔導スマッシュ";
+    
     logBattle(`⚔️ ${attacker.name} の ${skillName}！<br>${target.name} に <strong>${finalDamage}</strong> のダメージ！`);
 
     // CTをリセット
@@ -1936,12 +2084,13 @@ function handleVictory() {
     saveStatus.coins += rewards.coins;
     saveStatus.materials += rewards.materials;
 
-    // ★ 経験値を編成中のキャラ全員に付与し、個別にレベルアップを計算
+    // ★ 経験値を編成中のキャラ全員（ゲスト以外）に付与し、個別にレベルアップを計算
     let levelUpMessageHTML = "";
     if (saveStatus.party && saveStatus.characters) {
         saveStatus.party.forEach(uid => {
             if (uid) {
                 let c = saveStatus.characters.find(x => x.uid === uid);
+                // ゲストキャラ（"c_hiiro_guest"等）は保存されているcharacterデータにいないので経験値は入らない
                 if (c) {
                     if (c.exp === undefined) c.exp = 0;
                     c.exp += rewards.exp;
@@ -1968,7 +2117,6 @@ function handleVictory() {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
         saveStatus.questFlags.chapter2_cleared = true;
     }
-    // 2.5章クリアフラグ
     if (activeChapter === 2.5 && activeStage.id === 4) {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
         saveStatus.questFlags.chapter2_5_cleared = true;
@@ -1976,6 +2124,10 @@ function handleVictory() {
     if (activeChapter === 3 && activeStage.id === 5) {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
         saveStatus.questFlags.chapter3_cleared = true;
+    }
+    if (activeChapter === 4 && activeStage.id === 5) {
+        if(!saveStatus.questFlags) saveStatus.questFlags = {};
+        saveStatus.questFlags.chapter4_cleared = true;
     }
 
     // ★ 2-4クリア時に「カグヤ（c_kaguya）」を仲間に加える処理
