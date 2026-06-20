@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>おれたちの最強RPG - ストーリーモード</title>
+    <title>KAZIN - ストーリーモード</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
 
@@ -58,6 +58,7 @@
             text-align: right;
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .header-right span {
@@ -218,12 +219,12 @@
             border: 1px solid #718096;
         }
 
-        /* 🎵 ポップアップ確認ダイアログ (はい/いいえ) */
+        /* 🎵 モーダル全般 */
         .modal-overlay {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -267,6 +268,18 @@
             display: flex;
             gap: 15px;
         }
+
+        /* ⏳ ローディング画面用 */
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 242, 254, 0.3);
+            border-top-color: #00f2fe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes blink { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
         /* 👤 立ち絵（全体）表示エリア */
         .character-stand-container {
@@ -551,11 +564,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 55px 0; 
+            /* スクロールエリアの高さ約190pxの中央に95pxのボタンが来るように上下のpaddingを調整 */
+            padding: 48px 0; 
             gap: 20px;
         }
 
-        /* 🔴 メインスキルボタン (大幅に大型化) */
+        /* 🔴 メインスキルボタン */
         .skill-btn {
             width: 95px;
             height: 95px;
@@ -572,7 +586,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            scroll-snap-align: center;
+            scroll-snap-align: center; /* 中央にスナップ */
             scroll-snap-stop: always;
         }
 
@@ -779,14 +793,20 @@
             <div class="dialog-title">⚡ スタミナ回復</div>
             <div class="dialog-msg">
                 クエストに出発するためのスタミナが足りません。<br><br>
-                <strong style="color:#ffeb3b;">草コイン 1000G</strong> で<br>スタミナを <strong style="color:#00f2fe;">100 回復</strong> しますか？<br>
-                <span style="font-size:11px; color:#aaa;">（所持コイン: <span id="stamina-coins-val"></span> G）</span>
+                <strong style="color:#ffeb3b;"><img src="草コイン.png" style="width:16px; vertical-align:middle; margin-top:-2px;"> 1000</strong> で<br>スタミナを <strong style="color:#00f2fe;">100 回復</strong> しますか？<br>
+                <span style="font-size:11px; color:#aaa;">（所持: <span id="stamina-coins-val"></span>）</span>
             </div>
             <div class="dialog-buttons">
                 <button class="btn-action btn-secondary" onclick="closeStaminaModal()">やめる</button>
                 <button class="btn-action btn-primary" onclick="buyStamina()">回復する</button>
             </div>
         </div>
+    </div>
+
+    <!-- ⌛ ローディング画面 -->
+    <div id="loading-screen" class="modal-overlay" style="z-index: 300; background: #000; flex-direction: column;">
+        <div class="loader-spinner"></div>
+        <div style="margin-top: 20px; font-size: 16px; font-weight: bold; color: #00f2fe; letter-spacing: 2px; animation: blink 1s infinite alternate;">NOW LOADING...</div>
     </div>
 
     <!-- トースト通知 -->
@@ -800,8 +820,8 @@
         </div>
         <div class="header-right">
             <div>⚡ <span id="p-stamina">--</span></div>
-            <div>🪙 <span id="p-gold">--</span></div>
-            <div>💎 <span id="p-mats">--</span></div>
+            <div><img src="草コイン.png" style="width:14px; height:14px; vertical-align:middle; margin-top:-2px;"> <span id="p-gold">--</span></div>
+            <div><img src="草の化石.png" onerror="this.src='草の化石.jpg'" style="width:14px; height:14px; vertical-align:middle; margin-top:-2px;"> <span id="p-mats">--</span></div>
         </div>
     </div>
 
@@ -950,6 +970,68 @@ let saveStatus = {
     "questFlags": {}
 };
 
+// --- 🎵 BGM & SE管理システム ---
+let currentBgmAudio = null;
+let currentBgmSrc = "";
+let isBgmAllowed = false;
+const clickSound = new Audio('決定ボタンを押す10.mp3');
+
+document.addEventListener('click', function(e) {
+    if (!isBgmAllowed) {
+        isBgmAllowed = true;
+        if (currentBgmAudio && currentBgmAudio.paused) {
+            currentBgmAudio.play().catch(e => console.log("BGM Play Error:", e));
+        }
+    }
+
+    // ボタンやカードタップ時に効果音を鳴らす
+    if (e.target.closest('button') || e.target.closest('.chapter-card') || e.target.closest('.stage-card') || e.target.closest('.skill-btn') || e.target.closest('.def-btn')) {
+        const rawSeVolume = saveStatus.seVolume !== undefined ? saveStatus.seVolume : 50;
+        clickSound.volume = rawSeVolume / 100;
+        try { clickSound.currentTime = 0; clickSound.play().catch(err => {}); } catch(e) {}
+    }
+});
+
+function playBGM(src) {
+    if (currentBgmSrc === src) return; 
+
+    if (currentBgmAudio) {
+        currentBgmAudio.pause();
+        currentBgmAudio.currentTime = 0;
+    }
+
+    currentBgmSrc = src;
+    if (src === "") {
+        currentBgmAudio = null;
+        return;
+    }
+
+    currentBgmAudio = new Audio(src);
+    currentBgmAudio.loop = true;
+    
+    // bgmVolume設定 (sugoigameの2倍強化ロジックに準拠)
+    const rawBgmVolume = saveStatus.bgmVolume !== undefined ? saveStatus.bgmVolume : 50;
+    currentBgmAudio.volume = Math.min((rawBgmVolume / 100) * 2, 1.0);
+
+    if (isBgmAllowed) {
+        currentBgmAudio.play().catch(e => console.log("BGM Play Error:", e));
+    }
+}
+
+function updateStoryBGM() {
+    if (activeChapter === 1) {
+        playBGM("プレリュード第2番「名前を入力してください」.mp3");
+    } else if (activeChapter === 2) {
+        playBGM("王都.mp3");
+    } else if (activeChapter === 3) {
+        if (activeStage && activeStage.id === 1) {
+            playBGM("進軍_2.mp3");
+        } else {
+            playBGM("Small_World.mp3");
+        }
+    }
+}
+
 // --- 🖼️ 画像データ設定 ---
 const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300f2fe" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2300f2fe" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2300f2fe"/></svg>';
 
@@ -1045,8 +1127,8 @@ const storyChapters = {
             {
                 id: 4, name: "2-4. 歪んだ地下水道の異形", rewards: { exp: 200, coins: 2500, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。" },
@@ -1059,7 +1141,7 @@ const storyChapters = {
                 monsters: [ { name: "デブグリッチ", hp: 450, maxHp: 450, emoji: "👹", dmg: 22 } ],
                 dialogue: [
                     { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
-                    { speaker: "カグヤ", text: "「私 or 誰かが素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
+                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
                     { speaker: "主人公", text: "「わかった！ そこだっ……！」" }
                 ]
             },
@@ -1088,7 +1170,7 @@ const storyChapters = {
                     { speaker: "獣人の警備兵", text: "「人間め、ここから先は通さん！」" },
                     { speaker: "ナレーション", text: "現れたのは、鋭い爪と牙を持ち、巨大な槍を構えた獣人の警備兵たち。主人公たちを侵略者だと誤認して襲いかかってきたのです。" },
                     { speaker: "カグヤ", text: "「挨拶代わりにしては、ちょっと手荒すぎじゃない？ ――まぁ、いいわ。旅の疲れを吹き飛ばすのに丁度いいわね！」" },
-                    { speaker: "主人公", text: "「カグヤ、命までは奪わないようにしよう！」" },
+                    { speaker: "主人公", text: "「カグヤ、命までは奪わないようにね！」" },
                     { speaker: "ナレーション", text: "二人は息の合った動きで、獣人たちの攻撃をいなして立ち向かいます！" }
                 ]
             },
@@ -1246,6 +1328,7 @@ function startStaminaTimer() {
 
 function goBackToMainMenu() {
     saveData();
+    if(currentBgmAudio) currentBgmAudio.pause();
     window.location.href = "sugoigame.html";
 }
 
@@ -1273,12 +1356,16 @@ function showScreen(screenId) {
     const footer = document.getElementById('footer-nav');
     if (screenId === 'chapter-screen') {
         footer.innerHTML = `<button class="btn-action btn-secondary" onclick="goBackToMainMenu()">🔙 拠点に戻る</button>`;
+        playBGM("密林の神殿B.mp3");
     } else if (screenId === 'stage-screen') {
         footer.innerHTML = `<button class="btn-action btn-secondary" onclick="showScreen('chapter-screen')">🔙 ワールド選択に戻る</button>`;
+        playBGM("密林の神殿B.mp3");
     } else if (screenId === 'story-screen') {
         footer.innerHTML = `<button class="btn-action btn-primary" onclick="progressDialogue()">次へ進む ➔</button>`;
+        updateStoryBGM();
     } else if (screenId === 'battle-screen') {
         footer.innerHTML = `<button class="btn-action btn-danger" onclick="handleDefeat()">🏳️ 逃げる</button>`;
+        playBGM("龍太鼓_2.mp3");
     } else if (screenId === 'result-screen') {
         footer.innerHTML = `<button class="btn-action btn-primary" onclick="finishStageAndSave()">💾 クエストを終了してセーブ</button>`;
     }
@@ -1309,7 +1396,7 @@ function selectChapter(chapId) {
         card.innerHTML = `
             <div class="stage-info">
                 <div class="stage-name">${isLock ? '🔒 ' : ''}${stg.name}</div>
-                <div class="stage-reward-preview">🎁 報酬: ${stg.rewards.coins}G / ${stg.rewards.materials}素材</div>
+                <div class="stage-reward-preview">🎁 報酬: <img src="草コイン.png" style="width:10px;vertical-align:middle;">${stg.rewards.coins} / <img src="草の化石.png" onerror="this.src='草の化石.jpg'" style="width:10px;vertical-align:middle;">${stg.rewards.materials}</div>
             </div>
             ${badge}
         `;
@@ -1356,9 +1443,16 @@ function proceedToStage() {
     activeStage = selectedStageData;
     closeConfirmModal();
     
-    currentDialogueIdx = 0;
-    setupDialogue();
-    showScreen('story-screen');
+    // ⌛ ロード画面表示
+    document.getElementById('loading-screen').style.display = 'flex';
+    if(currentBgmAudio) currentBgmAudio.pause(); // ロード中はBGM一時停止
+
+    setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+        currentDialogueIdx = 0;
+        setupDialogue();
+        showScreen('story-screen');
+    }, 2000);
 }
 
 function openStaminaModal() {
@@ -1546,7 +1640,6 @@ function initBattleField() {
                     <!-- ★ 最下部固定の防御ボタン -->
                     <div class="def-btn-area">
                         <div class="def-btn" id="def-btn-${i}" onclick="triggerDefense(${i})">
-                            <!-- 防御ボタンも上からマスクが下がる表現 -->
                             <div class="def-ct-mask" id="def-ct-mask-${i}"></div>
                             <div class="def-text" id="def-text-${i}">ぼうぎょ</div>
                             <div class="def-lv">Lv1</div>
@@ -1619,7 +1712,6 @@ function updateBattleState() {
                 defBtn.style.pointerEvents = 'none';
             } else {
                 defBtn.style.pointerEvents = 'auto';
-                // 防御のCTゲージ（0から100に溜まる、黒いマスクが上から減る）
                 defMask.style.height = `${100 - p.defCt}%`;
                 
                 if (p.isDefending) {
@@ -1640,13 +1732,10 @@ function startCTTimer() {
     ctInterval = setInterval(() => {
         battleParty.forEach(p => {
             if (p.currentHp > 0) {
-                // メインスキルのチャージ
                 if (p.ct < 100) { p.ct += 15; if (p.ct > 100) p.ct = 100; }
-                // 防御スキルのチャージ
                 if (p.defCt < 100) { p.defCt += 15; if (p.defCt > 100) p.defCt = 100; }
             }
         });
-        
         updateBattleState();
     }, 1000);
 }
@@ -1854,8 +1943,8 @@ function handleVictory() {
 
     document.getElementById('rewards-container').innerHTML = `
         <div class="reward-item-row"><span>🔸 獲得経験値(全員)</span><span style="color: #00d2ff;">+ ${rewards.exp} EXP</span></div>
-        <div class="reward-item-row"><span>🪙 獲得草コイン</span><span style="color: #ffeb3b;">+ ${rewards.coins} G</span></div>
-        <div class="reward-item-row"><span>💎 獲得草の化石(素材)</span><span style="color: #e056fd;">+ ${rewards.materials} 個</span></div>
+        <div class="reward-item-row"><span><img src="草コイン.png" style="width:14px;vertical-align:middle;"> 獲得草コイン</span><span style="color: #ffeb3b;">+ ${rewards.coins} G</span></div>
+        <div class="reward-item-row"><span><img src="草の化石.png" onerror="this.src='草の化石.jpg'" style="width:14px;vertical-align:middle;"> 獲得草の化石</span><span style="color: #e056fd;">+ ${rewards.materials} 個</span></div>
         ${levelUpMessageHTML}
     `;
 }
@@ -1867,6 +1956,7 @@ function finishStageAndSave() {
 // --- 🏁 起動ロード処理 ---
 window.onload = function() {
     loadData();
+    showScreen('chapter-screen');
 };
 </script>
 
