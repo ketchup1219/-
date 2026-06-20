@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KAZIN - ストーリーモード</title>
+    <title>おれたちの最強RPG - ストーリーモード</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
 
@@ -564,7 +564,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* スクロールエリアの高さ約190pxの中央に95pxのボタンが来るように上下のpaddingを調整 */
             padding: 48px 0; 
             gap: 20px;
         }
@@ -844,6 +843,11 @@
                 <div class="chapter-desc">隣国「ジュン・ルナリア」に到着したあなたを待ち受けていたのは身に覚えのない指名手配。謎の美少女「カグヤ」と共に、歪んだ地下道からの脱出を目指す！</div>
             </div>
 
+            <div class="chapter-card" onclick="selectChapter(2.5)">
+                <div class="chapter-title">第2.5章：星空のキャンプ</div>
+                <div class="chapter-desc">追手を振り切り、荒野で一夜を明かす二人。焚き火を囲み、互いの過去と想いが交差する。</div>
+            </div>
+
             <div class="chapter-card" onclick="selectChapter(3)">
                 <div class="chapter-title">第3章：せいまろ帝国と甘美なるバグ</div>
                 <div class="chapter-desc">パステルカラーの異国「せいまろ帝国」での出会いと、お菓子なダンジョンに潜む脅威。お父さんの足跡がここに…？</div>
@@ -1021,7 +1025,7 @@ function playBGM(src) {
 function updateStoryBGM() {
     if (activeChapter === 1) {
         playBGM("プレリュード第2番「名前を入力してください」.mp3");
-    } else if (activeChapter === 2) {
+    } else if (activeChapter === 2 || activeChapter === 2.5) {
         playBGM("王都.mp3");
     } else if (activeChapter === 3) {
         if (activeStage && activeStage.id === 1) {
@@ -1141,7 +1145,7 @@ const storyChapters = {
                 monsters: [ { name: "デブグリッチ", hp: 450, maxHp: 450, emoji: "👹", dmg: 22 } ],
                 dialogue: [
                     { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
-                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
+                    { speaker: "カグヤ", text: "「私 or 誰かが素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
                     { speaker: "主人公", text: "「わかった！ そこだっ……！」" }
                 ]
             },
@@ -1152,6 +1156,57 @@ const storyChapters = {
                     { speaker: "カグヤ", text: "「崩れるわ！ あそこに地上へと繋がる縦穴が出現した、急いで！」" },
                     { speaker: "主人公", text: "「お前も無事だったんだな、よかった！」" },
                     { speaker: "ナレーション", text: "愛馬とも無事に再会を果たし、人間の国の衛兵たちを振り切った二人は、さらなる遠くを目指して荒野へと歩みを進めるのでした。" }
+                ]
+            }
+        ]
+    },
+    2.5: {
+        title: "第2.5章：星空のキャンプ",
+        stages: [
+            {
+                id: 1, name: "2.5-1. 追手を巻いた夜", rewards: { exp: 30, coins: 500, materials: 5 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "最初の国「ジュン・ルナリア」の激しい追撃を命からがら振り切り、主人公とカグヤが辿り着いたのは、せいまろ帝国へと続く峻険な山脈の入り口でした。" },
+                    { speaker: "ナレーション", text: "夜の帳が下りる頃、人間が滅多に立ち入らない荒野の岩陰に、二人は小さなキャンプ地を設営します。" },
+                    { speaker: "ナレーション", text: "カグヤが手際よく火を起こすと、パチパチと静かな音を立てて焚き火が闇を照らし出しました。" }
+                ]
+            },
+            {
+                id: 2, name: "2.5-2. ぶっきらぼうな給餌", rewards: { exp: 30, coins: 500, materials: 5 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "慣れない逃亡劇に少し疲れた表情の主人公。カグヤはそんな主人公をジロリと見ると、懐から干し肉と硬いパンを取り出し、無造作に放り投げてよこします。" },
+                    { speaker: "カグヤ", text: "「ほら、食べて。これからの山越えは、今日以上に体力がいるからね」" },
+                    { speaker: "ナレーション", text: "カグヤ自身も火の傍らに腰掛け、愛用の一対の短剣を取り出して、焚き火の光で刃こぼれがないか丁寧に手入れを始めました。" },
+                    { speaker: "主人公", text: "「ありがとう。……そういえば、ルナリアではバタバタしていて、ちゃんとお互いのことを話していなかったね」" },
+                    { speaker: "ナレーション", text: "主人公が切り出すと、カグヤは手を止め、フッと自嘲気味に笑います。" },
+                    { speaker: "カグヤ", text: "「そういえばそうね。私はカグヤ。……と言っても、自分が本当は誰なのか、どこで生まれたのかすら知らないんだけどね。」" },
+                    { speaker: "カグヤ", text: "「気づいた時にはルナリアの路地裏にいて、自分の名前と、この短剣の扱い方以外、何も覚えてないのよ」" },
+                    { speaker: "ナレーション", text: "不敵な態度の裏にある、カグヤの「記憶喪失」という切ない過去。驚く主人公をまっすぐ見つめ、カグヤは言葉を続けます。" },
+                    { speaker: "カグヤ", text: "「ただこの短剣で生き抜いてきた。それだけよ。あんたの腕前は認めてる。で、あんたは何者なの？」" },
+                    { speaker: "ナレーション", text: "主人公は少し照れくさそうに微笑みながら、自分がこの世界を巡る「トレジャーハンター」であることを明かしました。" }
+                ]
+            },
+            {
+                id: 3, name: "2.5-3. 表の顔、裏の目的", rewards: { exp: 50, coins: 800, materials: 10 }, monsters: [],
+                dialogue: [
+                    { speaker: "カグヤ", text: "「トレジャーハンター、ねぇ……。ただの宝探しにしては、ルナリアの軍に追われてまで国を飛び出すなんて命がいくつあっても足りないわよ。本当の目的は何？」" },
+                    { speaker: "ナレーション", text: "核心を突かれた主人公は、静かにポケットからお父さんの形見である「導きの魔導石」を取り出しました。石は焚き火の炎に呼応するように、淡い青色の光を放ちます。" },
+                    { speaker: "主人公", text: "「……トレジャーハンターっていうのは、表の目的なんだ。俺の本当の目的は、10年前に突然姿を消したお父さんを探すこと。」" },
+                    { speaker: "主人公", text: "「この魔導石はお父さんの形見で、きっとお父さんの居場所へ導いてくれると信じて旅をしてる」" },
+                    { speaker: "ナレーション", text: "答えの出ない問いを抱え、真剣な眼差しで石を見つめる主人公。その言葉を聞いたカグヤは短剣を鞘に収めると、パッと顔を上げて、いたずらっぽく、でもどこか愛らしさを感じる笑顔を向けました。" },
+                    { speaker: "カグヤ", text: "「ふーん、父親探しね……。そっか。それってさ、何よりも価値がある、世界に一つだけの大切な“お宝”を探してるんだね。」" },
+                    { speaker: "カグヤ", text: "「――よし、決ーめたっ！！ 私、あんたについていく！ 今日から何があっても、私が最高の相棒になってあげるね。」" },
+                    { speaker: "カグヤ", text: "「……あ、そういえばさ、あんたの名前、まだ聞いてなかったっけ。なーに？」" },
+                    { speaker: "ナレーション", text: "カグヤの真っ直ぐで少しお茶目な言葉に驚きつつも、主人公は自らの名前をしっかりと彼女に伝えます。" },
+                    { speaker: "ナレーション", text: "お互いに「失われた過去」を抱える者同士、ここで本当の相棒としての誓いを交わした二人の距離は、焚き火の光の中でぐっと縮まるのでした。" }
+                ]
+            },
+            {
+                id: 4, name: "2.5-4. 翌朝、未知の国へ", rewards: { exp: 50, coins: 800, materials: 10 }, monsters: [],
+                dialogue: [
+                    { speaker: "ナレーション", text: "翌朝、夜露に濡れたテントを片付け、二人は再び歩みを進めます。" },
+                    { speaker: "ナレーション", text: "山頂の霧の向こうに、ついにパステルカラーの異国「せいまろ帝国」の輪郭が見え始めていました。" },
+                    { speaker: "ナレーション", text: "名前を呼び合い、未来を共にする覚悟を決めた二人は、引き締まった表情で、獣人たちの待つ国境の門へと向かって坂を下りていきます。" }
                 ]
             }
         ]
@@ -1170,15 +1225,15 @@ const storyChapters = {
                     { speaker: "獣人の警備兵", text: "「人間め、ここから先は通さん！」" },
                     { speaker: "ナレーション", text: "現れたのは、鋭い爪と牙を持ち、巨大な槍を構えた獣人の警備兵たち。主人公たちを侵略者だと誤認して襲いかかってきたのです。" },
                     { speaker: "カグヤ", text: "「挨拶代わりにしては、ちょっと手荒すぎじゃない？ ――まぁ、いいわ。旅の疲れを吹き飛ばすのに丁度いいわね！」" },
-                    { speaker: "主人公", text: "「カグヤ、命までは奪わないようにね！」" },
+                    { speaker: "主人公", text: "「カグヤ、命までは奪わないようにしよう！」" },
                     { speaker: "ナレーション", text: "二人は息の合った動きで、獣人たちの攻撃をいなして立ち向かいます！" }
                 ]
             },
             {
                 id: 2, name: "3-2. 工場潜入", rewards: { exp: 200, coins: 3000, materials: 30 },
                 monsters: [
-                    { name: "バグキャンディ", hp: 100, maxHp: 100, emoji: "🍬", dmg: 12 },
-                    { name: "グリッチケーキ", hp: 100, maxHp: 100, emoji: "🍰", dmg: 12 }
+                    { name: "バグキャンディ", hp: 50, maxHp: 50, emoji: "🍬", dmg: 12 },
+                    { name: "グリッチケーキ", hp: 50, maxHp: 50, emoji: "🍰", dmg: 12 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "誤解が解け、二人はせいまろ帝国の危機を救うため、帝国の中枢「巨大スイーツ工場」へと潜入します。" },
@@ -1337,10 +1392,16 @@ function isStageAccessible(chapId, stageId) {
     if (chapId === 1 && stageId === 1) return true;
 
     if (stageId === 1) {
-        const prevChap = chapId - 1;
+        // 現在の章のインデックスを取得
+        const chapterOrder = [1, 2, 2.5, 3];
+        const currentIdx = chapterOrder.indexOf(chapId);
+        if (currentIdx <= 0) return false;
+        
+        const prevChap = chapterOrder[currentIdx - 1];
         if (!storyChapters[prevChap]) return false;
         const prevStages = storyChapters[prevChap].stages;
         const lastStageId = prevStages[prevStages.length - 1].id;
+        
         return saveStatus.clearedStages.includes(`${prevChap}-${lastStageId}`);
     } else {
         const prevStage = stageId - 1;
@@ -1868,6 +1929,8 @@ function handleDefeat() {
 // --- 🎉 リザルト＆報酬獲得同期システム ---
 function handleVictory() {
     showScreen('result-screen');
+    if(currentBgmAudio) currentBgmAudio.pause();
+    
     const rewards = activeStage.rewards;
     
     saveStatus.coins += rewards.coins;
@@ -1904,6 +1967,11 @@ function handleVictory() {
     if (activeChapter === 2 && activeStage.id === 6) {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
         saveStatus.questFlags.chapter2_cleared = true;
+    }
+    // 2.5章クリアフラグ
+    if (activeChapter === 2.5 && activeStage.id === 4) {
+        if(!saveStatus.questFlags) saveStatus.questFlags = {};
+        saveStatus.questFlags.chapter2_5_cleared = true;
     }
     if (activeChapter === 3 && activeStage.id === 5) {
         if(!saveStatus.questFlags) saveStatus.questFlags = {};
