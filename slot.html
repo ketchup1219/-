@@ -74,6 +74,19 @@ from{transform:rotate(0deg)}
 to{transform:rotate(360deg)}
 }
 
+
+.win-flash{animation:winflash .2s linear 10;}
+@keyframes winflash{
+0%{filter:brightness(1)}
+50%{filter:brightness(2)}
+100%{filter:brightness(1)}
+}
+.win-text{
+font-size:42px;
+font-weight:900;
+animation:pulse .4s infinite alternate;
+}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
 </style>
 </head>
 <body>
@@ -105,6 +118,7 @@ to{transform:rotate(360deg)}
 </div>
 
 
+<audio id="bgm" src="ジャックポット.mp3" loop></audio>
 <audio id="jackpotBgm" src="ジャックポット.mp3"></audio>
 <script>
 
@@ -208,6 +222,12 @@ function animate(idx){
 }
 
 document.getElementById("start").onclick=()=>{
+ document.getElementById("start").disabled=true;
+ const bgm=document.getElementById("bgm");
+ if(bgm && bgm.paused){
+   bgm.volume=0.5;
+   bgm.play().catch(()=>{});
+ }
  const bet=+document.getElementById("bet").value;
  if(coins<bet){alert("草コイン不足");return;}
  coins-=bet; saveCoins();
@@ -232,7 +252,12 @@ for(let i=0;i<3;i++){
    r.el.style.transform=`translateY(${-targetIndex*220}px)`;
    r.pos = targetIndex*220;
    
-   if(strips.every(x=>!x.run)) setTimeout(judge,750);
+   if(strips.every(x=>!x.run)){
+    setTimeout(()=>{
+        judge();
+        document.getElementById("start").disabled=false;
+    },750);
+}
  };
 }
 
@@ -249,7 +274,26 @@ function stopReelClick(i){
    r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
    r.el.style.transform=`translateY(${-targetIndex*220}px)`;
    r.pos = targetIndex*220;
-   if(strips.every(x=>!x.run)) setTimeout(judge,750);
+   if(strips.every(x=>!x.run)){
+    setTimeout(()=>{
+        judge();
+        document.getElementById("start").disabled=false;
+    },750);
+}
+}
+
+
+function winEffect(symbol, win){
+ document.body.classList.add('win-flash');
+ navigator.vibrate?.([150,80,150]);
+
+ let msg = `🎉 ${symbol} ×3<br>${win.toLocaleString()} 草コイン獲得!`;
+ if(symbol==='🍇') msg='🍇 GRAPE BONUS!<br>'+win.toLocaleString()+' 草コイン';
+ if(symbol==='777') return; // jackpot uses its own effect
+
+ result.innerHTML='<div class="win-text">'+msg+'</div>';
+
+ setTimeout(()=>document.body.classList.remove('win-flash'),2000);
 }
 
 function judge(){
@@ -265,7 +309,7 @@ function judge(){
    if(a[0]==="777"){
       megaJackpot(win);
    }else{
-      result.innerHTML="🎉 "+a[0]+" ×3<br>WIN "+win.toLocaleString()+" 草コイン";
+      winEffect(a[0], win);
    }
  }else{
    result.textContent="ハズレ";
