@@ -79,7 +79,12 @@ function animate(idx){
  r.id=setInterval(()=>{
    r.pos+=35;
    r.el.style.transform=`translateY(${-r.pos}px)`;
-   if(r.pos>220*symbols.length*10) r.pos=0;
+   const limit=220*symbols.length*15;
+   if(r.pos>limit){
+      r.pos=0;
+      r.el.style.transition="none";
+      r.el.style.transform="translateY(0px)";
+   }
  },16);
 }
 
@@ -101,9 +106,12 @@ for(let i=0;i<3;i++){
    clearInterval(r.id);
    r.run=false;
    r.result=symbols[Math.floor(Math.random()*symbols.length)];
-   const index=symbols.indexOf(r.result)+30*symbols.length;
+   const stopIndex = symbols.indexOf(r.result);
+   const currentCycle = Math.floor(r.pos / 220);
+   const target = currentCycle + 20 + stopIndex;
    r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
-   r.el.style.transform=`translateY(${-index*220}px)`;
+   r.el.style.transform=`translateY(${-target*220}px)`;
+   r.pos = target*220;
    document.getElementById("s"+i).disabled=true;
    if(strips.every(x=>!x.run)) setTimeout(judge,750);
  };
