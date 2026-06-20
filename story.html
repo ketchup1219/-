@@ -56,6 +56,8 @@
 
         .header-right {
             text-align: right;
+            display: flex;
+            gap: 10px;
         }
 
         .header-right span {
@@ -435,7 +437,7 @@
 
         /* パーティエリア（下部：4分割縦帯グリッド） */
         .party-stage {
-            height: 300px; /* スクロール枠と大きなスキルボタンのために高さを確保 */
+            height: 300px;
             display: flex;
             background: #000;
         }
@@ -538,7 +540,7 @@
             overflow-x: hidden;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE */
-            scroll-snap-type: y mandatory; /* スクロールがピタッと止まる！ */
+            scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
         }
         .skill-scroll-area::-webkit-scrollbar {
@@ -549,14 +551,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 最初と最後のボタンが中央にスナップするように上下の余白を大きく取る */
             padding: 55px 0; 
             gap: 20px;
         }
 
         /* 🔴 メインスキルボタン (大幅に大型化) */
         .skill-btn {
-            width: 95px; /* サイズをさらに拡大！ */
+            width: 95px;
             height: 95px;
             flex-shrink: 0;
             border-radius: 50%;
@@ -571,7 +572,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            scroll-snap-align: center; /* 常に中央にスナップする！ */
+            scroll-snap-align: center;
             scroll-snap-stop: always;
         }
 
@@ -596,7 +597,7 @@
         }
 
         .skill-name {
-            font-size: 13px; /* 見やすく拡大 */
+            font-size: 13px;
             font-weight: bold;
             color: #fff;
             text-shadow: 1px 1px 2px #000;
@@ -672,7 +673,6 @@
         .def-text { font-size: 10px; color: #fff; font-weight: bold; text-shadow: 1px 1px 1px #000; z-index: 2; pointer-events: none; }
         .def-lv { font-size: 8px; color: #f1c40f; z-index: 2; pointer-events: none; }
         
-        /* 防御中スタイル */
         .def-active {
             border-color: #3498db;
             box-shadow: 0 0 10px #3498db, inset 0 0 10px #3498db;
@@ -686,6 +686,8 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 0 30px rgba(255,235,59,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .result-title {
@@ -748,7 +750,7 @@
             text-align: center;
             padding: 8px;
             border-radius: 8px;
-            z-index: 100;
+            z-index: 200;
             font-size: 12px;
             font-weight: bold;
             display: none;
@@ -766,23 +768,40 @@
             <div class="dialog-msg" id="modal-stage-msg">このステージを開始しますか？</div>
             <div class="dialog-buttons">
                 <button class="btn-action btn-secondary" onclick="closeConfirmModal()">いいえ</button>
-                <button class="btn-action btn-primary" onclick="proceedToStage()">はい</button>
+                <button class="btn-action btn-primary" onclick="proceedToStage()">はい (消費:⚡10)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚡ スタミナ回復ダイアログ -->
+    <div id="stamina-modal" class="modal-overlay">
+        <div class="confirm-dialog">
+            <div class="dialog-title">⚡ スタミナ回復</div>
+            <div class="dialog-msg">
+                クエストに出発するためのスタミナが足りません。<br><br>
+                <strong style="color:#ffeb3b;">草コイン 1000G</strong> で<br>スタミナを <strong style="color:#00f2fe;">100 回復</strong> しますか？<br>
+                <span style="font-size:11px; color:#aaa;">（所持コイン: <span id="stamina-coins-val"></span> G）</span>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-action btn-secondary" onclick="closeStaminaModal()">やめる</button>
+                <button class="btn-action btn-primary" onclick="buyStamina()">回復する</button>
             </div>
         </div>
     </div>
 
     <!-- トースト通知 -->
-    <div id="toast" class="toast-msg">💾 セーブデータを同期しました！</div>
+    <div id="toast" class="toast-msg">メッセージ</div>
 
     <!-- ゲームヘッダー -->
     <div class="game-header">
         <div class="header-left">
             <div class="player-name" id="p-name">ロード中...</div>
-            <div id="p-job-lvl" style="color: #cbd5e0; font-size: 11px;">冒険者 | Lv.--</div>
+            <div id="p-job-lvl" style="color: #cbd5e0; font-size: 11px;">冒険者</div>
         </div>
         <div class="header-right">
-            <div>🪙 <span id="p-gold">--</span> G</div>
-            <div>💎 <span id="p-mats">--</span> 個</div>
+            <div>⚡ <span id="p-stamina">--</span></div>
+            <div>🪙 <span id="p-gold">--</span></div>
+            <div>💎 <span id="p-mats">--</span></div>
         </div>
     </div>
 
@@ -913,6 +932,8 @@ let saveStatus = {
     "coins": 50000,
     "stones": 1000,
     "materials": 20,
+    "stamina": 100,
+    "lastStaminaUpdate": Date.now(),
     "currentChapter": 1,
     "currentStage": 1,
     "equipped": {
@@ -1074,8 +1095,8 @@ const storyChapters = {
             {
                 id: 2, name: "3-2. 工場潜入", rewards: { exp: 200, coins: 3000, materials: 30 },
                 monsters: [
-                    { name: "バグキャンディ", hp: 150, maxHp: 150, emoji: "🍬", dmg: 12 },
-                    { name: "グリッチケーキ", hp: 150, maxHp: 150, emoji: "🍰", dmg: 12 }
+                    { name: "バグキャンディ", hp: 100, maxHp: 100, emoji: "🍬", dmg: 12 },
+                    { name: "グリッチケーキ", hp: 100, maxHp: 100, emoji: "🍰", dmg: 12 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "誤解が解け、二人はせいまろ帝国の危機を救うため、帝国の中枢「巨大スイーツ工場」へと潜入します。" },
@@ -1143,6 +1164,7 @@ let battleParty = [];
 let ctInterval = null;
 let currentCombo = 0;
 let comboTimeout = null;
+let staminaInterval = null;
 
 // --- ⚙️ 初期ロード & 同期処理 ---
 function loadData() {
@@ -1158,35 +1180,68 @@ function loadData() {
         }
     }
     
+    // スタミナの初期化
+    if (saveStatus.stamina === undefined) saveStatus.stamina = 100;
+    if (saveStatus.lastStaminaUpdate === undefined) saveStatus.lastStaminaUpdate = Date.now();
+
     if (!saveStatus.characters) {
         saveStatus.characters = [
-            { uid: "c_hero", name: saveStatus.playerName || "勇者", hp: saveStatus.max_hp || 100, attack: 50, isProtagonist: true }
+            { uid: "c_hero", name: saveStatus.playerName || "勇者", level: 1, exp: 0, hp: saveStatus.max_hp || 100, attack: 50, isProtagonist: true }
         ];
+    } else {
+        saveStatus.characters.forEach(c => { if(c.exp === undefined) c.exp = 0; });
     }
+    
     if (!saveStatus.party) {
         saveStatus.party = ["c_hero", null, null, null];
     }
 
     syncHeader();
+    startStaminaTimer();
 }
 
 function saveData() {
     localStorage.setItem('sugoigame', JSON.stringify(saveStatus));
     syncHeader();
-    showToast();
 }
 
 function syncHeader() {
     document.getElementById('p-name').innerText = saveStatus.playerName || "勇者";
-    document.getElementById('p-job-lvl').innerText = `${saveStatus.job || "冒険者"} | Lv.${saveStatus.level || 1}`;
+    document.getElementById('p-stamina').innerText = saveStatus.stamina;
     document.getElementById('p-gold').innerText = saveStatus.coins;
     document.getElementById('p-mats').innerText = saveStatus.materials;
 }
 
-function showToast() {
+function showToastMsg(msg) {
     const toast = document.getElementById('toast');
+    toast.innerText = msg;
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+// ⚡ スタミナ回復タイマー (1分で1回復、100以上なら回復ストップ)
+function startStaminaTimer() {
+    if (staminaInterval) clearInterval(staminaInterval);
+    
+    function updateStamina() {
+        let now = Date.now();
+        if (saveStatus.stamina < 100) {
+            let diff = now - saveStatus.lastStaminaUpdate;
+            let recoverAmount = Math.floor(diff / (60 * 1000)); // 60秒 = 1回復
+            if (recoverAmount > 0) {
+                saveStatus.stamina += recoverAmount;
+                if (saveStatus.stamina > 100) saveStatus.stamina = 100;
+                saveStatus.lastStaminaUpdate += recoverAmount * 60000;
+                syncHeader();
+                saveData();
+            }
+        } else {
+            saveStatus.lastStaminaUpdate = now;
+        }
+    }
+    
+    updateStamina();
+    staminaInterval = setInterval(updateStamina, 1000);
 }
 
 function goBackToMainMenu() {
@@ -1264,7 +1319,7 @@ function selectChapter(chapId) {
     showScreen('stage-screen');
 }
 
-// --- ❓ 確認ダイアログ ---
+// --- ❓ 出発＆スタミナ確認ダイアログ ---
 function openConfirmModal(stage) {
     selectedStageData = stage;
     document.getElementById('modal-stage-title').innerText = `⚔️ クエスト出発確認`;
@@ -1285,12 +1340,46 @@ function closeConfirmModal() {
 
 function proceedToStage() {
     if (!selectedStageData) return;
+    
+    // ⚡ スタミナチェック (消費 10)
+    if (saveStatus.stamina < 10) {
+        closeConfirmModal();
+        openStaminaModal();
+        return;
+    }
+    
+    // スタミナ消費
+    saveStatus.stamina -= 10;
+    saveStatus.lastStaminaUpdate = Date.now();
+    saveData();
+    
     activeStage = selectedStageData;
     closeConfirmModal();
     
     currentDialogueIdx = 0;
     setupDialogue();
     showScreen('story-screen');
+}
+
+function openStaminaModal() {
+    document.getElementById('stamina-coins-val').innerText = saveStatus.coins;
+    document.getElementById('stamina-modal').style.display = 'flex';
+}
+
+function closeStaminaModal() {
+    document.getElementById('stamina-modal').style.display = 'none';
+}
+
+function buyStamina() {
+    if (saveStatus.coins >= 1000) {
+        saveStatus.coins -= 1000;
+        saveStatus.stamina += 100;
+        saveData();
+        closeStaminaModal();
+        showToastMsg("スタミナを 100 回復しました！");
+    } else {
+        showToastMsg("草コインが足りません！");
+    }
 }
 
 // --- 💬 会話ストーリー進行 ---
@@ -1371,11 +1460,12 @@ function initBattleParty() {
                 let c = saveStatus.characters.find(x => x.uid === uid);
                 if (c) {
                     let iconSrc = c.isProtagonist ? (saveStatus.playerIcon || defaultAvatar) : speakerIcons["default"];
-                    if (c.uid === "c_kaguya") iconSrc = "カグヤ.png"; // カグヤの場合
+                    if (c.uid === "c_kaguya") iconSrc = "カグヤ.png"; 
 
                     battleParty.push({
                         uid: c.uid,
                         name: c.isProtagonist ? (saveStatus.playerName || "勇者") : c.name,
+                        level: c.level || 1,
                         maxHp: c.hp || 100,
                         currentHp: c.hp || 100, 
                         attack: c.attack || 50,
@@ -1390,7 +1480,7 @@ function initBattleParty() {
     }
     if (battleParty.length === 0) {
         battleParty.push({
-            uid: "hero", name: saveStatus.playerName || "勇者", 
+            uid: "hero", name: saveStatus.playerName || "勇者", level: saveStatus.level || 1, 
             maxHp: saveStatus.max_hp || 100, currentHp: saveStatus.max_hp || 100, 
             attack: 50, ct: 0, defCt: 100, isDefending: false, icon: saveStatus.playerIcon || defaultAvatar
         });
@@ -1427,7 +1517,7 @@ function initBattleField() {
                         <div class="char-name-row">${p.name}</div>
                         <div class="char-icon-box">
                             <img class="char-icon" src="${p.icon}" onerror="this.src='${defaultAvatar}'">
-                            <div class="char-lv">Lv1</div>
+                            <div class="char-lv">Lv${p.level}</div>
                         </div>
                     </div>
                     
@@ -1603,7 +1693,7 @@ function triggerComboSkill(charIdx) {
     }, 3500);
 
     let comboMultiplier = 1.0 + (currentCombo - 1) * 0.25;
-    let baseDmg = (attacker.attack || 30) * 0.5 + (saveStatus.level * 3);
+    let baseDmg = (attacker.attack || 30) * 0.5 + (attacker.level * 3);
     let finalDamage = Math.floor(baseDmg * comboMultiplier);
 
     target.hp -= finalDamage;
@@ -1693,7 +1783,28 @@ function handleVictory() {
     
     saveStatus.coins += rewards.coins;
     saveStatus.materials += rewards.materials;
-    saveStatus.exp += rewards.exp;
+
+    // ★ 経験値を編成中のキャラ全員に付与し、個別にレベルアップを計算
+    let levelUpMessageHTML = "";
+    if (saveStatus.party && saveStatus.characters) {
+        saveStatus.party.forEach(uid => {
+            if (uid) {
+                let c = saveStatus.characters.find(x => x.uid === uid);
+                if (c) {
+                    if (c.exp === undefined) c.exp = 0;
+                    c.exp += rewards.exp;
+                    let needExp = c.level * 100;
+                    if (c.exp >= needExp) {
+                        c.level += 1;
+                        c.exp -= needExp;
+                        c.hp = (c.hp || 100) + 15;
+                        c.attack = (c.attack || 50) + 5;
+                        levelUpMessageHTML += `<div style="color: #2ecc71; font-weight: 900; font-size: 14px; margin-top: 5px;">🔺 ${c.name} が Lv.${c.level} になった！</div>`;
+                    }
+                }
+            }
+        });
+    }
 
     const stageKey = `${activeChapter}-${activeStage.id}`;
     if (!saveStatus.clearedStages.includes(stageKey)) {
@@ -1710,29 +1821,18 @@ function handleVictory() {
         saveStatus.questFlags.chapter3_cleared = true;
     }
 
-    let levelUpMessage = "";
-    if (saveStatus.exp >= saveStatus.level * 100) {
-        saveStatus.level += 1;
-        saveStatus.exp = 0;
-        saveStatus.max_hp += 15;
-        saveStatus.max_mp += 5;
-        saveStatus.hp = saveStatus.max_hp;
-        saveStatus.mp = saveStatus.max_mp;
-        levelUpMessage = `<div style="color: #2ecc71; font-weight: 900; font-size: 18px; margin-top: 10px;">🔺 レベルアップ！ Lv.${saveStatus.level} になった！</div>`;
-    }
-
     // ★ 2-4クリア時に「カグヤ（c_kaguya）」を仲間に加える処理
     if (activeChapter === 2 && activeStage.id === 4) {
         if (!saveStatus.characters) {
             saveStatus.characters = [];
         }
-        // 重複して追加されないようにチェック
         if (!saveStatus.characters.some(c => c.uid === "c_kaguya" || c.id === "c_kaguya")) {
             saveStatus.characters.push({
                 uid: "c_kaguya",
                 id: "c_kaguya",
                 name: "カグヤ",
                 level: 1,
+                exp: 0,
                 hp: 150,
                 attack: 60,
                 defense: 40,
@@ -1740,22 +1840,23 @@ function handleVictory() {
                 typeText: "極速",
                 isProtagonist: false
             });
-            levelUpMessage += `
-                <div style="color: #ffeb3b; font-weight: 900; font-size: 16px; margin-top: 15px; text-shadow: 0 0 10px rgba(255, 235, 59, 0.5); animation: pulse 1s infinite alternate;">
+            levelUpMessageHTML += `
+                <div style="color: #ffeb3b; font-weight: 900; font-size: 16px; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.5); border: 2px solid #ffeb3b; border-radius: 8px; text-shadow: 0 0 10px rgba(255, 235, 59, 0.5); animation: pulse 1s infinite alternate;">
                     ✨ カグヤが仲間に加わりました！<br>
-                    「キャラ一覧でカグヤが編成できるようになった！」
+                    <span style="font-size: 12px;">拠点(メイン画面)の「キャラ一覧」で<br>カグヤが編成できるようになった！</span>
                 </div>
             `;
+            showToastMsg("カグヤが編成できるようになった！");
         }
     }
 
     saveData();
 
     document.getElementById('rewards-container').innerHTML = `
-        <div class="reward-item-row"><span>🔸 獲得経験値</span><span style="color: #00d2ff;">+ ${rewards.exp} EXP</span></div>
+        <div class="reward-item-row"><span>🔸 獲得経験値(全員)</span><span style="color: #00d2ff;">+ ${rewards.exp} EXP</span></div>
         <div class="reward-item-row"><span>🪙 獲得草コイン</span><span style="color: #ffeb3b;">+ ${rewards.coins} G</span></div>
         <div class="reward-item-row"><span>💎 獲得草の化石(素材)</span><span style="color: #e056fd;">+ ${rewards.materials} 個</span></div>
-        ${levelUpMessage}
+        ${levelUpMessageHTML}
     `;
 }
 
