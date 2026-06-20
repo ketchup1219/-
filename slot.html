@@ -20,6 +20,37 @@ button{padding:10px 18px;margin:4px;font-weight:bold}
 #result{text-align:center;font-size:32px;min-height:60px}
 .jackpot{animation:rb .5s linear infinite;font-weight:bold}
 @keyframes rb{0%{color:red}20%{color:orange}40%{color:yellow}60%{color:lime}80%{color:cyan}100%{color:magenta}}
+
+.jackpot-rainbow{
+position:fixed;inset:0;pointer-events:none;
+animation:flashbg .15s linear 25;
+z-index:9999;
+}
+@keyframes flashbg{
+0%{background:red}14%{background:orange}28%{background:yellow}
+42%{background:lime}56%{background:cyan}70%{background:blue}
+84%{background:violet}100%{background:red}
+}
+.confetti{
+position:fixed;width:14px;height:14px;top:-20px;
+animation:fall 4s linear forwards;
+z-index:10000;
+}
+@keyframes fall{
+to{transform:translateY(120vh) rotate(1440deg)}
+}
+.superjackpot{
+font-size:48px;
+font-weight:900;
+animation:rb .3s linear infinite;
+text-shadow:
+0 0 10px #fff,
+0 0 20px gold,
+0 0 40px gold,
+0 0 60px #ff00ff,
+0 0 90px #00ffff;
+}
+
 </style>
 </head>
 <body>
@@ -28,6 +59,13 @@ button{padding:10px 18px;margin:4px;font-weight:bold}
 <div class="credit">草コイン: <span id="coins">0</span></div>
 <div class="bet">BET:
 <select id="bet"><option>100</option><option>1000</option><option>10000</option><option>50000</option></select>
+</div>
+<div style="background:#000;color:#fff;padding:10px;text-align:center;font-weight:bold">
+🎰 配当表 🎰<br>
+🌈 777 ×3 → 5倍<br>
+🍇 ×3 → 3倍<br>
+🍎 ×3 → 1倍<br>
+🍒 🍉 🔔 ×3 → 2倍
 </div>
 
 <div class="reels">
@@ -45,7 +83,38 @@ button{padding:10px 18px;margin:4px;font-weight:bold}
 <div id="result"></div>
 </div>
 
+
+<audio id="jackpotBgm" src="ジャックポット.mp3"></audio>
 <script>
+function megaJackpot(win){
+ const ov=document.createElement('div');
+ ov.className='jackpot-rainbow';
+ document.body.appendChild(ov);
+
+ for(let i=0;i<250;i++){
+   const c=document.createElement('div');
+   c.className='confetti';
+   c.style.left=Math.random()*100+'vw';
+   c.style.background='hsl('+(Math.random()*360)+'deg 100% 50%)';
+   c.style.animationDuration=(2+Math.random()*3)+'s';
+   document.body.appendChild(c);
+   setTimeout(()=>c.remove(),5000);
+ }
+
+ const bgm=document.getElementById('jackpotBgm');
+ if(bgm){bgm.currentTime=0;bgm.play().catch(()=>{});}
+
+ navigator.vibrate?.([300,100,300,100,300,100,800]);
+
+ result.innerHTML=`<div class="superjackpot">
+ 🌈💥 777 JACKPOT 💥🌈<br>
+ ${win.toLocaleString()} 草コイン獲得！<br>
+ 🔥🔥🔥 MAX BONUS 🔥🔥🔥
+ </div>`;
+
+ setTimeout(()=>ov.remove(),4000);
+}
+
 const SAVE_NAME="sugoigame";
 const symbols=["777","🍇","🍒","🍎","🍉","🔔"];
 let coins=50000;
@@ -127,9 +196,11 @@ function judge(){
    else if(a[0]==="🍎") m=1;
    const win=bet*m;
    coins+=win; saveCoins();
-   result.innerHTML=a[0]==="777"
-    ?"<div class='jackpot'>🌈 777 JACKPOT 🌈<br>"+win.toLocaleString()+"草コイン</div>"
-    :"WIN "+win.toLocaleString()+" 草コイン";
+   if(a[0]==="777"){
+      megaJackpot(win);
+   }else{
+      result.textContent="WIN "+win.toLocaleString()+" 草コイン";
+   }
  }else{
    result.textContent="ハズレ";
  }
