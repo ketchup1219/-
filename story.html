@@ -458,7 +458,7 @@
 
         /* パーティエリア（下部：4分割縦帯グリッド） */
         .party-stage {
-            height: 320px; /* スクロール枠と大きなスキルボタンのために高さを確保 */
+            height: 320px;
             display: flex;
             background: #000;
         }
@@ -554,7 +554,7 @@
             border: 1px solid #fff;
         }
 
-        /* ✨ スキルボタン スクロールエリア（中央にピタッとスナップするよう調整） */
+        /* ✨ スキルボタン スクロールエリア（スナップ付き） */
         .skill-scroll-area {
             flex: 1;
             overflow-y: auto;
@@ -572,12 +572,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 100pxのボタンがエリアの中央でスナップするようにパディングを設定 */
             padding: 50px 0; 
             gap: 20px;
         }
 
-        /* 🔴 メインスキルボタン (100pxに大型化) */
+        /* 🔴 メインスキルボタン */
         .skill-btn {
             width: 100px;
             height: 100px;
@@ -594,7 +593,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            scroll-snap-align: center; /* 常に中央にスナップ */
+            scroll-snap-align: center;
             scroll-snap-stop: always;
         }
 
@@ -985,14 +984,15 @@ let saveStatus = {
     "currentChapter": 1,
     "currentStage": 1,
     "equipped": {
-        "weapon": "★1 ひのきの棒",
-        "head": "★1 冒険家の帽子",
-        "body_top": "★1 冒険家の服",
-        "body_bottom": "★1 冒険家のズボン",
-        "shield": "★1 冒険家の盾",
-        "accessory": "★1 冒険家のリュック",
-        "heart": "★1 冒険家のこころ"
+        "weapon": null,
+        "head": null,
+        "body_top": null,
+        "body_bottom": null,
+        "shield": null,
+        "accessory": null,
+        "heart": null
     },
+    "equipments": [],
     "inventory": [],
     "clearedStages": [], 
     "questFlags": {}
@@ -1168,8 +1168,8 @@ const storyChapters = {
             {
                 id: 4, name: "2-4. 歪んだ地下水道の異形", rewards: { exp: 200, coins: 2500, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。" },
@@ -1182,7 +1182,7 @@ const storyChapters = {
                 monsters: [ { name: "デブグリッチ", hp: 450, maxHp: 450, emoji: "👹", dmg: 22 } ],
                 dialogue: [
                     { speaker: "ナレーション", text: "（ズズン…！ ズズン…！）\n奥から、巨大な石の棍棒を振り回すボス「デブグリッチ」が立ちはだかります！" },
-                    { speaker: "カグヤ", text: "「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
+                    { speaker: "カグヤ", text: "「私 or 誰かが素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」" },
                     { speaker: "主人公", text: "「わかった！ そこだっ……！」" }
                 ]
             },
@@ -1190,8 +1190,8 @@ const storyChapters = {
                 id: 6, name: "2-6. 脱出と再会", rewards: { exp: 150, coins: 2000, materials: 15 }, monsters: [],
                 dialogue: [
                     { speaker: "ナレーション", text: "いつもの剣で放った渾身の一撃が、デブグリッチの核心へと突き刺さります！" },
-                    { speaker: "カグヤ", text: "「崩れるわ！ 、急いで！」" },
-                    { speaker: "主人公", text: "「何とか出れた。お前も無事だったんだな、よかった！」" },
+                    { speaker: "カグヤ", text: "「崩れるわ！ あそこに地上へと繋がる縦穴が出現した、急いで！」" },
+                    { speaker: "主人公", text: "「お前も無事だったんだな、よかった！」" },
                     { speaker: "ナレーション", text: "愛馬とも無事に再会を果たし、人間の国の衛兵たちを振り切った二人は、さらなる遠くを目指して荒野へと歩みを進めるのでした。" }
                 ]
             }
@@ -1269,8 +1269,8 @@ const storyChapters = {
             {
                 id: 2, name: "3-2. 工場潜入", rewards: { exp: 200, coins: 3000, materials: 30 },
                 monsters: [
-                    { name: "バグキャンディ", hp: 100, maxHp: 100, emoji: "🍬", dmg: 12 },
-                    { name: "グリッチケーキ", hp: 100, maxHp: 100, emoji: "🍰", dmg: 12 }
+                    { name: "バグキャンディ", hp: 50, maxHp: 50, emoji: "🍬", dmg: 12 },
+                    { name: "グリッチケーキ", hp: 50, maxHp: 50, emoji: "🍰", dmg: 12 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "誤解が解け、二人はせいまろ帝国の危機を救うため、帝国の中枢「巨大スイーツ工場」へと潜入します。" },
@@ -1330,7 +1330,7 @@ const storyChapters = {
             {
                 id: 1, name: "4-1. 異次元のテニス", rewards: { exp: 50, coins: 1000, materials: 10 }, monsters: [],
                 dialogue: [
-                    { speaker: "ナレーション", text: "最初の国ジュン・ルナリア、そして獣人たちのせいまろ帝国を駆け抜けた主人公とカグヤ。石像の光が指し示した方向へひたすら走ると、そこには見渡す限りの広大な雪山が広がっていました。" },
+                    { speaker: "ナレーション", text: "最初の国ジュン・ルナリア、そして獣人たちのせいまろ帝国を駆け抜けた主人公とカグヤ。石像の光が指し示した方向へひたすら走ると、そこには見渡す限りの広大なひまわり畑が広がっていました。" },
                     { speaker: "ナレーション", text: "しかし、その国境を越えた瞬間、二人の頭上を「シュババババッ！」と凄まじい風切り音が通り抜けます。" },
                     { speaker: "カグヤ", text: "「な、何事！？ 敵襲！？」" },
                     { speaker: "ナレーション", text: "カグヤが咄嗟に二振りの短剣を構えて身構えますが、飛んできたのは矢でも魔法弾でもなく、黄色い球体――テニスボールでした。" },
@@ -1369,9 +1369,9 @@ const storyChapters = {
             {
                 id: 3, name: "4-3. ハム魔導国の総力戦", rewards: { exp: 250, coins: 3000, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチC", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチC", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "不安に顔を曇らせるカグヤ。しかし、横にいる緋色・ハムの雰囲気がガラリと変わります。" },
@@ -1450,7 +1450,7 @@ const storyChapters = {
                     { speaker: "ミニ・ヒイロ", text: "「ふぇぇ……よくも俺の安眠を妨害してくれたnon（のん）。……まぁ嘘なんだけど。」" },
                     { speaker: "ミニ・ヒイロ", text: "「本当は狭いカバンの中から出してくれて感謝しとんよ。お主がこの鈴を鳴らしたってことは、俺が新しい主（あるじ）になってやるんよ」" },
                     { speaker: "カグヤ", text: "「緋色・ハム!? どこから湧いて出たのよ！」" },
-                    { speaker: "ミニ・ヒイロ", text: "「失礼な奴やな。俺はただのネズミじゃないの。高貴なる『緋色・ハム』のクローンなんよ。身体はちっちゃくても、お主らの旅をパコーンと手助けしてやる最高の仲間なの」" }
+                    { speaker: "ミニ・ヒイロ", text: "「失礼な女狐（めぎつね）なの。俺はただのネズミじゃないの。高貴なる『緋色・ハム』のクローンなんよ。身体はちっちゃくても、お主らの旅をパコーンと手助けしてやる最高の仲間なの」" }
                 ]
             },
             {
@@ -1575,7 +1575,7 @@ const storyChapters = {
                     { speaker: "ナレーション", text: "イットは右拳に凄まじい魔力を集中させ、大気を爆裂させながら地面へと真っ直ぐに振り下ろした。" },
                     { speaker: "ランペイジ・イット", text: "「――オラァァァッ！！！！！」" },
                     { speaker: "ナレーション", text: "ドドドドドォォォーーーーン！！！！！！！\nアジト全体がひっくり返るほどの超巨大な衝撃波が炸裂。煙が晴れたとき、100人ほどのレイダーたちは一人残らず白目をむいて気絶していた。文字通り、ワンパンだった。" },
-                    { speaker: "ミニ・ヒイロ", text: "「……うわぁ。あいつ、マジでゴリラじゃん。絶対に敵に回したくないわ……」" },
+                    { speaker: "ミニ・ヒイロ", text: "「……うわぁ。あいつ、マゾでゴリラじゃん。絶対に敵に回したくないわ……」" },
                     { speaker: "ランペイジ・イット", text: "「フゥー……。ハハッ！ 口ほどにもねえクソザコどもめ。少しは骨のある奴がいると思ったが、面白くねぇな」" },
                     { speaker: "ナレーション", text: "その後、地上へと出た主人公たちの前に、何百人ものレイダー組員がひれ伏した。「前の頭を倒した奴が次の頭」という掟により、イットが新しいランペイジのボスとなったのだ！" }
                 ]
@@ -1941,7 +1941,7 @@ function progressDialogue() {
 }
 
 // ====================================================
-// ⚔️ 星ドラ風 モダンバトルシステム (スクロール＆防御対応)
+// ⚔️ 星ドラ風 モダンバトルシステム (スクロール＆防御＆装備反映)
 // ====================================================
 
 function startBattlePhase() {
@@ -1961,6 +1961,26 @@ function startBattlePhase() {
 
 function initBattleParty() {
     battleParty = [];
+
+    // ★ 装備によるボーナスステータスを計算
+    let eqHpBonus = 0;
+    let eqAtkBonus = 0;
+    if (saveStatus.equipped && saveStatus.equipments) {
+        for (let cat in saveStatus.equipped) {
+            let eqId = saveStatus.equipped[cat];
+            if (eqId) {
+                let eqItem = saveStatus.equipments.find(e => e.id === eqId);
+                if (eqItem) {
+                    if (cat === "weapon" || cat === "accessory" || cat === "heart") {
+                        eqAtkBonus += eqItem.bonus;
+                    } else {
+                        eqHpBonus += eqItem.bonus;
+                    }
+                }
+            }
+        }
+    }
+
     if (saveStatus.party && saveStatus.characters) {
         saveStatus.party.forEach(uid => {
             if (uid) {
@@ -1971,13 +1991,17 @@ function initBattleParty() {
                     if (c.uid === "c_hiiro") iconSrc = "緋色の金権覇者ハム.png";
                     if (c.uid === "c_mini_hiiro") iconSrc = "ミニ・ヒイロ.png";
 
+                    // 装備ボーナスの加算
+                    let finalHp = (c.hp || 100) + eqHpBonus;
+                    let finalAtk = (c.attack || 50) + eqAtkBonus;
+
                     battleParty.push({
                         uid: c.uid,
                         name: c.isProtagonist ? (saveStatus.playerName || "勇者") : c.name,
                         level: c.level || 1,
-                        maxHp: c.hp || 100,
-                        currentHp: c.hp || 100, 
-                        attack: c.attack || 50,
+                        maxHp: finalHp,
+                        currentHp: finalHp, 
+                        attack: finalAtk,
                         ct: 0,
                         defCt: 100, // ★防御用のCT (初期は満タン)
                         isDefending: false, // ★防御状態
@@ -1988,10 +2012,12 @@ function initBattleParty() {
         });
     }
     if (battleParty.length === 0) {
+        let finalHp = (saveStatus.max_hp || 100) + eqHpBonus;
+        let finalAtk = 50 + eqAtkBonus;
         battleParty.push({
             uid: "hero", name: saveStatus.playerName || "勇者", level: saveStatus.level || 1, 
-            maxHp: saveStatus.max_hp || 100, currentHp: saveStatus.max_hp || 100, 
-            attack: 50, ct: 0, defCt: 100, isDefending: false, icon: saveStatus.playerIcon || defaultAvatar
+            maxHp: finalHp, currentHp: finalHp, 
+            attack: finalAtk, ct: 0, defCt: 100, isDefending: false, icon: saveStatus.playerIcon || defaultAvatar
         });
     }
 
@@ -2002,10 +2028,10 @@ function initBattleParty() {
             battleParty.push({
                 uid: "c_hiiro_guest",
                 name: "緋色・ハム",
-                level: 99,
-                maxHp: 999,
-                currentHp: 999,
-                attack: 250, // ゲストなので強めに設定
+                level: 35, // Lvを35に調整
+                maxHp: 350,
+                currentHp: 350,
+                attack: 120, // ステータスを適度に調整
                 ct: 0,
                 defCt: 100,
                 isDefending: false,
@@ -2050,6 +2076,8 @@ function initBattleField() {
                     <div class="char-plate">
                         <div class="hp-gauge"><div class="hp-fill" id="party-hp-fill-${i}" style="width: 100%;"></div></div>
                         <div class="char-name-row">${p.name}</div>
+                        <!-- ★HP数値を表示して強さを実感できるように -->
+                        <div style="font-size: 9px; color: #fff; font-weight: bold; margin-bottom: 2px;" id="party-hp-text-${i}">HP:${p.currentHp}</div>
                         <div class="char-icon-box">
                             <img class="char-icon" src="${p.icon}" onerror="this.src='${defaultAvatar}'">
                             <div class="char-lv">Lv${p.level}</div>
@@ -2115,6 +2143,7 @@ function updateBattleState() {
     // パーティの更新
     battleParty.forEach((p, i) => {
         let fill = document.getElementById(`party-hp-fill-${i}`);
+        let hpText = document.getElementById(`party-hp-text-${i}`);
         let btn = document.getElementById(`skill-btn-${i}`);
         let mask = document.getElementById(`skill-ct-mask-${i}`);
         
@@ -2127,6 +2156,10 @@ function updateBattleState() {
             let hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100);
             fill.style.width = `${hpPct}%`;
             fill.style.backgroundColor = hpPct > 25 ? "#2ecc71" : "#e74c3c";
+        }
+
+        if(hpText) {
+            hpText.innerText = `HP:${Math.floor(p.currentHp)}`;
         }
         
         // メインスキルのCT管理
@@ -2222,6 +2255,7 @@ function triggerComboSkill(charIdx) {
         logBattle("⚠️ スキルの発動間隔があき、コンボが途切れた！");
     }, 3500);
 
+    // ダメージ計算（装備ボーナスを含んだ攻撃力を元に計算）
     let comboMultiplier = 1.0 + (currentCombo - 1) * 0.25;
     let baseDmg = (attacker.attack || 30) * 0.5 + (attacker.level * 3);
     let finalDamage = Math.floor(baseDmg * comboMultiplier);
