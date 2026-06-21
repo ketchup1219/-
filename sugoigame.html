@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KAZIN</title>
+    <title>おれたちの最強RPG</title>
     <style>
         /* =========================================================
            🎨 ゲーム全体＆背景
@@ -123,6 +123,7 @@
         .btn-gacha-go:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #5c001a, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 0, 127, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
         .btn-setting { background: linear-gradient(to bottom, #6086d6, #283e70); border-color: #8f94fb; color: #fff; box-shadow: 0 8px 0 #131e38, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(143, 148, 251, 0.5), inset 0 2px 3px rgba(255,255,255,0.4); }
         .btn-setting:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #131e38, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(143, 148, 251, 0.7), inset 0 1px 2px rgba(255,255,255,0.3); }
+
         .btn-title-back { background: linear-gradient(to bottom, #661111, #330000); border-color: #ff416c; color: #ffb6b9; box-shadow: 0 8px 0 #1a0000, 0 12px 15px rgba(0,0,0,0.7), inset 0 0 15px rgba(255, 65, 108, 0.5), inset 0 2px 3px rgba(255,255,255,0.2); }
         .btn-title-back:not(:disabled):active { transform: translateY(6px); box-shadow: 0 0px 0 #1a0000, 0 4px 6px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 65, 108, 0.7), inset 0 1px 2px rgba(255,255,255,0.1); }
 
@@ -294,8 +295,6 @@
         #alert-message-box { max-height: 280px; overflow-y: auto; margin: 15px 0; padding: 10px; text-align: left; background: rgba(0,0,0,0.6); border-radius: 8px; border: 1px inset #00f2fe; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
         #alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 999; }
         
-        .gacha-banner { background: linear-gradient(135deg, rgba(30, 20, 50, 0.9), rgba(10, 5, 20, 0.9)); border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2); text-align: left; box-shadow: 0 8px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0, 180, 219, 0.2); position: relative; overflow: hidden; }
-        .gacha-banner::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent); transform: skewX(-25deg); animation: bannerShine 5s infinite; }
     </style>
 </head>
 <body>
@@ -428,12 +427,13 @@
         </div>
     </div>
 
-    <!-- 🌟 スクロール完全制御！ -->
+    <!-- 🌟 スクロール完全制御！ ここが全ての画面の親コンテナです -->
     <div id="main-content" style="padding: 0; overflow-y: hidden;">
         <!-- =========================================================
-           ① タイトル画面
+           ① タイトル画面（スクロール完全ロック！）
            ========================================================= -->
         <div id="screen-title" class="screen active" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;">
+            
             <div style="position: absolute; top: 1%; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; pointer-events: none; width: 100%;">
                 <img src="KAZIN.png" alt="KAZIN" onerror="this.src='KAZIN.jpg'; this.onerror=function(){this.style.display='none';}" style="width: 425px; max-width: 95%; filter: drop-shadow(0 0 20px #00f2fe); object-fit: contain; margin-left: auto; margin-right: auto;">
             </div>
@@ -445,8 +445,8 @@
             </div>
         </div>
 
-        <!-- スクロール可能なラッパー -->
-        <div style="display: none; padding: 15px; padding-bottom: 90px; height: 100%; overflow-y: auto;" id="inner-content-wrapper">
+        <!-- 以下の画面は padding を戻すためのラッパー。タイトル画面では非表示にしてスクロールさせない！ -->
+        <div style="display: none;" id="inner-content-wrapper">
             <!-- =========================================================
                ② ホーム画面
                ========================================================= -->
@@ -488,9 +488,8 @@
                 </div>
 
                 <button class="btn-story" onclick="goToStory()" style="padding: 20px; font-size: 18px; box-shadow: inset 0 0 15px rgba(56, 239, 125, 0.5);">⚔️ 冒険に出る (Story)</button>
-                
                 <button class="btn-slot" onclick="goToslot()" style="padding: 20px; font-size: 18px; box-shadow: inset 0 0 15px rgba(56, 239, 125, 0.5);">🎰 カジノに行く (SLOT)</button>
-
+                
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button class="btn-setting" style="margin:0;" onclick="openPartyScreen()">👥 キャラ一覧</button>
                     <button class="btn-setting" style="margin:0;" onclick="openEquipScreen('weapon')">⚔️ 装備・合体</button>
@@ -539,11 +538,18 @@
             </div>
 
             <!-- =========================================================
-               ④ 装備変更・合体画面
+               ④ 装備変更・合体画面（キャラ別装備機能つき！）
                ========================================================= -->
             <div id="screen-equip" class="screen">
                 <h2 style="text-align: left; border-bottom: none; margin-bottom: 10px;">装備・工房</h2>
                 
+                <!-- 🌟 キャラクター選択メニュー -->
+                <div class="status-box" style="padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #00f2fe;">
+                    <label style="color: #00f2fe; font-size: 12px; font-weight: bold;">装備を変更するキャラクター:</label>
+                    <select id="equip-char-select" onchange="changeEquipChar(this.value)" style="width: 100%; padding: 8px; margin-top: 5px; background: #111; color: #fff; border: 1px solid #00f2fe; border-radius: 5px;">
+                    </select>
+                </div>
+
                 <div class="category-tabs">
                     <button class="tab-btn active-tab" id="tab-weapon" onclick="openEquipScreen('weapon')">⚔️ 武器</button>
                     <button class="tab-btn" id="tab-head" onclick="openEquipScreen('head')">👤 頭</button>
@@ -783,7 +789,6 @@ function executeGoToTitle() {
     if(headerBar) headerBar.style.display = 'none';
     if(footerNav) footerNav.style.display = 'none';
     
-    // 🌟 タイトルに戻ったフラグを保存
     if(!saveStatus.flags) saveStatus.flags = {};
     saveStatus.flags.wentToTitle = true;
     saveGame();
@@ -945,6 +950,7 @@ function createParticles() {
 
 const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300f2fe" width="100" height="100"><circle cx="12" cy="12" r="11" fill="%231a1a2e" stroke="%2300f2fe" stroke-width="1"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="%2300f2fe"/></svg>';
 
+// 🌟 キャラクター別装備システム対応セーブデータ
 let saveStatus = {
     stones: 1000, materials: 20, coins: 50000, 
     playerName: "勇者", playerIcon: defaultAvatar, 
@@ -953,7 +959,10 @@ let saveStatus = {
     unlockedAchievements: [], selectedAchievement: "",
     lastLoginDate: "", lastFreeGachaDate: "", 
     flags: { openedEquip: false, openedGacha: false, openedParty: false, wentToTitle: false },
-    characters: [ { uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 100, attack: 50, defense: 30, isProtagonist: true, element: "none", typeText: "無" } ],
+    characters: [ { 
+        uid: "char_init", id: "c_hero", name: "勇者", level: 1, hp: 100, attack: 50, defense: 30, isProtagonist: true, element: "none", typeText: "無",
+        equipped: { weapon: "init_weap_1", head: "init_head_1", body_top: "init_body_top_1", body_bottom: "init_body_bottom_1", shield: "init_shield_1", accessory: "init_acc_1", heart: "init_heart_1" }
+    } ],
     party: ["char_init", null, null, null],
     
     equipments: [ 
@@ -965,10 +974,6 @@ let saveStatus = {
         { id: "init_acc_1", name: "★1 冒険家のリュック", level: 1, limitBreak: 0, bonus: 3, category: "accessory" },
         { id: "init_heart_1", name: "★1 冒険家のこころ", level: 1, limitBreak: 0, bonus: 10, category: "heart" }
     ],
-    equipped: { 
-        weapon: "init_weap_1", head: "init_head_1", body_top: "init_body_top_1", 
-        body_bottom: "init_body_bottom_1", shield: "init_shield_1", accessory: "init_acc_1", heart: "init_heart_1" 
-    },
     
     gachaData: { normal: { draws: 0, stamps: 0, guaranteed: false }, new: { draws: 0, stamps: 0, guaranteed: false }, revival: { draws: 0, stamps: 0, guaranteed: false } },
     bgmVolume: 50, seVolume: 50
@@ -979,6 +984,7 @@ let currentCategoryTab = "weapon";
 let selectedCharIndex = 0; 
 let selectedExchangeWeaponId = ""; 
 let currentMissionTab = "daily";
+let currentEquipCharUid = null; // 🌟 装備変更対象キャラクター
 
 function saveGame() {
     try {
@@ -1021,16 +1027,23 @@ function loadGame() {
         if (saveStatus.seVolume === undefined) saveStatus.seVolume = 50;
 
         if (saveStatus.gachaData === undefined) {
-            saveStatus.gachaData = {
-                normal: { draws: saveStatus.totalGachaDraws || 0, stamps: saveStatus.gachaStamps || 0, guaranteed: saveStatus.isNextGachaGuaranteed || false },
-                new: { draws: 0, stamps: 0, guaranteed: false },
-                revival: { draws: 0, stamps: 0, guaranteed: false }
-            };
+            saveStatus.gachaData = { normal: { draws: saveStatus.totalGachaDraws || 0, stamps: saveStatus.gachaStamps || 0, guaranteed: saveStatus.isNextGachaGuaranteed || false }, new: { draws: 0, stamps: 0, guaranteed: false }, revival: { draws: 0, stamps: 0, guaranteed: false } };
         }
 
         if (saveStatus.equipments === undefined) saveStatus.equipments = [{ id: "init_weap_1", name: "★1 ひのきの棒", level: 1, limitBreak: 0, bonus: 10, category: "weapon" }];
-        if (saveStatus.equipped === undefined || typeof saveStatus.equipped === "string") {
-            saveStatus.equipped = { weapon: "init_weap_1", head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
+        
+        // 🌟 旧セーブデータからキャラ別装備への移行
+        if (saveStatus.equipped) {
+            let hero = saveStatus.characters.find(c => c.isProtagonist) || saveStatus.characters[0];
+            hero.equipped = JSON.parse(JSON.stringify(saveStatus.equipped));
+            saveStatus.characters.forEach(c => {
+                if (!c.equipped) c.equipped = { weapon: null, head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
+            });
+            delete saveStatus.equipped; 
+        } else {
+            saveStatus.characters.forEach(c => {
+                if(!c.equipped) c.equipped = { weapon: null, head: null, body_top: null, body_bottom: null, shield: null, accessory: null, heart: null };
+            });
         }
         
         if (!saveStatus.equipments.some(e => e.id === "init_head_1")) {
@@ -1041,12 +1054,13 @@ function loadGame() {
             saveStatus.equipments.push({ id: "init_acc_1", name: "★1 冒険家のリュック", level: 1, limitBreak: 0, bonus: 3, category: "accessory" });
             saveStatus.equipments.push({ id: "init_heart_1", name: "★1 冒険家のこころ", level: 1, limitBreak: 0, bonus: 10, category: "heart" });
             
-            if (!saveStatus.equipped.head) saveStatus.equipped.head = "init_head_1";
-            if (!saveStatus.equipped.body_top) saveStatus.equipped.body_top = "init_body_top_1";
-            if (!saveStatus.equipped.body_bottom) saveStatus.equipped.body_bottom = "init_body_bottom_1";
-            if (!saveStatus.equipped.shield) saveStatus.equipped.shield = "init_shield_1";
-            if (!saveStatus.equipped.accessory) saveStatus.equipped.accessory = "init_acc_1";
-            if (!saveStatus.equipped.heart) saveStatus.equipped.heart = "init_heart_1";
+            let hero = saveStatus.characters.find(c => c.isProtagonist) || saveStatus.characters[0];
+            if (!hero.equipped.head) hero.equipped.head = "init_head_1";
+            if (!hero.equipped.body_top) hero.equipped.body_top = "init_body_top_1";
+            if (!hero.equipped.body_bottom) hero.equipped.body_bottom = "init_body_bottom_1";
+            if (!hero.equipped.shield) hero.equipped.shield = "init_shield_1";
+            if (!hero.equipped.accessory) hero.equipped.accessory = "init_acc_1";
+            if (!hero.equipped.heart) hero.equipped.heart = "init_heart_1";
         }
         
         saveStatus.equipments.forEach(eq => { if (eq.limitBreak === undefined) { eq.limitBreak = eq.level || 0; eq.level = 1; } });
@@ -1158,14 +1172,17 @@ function updateUI() {
     let titleText = titleObj ? `[${titleObj.title}]` : "初心者";
     if (document.getElementById('home-player-title')) document.getElementById('home-player-title').innerText = titleText;
     
-    let eqBonusTotal = 0;
-    for (let cat in saveStatus.equipped) {
-        let eqId = saveStatus.equipped[cat];
+    // 🌟 リーダーのステータス取得と表示
+    let leaderUid = saveStatus.party[0];
+    let leaderChar = saveStatus.characters.find(c => c.uid === leaderUid);
+    if (!leaderChar) leaderChar = saveStatus.characters[0];
+
+    for (let cat in leaderChar.equipped) {
+        let eqId = leaderChar.equipped[cat];
         let elCatDisplay = document.getElementById('eq-display-' + cat);
         if (eqId) {
             let eqItem = saveStatus.equipments.find(e => e.id === eqId);
             if (eqItem) {
-                eqBonusTotal += eqItem.bonus;
                 let safeName = getBaseName(eqItem.name);
                 if (elCatDisplay) elCatDisplay.innerHTML = `⚔️ ${safeName} <span style="color:#ffeb3b;">+${eqItem.limitBreak}</span>`;
             } else { if (elCatDisplay) elCatDisplay.innerText = "なし"; }
@@ -1176,7 +1193,17 @@ function updateUI() {
     saveStatus.party.forEach(uid => {
         if (uid) {
             let pChar = saveStatus.characters.find(c => c.uid === uid);
-            if (pChar) partyTotalAtk += (pChar.attack + eqBonusTotal); 
+            if (pChar) {
+                let charAtk = pChar.attack;
+                for (let cat in pChar.equipped) {
+                    let eqId = pChar.equipped[cat];
+                    if (eqId) {
+                        let eqItem = saveStatus.equipments.find(e => e.id === eqId);
+                        if (eqItem) charAtk += eqItem.bonus;
+                    }
+                }
+                partyTotalAtk += charAtk;
+            }
         }
     });
     if (document.getElementById('home-power')) document.getElementById('home-power').innerText = partyTotalAtk;
@@ -1217,46 +1244,32 @@ const bingoData = [
 ];
 const bingoLines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
 
-// 🌟 クリア条件判定ロジック！
 function checkMissionClear(id) {
     if(!saveStatus.flags) saveStatus.flags = {};
     switch(id) {
-        // 通常ミッション
-        case 'd1': return true; // ログイン
+        case 'd1': return true; 
         case 'd2': return !!saveStatus.flags.openedEquip; 
         case 'd3': return !!saveStatus.flags.openedGacha; 
-        case 'e1': return true; // スタートダッシュ
+        case 'e1': return true; 
         case 'e2': return saveStatus.equipments.some(e => getWeaponStar(e.name) >= 5);
         case 'a1': return true;
         case 'a2': return saveStatus.equipments.some(e => e.level > 1 || e.limitBreak > 0);
         case 'a3': return Object.values(saveStatus.gachaData).some(d => d.draws > 0);
         case 'a4': return saveStatus.bingoClaimedLines && saveStatus.bingoClaimedLines.length > 0;
-        
-        // ビンゴミッション
-        case 'b0': return true; // ログイン
-        case 'b1': {
-            let total = 0;
-            Object.values(saveStatus.gachaData).forEach(d => total += d.draws);
-            return total >= 1;
-        }
+        case 'b0': return true; 
+        case 'b1': { let total = 0; Object.values(saveStatus.gachaData).forEach(d => total += d.draws); return total >= 1; }
         case 'b2': return saveStatus.equipments.some(e => e.level > 1);
         case 'b3': return !!saveStatus.flags.openedParty;
-        case 'b4': return true; // FREEマス
+        case 'b4': return true; 
         case 'b5': return saveStatus.playerName !== "勇者" || saveStatus.playerIcon !== defaultAvatar;
         case 'b6': return saveStatus.equipments.some(e => e.limitBreak > 0);
         case 'b7': return !!saveStatus.flags.wentToTitle;
-        case 'b8': {
-            let total = 0;
-            Object.values(saveStatus.gachaData).forEach(d => total += d.draws);
-            return total >= 10;
-        }
+        case 'b8': { let total = 0; Object.values(saveStatus.gachaData).forEach(d => total += d.draws); return total >= 10; }
         default: return false;
     }
 }
 
-function openMissionScreen() {
-    changeScreen('mission');
-}
+function openMissionScreen() { changeScreen('mission'); }
 
 function openMissionTab(tabName) {
     currentMissionTab = tabName;
@@ -1286,13 +1299,9 @@ function renderMissionsList(dataList, type, savedArray) {
         let btnText = isClaimed ? "獲得済" : (isCleared ? (type === 'achieve' ? "解放する" : "うけとる") : "未達成");
         let btnStyle = "";
         
-        if (isClaimed) {
-            btnStyle = "background: #333; border-color: #555; color: #aaa; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transform: none; cursor: default;";
-        } else if (isCleared) {
-            btnStyle = "background: linear-gradient(to bottom, #ffea70, #ffb860); border-color: #fff; color: #111;";
-        } else {
-            btnStyle = "background: #555; border-color: #777; color: #999; box-shadow: none; transform: none; cursor: not-allowed;";
-        }
+        if (isClaimed) { btnStyle = "background: #333; border-color: #555; color: #aaa; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); transform: none; cursor: default;"; } 
+        else if (isCleared) { btnStyle = "background: linear-gradient(to bottom, #ffea70, #ffb860); border-color: #fff; color: #111;"; } 
+        else { btnStyle = "background: #555; border-color: #777; color: #999; box-shadow: none; transform: none; cursor: not-allowed;"; }
         
         let onClickEvent = (isCleared && !isClaimed) ? `claimMissionReward('${m.id}', '${type}')` : ``;
 
@@ -1338,9 +1347,7 @@ function claimMissionReward(id, type) {
         }
 
         showGameAlert("✨ クリア！", `報酬を獲得しました！<br><br>${msg}`);
-        saveGame();
-        openMissionTab(type);
-        updateUI();
+        saveGame(); openMissionTab(type); updateUI();
     }
 }
 
@@ -1357,10 +1364,7 @@ function renderBingoBoard() {
         </div>`;
                            
     let grid = document.createElement('div');
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
-    grid.style.gap = "8px";
-    grid.style.marginBottom = "20px";
+    grid.style.display = "grid"; grid.style.gridTemplateColumns = "repeat(3, 1fr)"; grid.style.gap = "8px"; grid.style.marginBottom = "20px";
     
     bingoData.forEach((b, i) => {
         let isOpened = saveStatus.bingoCells?.includes(i);
@@ -1376,20 +1380,14 @@ function renderBingoBoard() {
         let transform = isOpened ? "scale(0.95)" : "scale(1)";
 
         let statusText = "";
-        if (isOpened) {
-            statusText = '<span style="font-size:10px; color:#c33; margin-top:4px;">CLEAR!</span>';
-        } else if (isCleared) {
-            statusText = '<span style="font-size:10px; color:#ffeb3b; margin-top:4px;">タップで解放！</span>';
-        } else {
-            statusText = '<span style="font-size:9px; color:#aaa; margin-top:4px;">未達成</span>';
-        }
+        if (isOpened) { statusText = '<span style="font-size:10px; color:#c33; margin-top:4px;">CLEAR!</span>'; } 
+        else if (isCleared) { statusText = '<span style="font-size:10px; color:#ffeb3b; margin-top:4px;">タップで解放！</span>'; } 
+        else { statusText = '<span style="font-size:9px; color:#aaa; margin-top:4px;">未達成</span>'; }
 
         grid.innerHTML += `
             <div class="bingo-cell" style="aspect-ratio:1/1; background:${bg}; color:${col}; border:${border}; border-radius:8px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-size:12px; font-weight:bold; box-shadow:${shadow}; transform:${transform}; transition:all 0.2s; cursor:pointer;"
                  onclick="${isOpened ? '' : `openBingoCell(${i})`}">
-                 ${b.text}
-                 ${b.isFree ? '<br><span style="font-size:10px; color:#555; margin-top:2px;">(FREE)</span>' : ''}
-                 <br>${statusText}
+                 ${b.text} ${b.isFree ? '<br><span style="font-size:10px; color:#555; margin-top:2px;">(FREE)</span>' : ''} <br>${statusText}
             </div>
         `;
     });
@@ -1404,22 +1402,16 @@ function openBingoCell(index) {
     if(saveStatus.bingoCells.includes(index)) return;
     
     let bingoId = 'b' + index;
-    if (!checkMissionClear(bingoId)) {
-        showGameAlert("❌ 未達成", `まだこのマスの条件をクリアしていません！<br><br>【条件】<br><strong style="color:#00f2fe;">${bingoData[index].text}</strong>`);
-        return;
-    }
+    if (!checkMissionClear(bingoId)) { showGameAlert("❌ 未達成", `まだこのマスの条件をクリアしていません！<br><br>【条件】<br><strong style="color:#00f2fe;">${bingoData[index].text}</strong>`); return; }
     
     saveStatus.bingoCells.push(index);
-    
     let b = bingoData[index];
     if(b.rewardCoins) saveStatus.coins += b.rewardCoins;
     if(b.rewardStones) saveStatus.stones += b.rewardStones;
     if(b.rewardMaterials) saveStatus.materials += b.rewardMaterials;
     
     showGameAlert("✨ マス解放！", `マスの報酬を獲得したよ！<br>ラインが揃ったら下部のボタンを押してね！`);
-    saveGame();
-    openMissionTab('bingo');
-    updateUI();
+    saveGame(); openMissionTab('bingo'); updateUI();
 }
 
 function checkBingoLines() {
@@ -1431,19 +1423,14 @@ function checkBingoLines() {
     
     bingoLines.forEach((line, index) => {
         if (line.every(val => opened.includes(val))) {
-            if (!saveStatus.bingoClaimedLines.includes(index)) {
-                saveStatus.bingoClaimedLines.push(index);
-                newLines++;
-            }
+            if (!saveStatus.bingoClaimedLines.includes(index)) { saveStatus.bingoClaimedLines.push(index); newLines++; }
         }
     });
     
     if (newLines > 0) {
-        let rewardStones = newLines * 300;
-        saveStatus.stones += rewardStones;
+        let rewardStones = newLines * 300; saveStatus.stones += rewardStones;
         showGameAlert("🎉 BINGO 達成！！", `<span style="font-size:24px; color:#ffeb3b; font-weight:bold;">${newLines} ライン達成！</span><br><br>ボーナスとして <strong style="color:#00f2fe;">草核 ${rewardStones}個</strong> を獲得したよ！`);
-        saveGame();
-        updateUI();
+        saveGame(); updateUI();
     } else {
         showGameAlert("ℹ️ おしらせ", "新しく揃ったラインはありませんでした。<br>マスをタップして開けていこう！");
     }
@@ -1509,49 +1496,41 @@ function saveProfile() {
     let protagonist = saveStatus.characters.find(c => c.isProtagonist);
     if (protagonist) protagonist.name = nameInput;
     
-    saveGame(); 
-    showGameAlert("👤 保存完了", "プロフィールを変更したよ！");
-    changeScreen('home'); 
+    saveGame(); showGameAlert("👤 保存完了", "プロフィールを変更したよ！"); changeScreen('home'); 
 }
 
 // ---------------------------------------------------------
 // 👥 キャラクター
 // ---------------------------------------------------------
 function openPartyScreen() {
-    if(!saveStatus.flags) saveStatus.flags = {};
-    saveStatus.flags.openedParty = true;
-    saveGame();
-    changeScreen('party');
-    selectedCharIndex = 0; 
-    updatePartyScreenUI();
+    if(!saveStatus.flags) saveStatus.flags = {}; saveStatus.flags.openedParty = true; saveGame();
+    changeScreen('party'); selectedCharIndex = 0; updatePartyScreenUI();
 }
 
 function updatePartyScreenUI() {
-    let eqBonusTotal = 0;
-    for (let cat in saveStatus.equipped) {
-        let eqId = saveStatus.equipped[cat];
-        if (eqId) {
-            let eqItem = saveStatus.equipments.find(e => e.id === eqId);
-            if (eqItem) eqBonusTotal += eqItem.bonus;
-        }
-    }
-
     const slotsContainer = document.getElementById('party-slots-container');
     slotsContainer.innerHTML = "";
     for (let i = 0; i < 4; i++) {
         let slotUid = saveStatus.party[i];
         if (slotUid) {
             let pChar = saveStatus.characters.find(c => c.uid === slotUid);
+            let charEqBonus = 0;
+            for (let cat in pChar.equipped) {
+                let eqId = pChar.equipped[cat];
+                if (eqId) {
+                    let eqItem = saveStatus.equipments.find(e => e.id === eqId);
+                    if (eqItem) charEqBonus += eqItem.bonus;
+                }
+            }
             let leaderIcon = (i === 0) ? '<div style="position:absolute; top:-8px; left:-8px; font-size:20px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));">👑</div>' : '';
-            let elementBadge = `<span class="char-element-badge el-${pChar.element || 'grass'}" style="position:absolute; top:4px; right:4px; font-size:8px;">${pChar.typeText || '超知'}</span>`;
+            let elementBadge = `<span class="char-element-badge el-${pChar.element || 'none'}" style="position:absolute; top:4px; right:4px; font-size:8px;">${pChar.typeText || '無'}</span>`;
             slotsContainer.innerHTML += `
                 <div class="party-slot filled" onclick="removeFromParty(${i})" style="position:relative; border-color: ${i===0 ? '#f8b500':'#00f2fe'};">
-                    ${leaderIcon}
-                    ${elementBadge}
+                    ${leaderIcon} ${elementBadge}
                     <div style="font-size:28px; margin-top:5px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3));">👤</div>
                     <div style="font-size:11px; font-weight:900; color:#fff; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow: 1px 1px 2px #000;">${pChar.name}</div>
                     <div class="party-slot-star">★★★★★</div>
-                    <div style="font-size:10px; color:#ffeb3b; font-weight:bold; margin-top:2px; text-shadow: 1px 1px 1px #000;">攻:${pChar.attack + eqBonusTotal}</div>
+                    <div style="font-size:10px; color:#ffeb3b; font-weight:bold; margin-top:2px; text-shadow: 1px 1px 1px #000;">攻:${pChar.attack + charEqBonus}</div>
                     <div style="font-size:9px; background:linear-gradient(to right, #e43f5a, #8a0029); padding:2px 8px; border-radius:10px; margin-top:4px; color:#fff; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.5);">外す</div>
                 </div>`;
         } else {
@@ -1563,21 +1542,27 @@ function updatePartyScreenUI() {
     list.innerHTML = ""; 
     
     saveStatus.characters.forEach((char, index) => {
+        let charEqBonus = 0;
+        for (let cat in char.equipped) {
+            let eqId = char.equipped[cat];
+            if (eqId) { let eqItem = saveStatus.equipments.find(e => e.id === eqId); if (eqItem) charEqBonus += eqItem.bonus; }
+        }
+
         let isSelected = (index === selectedCharIndex);
         let itemClass = isSelected ? "rich-card rarity-5 selected-char" : "rich-card rarity-5";
-        let totalAtk = char.attack + eqBonusTotal;
-        let totalDef = char.defense + eqBonusTotal;
+        let totalAtk = char.attack + charEqBonus;
+        let totalDef = char.defense + charEqBonus;
         let partyIndex = saveStatus.party.indexOf(char.uid);
         let inParty = partyIndex !== -1;
         let btnText = inParty ? (partyIndex === 0 ? "👑リーダー" : "外す") : "＋編成";
         let btnClass = inParty ? (partyIndex === 0 ? "btn-gold" : "btn-red") : "btn-green";
         let onClickAction = inParty ? (partyIndex === 0 ? `showGameAlert('⚠️ 外せません', 'リーダー（1枠目）は絶対に編成から外せないよ！')` : `removeFromParty(${partyIndex})`) : `addToParty('${char.uid}')`;
-        let elementClass = "el-" + (char.element || "grass");
+        let elementClass = "el-" + (char.element || "none");
 
         list.innerHTML += `
             <div class="${itemClass}" onclick="selectChar(${index})">
                 <div class="card-header">
-                    <span class="element-badge ${elementClass}">${char.typeText || '超知'}</span>
+                    <span class="element-badge ${elementClass}">${char.typeText || '無'}</span>
                     <span class="stars">★★★★★</span>
                 </div>
                 <div class="card-body">
@@ -1620,11 +1605,29 @@ function removeFromParty(slotIndex) {
 }
 
 // =========================================================
-// 🛡️ 装備管理（一括強化対応！）
+// 🛡️ 装備管理（🌟キャラ別装備完全対応！）
 // =========================================================
 function openEquipScreen(category) {
     currentCategoryTab = category;
+    
+    // 現在選択中のキャラがいなければリーダーを初期選択
+    if (!currentEquipCharUid && saveStatus.party[0]) {
+        currentEquipCharUid = saveStatus.party[0];
+    } else if (!currentEquipCharUid) {
+        currentEquipCharUid = saveStatus.characters[0].uid;
+    }
+
     changeScreen('equip');
+
+    // キャラクター選択プルダウンの構築
+    let charSelect = document.getElementById('equip-char-select');
+    if (charSelect) {
+        charSelect.innerHTML = "";
+        saveStatus.characters.forEach(c => {
+            let selected = (c.uid === currentEquipCharUid) ? "selected" : "";
+            charSelect.innerHTML += `<option value="${c.uid}" ${selected}>${c.name}</option>`;
+        });
+    }
 
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
     document.getElementById('tab-' + category)?.classList.add('active-tab');
@@ -1642,13 +1645,34 @@ function openEquipScreen(category) {
     filteredEquips.sort((a, b) => getWeaponStar(b.name) - getWeaponStar(a.name));
 
     filteredEquips.forEach((weap) => {
-        let isEquipped = Object.values(saveStatus.equipped).includes(weap.id);
-        let equipBtnText = isEquipped ? "❌はずす" : "装備";
-        let equipBtnClass = isEquipped ? "btn-red" : "btn-green";
+        // 誰が装備しているかを判定
+        let equippedBy = null;
+        saveStatus.characters.forEach(c => {
+            if (Object.values(c.equipped).includes(weap.id)) {
+                equippedBy = c;
+            }
+        });
+
+        let isEquippedByCurrentChar = (equippedBy && equippedBy.uid === currentEquipCharUid);
+        let isEquippedByOtherChar = (equippedBy && equippedBy.uid !== currentEquipCharUid);
+
+        let equipBtnText = "装備";
+        let equipBtnClass = "btn-green";
+        let equipAction = `setWeapon('${weap.id}', '${category}')`;
+
+        if (isEquippedByCurrentChar) {
+            equipBtnText = "❌はずす";
+            equipBtnClass = "btn-red";
+        } else if (isEquippedByOtherChar) {
+            equipBtnText = `❌${equippedBy.name}装備中`;
+            equipBtnClass = "btn-red";
+            equipAction = "showGameAlert('⚠️ 装備できません', 'この装備は<br><strong>" + equippedBy.name + "</strong><br>が装備中です。先に外してください。')";
+        }
 
         let sameWeaponsCount = 0;
         saveStatus.equipments.forEach((otherWeap) => {
-            let isOtherEquipped = Object.values(saveStatus.equipped).includes(otherWeap.id);
+            let isOtherEquipped = false;
+            saveStatus.characters.forEach(c => { if (Object.values(c.equipped).includes(otherWeap.id)) isOtherEquipped = true; });
             if (otherWeap.id !== weap.id && isSameWeaponType(otherWeap, weap) && otherWeap.limitBreak === 0 && !isOtherEquipped) sameWeaponsCount++;
         });
 
@@ -1694,11 +1718,33 @@ function openEquipScreen(category) {
                             <button style="${levelUpBtnStyle}; flex: 1; padding:4px; font-size:10px;" onclick="${levelUpMaxAction}">最大<br>強化</button>
                         </div>
                         
-                        <button class="${equipBtnClass}" style="padding:4px;" onclick="setWeapon('${weap.id}', '${category}')">${equipBtnText}</button>
+                        <button class="${equipBtnClass}" style="padding:4px;" onclick="${equipAction}">${equipBtnText}</button>
                     </div>
                 </div>
             </div>`;
     });
+}
+
+function changeEquipChar(uid) {
+    currentEquipCharUid = uid;
+    openEquipScreen(currentCategoryTab);
+}
+
+function setWeapon(id, category) {
+    let targetChar = saveStatus.characters.find(c => c.uid === currentEquipCharUid);
+    if (!targetChar) return;
+    
+    let weap = saveStatus.equipments.find(e => e.id === id);
+    let safeName = getBaseName(weap.name);
+    
+    if (targetChar.equipped[category] === id) {
+        targetChar.equipped[category] = null;
+        showGameAlert("🛡️ そうびをはずした", `<strong>${targetChar.name}</strong> が <strong style="color:#ffeb3b;">${safeName}</strong> をはずしたよ！`);
+    } else {
+        targetChar.equipped[category] = id;
+        showGameAlert("🛡️ そうび完了", `<strong>${targetChar.name}</strong> が <strong style="color:#00f2fe;">${safeName}</strong> を装備したよ！`);
+    }
+    saveGame(); openEquipScreen(currentCategoryTab);
 }
 
 function levelUpWeapon(id) {
@@ -1716,26 +1762,19 @@ function levelUpWeapon(id) {
     saveGame(); openEquipScreen(currentCategoryTab);
 }
 
-// 🌟 新機能：一括最大強化
+// 一括最大強化
 function levelUpWeaponMax(id) {
     let weap = saveStatus.equipments.find(e => e.id === id);
     if (!weap) return;
     let maxLevel = getMaxWeaponLevel(getWeaponStar(weap.name));
     if (weap.level >= maxLevel) { showGameAlert("👑 最大レベルです", `この装備はレベル上限です！`); return; }
     
-    let totalCost = 0;
-    let levelUps = 0;
-    let tempLevel = weap.level;
+    let totalCost = 0; let levelUps = 0; let tempLevel = weap.level;
     
-    // 素材が許す限り計算
     while (tempLevel < maxLevel) {
         let nextCost = getUpgradeCost(tempLevel);
-        if (saveStatus.materials < (totalCost + nextCost)) {
-            break; 
-        }
-        totalCost += nextCost;
-        tempLevel++;
-        levelUps++;
+        if (saveStatus.materials < (totalCost + nextCost)) break; 
+        totalCost += nextCost; tempLevel++; levelUps++;
     }
     
     if (levelUps === 0) {
@@ -1745,8 +1784,7 @@ function levelUpWeaponMax(id) {
     }
     
     saveStatus.materials -= totalCost;
-    weap.level += levelUps;
-    weap.bonus += (10 * levelUps);
+    weap.level += levelUps; weap.bonus += (10 * levelUps);
     
     let safeName = getBaseName(weap.name);
     showGameAlert("🔨 連続強化せいこう！", `<strong>${safeName}</strong> を一気に <strong>${levelUps}回</strong> 強化して <span style="color:#00f2fe; font-weight:bold;">Lv.${weap.level}</span> にした！<br><span style="font-size:11px; color:#aaa;">（消費: 草の化石 ${totalCost}個）</span>`);
@@ -1761,10 +1799,11 @@ function openCombineSelectModal(baseId) {
     let baseWeap = saveStatus.equipments.find(e => e.id === baseId);
     if (!baseWeap) return;
     let materials = saveStatus.equipments.filter(e => {
-        let isEquipped = Object.values(saveStatus.equipped).includes(e.id);
-        return e.id !== baseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquipped;
+        let isEquippedByAnyone = false;
+        saveStatus.characters.forEach(c => { if (Object.values(c.equipped).includes(e.id)) isEquippedByAnyone = true; });
+        return e.id !== baseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquippedByAnyone;
     });
-    if (materials.length === 0) { showGameAlert("🌀 合体できないよ", "合体させるには、同じ種類の限界突破していない＆未そうびの装備をもう1つ手に入れる必要があるよ！"); return; }
+    if (materials.length === 0) { showGameAlert("🌀 合体できないよ", "合体させるには、同じ種類の限界突破していない＆<br><strong>誰も装備していない</strong>装備を手に入れる必要があるよ！"); return; }
     currentCombineBaseId = baseId; selectedMaterials = []; maxSelectableCount = 4 - baseWeap.limitBreak; 
     updateCombineModalUI(materials, baseWeap);
     document.getElementById('alert-overlay').style.display = 'block';
@@ -1786,8 +1825,9 @@ function toggleMaterialSelection(matId) {
     }
     let baseWeap = saveStatus.equipments.find(e => e.id === currentCombineBaseId);
     let materials = saveStatus.equipments.filter(e => {
-        let isEquipped = Object.values(saveStatus.equipped).includes(e.id);
-        return e.id !== currentCombineBaseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquipped;
+        let isEquippedByAnyone = false;
+        saveStatus.characters.forEach(c => { if (Object.values(c.equipped).includes(e.id)) isEquippedByAnyone = true; });
+        return e.id !== currentCombineBaseId && isSameWeaponType(e, baseWeap) && e.limitBreak === 0 && !isEquippedByAnyone;
     });
     updateCombineModalUI(materials, baseWeap);
 }
@@ -1801,23 +1841,15 @@ function updateCombineModalUI(materials, baseWeap) {
     let infoHtml = `あと ${maxSelectableCount - combineCount} 個 選べるよ！`;
     if (combineCount > 0) {
         infoHtml += `<br><span style="color:#ffd700; font-size:12px; margin-top:5px; display:inline-block;">必要草コイン: <img src="草コイン.png" style="width:14px; height:14px; vertical-align:middle;" onerror="this.style.display='none'"> ${cost} (所持: ${saveStatus.coins})</span>`;
-        if (saveStatus.coins < cost) {
-            infoHtml += `<br><span style="color:#ff416c; font-size:11px;">※草コインが足りません！</span>`;
-        }
+        if (saveStatus.coins < cost) { infoHtml += `<br><span style="color:#ff416c; font-size:11px;">※草コインが足りません！</span>`; }
     }
     document.getElementById('combine-info-text').innerHTML = infoHtml;
 
     let btnExecute = document.getElementById('btn-execute-combine');
     if (combineCount > 0 && saveStatus.coins >= cost) { 
-        btnExecute.style.background = "linear-gradient(45deg, #ffeb3b, #f8b500)"; 
-        btnExecute.style.color = "#1f2833"; 
-        btnExecute.style.cursor = "pointer"; 
-        btnExecute.disabled = false;
+        btnExecute.style.background = "linear-gradient(45deg, #ffeb3b, #f8b500)"; btnExecute.style.color = "#1f2833"; btnExecute.style.cursor = "pointer"; btnExecute.disabled = false;
     } else { 
-        btnExecute.style.background = "#333"; 
-        btnExecute.style.color = "#777"; 
-        btnExecute.style.cursor = "not-allowed"; 
-        btnExecute.disabled = true;
+        btnExecute.style.background = "#333"; btnExecute.style.color = "#777"; btnExecute.style.cursor = "not-allowed"; btnExecute.disabled = true;
     }
 
     materials.forEach(mat => {
@@ -1838,18 +1870,11 @@ function updateCombineModalUI(materials, baseWeap) {
 
 function confirmCombineSelection() {
     if (selectedMaterials.length === 0) return; 
-    
     let baseWeap = saveStatus.equipments.find(e => e.id === currentCombineBaseId);
     let cost = getCombineCost(baseWeap.name, selectedMaterials.length);
-    
-    if (saveStatus.coins < cost) {
-        showGameAlert("❌ 草コイン不足", "草コインが足りないため、合体できません！");
-        return;
-    }
-    
+    if (saveStatus.coins < cost) { showGameAlert("❌ 草コイン不足", "草コインが足りないため、合体できません！"); return; }
     materialsToCombine = [...selectedMaterials];
-    closeCombineSelectModal();
-    startCombineAnimation();
+    closeCombineSelectModal(); startCombineAnimation();
 }
 
 function startCombineAnimation() {
@@ -1870,7 +1895,11 @@ function executeMultiCombine() {
 
     saveStatus.equipments = saveStatus.equipments.filter(e => !materialsToCombine.includes(e.id));
     materialsToCombine.forEach(matId => {
-        for (let cat in saveStatus.equipped) { if (saveStatus.equipped[cat] === matId) saveStatus.equipped[cat] = targetWeapon.id; }
+        saveStatus.characters.forEach(c => {
+            for (let cat in c.equipped) {
+                if (c.equipped[cat] === matId) c.equipped[cat] = targetWeapon.id; 
+            }
+        });
     });
 
     let safeName = getBaseName(targetWeapon.name);
@@ -1878,17 +1907,6 @@ function executeMultiCombine() {
     if (targetWeapon.limitBreak >= 4) { successMessage += `<br><br><span style="color:#00f2fe; font-weight:bold; font-size:18px;">👑 最大限界突破（+4）達成！ 👑</span>`; }
     showGameAlert("🔥 装備合体 大成功！！", successMessage);
     materialsToCombine = []; saveGame(); openEquipScreen(currentCategoryTab);
-}
-
-function setWeapon(id, category) {
-    let weap = saveStatus.equipments.find(e => e.id === id);
-    let safeName = getBaseName(weap.name);
-    if (saveStatus.equipped[category] === id) {
-        saveStatus.equipped[category] = null; showGameAlert("🛡️ そうびをはずした", `<strong>${safeName}</strong> をはずしたよ！`);
-    } else {
-        saveStatus.equipped[category] = id; showGameAlert("🛡️ そうび完了", `<strong>${safeName}</strong> を [${categoryNames[category]}] に装備したよ！`);
-    }
-    saveGame(); openEquipScreen(currentCategoryTab);
 }
 
 // =========================================================
