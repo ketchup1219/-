@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KAZIN - ストーリーモード</title>
+    <title>おれたちの最強RPG - ストーリーモード</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
 
@@ -576,7 +576,7 @@
             gap: 20px;
         }
 
-        /* 🔴 メインスキルボタン */
+        /* 🔴 メインスキルボタン (100pxに大型化) */
         .skill-btn {
             width: 100px;
             height: 100px;
@@ -1369,9 +1369,9 @@ const storyChapters = {
             {
                 id: 3, name: "4-3. ハム魔導国の総力戦", rewards: { exp: 250, coins: 3000, materials: 25 },
                 monsters: [
-                    { name: "雑魚グリッチA", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチB", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 },
-                    { name: "雑魚グリッチC", hp: 50, maxHp: 50, emoji: "👾", dmg: 10 }
+                    { name: "雑魚グリッチA", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチB", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 },
+                    { name: "雑魚グリッチC", hp: 100, maxHp: 100, emoji: "👾", dmg: 10 }
                 ],
                 dialogue: [
                     { speaker: "ナレーション", text: "不安に顔を曇らせるカグヤ。しかし、横にいる緋色・ハムの雰囲気がガラリと変わります。" },
@@ -1479,7 +1479,7 @@ const storyChapters = {
         ]
     },
     5: {
-        title: "第5章：法なき砂漠と無敵の拳",
+        title: "第5章：法なき砂漠と無敵の頭",
         stages: [
             {
                 id: 1, name: "5-1. 砂塵渦巻く大砂漠", rewards: { exp: 100, coins: 2000, materials: 20 },
@@ -2376,35 +2376,33 @@ function handleVictory() {
         });
     }
 
+    let chapterClearBonusHTML = "";
     const stageKey = `${activeChapter}-${activeStage.id}`;
-    if (!saveStatus.clearedStages.includes(stageKey)) {
+    let isFirstClear = !saveStatus.clearedStages.includes(stageKey);
+    
+    if (isFirstClear) {
         saveStatus.clearedStages.push(stageKey);
-    }
+        
+        let isChapterClear = false;
+        if (activeChapter === 1 && activeStage.id === 3) { saveStatus.questFlags.chapter1_cleared = true; isChapterClear = true; }
+        if (activeChapter === 2 && activeStage.id === 6) { saveStatus.questFlags.chapter2_cleared = true; isChapterClear = true; }
+        if (activeChapter === 2.5 && activeStage.id === 4) { saveStatus.questFlags.chapter2_5_cleared = true; isChapterClear = true; }
+        if (activeChapter === 3 && activeStage.id === 5) { saveStatus.questFlags.chapter3_cleared = true; isChapterClear = true; }
+        if (activeChapter === 4 && activeStage.id === 5) { saveStatus.questFlags.chapter4_cleared = true; isChapterClear = true; }
+        if (activeChapter === 4.5 && activeStage.id === 4) { saveStatus.questFlags.chapter4_5_cleared = true; isChapterClear = true; }
+        if (activeChapter === 5 && activeStage.id === 6) { saveStatus.questFlags.chapter5_cleared = true; isChapterClear = true; }
 
-    if (activeChapter === 1 && activeStage.id === 3) saveStatus.questFlags.chapter1_cleared = true;
-    if (activeChapter === 2 && activeStage.id === 6) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter2_cleared = true;
-    }
-    if (activeChapter === 2.5 && activeStage.id === 4) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter2_5_cleared = true;
-    }
-    if (activeChapter === 3 && activeStage.id === 5) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter3_cleared = true;
-    }
-    if (activeChapter === 4 && activeStage.id === 5) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter4_cleared = true;
-    }
-    if (activeChapter === 4.5 && activeStage.id === 4) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter4_5_cleared = true;
-    }
-    if (activeChapter === 5 && activeStage.id === 6) {
-        if(!saveStatus.questFlags) saveStatus.questFlags = {};
-        saveStatus.questFlags.chapter5_cleared = true;
+        // ★ 章をクリアしたら「草核」を1000個プレゼント！
+        if (isChapterClear) {
+            saveStatus.stones += 1000;
+            chapterClearBonusHTML = `
+                <div style="color: #00f2fe; font-weight: 900; font-size: 16px; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.5); border: 2px solid #00f2fe; border-radius: 8px; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); animation: pulse 1s infinite alternate;">
+                    🎉 章クリアボーナス！<br>
+                    <span style="font-size: 12px;"><img src="草核.png" onerror="this.src='草核.jpg'" style="width:14px;vertical-align:middle;"> 草核 1000個 獲得！</span>
+                </div>
+            `;
+            setTimeout(() => { showToastMsg("章クリア！草核を1000個獲得した！"); }, 500);
+        }
     }
 
     // ★ 4.5-4クリア時に「ミニ・ヒイロ（c_mini_hiiro）」を仲間に加える処理
@@ -2432,7 +2430,7 @@ function handleVictory() {
                     <span style="font-size: 12px;">拠点(メイン画面)の「キャラ一覧」で<br>ミニ・ヒイロが編成できるようになった！</span>
                 </div>
             `;
-            showToastMsg("ミニ・ヒイロが編成できるようになった！");
+            setTimeout(() => { showToastMsg("ミニ・ヒイロが編成できるようになった！"); }, 1000);
         }
     }
 
@@ -2442,6 +2440,7 @@ function handleVictory() {
         <div class="reward-item-row"><span>🔸 獲得経験値(全員)</span><span style="color: #00d2ff;">+ ${rewards.exp} EXP</span></div>
         <div class="reward-item-row"><span><img src="草コイン.png" class="resource-icon"> 獲得草コイン</span><span style="color: #ffeb3b;">+ ${rewards.coins} G</span></div>
         <div class="reward-item-row"><span><img src="草の化石.png" onerror="this.src='草の化石.jpg'" class="resource-icon"> 獲得草の化石</span><span style="color: #e056fd;">+ ${rewards.materials} 個</span></div>
+        ${chapterClearBonusHTML}
         ${levelUpMessageHTML}
     `;
 }
