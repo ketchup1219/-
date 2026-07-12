@@ -21,6 +21,7 @@
     .font-fantasy {
       font-family: 'Cinzel', 'Shippori Mincho', serif;
     }
+    
     /* スクロールバー装飾 */
     ::-webkit-scrollbar {
       width: 6px;
@@ -35,6 +36,15 @@
     }
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(255,255,255,0.4);
+    }
+
+    /* 横スクロールリスト用のスクロールバー非表示クラス */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
     }
     
     /* 選択中のサイドメニューアクティブ演出 */
@@ -51,6 +61,24 @@
     .region-btn:hover {
       color: #ebc487;
       padding-left: 1.1rem;
+    }
+
+    /* スマホ画面横スクロール時のアクティブ演出微調整 */
+    @media (max-width: 767px) {
+      .region-btn.active {
+        background: rgba(235, 196, 135, 0.15);
+        border-left: none;
+        border-bottom: 3px solid #ebc487;
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .region-btn {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+      }
+      .region-btn:hover {
+        padding-left: 1rem;
+      }
     }
 
     /* キャラクター選択カルーセルのアクティブ枠 */
@@ -116,69 +144,67 @@
 <body class="text-gray-100 min-h-screen flex flex-col justify-between relative bg-transition bg-cover bg-center" id="main-body" style="background-image: linear-gradient(rgba(12, 15, 23, 0.55), rgba(12, 15, 23, 0.85)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');">
 
   <!-- ==================== HEADER ==================== -->
-  <header class="w-full bg-slate-900/85 backdrop-blur-md border-b border-white/10 px-6 py-3 flex items-center justify-between z-40 relative">
+  <header class="w-full bg-slate-900/85 backdrop-blur-md border-b border-white/10 px-4 md:px-6 py-3 flex items-center justify-between z-40 relative">
     <!-- 左側: タイトル・ロゴ -->
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#ebc487] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
-        <i data-lucide="compass" class="w-6 h-6 text-slate-900"></i>
+      <div class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-[#ebc487] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
+        <i data-lucide="compass" class="w-5 h-5 md:w-6 md:h-6 text-slate-900"></i>
       </div>
       <div>
-        <h1 class="text-xl font-bold tracking-wider font-fantasy text-white">ROUGE GALLEON</h1>
-        <p class="text-[9px] tracking-widest text-amber-200/80 uppercase -mt-1">Official Wiki & Library</p>
+        <h1 class="text-lg md:text-xl font-bold tracking-wider font-fantasy text-white">ROUGE GALLEON</h1>
+        <p class="text-[8px] md:text-[9px] tracking-widest text-amber-200/80 uppercase -mt-1">Official Wiki & Library</p>
       </div>
     </div>
 
-    <!-- 中央: ナビゲーション -->
-    <nav class="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide text-gray-300">
+    <!-- 中央: ナビゲーション (タブレット以上で表示) -->
+    <nav class="hidden md:flex items-center space-x-6 lg:space-x-8 text-sm font-medium tracking-wide text-gray-300">
       <a href="index.html" class="hover:text-white transition duration-200">HOME</a>
-      <!-- WORLDにクリックイベントを設定（既存のものを保持したまま機能を追加） -->
       <a href="javascript:void(0)" onclick="openWorldMap()" class="hover:text-[#ebc487] hover:scale-105 transition duration-200 flex items-center gap-1"><i data-lucide="map" class="w-4 h-4"></i> WORLD</a>
-      <!-- CHARACTERタブをアクティブ状態に設定 -->
       <a href="kaizokusetumei.html" class="text-[#ebc487] border-b-2 border-[#ebc487] pb-1 font-semibold transition duration-200">CHARACTER</a>
       <a href="#" class="hover:text-white transition duration-200 flex items-center">SYSTEM <i data-lucide="chevron-down" class="w-3.5 h-3.5 ml-1"></i></a>
       <a href="#" class="hover:text-white transition duration-200">COMMUNITY</a>
     </nav>
 
     <!-- 右側: アクション -->
-    <div class="flex items-center space-x-4">
-      <button class="text-gray-300 hover:text-white p-2 relative" onclick="toggleMute()">
+    <div class="flex items-center space-x-3 md:space-x-4">
+      <button class="text-gray-300 hover:text-white p-1.5 md:p-2 relative" onclick="toggleMute()" aria-label="ミュート切り替え">
         <i id="bgm-icon" data-lucide="volume-2" class="w-5 h-5"></i>
       </button>
-      <button onclick="window.location.href='kaizoku.html'" class="bg-gradient-to-r from-amber-400 to-[#ebc487] text-slate-950 px-6 py-2 rounded-sm font-bold text-sm tracking-widest hover:brightness-110 active:scale-95 transition shadow-lg shadow-amber-500/15 uppercase">
+      <button onclick="window.location.href='kaizoku.html'" class="bg-gradient-to-r from-amber-400 to-[#ebc487] text-slate-950 px-4 md:px-6 py-1.5 md:py-2 rounded-sm font-bold text-xs md:text-sm tracking-widest hover:brightness-110 active:scale-95 transition shadow-lg shadow-amber-500/15 uppercase">
         ゲーム起動
       </button>
     </div>
   </header>
 
   <!-- ==================== MAIN CONTENT AREA ==================== -->
-  <main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-6 grid grid-cols-12 gap-6 items-stretch relative z-30">
+  <main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 grid grid-cols-12 gap-4 md:gap-6 items-stretch relative z-30">
     
-    <!-- 左サイド: 地域・勢力切り替え -->
-    <div class="col-span-12 md:col-span-3 flex md:flex-col flex-row overflow-x-auto md:overflow-x-visible space-x-2 md:space-x-0 md:space-y-3 py-2 md:py-6 border-b md:border-b-0 md:border-r border-white/10 z-20" id="region-list">
+    <!-- 左サイド（スマホ時は最上部で横スクロール表示、PC時は左側に縦配置） -->
+    <div class="col-span-12 md:col-span-3 flex md:flex-col flex-row overflow-x-auto md:overflow-x-visible space-x-2 md:space-x-0 md:space-y-3 py-2 md:py-6 border-b md:border-b-0 md:border-r border-white/10 z-20 scrollbar-none no-scrollbar snap-x" id="region-list">
       <!-- JavaScript で地域リストが動的に生成されます -->
     </div>
 
     <!-- 中央＆右：キャラクターショーケース -->
-    <div class="col-span-12 md:col-span-9 grid grid-cols-12 gap-6 items-center min-h-[500px]">
+    <div class="col-span-12 md:col-span-9 grid grid-cols-12 gap-6 items-center min-h-[450px] md:min-h-[500px]">
       
-      <!-- 左：詳細情報テキストカード -->
-      <div class="col-span-12 md:col-span-6 flex flex-col justify-center space-y-6 z-20 opacity-0" id="detail-card">
+      <!-- 左：詳細情報テキストカード (スマホ時は立ち絵の下、またはレイアウト状況により最適配置) -->
+      <div class="col-span-12 md:col-span-6 flex flex-col justify-center space-y-4 md:space-y-6 z-20 opacity-0 order-2 md:order-1" id="detail-card">
         
         <!-- 国・所属表示 -->
         <div class="relative">
-          <span class="text-xs uppercase tracking-[0.3em] text-amber-200/70 font-fantasy block" id="char-sub">CRIMSON PIRATES</span>
-          <h2 class="text-4xl md:text-5xl font-bold tracking-wide mt-2 font-fantasy text-white drop-shadow-md" id="char-name">ーーーーー</h2>
+          <span class="text-xs uppercase tracking-[0.3em] text-amber-200/70 font-fantasy block animate-pulse" id="char-sub">CRIMSON PIRATES</span>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-wide mt-2 font-fantasy text-white drop-shadow-md" id="char-name">ーーーーー</h2>
         </div>
 
         <!-- 役割(TYPE) & 説明読み上げボタン -->
         <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 bg-amber-950/40 border border-amber-500/30 px-4 py-1.5 rounded-sm">
+          <div class="flex items-center space-x-2 bg-amber-950/40 border border-amber-500/30 px-3.5 py-1.5 rounded-sm">
             <span class="text-xs text-amber-200/80 tracking-widest">TYPE:</span>
             <!-- 属性名のみを表示 -->
-            <span class="text-sm font-semibold text-white tracking-wider" id="char-type">炎</span>
+            <span class="text-xs md:text-sm font-semibold text-white tracking-wider" id="char-type">炎</span>
           </div>
-          <button onclick="playVoice()" class="w-10 h-10 rounded-full bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 flex items-center justify-center text-amber-300 transition-all hover:scale-105 active:scale-95 group shadow-lg shadow-amber-500/10" title="解説を読み上げる">
-            <i data-lucide="volume-2" class="w-5 h-5 group-hover:animate-bounce"></i>
+          <button onclick="playVoice()" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 flex items-center justify-center text-amber-300 transition-all hover:scale-105 active:scale-95 group shadow-lg shadow-amber-500/10" title="解説を読み上げる">
+            <i data-lucide="volume-2" class="w-4.5 h-4.5 md:w-5 md:h-5 group-hover:animate-bounce"></i>
           </button>
           <span class="text-xs text-gray-400 italic" id="voice-status">クリックで紹介文を音読</span>
         </div>
@@ -192,15 +218,15 @@
         </div>
 
         <!-- キャラクター詳細説明テキスト -->
-        <div class="bg-slate-950/70 backdrop-blur-md border-l-4 border-amber-400 p-5 rounded-r-lg max-w-lg relative overflow-hidden shadow-2xl">
+        <div class="bg-slate-950/70 backdrop-blur-md border-l-4 border-amber-400 p-4 md:p-5 rounded-r-lg max-w-lg relative overflow-hidden shadow-2xl">
           <div class="absolute top-0 right-0 p-1 opacity-10">
-            <i data-lucide="quote" class="w-12 h-12 text-white"></i>
+            <i data-lucide="quote" class="w-10 md:w-12 h-10 md:h-12 text-white"></i>
           </div>
           <!-- ファンタジー四隅飾り -->
           <div class="absolute top-1 right-1 w-2 h-2 border-t border-r border-amber-300/40"></div>
           <div class="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-amber-300/40"></div>
 
-          <p class="text-sm leading-relaxed text-gray-200 tracking-wide font-light whitespace-pre-wrap" id="char-description">
+          <p class="text-xs md:text-sm leading-relaxed text-gray-200 tracking-wide font-light whitespace-pre-wrap" id="char-description">
             紅の海賊団を率いる若き若頭。情熱的で、曲がったことが大嫌いな性格。
             真っ赤なマントを羽ばたかせながら、大いなる海へと繰り出し、仲間たちの笑顔を守るために自慢の炎を操る。
           </p>
@@ -208,8 +234,8 @@
 
         <!-- 決め台詞 -->
         <div class="pt-2">
-          <div class="inline-block relative px-6 py-2 border-y border-amber-400/30 bg-gradient-to-r from-amber-500/5 to-transparent">
-            <p class="text-amber-200 text-sm md:text-base font-medium tracking-widest" id="char-quote">
+          <div class="inline-block relative px-4 md:px-6 py-2 border-y border-amber-400/30 bg-gradient-to-r from-amber-500/5 to-transparent w-full md:w-auto">
+            <p class="text-amber-200 text-xs md:text-base font-medium tracking-widest italic" id="char-quote">
               「俺の真っ赤なマントの下で、果てない海を一緒に駆け抜けようぜ！」
             </p>
           </div>
@@ -217,16 +243,16 @@
 
       </div>
 
-      <!-- 右：ダイナミック立ち絵イラスト -->
-      <div class="col-span-12 md:col-span-6 flex items-center justify-center relative min-h-[350px] md:min-h-[500px]">
+      <!-- 右：ダイナミック立ち絵イラスト (スマホ時はテキストの上に配置) -->
+      <div class="col-span-12 md:col-span-6 flex items-center justify-center relative min-h-[300px] md:min-h-[500px] order-1 md:order-2">
         <!-- 背景のエフェクト円 -->
-        <div class="absolute w-72 h-72 md:w-[420px] md:h-[420px] rounded-full bg-gradient-to-tr from-amber-500/10 to-transparent blur-3xl -z-10 animate-pulse"></div>
-        <div class="absolute w-64 h-64 md:w-[320px] md:h-[320px] rounded-full border border-white/5 -z-10 flex items-center justify-center">
-          <div class="w-48 h-48 md:w-[240px] md:h-[240px] rounded-full border border-amber-400/15 border-dashed animate-[spin_40s_linear_infinite]"></div>
+        <div class="absolute w-56 h-56 md:w-[420px] md:h-[420px] rounded-full bg-gradient-to-tr from-amber-500/10 to-transparent blur-3xl -z-10 animate-pulse"></div>
+        <div class="absolute w-48 h-48 md:w-[320px] md:h-[320px] rounded-full border border-white/5 -z-10 flex items-center justify-center">
+          <div class="w-36 h-36 md:w-[240px] md:h-[240px] rounded-full border border-amber-400/15 border-dashed animate-[spin_40s_linear_infinite]"></div>
         </div>
 
         <!-- 立ち絵表示コンテナ -->
-        <div class="w-full max-w-[320px] md:max-w-[420px] float-anim flex items-center justify-center relative opacity-0" id="char-illustration-container">
+        <div class="w-full max-w-[260px] md:max-w-[420px] float-anim flex items-center justify-center relative opacity-0" id="char-illustration-container">
           <!-- JSでここに画像(PNG)およびフォールバックSVGが動的に描写されます -->
         </div>
       </div>
@@ -235,30 +261,30 @@
   </main>
 
   <!-- ==================== FOOTER / CAROUSEL ==================== -->
-  <footer class="w-full bg-gradient-to-t from-slate-950/95 to-slate-900/50 backdrop-blur-md border-t border-white/5 py-4 px-6 z-30 relative">
+  <footer class="w-full bg-gradient-to-t from-slate-950/95 to-slate-900/50 backdrop-blur-md border-t border-white/5 py-4 px-4 md:px-6 z-30 relative">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       
       <!-- 左: 操作案内 -->
-      <div class="text-xs text-gray-400 flex items-center space-x-2">
+      <div class="text-[10px] md:text-xs text-gray-400 flex items-center space-x-2">
         <span class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-300">←</span>
         <span class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-300">→</span>
-        <span>左右キー、またはサムネイルクリックでキャラクターを切り替え</span>
+        <span>左右キー、またはサムネイル選択でキャラクター切り替え</span>
       </div>
 
       <!-- 中央: スライドカルーセル -->
-      <div class="flex items-center space-x-4 w-full md:w-auto justify-center">
+      <div class="flex items-center space-x-3 w-full md:w-auto justify-center">
         <!-- 前へボタン -->
-        <button onclick="prevCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60">
+        <button onclick="prevCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60 flex-shrink-0" aria-label="前のキャラクター">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
 
         <!-- サムネイルコンテナ -->
-        <div class="flex items-center space-x-3 overflow-x-auto py-2 px-1 max-w-[280px] sm:max-w-[450px] md:max-w-[550px] no-scrollbar" id="carousel-list">
+        <div class="flex items-center space-x-2 overflow-x-auto py-1 px-1 max-w-[200px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[600px] no-scrollbar scroll-smooth snap-x" id="carousel-list">
           <!-- JSで現在カテゴリのキャラ一覧が挿入されます -->
         </div>
 
         <!-- 次へボタン -->
-        <button onclick="nextCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60">
+        <button onclick="nextCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60 flex-shrink-0" aria-label="次のキャラクター">
           <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
       </div>
@@ -272,13 +298,13 @@
 
   <!-- ==================== WORLD MAP MODAL (新マップ機能) ==================== -->
   <div id="map-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="relative w-11/12 max-w-5xl bg-slate-900 border border-[#ebc487]/30 rounded-lg p-6 shadow-2xl flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
+    <div class="relative w-11/12 max-w-5xl bg-slate-900 border border-[#ebc487]/30 rounded-lg p-4 md:p-6 shadow-2xl flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
       
       <!-- モーダルヘッダー -->
       <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
         <div class="flex items-center space-x-2">
-          <i data-lucide="compass" class="w-6 h-6 text-amber-400 animate-spin-slow"></i>
-          <h3 class="text-xl font-bold tracking-widest font-fantasy text-amber-200">WORLD MAP - 航海図</h3>
+          <i data-lucide="compass" class="w-5 h-5 md:w-6 h-6 text-amber-400 animate-spin-slow"></i>
+          <h3 class="text-lg md:text-xl font-bold tracking-widest font-fantasy text-amber-200">WORLD MAP - 航海図</h3>
         </div>
         <button onclick="closeWorldMap()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -350,8 +376,8 @@
       </div>
 
       <!-- モーダルフッター -->
-      <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
-        <p>ダブルクリック、または右下のパネルでマップを自由自在に拡大・縮小できます。</p>
+      <div class="mt-4 flex items-center justify-between text-[10px] md:text-xs text-gray-500">
+        <p class="hidden sm:block">ダブルクリック、または右下のパネルでマップを拡大・縮小できます。</p>
         <button onclick="closeWorldMap()" class="px-5 py-2 bg-[#ebc487]/15 hover:bg-[#ebc487]/30 text-[#ebc487] font-bold rounded tracking-widest transition-all">CLOSE</button>
       </div>
 
@@ -448,8 +474,7 @@
         </svg>`
       },
 
-      
-      // ランペイジ (rampage) -> ランペイジ・イット (雷属性)
+      // O&H COMPANY
       {
         id: "onisi",
         regionId: "oh",
@@ -481,8 +506,7 @@
         </svg>`
       },
 
-
-      // ランペイジ (rampage) -> ランペイジ・イット (雷属性)
+      // 神代共和国 (taka)
       {
         id: "takaking",
         regionId: "taka",
@@ -628,7 +652,7 @@
         </svg>`
       },
 
-      // カズキングダム (kazukingdom) -> カズキングタイジュウフエターネキンギーニ (属性を「炎」に変更)
+      // カズキングダム (kazukingdom)
       {
         id: "kazuking_taiju",
         regionId: "kazukingdom",
@@ -636,7 +660,7 @@
         sub: "Kazukingdom / デブい王",
         type: "炎",
         description: "カズキングダムの5代目皇帝、王としての威厳は無いように見えるが、いざというときは誰よりも頼りになる王様。ジャンクフードは何でも好き",
-        quote: "「勝利のファンファーレは決まった！」",
+        quote: "「勝利 of ファンファーレは決まった！」",
         speechPitch: 0.95,
         speechRate: 0.9,
         bgUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80",
@@ -660,7 +684,7 @@
         </svg>`
       },
 
-      // TANAKA HOLDINGS (tanaka_holdings) -> エージェント・タナカ (属性を「草」に変更)
+      // TANAKA HOLDINGS (tanaka_holdings)
       {
         id: "tanaka_ceo",
         regionId: "tanaka_holdings",
@@ -694,7 +718,7 @@
         </svg>`
       },
 
-      // KAZIN (kazin) -> カグヤ (風属性)
+      // KAZIN (kazin)
       {
         id: "kaguya_ch",
         regionId: "kazin",
@@ -728,10 +752,10 @@
     ];
 
     // 現在のステート管理
-    let currentCharacterId = "ketchup"; // 変更: 初期キャラをketchupへ
+    let currentCharacterId = "ketchup"; // 初期キャラをketchupへ
     let isMuted = false;
     let currentStyleIndex = 0; // スタイル切り替えインデックス
-    let mapZoomScale = 1; // 追加: マップズーム管理
+    let mapZoomScale = 1; // マップズーム管理
 
     // --- 3. 初期化処理 ---
     window.addEventListener('DOMContentLoaded', () => {
@@ -748,7 +772,7 @@
         }
       });
 
-      // 追加: マップモーダルのダブルクリックズーム
+      // マップモーダルのダブルクリックズーム
       const mapZoomTarget = document.getElementById('map-zoom-target');
       if (mapZoomTarget) {
         mapZoomTarget.addEventListener('dblclick', () => {
@@ -768,7 +792,8 @@
 
       regions.forEach((region) => {
         const btn = document.createElement('button');
-        btn.className = `region-btn text-left py-2.5 px-3 text-xs md:text-sm font-semibold tracking-widest flex items-center justify-between transition-all outline-none flex-shrink-0 md:flex-shrink w-full`;
+        // スマホ表示とPC表示でシームレスに切り替わるようにTailwindクラスを適用。横スクロール時にもボタン幅が縮まないよう「flex-shrink-0」を適用。
+        btn.className = `region-btn text-left py-2.5 md:py-3 px-4 md:px-3 text-xs md:text-sm font-semibold tracking-widest flex items-center justify-between transition-all outline-none flex-shrink-0 md:flex-shrink-0 w-auto md:w-full snap-start border-r md:border-r-0 border-white/5 md:border-b md:border-white/10`;
         btn.id = `btn-${region.id}`;
         btn.onclick = () => {
           playSE('se-click');
@@ -778,9 +803,9 @@
         btn.innerHTML = `
           <div class="flex items-center space-x-2">
             <span class="w-1.5 h-1.5 bg-amber-400 rotate-45 inline-block opacity-60"></span>
-            <span>${region.english}</span>
+            <span class="whitespace-nowrap">${region.english}</span>
           </div>
-          <span class="text-[10px] text-gray-500 hidden lg:inline ml-3">${region.name}</span>
+          <span class="text-[10px] text-gray-500 hidden lg:inline ml-3 whitespace-nowrap">${region.name}</span>
         `;
         regionListEl.appendChild(btn);
       });
@@ -794,7 +819,11 @@
       });
 
       const activeBtn = document.getElementById(`btn-${regionId}`);
-      if (activeBtn) activeBtn.classList.add('active');
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        // スマホ横スクロール時に選択した勢力が画面外にあれば中央にスクロールさせる
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
 
       const filteredChars = characters.filter(c => c.regionId === regionId);
 
@@ -821,7 +850,7 @@
 
       chars.forEach(char => {
         const item = document.createElement('div');
-        item.className = `char-thumb flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded border-2 border-white/20 bg-slate-950/80 cursor-pointer flex flex-col items-center justify-center p-1 transition-all duration-300 relative group overflow-hidden`;
+        item.className = `char-thumb flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded border-2 border-white/20 bg-slate-950/80 cursor-pointer flex flex-col items-center justify-center p-1 transition-all duration-300 relative group overflow-hidden snap-start`;
         item.id = `thumb-${char.id}`;
         item.onclick = () => {
           playSE('se-click');
@@ -854,7 +883,10 @@
       allThumbs.forEach(t => t.classList.remove('active'));
 
       const activeThumb = document.getElementById(`thumb-${charId}`);
-      if (activeThumb) activeThumb.classList.add('active');
+      if (activeThumb) {
+        activeThumb.classList.add('active');
+        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
 
       const detailCard = document.getElementById('detail-card');
       const illustrationContainer = document.getElementById('char-illustration-container');
@@ -903,9 +935,9 @@
 
       // 立ち絵（画像＋フォールバックSVG）の流し込み
       illustrationContainer.innerHTML = `
-        <div class="relative w-full h-full flex items-center justify-center min-h-[300px]">
+        <div class="relative w-full h-full flex items-center justify-center min-h-[260px] md:min-h-[300px]">
           <!-- 指定されたPNG画像 -->
-          <img src="${displayImg}" id="png-illustration" class="max-h-[340px] md:max-h-[440px] object-contain drop-shadow-2xl z-10 transition-transform duration-500 hover:scale-105" onerror="handleImageLoadError(this)">
+          <img src="${displayImg}" id="png-illustration" class="max-h-[260px] md:max-h-[440px] object-contain drop-shadow-2xl z-10 transition-transform duration-500 hover:scale-105" onerror="handleImageLoadError(this)">
           <!-- フォールバック用SVG（画像が見つからない・ロード失敗時に現れる） -->
           <div id="svg-fallback" class="absolute inset-0 flex items-center justify-center hidden">
             ${char.svg}
