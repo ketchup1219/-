@@ -131,9 +131,10 @@
     <!-- 中央: ナビゲーション -->
     <nav class="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide text-gray-300">
       <a href="index.html" class="hover:text-white transition duration-200">HOME</a>
-      <a href="#" class="hover:text-white transition duration-200">WORLD</a>
+      <!-- WORLDにクリックイベントを設定（既存のものを保持したまま機能を追加） -->
+      <a href="javascript:void(0)" onclick="openWorldMap()" class="hover:text-[#ebc487] hover:scale-105 transition duration-200 flex items-center gap-1"><i data-lucide="map" class="w-4 h-4"></i> WORLD</a>
       <!-- CHARACTERタブをアクティブ状態に設定 -->
-      <a href="index.html" class="text-[#ebc487] border-b-2 border-[#ebc487] pb-1 font-semibold transition duration-200">CHARACTER</a>
+      <a href="kaizokusetumei.html" class="text-[#ebc487] border-b-2 border-[#ebc487] pb-1 font-semibold transition duration-200">CHARACTER</a>
       <a href="#" class="hover:text-white transition duration-200 flex items-center">SYSTEM <i data-lucide="chevron-down" class="w-3.5 h-3.5 ml-1"></i></a>
       <a href="#" class="hover:text-white transition duration-200">COMMUNITY</a>
     </nav>
@@ -269,6 +270,94 @@
     </div>
   </footer>
 
+  <!-- ==================== WORLD MAP MODAL (新マップ機能) ==================== -->
+  <div id="map-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="relative w-11/12 max-w-5xl bg-slate-900 border border-[#ebc487]/30 rounded-lg p-6 shadow-2xl flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
+      
+      <!-- モーダルヘッダー -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="compass" class="w-6 h-6 text-amber-400 animate-spin-slow"></i>
+          <h3 class="text-xl font-bold tracking-widest font-fantasy text-amber-200">WORLD MAP - 航海図</h3>
+        </div>
+        <button onclick="closeWorldMap()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- モーダル本体（マップ表示エリア） -->
+      <div class="flex-grow overflow-hidden relative rounded bg-slate-950 border border-white/5 flex items-center justify-center group">
+        <!-- ズーム/コントロールパネル -->
+        <div class="absolute bottom-4 right-4 z-20 flex flex-col space-y-2 bg-slate-900/80 backdrop-blur border border-white/10 p-2 rounded shadow-lg">
+          <button onclick="zoomMap(1.2)" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="拡大"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+          <button onclick="zoomMap(0.8)" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="縮小"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+          <button onclick="resetMapZoom()" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="リセット"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+        </div>
+
+        <!-- マップ表示用コンテナ -->
+        <div class="w-full h-full overflow-auto flex items-center justify-center" id="map-container">
+          <div class="relative transition-transform duration-300 ease-out origin-center" id="map-zoom-target" style="transform: scale(1);">
+            <!-- マップ画像 (kaizokumap.png) -->
+            <img src="kaizokumap.png" id="actual-map-img" class="max-w-full max-h-[60vh] object-contain rounded drop-shadow-2xl select-none" alt="ROUGE GALLEON WORLD MAP" onerror="handleMapError(this)">
+            
+            <!-- 画像がない時のファンタジーな手書き地図風フォールバックSVG -->
+            <div id="map-fallback-svg" class="absolute inset-0 w-full h-full min-w-[600px] min-h-[400px] flex items-center justify-center hidden bg-amber-950/20 rounded p-6">
+              <svg viewBox="0 0 800 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <!-- 海のうねり風背景 -->
+                <rect width="800" height="500" fill="#141a29" stroke="#ebc487" stroke-width="4" rx="10"/>
+                <path d="M 50 100 Q 150 80 250 120 T 450 100 T 650 120 T 750 90" stroke="#1d273a" stroke-width="2" fill="none"/>
+                <path d="M 50 380 Q 150 360 250 400 T 450 380 T 650 400 T 750 370" stroke="#1d273a" stroke-width="2" fill="none"/>
+                
+                <!-- 抽象的な大陸・島影 -->
+                <path d="M 120 150 C 180 120 220 200 200 280 C 180 340 100 300 80 240 C 60 180 90 160 120 150 Z" fill="#ebc487" opacity="0.15" stroke="#ebc487" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="140" y="220" fill="#ebc487" font-size="14" font-family="Cinzel" opacity="0.5" font-weight="bold">RAMPAGE</text>
+
+                <path d="M 550 200 C 620 150 680 220 660 300 C 640 380 520 360 480 300 C 460 250 500 220 550 200 Z" fill="#ebc487" opacity="0.15" stroke="#ebc487" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="520" y="280" fill="#ebc487" font-size="14" font-family="Cinzel" opacity="0.5" font-weight="bold">SEIMARO EMPIRE</text>
+
+                <!-- 航路（点線） -->
+                <path d="M 210 240 Q 350 180 510 270" stroke="#f97316" stroke-width="2" stroke-dasharray="6,6" fill="none" opacity="0.7"/>
+
+                <!-- 帆船のアイコン -->
+                <g transform="translate(340, 200) scale(0.8)" opacity="0.8">
+                  <path d="M 10 30 L 40 30 L 50 15 L 0 15 Z" fill="#ebc487"/>
+                  <path d="M 25 15 L 25 0 L 10 7 Z" fill="#ffffff"/>
+                  <path d="M 25 15 L 25 2 L 40 9 Z" fill="#ffffff"/>
+                </g>
+
+                <!-- コンパスローズ（羅針盤） -->
+                <g transform="translate(400, 100) scale(0.6)">
+                  <circle cx="0" cy="0" r="40" fill="none" stroke="#ebc487" stroke-width="2" opacity="0.6"/>
+                  <polygon points="0,-50 8,-10 0,0" fill="#ef4444"/>
+                  <polygon points="0,-50 -8,-10 0,0" fill="#b91c1c"/>
+                  <polygon points="0,50 8,10 0,0" fill="#ebc487"/>
+                  <polygon points="0,50 -8,10 0,0" fill="#78350f"/>
+                  <polygon points="50,0 10,8 0,0" fill="#ebc487"/>
+                  <polygon points="-50,0 -10,8 0,0" fill="#ebc487"/>
+                  <text x="-5" y="-55" fill="#ebc487" font-size="14" font-weight="bold">N</text>
+                </g>
+
+                <!-- 謎の怪獣（クラーケン）の触手風グラフィック -->
+                <path d="M 380 340 Q 370 310 390 300 Q 400 320 390 350" fill="none" stroke="#ebc487" stroke-width="3" opacity="0.4"/>
+                <path d="M 410 360 Q 400 330 420 320 Q 430 340 420 370" fill="none" stroke="#ebc487" stroke-width="3" opacity="0.4"/>
+
+                <!-- 手書き地図風のうっすら文字 -->
+                <text x="320" y="440" fill="#ebc487" font-size="18" font-family="Cinzel" opacity="0.7" tracking-widest>ROUGE GALLEON OCEAN</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- モーダルフッター -->
+      <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+        <p>ダブルクリック、または右下のパネルでマップを自由自在に拡大・縮小できます。</p>
+        <button onclick="closeWorldMap()" class="px-5 py-2 bg-[#ebc487]/15 hover:bg-[#ebc487]/30 text-[#ebc487] font-bold rounded tracking-widest transition-all">CLOSE</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ==================== SOUND EFFECT SYSTEM ==================== -->
   <audio id="se-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
   <audio id="se-transition" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
@@ -357,8 +446,7 @@
         </svg>`
       },
 
-
-            // 緋色・ハム (hiromadou) -> 緋色・ハム (氷属性)
+      // 緋色・ハム (hiromadou) -> 緋色・ハム (氷属性)
       {
         id: "hirohamu",
         regionId: "hiromadou",
@@ -572,9 +660,10 @@
     ];
 
     // 現在のステート管理
-    let currentCharacterId = "kid";
+    let currentCharacterId = "ketchup"; // 変更: 初期キャラをketchupへ
     let isMuted = false;
     let currentStyleIndex = 0; // スタイル切り替えインデックス
+    let mapZoomScale = 1; // 追加: マップズーム管理
 
     // --- 3. 初期化処理 ---
     window.addEventListener('DOMContentLoaded', () => {
@@ -590,6 +679,18 @@
           prevCharacter();
         }
       });
+
+      // 追加: マップモーダルのダブルクリックズーム
+      const mapZoomTarget = document.getElementById('map-zoom-target');
+      if (mapZoomTarget) {
+        mapZoomTarget.addEventListener('dblclick', () => {
+          if (mapZoomScale === 1) {
+            zoomMap(1.5);
+          } else {
+            resetMapZoom();
+          }
+        });
+      }
     });
 
     // --- 4. 勢力(カテゴリ)メニューの描画 ---
@@ -787,6 +888,58 @@
       const fallbackContainer = document.getElementById('svg-fallback');
       if (fallbackContainer) {
         fallbackContainer.classList.remove('hidden'); // 美麗SVGを表示
+      }
+    }
+
+    // --- 7.1 追加: 新ワールドマップ表示機能 (kaizokumap.png 対応) ---
+    function openWorldMap() {
+      playSE('se-click');
+      const modal = document.getElementById('map-modal');
+      const modalCard = document.getElementById('map-modal-card');
+      
+      modal.classList.remove('pointer-events-none');
+      modal.classList.add('opacity-100');
+      modalCard.classList.remove('scale-95');
+      modalCard.classList.add('scale-100');
+      
+      resetMapZoom();
+    }
+
+    function closeWorldMap() {
+      playSE('se-click');
+      const modal = document.getElementById('map-modal');
+      const modalCard = document.getElementById('map-modal-card');
+      
+      modal.classList.add('pointer-events-none');
+      modal.classList.remove('opacity-100');
+      modalCard.classList.add('scale-95');
+      modalCard.classList.remove('scale-100');
+    }
+
+    // マップ読み込みエラー（画像未検出時）のフォールバック
+    function handleMapError(imgElement) {
+      imgElement.style.display = 'none';
+      const fallback = document.getElementById('map-fallback-svg');
+      if (fallback) {
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    // マップズームコントロール
+    function zoomMap(factor) {
+      mapZoomScale = Math.min(Math.max(mapZoomScale * factor, 0.5), 3); // ズーム倍率を0.5倍から3倍の範囲に制限
+      updateMapTransform();
+    }
+
+    function resetMapZoom() {
+      mapZoomScale = 1;
+      updateMapTransform();
+    }
+
+    function updateMapTransform() {
+      const target = document.getElementById('map-zoom-target');
+      if (target) {
+        target.style.transform = `scale(${mapZoomScale})`;
       }
     }
 
