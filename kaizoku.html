@@ -61,6 +61,10 @@
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
+    <!-- BGM & SE -->
+    <audio id="bgm-home" src="Pirates.mp3" loop></audio>
+    <audio id="se-click" src="決定ボタンを押す10.mp3"></audio>
+
     <img id="img-seimaro-boss" src="せいまろ.png" class="hidden" alt="boss">
     <div class="bubbles-container" id="bubbles-layer"></div>
 
@@ -327,7 +331,7 @@
             </div>
         </main>
 
-        <!-- 下部ナビゲーション (5列) -->
+        <!-- 下部ナビゲーション -->
         <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-1 py-1 pb-4 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
             <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1" data-target="screen-home">
                 <span class="nav-icon mb-1">🏠</span><span class="nav-text">ホーム</span>
@@ -479,8 +483,9 @@
                     <h4 class="text-sm font-black text-yellow-400 mb-1">⭐ レアリティ排出確率</h4>
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold text-slate-300">
                         <div class="flex justify-between border-b border-indigo-800/50 pb-1"><span>超激レア (UR):</span> <span class="text-pink-400 font-black">1.0% 〜 (爆死救済)</span></div>
+                        <div class="flex justify-between border-b border-indigo-800/50 pb-1"><span class="text-yellow-300">Sレア (SSR):</span> <span class="text-white">5.0%</span></div>
                         <div class="flex justify-between border-b border-indigo-800 pb-1"><span class="text-purple-400">激レア (SR):</span> <span class="text-white">10.0%</span></div>
-                        <div class="flex justify-between"><span class="text-blue-400">レア (R):</span> <span class="text-white">30.0%</span></div>
+                        <div class="flex justify-between border-b border-indigo-800 pb-1"><span class="text-blue-400">レア (R):</span> <span class="text-white">25.0%</span></div>
                         <div class="flex justify-between"><span>ノーマル (N):</span> <span class="text-white">59.0%</span></div>
                     </div>
                 </div>
@@ -491,6 +496,8 @@
                             <div class="flex justify-between"><span>海神の光条 (大砲)</span><span class="text-yellow-400">通常のみ</span></div>
                             <div class="flex justify-between"><span>伝説の海賊王の船 (船)</span><span class="text-yellow-400">通常のみ</span></div>
                             <div class="flex justify-between"><span>伝説のキャプテン (乗組員)</span><span class="text-yellow-400">通常のみ</span></div>
+                            <div class="flex justify-between"><span>北前船 (船)</span><span class="text-yellow-400">通常のみ</span></div>
+                            <div class="flex justify-between text-yellow-300"><span>雷戦艦せいまろ号 (限定船)</span><span>EX限定!!</span></div>
                             <div class="flex justify-between text-yellow-300"><span>せいまろ🐾 (限定乗組員)</span><span>EX限定!!</span></div>
                         </div>
                     </div>
@@ -624,6 +631,28 @@
     </div>
 
 <script>
+// --- 音声制御 (BGM & SE) ---
+document.addEventListener('click', (e) => {
+    if (e.target.closest('button') || e.target.closest('.game-btn') || e.target.closest('.icon-sel-btn')) {
+        const se = document.getElementById('se-click');
+        if (se) { se.currentTime = 0; se.play().catch(()=>{}); }
+    }
+});
+let bgmStarted = false;
+function playHomeBGM() {
+    const bgm = document.getElementById('bgm-home');
+    if (bgm && bgm.paused) { bgm.play().catch(()=>{}); }
+}
+function stopHomeBGM() {
+    const bgm = document.getElementById('bgm-home');
+    if (bgm && !bgm.paused) { bgm.pause(); }
+}
+document.addEventListener('click', () => {
+    if (!bgmStarted && !document.getElementById('screen-home').classList.contains('hidden')) {
+        playHomeBGM(); bgmStarted = true;
+    }
+}, { once: true });
+
 // --- 短縮・ユーティリティ関数 ---
 const $ = id => document.getElementById(id);
 const showEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.remove('hidden'); e.classList.add(dType);} };
@@ -645,16 +674,38 @@ const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン'
 const MASTER = {
     systems: { 'stamina_cap': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
     weapons: { 'wp_normal': {id:'wp_normal',name:'木の大砲',rarity:'N',fireRate:15,speed:6,type:'single',color:'#60a5fa',desc:'普通の弾を撃ち出す！'}, 'wp_spread': {id:'wp_spread',name:'鉄の散弾砲',rarity:'R',fireRate:20,speed:5,type:'spread',color:'#38bdf8',desc:'3方向に弾をばらまく！'}, 'wp_machine':{id:'wp_machine',name:'ガトリング砲',rarity:'SR',fireRate:5,speed:8,type:'single',color:'#2dd4bf',desc:'超すごいスピードで弾を連射！'}, 'wp_legend': {id:'wp_legend',name:'海神の光条',rarity:'UR',fireRate:10,speed:15,type:'laser',color:'#a78bfa',desc:'全てを貫通する最強のレーザー大砲！'} },
-    skins: { 'skin_default': {id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 'skin_pirate': {id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 'skin_ghost': {id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 'skin_king': {id:'skin_king',name:'伝説の海賊王の船',rarity:'UR',icon:'🏴‍☠️'} },
+    skins: { 
+        'skin_default': {id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 
+        'skin_pirate': {id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 
+        'skin_wood': {id:'skin_wood',name:'木の船',rarity:'SR',icon:'🪵'},
+        'skin_iron': {id:'skin_iron',name:'鉄の船',rarity:'SR',icon:'🚢'},
+        'skin_benzai': {id:'skin_benzai',name:'弁才船',rarity:'SR',icon:'🏯'},
+        'skin_higaki': {id:'skin_higaki',name:'菱垣廻船',rarity:'SR',icon:'⛴️'},
+        'skin_ghost': {id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 
+        'skin_titanic': {id:'skin_titanic',name:'タイタニック',rarity:'SSR',icon:'🛳️'},
+        'skin_yamato': {id:'skin_yamato',name:'ヤマト',rarity:'SSR',icon:'🛥️'},
+        'skin_titus': {id:'skin_titus',name:'グランドタイタス',rarity:'SSR',icon:'🚢'},
+        'skin_king': {id:'skin_king',name:'伝説の海賊王の船',rarity:'UR',icon:'🏴‍☠️'},
+        'skin_kitamae': {id:'skin_kitamae',name:'北前船',rarity:'UR',icon:'🏮'},
+        'skin_seimaro': {id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'⚡'}
+    },
     crew: { 'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 'crew_speed': {id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'船のスピードUP！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 'crew_score': {id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払った時のポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 'crew_power': {id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 'crew_seimaro': {id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
 MASTER.exStages = [ {id:'ex_infinity',name:'インフィニティステージ',goalScore:'∞',enemySpeed:3,spawnRate:30,reward:'お見送り数次第',color:'border-purple-500',isEndless:true,isEx:true,staminaCost:20}, {id:'ex_seimaro_1',name:'せいまろの試練 1',goalScore:50,enemySpeed:2,spawnRate:50,reward:3,rewardCoins:2000,color:'border-pink-400',isEndless:false,isEx:true,reqClearEx:0,staminaCost:10}, {id:'ex_seimaro_2',name:'せいまろの試練 2',goalScore:80,enemySpeed:3,spawnRate:35,reward:5,rewardCoins:3000,color:'border-pink-500',isEndless:false,isEx:true,reqClearEx:1,staminaCost:20}, {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} ];
 MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
 const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
-MASTER.gachaPool = [{type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'},{type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_king'},{type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_power'}];
-MASTER.exGachaPool = [{type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_ghost'},{type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_seimaro'}];
-const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
+MASTER.gachaPool = [
+    {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'},
+    {type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_king'},{type:'skins',id:'skin_kitamae'},
+    {type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_power'}
+];
+MASTER.exGachaPool = [
+    {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},
+    {type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_seimaro'},
+    {type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_seimaro'}
+];
+const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','SSR':'text-yellow-200 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
 
 let currentGachaTab='normal', happyShareTimeoutId=null, currentStageTab='normal', currentMissionTab='daily', currentMultiRoom=null, roomListener=null, multiSyncInterval=null;
 const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！オレ様はポリーだ！\n「大冒険へ出発!!」を押して初航海に出よう！',targetId:'btn-start-navigation'}], 'gacha': [{character:'🦜',text:'手に入れた「草核」を使って宝箱をあけよう！\n新しい装備が手に入るかも！？',targetId:'btn-draw-gacha-1'}], 'gacha_done': [{character:'🦜',text:'すっげーお宝だ！！\n下の「強化」ボタンを押して、船にセットしようぜ！',targetId:'nav-btn-equip'}], 'equip': [{character:'🦜',text:'手に入れたお宝のボタンをタップして、\n船をパワーアップさせてみよう！！',targetId:'tutorial-target-equip'}], 'all_done': [{character:'🦜',text:'カンペキだ船長！！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！',targetId:null}] };
@@ -677,7 +728,13 @@ function getItemLevel(id) { return DB.itemLevels[id]||1; }
 function getMaxStamina() { return 100+(getItemLevel('stamina_cap')-1)*10; }
 setInterval(() => { if(!DB)return; const maxSt=getMaxStamina(); if(DB.stamina<maxSt){ const diff=Date.now()-DB.lastStaminaUpdateTime; const add=Math.floor(diff/60000); if(add>0){ DB.stamina=Math.min(maxSt,DB.stamina+add); DB.lastStaminaUpdateTime=DB.stamina===maxSt?Date.now():DB.lastStaminaUpdateTime+(add*60000); saveGame(); if($('ui-stamina')) $('ui-stamina').innerText=`${DB.stamina}/${maxSt}`; } }else{ DB.lastStaminaUpdateTime=Date.now(); } }, 1000);
 function openStaminaModal() { showEl('stamina-modal'); } function closeStaminaModal() { hideEl('stamina-modal'); }
-function buyStamina() { if(DB.coins<500){showAlert("草コインが足りないぞ！");return;} DB.coins-=500; DB.stamina+=50; saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを50回復したぞ！"); }
+function buyStamina() { 
+    const maxSt = getMaxStamina();
+    if(DB.stamina >= maxSt){ showAlert("スタミナは既に満タンだぞ！"); return; }
+    if(DB.coins<500){ showAlert("草コインが足りないぞ！"); return; } 
+    DB.coins-=500; DB.stamina = Math.min(DB.stamina + 50, maxSt); 
+    saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを回復したぞ！"); 
+}
 
 // --- Firebase・フレンド ---
 const firebaseConfig={apiKey:"AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",authDomain:"game-685f2.firebaseapp.com",databaseURL:"https://game-685f2-default-rtdb.firebaseio.com",projectId:"game-685f2",storageBucket:"game-685f2.firebasestorage.app",messagingSenderId:"266871071111",appId:"1:266871071111:web:ffff3b65d0234fc5abb322"};
@@ -717,8 +774,22 @@ function navTo(sid) {
     document.querySelectorAll('.screen').forEach(e=>{e.classList.add('hidden'); e.classList.remove('block','flex');});
     const s=$(sid); if(s){s.classList.remove('hidden'); s.classList.add('flex'); s.style.animation='none'; s.offsetHeight; s.style.animation=null;}
     document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.dataset.target===sid) b.classList.add('text-yellow-400','scale-110'); else b.classList.remove('text-yellow-400','scale-110'); });
-    if(sid==='screen-home') initHome(); if(sid==='screen-stage') initStageSelect(); if(sid==='screen-equip') initEquip(); if(sid==='screen-gacha') updateGachaUI(); if(sid==='screen-friend'&&currentFriendTab==='list') renderFriendList(); if(sid==='screen-mission') renderMissionList();
-    if(sid!=='screen-game'){ stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; }else{ hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; }
+    
+    if(sid==='screen-home') initHome(); 
+    if(sid==='screen-stage') initStageSelect(); 
+    if(sid==='screen-equip') initEquip(); 
+    if(sid==='screen-gacha') updateGachaUI(); 
+    if(sid==='screen-friend'&&currentFriendTab==='list') renderFriendList(); 
+    if(sid==='screen-mission') renderMissionList();
+    
+    if(sid!=='screen-game'){ 
+        stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; 
+        playHomeBGM();
+    }else{ 
+        hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; 
+        stopHomeBGM();
+    }
+
     if(sid==='screen-gacha'&&DB.tutorialCompleted&&!DB.tutorialGachaCompleted) setTimeout(()=>startSpecificTutorial('gacha'),500); else if(sid==='screen-equip'&&DB.tutorialGachaCompleted&&!DB.tutorialEquipCompleted) setTimeout(()=>startSpecificTutorial('equip'),500); else if(sid==='screen-home') checkAndStartTutorial();
 }
 
@@ -739,7 +810,6 @@ window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailK
 function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
 function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
 
-// 🌟 新システム：才能強化関連のUI更新
 function updateTalentUI(crewId) {
     if(!DB.crewStats) DB.crewStats={};
     if(!DB.crewStats[crewId]) DB.crewStats[crewId] = {reincarnation:0, power:0, speed:0, score:0};
@@ -751,7 +821,6 @@ function updateTalentUI(crewId) {
     if (getItemLevel(crewId) >= 100) showEl('btn-reincarnate', 'block'); else hideEl('btn-reincarnate');
 }
 
-// 🌟 新システム：才能強化
 function upgradeTalent(type) {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
     const crewId = currentDetailItem.id; const st = DB.crewStats[crewId];
@@ -760,7 +829,6 @@ function upgradeTalent(type) {
     DB.materials -= cost; st[type] += 1; saveGame(); updateHeaderUI(); updateTalentUI(crewId);
 }
 
-// 🌟 新システム：転生
 function reincarnateCrew() {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
     const crewId = currentDetailItem.id;
@@ -778,19 +846,13 @@ function openItemDetail(id, k) {
     const ic=$('detail-icon'); ic.innerHTML=m.type==='image'?`<span class="inline-flex relative w-16 h-16 filter drop-shadow-md"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-5xl')"></span>`:`<span class="text-6xl filter drop-shadow-md">${m.icon}</span>`; 
     $('detail-name').innerText=m.name; $('detail-desc').innerText=m.desc; 
 
-    // レベル上限をアイテムカテゴリで分ける（乗組員は100、その他は10）
-    const isCrew = k === 'equippedCrew';
-    const maxLevel = isCrew ? 100 : 10;
-    const reqCoins = isCrew ? lv * 50 : lv * 200;
-    const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
+    const isCrew = k === 'equippedCrew'; const maxLevel = isCrew ? 100 : 10;
+    const reqCoins = isCrew ? lv * 50 : lv * 200; const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
 
     $('req-coins').innerText=reqCoins; $('req-materials').innerText=reqMats; 
     const bu=$('btn-upgrade'); 
-    if(lv>=maxLevel){
-        bu.innerHTML="MAX レベル!! 🌟";bu.disabled=true;bu.classList.add('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.remove('from-green-400','to-green-600','active:scale-95');
-    }else{
-        bu.innerHTML="パワーアップ!! ✨";bu.disabled=false;bu.classList.remove('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.add('from-green-400','to-green-600','active:scale-95');
-    } 
+    if(lv>=maxLevel){ bu.innerHTML="MAX レベル!! 🌟";bu.disabled=true;bu.classList.add('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.remove('from-green-400','to-green-600','active:scale-95'); }
+    else{ bu.innerHTML="パワーアップ!! ✨";bu.disabled=false;bu.classList.remove('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.add('from-green-400','to-green-600','active:scale-95'); } 
 
     if(isCrew){ showEl('crew-talent-ui', 'flex'); updateTalentUI(m.id); } else { hideEl('crew-talent-ui'); }
     if(k==='system')hideEl('btn-equip');else showEl('btn-equip'); showEl('item-detail-modal'); 
@@ -801,8 +863,7 @@ function upgradeItem() {
     if(!currentDetailItem)return; const lv=getItemLevel(currentDetailItem.id); 
     const isCrew = currentDetailKey === 'equippedCrew';
     if(lv>=(isCrew?100:10))return; 
-    const reqCoins = isCrew ? lv * 50 : lv * 200;
-    const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
+    const reqCoins = isCrew ? lv * 50 : lv * 200; const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
     if(DB.coins<reqCoins||DB.materials<reqMats)return showAlert("素材が足りないぞ！"); 
     DB.coins-=reqCoins; DB.materials-=reqMats; DB.itemLevels[currentDetailItem.id]=lv+1; saveGame(); updateHeaderUI(); openItemDetail(currentDetailItem.id,currentDetailKey); initEquip(); 
 }
@@ -812,7 +873,21 @@ function openGachaProbabilityModal() { showEl('gacha-probability-modal'); } func
 function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), be=$('tab-gacha-ex'), ti=$('gacha-title'), su=$('gacha-sub'), em=$('gacha-chest-emoji'), ba=$('ex-pickup-badge'); if(t==='normal'){bn.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";be.className="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";ti.innerText="わくわく通常ガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md";su.innerText="いろんなお宝が眠っているぞ！";em.innerText="🏴‍☠️";hideEl('ex-pickup-badge');}else{bn.className="flex-1 py-2 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent";be.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";ti.innerText="⭐ 超・限定EXガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md";su.innerText="今だけ！すごい乗組員がゲットできるかも！";em.innerText="⭐";showEl('ex-pickup-badge');} }
 function updateGachaUI() { updateHeaderUI(); $('gacha-rate').innerText=`${Math.min(1.0+(DB.pityCounter*0.5),100.0).toFixed(1)}%`; $('pity-bar').style.width=`${Math.min((DB.pityCounter/50)*100,100)}%`; }
 let currentGachaResults=[];
-function startGachaAnim(times) { if(!$('tutorial-overlay').classList.contains('hidden'))return; if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！ミッション等で集めよう！"); DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; for(let i=0;i<times;i++){ let ur=0.01+(DB.pityCounter*0.005), sr=0.10, r=0.30, rand=Math.random(), rr='N'; if(rand<ur)rr='UR';else if(rand<ur+sr)rr='SR';else if(rand<ur+sr+r)rr='R'; const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} let d=pool[Math.floor(Math.random()*pool.length)], m=MASTER[d.type][d.id], ok=d.type==='weapons'?'ownedWeapons':d.type==='skins'?'ownedSkins':'ownedCrew', isNew=!DB[ok].includes(d.id); if(isNew)DB[ok].push(d.id);else{DB.coins+=500;DB.materials+=1;} if(rr==='UR'){hasUR=true;hItem=m;DB.pityCounter=0;}else DB.pityCounter++; currentGachaResults.push({item:m,isNew:isNew}); } saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); }
+function startGachaAnim(times) { 
+    if(!$('tutorial-overlay').classList.contains('hidden'))return; 
+    if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！ミッション等で集めよう！"); 
+    DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; 
+    for(let i=0;i<times;i++){ 
+        let ur=0.01+(DB.pityCounter*0.005), ssr=0.05, sr=0.10, r=0.25, rand=Math.random(), rr='N'; 
+        if(rand<ur)rr='UR';else if(rand<ur+ssr)rr='SSR';else if(rand<ur+ssr+sr)rr='SR';else if(rand<ur+ssr+sr+r)rr='R'; 
+        const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; 
+        let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} 
+        let d=pool[Math.floor(Math.random()*pool.length)], m=MASTER[d.type][d.id], ok=d.type==='weapons'?'ownedWeapons':d.type==='skins'?'ownedSkins':'ownedCrew', isNew=!DB[ok].includes(d.id); 
+        if(isNew)DB[ok].push(d.id);else{DB.coins+=500;DB.materials+=1;} 
+        if(rr==='UR'){hasUR=true;hItem=m;DB.pityCounter=0;}else DB.pityCounter++; 
+        currentGachaResults.push({item:m,isNew:isNew}); 
+    } 
+    saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); }
 function showGachaResult(item, isNew) { document.querySelectorAll('.gacha-result-text').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=null;}); shootConfetti('gacha-confetti-container',80); $('gacha-result-rarity').innerText=item.rarity; $('gacha-result-rarity').className=`text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`; const vc=$('gacha-result-visual-container'); vc.innerHTML=item.type==='image'?`<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`:`<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon||'⚔️'}</span>`; $('gacha-result-name').innerHTML=`${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew?'🎉 初ゲット！！':'持ってるぞ！(+500/化石+1)'}</span>`; $('gacha-result-desc').innerText=item.desc||''; showEl('gacha-result-modal'); }
 function closeGachaResult() { hideEl('gacha-result-modal'); $('gacha-confetti-container').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
 function showGacha10Result() { const g=$('gacha-10-grid'); g.innerHTML=''; shootConfetti('gacha-confetti-container-10',120); currentGachaResults.forEach((r,i)=>{ const m=r.item, d=document.createElement('div'); d.className=`bg-indigo-900 border-2 border-indigo-500 rounded-xl p-2 flex flex-col items-center justify-center relative shadow-lg pop-in`; d.style.animationDelay=`${i*0.1}s`; d.style.animationFillMode='both'; const vi=m.type==='image'?`<span class="inline-flex relative w-12 h-12"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain drop-shadow-md z-10" onerror="fb(this,'${m.fallbackIcon}','text-2xl drop-shadow-md')"></span>`:`<span class="text-5xl drop-shadow-md">${m.icon||'⚔️'}</span>`; d.innerHTML=`<div class="absolute top-1 left-1 ${rarityColors[m.rarity]} font-black text-[10px] bg-indigo-950/80 px-1 rounded">${m.rarity}</div>${r.isNew?'<div class="absolute top-1 right-1 text-[8px] bg-pink-500 text-white font-black px-1 rounded shadow-md">NEW</div>':'<div class="absolute top-1 right-1 text-[8px] bg-slate-500 text-white font-black px-1 rounded shadow-md">ダブり</div>'}<div class="mt-4 mb-2 h-12 flex items-center justify-center">${vi}</div><div class="text-[9px] text-white font-bold text-center w-full truncate px-1">${m.name}</div>`; g.appendChild(d); }); showEl('gacha-result-10-modal'); }
@@ -859,7 +934,6 @@ function startStage(stage, isMulti=false) {
         const w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none'];
         const wl=getItemLevel(w.id), sl=getItemLevel(s.id), cl=getItemLevel(c.id);
         
-        // 🌟 才能・転生ボーナスの取得
         if(!DB.crewStats) DB.crewStats={};
         const cStats = DB.crewStats[c.id] || {reincarnation:0, power:0, speed:0, score:0};
         const rBonus = 1 + (cStats.reincarnation * 0.5);
