@@ -518,20 +518,20 @@
                     <p id="detail-desc" class="text-[11px] text-indigo-200 mt-2 text-center font-bold bg-indigo-950/50 p-2 rounded-xl w-full whitespace-pre-line"></p>
                 </div>
                 
-                <!-- 乗組員専用: 才能強化＆転生UI -->
                 <div id="crew-talent-ui" class="hidden w-full flex-col gap-2 mt-1 bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 shadow-inner">
-                    <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（化石消費）＆ 転生</div>
+                    <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（Lvアップで1Pt獲得！）</div>
+                    <div class="text-xs text-indigo-200 text-center font-bold">残り才能ポイント: <span id="talent-points-available" class="text-yellow-400 font-black text-sm">0</span></div>
                     <div class="flex justify-between items-center text-xs text-white font-bold">
                         <span class="flex items-center gap-1">⚔️ パワー <span id="talent-val-power" class="text-yellow-400 font-black text-sm">0</span></span>
-                        <button onclick="upgradeTalent('power')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">化石<span id="talent-cost-power">1</span>で強化</button>
+                        <button id="btn-talent-power" onclick="upgradeTalent('power')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">＋ 強化</button>
                     </div>
                     <div class="flex justify-between items-center text-xs text-white font-bold">
                         <span class="flex items-center gap-1">🏃 スピード <span id="talent-val-speed" class="text-yellow-400 font-black text-sm">0</span></span>
-                        <button onclick="upgradeTalent('speed')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">化石<span id="talent-cost-speed">1</span>で強化</button>
+                        <button id="btn-talent-speed" onclick="upgradeTalent('speed')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">＋ 強化</button>
                     </div>
                     <div class="flex justify-between items-center text-xs text-white font-bold">
                         <span class="flex items-center gap-1">🗺️ スコア <span id="talent-val-score" class="text-yellow-400 font-black text-sm">0</span></span>
-                        <button onclick="upgradeTalent('score')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">化石<span id="talent-cost-score">1</span>で強化</button>
+                        <button id="btn-talent-score" onclick="upgradeTalent('score')" class="game-btn bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-blue-400 px-3 py-1.5 rounded shadow text-[10px]">＋ 強化</button>
                     </div>
                     <button id="btn-reincarnate" onclick="reincarnateCrew()" class="hidden game-btn w-full py-2.5 mt-1 bg-gradient-to-b from-purple-500 to-purple-700 rounded-lg font-black text-white border-2 border-purple-300 shadow-md text-sm animate-pulse">🌟 転生する (Lv100必要)</button>
                     <div id="reincarnation-count-display" class="text-[10px] text-purple-300 text-center font-black mt-1">🔄 転生回数: 0</div>
@@ -863,31 +863,58 @@ window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailK
 function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
 function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
 
+// 🧬 新システム：レベル上昇時に才能ポイントを割り振る機能
 function updateTalentUI(crewId) {
     if(!DB.crewStats) DB.crewStats={};
     if(!DB.crewStats[crewId]) DB.crewStats[crewId] = {reincarnation:0, power:0, speed:0, score:0};
     const st = DB.crewStats[crewId];
-    $('talent-val-power').innerText = st.power; $('talent-val-speed').innerText = st.speed; $('talent-val-score').innerText = st.score;
-    const cost = 1 + Math.floor((st.power + st.speed + st.score) / 5);
-    $('talent-cost-power').innerText = cost; $('talent-cost-speed').innerText = cost; $('talent-cost-score').innerText = cost;
+    const lv = getItemLevel(crewId);
+    
+    const totalPoints = (lv - 1) + (st.reincarnation * 10);
+    const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0);
+    const availablePoints = Math.max(0, totalPoints - usedPoints);
+    
+    $('talent-val-power').innerText = st.power || 0; 
+    $('talent-val-speed').innerText = st.speed || 0; 
+    $('talent-val-score').innerText = st.score || 0;
+    $('talent-points-available').innerText = availablePoints;
+    
+    ['power', 'speed', 'score'].forEach(type => {
+        const btn = $(`btn-talent-${type}`);
+        if (btn) {
+            if (availablePoints > 0) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); } 
+            else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+    });
+    
     $('reincarnation-count-display').innerText = `🔄 転生回数: ${st.reincarnation}`;
-    if (getItemLevel(crewId) >= 100) showEl('btn-reincarnate', 'block'); else hideEl('btn-reincarnate');
+    if (lv >= 100) showEl('btn-reincarnate', 'block'); else hideEl('btn-reincarnate');
 }
 
 function upgradeTalent(type) {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
     const crewId = currentDetailItem.id; const st = DB.crewStats[crewId];
-    const cost = 1 + Math.floor((st.power + st.speed + st.score) / 5);
-    if(DB.materials < cost) return showAlert(`草の化石が足りないぞ！\n(必要: ${cost}個)`);
-    DB.materials -= cost; st[type] += 1; saveGame(); updateHeaderUI(); updateTalentUI(crewId);
+    const lv = getItemLevel(crewId);
+    
+    const totalPoints = (lv - 1) + (st.reincarnation * 10);
+    const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0);
+    const availablePoints = totalPoints - usedPoints;
+    
+    if (availablePoints <= 0) return showAlert("才能ポイントがないぞ！\nレベルを上げてポイントをゲットしよう！");
+    
+    st[type] = (st[type] || 0) + 1; 
+    saveGame(); updateHeaderUI(); updateTalentUI(crewId);
 }
 
 function reincarnateCrew() {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
     const crewId = currentDetailItem.id;
     if(getItemLevel(crewId) < 100) return showAlert("レベル100にならないと転生できないぞ！");
-    DB.crewStats[crewId].reincarnation += 1; DB.itemLevels[crewId] = 1; saveGame();
-    showAlert(`【${currentDetailItem.name}】が転生した！！\n基礎能力がさらに引き上げられたぞ！`);
+    
+    DB.crewStats[crewId].reincarnation += 1; 
+    DB.crewStats[crewId].power = 0; DB.crewStats[crewId].speed = 0; DB.crewStats[crewId].score = 0;
+    DB.itemLevels[crewId] = 1; saveGame();
+    showAlert(`【${currentDetailItem.name}】が転生した！！\nレベルは1に戻ったが、転生ボーナスポイントとして\n才能ポイント+10を永続獲得したぞ！`);
     openItemDetail(crewId, currentDetailKey);
 }
 
@@ -995,7 +1022,7 @@ function startStage(stage, isMulti=false) {
             player:{
                 x:canvas.width/2-30,y:canvas.height-140,width:60,height:60,
                 speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5)+(cStats.speed*0.2*rBonus), 
-                skinIcon:s.icon,
+                skinIcon:s.icon, skinType:s.type||'text', skinFallback:s.fallbackIcon||'⚡', skinId:s.id,
                 weapon:{...w,fireRate:Math.max(2,w.fireRate-Math.floor(wl/2)),speed:w.speed+(wl*0.5)},
                 crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect,
                 bulletSizeMod:((c.effect==='powerUp'?2:1)+(cStats.power*0.1))*rBonus, 
@@ -1022,11 +1049,38 @@ function updateGame() {
     if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
     if(gameState.specialGauge<100){gameState.specialGauge+=0.05;if(gameState.specialGauge>100)gameState.specialGauge=100;if(gameState.frameCount%5===0)updateSpecialGaugeUI();}
     if(input.keys['ArrowLeft']||input.keys['a'])p.x-=p.speed; if(input.keys['ArrowRight']||input.keys['d'])p.x+=p.speed; p.x=Math.max(0,Math.min(canvas.width-p.width,p.x));
-    if(gameState.frameCount%p.weapon.fireRate===0){ const bx=p.x+p.width/2, by=p.y+10, bw=12*p.bulletSizeMod, bh=(p.weapon.type==='laser'?100:20)*p.bulletSizeMod; if(p.crewEffect==='doubleShot'){gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});}else if(p.weapon.type==='spread'){gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});}else{gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});} }
+    
+    if(gameState.frameCount%p.weapon.fireRate===0){ 
+        const bx=p.x+p.width/2, by=p.y+10, bw=12*p.bulletSizeMod, bh=(p.weapon.type==='laser'?100:20)*p.bulletSizeMod; 
+        if(p.crewEffect==='doubleShot'){
+            gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
+            gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
+        }else if(p.weapon.type==='spread'){
+            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
+            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
+            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
+        }else{
+            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
+        } 
+    }
     for(let i=gameState.bullets.length-1;i>=0;i--){let b=gameState.bullets[i];b.x+=b.dx;b.y+=b.dy;if(b.y<-100||b.x<-50||b.x>canvas.width+50)gameState.bullets.splice(i,1);}
     if(!s.isBossStage&&gameState.frameCount%s.spawnRate===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:s.enemySpeed+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }else if(s.isBossStage&&gameState.frameCount%(s.spawnRate/10)===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:3+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }
-    for(let i=gameState.enemies.length-1;i>=0;i--){ let e=gameState.enemies[i]; if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
-        if(hit&&e.hp<=0){ gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} if(s.type==='coop'){const b=gameState.enemies.find(en=>en.isBoss);if(b)$('game-score').innerText=Math.ceil(b.hp);}else{$('game-score').innerText=gameState.score;} if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} checkStageClear(false); }else if(!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){triggerGameOver();return;}
+    for(let i=gameState.enemies.length-1;i>=0;i--){ 
+        let e=gameState.enemies[i]; 
+        if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} 
+        if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} 
+        let hit=false; 
+        for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
+        if(hit&&e.hp<=0){ 
+            gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); 
+            if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} 
+            if(s.type==='coop'){const b=gameState.enemies.find(en=>en.isBoss);if(b)$('game-score').innerText=Math.ceil(b.hp);}else{$('game-score').innerText=gameState.score;} 
+            if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} 
+            if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} 
+            checkStageClear(false); 
+        }else if(!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){
+            triggerGameOver();return;
+        }
     }
     for(let i=gameState.particles.length-1;i>=0;i--){let pt=gameState.particles[i];pt.x+=pt.dx;pt.y+=pt.dy;pt.life--;pt.dy+=0.2;if(pt.life<=0)gameState.particles.splice(i,1);}
 }
@@ -1039,22 +1093,20 @@ function drawGame() {
     ctx.textBaseline="middle"; ctx.textAlign="center"; const bi=$('img-seimaro-boss');
     gameState.enemies.forEach(e=>{ ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2); if(e.isBoss){ctx.rotate(Math.sin(gameState.frameCount/20)*0.1);if(bi.complete&&bi.naturalHeight!==0)ctx.drawImage(bi,-e.w/2,-e.h/2,e.w,e.h);else{ctx.font=`${e.w*0.8}px serif`;ctx.fillText('🐾',0,0);}ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(-e.w/2,-e.h/2-20,e.w,10);ctx.fillStyle='#ef4444';ctx.fillRect(-e.w/2,-e.h/2-20,e.w*(e.hp/e.maxHp),10);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(-e.w/2,-e.h/2-20,e.w,10);}else{ctx.font="40px serif";ctx.rotate(Math.sin(gameState.frameCount/10+e.wobbleOffset)*0.2);ctx.fillText('🚢',0,0);} ctx.restore(); });
     
-    // 自機描画 (画像対応を汎用化)
     ctx.save();
     ctx.translate(p.x+p.width/2, p.y+p.height/2);
     ctx.rotate(Math.sin(gameState.frameCount / 15) * 0.05);
-    const eqSkin=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'];
-    if (eqSkin.type === 'image') {
+    if (p.skinType === 'image') {
         window._skinImgCache = window._skinImgCache || {};
-        if (!window._skinImgCache[eqSkin.id]) {
-            window._skinImgCache[eqSkin.id] = new Image();
-            window._skinImgCache[eqSkin.id].src = eqSkin.icon;
+        if (!window._skinImgCache[p.skinId]) {
+            window._skinImgCache[p.skinId] = new Image();
+            window._skinImgCache[p.skinId].src = p.skinIcon;
         }
-        const img = window._skinImgCache[eqSkin.id];
+        const img = window._skinImgCache[p.skinId];
         if (img.complete && img.naturalHeight !== 0) {
             ctx.drawImage(img, -p.width/2, -p.height/2, p.width, p.height);
         } else {
-            ctx.font=`${p.width}px serif`; ctx.fillText(eqSkin.fallbackIcon||'⚡', 0, 0);
+            ctx.font=`${p.width}px serif`; ctx.fillText(p.skinFallback||'⚡', 0, 0);
         }
     } else {
         ctx.font=`${p.width}px serif`; ctx.fillText(p.skinIcon, 0, 0);
@@ -1072,7 +1124,7 @@ function checkStageClear(isRetreat=false) {
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
         $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
         let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ 
-            eTk=Math.floor(gameState.score/60); // 草核の排出率を少し絞りました
+            eTk=Math.floor(gameState.score/60); 
             eCo=Math.floor(gameState.score/5)*50;
             eMt=Math.floor(gameState.score/30); 
             if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; }else{ let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } } }
