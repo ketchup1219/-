@@ -95,7 +95,7 @@
                     <span id="ui-materials" class="text-gray-300 text-xs drop-shadow-md font-black">0</span>
                 </div>
                 <div class="flex items-center gap-1 pop-in whitespace-nowrap border-l border-indigo-700 pl-1">
-                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span>
+                    <span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span>
                     <span id="ui-tickets" class="text-white text-xs drop-shadow-md font-black">0</span>
                 </div>
             </div>
@@ -216,7 +216,7 @@
                 </div>
                 <div class="w-full bg-indigo-900/90 p-3 rounded-2xl border-2 border-indigo-700 shadow-xl backdrop-blur mt-2">
                     <div class="flex justify-between text-xs mb-1.5">
-                        <span class="text-indigo-200 font-black">🌟 超激レア(UR) 確率アップ中！</span><span id="gacha-rate" class="text-yellow-400 font-black text-sm">1.0%</span>
+                        <span class="text-indigo-200 font-black">🌟 確率上昇中！(爆死救済機能付き)</span><span id="gacha-rate" class="text-yellow-400 font-black text-sm">1.0%</span>
                     </div>
                     <div class="w-full bg-indigo-950 h-3 rounded-full overflow-hidden border-2 border-indigo-800 shadow-inner">
                         <div id="pity-bar" class="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 h-full w-0 transition-all duration-500"></div>
@@ -494,9 +494,9 @@
                         <h4 class="text-xs font-black text-pink-400 bg-indigo-950 px-2 py-1 rounded mb-1">【UR】超激レア（大当り）</h4>
                         <div class="text-xs space-y-1 pl-2 font-bold text-slate-200">
                             <div class="flex justify-between"><span>海神の光条 (大砲)</span><span class="text-yellow-400">通常のみ</span></div>
-                            <div class="flex justify-between"><span>伝説の海賊王の船 (船)</span><span class="text-yellow-400">通常のみ</span></div>
-                            <div class="flex justify-between"><span>伝説のキャプテン (乗組員)</span><span class="text-yellow-400">通常のみ</span></div>
+                            <div class="flex justify-between"><span>伝説 of 海賊船 (船)</span><span class="text-yellow-400">通常のみ</span></div>
                             <div class="flex justify-between"><span>北前船 (船)</span><span class="text-yellow-400">通常のみ</span></div>
+                            <div class="flex justify-between"><span>伝説のキャプテン (乗組員)</span><span class="text-yellow-400">通常のみ</span></div>
                             <div class="flex justify-between text-yellow-300"><span>雷戦艦せいまろ号 (限定船)</span><span>EX限定!!</span></div>
                             <div class="flex justify-between text-yellow-300"><span>せいまろ🐾 (限定乗組員)</span><span>EX限定!!</span></div>
                         </div>
@@ -518,7 +518,6 @@
                     <p id="detail-desc" class="text-[11px] text-indigo-200 mt-2 text-center font-bold bg-indigo-950/50 p-2 rounded-xl w-full whitespace-pre-line"></p>
                 </div>
                 
-                <!-- 乗組員専用: 才能強化＆転生UI -->
                 <div id="crew-talent-ui" class="hidden w-full flex-col gap-2 mt-1 bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 shadow-inner">
                     <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（化石消費）＆ 転生</div>
                     <div class="flex justify-between items-center text-xs text-white font-bold">
@@ -676,34 +675,70 @@ const MASTER = {
     weapons: { 'wp_normal': {id:'wp_normal',name:'木の大砲',rarity:'N',fireRate:15,speed:6,type:'single',color:'#60a5fa',desc:'普通の弾を撃ち出す！'}, 'wp_spread': {id:'wp_spread',name:'鉄の散弾砲',rarity:'R',fireRate:20,speed:5,type:'spread',color:'#38bdf8',desc:'3方向に弾をばらまく！'}, 'wp_machine':{id:'wp_machine',name:'ガトリング砲',rarity:'SR',fireRate:5,speed:8,type:'single',color:'#2dd4bf',desc:'超すごいスピードで弾を連射！'}, 'wp_legend': {id:'wp_legend',name:'海神の光条',rarity:'UR',fireRate:10,speed:15,type:'laser',color:'#a78bfa',desc:'全てを貫通する最強のレーザー大砲！'} },
     skins: { 
         'skin_default': {id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 
+        'skin_ironwind': {id:'skin_ironwind',name:'アイアンウィンド',rarity:'R',icon:'🌬️'},
+        'skin_seasurge': {id:'skin_seasurge',name:'シーサージ',rarity:'R',icon:'🌊'},
+        'skin_aquastriker': {id:'skin_aquastriker',name:'アクアストライカー',rarity:'R',icon:'🔱'},
+        'skin_bronzemoon': {id:'skin_bronzemoon',name:'ブロンズムーン',rarity:'R',icon:'🌙'},
         'skin_pirate': {id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 
         'skin_wood': {id:'skin_wood',name:'木の船',rarity:'SR',icon:'🪵'},
         'skin_iron': {id:'skin_iron',name:'鉄の船',rarity:'SR',icon:'🚢'},
         'skin_benzai': {id:'skin_benzai',name:'弁才船',rarity:'SR',icon:'🏯'},
         'skin_higaki': {id:'skin_higaki',name:'菱垣廻船',rarity:'SR',icon:'⛴️'},
+        'skin_vortexgear': {id:'skin_vortexgear',name:'ヴォルテックスギア',rarity:'SR',icon:'⚙️'},
+        'skin_silvermoon': {id:'skin_silvermoon',name:'シルバームーン',rarity:'SR',icon:'🌙'},
+        'skin_blazeanchor': {id:'skin_blazeanchor',name:'ブレイズアンカー',rarity:'SR',icon:'⚓'},
         'skin_ghost': {id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 
         'skin_titanic': {id:'skin_titanic',name:'タイタニック',rarity:'SSR',icon:'🛳️'},
         'skin_yamato': {id:'skin_yamato',name:'ヤマト',rarity:'SSR',icon:'🛥️'},
         'skin_titus': {id:'skin_titus',name:'グランドタイタス',rarity:'SSR',icon:'🚢'},
-        'skin_king': {id:'skin_king',name:'伝説の海賊王の船',rarity:'UR',icon:'🏴‍☠️'},
+        'skin_leviathan': {id:'skin_leviathan',name:'リヴァイアサン',rarity:'SSR',icon:'🐉'},
+        'skin_goldmoon': {id:'skin_goldmoon',name:'ゴールドムーン',rarity:'SSR',icon:'🌙'},
+        'skin_shisa': {id:'skin_shisa',name:'シーサー',rarity:'SSR',icon:'🦁'},
+        'skin_king': {id:'skin_king',name:'伝説 of 海賊船',rarity:'UR',icon:'🏴‍☠️'},
         'skin_kitamae': {id:'skin_kitamae',name:'北前船',rarity:'UR',icon:'🏮'},
         'skin_seimaro': {id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'⚡'}
     },
-    crew: { 'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 'crew_speed': {id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'船のスピードUP！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 'crew_score': {id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払った時のポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 'crew_power': {id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 'crew_seimaro': {id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} }
+    crew: { 
+        'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 
+        'crew_tom': {id:'crew_tom',name:'トム',rarity:'R',effect:'speedUp',skillName:'トムズ・ダッシュ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍✈️',type:'text'},
+        'crew_alex': {id:'crew_alex',name:'アレックス',rarity:'R',effect:'scoreUp',skillName:'アレックスサーチ',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🔧',type:'text'},
+        'crew_steve': {id:'crew_steve',name:'スティーブ',rarity:'R',effect:'powerUp',skillName:'スティーブパンチ',desc:'パワーが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🌾',type:'text'},
+        'crew_bob': {id:'crew_bob',name:'ボブ',rarity:'R',effect:'speedUp',skillName:'ボブズウェーブ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🍳',type:'text'},
+        'crew_mark': {id:'crew_mark',name:'マーク',rarity:'R',effect:'scoreUp',skillName:'マークトレジャー',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🎨',type:'text'},
+        'crew_speed': {id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
+        'crew_john': {id:'crew_john',name:'ジョン',rarity:'SR',effect:'powerUp',skillName:'ジョンズキヤノン',desc:'パワーが中アップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'},
+        'crew_jack': {id:'crew_jack',name:'ジャック',rarity:'SR',effect:'speedUp',skillName:'ジャックストーム',desc:'スピードが中アップ！\n【SP】画面の敵を一掃！',icon:'🕵️',type:'text'},
+        'crew_leon': {id:'crew_leon',name:'レオン',rarity:'SR',effect:'scoreUp',skillName:'レオンハンター',desc:'スコアが中アップ！\n【SP】画面の敵を一掃！',icon:'💂',type:'text'},
+        'crew_luke': {id:'crew_luke',name:'ルーク',rarity:'SR',effect:'doubleShot',skillName:'ルークツイン',desc:'たまに弾が2列に！？\n【SP】画面の敵を一掃！',icon:'🤵',type:'text'},
+        'crew_bill': {id:'crew_bill',name:'ビル',rarity:'SR',effect:'powerUp',skillName:'ビルズアーマー',desc:'弾サイズ中アップ！\n【SP】画面の敵を一掃！',icon:'👲',type:'text'},
+        'crew_score': {id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払ったポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 
+        'crew_power': {id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 
+        'crew_seimaro': {id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} 
+    }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
 MASTER.exStages = [ {id:'ex_infinity',name:'インフィニティステージ',goalScore:'∞',enemySpeed:3,spawnRate:30,reward:'お見送り数次第',color:'border-purple-500',isEndless:true,isEx:true,staminaCost:20}, {id:'ex_seimaro_1',name:'せいまろの試練 1',goalScore:50,enemySpeed:2,spawnRate:50,reward:3,rewardCoins:2000,color:'border-pink-400',isEndless:false,isEx:true,reqClearEx:0,staminaCost:10}, {id:'ex_seimaro_2',name:'せいまろの試練 2',goalScore:80,enemySpeed:3,spawnRate:35,reward:5,rewardCoins:3000,color:'border-pink-500',isEndless:false,isEx:true,reqClearEx:1,staminaCost:20}, {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} ];
 MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
 const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
+
 MASTER.gachaPool = [
     {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'},
-    {type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_king'},{type:'skins',id:'skin_kitamae'},
-    {type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_power'}
+    {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'},
+    {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'},
+    {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'},
+    {type:'skins',id:'skin_king'},{type:'skins',id:'skin_kitamae'},
+    {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'},
+    {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'},
+    {type:'crew',id:'crew_power'}
 ];
 MASTER.exGachaPool = [
     {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},
-    {type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_seimaro'},
-    {type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_seimaro'}
+    {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'},
+    {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'},
+    {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'},{type:'skins',id:'skin_seimaro'},
+    {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'},
+    {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'},
+    {type:'crew',id:'crew_seimaro'}
 ];
 const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','SSR':'text-yellow-200 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
 
