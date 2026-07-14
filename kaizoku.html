@@ -18,7 +18,7 @@
         #gameCanvas { background: linear-gradient(to bottom, #0284c7, #1e40af, #1e3a8a); display: block; margin: 0 auto; width: 100%; height: 100%; max-width: 500px; box-shadow: inset 0 0 50px rgba(0,0,0,0.6); }
         .game-btn { transition: all 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.4); transform: translateY(0); }
         .game-btn:active { box-shadow: 0 0px 0 rgba(0,0,0,0.4); transform: translateY(6px); }
-        .game-btn:disabled { transform: translateY(0); box-shadow: none; }
+        .game-btn:disabled { transform: translateY(0); box-shadow: none; filter: grayscale(100%); opacity: 0.7; }
         .logo-container { perspective: 1500px; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; min-height: 280px; z-index: 10; }
         .logo-enhanced { width: 160%; max-width: 500px; max-height: 280px; object-fit: contain; animation: superGiantFloat 4s ease-in-out infinite, metallicShineSuper 5s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
         @keyframes superGiantFloat { 0%, 100% { transform: scale(1.1) translateY(0px) rotate(-2deg); } 50% { transform: scale(1.15) translateY(-15px) rotate(2deg); } }
@@ -55,8 +55,9 @@
         .flash-anim { animation: flashLightning 0.6s ease-out; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .nav-text { font-size: 10px; font-weight: 900; margin-top: 2px; }
+        .nav-icon { font-size: 1.5rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
     </style>
-    <script>function fb(el, em, cls="text-sm drop-shadow-md") { el.outerHTML = `<span class='${cls}'>${em}</span>`; }</script>
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
@@ -84,25 +85,28 @@
                 </div>
                 <!-- 草コイン -->
                 <div class="flex items-center gap-1 pop-in whitespace-nowrap pl-1">
-                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'💰','text-xs')"></span>
+                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span>
                     <span id="ui-coins" class="text-yellow-300 text-xs drop-shadow-md font-black">0</span>
                 </div>
                 <!-- 草の化石 -->
                 <div class="flex items-center gap-1 pop-in whitespace-nowrap">
-                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'🦴','text-xs')"></span>
+                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span>
                     <span id="ui-materials" class="text-gray-300 text-xs drop-shadow-md font-black">0</span>
                 </div>
                 <!-- 草核 -->
                 <div class="flex items-center gap-1 pop-in whitespace-nowrap border-l border-indigo-700 pl-1">
-                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'✨','text-xs')"></span>
+                    <span class="inline-flex items-center justify-center relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span>
                     <span id="ui-tickets" class="text-white text-xs drop-shadow-md font-black">0</span>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 relative overflow-y-auto no-scrollbar pb-20">
+        <!-- メイン領域 -->
+        <main class="flex-1 relative overflow-hidden">
+            
             <!-- 1. ホーム -->
-            <div id="screen-home" class="screen p-4 flex flex-col items-center justify-between min-h-full gap-2 relative overflow-hidden">
+            <div id="screen-home" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-between gap-2 relative">
+                <a href="kaizokusetumei.html" class="absolute top-2 right-2 game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 text-xl transition-transform hover:scale-110 tooltip">📖</a>
                 <div class="holy-aura"></div>
                 <div class="logo-container mt-2">
                     <div class="relative w-full flex justify-center items-center">
@@ -136,25 +140,37 @@
             </div>
 
             <!-- 2. ステージ選択 -->
-            <div id="screen-stage" class="screen hidden p-4 flex flex-col gap-4">
-                <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
-                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">🗺️ 航路図（ステージ）</h2>
-                    <p class="text-xs text-indigo-300 mt-1 font-bold">ライバルを追い払って財宝をゲットしよう！</p>
+            <div id="screen-stage" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-3 flex flex-col gap-3">
+                <div class="bg-indigo-900 rounded-xl p-2 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
+                    <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">🗺️ 航路図（ステージ）</h2>
                 </div>
                 <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 shadow-inner flex-shrink-0">
-                    <button id="tab-stage-normal" onclick="switchStageTab('normal')" class="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">🗺️ 通常海域</button>
-                    <button id="tab-stage-ex" onclick="switchStageTab('ex')" class="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">
-                        ✨ EXステージ<span class="absolute -top-1 -right-1 bg-pink-500 text-white text-[8px] px-1.5 py-0.5 rounded-full shadow-md animate-pulse border border-white">特別!</span>
+                    <button id="tab-stage-normal" onclick="switchStageTab('normal')" class="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">🗺️ 通常</button>
+                    <button id="tab-stage-ex" onclick="switchStageTab('ex')" class="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">
+                        ✨ EX<span class="absolute -top-1 -right-1 bg-pink-500 text-white text-[8px] px-1 rounded-full shadow animate-pulse border border-white">特別</span>
+                    </button>
+                    <button id="tab-stage-multi" onclick="switchStageTab('multi')" class="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">
+                        🤝 マルチ<span class="absolute -top-1 -right-1 bg-green-500 text-white text-[8px] px-1 rounded-full shadow border border-white">New!</span>
                     </button>
                 </div>
-                <div id="stage-list" class="flex flex-col gap-4 pb-8 overflow-y-auto pr-2 no-scrollbar"></div>
+                
+                <div id="multi-lobby-ui" class="hidden flex-col gap-3">
+                    <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg text-center">
+                        <p class="text-xs text-indigo-200 font-bold mb-2">友達と合言葉（ルームID）を合わせて遊ぼう！</p>
+                        <div class="flex gap-2">
+                            <button onclick="openCreateRoomModal()" class="game-btn flex-1 bg-gradient-to-b from-blue-500 to-blue-700 text-white font-black py-2 rounded-lg border border-blue-400 shadow-md text-sm">部屋を作る</button>
+                            <button onclick="openJoinRoomModal()" class="game-btn flex-1 bg-gradient-to-b from-green-500 to-green-700 text-white font-black py-2 rounded-lg border border-green-400 shadow-md text-sm">部屋に入る</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stage-list" class="flex flex-col gap-3"></div>
             </div>
 
-            <!-- 3. 編成 -->
-            <div id="screen-equip" class="screen hidden p-4 flex flex-col gap-4">
+            <!-- 3. 編成・強化 -->
+            <div id="screen-equip" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-4">
                 <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center">
                     <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-300">⚓ 編成・強化</h2>
-                    <p class="text-xs text-indigo-300 mt-1 font-bold">お宝をタップしてレベルアップ＆装備だ！</p>
                 </div>
                 <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
                     <h3 class="text-sm font-black text-blue-300 mb-2">⛵ 海賊船（スピードUP！）</h3>
@@ -168,14 +184,14 @@
                     <h3 class="text-sm font-black text-pink-300 mb-2">🦜 乗組員（パワー・ポイントUP！）</h3>
                     <div id="equip-crew" class="grid grid-cols-2 gap-3"></div>
                 </div>
-                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg mt-2">
+                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg mt-2 mb-4">
                     <h3 class="text-sm font-black text-yellow-400 mb-2">🔋 スタミナ上限（最大値UP！）</h3>
                     <div id="equip-system" class="grid grid-cols-1 gap-3"></div>
                 </div>
             </div>
 
             <!-- 4. ガチャ -->
-            <div id="screen-gacha" class="screen hidden p-4 flex flex-col items-center justify-start min-h-full gap-3 relative">
+            <div id="screen-gacha" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-start gap-3 relative">
                 <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 mt-1 shadow-inner">
                     <button id="tab-gacha-normal" onclick="switchGachaTab('normal')" class="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">🌊 わくわく通常</button>
                     <button id="tab-gacha-ex" onclick="switchGachaTab('ex')" class="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">
@@ -187,10 +203,10 @@
                         <h2 id="gacha-title" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 drop-shadow-md">伝説の宝箱ガチャ</h2>
                         <p id="gacha-sub" class="text-[10px] text-yellow-100 font-bold bg-indigo-900 px-2 py-0.5 rounded-full inline-block border border-indigo-700">ドキドキ！何が出るかな！？</p>
                     </div>
-                    <button onclick="openGachaProbabilityModal()" class="game-btn px-3 py-2 bg-indigo-900 border border-indigo-700 hover:bg-indigo-800 text-yellow-300 text-xs font-black rounded-xl shadow-md">📋 確率・一覧</button>
+                    <button onclick="openGachaProbabilityModal()" class="game-btn px-3 py-2 bg-indigo-900 border border-indigo-700 hover:bg-indigo-800 text-yellow-300 text-xs font-black rounded-xl shadow-md">📋 確率一覧</button>
                 </div>
                 
-                <div class="relative w-full max-w-[200px] aspect-square flex items-center justify-center">
+                <div class="relative w-full max-w-[200px] aspect-square flex items-center justify-center my-4">
                     <div class="absolute inset-0 bg-yellow-400/30 rounded-full blur-2xl animate-pulse"></div>
                     <div id="gacha-chest-emoji" class="text-[7rem] relative z-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform hover:scale-110">🏴‍☠️</div>
                     <div id="ex-pickup-badge" class="absolute bottom-0 bg-gradient-to-r from-pink-500 to-purple-600 border-2 border-white rounded-xl p-2 flex items-center gap-2 z-20 shadow-xl hidden">
@@ -211,23 +227,22 @@
                     </div>
                 </div>
 
-                <div class="w-full flex gap-3 px-1 mt-1">
+                <div class="w-full flex gap-3 px-1 mt-2">
                     <button id="btn-draw-gacha-1" onclick="startGachaAnim(1)" class="game-btn flex-1 py-3 bg-gradient-to-b from-blue-300 to-blue-600 rounded-xl font-black text-white border-2 border-white flex flex-col justify-center items-center gap-1 shadow-lg">
                         <span class="text-sm">1回引く</span>
-                        <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-4 h-4 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'✨','text-xs')"></span><span class="text-white text-xs">1</span></div>
+                        <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-4 h-4 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-white text-xs">1</span></div>
                     </button>
                     <button id="btn-draw-gacha-10" onclick="startGachaAnim(10)" class="game-btn flex-[1.5] py-3 bg-gradient-to-b from-yellow-300 to-orange-500 rounded-xl font-black text-indigo-950 border-2 border-white flex flex-col justify-center items-center gap-1 shadow-lg">
                         <span class="text-lg">10回 連続!!</span>
-                        <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-5 h-5 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'✨','text-sm')"></span><span class="text-white text-xs">10</span></div>
+                        <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-5 h-5 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-white text-xs">10</span></div>
                     </button>
                 </div>
             </div>
 
             <!-- 5. フレンド -->
-            <div id="screen-friend" class="screen hidden p-4 flex flex-col gap-4">
+            <div id="screen-friend" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-4">
                 <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
                     <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-rose-300">🤝 海賊団（フレンド）</h2>
-                    <p class="text-xs text-indigo-300 mt-1 font-bold">仲間を集めて一緒に海を渡ろう！</p>
                 </div>
                 <div class="bg-indigo-900/80 p-4 rounded-xl border-2 border-indigo-700 shadow-lg text-center relative">
                     <p class="text-xs text-indigo-300 font-bold mb-2">キミの海賊ID（フレンドコード）</p>
@@ -246,11 +261,25 @@
                         届いた申請 <span id="friend-req-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[11px] px-2 py-0.5 rounded-full font-black shadow-md border border-white hidden">!</span>
                     </button>
                 </div>
-                <div id="friend-list-container" class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 pb-8"></div>
+                <div id="friend-list-container" class="flex flex-col gap-3"></div>
             </div>
 
-            <!-- 6. ゲーム -->
-            <div id="screen-game" class="screen hidden w-full h-full relative">
+            <!-- 6. ミッション -->
+            <div id="screen-mission" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-3">
+                <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500">📜 ミッション</h2>
+                    <p class="text-xs text-indigo-300 mt-1 font-bold">依頼をこなして豪華報酬をゲット！</p>
+                </div>
+                <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 shadow-inner flex-shrink-0">
+                    <button id="tab-mission-daily" onclick="switchMissionTab('daily')" class="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">日替わり</button>
+                    <button id="tab-mission-normal" onclick="switchMissionTab('normal')" class="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all border-b-4 border-transparent">ノーマル</button>
+                    <button id="tab-mission-event" onclick="switchMissionTab('event')" class="flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent">イベント</button>
+                </div>
+                <div id="mission-list-container" class="flex flex-col gap-3"></div>
+            </div>
+
+            <!-- 7. ゲーム -->
+            <div id="screen-game" class="screen hidden h-full w-full relative">
                 <div id="game-tutorial-overlay" class="absolute top-20 left-4 right-4 pointer-events-none hidden z-30 transition-opacity duration-1000">
                     <div class="bg-indigo-900/95 border-2 border-yellow-400 rounded-2xl p-3 text-center shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
                         <span class="text-yellow-400 font-black text-sm block mb-0.5">💡 ポリーのアドバイス！</span>
@@ -258,11 +287,22 @@
                     </div>
                 </div>
                 <div id="game-ui" class="absolute top-3 left-3 right-3 flex justify-between pointer-events-none z-10">
-                    <div class="bg-indigo-950/90 border-2 border-indigo-500 px-4 py-2 rounded-xl text-white font-black shadow-lg flex items-center gap-2">
-                        <span class="text-xs text-indigo-300">追い払った数:</span><span id="game-score" class="text-yellow-400 text-xl">0</span><span class="text-indigo-500 text-sm">/</span><span id="game-goal" class="text-sm">100</span>
+                    <div id="score-container" class="bg-indigo-950/90 border-2 border-indigo-500 px-4 py-2 rounded-xl text-white font-black shadow-lg flex items-center gap-2">
+                        <span id="score-label" class="text-xs text-indigo-300">追い払った数:</span>
+                        <span id="game-score" class="text-yellow-400 text-xl">0</span>
+                        <span id="score-slash" class="text-indigo-500 text-sm">/</span>
+                        <span id="game-goal" class="text-sm">100</span>
                     </div>
                     <button id="btn-retreat" onclick="checkStageClear(true)" class="game-btn pointer-events-auto bg-gradient-to-b from-red-500 to-red-700 border-2 border-white px-5 py-2 rounded-xl text-white font-black shadow-lg text-sm">逃げる!! 🏃</button>
                 </div>
+                
+                <div id="multi-match-ui" class="absolute top-16 left-0 right-0 hidden flex justify-center z-10 pointer-events-none">
+                    <div class="bg-indigo-950/90 border-2 border-pink-500 px-4 py-1.5 rounded-full text-white font-black shadow-lg flex items-center gap-3">
+                        <span class="text-xs text-pink-300">ライバルスコア:</span>
+                        <span id="rival-score" class="text-pink-400 text-lg">0</span>
+                    </div>
+                </div>
+
                 <div id="special-ui-container" class="absolute bottom-6 right-4 z-10 flex flex-col items-end gap-1 pointer-events-auto hidden">
                     <div class="text-[10px] font-black text-cyan-300 drop-shadow-md tracking-widest">SPECIAL</div>
                     <button id="btn-special" onclick="triggerSpecialSkill()" class="game-btn bg-slate-700 w-16 h-16 rounded-full border-4 border-slate-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.8)] transition-all opacity-80 cursor-not-allowed">
@@ -294,29 +334,33 @@
                     <button id="btn-tutorial-exit" onclick="navTo('screen-home')" class="game-btn w-full max-w-[240px] py-4 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full font-black text-white shadow-xl border-2 border-white text-xl pop-in relative z-10" style="animation-delay: 0.4s; animation-fill-mode: both;">港へ帰る！ ⚓</button>
                 </div>
             </div>
-
         </main>
 
-        <!-- 下部ナビ -->
-        <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-2 py-2 pb-6 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
-            <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-2 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-2" data-target="screen-home">
-                <span class="text-3xl mb-1 filter drop-shadow-md">🏠</span><span class="text-[11px] font-black">ホーム</span>
+        <!-- 下部ナビゲーション (5列) -->
+        <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-1 py-1 pb-4 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+            <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1" data-target="screen-home">
+                <span class="nav-icon mb-1">🏠</span><span class="nav-text">ホーム</span>
             </button>
-            <button id="nav-btn-equip" onclick="tryAccessLockedScreen('screen-equip')" class="flex-1 nav-btn flex flex-col items-center p-2 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-2 relative" data-target="screen-equip">
-                <span id="nav-equip-lock" class="absolute top-1 right-2 text-xs bg-red-600 text-white rounded-full px-1.5 py-0.5 shadow-md font-bold">🔒</span>
-                <span class="text-3xl mb-1 filter drop-shadow-md">⚓</span><span class="text-[11px] font-black">準備・強化</span>
+            <button id="nav-btn-equip" onclick="tryAccessLockedScreen('screen-equip')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-equip">
+                <span id="nav-equip-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
+                <span class="nav-icon mb-1">⚓</span><span class="nav-text">強化</span>
             </button>
-            <button id="nav-btn-gacha" onclick="tryAccessLockedScreen('screen-gacha')" class="flex-1 nav-btn flex flex-col items-center p-2 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-2 relative" data-target="screen-gacha">
-                <span id="nav-gacha-lock" class="absolute top-1 right-2 text-xs bg-red-600 text-white rounded-full px-1.5 py-0.5 shadow-md font-bold">🔒</span>
-                <span class="text-3xl mb-1 filter drop-shadow-md">🎁</span><span class="text-[11px] font-black">宝箱</span>
+            <button id="nav-btn-gacha" onclick="tryAccessLockedScreen('screen-gacha')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-gacha">
+                <span id="nav-gacha-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
+                <span class="nav-icon mb-1">🎁</span><span class="nav-text">宝箱</span>
             </button>
-            <button id="nav-btn-friend" onclick="tryAccessLockedScreen('screen-friend')" class="flex-1 nav-btn flex flex-col items-center p-2 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-2 relative" data-target="screen-friend">
-                <span id="nav-friend-lock" class="absolute top-1 right-2 text-xs bg-red-600 text-white rounded-full px-1.5 py-0.5 shadow-md font-bold">🔒</span>
-                <span class="text-3xl mb-1 filter drop-shadow-md">🤝</span><span class="text-[11px] font-black">海賊団</span>
+            <button id="nav-btn-friend" onclick="tryAccessLockedScreen('screen-friend')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-friend">
+                <span id="nav-friend-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
+                <span class="nav-icon mb-1">🤝</span><span class="nav-text">海賊団</span>
+            </button>
+            <button id="nav-btn-mission" onclick="tryAccessLockedScreen('screen-mission')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-mission">
+                <span id="nav-mission-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
+                <span id="nav-mission-badge" class="absolute top-0 right-1 text-[8px] bg-yellow-500 text-indigo-950 rounded-full px-1.5 shadow font-black hidden">!</span>
+                <span class="nav-icon mb-1">📜</span><span class="nav-text">依頼</span>
             </button>
         </nav>
 
-        <!-- モーダル類 -->
+        <!-- モーダル群 -->
         <div id="tutorial-overlay" class="absolute inset-0 bg-indigo-950/80 hidden flex-col items-center justify-center z-50 p-6 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-yellow-400 rounded-3xl p-6 w-full max-w-[340px] shadow-2xl flex flex-col gap-5 pop-in">
                 <div class="flex justify-between items-center border-b-2 border-indigo-700 pb-3">
@@ -330,7 +374,9 @@
                 <button onclick="nextTutorialStep()" class="game-btn w-full py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black text-lg rounded-2xl shadow-lg border-2 border-white">OK！わかった！ 👍</button>
             </div>
         </div>
+        
         <div id="tutorial-arrow" class="absolute hidden z-50 pointer-events-none bounce-arrow"><span class="text-6xl text-yellow-400 drop-shadow-[0_5px_15px_rgba(234,179,8,1)]">👇</span></div>
+        
         <div id="custom-alert-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-center z-[9999] p-4 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-yellow-400 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col gap-4 pop-in text-center">
                 <span class="text-6xl mb-2 animate-bounce drop-shadow-md">🦜</span>
@@ -339,7 +385,6 @@
             </div>
         </div>
         
-        <!-- スタミナ回復モーダル -->
         <div id="stamina-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-yellow-400 rounded-3xl p-5 w-full max-w-[320px] shadow-2xl flex flex-col gap-4 pop-in relative text-center">
                 <button onclick="closeStaminaModal()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
@@ -365,6 +410,7 @@
                 <button onclick="closeLockedAlert()" class="game-btn w-full py-3 bg-slate-600 text-white font-black rounded-xl shadow-lg border-2 border-slate-400 text-lg">はーい！ 🏃</button>
             </div>
         </div>
+
         <div id="tutorial-clear-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-6 overflow-hidden">
             <div class="holy-aura"></div><div id="tutorial-confetti-container" class="absolute inset-0 pointer-events-none"></div>
             <div class="relative z-10 text-center flex flex-col items-center gap-6 pop-in">
@@ -372,9 +418,7 @@
                 <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-orange-400 to-yellow-500 tracking-widest drop-shadow-lg">ライセンス獲得!!</h2>
                 <div class="bg-indigo-900/90 border-2 border-yellow-500 rounded-2xl p-5 w-full max-w-xs text-sm font-bold text-white leading-relaxed shadow-2xl backdrop-blur">
                     大・大・大成功！！<br>キミはもう立派な船長だ！！<br><br>
-                    <span class="text-yellow-400 text-lg block mb-1">🔓「編成・準備」</span>
-                    <span class="text-yellow-400 text-lg block mb-1">🔓「伝説の宝箱」</span>
-                    <span class="text-yellow-400 text-lg block">🔓「海賊団 (フレンド)」</span><br>が、あそべるようになったぞ！
+                    <span class="text-yellow-400 text-base block mb-1">🔓「編成・宝箱・海賊団・ミッション」解放！</span>
                 </div>
                 <div class="bg-indigo-800/90 p-4 rounded-2xl border-2 border-indigo-500 w-full flex flex-col items-center gap-2 shadow-inner">
                     <span class="text-xs text-yellow-300 font-black">🎉 船長就任の超・特大プレゼント！ 🎉</span>
@@ -404,14 +448,14 @@
                     </div>
                     <div class="mt-3 flex flex-col items-center gap-2">
                         <input type="file" id="icon-upload" accept="image/*" class="hidden" onchange="handleIconUpload(event)">
-                        <button onclick="document.getElementById('icon-upload').click()" class="game-btn bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold border border-indigo-400 flex items-center gap-1"><span>📷</span> 自分の画像を使う</button>
+                        <button onclick="$('icon-upload').click()" class="game-btn bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold border border-indigo-400 flex items-center gap-1"><span>📷</span> 自分の画像を使う</button>
                         <div id="custom-icon-preview-container" class="hidden mt-1 flex justify-center">
                             <button id="custom-icon-btn" class="icon-sel-btn w-12 h-12 rounded-xl transition-transform hover:scale-110 bg-indigo-950 border-2 border-indigo-800 overflow-hidden flex items-center justify-center p-0" onclick="selectIcon('CUSTOM_IMAGE')"><img id="custom-icon-img" src="" class="w-full h-full object-cover"></button>
                         </div>
                     </div>
                 </div>
                 <div class="mb-8">
-                    <label class="block text-xs text-indigo-300 font-bold mb-2">船長の名前（カッコよくね！）</label>
+                    <label class="block text-xs text-indigo-300 font-bold mb-2">船長の名前</label>
                     <input type="text" id="edit-username" class="w-full bg-indigo-950 border-2 border-indigo-700 rounded-xl p-3 text-white font-black text-lg outline-none focus:border-yellow-400 shadow-inner" maxlength="8" placeholder="なまえをいれてね">
                 </div>
                 <div class="flex gap-3">
@@ -530,1014 +574,271 @@
             <button onclick="closeHappyShareToast()" class="absolute top-2 right-2 text-white bg-black/40 hover:bg-black/60 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow-md transition-colors active:scale-95 select-none z-10">✕</button>
         </div>
 
+        <!-- マルチプレイルームモーダル -->
+        <div id="multi-room-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center gap-4 pop-in relative text-center">
+                <button onclick="leaveRoom()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
+                <h3 id="room-modal-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-400 tracking-wider border-b-2 border-indigo-700 pb-2 mb-1 w-full">部屋を作成</h3>
+                
+                <div id="room-create-ui" class="w-full flex flex-col gap-3">
+                    <p class="text-sm text-indigo-200 font-bold">遊ぶステージを選んでね！</p>
+                    <div id="multi-stage-select-list" class="flex flex-col gap-2 max-h-[200px] overflow-y-auto no-scrollbar"></div>
+                </div>
+
+                <div id="room-join-ui" class="w-full flex flex-col gap-3 hidden">
+                    <p class="text-sm text-indigo-200 font-bold">友達のルームIDを入力してね！</p>
+                    <input type="text" id="room-id-input" placeholder="4桁の数字" class="w-full bg-indigo-950 border-2 border-indigo-500 rounded-lg p-3 text-center text-white font-black text-2xl outline-none uppercase tracking-widest" maxlength="4">
+                    <button onclick="submitJoinRoom()" class="game-btn w-full bg-green-500 text-white font-black py-3 rounded-lg border-2 border-white shadow-md text-lg mt-2">入室する！</button>
+                </div>
+
+                <div id="room-waiting-ui" class="w-full flex flex-col gap-3 hidden">
+                    <p class="text-sm text-yellow-300 font-bold animate-pulse">友達を待機中...</p>
+                    <div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700">
+                        <p class="text-xs text-indigo-300 mb-1">キミのルームID</p>
+                        <div class="text-3xl font-black text-white tracking-widest select-all" id="display-room-id">0000</div>
+                    </div>
+                    <div class="flex justify-between items-center bg-indigo-900/50 p-2 rounded-lg border border-indigo-600">
+                        <div class="flex flex-col items-center w-1/2 border-r border-indigo-700">
+                            <span class="text-2xl mb-1" id="room-p1-icon">👤</span><span class="text-xs text-white font-bold truncate w-full" id="room-p1-name">---</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/2">
+                            <span class="text-2xl mb-1" id="room-p2-icon">❓</span><span class="text-xs text-slate-400 font-bold truncate w-full" id="room-p2-name">待機中</span>
+                        </div>
+                    </div>
+                    <button id="btn-start-multi" onclick="startMultiStage()" class="game-btn w-full bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 font-black py-3 rounded-lg border-2 border-white shadow-md text-lg mt-2 hidden">出航する！！</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 <script>
-function showAlert(msg) {
-    document.getElementById('custom-alert-text').innerText = msg;
-    document.getElementById('custom-alert-modal').classList.remove('hidden');
-    document.getElementById('custom-alert-modal').classList.add('flex');
-}
-function closeCustomAlert() {
-    document.getElementById('custom-alert-modal').classList.add('hidden');
-    document.getElementById('custom-alert-modal').classList.remove('flex');
-}
+// --- 短縮・ユーティリティ関数 ---
+const $ = id => document.getElementById(id);
+const showEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.remove('hidden'); e.classList.add(dType);} };
+const hideEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.add('hidden'); e.classList.remove(dType);} };
+function fb(el, em, cls="text-sm drop-shadow-md") { el.outerHTML = `<span class='${cls}'>${em}</span>`; }
+function showLogoFallback(imgEl) { imgEl.style.display = 'none'; showEl('title-fallback', 'block'); }
+function checkRectCollision(r1, r2) { const w1=r1.w||r1.width; const h1=r1.h||r1.height; const w2=r2.w||r2.width; const h2=r2.h||r2.height; return r1.x<r2.x+w2 && r1.x+w1>r2.x && r1.y<r2.y+h2 && r1.y+h1>r2.y; }
+function createPopParticles(x, y, color, isStar=false) { const count=isStar?12:8; for(let i=0;i<count;i++){ gameState.particles.push({ x:x,y:y,dx:(Math.random()-0.5)*12,dy:(Math.random()-0.5)*12-2,life:20+Math.random()*20,color:isStar&&Math.random()>0.5?'#fff':color,size:Math.random()*6+3,isStar:isStar&&Math.random()>0.3 }); } }
+function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) { let rot=Math.PI/2*3; let x=cx; let y=cy; let step=Math.PI/spikes; ctx.beginPath(); ctx.moveTo(cx, cy-outerRadius); for(let i=0;i<spikes;i++){ x=cx+Math.cos(rot)*outerRadius; y=cy+Math.sin(rot)*outerRadius; ctx.lineTo(x,y); rot+=step; x=cx+Math.cos(rot)*innerRadius; y=cy+Math.sin(rot)*innerRadius; ctx.lineTo(x,y); rot+=step; } ctx.lineTo(cx, cy-outerRadius); ctx.closePath(); ctx.fillStyle=color; ctx.fill(); }
+function drawLightningLine(ctx, startX, startY, endX, endY, color, width, blur, branches=true) { ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=width; ctx.shadowColor='#0284c7'; ctx.shadowBlur=blur; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.beginPath(); ctx.moveTo(startX, startY); let currentX=startX; let currentY=startY; const distanceY=endY-startY; const segments=8; for(let i=1;i<=segments;i++){ const targetY=startY+(distanceY/segments)*i; const targetX=startX+(endX-startX)*(i/segments)+(Math.random()-0.5)*60; ctx.lineTo(targetX, targetY); if(branches&&Math.random()>0.6&&i<segments){ ctx.save(); ctx.beginPath(); ctx.moveTo(targetX, targetY); let bx=targetX; let by=targetY; for(let j=0;j<3;j++){ bx+=(Math.random()-0.5)*60; by+=Math.random()*40; ctx.lineTo(bx,by); } ctx.lineWidth=width*0.4; ctx.stroke(); ctx.restore(); ctx.moveTo(targetX, targetY); } currentX=targetX; currentY=targetY; } ctx.stroke(); ctx.restore(); }
+function shootLightningImpactConfetti(x, y) { for(let i=0;i<6;i++){ gameState.particles.push({ x:x,y:y,dx:(Math.random()-0.5)*20,dy:(Math.random()-0.5)*20-4,life:15+Math.random()*15,color:Math.random()>0.4?'#e0f2fe':'#38bdf8',size:Math.random()*8+4,isStar:true }); } }
+function showAlert(msg) { $('custom-alert-text').innerText = msg; showEl('custom-alert-modal'); }
+function closeCustomAlert() { hideEl('custom-alert-modal'); }
+function shootConfetti(cid, count=50) { const c=$(cid); if(!c)return; c.innerHTML=''; const colors=['#ef4444','#3b82f6','#facc15','#22c55e','#a855f7','#ec4899']; for(let i=0;i<count;i++){ const f=document.createElement('div'); f.className='confetti'; f.style.left=`${Math.random()*100}%`; f.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)]; f.style.width=`${Math.random()*10+5}px`; f.style.height=`${Math.random()*20+10}px`; f.style.animationDuration=`${Math.random()*2+2}s`; f.style.animationDelay=`${Math.random()*0.5}s`; c.appendChild(f); } }
 
-function checkRectCollision(r1, r2) {
-    const w1 = r1.w || r1.width; const h1 = r1.h || r1.height;
-    const w2 = r2.w || r2.width; const h2 = r2.h || r2.height;
-    return r1.x < r2.x + w2 && r1.x + w1 > r2.x && r1.y < r2.y + h2 && r1.y + h1 > r2.y;
-}
-
-function createPopParticles(x, y, color, isStar = false) {
-    const count = isStar ? 12 : 8;
-    for (let i = 0; i < count; i++) {
-        gameState.particles.push({
-            x: x, y: y, dx: (Math.random() - 0.5) * 12, dy: (Math.random() - 0.5) * 12 - 2, 
-            life: 20 + Math.random() * 20, color: isStar && Math.random()>0.5 ? '#fff' : color, 
-            size: Math.random() * 6 + 3, isStar: isStar && Math.random() > 0.3 
-        });
-    }
-}
-
-function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
-    let rot = Math.PI / 2 * 3; let x = cx; let y = cy; let step = Math.PI / spikes;
-    ctx.beginPath(); ctx.moveTo(cx, cy - outerRadius);
-    for (let i = 0; i < spikes; i++) {
-        x = cx + Math.cos(rot) * outerRadius; y = cy + Math.sin(rot) * outerRadius; ctx.lineTo(x, y); rot += step;
-        x = cx + Math.cos(rot) * innerRadius; y = cy + Math.sin(rot) * innerRadius; ctx.lineTo(x, y); rot += step;
-    }
-    ctx.lineTo(cx, cy - outerRadius); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
-}
-
-function drawLightningLine(ctx, startX, startY, endX, endY, color, width, blur, branches = true) {
-    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.shadowColor = '#0284c7'; ctx.shadowBlur = blur; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.beginPath(); ctx.moveTo(startX, startY);
-    let currentX = startX; let currentY = startY; const distanceY = endY - startY; const segments = 8; 
-    for (let i = 1; i <= segments; i++) {
-        const targetY = startY + (distanceY / segments) * i;
-        const targetX = startX + (endX - startX) * (i / segments) + (Math.random() - 0.5) * 60; 
-        ctx.lineTo(targetX, targetY);
-        if (branches && Math.random() > 0.6 && i < segments) {
-            ctx.save(); ctx.beginPath(); ctx.moveTo(targetX, targetY);
-            let branchX = targetX; let branchY = targetY;
-            for(let j=0; j<3; j++) { branchX += (Math.random() - 0.5) * 60; branchY += Math.random() * 40; ctx.lineTo(branchX, branchY); }
-            ctx.lineWidth = width * 0.4; ctx.stroke(); ctx.restore(); ctx.moveTo(targetX, targetY); 
-        }
-        currentX = targetX; currentY = targetY;
-    }
-    ctx.stroke(); ctx.restore();
-}
-
-function shootLightningImpactConfetti(x, y) {
-    for (let i = 0; i < 6; i++) {
-        gameState.particles.push({
-            x: x, y: y, dx: (Math.random() - 0.5) * 20, dy: (Math.random() - 0.5) * 20 - 4, 
-            life: 15 + Math.random() * 15, color: Math.random() > 0.4 ? '#e0f2fe' : '#38bdf8', 
-            size: Math.random() * 8 + 4, isStar: true 
-        });
-    }
-}
-</script>
-
-<script>
-let DB = {
-    userId: 'user_001', userName: '新米船長', userIcon: '👤', gachaTickets: 0, coins: 0, materials: 0,   
-    itemLevels: {}, pityCounter: 0, ownedWeapons: ['wp_normal'], ownedSkins: ['skin_default'], ownedCrew: ['crew_none'],
-    equippedWeapon: 'wp_normal', equippedSkin: 'skin_default', equippedCrew: 'crew_none', clearedStages: 0, clearedSeimaroStage: 0, 
-    tutorialCompleted: false, tutorialGachaCompleted: false, tutorialEquipCompleted: false, lastLoginDate: '', loginStreak: 0, lastShareTimestamp: 0,
-    stamina: 100, lastStaminaUpdateTime: Date.now() // ★スタミナ追加
-};
-
-const LOGIN_BONUS_MASTER = [
-    { day: 1, type: 'coins', amount: 500, label: '草コイン', icon: '草コイン.png', fallback: '💰' },
-    { day: 2, type: 'materials', amount: 2, label: '草の化石', icon: '草の化石.png', fallback: '🦴' },
-    { day: 3, type: 'tickets', amount: 2, label: '草核', icon: '草核.png', fallback: '✨' },
-    { day: 4, type: 'coins', amount: 1200, label: '草コイン', icon: '草コイン.png', fallback: '💰' },
-    { day: 5, type: 'materials', amount: 5, label: '草の化石', icon: '草の化石.png', fallback: '🦴' },
-    { day: 6, type: 'tickets', amount: 3, label: '草核', icon: '草核.png', fallback: '✨' },
-    { day: 7, type: 'special', amount: 5, coinsBonus: 3000, label: '超・船長お祝いパック', icon: '草核.png', fallback: '👑' }
-];
-
+// --- データ定義 ---
+let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[] };
+const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:2,type:'materials',amount:2,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:3,type:'tickets',amount:2,label:'草核',icon:'草核.png',fallback:'✨'}, {day:4,type:'coins',amount:1200,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:5,type:'materials',amount:5,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:6,type:'tickets',amount:3,label:'草核',icon:'草核.png',fallback:'✨'}, {day:7,type:'special',amount:5,coinsBonus:3000,label:'超・船長パック',icon:'草核.png',fallback:'👑'} ];
 const MASTER = {
-    systems: {
-        'stamina_cap': { id: 'stamina_cap', name: 'スタミナタンク', rarity: 'SR', icon: '🔋', fallbackIcon: '🔋', type: 'text', desc: '最大スタミナがアップするぞ！\nレベル1につき上限が+10される！' }
-    },
-    weapons: {
-        'wp_normal': { id: 'wp_normal', name: '木の大砲', rarity: 'N', fireRate: 15, speed: 6, type: 'single', color: '#60a5fa', desc: '普通の弾を撃ち出す大砲だ！' },
-        'wp_spread': { id: 'wp_spread', name: '鉄の散弾砲', rarity: 'R', fireRate: 20, speed: 5, type: 'spread', color: '#38bdf8', desc: '3方向に弾をばらまく！当てやすいぞ！' },
-        'wp_machine':{ id: 'wp_machine', name: 'ガトリング砲', rarity: 'SR', fireRate: 5, speed: 8, type: 'single', color: '#2dd4bf', desc: '超すごいスピードで弾を連射する大砲だ！' },
-        'wp_legend': { id: 'wp_legend', name: '海神の光条', rarity: 'UR', fireRate: 10, speed: 15, type: 'laser', color: '#a78bfa', desc: '全てを貫通する最強のレーザー大砲！！' }
-    },
-    skins: {
-        'skin_default': { id: 'skin_default', name: '丸太 of イカダ', rarity: 'N', icon: '🛶' },
-        'skin_pirate': { id: 'skin_pirate', name: 'アドベンチャー船', rarity: 'R', icon: '⛵' },
-        'skin_ghost': { id: 'skin_ghost', name: 'ふしぎなオバケ船', rarity: 'SR', icon: '👻' },
-        'skin_king': { id: 'skin_king', name: '伝説の海賊王の船', rarity: 'UR', icon: '🏴‍☠️' }
-    },
-    crew: {
-        'crew_none': { id: 'crew_none', name: 'ひとりぼっち', rarity: 'N', effect: 'none', skillName: 'がむしゃらアタック', desc: '乗組員はまだいない。\n【スペシャル】がむしゃらアタック（画面の敵を一掃！）', icon: '🧑‍🦲', type: 'text' },
-        'crew_speed': { id: 'crew_speed', name: 'ダッシュマン・ジャック', rarity: 'R', effect: 'speedUp', skillName: '音速ハリケーン', desc: '船の動くスピードがアップするぞ！\n【スペシャル】音速ハリケーン（画面の敵を一掃！）', icon: '🏃', type: 'text' },
-        'crew_score': { id: 'crew_score', name: '天才ナビゲーター', rarity: 'SR', effect: 'scoreUp', skillName: 'お宝ディスカバリー', desc: '敵を追い払った時のポイントが2倍に！\n【スペシャル】お宝ディスカバリー（画面の敵を一掃！）', icon: '🗺️', type: 'text' },
-        'crew_power': { id: 'crew_power', name: '伝説のキャプテン', rarity: 'UR', effect: 'powerUp', skillName: '覇王の号令', desc: '弾のサイズと判定が巨大化\n【スペシャル】覇王の号令（画面の敵を一掃！）', icon: '👑', type: 'text' },
-        'crew_seimaro': { 
-            id: 'crew_seimaro', name: 'せいまろ', rarity: 'UR', effect: 'doubleShot', skillName: '雷霆蒼破', desc: '大砲が2コになって、パワーが2倍だ！！\n【スペシャル】雷霆蒼破（いなずまで敵を一掃！）', icon: 'せいまろ.png', fallbackIcon: '🐾', type: 'image' 
-        }
-    }
+    systems: { 'stamina_cap': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
+    weapons: { 'wp_normal': {id:'wp_normal',name:'木の大砲',rarity:'N',fireRate:15,speed:6,type:'single',color:'#60a5fa',desc:'普通の弾を撃ち出す！'}, 'wp_spread': {id:'wp_spread',name:'鉄の散弾砲',rarity:'R',fireRate:20,speed:5,type:'spread',color:'#38bdf8',desc:'3方向に弾をばらまく！'}, 'wp_machine':{id:'wp_machine',name:'ガトリング砲',rarity:'SR',fireRate:5,speed:8,type:'single',color:'#2dd4bf',desc:'超すごいスピードで弾を連射！'}, 'wp_legend': {id:'wp_legend',name:'海神の光条',rarity:'UR',fireRate:10,speed:15,type:'laser',color:'#a78bfa',desc:'全てを貫通する最強のレーザー大砲！'} },
+    skins: { 'skin_default': {id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 'skin_pirate': {id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 'skin_ghost': {id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 'skin_king': {id:'skin_king',name:'伝説の海賊王の船',rarity:'UR',icon:'🏴‍☠️'} },
+    crew: { 'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 'crew_speed': {id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'船のスピードUP！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 'crew_score': {id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払った時のポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 'crew_power': {id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 'crew_seimaro': {id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} }
 };
+MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
+MASTER.exStages = [ {id:'ex_infinity',name:'インフィニティステージ',goalScore:'∞',enemySpeed:3,spawnRate:30,reward:'お見送り数次第',color:'border-purple-500',isEndless:true,isEx:true,staminaCost:20}, {id:'ex_seimaro_1',name:'せいまろの試練 1',goalScore:50,enemySpeed:2,spawnRate:50,reward:3,rewardCoins:2000,color:'border-pink-400',isEndless:false,isEx:true,reqClearEx:0,staminaCost:10}, {id:'ex_seimaro_2',name:'せいまろの試練 2',goalScore:80,enemySpeed:3,spawnRate:35,reward:5,rewardCoins:3000,color:'border-pink-500',isEndless:false,isEx:true,reqClearEx:1,staminaCost:20}, {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} ];
+MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
+const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
+MASTER.gachaPool = [{type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'},{type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_ghost'},{type:'skins',id:'skin_king'},{type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_power'}];
+MASTER.exGachaPool = [{type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'skins',id:'skin_pirate'},{type:'skins',id:'skin_ghost'},{type:'crew',id:'crew_speed'},{type:'crew',id:'crew_score'},{type:'crew',id:'crew_seimaro'}];
+const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
 
-MASTER.stages = [];
-for (let i = 1; i <= 100; i++) {
-    let isBoss = i % 10 === 0;
-    let cost = 5 + Math.floor((i - 1) / 10) * 5; // ★スタミナコスト計算
-    MASTER.stages.push({
-        id: i, name: isBoss ? `海域 ${i} (BOSS級)` : `海域 ${i}`, goalScore: 20 + i * 5, enemySpeed: 1.5 + (i * 0.03),
-        spawnRate: Math.max(15, 60 - Math.floor(i / 2)), reward: 1 + Math.floor(i / 10),
-        color: isBoss ? 'border-red-500' : (i % 2 === 0 ? 'border-blue-400' : 'border-green-400'), isEndless: false, staminaCost: cost
-    });
-}
+let currentGachaTab='normal', happyShareTimeoutId=null, currentStageTab='normal', currentMissionTab='daily', currentMultiRoom=null, roomListener=null, multiSyncInterval=null;
+const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！オレ様はポリーだ！\n「大冒険へ出発!!」を押して初航海に出よう！',targetId:'btn-start-navigation'}], 'gacha': [{character:'🦜',text:'手に入れた「草核」を使って宝箱をあけよう！\n新しい装備が手に入るかも！？',targetId:'btn-draw-gacha-1'}], 'gacha_done': [{character:'🦜',text:'すっげーお宝だ！！\n下の「強化」ボタンを押して、船にセットしようぜ！',targetId:'nav-btn-equip'}], 'equip': [{character:'🦜',text:'手に入れたお宝のボタンをタップして、\n船をパワーアップさせてみよう！！',targetId:'tutorial-target-equip'}], 'all_done': [{character:'🦜',text:'カンペキだ船長！！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！',targetId:null}] };
+let currentTutorialScenario=null, tutorialStep=0;
 
-MASTER.exStages = [
-    { id: 'ex_infinity', name: 'インフィニティステージ', goalScore: '∞', enemySpeed: 3, spawnRate: 30, reward: 'お見送り数次第', color: 'border-purple-500', isEndless: true, isEx: true, staminaCost: 20 },
-    { id: 'ex_seimaro_1', name: 'せいまろの試練 1', goalScore: 50, enemySpeed: 2, spawnRate: 50, reward: 3, rewardCoins: 2000, color: 'border-pink-400', isEndless: false, isEx: true, reqClearEx: 0, staminaCost: 10 },
-    { id: 'ex_seimaro_2', name: 'せいまろの試練 2', goalScore: 80, enemySpeed: 3, spawnRate: 35, reward: 5, rewardCoins: 3000, color: 'border-pink-500', isEndless: false, isEx: true, reqClearEx: 1, staminaCost: 20 },
-    { id: 'ex_seimaro_3', name: 'せいまろの試練 3 (BOSS)', goalScore: 1, enemySpeed: 0.5, spawnRate: 99999, reward: 10, rewardCoins: 5000, rewardMats: 5, color: 'border-red-600', isEndless: false, isEx: true, isBossStage: true, reqClearEx: 2, staminaCost: 30 }
-];
-
-MASTER.gachaPool = [
-    { type: 'weapons', id: 'wp_spread' }, { type: 'weapons', id: 'wp_machine' }, { type: 'weapons', id: 'wp_legend' },
-    { type: 'skins', id: 'skin_pirate' }, { type: 'skins', id: 'skin_ghost' }, { type: 'skins', id: 'skin_king' },
-    { type: 'crew', id: 'crew_speed' }, { type: 'crew', id: 'crew_score' }, { type: 'crew', id: 'crew_power' }
-];
-
-MASTER.exGachaPool = [
-    { type: 'weapons', id: 'wp_spread' }, { type: 'weapons', id: 'wp_machine' },
-    { type: 'skins', id: 'skin_pirate' }, { type: 'skins', id: 'skin_ghost' },
-    { type: 'crew', id: 'crew_speed' }, { type: 'crew', id: 'crew_score' }, { type: 'crew', id: 'crew_seimaro' }
-];
-
-const rarityColors = { 'N': 'text-slate-400', 'R': 'text-blue-400', 'SR': 'text-purple-400', 'UR': 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]' };
-
-let currentGachaTab = 'normal'; 
-let happyShareTimeoutId = null; 
-let currentStageTab = 'normal'; 
-
-/**
- * 💾 オートセーブ＆スタミナ更新
- */
-function saveGame() {
-    try { localStorage.setItem('kaizoku', JSON.stringify(DB)); updateMyDataOnFirebase(); } catch (e) {}
-}
-
+// --- セーブロード・スタミナ ---
+function saveGame() { try{ localStorage.setItem('kaizoku',JSON.stringify(DB)); updateMyDataOnFirebase(); checkMissions(); }catch(e){} }
 function loadGame() {
-    try {
-        const saved = localStorage.getItem('kaizoku');
-        if (saved) {
-            DB = { ...DB, ...JSON.parse(saved) };
-            if(DB.coins === undefined) DB.coins = 0; if(DB.materials === undefined) DB.materials = 0;
-            if(!DB.itemLevels) DB.itemLevels = {}; if(!DB.lastShareTimestamp) DB.lastShareTimestamp = 0;
-            if(DB.clearedSeimaroStage === undefined) DB.clearedSeimaroStage = 0;
-            if(DB.stamina === undefined) { DB.stamina = 100; DB.lastStaminaUpdateTime = Date.now(); } // 初期化
-        }
-        if (!DB.userId || DB.userId === 'user_001') { DB.userId = 'PIRATE_' + Math.random().toString(36).substr(2, 9).toUpperCase(); saveGame(); }
-    } catch (e) {}
-}
-
-function getItemLevel(itemId) { return DB.itemLevels[itemId] || 1; }
-function getMaxStamina() { return 100 + (getItemLevel('stamina_cap') - 1) * 10; } // ★最大スタミナ
-
-// 毎秒スタミナ回復をチェック
-setInterval(() => {
-    if (!DB) return;
-    const maxSt = getMaxStamina();
-    if (DB.stamina < maxSt) {
-        const now = Date.now();
-        const diff = now - DB.lastStaminaUpdateTime;
-        const add = Math.floor(diff / 60000); // 1分で1回復
-        if (add > 0) {
-            DB.stamina += add;
-            if (DB.stamina > maxSt) {
-                DB.stamina = maxSt;
-                DB.lastStaminaUpdateTime = now;
-            } else {
-                DB.lastStaminaUpdateTime += add * 60000;
-            }
-            saveGame();
-            // UI更新は重くないようにスタミナテキストのみ
-            const stEl = document.getElementById('ui-stamina');
-            if (stEl) stEl.innerText = `${DB.stamina}/${maxSt}`;
-        }
-    } else {
-        DB.lastStaminaUpdateTime = Date.now();
-    }
-}, 1000);
-
-// スタミナ購入処理
-function openStaminaModal() {
-    document.getElementById('stamina-modal').classList.remove('hidden');
-    document.getElementById('stamina-modal').classList.add('flex');
-}
-function closeStaminaModal() {
-    document.getElementById('stamina-modal').classList.add('hidden');
-    document.getElementById('stamina-modal').classList.remove('flex');
-}
-function buyStamina() {
-    if (DB.coins < 500) { showAlert("草コインが足りないぞ！\n冒険して稼いでこよう！"); return; }
-    DB.coins -= 500;
-    DB.stamina += 50; // オーバーフロー許可
+    try { const saved=localStorage.getItem('kaizoku'); if(saved){ const p=JSON.parse(saved); if(p&&typeof p==='object') for(let k in p) if(p[k]!==undefined&&p[k]!==null) DB[k]=p[k]; } }catch(e){}
+    if(!DB.userId||DB.userId==='user_001') DB.userId='PIRATE_'+Math.random().toString(36).substr(2,9).toUpperCase();
+    if(!DB.itemLevels) DB.itemLevels={}; if(!DB.ownedWeapons) DB.ownedWeapons=[]; if(!DB.ownedSkins) DB.ownedSkins=[]; if(!DB.ownedCrew) DB.ownedCrew=[]; if(!DB.claimedMissions) DB.claimedMissions=[];
+    DB.ownedWeapons=DB.ownedWeapons.filter(id=>MASTER.weapons[id]); DB.ownedSkins=DB.ownedSkins.filter(id=>MASTER.skins[id]); DB.ownedCrew=DB.ownedCrew.filter(id=>MASTER.crew[id]);
+    if(DB.ownedWeapons.length===0) DB.ownedWeapons=['wp_normal']; if(DB.ownedSkins.length===0) DB.ownedSkins=['skin_default']; if(DB.ownedCrew.length===0) DB.ownedCrew=['crew_none'];
+    if(!MASTER.weapons[DB.equippedWeapon]) DB.equippedWeapon='wp_normal'; if(!MASTER.skins[DB.equippedSkin]) DB.equippedSkin='skin_default'; if(!MASTER.crew[DB.equippedCrew]) DB.equippedCrew='crew_none';
+    if(!DB.missionProgress) DB.missionProgress={defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0};
     saveGame();
-    updateHeaderUI();
-    closeStaminaModal();
-    showAlert("草コインを使ってスタミナを 50 回復したぞ！");
 }
+function getItemLevel(id) { return DB.itemLevels[id]||1; }
+function getMaxStamina() { return 100+(getItemLevel('stamina_cap')-1)*10; }
+setInterval(() => { if(!DB)return; const maxSt=getMaxStamina(); if(DB.stamina<maxSt){ const diff=Date.now()-DB.lastStaminaUpdateTime; const add=Math.floor(diff/60000); if(add>0){ DB.stamina=Math.min(maxSt,DB.stamina+add); DB.lastStaminaUpdateTime=DB.stamina===maxSt?Date.now():DB.lastStaminaUpdateTime+(add*60000); saveGame(); if($('ui-stamina')) $('ui-stamina').innerText=`${DB.stamina}/${maxSt}`; } }else{ DB.lastStaminaUpdateTime=Date.now(); } }, 1000);
+function openStaminaModal() { showEl('stamina-modal'); } function closeStaminaModal() { hideEl('stamina-modal'); }
+function buyStamina() { if(DB.coins<500){showAlert("草コインが足りないぞ！");return;} DB.coins-=500; DB.stamina+=50; saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを50回復したぞ！"); }
 
+// --- Firebase・フレンド ---
+const firebaseConfig={apiKey:"AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",authDomain:"game-685f2.firebaseapp.com",databaseURL:"https://game-685f2-default-rtdb.firebaseio.com",projectId:"game-685f2",storageBucket:"game-685f2.firebasestorage.app",messagingSenderId:"266871071111",appId:"1:266871071111:web:ffff3b65d0234fc5abb322"};
+let isFirebaseInitialized=false, friendRequests={}, friendsList={}, currentFriendTab='list';
+function initFirebase() { try{ firebase.initializeApp(firebaseConfig); window.db=firebase.database(); isFirebaseInitialized=true; updateMyDataOnFirebase(); window.db.ref('friendRequests/'+DB.userId).on('value',snap=>{friendRequests=snap.val()||{};updateFriendReqBadge();if(currentFriendTab==='req')renderFriendList();}); window.db.ref('friends/'+DB.userId).on('value',snap=>{friendsList=snap.val()||{};if(currentFriendTab==='list')renderFriendList();}); let initLoad=true; window.db.ref('global/latest_ur_pull').on('value',s=>{const d=s.val();if(d&&!initLoad&&d.timestamp>DB.lastShareTimestamp&&d.userId!==DB.userId){DB.lastShareTimestamp=d.timestamp;saveGame();triggerHappyShare(d.userName,d.itemName);}initLoad=false;}); }catch(e){} }
+function updateMyDataOnFirebase() { if(isFirebaseInitialized) window.db.ref('users/'+DB.userId).set({userName:DB.userName,userIcon:DB.userIcon,clearedStages:DB.clearedStages}); }
+function copyMyId() { const i=document.createElement("input"); i.value=DB.userId; document.body.appendChild(i); i.select(); try{document.execCommand("copy");showAlert("海賊IDをコピーしたぞ！");}catch(e){} document.body.removeChild(i); }
+function switchFriendTab(tab) { currentFriendTab=tab; const bl=$('tab-friend-list'), br=$('tab-friend-req'); if(tab==='list'){bl.className="flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all shadow-md";br.className="flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all relative shadow-md";}else{bl.className="flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all shadow-md";br.className="flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all relative shadow-md";} renderFriendList(); }
+function updateFriendReqBadge() { const b=$('friend-req-badge'); if(Object.keys(friendRequests).length>0){b.innerText="!";showEl('friend-req-badge','block');}else{hideEl('friend-req-badge');} }
+async function renderFriendList() { const c=$('friend-list-container'); c.innerHTML='<div class="text-center text-indigo-300 font-bold mt-4 animate-pulse">読込中...</div>'; if(!isFirebaseInitialized){c.innerHTML='<div class="text-center text-red-400 font-bold mt-4">通信エラー！</div>';return;} const ids=Object.keys(currentFriendTab==='list'?friendsList:friendRequests); if(ids.length===0){c.innerHTML=`<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">${currentFriendTab==='list'?'友達のIDを入力して申請しよう！':'申請はないぞ。'}</div>`;return;} let h=''; for(let uid of ids){ try{ const s=await window.db.ref('users/'+uid).once('value'); const u=s.val(); if(!u)continue; const ic=u.userIcon&&u.userIcon.startsWith('data:image')?`<img src="${u.userIcon}" class="w-12 h-12 rounded-xl object-cover border-2 border-indigo-400">`:`<div class="w-12 h-12 bg-indigo-800 rounded-xl flex items-center justify-center text-2xl border-2 border-indigo-400">${u.userIcon||'👤'}</div>`; const ac=currentFriendTab==='req'?`<button onclick="acceptFriend('${uid}')" class="game-btn bg-green-500 text-white text-xs font-black px-4 py-2 rounded-lg">承認</button><button onclick="rejectFriend('${uid}')" class="game-btn bg-red-500 text-white text-xs font-black px-3 py-2 rounded-lg">✕</button>`:`<div class="text-[10px] text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded">海域 ${u.clearedStages||0}</div>`; h+=`<div class="bg-indigo-900/80 border-2 border-indigo-700 p-3 rounded-2xl flex items-center gap-3 pop-in">${ic}<div class="flex-1 overflow-hidden"><div class="font-black text-white text-base truncate">${u.userName}</div><div class="text-[9px] text-indigo-300">ID: ${uid}</div></div><div class="flex items-center gap-1">${ac}</div></div>`; }catch(e){} } c.innerHTML=h; }
+function sendFriendRequest() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); const v=$('friend-search-input').value.trim().toUpperCase(); if(!v)return showAlert("IDを入力して！"); if(v===DB.userId)return showAlert("自分のIDだ！"); window.db.ref('users/'+v).once('value').then(s=>{if(!s.exists())return showAlert("見つからないぞ！"); window.db.ref('friendRequests/'+v+'/'+DB.userId).set(Date.now()).then(()=>{showAlert("申請したぞ！");$('friend-search-input').value='';});}); }
+function acceptFriend(uid) { if(isFirebaseInitialized){ window.db.ref('friends/'+DB.userId+'/'+uid).set(true); window.db.ref('friends/'+uid+'/'+DB.userId).set(true); window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); } }
+function rejectFriend(uid) { if(isFirebaseInitialized) window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); }
 
-function shootConfetti(containerId, count = 50) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = '';
-    const colors = ['#ef4444', '#3b82f6', '#facc15', '#22c55e', '#a855f7', '#ec4899'];
-    for(let i=0; i<count; i++) {
-        const conf = document.createElement('div');
-        conf.className = 'confetti'; conf.style.left = `${Math.random() * 100}%`;
-        conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        conf.style.width = `${Math.random() * 10 + 5}px`; conf.style.height = `${Math.random() * 20 + 10}px`;
-        conf.style.animationDuration = `${Math.random() * 2 + 2}s`; conf.style.animationDelay = `${Math.random() * 0.5}s`;
-        container.appendChild(conf);
-    }
-}
+// --- ログイン・プロフィール ---
+function checkLoginBonus() { const t=new Date().toDateString(); if(DB.lastLoginDate!==t){ DB.loginStreak=(DB.loginStreak>=7?0:DB.loginStreak)+1; DB.lastLoginDate=t; DB.missionProgress.dailyDefeat=0; DB.missionProgress.dailyGacha=0; DB.missionProgress.dailyPlayMulti=0; DB.claimedMissions=DB.claimedMissions.filter(id=>!id.startsWith('d')); saveGame(); showLoginBonusPopup(); } }
+function showLoginBonusPopup() { const st=DB.loginStreak; const g=$('login-grid'); g.innerHTML=''; const tr=LOGIN_BONUS_MASTER[st-1]; LOGIN_BONUS_MASTER.forEach(b=>{ const c=b.day<st; const t=b.day===st; const div=document.createElement('div'); div.className=`p-2 rounded-xl flex flex-col items-center justify-center relative border-2 ${t?'bg-indigo-600 border-yellow-400 shadow-lg scale-105 z-10':c?'bg-indigo-950/60 border-indigo-900 opacity-60':'bg-indigo-950 border-indigo-800'}`; div.innerHTML=`<div class="text-[9px] font-black text-indigo-300">${b.day}日目</div><div class="my-1.5 h-7 flex items-center justify-center">${b.type==='special'?'<div class="text-xl">⭐</div>':`<span class="inline-flex relative w-6 h-6"><img src="${b.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${b.fallback}','text-lg')"></span>`}</div><div class="text-[10px] text-white font-black">${b.type==='special'?'大入':'×'+b.amount}</div>${c?'<div class="absolute inset-0 bg-black/45 rounded-xl flex items-center justify-center font-black text-xs text-green-400">✔️ 済</div>':''}${t?'<div class="absolute -top-1 bg-yellow-500 text-indigo-950 font-black text-[8px] px-1 rounded">本日!</div>':''}`; g.appendChild(div); }); $('login-today-reward-visual').innerHTML=tr.type==='special'?`<span class="inline-flex relative w-7 h-7"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-yellow-400 text-lg font-black">×${tr.amount}</span><span class="text-indigo-400 mx-1">+</span><span class="inline-flex relative w-7 h-7"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰')"></span><span class="text-yellow-400 text-lg font-black">×${tr.coinsBonus}</span>`:`<span class="inline-flex relative w-8 h-8 mr-2"><img src="${tr.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${tr.fallback}','text-2xl')"></span><span class="text-yellow-400 text-2xl font-black">${tr.label} ×${tr.amount}</span>`; showEl('login-bonus-modal'); shootConfetti('login-confetti-container',80); }
+function claimLoginBonus() { const tr=LOGIN_BONUS_MASTER[DB.loginStreak-1]; if(tr.type==='coins') DB.coins+=tr.amount; else if(tr.type==='materials') DB.materials+=tr.amount; else if(tr.type==='tickets') DB.gachaTickets+=tr.amount; else if(tr.type==='special'){DB.gachaTickets+=tr.amount;DB.coins+=tr.coinsBonus;} saveGame(); updateHeaderUI(); hideEl('login-bonus-modal'); $('login-confetti-container').innerHTML=''; }
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
-    authDomain: "game-685f2.firebaseapp.com", databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
-    projectId: "game-685f2", storageBucket: "game-685f2.firebasestorage.app", messagingSenderId: "266871071111", appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
-};
-
-let isFirebaseInitialized = false;
-let friendRequests = {}; let friendsList = {}; let currentFriendTab = 'list';
-
-function initFirebase() {
-    try {
-        firebase.initializeApp(firebaseConfig); window.db = firebase.database(); isFirebaseInitialized = true;
-        updateMyDataOnFirebase();
-        window.db.ref('friendRequests/' + DB.userId).on('value', snap => { friendRequests = snap.val() || {}; updateFriendReqBadge(); if (currentFriendTab === 'req') renderFriendList(); });
-        window.db.ref('friends/' + DB.userId).on('value', snap => { friendsList = snap.val() || {}; if (currentFriendTab === 'list') renderFriendList(); });
-        let isInitialShareLoad = true;
-        window.db.ref('global/latest_ur_pull').on('value', snap => {
-            const data = snap.val();
-            if (data && !isInitialShareLoad) {
-                if (data.timestamp > DB.lastShareTimestamp && data.userId !== DB.userId) {
-                    DB.lastShareTimestamp = data.timestamp; saveGame(); triggerHappyShare(data.userName, data.itemName);
-                }
-            }
-            isInitialShareLoad = false;
-        });
-    } catch(e) { console.warn("Firebase Init Failed", e); }
-}
-
-function updateMyDataOnFirebase() {
-    if (!isFirebaseInitialized) return;
-    window.db.ref('users/' + DB.userId).set({ userName: DB.userName, userIcon: DB.userIcon, clearedStages: DB.clearedStages });
-}
-
-function copyMyId() {
-    const tempInput = document.createElement("input"); tempInput.value = DB.userId; document.body.appendChild(tempInput); tempInput.select();
-    try { document.execCommand("copy"); showAlert("キミの海賊IDをコピーしたぞ！\n友達に教えよう！"); } catch(err) { showAlert("コピーに失敗したぜ...。\n手動でメモしてくれ！"); }
-    document.body.removeChild(tempInput);
-}
-
-function switchFriendTab(tab) {
-    currentFriendTab = tab;
-    const btnList = document.getElementById('tab-friend-list'); const btnReq = document.getElementById('tab-friend-req');
-    if (tab === 'list') {
-        btnList.className = "flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all shadow-md";
-        btnReq.className = "flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all relative shadow-md";
-    } else {
-        btnList.className = "flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all shadow-md";
-        btnReq.className = "flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all relative shadow-md";
-    }
-    renderFriendList();
-}
-
-function updateFriendReqBadge() {
-    const count = Object.keys(friendRequests).length; const badge = document.getElementById('friend-req-badge');
-    if (count > 0) { badge.innerText = "!"; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-}
-
-async function renderFriendList() {
-    const container = document.getElementById('friend-list-container');
-    container.innerHTML = '<div class="text-center text-indigo-300 font-bold mt-4 animate-pulse">読み込み中...</div>';
-    if (!isFirebaseInitialized) { container.innerHTML = '<div class="text-center text-red-400 font-bold mt-4">通信エラーが発生しているぞ！</div>'; return; }
-    const targetObj = currentFriendTab === 'list' ? friendsList : friendRequests;
-    const userIds = Object.keys(targetObj);
-    if (userIds.length === 0) {
-        container.innerHTML = `<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl border border-indigo-800">${currentFriendTab === 'list' ? 'まだ海賊団の仲間がいないぞ。<br>上の検索から友達のIDを入力して申請しよう！' : '届いている申請はないぞ。'}</div>`;
-        return;
-    }
-    let html = '';
-    for (let uid of userIds) {
-        try {
-            const snap = await window.db.ref('users/' + uid).once('value'); const userData = snap.val(); if (!userData) continue;
-            let iconHtml = '';
-            if (userData.userIcon && userData.userIcon.startsWith('data:image')) {
-                iconHtml = `<img src="${userData.userIcon}" class="w-12 h-12 rounded-xl object-cover border-2 border-indigo-400 shadow-md">`;
-            } else {
-                iconHtml = `<div class="w-12 h-12 bg-indigo-800 rounded-xl flex items-center justify-center text-2xl border-2 border-indigo-400 shadow-md">${userData.userIcon || '👤'}</div>`;
-            }
-            let actionHtml = '';
-            if (currentFriendTab === 'req') {
-                actionHtml = `<button onclick="acceptFriend('${uid}')" class="game-btn bg-gradient-to-b from-green-400 to-green-600 text-white text-xs font-black px-4 py-2 rounded-lg border-2 border-white shadow-md">承認</button><button onclick="rejectFriend('${uid}')" class="game-btn bg-gradient-to-b from-red-400 to-red-600 text-white text-xs font-black px-3 py-2 rounded-lg border-2 border-white shadow-md">✕</button>`;
-            } else {
-                actionHtml = `<div class="text-[10px] text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded border border-indigo-700">海域 ${userData.clearedStages || 0}</div>`;
-            }
-            html += `<div class="bg-indigo-900/80 border-2 border-indigo-700 p-3 rounded-2xl flex items-center gap-3 shadow-lg pop-in">${iconHtml}<div class="flex-1 overflow-hidden"><div class="font-black text-white text-base truncate drop-shadow-md">${userData.userName}</div><div class="text-[9px] text-indigo-300 font-mono tracking-wider">ID: ${uid}</div></div><div class="flex items-center gap-1">${actionHtml}</div></div>`;
-        } catch(e) {}
-    }
-    container.innerHTML = html;
-}
-
-function sendFriendRequest() {
-    if (!isFirebaseInitialized) return showAlert("通信エラーだ！今は申請できないぞ！");
-    const input = document.getElementById('friend-search-input'); const targetId = input.value.trim().toUpperCase();
-    if (!targetId) return showAlert("友達の海賊IDを入力してくれ！");
-    if (targetId === DB.userId) return showAlert("それは自分のIDだぞ！");
-    window.db.ref('users/' + targetId).once('value').then(snap => {
-        if (!snap.exists()) { showAlert("そのIDの海賊は見つからなかったぞ！"); return; }
-        window.db.ref('friendRequests/' + targetId + '/' + DB.userId).set(Date.now()).then(() => { showAlert("フレンド申請を送ったぞ！"); input.value = ''; });
-    });
-}
-function acceptFriend(uid) { if (!isFirebaseInitialized) return; window.db.ref('friends/' + DB.userId + '/' + uid).set(true); window.db.ref('friends/' + uid + '/' + DB.userId).set(true); window.db.ref('friendRequests/' + DB.userId + '/' + uid).remove(); }
-function rejectFriend(uid) { if (!isFirebaseInitialized) return; window.db.ref('friendRequests/' + DB.userId + '/' + uid).remove(); }
-
-function checkLoginBonus() {
-    const todayStr = new Date().toDateString(); 
-    if (DB.lastLoginDate !== todayStr) {
-        let streak = DB.loginStreak || 0; if (streak >= 7) streak = 0;
-        DB.loginStreak = streak + 1; DB.lastLoginDate = todayStr; saveGame(); showLoginBonusPopup();
-    }
-}
-
-function showLoginBonusPopup() {
-    const streak = DB.loginStreak; const grid = document.getElementById('login-grid'); grid.innerHTML = '';
-    const todayReward = LOGIN_BONUS_MASTER[streak - 1];
-    LOGIN_BONUS_MASTER.forEach(b => {
-        const isClaimed = b.day < streak; const isToday = b.day === streak;
-        const cell = document.createElement('div');
-        cell.className = `p-2 rounded-xl flex flex-col items-center justify-center relative border-2 ${isToday ? 'bg-indigo-600 border-yellow-400 shadow-lg scale-105 z-10' : isClaimed ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : 'bg-indigo-950 border-indigo-800'}`;
-        let rewardVisual = b.type === 'special' ? `<div class="text-xl">⭐</div>` : `<span class="inline-flex relative w-6 h-6"><img src="${b.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${b.fallback}','text-lg')"></span>`;
-        cell.innerHTML = `<div class="text-[9px] font-black text-indigo-300">${b.day}日目</div><div class="my-1.5 h-7 flex items-center justify-center">${rewardVisual}</div><div class="text-[10px] text-white font-black">${b.type === 'special' ? '大入' : '×' + b.amount}</div>${isClaimed ? '<div class="absolute inset-0 bg-black/45 rounded-xl flex items-center justify-center font-black text-xs text-green-400">✔️ 済</div>' : ''}${isToday ? '<div class="absolute -top-1 bg-yellow-500 text-indigo-950 font-black text-[8px] px-1 rounded shadow-md animate-pulse">本日!</div>' : ''}`;
-        grid.appendChild(cell);
-    });
-    const todayVisual = document.getElementById('login-today-reward-visual');
-    if (todayReward.type === 'special') {
-        todayVisual.innerHTML = `<span class="inline-flex relative w-7 h-7"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xl')"></span><span class="text-yellow-400 text-lg font-black">草核×${todayReward.amount}</span><span class="text-indigo-400 font-bold mx-1">+</span><span class="inline-flex relative w-7 h-7"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xl')"></span><span class="text-yellow-400 text-lg font-black">×${todayReward.coinsBonus}</span>`;
-    } else {
-        todayVisual.innerHTML = `<span class="inline-flex relative w-8 h-8 mr-2"><img src="${todayReward.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${todayReward.fallback}','text-2xl')"></span><span class="text-yellow-400 text-2xl font-black">${todayReward.label} ×${todayReward.amount}</span>`;
-    }
-    document.getElementById('login-bonus-modal').classList.remove('hidden'); document.getElementById('login-bonus-modal').classList.add('flex');
-    shootConfetti('login-confetti-container', 80);
-}
-
-function claimLoginBonus() {
-    const streak = DB.loginStreak; const reward = LOGIN_BONUS_MASTER[streak - 1];
-    if (reward.type === 'coins') DB.coins += reward.amount; else if (reward.type === 'materials') DB.materials += reward.amount; else if (reward.type === 'tickets') DB.gachaTickets += reward.amount; else if (reward.type === 'special') { DB.gachaTickets += reward.amount; DB.coins += reward.coinsBonus; }
-    saveGame(); updateHeaderUI(); document.getElementById('login-bonus-modal').classList.add('hidden'); document.getElementById('login-bonus-modal').classList.remove('flex'); document.getElementById('login-confetti-container').innerHTML = '';
-}
-
-function openGachaProbabilityModal() { document.getElementById('gacha-probability-modal').classList.remove('hidden'); document.getElementById('gacha-probability-modal').classList.add('flex'); }
-function closeGachaProbabilityModal() { document.getElementById('gacha-probability-modal').classList.add('hidden'); document.getElementById('gacha-probability-modal').classList.remove('flex'); }
-
-const TUTORIAL_SCENARIOS = {
-    'battle': [ { character: '🦜', text: 'ようこそ！「ルージュ・ガレオン」の世界へ！！\nオレ様はナビゲーターのポリーだ！\n大海原にはライバル海賊がいっぱいいるぞ。', targetId: null }, { character: '🦜', text: 'まずは船のそうじゅうに慣れるために、\n「大冒険へ出発!!」を押して初航海に出よう！', targetId: 'btn-start-navigation' } ],
-    'gacha': [ { character: '🦜', text: '初航海おつかれさま！見事なそうじゅうだったぜ！\n手に入れた「草核」を使って宝箱をあけよう！\n新しい装備や乗組員が手に入るかも！？', targetId: 'btn-draw-gacha-1' } ],
-    'gacha_done': [ { character: '🦜', text: 'すっげーお宝を手に入れたな！！\nさっそく下の「準備」ボタンを押して、\n今のお宝を船にセットしに行こうぜ！', targetId: 'nav-btn-equip' } ],
-    'equip': [ { character: '🦜', text: 'ここが準備の画面だ！\n手に入れたお宝のボタンをタップして、\n船をパワーアップさせてみよう！！', targetId: 'tutorial-target-equip' } ],
-    'all_done': [ { character: '🦜', text: 'カンペキだ、船長！！\nこれで冒険の準備はすべて完了したぜ！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！', targetId: null } ]
-};
-
-let currentTutorialScenario = null; let tutorialStep = 0;
-
-function startSpecificTutorial(scenarioName) { currentTutorialScenario = scenarioName; tutorialStep = 0; showTutorialStep(); }
-function checkAndStartTutorial() {
-    updateLockStatus();
-    if (!DB.tutorialCompleted) startSpecificTutorial('battle');
-    else if (!DB.tutorialGachaCompleted) { if (!document.getElementById('screen-gacha').classList.contains('hidden')) startSpecificTutorial('gacha'); else positionTutorialArrow('nav-btn-gacha'); }
-    else if (!DB.tutorialEquipCompleted) { if (!document.getElementById('screen-equip').classList.contains('hidden')) startSpecificTutorial('equip'); else positionTutorialArrow('nav-btn-equip'); }
-    else positionTutorialArrow(null);
-}
-
-function positionTutorialArrow(targetId) {
-    const arrow = document.getElementById('tutorial-arrow');
-    if (!targetId) { arrow.classList.add('hidden'); return; }
-    const target = document.getElementById(targetId);
-    if (!target) { arrow.classList.add('hidden'); return; }
-    const appContainer = document.getElementById('app'); const appRect = appContainer.getBoundingClientRect(); const targetRect = target.getBoundingClientRect();
-    arrow.style.top = `${targetRect.top - appRect.top - 60}px`; arrow.style.left = `${targetRect.left - appRect.left + (targetRect.width / 2) - 24}px`; arrow.classList.remove('hidden');
-}
-
-function showTutorialStep() {
-    const overlay = document.getElementById('tutorial-overlay'); const steps = TUTORIAL_SCENARIOS[currentTutorialScenario];
-    if (!steps || !steps[tutorialStep]) { overlay.classList.add('hidden'); positionTutorialArrow(null); return; }
-    const stepData = steps[tutorialStep]; overlay.classList.remove('hidden'); overlay.classList.add('flex');
-    const counter = document.getElementById('tutorial-step-counter');
-    if (steps.length > 1) { counter.innerText = `${tutorialStep + 1}/${steps.length}`; counter.classList.remove('hidden'); } else counter.classList.add('hidden');
-    document.getElementById('tutorial-character').innerText = stepData.character; document.getElementById('tutorial-text').innerText = stepData.text;
-    document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-    if (stepData.targetId) { const target = document.getElementById(stepData.targetId); if (target) { target.classList.add('tutorial-highlight'); setTimeout(() => { positionTutorialArrow(stepData.targetId); }, 100); } } else positionTutorialArrow(null);
-}
-
-function nextTutorialStep() {
-    const steps = TUTORIAL_SCENARIOS[currentTutorialScenario]; tutorialStep++;
-    if (tutorialStep >= steps.length) {
-        document.getElementById('tutorial-overlay').classList.add('hidden'); document.getElementById('tutorial-overlay').classList.remove('flex'); document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-        const lastTarget = steps[steps.length - 1].targetId;
-        if (lastTarget) { const btn = document.getElementById(lastTarget); if (btn) btn.classList.add('animate-pulse'); positionTutorialArrow(lastTarget); } else positionTutorialArrow(null);
-        if (currentTutorialScenario === 'all_done') { document.querySelectorAll('.animate-pulse').forEach(el => el.classList.remove('animate-pulse')); document.getElementById('special-ui-container').classList.remove('hidden'); }
-    } else showTutorialStep();
-}
-
-function tryAccessLockedScreen(screenId) {
-    if (!DB.tutorialCompleted) { document.getElementById('locked-alert-overlay').classList.remove('hidden'); document.getElementById('locked-alert-overlay').classList.add('flex'); return; }
-    navTo(screenId);
-}
-function closeLockedAlert() { document.getElementById('locked-alert-overlay').classList.add('hidden'); document.getElementById('locked-alert-overlay').classList.remove('flex'); }
-
-function updateLockStatus() {
-    const lockEquip = document.getElementById('nav-equip-lock'); const lockGacha = document.getElementById('nav-gacha-lock'); const lockFriend = document.getElementById('nav-friend-lock');
-    const btnEquip = document.getElementById('nav-btn-equip'); const btnGacha = document.getElementById('nav-btn-gacha'); const btnFriend = document.getElementById('nav-btn-friend');
-    if (DB.tutorialCompleted) {
-        if(lockEquip) lockEquip.classList.add('hidden'); if(lockGacha) lockGacha.classList.add('hidden'); if(lockFriend) lockFriend.classList.add('hidden');
-        if(btnEquip) btnEquip.classList.remove('opacity-50'); if(btnGacha) btnGacha.classList.remove('opacity-50'); if(btnFriend) btnFriend.classList.remove('opacity-50');
-    } else {
-        if(lockEquip) lockEquip.classList.remove('hidden'); if(lockGacha) lockGacha.classList.remove('hidden'); if(lockFriend) lockFriend.classList.remove('hidden');
-        if(btnEquip) btnEquip.classList.add('opacity-50'); if(btnGacha) btnGacha.classList.add('opacity-50'); if(btnFriend) btnFriend.classList.add('opacity-50');
-    }
-}
-
-function handleTutorialClear() {
-    DB.tutorialCompleted = true; DB.gachaTickets += 10; DB.coins += 2000;
-    positionTutorialArrow(null); updateLockStatus(); updateHeaderUI(); saveGame(); 
-    const btn = document.getElementById('btn-start-navigation'); if (btn) btn.classList.remove('animate-pulse');
-    document.getElementById('tutorial-clear-modal').classList.remove('hidden'); document.getElementById('tutorial-clear-modal').classList.add('flex');
-    shootConfetti('tutorial-confetti-container', 100);
-}
-
-function finishTutorialClear() {
-    document.getElementById('tutorial-clear-modal').classList.add('hidden'); document.getElementById('tutorial-clear-modal').classList.remove('flex'); document.getElementById('tutorial-confetti-container').innerHTML = ''; 
-    navTo('screen-home'); setTimeout(() => { positionTutorialArrow('nav-btn-gacha'); }, 400);
-}
-
-function showLogoFallback(imgEl) { imgEl.style.display = 'none'; document.getElementById('title-fallback').classList.remove('hidden'); }
-
-let tempSelectedIcon = ''; let customIconDataUrl = ''; 
-function handleIconUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas'); canvas.width = 100; canvas.height = 100; const ctx = canvas.getContext('2d');
-                const size = Math.min(img.width, img.height); const sx = (img.width - size) / 2; const sy = (img.height - size) / 2;
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 100, 100); ctx.drawImage(img, sx, sy, size, size, 0, 0, 100, 100);
-                customIconDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                document.getElementById('custom-icon-img').src = customIconDataUrl; document.getElementById('custom-icon-preview-container').classList.remove('hidden'); selectIcon('CUSTOM_IMAGE');
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
-}
-function openProfileModal() {
-    tempSelectedIcon = DB.userIcon; document.getElementById('edit-username').value = DB.userName;
-    if (tempSelectedIcon && tempSelectedIcon.startsWith('data:image')) { customIconDataUrl = tempSelectedIcon; document.getElementById('custom-icon-img').src = customIconDataUrl; document.getElementById('custom-icon-preview-container').classList.remove('hidden'); }
-    updateIconSelectionUI(); document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-modal').classList.add('flex');
-}
-function selectIcon(iconValue) { if (iconValue === 'CUSTOM_IMAGE') { tempSelectedIcon = customIconDataUrl; } else { tempSelectedIcon = iconValue; } updateIconSelectionUI(); }
-function updateIconSelectionUI() {
-    document.querySelectorAll('.icon-sel-btn').forEach(btn => {
-        if (btn.id === 'custom-icon-btn') { if (tempSelectedIcon && tempSelectedIcon.startsWith('data:image') && tempSelectedIcon === customIconDataUrl) { btn.classList.add('border-yellow-400', 'shadow-[0_0_10px_yellow]'); btn.classList.remove('border-indigo-800'); } else { btn.classList.remove('border-yellow-400', 'shadow-[0_0_10px_yellow]'); btn.classList.add('border-indigo-800'); } } 
-        else { if(btn.innerText === tempSelectedIcon) { btn.classList.add('bg-indigo-700', 'border-blue-400'); btn.classList.remove('border-transparent'); } else { btn.classList.remove('bg-indigo-700', 'border-blue-400'); btn.classList.add('border-transparent'); } }
-    });
-}
-function saveProfile() { const newName = document.getElementById('edit-username').value.trim(); if (newName) DB.userName = newName; DB.userIcon = tempSelectedIcon; updateHeaderUI(); closeProfileModal(); saveGame(); }
-function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); document.getElementById('profile-modal').classList.remove('flex'); }
+let tempSelectedIcon='', customIconDataUrl='';
+function handleIconUpload(e) { const f=e.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); c.width=100; c.height=100; const ctx=c.getContext('2d'); const s=Math.min(img.width,img.height); ctx.fillStyle="#fff"; ctx.fillRect(0,0,100,100); ctx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,100,100); customIconDataUrl=c.toDataURL('image/jpeg',0.8); $('custom-icon-img').src=customIconDataUrl; showEl('custom-icon-preview-container'); selectIcon('CUSTOM_IMAGE'); }; img.src=e.target.result; }; r.readAsDataURL(f); } }
+function openProfileModal() { tempSelectedIcon=DB.userIcon; $('edit-username').value=DB.userName; if(tempSelectedIcon&&tempSelectedIcon.startsWith('data:image')){ customIconDataUrl=tempSelectedIcon; $('custom-icon-img').src=customIconDataUrl; showEl('custom-icon-preview-container'); } updateIconSelectionUI(); showEl('profile-modal'); }
+function selectIcon(v) { tempSelectedIcon=v==='CUSTOM_IMAGE'?customIconDataUrl:v; updateIconSelectionUI(); }
+function updateIconSelectionUI() { document.querySelectorAll('.icon-sel-btn').forEach(b=>{ if(b.id==='custom-icon-btn'){ if(tempSelectedIcon.startsWith('data:image')&&tempSelectedIcon===customIconDataUrl) b.classList.add('border-yellow-400','shadow-[0_0_10px_yellow]'); else b.classList.remove('border-yellow-400','shadow-[0_0_10px_yellow]'); }else{ if(b.innerText===tempSelectedIcon) b.classList.add('bg-indigo-700','border-blue-400'); else b.classList.remove('bg-indigo-700','border-blue-400'); } }); }
+function saveProfile() { const n=$('edit-username').value.trim(); if(n) DB.userName=n; DB.userIcon=tempSelectedIcon; updateHeaderUI(); hideEl('profile-modal'); saveGame(); }
+function closeProfileModal() { hideEl('profile-modal'); }
 
 function updateHeaderUI() {
-    document.getElementById('ui-username').innerText = DB.userName;
-    const iconContainer = document.getElementById('ui-usericon');
-    if (DB.userIcon && DB.userIcon.startsWith('data:image')) iconContainer.innerHTML = `<img src="${DB.userIcon}" class="w-full h-full object-cover">`; else iconContainer.innerText = DB.userIcon;
-    document.getElementById('ui-tickets').innerText = DB.gachaTickets; document.getElementById('ui-coins').innerText = DB.coins; document.getElementById('ui-materials').innerText = DB.materials;
-    const maxSt = getMaxStamina(); document.getElementById('ui-stamina').innerText = `${DB.stamina}/${maxSt}`;
+    $('ui-username').innerText=DB.userName; const ic=$('ui-usericon'); if(DB.userIcon.startsWith('data:image')) ic.innerHTML=`<img src="${DB.userIcon}" class="w-full h-full object-cover">`; else ic.innerText=DB.userIcon;
+    $('ui-tickets').innerText=DB.gachaTickets; $('ui-coins').innerText=DB.coins; $('ui-materials').innerText=DB.materials;
+    $('ui-stamina').innerText=`${DB.stamina}/${getMaxStamina()}`; checkMissions();
 }
 
-function navTo(screenId) {
-    positionTutorialArrow(null); document.querySelectorAll('.animate-pulse').forEach(el => el.classList.remove('animate-pulse')); document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
-    const targetScreen = document.getElementById(screenId); targetScreen.classList.remove('hidden'); targetScreen.style.animation = 'none'; targetScreen.offsetHeight; targetScreen.style.animation = null;
-    document.querySelectorAll('.nav-btn').forEach(btn => { if (btn.dataset.target === screenId) { btn.classList.add('text-yellow-400', 'scale-110'); btn.classList.remove('text-indigo-400'); } else { btn.classList.remove('text-yellow-400', 'scale-110'); btn.classList.add('text-indigo-400'); } });
-    if (screenId === 'screen-home') initHome(); if (screenId === 'screen-stage') initStageSelect(); if (screenId === 'screen-equip') initEquip(); if (screenId === 'screen-gacha') updateGachaUI(); if (screenId === 'screen-friend') { if (currentFriendTab === 'list') renderFriendList(); }
-    if (screenId !== 'screen-game') { stopGame(); document.getElementById('app-header').classList.remove('hidden'); document.getElementById('app-nav').classList.remove('hidden'); document.getElementById('bubbles-layer').style.display = 'block'; } else { document.getElementById('app-header').classList.add('hidden'); document.getElementById('app-nav').classList.add('hidden'); document.getElementById('bubbles-layer').style.display = 'none'; }
-    if (screenId === 'screen-gacha' && DB.tutorialCompleted && !DB.tutorialGachaCompleted) setTimeout(() => startSpecificTutorial('gacha'), 500); else if (screenId === 'screen-equip' && DB.tutorialGachaCompleted && !DB.tutorialEquipCompleted) setTimeout(() => startSpecificTutorial('equip'), 500); else if (screenId === 'screen-home') checkAndStartTutorial();
+// --- 画面遷移・チュートリアル ---
+function navTo(sid) {
+    positionTutorialArrow(null); document.querySelectorAll('.animate-pulse').forEach(e=>e.classList.remove('animate-pulse'));
+    document.querySelectorAll('.screen').forEach(e=>{e.classList.add('hidden'); e.classList.remove('block','flex');});
+    const s=$(sid); if(s){s.classList.remove('hidden'); s.classList.add('flex'); s.style.animation='none'; s.offsetHeight; s.style.animation=null;}
+    document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.dataset.target===sid) b.classList.add('text-yellow-400','scale-110'); else b.classList.remove('text-yellow-400','scale-110'); });
+    if(sid==='screen-home') initHome(); if(sid==='screen-stage') initStageSelect(); if(sid==='screen-equip') initEquip(); if(sid==='screen-gacha') updateGachaUI(); if(sid==='screen-friend'&&currentFriendTab==='list') renderFriendList(); if(sid==='screen-mission') renderMissionList();
+    if(sid!=='screen-game'){ stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; }else{ hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; }
+    if(sid==='screen-gacha'&&DB.tutorialCompleted&&!DB.tutorialGachaCompleted) setTimeout(()=>startSpecificTutorial('gacha'),500); else if(sid==='screen-equip'&&DB.tutorialGachaCompleted&&!DB.tutorialEquipCompleted) setTimeout(()=>startSpecificTutorial('equip'),500); else if(sid==='screen-home') checkAndStartTutorial();
 }
 
-function initHome() {
-    updateHeaderUI();
-    const skin = MASTER.skins[DB.equippedSkin]; const weapon = MASTER.weapons[DB.equippedWeapon]; const crew = MASTER.crew[DB.equippedCrew];
-    document.getElementById('home-skin-icon').innerText = skin.icon; document.getElementById('home-skin').innerText = skin.name; document.getElementById('home-weapon-icon').innerText = '💣'; document.getElementById('home-weapon').innerText = weapon.name;
-    const crewContainer = document.getElementById('home-crew-container'); crewContainer.innerHTML = '';
-    if (crew.type === 'image') crewContainer.innerHTML = `<span class="inline-flex relative w-10 h-10 filter drop-shadow-md"><img src="${crew.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${crew.fallbackIcon}','text-3xl filter drop-shadow-md')"></span>`;
-    else crewContainer.innerHTML = `<span class="text-4xl filter drop-shadow-md">${crew.icon}</span>`;
-    document.getElementById('home-crew').innerText = crew.name;
-}
+function startSpecificTutorial(name) { currentTutorialScenario=name; tutorialStep=0; showTutorialStep(); }
+function checkAndStartTutorial() { updateLockStatus(); if(!DB.tutorialCompleted) startSpecificTutorial('battle'); else if(!DB.tutorialGachaCompleted) { if(!$('screen-gacha').classList.contains('hidden')) startSpecificTutorial('gacha'); else positionTutorialArrow('nav-btn-gacha'); } else if(!DB.tutorialEquipCompleted) { if(!$('screen-equip').classList.contains('hidden')) startSpecificTutorial('equip'); else positionTutorialArrow('nav-btn-equip'); } else positionTutorialArrow(null); }
+function positionTutorialArrow(tid) { const a=$('tutorial-arrow'); if(!tid){hideEl('tutorial-arrow');return;} const t=$(tid); if(!t){hideEl('tutorial-arrow');return;} const ar=$('app').getBoundingClientRect(), tr=t.getBoundingClientRect(); a.style.top=`${tr.top-ar.top-60}px`; a.style.left=`${tr.left-ar.left+(tr.width/2)-24}px`; showEl('tutorial-arrow','block'); }
+function showTutorialStep() { const o=$('tutorial-overlay'); const st=TUTORIAL_SCENARIOS[currentTutorialScenario]; if(!st||!st[tutorialStep]){hideEl('tutorial-overlay');positionTutorialArrow(null);return;} const d=st[tutorialStep]; showEl('tutorial-overlay'); const c=$('tutorial-step-counter'); if(st.length>1){c.innerText=`${tutorialStep+1}/${st.length}`;showEl('tutorial-step-counter','block');}else hideEl('tutorial-step-counter'); $('tutorial-character').innerText=d.character; $('tutorial-text').innerText=d.text; document.querySelectorAll('.tutorial-highlight').forEach(e=>e.classList.remove('tutorial-highlight')); if(d.targetId){const t=$(d.targetId);if(t){t.classList.add('tutorial-highlight');setTimeout(()=>positionTutorialArrow(d.targetId),100);}}else positionTutorialArrow(null); }
+function nextTutorialStep() { const st=TUTORIAL_SCENARIOS[currentTutorialScenario]; tutorialStep++; if(tutorialStep>=st.length){ hideEl('tutorial-overlay'); document.querySelectorAll('.tutorial-highlight').forEach(e=>e.classList.remove('tutorial-highlight')); const lt=st[st.length-1].targetId; if(lt){const b=$(lt);if(b)b.classList.add('animate-pulse');positionTutorialArrow(lt);}else positionTutorialArrow(null); if(currentTutorialScenario==='all_done'){document.querySelectorAll('.animate-pulse').forEach(e=>e.classList.remove('animate-pulse'));showEl('special-ui-container');} }else showTutorialStep(); }
+function tryAccessLockedScreen(sid) { if(!DB.tutorialCompleted){showEl('locked-alert-overlay');return;} navTo(sid); }
+function closeLockedAlert() { hideEl('locked-alert-overlay'); }
+function updateLockStatus() { const c=DB.tutorialCompleted; ['equip','gacha','friend','mission'].forEach(id=>{ const l=$(`nav-${id}-lock`), b=$(`nav-btn-${id}`); if(c){if(l)hideEl(`nav-${id}-lock`);if(b)b.classList.remove('opacity-50');}else{if(l)showEl(`nav-${id}-lock`,'block');if(b)b.classList.add('opacity-50');} }); }
+function handleTutorialClear() { DB.tutorialCompleted=true; DB.gachaTickets+=10; DB.coins+=2000; positionTutorialArrow(null); updateLockStatus(); updateHeaderUI(); saveGame(); const b=$('btn-start-navigation'); if(b)b.classList.remove('animate-pulse'); showEl('tutorial-clear-modal'); shootConfetti('tutorial-confetti-container',100); }
+function finishTutorialClear() { hideEl('tutorial-clear-modal'); $('tutorial-confetti-container').innerHTML=''; navTo('screen-home'); setTimeout(()=>positionTutorialArrow('nav-btn-gacha'),400); }
 
-window._tutorialEquipTargetSet = false; let currentDetailItem = null; let currentDetailKey = null;
-function initEquip() { window._tutorialEquipTargetSet = false; updateHeaderUI(); renderEquipList('equip-weapons', MASTER.weapons, DB.ownedWeapons, DB.equippedWeapon, 'equippedWeapon'); renderEquipList('equip-skins', MASTER.skins, DB.ownedSkins, DB.equippedSkin, 'equippedSkin'); renderEquipList('equip-crew', MASTER.crew, DB.ownedCrew, DB.equippedCrew, 'equippedCrew'); renderEquipList('equip-system', MASTER.systems, ['stamina_cap'], null, 'system'); }
-function renderEquipList(containerId, masterData, ownedList, equippedId, dbKey) {
-    const container = document.getElementById(containerId); container.innerHTML = '';
-    ownedList.forEach(id => {
-        const item = masterData[id]; const isEquipped = id === equippedId; const level = getItemLevel(id); const btn = document.createElement('button');
-        btn.className = `p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${isEquipped ? 'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'bg-indigo-950 border-indigo-700 shadow-md'}`;
-        let visualHTML = item.type === 'image' ? `<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-sm')"></div>` : `<span class="text-2xl filter drop-shadow-md">${item.icon || '⚔️'}</span>`;
-        
-        // ★システム（スタミナ）用特別表示
-        if (dbKey === 'system') {
-            btn.innerHTML = `<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${level}</div></div><div class="flex items-center gap-2">${visualHTML}<div class="font-bold text-white text-xs leading-tight">${item.name}<br><span class="text-[9px] text-indigo-300">最大値UP!</span></div></div>`;
-        } else {
-            btn.innerHTML = `<div class="flex justify-between items-start mb-1"><div class="${rarityColors[item.rarity]} font-black text-[10px] drop-shadow-sm">[${item.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${level}</div></div><div class="flex items-center gap-2">${visualHTML}<div class="font-bold text-white text-xs leading-tight">${item.name}</div></div>${isEquipped ? '<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm border-b border-l border-yellow-200">装備中!!</div>' : ''}`;
-        }
+// --- ホーム・編成 ---
+function initHome() { updateHeaderUI(); const s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none']; $('home-skin-icon').innerText=s.icon; $('home-skin').innerText=s.name; $('home-weapon-icon').innerText='💣'; $('home-weapon').innerText=w.name; const cc=$('home-crew-container'); cc.innerHTML=c.type==='image'?`<span class="inline-flex relative w-10 h-10 filter drop-shadow-md"><img src="${c.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${c.fallbackIcon}','text-3xl filter drop-shadow-md')"></span>`:`<span class="text-4xl filter drop-shadow-md">${c.icon}</span>`; $('home-crew').innerText=c.name; }
+window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailKey=null;
+function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
+function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
+function openItemDetail(id, k) { const ty=k==='equippedWeapon'?'weapons':k==='equippedSkin'?'skins':k==='equippedCrew'?'crew':'systems'; const m=MASTER[ty][id]; if(!m)return; currentDetailItem=m; currentDetailKey=k; const lv=getItemLevel(m.id); $('detail-rarity').innerText=m.rarity||'System'; $('detail-rarity').className=`font-black text-lg ${m.rarity?rarityColors[m.rarity]:'text-yellow-400'}`; $('detail-level').innerText=`Lv.${lv}`; const ic=$('detail-icon'); ic.innerHTML=m.type==='image'?`<span class="inline-flex relative w-16 h-16 filter drop-shadow-md"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-5xl')"></span>`:`<span class="text-6xl filter drop-shadow-md">${m.icon}</span>`; $('detail-name').innerText=m.name; $('detail-desc').innerText=m.desc; const rc=lv*200, rm=Math.floor(lv/2)+1; $('req-coins').innerText=rc; $('req-materials').innerText=rm; const bu=$('btn-upgrade'); if(lv>=10){bu.innerHTML="MAX レベル!! 🌟";bu.disabled=true;bu.classList.add('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.remove('from-green-400','to-green-600','active:scale-95');}else{bu.innerHTML="パワーアップ!! ✨";bu.disabled=false;bu.classList.remove('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.add('from-green-400','to-green-600','active:scale-95');} if(k==='system')hideEl('btn-equip');else showEl('btn-equip'); showEl('item-detail-modal'); }
+function closeItemDetail() { hideEl('item-detail-modal'); }
+function equipItem() { if(!currentDetailItem||!currentDetailKey||currentDetailKey==='system')return; DB[currentDetailKey]=currentDetailItem.id; saveGame(); initEquip(); closeItemDetail(); if(!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){DB.tutorialEquipCompleted=true;saveGame();positionTutorialArrow(null);setTimeout(()=>startSpecificTutorial('all_done'),300);} }
+function upgradeItem() { if(!currentDetailItem)return; const lv=getItemLevel(currentDetailItem.id); if(lv>=10)return; const rc=lv*200, rm=Math.floor(lv/2)+1; if(DB.coins<rc||DB.materials<rm)return showAlert("素材が足りないぞ！"); DB.coins-=rc; DB.materials-=rm; DB.itemLevels[currentDetailItem.id]=lv+1; saveGame(); updateHeaderUI(); openItemDetail(currentDetailItem.id,currentDetailKey); initEquip(); }
 
-        if (!isEquipped && dbKey !== 'system' && !window._tutorialEquipTargetSet && !DB.tutorialEquipCompleted && currentTutorialScenario === 'equip') { btn.id = 'tutorial-target-equip'; window._tutorialEquipTargetSet = true; }
-        btn.onclick = () => { openItemDetail(id, dbKey); }; container.appendChild(btn);
-    });
-}
-function openItemDetail(itemId, dbKey) {
-    let masterType = dbKey === 'equippedWeapon' ? 'weapons' : dbKey === 'equippedSkin' ? 'skins' : dbKey === 'equippedCrew' ? 'crew' : 'systems';
-    const mItem = MASTER[masterType][itemId]; currentDetailItem = mItem; currentDetailKey = dbKey; const level = getItemLevel(mItem.id);
-    
-    document.getElementById('detail-rarity').innerText = mItem.rarity || 'System'; document.getElementById('detail-rarity').className = `font-black text-lg ${mItem.rarity ? rarityColors[mItem.rarity] : 'text-yellow-400'}`; document.getElementById('detail-level').innerText = `Lv.${level}`;
-    const iconCont = document.getElementById('detail-icon'); iconCont.innerHTML = '';
-    if (mItem.type === 'image') iconCont.innerHTML = `<span class="inline-flex relative w-16 h-16 filter drop-shadow-md"><img src="${mItem.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${mItem.fallbackIcon}','text-5xl')"></span>`;
-    else iconCont.innerHTML = `<span class="text-6xl filter drop-shadow-md">${mItem.icon}</span>`;
-    document.getElementById('detail-name').innerText = mItem.name; document.getElementById('detail-desc').innerText = mItem.desc;
-    
-    const reqCoins = level * 200; const reqMats = Math.floor(level / 2) + 1;
-    document.getElementById('req-coins').innerText = reqCoins; document.getElementById('req-materials').innerText = reqMats;
-    const btnUpgrade = document.getElementById('btn-upgrade');
-    if (level >= 10) { btnUpgrade.innerHTML = "MAX レベル!! 🌟"; btnUpgrade.disabled = true; btnUpgrade.classList.add('opacity-50', 'cursor-not-allowed', 'from-gray-500', 'to-gray-700'); btnUpgrade.classList.remove('from-green-400', 'to-green-600', 'active:scale-95'); } 
-    else { btnUpgrade.innerHTML = "パワーアップ!! ✨"; btnUpgrade.disabled = false; btnUpgrade.classList.remove('opacity-50', 'cursor-not-allowed', 'from-gray-500', 'to-gray-700'); btnUpgrade.classList.add('from-green-400', 'to-green-600', 'active:scale-95'); }
-    
-    if (dbKey === 'system') document.getElementById('btn-equip').classList.add('hidden'); else document.getElementById('btn-equip').classList.remove('hidden');
-    
-    document.getElementById('item-detail-modal').classList.remove('hidden'); document.getElementById('item-detail-modal').classList.add('flex');
-}
-function closeItemDetail() { document.getElementById('item-detail-modal').classList.add('hidden'); document.getElementById('item-detail-modal').classList.remove('flex'); }
-function equipItem() {
-    if (!currentDetailItem || !currentDetailKey || currentDetailKey === 'system') return; DB[currentDetailKey] = currentDetailItem.id; saveGame(); initEquip(); closeItemDetail();
-    if (!DB.tutorialEquipCompleted && currentTutorialScenario === 'equip') { DB.tutorialEquipCompleted = true; saveGame(); positionTutorialArrow(null); setTimeout(() => startSpecificTutorial('all_done'), 300); }
-}
-function upgradeItem() {
-    if (!currentDetailItem) return; const level = getItemLevel(currentDetailItem.id); if (level >= 10) return;
-    const reqCoins = level * 200; const reqMats = Math.floor(level / 2) + 1;
-    if (DB.coins < reqCoins || DB.materials < reqMats) { showAlert("草コインか草の化石が足りないぞ！\n冒険したり、ガチャのダブりで集めよう！"); return; }
-    DB.coins -= reqCoins; DB.materials -= reqMats; DB.itemLevels[currentDetailItem.id] = level + 1; saveGame(); updateHeaderUI(); openItemDetail(currentDetailItem.id, currentDetailKey); initEquip(); 
-}
+// --- ガチャ ---
+function openGachaProbabilityModal() { showEl('gacha-probability-modal'); } function closeGachaProbabilityModal() { hideEl('gacha-probability-modal'); }
+function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), be=$('tab-gacha-ex'), ti=$('gacha-title'), su=$('gacha-sub'), em=$('gacha-chest-emoji'), ba=$('ex-pickup-badge'); if(t==='normal'){bn.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";be.className="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";ti.innerText="わくわく通常ガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md";su.innerText="いろんなお宝が眠っているぞ！";em.innerText="🏴‍☠️";hideEl('ex-pickup-badge');}else{bn.className="flex-1 py-2 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent";be.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";ti.innerText="⭐ 超・限定EXガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md";su.innerText="今だけ！すごい乗組員がゲットできるかも！";em.innerText="⭐";showEl('ex-pickup-badge');} }
+function updateGachaUI() { updateHeaderUI(); $('gacha-rate').innerText=`${Math.min(1.0+(DB.pityCounter*0.5),100.0).toFixed(1)}%`; $('pity-bar').style.width=`${Math.min((DB.pityCounter/50)*100,100)}%`; }
+let currentGachaResults=[];
+function startGachaAnim(times) { if(!$('tutorial-overlay').classList.contains('hidden'))return; if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！"); DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; for(let i=0;i<times;i++){ let ur=0.01+(DB.pityCounter*0.005), sr=0.10, r=0.30, rand=Math.random(), rr='N'; if(rand<ur)rr='UR';else if(rand<ur+sr)rr='SR';else if(rand<ur+sr+r)rr='R'; const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} let d=pool[Math.floor(Math.random()*pool.length)], m=MASTER[d.type][d.id], ok=d.type==='weapons'?'ownedWeapons':d.type==='skins'?'ownedSkins':'ownedCrew', isNew=!DB[ok].includes(d.id); if(isNew)DB[ok].push(d.id);else{DB.coins+=500;DB.materials+=1;} if(rr==='UR'){hasUR=true;hItem=m;DB.pityCounter=0;}else DB.pityCounter++; currentGachaResults.push({item:m,isNew:isNew}); } saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); }
+function showGachaResult(item, isNew) { document.querySelectorAll('.gacha-result-text').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=null;}); shootConfetti('gacha-confetti-container',80); $('gacha-result-rarity').innerText=item.rarity; $('gacha-result-rarity').className=`text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`; const vc=$('gacha-result-visual-container'); vc.innerHTML=item.type==='image'?`<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`:`<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon||'⚔️'}</span>`; $('gacha-result-name').innerHTML=`${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew?'🎉 初ゲット！！':'持ってるぞ！(+500/化石+1)'}</span>`; $('gacha-result-desc').innerText=item.desc||''; showEl('gacha-result-modal'); }
+function closeGachaResult() { hideEl('gacha-result-modal'); $('gacha-confetti-container').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
+function showGacha10Result() { const g=$('gacha-10-grid'); g.innerHTML=''; shootConfetti('gacha-confetti-container-10',120); currentGachaResults.forEach((r,i)=>{ const m=r.item, d=document.createElement('div'); d.className=`bg-indigo-900 border-2 border-indigo-500 rounded-xl p-2 flex flex-col items-center justify-center relative shadow-lg pop-in`; d.style.animationDelay=`${i*0.1}s`; d.style.animationFillMode='both'; const vi=m.type==='image'?`<span class="inline-flex relative w-12 h-12"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain drop-shadow-md z-10" onerror="fb(this,'${m.fallbackIcon}','text-2xl drop-shadow-md')"></span>`:`<span class="text-5xl drop-shadow-md">${m.icon||'⚔️'}</span>`; d.innerHTML=`<div class="absolute top-1 left-1 ${rarityColors[m.rarity]} font-black text-[10px] bg-indigo-950/80 px-1 rounded">${m.rarity}</div>${r.isNew?'<div class="absolute top-1 right-1 text-[8px] bg-pink-500 text-white font-black px-1 rounded shadow-md">NEW</div>':'<div class="absolute top-1 right-1 text-[8px] bg-slate-500 text-white font-black px-1 rounded shadow-md">ダブり</div>'}<div class="mt-4 mb-2 h-12 flex items-center justify-center">${vi}</div><div class="text-[9px] text-white font-bold text-center w-full truncate px-1">${m.name}</div>`; g.appendChild(d); }); showEl('gacha-result-10-modal'); }
+function closeGacha10Result() { hideEl('gacha-result-10-modal'); $('gacha-confetti-container-10').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
+function closeHappyShareToast() { $('happy-share-toast').classList.remove('show'); if(happyShareTimeoutId){clearTimeout(happyShareTimeoutId);happyShareTimeoutId=null;} }
+function triggerHappyShare(n, i) { const t=$('happy-share-toast'); if(happyShareTimeoutId)clearTimeout(happyShareTimeoutId); $('toast-message').innerHTML=`<span class="text-yellow-200">${n}</span> が<br>超激レア【${i}】を入手！`; t.classList.add('show'); DB.gachaTickets+=1; updateHeaderUI(); saveGame(); happyShareTimeoutId=setTimeout(()=>closeHappyShareToast(),3500); }
 
-function switchGachaTab(tabType) {
-    currentGachaTab = tabType; const btnNormal = document.getElementById('tab-gacha-normal'); const btnEx = document.getElementById('tab-gacha-ex'); const titleEl = document.getElementById('gacha-title'); const subEl = document.getElementById('gacha-sub'); const emojiEl = document.getElementById('gacha-chest-emoji'); const badgeEl = document.getElementById('ex-pickup-badge');
-    if (tabType === 'normal') {
-        btnNormal.className = "flex-1 py-3 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; btnEx.className = "flex-1 py-3 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";
-        titleEl.innerText = "わくわく通常ガチャ"; titleEl.className = "text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md"; subEl.innerText = "いろんなお宝が眠っているぞ！"; emojiEl.innerText = "🏴‍☠️"; badgeEl.classList.add('hidden');
-    } else {
-        btnNormal.className = "flex-1 py-3 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent"; btnEx.className = "flex-1 py-3 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";
-        titleEl.innerText = "⭐ 超・限定EXガチャ"; titleEl.className = "text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md"; subEl.innerText = "今だけ！すごい乗組員がゲットできるかも！"; emojiEl.innerText = "⭐"; badgeEl.classList.remove('hidden');
-    }
-}
-
-function updateGachaUI() {
-    updateHeaderUI(); let urRate = Math.min(1.0 + (DB.pityCounter * 0.5), 100.0).toFixed(1); document.getElementById('gacha-rate').innerText = `${urRate}%`;
-    let progress = Math.min((DB.pityCounter / 50) * 100, 100); document.getElementById('pity-bar').style.width = `${progress}%`;
-}
-
-let currentGachaResults = [];
-function startGachaAnim(times) {
-    if (!document.getElementById('tutorial-overlay').classList.contains('hidden')) return;
-    if (DB.gachaTickets < times) { showAlert("草核が足りないぞ！冒険して集めよう！"); return; }
-    DB.gachaTickets -= times; currentGachaResults = []; let hasUR = false; let highestRarityItem = null;
-    for (let i = 0; i < times; i++) {
-        let urRate = 0.01 + (DB.pityCounter * 0.005); let srRate = 0.10; let rRate = 0.30; let rand = Math.random(); let resultRarity = 'N';
-        if (rand < urRate) resultRarity = 'UR'; else if (rand < urRate + srRate) resultRarity = 'SR'; else if (rand < urRate + srRate + rRate) resultRarity = 'R';
-        const activePool = currentGachaTab === 'normal' ? MASTER.gachaPool : MASTER.exGachaPool;
-        let pool = activePool.filter(i => MASTER[i.type][i.id].rarity === resultRarity); if (pool.length === 0) { resultRarity = 'R'; pool = activePool.filter(i => MASTER[i.type][i.id].rarity === 'R'); }
-        let drawnItem = pool[Math.floor(Math.random() * pool.length)]; let masterItem = MASTER[drawnItem.type][drawnItem.id];
-        let ownedKey = drawnItem.type === 'weapons' ? 'ownedWeapons' : drawnItem.type === 'skins' ? 'ownedSkins' : 'ownedCrew';
-        let isNew = !DB[ownedKey].includes(drawnItem.id);
-        if (isNew) { DB[ownedKey].push(drawnItem.id); } else { DB.coins += 500; DB.materials += 1; }
-        if (resultRarity === 'UR') { hasUR = true; highestRarityItem = masterItem; DB.pityCounter = 0; } else { DB.pityCounter++; }
-        currentGachaResults.push({ item: masterItem, isNew: isNew });
-    }
-    saveGame(); positionTutorialArrow(null); 
-    const animCont = document.getElementById('gacha-anim-container'); const chest = document.getElementById('gacha-chest'); const urLayer = document.getElementById('ur-anim-layer'); const flashText = document.getElementById('ur-flash-text');
-    animCont.classList.remove('hidden'); animCont.classList.add('flex');
-    chest.innerText = times === 10 ? '📦📦' : '📦'; chest.classList.add('shake-box'); urLayer.classList.remove('active'); flashText.classList.add('hidden'); chest.style.transform = 'scale(1)';
-    setTimeout(() => {
-        chest.classList.remove('shake-box');
-        if (hasUR) {
-            urLayer.classList.add('active'); chest.innerText = '✨🎁✨'; chest.style.transform = 'scale(1.5)'; flashText.classList.remove('hidden');
-            if (isFirebaseInitialized) { window.db.ref('global/latest_ur_pull').set({ userId: DB.userId, userName: DB.userName, itemName: highestRarityItem.name, timestamp: firebase.database.ServerValue.TIMESTAMP }); } else { setTimeout(() => { triggerHappyShare(DB.userName, highestRarityItem.name); }, 1000); }
-            setTimeout(() => { animCont.classList.add('hidden'); animCont.classList.remove('flex'); if (times === 1) showGachaResult(currentGachaResults[0].item, currentGachaResults[0].isNew); else showGacha10Result(); }, 3000);
-        } else {
-            chest.innerText = currentGachaResults.some(r=>r.item.rarity==='SR') ? '🎁' : '📦';
-            setTimeout(() => { animCont.classList.add('hidden'); animCont.classList.remove('flex'); if (times === 1) showGachaResult(currentGachaResults[0].item, currentGachaResults[0].isNew); else showGacha10Result(); }, 1000);
-        }
-        updateGachaUI(); saveGame(); 
-    }, 1500);
-}
-
-function showGachaResult(item, isNew) {
-    const modal = document.getElementById('gacha-result-modal');
-    document.querySelectorAll('.gacha-result-text').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = null; });
-    shootConfetti('gacha-confetti-container', 80);
-    document.getElementById('gacha-result-rarity').innerText = item.rarity; document.getElementById('gacha-result-rarity').className = `text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`;
-    const visualContainer = document.getElementById('gacha-result-visual-container'); visualContainer.innerHTML = '';
-    if (item.type === 'image') visualContainer.innerHTML = `<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`;
-    else visualContainer.innerHTML = `<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon || '⚔️'}</span>`;
-    document.getElementById('gacha-result-name').innerHTML = `${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew ? '🎉 初ゲット！！' : '持ってるぞ！(コイン+500/化石+1)'}</span>`;
-    document.getElementById('gacha-result-desc').innerText = item.desc || '';
-    modal.classList.remove('hidden'); modal.classList.add('flex');
-}
-
-function closeGachaResult() {
-    document.getElementById('gacha-result-modal').classList.add('hidden'); document.getElementById('gacha-result-modal').classList.remove('flex'); document.getElementById('gacha-confetti-container').innerHTML = ''; 
-    if (!DB.tutorialGachaCompleted) { DB.tutorialGachaCompleted = true; saveGame(); setTimeout(() => startSpecificTutorial('gacha_done'), 300); }
-}
-
-function showGacha10Result() {
-    const modal = document.getElementById('gacha-result-10-modal'); const grid = document.getElementById('gacha-10-grid'); grid.innerHTML = '';
-    shootConfetti('gacha-confetti-container-10', 120);
-    currentGachaResults.forEach((res, index) => {
-        const item = res.item; const div = document.createElement('div');
-        div.className = `bg-indigo-900 border-2 border-indigo-500 rounded-xl p-2 flex flex-col items-center justify-center relative shadow-lg pop-in`; div.style.animationDelay = `${index * 0.1}s`; div.style.animationFillMode = 'both';
-        let visualHTML = item.type === 'image' ? `<span class="inline-flex relative w-12 h-12"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain drop-shadow-md z-10" onerror="fb(this,'${item.fallbackIcon}','text-2xl drop-shadow-md')"></span>` : `<span class="text-5xl drop-shadow-md">${item.icon || '⚔️'}</span>`;
-        div.innerHTML = `<div class="absolute top-1 left-1 ${rarityColors[item.rarity]} font-black text-[10px] bg-indigo-950/80 px-1 rounded">${item.rarity}</div>${res.isNew ? '<div class="absolute top-1 right-1 text-[8px] bg-pink-500 text-white font-black px-1 rounded shadow-md">NEW</div>' : '<div class="absolute top-1 right-1 text-[8px] bg-slate-500 text-white font-black px-1 rounded shadow-md">ダブり</div>'}<div class="mt-4 mb-2 h-12 flex items-center justify-center">${visualHTML}</div><div class="text-[9px] text-white font-bold text-center w-full truncate px-1">${item.name}</div>`;
-        grid.appendChild(div);
-    });
-    modal.classList.remove('hidden'); modal.classList.add('flex');
-}
-
-function closeGacha10Result() {
-    document.getElementById('gacha-result-10-modal').classList.add('hidden'); document.getElementById('gacha-result-10-modal').classList.remove('flex'); document.getElementById('gacha-confetti-container-10').innerHTML = ''; 
-    if (!DB.tutorialGachaCompleted) { DB.tutorialGachaCompleted = true; saveGame(); setTimeout(() => startSpecificTutorial('gacha_done'), 300); }
-}
-
-function closeHappyShareToast() { const toast = document.getElementById('happy-share-toast'); toast.classList.remove('show'); if (happyShareTimeoutId) { clearTimeout(happyShareTimeoutId); happyShareTimeoutId = null; } }
-function triggerHappyShare(userName, itemName) {
-    const toast = document.getElementById('happy-share-toast'); const msg = document.getElementById('toast-message'); if (happyShareTimeoutId) { clearTimeout(happyShareTimeoutId); }
-    msg.innerHTML = `<span class="text-yellow-200">${userName}</span> が<br>超激レア【${itemName}】を入手！`; toast.classList.add('show');
-    DB.gachaTickets += 1; updateHeaderUI(); saveGame(); 
-    happyShareTimeoutId = setTimeout(() => { closeHappyShareToast(); }, 3500);
-}
-
-
-/**
- * 🗺️ ステージ選択 
- */
-function switchStageTab(tabType) {
-    currentStageTab = tabType;
-    const btnNormal = document.getElementById('tab-stage-normal'); const btnEx = document.getElementById('tab-stage-ex');
-    if (tabType === 'normal') { btnNormal.className = "flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; btnEx.className = "flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; }
-    else { btnNormal.className = "flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all border-b-4 border-transparent"; btnEx.className = "flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800"; }
-    renderStageList();
-}
-
+// --- ステージ・マルチ ---
+function switchStageTab(t) { currentStageTab=t; const bn=$('tab-stage-normal'), be=$('tab-stage-ex'), bm=$('tab-stage-multi'); bn.className=be.className=bm.className="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; showEl('stage-list'); hideEl('multi-lobby-ui'); if(t==='normal'){bn.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";renderStageList(MASTER.stages);}else if(t==='ex'){be.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";renderStageList(MASTER.exStages);}else if(t==='multi'){bm.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";hideEl('stage-list');showEl('multi-lobby-ui');} }
 function initStageSelect() { switchStageTab('normal'); }
+function renderStageList(stgs) { const l=$('stage-list'); l.innerHTML=''; let a=!DB.tutorialCompleted?[{id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0}]:stgs; a.forEach((s,i)=>{ let lk=false; if(!s.isTutorial){if(currentStageTab==='normal')lk=i>0&&DB.clearedStages<i;else if(s.reqClearEx!==undefined)lk=DB.clearedSeimaroStage<s.reqClearEx;} const b=document.createElement('button'); b.id=`stage-btn-${s.id}`; b.className=`p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk?'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed':'bg-indigo-800 '+s.color}`; let rd=s.isTutorial?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`:s.isEndless?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`:`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`; b.innerHTML=`<div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div><div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div><div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless||s.isBossStage?'':'隻 追い払う！'}</div><div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless||s.isBossStage?'報酬:':s.isTutorial?'目標報酬:':'初回お祝い:'}</span>${rd}</div>${lk?'<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>':''}`; if(!lk)b.onclick=()=>{positionTutorialArrow(null);startStage(s);}; l.appendChild(b); }); if(!DB.tutorialCompleted)setTimeout(()=>positionTutorialArrow('stage-btn-999'),100); }
+function openCreateRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="遊ぶステージを選択"; showEl('room-create-ui'); hideEl('room-join-ui'); hideEl('room-waiting-ui'); const l=$('multi-stage-select-list'); l.innerHTML=''; MASTER.multiStages.forEach(s=>{ const b=document.createElement('button'); b.className=`w-full text-left p-3 bg-indigo-800 rounded-xl border-2 ${s.color} shadow-md active:scale-95 flex flex-col gap-1`; b.innerHTML=`<span class="font-black text-white text-lg">${s.name}</span><div class="flex justify-between items-center w-full"><span class="text-xs text-indigo-200 font-bold">スタミナ: ⚡${s.staminaCost}</span><span class="text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded">選択！</span></div>`; b.onclick=()=>createRoom(s); l.appendChild(b); }); showEl('multi-room-modal'); }
+function openJoinRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="部屋に入る"; hideEl('room-create-ui'); showEl('room-join-ui'); hideEl('room-waiting-ui'); $('room-id-input').value=''; showEl('multi-room-modal'); }
+function createRoom(s) { if(DB.stamina<s.staminaCost)return showAlert("スタミナ不足！"); const rId=Math.floor(1000+Math.random()*9000).toString(); currentMultiRoom={id:rId,stageId:s.id,isHost:true}; window.db.ref('rooms/'+rId).set({stageId:s.id,status:'waiting',hostId:DB.userId,timestamp:firebase.database.ServerValue.TIMESTAMP,p1:{id:DB.userId,name:DB.userName,icon:DB.userIcon,score:0,ready:false},p2:null}); showWaitingUI(rId); listenToRoom(rId); }
+function submitJoinRoom() { const rId=$('room-id-input').value.trim(); if(rId.length!==4)return showAlert("4桁の数字！"); window.db.ref('rooms/'+rId).once('value').then(s=>{ const d=s.val(); if(!d)return showAlert("見つからない！"); if(d.status!=='waiting')return showAlert("出航済み！"); const ms=MASTER.multiStages.find(x=>x.id===d.stageId); if(DB.stamina<ms.staminaCost)return showAlert("スタミナ不足！"); currentMultiRoom={id:rId,stageId:d.stageId,isHost:false}; window.db.ref('rooms/'+rId+'/p2').set({id:DB.userId,name:DB.userName,icon:DB.userIcon,score:0,ready:false}); showWaitingUI(rId); listenToRoom(rId); }); }
+function showWaitingUI(rId) { $('room-modal-title').innerText="出航準備中！"; hideEl('room-create-ui'); hideEl('room-join-ui'); showEl('room-waiting-ui'); $('display-room-id').innerText=rId; $('room-p1-icon').innerHTML=DB.userIcon.startsWith('data:image')?`<img src="${DB.userIcon}" class="w-8 h-8 rounded-full object-cover">`:DB.userIcon; $('room-p1-name').innerText=DB.userName; $('room-p2-icon').innerHTML="❓"; $('room-p2-name').innerText="待機中..."; hideEl('btn-start-multi'); }
+function listenToRoom(rId) { if(roomListener) window.db.ref('rooms/'+currentMultiRoom.id).off('value',roomListener); roomListener=window.db.ref('rooms/'+rId).on('value',s=>{ const d=s.val(); if(!d){leaveRoom();return showAlert("部屋が解散した！");} if(d.p2){ const isP1=d.p1.id===DB.userId; const p2=isP1?d.p2:d.p1; $('room-p2-icon').innerHTML=p2.icon&&p2.icon.startsWith('data:image')?`<img src="${p2.icon}" class="w-8 h-8 rounded-full object-cover">`:p2.icon||"👤"; $('room-p2-name').innerText=p2.name; $('room-p2-name').classList.replace('text-slate-400','text-white'); if(currentMultiRoom.isHost&&d.status==='waiting')showEl('btn-start-multi','block'); } if(d.status==='playing'){ window.db.ref('rooms/'+rId).off('value',roomListener); roomListener=null; hideEl('multi-room-modal'); startStage(MASTER.multiStages.find(x=>x.id===currentMultiRoom.stageId),true); } }); }
+function startMultiStage() { if(currentMultiRoom&&currentMultiRoom.isHost) window.db.ref('rooms/'+currentMultiRoom.id+'/status').set('playing'); }
+function leaveRoom() { hideEl('multi-room-modal'); if(currentMultiRoom&&roomListener){window.db.ref('rooms/'+currentMultiRoom.id).off('value',roomListener);roomListener=null;if(currentMultiRoom.isHost)window.db.ref('rooms/'+currentMultiRoom.id).remove();} currentMultiRoom=null; }
+function startMultiSync() { if(!currentMultiRoom||!isFirebaseInitialized)return; showEl('multi-match-ui'); const mk=currentMultiRoom.isHost?'p1':'p2', rk=currentMultiRoom.isHost?'p2':'p1'; multiSyncInterval=setInterval(()=>{ if(!gameState||gameState.isPaused)return; window.db.ref(`rooms/${currentMultiRoom.id}/${mk}/score`).set(gameState.score); window.db.ref(`rooms/${currentMultiRoom.id}/${rk}/score`).once('value').then(s=>{ const rs=s.val()||0; $('rival-score').innerText=rs; if(currentStage.type==='coop'&&currentStage.isBossStage&&gameState.enemies.length>0){ const b=gameState.enemies.find(e=>e.isBoss); if(b){ b.hp=Math.max(0,b.maxHp-(gameState.score+rs)); if(b.hp<=0)checkStageClear(false); } } }); }, 2000); }
 
-function renderStageList() {
-    const list = document.getElementById('stage-list'); list.innerHTML = '';
-    let stagesToRender = !DB.tutorialCompleted ? [{ id: 999, name: 'ワクワク初航海！（訓練海域）', goalScore: 3, enemySpeed: 1.5, spawnRate: 80, reward: 0, color: 'border-yellow-400', isEndless: false, isTutorial: true, staminaCost: 0 }] : (currentStageTab === 'normal' ? MASTER.stages : MASTER.exStages);
+// --- ミッション ---
+function switchMissionTab(t) { currentMissionTab=t; const bd=$('tab-mission-daily'), bn=$('tab-mission-normal'), be=$('tab-mission-event'); bd.className=bn.className="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all border-b-4 border-transparent"; be.className="flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent"; if(t==='daily')bd.className="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; else if(t==='normal')bn.className="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; else be.className="flex-1 py-2 rounded-lg font-black text-xs bg-pink-600 text-white shadow-md transition-all border-b-4 border-pink-800"; renderMissionList(); }
+function getMissionProgress(m) { if(m.targetType==='dailyDefeat')return DB.missionProgress.dailyDefeat; if(m.targetType==='dailyGacha')return DB.missionProgress.dailyGacha; if(m.targetType==='dailyPlayMulti')return DB.missionProgress.dailyPlayMulti; if(m.targetType==='defeatTotal')return DB.missionProgress.defeatTotal; if(m.targetType==='stage')return Math.min(DB.clearedStages,m.target); if(m.targetType==='exClear')return DB.clearedSeimaroStage>=m.target?1:0; return 0; }
+function checkMissions() { let hc=false; ['daily','normal','event'].forEach(t=>{ MISSIONS[t].forEach(m=>{ if(!DB.claimedMissions.includes(m.id)&&getMissionProgress(m)>=m.target) hc=true; }); }); const bg=$('nav-mission-badge'); if(bg){if(hc)showEl('nav-mission-badge','block');else hideEl('nav-mission-badge');} }
+function renderMissionList() { const l=$('mission-list-container'); l.innerHTML=''; const m=MISSIONS[currentMissionTab]||[]; if(m.length===0){l.innerHTML=`<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">依頼がないぞ。</div>`;return;} m.forEach(x=>{ const ic=DB.claimedMissions.includes(x.id), p=getMissionProgress(x), isC=p>=x.target, d=document.createElement('div'); d.className=`p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic?'bg-indigo-950/60 border-indigo-900 opacity-60':isC?'bg-indigo-800 border-yellow-400':'bg-indigo-900 border-indigo-700'}`; const ri=x.reward.type==='coins'?'💰':x.reward.type==='tickets'?'✨':x.reward.type==='materials'?'🦴':'👑', img=x.reward.type==='coins'?'草コイン.png':x.reward.type==='materials'?'草の化石.png':'草核.png'; d.innerHTML=`<div class="flex justify-between items-start"><div class="font-black text-sm text-white pr-2">${x.desc}</div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0"><span class="inline-flex relative w-4 h-4"><img src="${img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${ri}','text-xs')"></span><span class="text-xs text-yellow-400 font-black">×${x.reward.amount}</span></div></div><div class="flex items-center justify-between mt-1"><div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100,(p/x.target)*100)}%;"></div><div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p,x.target)} / ${x.target}</div></div>${ic?`<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>`:isC?`<button onclick="claimMission('${x.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>`:`<span class="text-xs font-black text-slate-400">挑戦中</span>`}</div>`; l.appendChild(d); }); }
+function claimMission(id) { let m=null; ['daily','normal','event'].forEach(t=>{const f=MISSIONS[t].find(x=>x.id===id);if(f)m=f;}); if(!m||DB.claimedMissions.includes(id))return; DB.claimedMissions.push(id); if(m.reward.type==='coins')DB.coins+=m.reward.amount; else if(m.reward.type==='tickets')DB.gachaTickets+=m.reward.amount; else if(m.reward.type==='materials')DB.materials+=m.reward.amount; else if(m.reward.type==='special'){DB.gachaTickets+=5;DB.coins+=2000;} saveGame(); updateHeaderUI(); renderMissionList(); showAlert("報酬を獲得したぞ！"); }
 
-    stagesToRender.forEach((stage, index) => {
-        let isLocked = false;
-        if (!stage.isTutorial) { if (currentStageTab === 'normal') isLocked = index > 0 && DB.clearedStages < index; else if (stage.reqClearEx !== undefined) isLocked = DB.clearedSeimaroStage < stage.reqClearEx; }
-        
-        const btn = document.createElement('button'); btn.id = `stage-btn-${stage.id}`;
-        btn.className = `p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${isLocked ? 'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed' : 'bg-indigo-800 ' + stage.color}`;
-        
-        let rewardDisplay = '';
-        if (stage.isTutorial) rewardDisplay = `<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`;
-        else if (stage.isEndless) rewardDisplay = `<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${stage.reward}</span>`;
-        else rewardDisplay = `<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${stage.reward}</span></div>`;
+// --- ゲームエンジン ---
+let gameLoopId=null, currentStage=null, specialCutinTimeout=null;
+let gameState={score:0,frameCount:0,player:{},bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false};
+const input={touchX:0,touchY:0,isTouching:false,keys:{}}; window.addEventListener('keydown',e=>input.keys[e.key]=true); window.addEventListener('keyup',e=>input.keys[e.key]=false);
+const canvas=$('gameCanvas'), ctx=canvas.getContext('2d');
+canvas.addEventListener('touchstart',e=>{input.isTouching=true;input.touchX=e.touches[0].clientX-canvas.getBoundingClientRect().left;});
+canvas.addEventListener('touchmove',e=>{if(!input.isTouching)return;e.preventDefault();const cx=e.touches[0].clientX-canvas.getBoundingClientRect().left;if(!gameState.isPaused)gameState.player.x+=(cx-input.touchX);input.touchX=cx;});
+canvas.addEventListener('touchend',()=>input.isTouching=false);
 
-        btn.innerHTML = `
-            <div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${stage.staminaCost}</div>
-            <div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${stage.name}</div>
-            <div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${stage.goalScore}${stage.isEndless || stage.isBossStage ? '' : '隻 ド派手に追い払う！'}</div>
-            <div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${stage.isEndless || stage.isBossStage ? '報酬:' : stage.isTutorial ? '目標報酬:' : '初回お祝い:'}</span>${rewardDisplay}</div>
-            ${isLocked ? '<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>' : ''}
-        `;
-        
-        if (!isLocked) btn.onclick = () => { positionTutorialArrow(null); startStage(stage); };
-        list.appendChild(btn);
-    });
-
-    if (!DB.tutorialCompleted) setTimeout(() => { positionTutorialArrow('stage-btn-999'); }, 100);
-}
-
-
-/**
- * 💥 Canvas ゲームエンジン
- */
-const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-let gameLoopId = null; let currentStage = null; let specialCutinTimeout = null;
-
-let gameState = { score: 0, frameCount: 0, player: {}, bullets: [], enemies: [], particles: [], bgOffset: 0, specialGauge: 0, isPaused: false, screenFlash: 0, bossDefeated: false };
-const input = { touchX: 0, touchY: 0, isTouching: false, keys: {} };
-window.addEventListener('keydown', e => input.keys[e.key] = true); window.addEventListener('keyup', e => input.keys[e.key] = false);
-
-canvas.addEventListener('touchstart', e => { input.isTouching = true; const rect = canvas.getBoundingClientRect(); input.touchX = e.touches[0].clientX - rect.left; });
-canvas.addEventListener('touchmove', e => { if (!input.isTouching) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const cx = e.touches[0].clientX - rect.left; if (!gameState.isPaused) gameState.player.x += (cx - input.touchX); input.touchX = cx; });
-canvas.addEventListener('touchend', () => input.isTouching = false);
-
-function startStage(stage) {
-    if (DB.stamina < stage.staminaCost) {
-        showAlert(`スタミナが足りないぞ！\n時間で回復するか、草コインで回復しよう！\n(必要スタミナ: ${stage.staminaCost})`);
-        return;
-    }
-    
-    // スタミナ消費
-    DB.stamina -= stage.staminaCost;
-    saveGame();
-    updateHeaderUI();
-
-    currentStage = stage; navTo('screen-game');
-    if (DB.tutorialCompleted) document.getElementById('special-ui-container').classList.remove('hidden'); else document.getElementById('special-ui-container').classList.add('hidden');
-
-    setTimeout(() => {
-        const rect = canvas.parentElement.getBoundingClientRect(); let computedWidth = rect.width; let computedHeight = rect.height;
-        if (computedWidth < 100) computedWidth = window.innerWidth; if (computedHeight < 100) computedHeight = window.innerHeight - 80;
-        canvas.width = computedWidth; canvas.height = computedHeight;
-
-        const weapon = MASTER.weapons[DB.equippedWeapon]; const skin = MASTER.skins[DB.equippedSkin]; const crew = MASTER.crew[DB.equippedCrew];
-        const wLevel = getItemLevel(weapon.id); const sLevel = getItemLevel(skin.id); const cLevel = getItemLevel(crew.id);
-
-        gameState = {
-            score: 0, frameCount: 0, bullets: [], enemies: [], particles: [], bgOffset: 0, specialGauge: 0, isPaused: false, screenFlash: 0, bossDefeated: false,
-            player: {
-                x: canvas.width / 2 - 30, y: canvas.height - 140, width: 60, height: 60, speed: 6 + (crew.effect === 'speedUp' ? 4 : 0) + (sLevel * 0.5), skinIcon: skin.icon,
-                weapon: { ...weapon, fireRate: Math.max(5, weapon.fireRate - Math.floor(wLevel / 2)), speed: weapon.speed + (wLevel * 0.5) },
-                crewId: crew.id, crewIcon: crew.icon, crewFallback: crew.fallbackIcon, crewType: crew.type, crewSkillName: crew.skillName, crewEffect: crew.effect,
-                bulletSizeMod: (crew.effect === 'powerUp' ? 2 : 1) + (cLevel * 0.1), scoreMod: (crew.effect === 'scoreUp' ? 2 : 1) + (cLevel * 0.5)
-            }
-        };
-
-        document.getElementById('game-score').innerText = '0'; document.getElementById('game-goal').innerText = stage.goalScore; document.getElementById('game-end-modal').classList.add('hidden'); updateSpecialGaugeUI(); 
-
-        if (stage.isBossStage) {
-            gameState.enemies.push({ x: canvas.width / 2 - 75, y: -150, w: 150, h: 150, speed: stage.enemySpeed, hp: 150, maxHp: 150, wobbleOffset: 0, isBoss: true });
-        }
-
-        const guideOverlay = document.getElementById('game-tutorial-overlay');
-        if (stage.isTutorial) {
-            guideOverlay.classList.remove('hidden'); guideOverlay.style.opacity = 1; document.getElementById('game-tutorial-text').innerText = '左右にスライド、または矢印キーで船を動かそう！大砲は自動で連射されるぞ！';
-            setTimeout(() => { guideOverlay.style.opacity = 0; setTimeout(() => { guideOverlay.classList.add('hidden'); guideOverlay.style.opacity = ''; }, 1000); }, 4000);
-        } else { guideOverlay.classList.add('hidden'); }
-
-        if (gameLoopId) cancelAnimationFrame(gameLoopId); gameLoop();
+function startStage(stage, isMulti=false) {
+    if(!isMulti&&DB.stamina<stage.staminaCost)return showAlert(`スタミナ不足！(必要: ${stage.staminaCost})`);
+    if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game');
+    if(DB.tutorialCompleted) showEl('special-ui-container'); else hideEl('special-ui-container'); hideEl('multi-match-ui');
+    setTimeout(()=>{
+        const rect=canvas.parentElement.getBoundingClientRect(); canvas.width=rect.width<100?window.innerWidth:rect.width; canvas.height=rect.height<100?window.innerHeight-80:rect.height;
+        const w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none'];
+        const wl=getItemLevel(w.id), sl=getItemLevel(s.id), cl=getItemLevel(c.id);
+        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false, player:{x:canvas.width/2-30,y:canvas.height-140,width:60,height:60,speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5),skinIcon:s.icon,weapon:{...w,fireRate:Math.max(5,w.fireRate-Math.floor(wl/2)),speed:w.speed+(wl*0.5)},crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect,bulletSizeMod:(c.effect==='powerUp'?2:1)+(cl*0.1),scoreMod:(c.effect==='scoreUp'?2:1)+(cl*0.5)} };
+        if(stage.type==='coop'){ $('score-label').innerText='ボスの残りHP:'; hideEl('score-slash'); hideEl('game-goal'); }else{ $('score-label').innerText='追い払った数:'; showEl('score-slash','inline'); showEl('game-goal','inline'); $('game-goal').innerText=stage.goalScore; }
+        $('game-score').innerText='0'; hideEl('game-end-modal'); updateSpecialGaugeUI();
+        if(stage.isBossStage){ let bhp=stage.type==='coop'?1000:150; gameState.enemies.push({x:canvas.width/2-75,y:-150,w:150,h:150,speed:stage.enemySpeed,hp:bhp,maxHp:bhp,wobbleOffset:0,isBoss:true}); if(stage.type==='coop') $('game-score').innerText=bhp; }
+        const go=$('game-tutorial-overlay'); if(stage.isTutorial){ showEl('game-tutorial-overlay','block'); go.style.opacity=1; $('game-tutorial-text').innerText='左右にスライドで動かそう！'; setTimeout(()=>{go.style.opacity=0;setTimeout(()=>{hideEl('game-tutorial-overlay');go.style.opacity='';},1000);},4000); }else hideEl('game-tutorial-overlay');
+        if(isMulti){startMultiSync();DB.missionProgress.dailyPlayMulti+=1;saveGame();} if(gameLoopId)cancelAnimationFrame(gameLoopId); gameLoop();
     }, 50);
 }
-
-function stopGame() { if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; } if (specialCutinTimeout) { clearTimeout(specialCutinTimeout); specialCutinTimeout = null; } document.getElementById('special-cutin').classList.add('hidden'); }
-
-function triggerGameOver() {
-    stopGame(); const modal = document.getElementById('game-end-modal');
-    document.getElementById('game-end-title').innerText = 'GAME OVER...'; document.getElementById('game-end-title').className = 'text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
-    let desc = `ライバルに防衛ラインを突破されてしまった...！\n\n今回の追い払った数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">※放置はダメだぞ！しっかり船を操作して敵を逃さないようにしよう！</span>`;
-    document.getElementById('game-end-desc').innerHTML = desc; modal.classList.remove('hidden'); modal.classList.add('flex'); document.getElementById('end-confetti-container').innerHTML = '';
-    setTimeout(() => { positionTutorialArrow('btn-tutorial-exit'); }, 300);
-}
-
-let lastGaugeUI = -1;
-function updateSpecialGaugeUI() {
-    let g = Math.floor(gameState.specialGauge); if (g === lastGaugeUI) return; lastGaugeUI = g;
-    const bar = document.getElementById('special-gauge'); bar.style.width = `${g}%`; const btn = document.getElementById('btn-special'); const icon = document.getElementById('btn-special-icon');
-    if (g >= 100) { btn.classList.remove('bg-slate-700', 'border-slate-500', 'opacity-80', 'cursor-not-allowed'); btn.classList.add('bg-gradient-to-t', 'from-yellow-400', 'to-orange-500', 'border-white', 'animate-pulse'); icon.classList.remove('grayscale'); btn.disabled = false; } 
-    else { btn.classList.add('bg-slate-700', 'border-slate-500', 'opacity-80', 'cursor-not-allowed'); btn.classList.remove('bg-gradient-to-t', 'from-yellow-400', 'to-orange-500', 'border-white', 'animate-pulse'); icon.classList.add('grayscale'); btn.disabled = true; }
-}
-
-function triggerSpecialSkill() {
-    if (gameState.specialGauge < 100 || gameState.isPaused) return; gameState.isPaused = true; 
-    const p = gameState.player; const cutin = document.getElementById('special-cutin'); const cutinChar = document.getElementById('cutin-char'); const cutinName = document.getElementById('cutin-name'); const flash = document.getElementById('cutin-flash');
-    
-    if (p.crewType === 'image') cutinChar.innerHTML = `<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`;
-    else cutinChar.innerHTML = `<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`;
-    
-    cutinName.innerText = p.crewSkillName || 'フルパワー全開！'; cutin.classList.remove('hidden');
-    cutinChar.classList.remove('cutin-char-anim'); cutinName.classList.remove('cutin-name-anim'); flash.classList.remove('flash-anim'); void cutinChar.offsetWidth; 
-    cutinChar.classList.add('cutin-char-anim'); cutinName.classList.add('cutin-name-anim');
-    if (p.crewId === 'crew_seimaro') flash.classList.add('flash-anim');
-    specialCutinTimeout = setTimeout(() => { executeSpecialEffect(); }, 2500); 
-}
-
-function skipSpecial() { if (specialCutinTimeout) { clearTimeout(specialCutinTimeout); specialCutinTimeout = null; executeSpecialEffect(); } }
-
-function executeSpecialEffect() {
-    document.getElementById('special-cutin').classList.add('hidden'); const p = gameState.player;
-    if (p.crewId === 'crew_seimaro') {
-        gameState.enemies.forEach(e => {
-            if (e.isBoss) { e.hp -= 50; createPopParticles(e.x + e.w/2, e.y + e.h/2, '#0ea5e9', true); } 
-            else { createPopParticles(e.x + e.w/2, e.y + e.h/2, '#0ea5e9', true); createPopParticles(e.x + e.w/2, e.y + e.h/2, '#ffffff', false); gameState.score += Math.floor(1 * p.scoreMod); e.hp = 0; }
-        });
-        gameState.screenFlash = 25; 
-    } else {
-        gameState.enemies.forEach(e => {
-            if (e.isBoss) { e.hp -= 30; createPopParticles(e.x + e.w/2, e.y + e.h/2, '#ffffff', true); } 
-            else { createPopParticles(e.x + e.w/2, e.y + e.h/2, '#ffffff', true); gameState.score += Math.floor(1 * p.scoreMod); e.hp = 0; }
-        });
-        gameState.screenFlash = 5; 
-    }
-    gameState.enemies = gameState.enemies.filter(e => e.hp > 0); document.getElementById('game-score').innerText = gameState.score;
-    gameState.specialGauge = 0; updateSpecialGaugeUI(); gameState.isPaused = false;
-    if (currentStage.isBossStage && gameState.enemies.length === 0) gameState.bossDefeated = true;
-    checkStageClear(false);
-}
-
-function gameLoop() { if (!gameState.isPaused) updateGame(); drawGame(); gameLoopId = requestAnimationFrame(gameLoop); }
+function stopGame() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;} if(multiSyncInterval){clearInterval(multiSyncInterval);multiSyncInterval=null;} hideEl('special-cutin'); }
+function triggerGameOver() { stopGame(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
+let lastGaugeUI=-1;
+function updateSpecialGaugeUI() { let g=Math.floor(gameState.specialGauge); if(g===lastGaugeUI)return; lastGaugeUI=g; $('special-gauge').style.width=`${g}%`; const b=$('btn-special'), i=$('btn-special-icon'); if(g>=100){b.classList.remove('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.add('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.remove('grayscale');b.disabled=false;}else{b.classList.add('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.remove('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.add('grayscale');b.disabled=true;} }
+function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
+function skipSpecial() { if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;executeSpecialEffect();} }
+function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
 
 function updateGame() {
-    const p = gameState.player; const s = currentStage; gameState.frameCount++; gameState.bgOffset = (gameState.bgOffset + 2) % 100;
-
-    if (s.isEndless) { s.enemySpeed = 3 + (gameState.score / 50); s.spawnRate = Math.max(10, 30 - Math.floor(gameState.score / 20)); }
-
-    if (gameState.specialGauge < 100) { gameState.specialGauge += 0.05; if (gameState.specialGauge > 100) gameState.specialGauge = 100; if (gameState.frameCount % 5 === 0) updateSpecialGaugeUI(); }
-
-    if (input.keys['ArrowLeft'] || input.keys['a']) p.x -= p.speed; if (input.keys['ArrowRight'] || input.keys['d']) p.x += p.speed;
-    p.x = Math.max(0, Math.min(canvas.width - p.width, p.x));
-
-    if (gameState.frameCount % p.weapon.fireRate === 0) {
-        const bx = p.x + p.width / 2; const by = p.y + 10; const bw = 12 * p.bulletSizeMod; const bh = (p.weapon.type === 'laser' ? 100 : 20) * p.bulletSizeMod;
-        if (p.crewEffect === 'doubleShot') {
-            gameState.bullets.push({x: p.x+5-bw/2, y: by, w: bw, h: bh, dx: 0, dy: -p.weapon.speed, color: p.weapon.color, type: p.weapon.type});
-            gameState.bullets.push({x: p.x+p.width-5-bw/2, y: by, w: bw, h: bh, dx: 0, dy: -p.weapon.speed, color: p.weapon.color, type: p.weapon.type});
-        } else if (p.weapon.type === 'spread') {
-            gameState.bullets.push({x: bx-bw/2, y: by, w: bw, h: bh, dx: 0, dy: -p.weapon.speed, color: p.weapon.color, type: 'normal'});
-            gameState.bullets.push({x: bx-bw/2, y: by, w: bw, h: bh, dx: -3, dy: -p.weapon.speed, color: p.weapon.color, type: 'normal'});
-            gameState.bullets.push({x: bx-bw/2, y: by, w: bw, h: bh, dx: 3, dy: -p.weapon.speed, color: p.weapon.color, type: 'normal'});
-        } else {
-            gameState.bullets.push({x: bx-bw/2, y: by, w: bw, h: bh, dx: 0, dy: -p.weapon.speed, color: p.weapon.color, type: p.weapon.type});
-        }
+    const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
+    if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
+    if(gameState.specialGauge<100){gameState.specialGauge+=0.05;if(gameState.specialGauge>100)gameState.specialGauge=100;if(gameState.frameCount%5===0)updateSpecialGaugeUI();}
+    if(input.keys['ArrowLeft']||input.keys['a'])p.x-=p.speed; if(input.keys['ArrowRight']||input.keys['d'])p.x+=p.speed; p.x=Math.max(0,Math.min(canvas.width-p.width,p.x));
+    if(gameState.frameCount%p.weapon.fireRate===0){ const bx=p.x+p.width/2, by=p.y+10, bw=12*p.bulletSizeMod, bh=(p.weapon.type==='laser'?100:20)*p.bulletSizeMod; if(p.crewEffect==='doubleShot'){gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});}else if(p.weapon.type==='spread'){gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});}else{gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});} }
+    for(let i=gameState.bullets.length-1;i>=0;i--){let b=gameState.bullets[i];b.x+=b.dx;b.y+=b.dy;if(b.y<-100||b.x<-50||b.x>canvas.width+50)gameState.bullets.splice(i,1);}
+    if(!s.isBossStage&&gameState.frameCount%s.spawnRate===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:s.enemySpeed+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }else if(s.isBossStage&&gameState.frameCount%(s.spawnRate/10)===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:3+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }
+    for(let i=gameState.enemies.length-1;i>=0;i--){ let e=gameState.enemies[i]; if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp--;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
+        if(hit&&e.hp<=0){ gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} if(s.type==='coop'){const b=gameState.enemies.find(en=>en.isBoss);if(b)$('game-score').innerText=Math.ceil(b.hp);}else{$('game-score').innerText=gameState.score;} if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} checkStageClear(false); }else if(!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){triggerGameOver();return;}
     }
-
-    for (let i = gameState.bullets.length - 1; i >= 0; i--) { let b = gameState.bullets[i]; b.x += b.dx; b.y += b.dy; if (b.y < -100 || b.x < -50 || b.x > canvas.width + 50) gameState.bullets.splice(i, 1); }
-
-    if (!s.isBossStage && gameState.frameCount % s.spawnRate === 0) {
-        gameState.enemies.push({ x: Math.random() * (canvas.width - 50), y: -50, w: 50, h: 50, speed: s.enemySpeed + (Math.random() * 1.5), hp: 1, wobbleOffset: Math.random() * Math.PI * 2 });
-    } else if (s.isBossStage && gameState.frameCount % (s.spawnRate / 10) === 0) {
-        gameState.enemies.push({ x: Math.random() * (canvas.width - 50), y: -50, w: 50, h: 50, speed: 3 + (Math.random() * 1.5), hp: 1, wobbleOffset: Math.random() * Math.PI * 2 });
-    }
-
-    for (let i = gameState.enemies.length - 1; i >= 0; i--) {
-        let e = gameState.enemies[i];
-        if (e.isBoss) { if (e.y < 50) e.y += e.speed; else e.x += Math.sin(gameState.frameCount / 30) * 2; } 
-        else { e.y += e.speed; e.x += Math.sin(gameState.frameCount / 20 + e.wobbleOffset) * 1.5; }
-
-        if (checkRectCollision(p, e)) { if (!e.isBoss) { gameState.enemies.splice(i, 1); createPopParticles(e.x + e.w/2, e.y + e.h/2, '#38bdf8'); } continue; }
-
-        let hit = false;
-        for (let j = gameState.bullets.length - 1; j >= 0; j--) {
-            let b = gameState.bullets[j];
-            if (checkRectCollision(b, e)) { hit = true; e.hp--; if (b.type !== 'laser') gameState.bullets.splice(j, 1); if (e.hp <= 0) break; }
-        }
-
-        if (hit && e.hp <= 0) {
-            gameState.enemies.splice(i, 1); createPopParticles(e.x + e.w/2, e.y + e.h/2, '#facc15', true); 
-            if (e.isBoss) { gameState.bossDefeated = true; gameState.score += 1; } else { gameState.score += Math.floor(1 * p.scoreMod); }
-            document.getElementById('game-score').innerText = gameState.score;
-            if (gameState.specialGauge < 100) { gameState.specialGauge += (e.isBoss ? 50 : 5); if (gameState.specialGauge > 100) gameState.specialGauge = 100; updateSpecialGaugeUI(); }
-            if (s.isTutorial) { const left = Math.max(0, s.goalScore - gameState.score); if (left > 0) document.getElementById('game-tutorial-text').innerText = `素晴らしいぞ！あと ${left} 隻を大砲で追い払えば、訓練クリアだ！`; }
-            checkStageClear(false);
-        } else if (!e.isBoss && canvas.height > 200 && e.y + e.h > canvas.height - 50) {
-            triggerGameOver(); return;
-        }
-    }
-
-    for (let i = gameState.particles.length - 1; i >= 0; i--) { let pt = gameState.particles[i]; pt.x += pt.dx; pt.y += pt.dy; pt.life--; pt.dy += 0.2; if (pt.life <= 0) gameState.particles.splice(i, 1); }
+    for(let i=gameState.particles.length-1;i>=0;i--){let pt=gameState.particles[i];pt.x+=pt.dx;pt.y+=pt.dy;pt.life--;pt.dy+=0.2;if(pt.life<=0)gameState.particles.splice(i,1);}
 }
 
 function drawGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; ctx.lineWidth = 2;
-    for(let y = (gameState.bgOffset % 100) - 100; y < canvas.height; y += 100) { ctx.beginPath(); for(let x = 0; x < canvas.width; x += 50) { ctx.quadraticCurveTo(x + 25, y + 10, x + 50, y); } ctx.stroke(); }
-
-    const p = gameState.player;
-    if (p.crewId === 'crew_seimaro' && !gameState.isPaused) {
-        if (gameState.frameCount % 2 === 0) { 
-            const originX = p.x + p.width / 2; const originY = p.y + p.height / 2;
-            for(let lightningCount=0; lightningCount<3; lightningCount++) {
-                ctx.save(); ctx.beginPath();
-                let startX = originX + (Math.random() - 0.5) * p.width * 0.5; let startY = originY + (Math.random() - 0.5) * p.height * 0.5; ctx.moveTo(startX, startY);
-                for(let seg=0; seg<5; seg++) { 
-                    startX += (Math.random() - 0.5) * 60; startY += (Math.random() - 0.5) * 60; ctx.lineTo(startX, startY);
-                    if (Math.random() > 0.5) { ctx.fillStyle = '#cffafe'; ctx.beginPath(); ctx.arc(startX, startY, Math.random() * 5 + 2, 0, Math.PI*2); ctx.fill(); }
-                }
-                const colors = ['#ffffff', '#38bdf8', '#22d3ee']; ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)]; 
-                ctx.lineWidth = Math.random() * 4 + 2; ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 25; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
-            }
-        }
-    }
-
-    ctx.save(); ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]); ctx.beginPath(); ctx.moveTo(0, canvas.height - 50); ctx.lineTo(canvas.width, canvas.height - 50); ctx.stroke(); ctx.fillStyle = 'rgba(239, 68, 68, 0.2)'; ctx.fillRect(0, canvas.height - 50, canvas.width, 50); ctx.restore();
-
-    gameState.bullets.forEach(b => {
-        ctx.fillStyle = b.color; ctx.shadowColor = b.color; ctx.shadowBlur = 15;
-        if(b.type === 'laser') { ctx.fillRect(b.x, b.y, b.w, b.h); } 
-        else { ctx.beginPath(); ctx.ellipse(b.x + b.w/2, b.y + b.h/2, b.w/2, b.h/2, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.arc(b.x + b.w/2 - b.w/6, b.y + b.h/2 - b.h/6, b.w/4, 0, Math.PI*2); ctx.fill(); }
-    });
-    ctx.shadowBlur = 0;
-
-    ctx.textBaseline = "middle"; ctx.textAlign = "center";
-    const bossImgElement = document.getElementById('img-seimaro-boss');
-    
-    gameState.enemies.forEach(e => {
-        ctx.save(); ctx.translate(e.x + e.w/2, e.y + e.h/2);
-        if (e.isBoss) {
-            ctx.rotate(Math.sin(gameState.frameCount / 20) * 0.1);
-            if (bossImgElement.complete && bossImgElement.naturalHeight !== 0) ctx.drawImage(bossImgElement, -e.w/2, -e.h/2, e.w, e.h); else { ctx.font = `${e.w * 0.8}px serif`; ctx.fillText('🐾', 0, 0); }
-            ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(-e.w/2, -e.h/2 - 20, e.w, 10); ctx.fillStyle = '#ef4444'; ctx.fillRect(-e.w/2, -e.h/2 - 20, e.w * (e.hp / e.maxHp), 10); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(-e.w/2, -e.h/2 - 20, e.w, 10);
-        } else {
-            ctx.font = "40px serif"; ctx.rotate(Math.sin(gameState.frameCount / 10 + e.wobbleOffset) * 0.2); ctx.fillText('🚢', 0, 0);
-        }
-        ctx.restore();
-    });
-
-    ctx.font = `${p.width}px serif`; ctx.save(); ctx.translate(p.x + p.width/2, p.y + p.height/2); ctx.rotate(Math.sin(gameState.frameCount / 15) * 0.05); ctx.fillText(p.skinIcon, 0, 0); ctx.restore();
-    
-    gameState.particles.forEach(pt => {
-        ctx.globalAlpha = pt.life / 30;
-        if (pt.isStar) drawStar(ctx, pt.x, pt.y, 5, pt.size, pt.size/2, pt.color); else { ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2); ctx.fill(); }
-    });
-    ctx.globalAlpha = 1.0;
-
-    if (gameState.screenFlash > 0) {
-        const flashProgress = gameState.screenFlash / 25;
-        if (p.crewId === 'crew_seimaro') {
-            ctx.fillStyle = `rgba(0, 10, 30, ${flashProgress * 0.8})`; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if (gameState.screenFlash > 10) {
-                for(let i=0; i<8; i++) {
-                    const targetX = Math.random() * canvas.width; const topX = targetX + (Math.random() - 0.5) * 300;
-                    drawLightningLine(ctx, topX, 0, targetX, canvas.height, '#0284c7', 25, 60, true); drawLightningLine(ctx, topX, 0, targetX, canvas.height, '#22d3ee', 12, 30, true); drawLightningLine(ctx, topX, 0, targetX, canvas.height, '#ffffff', 5, 15, false);
-                    shootLightningImpactConfetti(targetX, canvas.height - 40);
-                }
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.6 + 0.4})`; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else { ctx.fillStyle = `rgba(255, 255, 255, ${(gameState.screenFlash / 10) * 0.6})`; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        } else { ctx.fillStyle = `rgba(255, 255, 255, ${gameState.screenFlash / 5})`; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        gameState.screenFlash--;
-    }
+    ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=2; for(let y=(gameState.bgOffset%100)-100;y<canvas.height;y+=100){ctx.beginPath();for(let x=0;x<canvas.width;x+=50)ctx.quadraticCurveTo(x+25,y+10,x+50,y);ctx.stroke();}
+    const p=gameState.player; if(p.crewId==='crew_seimaro'&&!gameState.isPaused&&gameState.frameCount%2===0){ const ox=p.x+p.width/2, oy=p.y+p.height/2; for(let lc=0;lc<3;lc++){ ctx.save();ctx.beginPath();let sx=ox+(Math.random()-0.5)*p.width*0.5, sy=oy+(Math.random()-0.5)*p.height*0.5;ctx.moveTo(sx,sy); for(let seg=0;seg<5;seg++){sx+=(Math.random()-0.5)*60;sy+=(Math.random()-0.5)*60;ctx.lineTo(sx,sy);if(Math.random()>0.5){ctx.fillStyle='#cffafe';ctx.beginPath();ctx.arc(sx,sy,Math.random()*5+2,0,Math.PI*2);ctx.fill();}} const cols=['#fff','#38bdf8','#22d3ee'];ctx.strokeStyle=cols[Math.floor(Math.random()*cols.length)];ctx.lineWidth=Math.random()*4+2;ctx.shadowColor='#0284c7';ctx.shadowBlur=25;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore(); } }
+    ctx.save(); ctx.strokeStyle='rgba(239, 68, 68, 0.6)'; ctx.lineWidth=3; ctx.setLineDash([10,10]); ctx.beginPath(); ctx.moveTo(0,canvas.height-50); ctx.lineTo(canvas.width,canvas.height-50); ctx.stroke(); ctx.fillStyle='rgba(239, 68, 68, 0.2)'; ctx.fillRect(0,canvas.height-50,canvas.width,50); ctx.restore();
+    gameState.bullets.forEach(b=>{ ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=15; if(b.type==='laser')ctx.fillRect(b.x,b.y,b.w,b.h);else{ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h/2,b.w/2,b.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(b.x+b.w/2-b.w/6,b.y+b.h/2-b.h/6,b.w/4,0,Math.PI*2);ctx.fill();} }); ctx.shadowBlur=0;
+    ctx.textBaseline="middle"; ctx.textAlign="center"; const bi=$('img-seimaro-boss');
+    gameState.enemies.forEach(e=>{ ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2); if(e.isBoss){ctx.rotate(Math.sin(gameState.frameCount/20)*0.1);if(bi.complete&&bi.naturalHeight!==0)ctx.drawImage(bi,-e.w/2,-e.h/2,e.w,e.h);else{ctx.font=`${e.w*0.8}px serif`;ctx.fillText('🐾',0,0);}ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(-e.w/2,-e.h/2-20,e.w,10);ctx.fillStyle='#ef4444';ctx.fillRect(-e.w/2,-e.h/2-20,e.w*(e.hp/e.maxHp),10);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(-e.w/2,-e.h/2-20,e.w,10);}else{ctx.font="40px serif";ctx.rotate(Math.sin(gameState.frameCount/10+e.wobbleOffset)*0.2);ctx.fillText('🚢',0,0);} ctx.restore(); });
+    ctx.font=`${p.width}px serif`; ctx.save(); ctx.translate(p.x+p.width/2,p.y+p.height/2); ctx.rotate(Math.sin(gameState.frameCount/15)*0.05); ctx.fillText(p.skinIcon,0,0); ctx.restore();
+    gameState.particles.forEach(pt=>{ ctx.globalAlpha=pt.life/30; if(pt.isStar)drawStar(ctx,pt.x,pt.y,5,pt.size,pt.size/2,pt.color);else{ctx.fillStyle=pt.color;ctx.beginPath();ctx.arc(pt.x,pt.y,pt.size,0,Math.PI*2);ctx.fill();} }); ctx.globalAlpha=1.0;
+    if(gameState.screenFlash>0){ const fp=gameState.screenFlash/25; if(p.crewId==='crew_seimaro'){ ctx.fillStyle=`rgba(0,10,30,${fp*0.8})`;ctx.fillRect(0,0,canvas.width,canvas.height); if(gameState.screenFlash>10){for(let i=0;i<8;i++){const tx=Math.random()*canvas.width, topX=tx+(Math.random()-0.5)*300;drawLightningLine(ctx,topX,0,tx,canvas.height,'#0284c7',25,60,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#22d3ee',12,30,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#fff',5,15,false);shootLightningImpactConfetti(tx,canvas.height-40);}ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.6+0.4})`;ctx.fillRect(0,0,canvas.width,canvas.height);}else{ctx.fillStyle=`rgba(255,255,255,${(gameState.screenFlash/10)*0.6})`;ctx.fillRect(0,0,canvas.width,canvas.height);} }else{ ctx.fillStyle=`rgba(255,255,255,${gameState.screenFlash/5})`;ctx.fillRect(0,0,canvas.width,canvas.height); } gameState.screenFlash--; }
 }
 
-function checkStageClear(isRetreat = false) {
-    const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (!currentStage.isEndless && gameState.score >= currentStage.goalScore);
-
-    if (isRetreat || isCleared) {
-        stopGame();
-        
-        if (currentStage.isTutorial && !isRetreat) { handleTutorialClear(); return; }
-
-        const modal = document.getElementById('game-end-modal');
-        document.getElementById('game-end-title').innerText = isRetreat ? '港に戻りました' : '大・大・大成功！！';
-        document.getElementById('game-end-title').className = 'text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
-        
-        let rewardText = `追い払ったライバルの数: ${gameState.score}`; let earnedTickets = 0; let earnedCoins = 0; let earnedMats = 0;
-
-        if (currentStage.isEndless) {
-            earnedTickets = Math.floor(gameState.score / 20); earnedCoins = Math.floor(gameState.score / 5) * 50; earnedMats = Math.floor(gameState.score / 20);      
-            if (earnedTickets > 0 || earnedCoins > 0) {
-                DB.gachaTickets += earnedTickets; DB.coins += earnedCoins; DB.materials += earnedMats;
-                rewardText += `<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">
-                    ${earnedTickets > 0 ? `<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedTickets}</span></div>` : ''}
-                    ${earnedCoins > 0 ? `<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedCoins}</span></div>` : ''}
-                    ${earnedMats > 0 ? `<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedMats}</span></div>` : ''}
-                </div>`;
-            } else rewardText += `<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`;
-        } else {
-            let isFirstClear = false;
-            if (currentStage.isEx) { if (DB.clearedSeimaroStage < currentStage.reqClearEx + 1 && !isRetreat) { DB.clearedSeimaroStage = currentStage.reqClearEx + 1; isFirstClear = true; } } 
-            else { if (DB.clearedStages < currentStage.id && !isRetreat) { DB.clearedStages = currentStage.id; isFirstClear = true; } }
-
-            if (isFirstClear) {
-                earnedTickets = currentStage.reward; earnedCoins = currentStage.rewardCoins || 1000; earnedMats = currentStage.rewardMats || 2;
-                DB.gachaTickets += earnedTickets; DB.coins += earnedCoins; DB.materials += earnedMats;
-                rewardText += `<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br>
-                    <div class="flex justify-center gap-2 mt-2">
-                        <div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedTickets}</span></div>
-                        <div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedCoins}</span></div>
-                        <div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${earnedMats}</span></div>
-                    </div>`;
-            }
-        }
-        
-        document.getElementById('game-end-desc').innerHTML = rewardText; modal.classList.remove('hidden'); modal.classList.add('flex');
-        shootConfetti('end-confetti-container', 80); setTimeout(() => { positionTutorialArrow('btn-tutorial-exit'); }, 300); updateHeaderUI(); saveGame(); 
+function checkStageClear(isRetreat=false) {
+    const isCleared=currentStage.isBossStage?gameState.bossDefeated:(!currentStage.isEndless&&gameState.score>=currentStage.goalScore);
+    if(isRetreat||isCleared){
+        stopGame(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
+        if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
+        $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
+        let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ eTk=Math.floor(gameState.score/20);eCo=Math.floor(gameState.score/5)*50;eMt=Math.floor(gameState.score/20); if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; }else{ let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } } }
+        $('game-end-desc').innerHTML=rt; showEl('game-end-modal'); shootConfetti('end-confetti-container',80); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); updateHeaderUI(); saveGame();
+        if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
     }
 }
+function gameLoop(){ if(!gameState.isPaused)updateGame();drawGame();gameLoopId=requestAnimationFrame(gameLoop); }
 
-window.onload = () => { loadGame(); navTo('screen-home'); setTimeout(checkAndStartTutorial, 600); setTimeout(checkLoginBonus, 1200); initFirebase(); };
+// --- 起動 ---
+window.onload = () => { loadGame(); navTo('screen-home'); setTimeout(checkAndStartTutorial,600); setTimeout(checkLoginBonus,1200); initFirebase(); };
 </script>
 </body>
 </html>
