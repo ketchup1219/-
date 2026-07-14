@@ -62,7 +62,7 @@
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
     <!-- BGM & SE -->
-    <audio id="bgm-home" src="The_Pirates.mp3" loop></audio>
+    <audio id="bgm-home" src="Pirates.mp3" loop></audio>
     <audio id="se-click" src="決定ボタンを押す10.mp3"></audio>
 
     <img id="img-seimaro-boss" src="せいまろ.png" class="hidden" alt="boss">
@@ -119,7 +119,7 @@
                     <div class="flex justify-around items-end h-16 mt-2">
                         <div class="flex flex-col items-center w-1/3">
                             <span class="text-[10px] text-indigo-300 font-bold">海賊船</span>
-                            <span id="home-skin-icon" class="text-4xl mb-1 filter drop-shadow-lg pop-in"></span>
+                            <span id="home-skin-icon" class="w-10 h-10 mb-1 flex items-center justify-center filter drop-shadow-lg pop-in"></span>
                             <span id="home-skin" class="font-bold text-yellow-200 text-xs w-full truncate px-1"></span>
                         </div>
                         <div class="flex flex-col items-center w-1/3 border-l-2 border-r-2 border-indigo-700">
@@ -518,6 +518,7 @@
                     <p id="detail-desc" class="text-[11px] text-indigo-200 mt-2 text-center font-bold bg-indigo-950/50 p-2 rounded-xl w-full whitespace-pre-line"></p>
                 </div>
                 
+                <!-- 乗組員専用: 才能強化＆転生UI -->
                 <div id="crew-talent-ui" class="hidden w-full flex-col gap-2 mt-1 bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 shadow-inner">
                     <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（化石消費）＆ 転生</div>
                     <div class="flex justify-between items-center text-xs text-white font-bold">
@@ -696,7 +697,7 @@ const MASTER = {
         'skin_shisa': {id:'skin_shisa',name:'シーサー',rarity:'SSR',icon:'🦁'},
         'skin_king': {id:'skin_king',name:'伝説 of 海賊船',rarity:'UR',icon:'🏴‍☠️'},
         'skin_kitamae': {id:'skin_kitamae',name:'北前船',rarity:'UR',icon:'🏮'},
-        'skin_seimaro': {id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'⚡'}
+        'skin_seimaro': {id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'せいまろ旗.png',fallbackIcon:'⚡',type:'image'}
     },
     crew: { 
         'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 
@@ -840,7 +841,24 @@ function handleTutorialClear() { DB.tutorialCompleted=true; DB.gachaTickets+=10;
 function finishTutorialClear() { hideEl('tutorial-clear-modal'); $('tutorial-confetti-container').innerHTML=''; navTo('screen-home'); setTimeout(()=>positionTutorialArrow('nav-btn-gacha'),400); }
 
 // --- ホーム・編成 ---
-function initHome() { updateHeaderUI(); const s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none']; $('home-skin-icon').innerText=s.icon; $('home-skin').innerText=s.name; $('home-weapon-icon').innerText='💣'; $('home-weapon').innerText=w.name; const cc=$('home-crew-container'); cc.innerHTML=c.type==='image'?`<span class="inline-flex relative w-10 h-10 filter drop-shadow-md"><img src="${c.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${c.fallbackIcon}','text-3xl filter drop-shadow-md')"></span>`:`<span class="text-4xl filter drop-shadow-md">${c.icon}</span>`; $('home-crew').innerText=c.name; }
+function initHome() { 
+    updateHeaderUI(); 
+    const s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none']; 
+    const skinIconContainer = $('home-skin-icon');
+    if (skinIconContainer) {
+        if (s.type === 'image') {
+            skinIconContainer.innerHTML = `<span class="inline-flex relative w-10 h-10 filter drop-shadow-lg"><img src="${s.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${s.fallbackIcon}','text-4xl filter drop-shadow-lg')"></span>`;
+        } else {
+            skinIconContainer.innerHTML = `<span class="text-4xl filter drop-shadow-lg">${s.icon}</span>`;
+        }
+    }
+    $('home-skin').innerText=s.name; 
+    $('home-weapon-icon').innerText='💣'; 
+    $('home-weapon').innerText=w.name; 
+    const cc=$('home-crew-container'); 
+    cc.innerHTML=c.type==='image'?`<span class="inline-flex relative w-10 h-10 filter drop-shadow-md"><img src="${c.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${c.fallbackIcon}','text-3xl filter drop-shadow-md')"></span>`:`<span class="text-4xl filter drop-shadow-md">${c.icon}</span>`; 
+    $('home-crew').innerText=c.name; 
+}
 window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailKey=null;
 function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
 function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
@@ -1020,7 +1038,29 @@ function drawGame() {
     gameState.bullets.forEach(b=>{ ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=15; if(b.type==='laser')ctx.fillRect(b.x,b.y,b.w,b.h);else{ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h/2,b.w/2,b.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(b.x+b.w/2-b.w/6,b.y+b.h/2-b.h/6,b.w/4,0,Math.PI*2);ctx.fill();} }); ctx.shadowBlur=0;
     ctx.textBaseline="middle"; ctx.textAlign="center"; const bi=$('img-seimaro-boss');
     gameState.enemies.forEach(e=>{ ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2); if(e.isBoss){ctx.rotate(Math.sin(gameState.frameCount/20)*0.1);if(bi.complete&&bi.naturalHeight!==0)ctx.drawImage(bi,-e.w/2,-e.h/2,e.w,e.h);else{ctx.font=`${e.w*0.8}px serif`;ctx.fillText('🐾',0,0);}ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(-e.w/2,-e.h/2-20,e.w,10);ctx.fillStyle='#ef4444';ctx.fillRect(-e.w/2,-e.h/2-20,e.w*(e.hp/e.maxHp),10);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(-e.w/2,-e.h/2-20,e.w,10);}else{ctx.font="40px serif";ctx.rotate(Math.sin(gameState.frameCount/10+e.wobbleOffset)*0.2);ctx.fillText('🚢',0,0);} ctx.restore(); });
-    ctx.font=`${p.width}px serif`; ctx.save(); ctx.translate(p.x+p.width/2,p.y+p.height/2); ctx.rotate(Math.sin(gameState.frameCount/15)*0.05); ctx.fillText(p.skinIcon,0,0); ctx.restore();
+    
+    // 自機描画 (画像対応を汎用化)
+    ctx.save();
+    ctx.translate(p.x+p.width/2, p.y+p.height/2);
+    ctx.rotate(Math.sin(gameState.frameCount / 15) * 0.05);
+    const eqSkin=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'];
+    if (eqSkin.type === 'image') {
+        window._skinImgCache = window._skinImgCache || {};
+        if (!window._skinImgCache[eqSkin.id]) {
+            window._skinImgCache[eqSkin.id] = new Image();
+            window._skinImgCache[eqSkin.id].src = eqSkin.icon;
+        }
+        const img = window._skinImgCache[eqSkin.id];
+        if (img.complete && img.naturalHeight !== 0) {
+            ctx.drawImage(img, -p.width/2, -p.height/2, p.width, p.height);
+        } else {
+            ctx.font=`${p.width}px serif`; ctx.fillText(eqSkin.fallbackIcon||'⚡', 0, 0);
+        }
+    } else {
+        ctx.font=`${p.width}px serif`; ctx.fillText(p.skinIcon, 0, 0);
+    }
+    ctx.restore();
+    
     gameState.particles.forEach(pt=>{ ctx.globalAlpha=pt.life/30; if(pt.isStar)drawStar(ctx,pt.x,pt.y,5,pt.size,pt.size/2,pt.color);else{ctx.fillStyle=pt.color;ctx.beginPath();ctx.arc(pt.x,pt.y,pt.size,0,Math.PI*2);ctx.fill();} }); ctx.globalAlpha=1.0;
     if(gameState.screenFlash>0){ const fp=gameState.screenFlash/25; if(p.crewId==='crew_seimaro'){ ctx.fillStyle=`rgba(0,10,30,${fp*0.8})`;ctx.fillRect(0,0,canvas.width,canvas.height); if(gameState.screenFlash>10){for(let i=0;i<8;i++){const tx=Math.random()*canvas.width, topX=tx+(Math.random()-0.5)*300;drawLightningLine(ctx,topX,0,tx,canvas.height,'#0284c7',25,60,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#22d3ee',12,30,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#fff',5,15,false);shootLightningImpactConfetti(tx,canvas.height-40);}ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.6+0.4})`;ctx.fillRect(0,0,canvas.width,canvas.height);}else{ctx.fillStyle=`rgba(255,255,255,${(gameState.screenFlash/10)*0.6})`;ctx.fillRect(0,0,canvas.width,canvas.height);} }else{ ctx.fillStyle=`rgba(255,255,255,${gameState.screenFlash/5})`;ctx.fillRect(0,0,canvas.width,canvas.height); } gameState.screenFlash--; }
 }
@@ -1031,7 +1071,11 @@ function checkStageClear(isRetreat=false) {
         stopGame(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
         $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
-        let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ eTk=Math.floor(gameState.score/20);eCo=Math.floor(gameState.score/5)*50;eMt=Math.floor(gameState.score/20); if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; }else{ let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } } }
+        let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ 
+            eTk=Math.floor(gameState.score/60); // 草核の排出率を少し絞りました
+            eCo=Math.floor(gameState.score/5)*50;
+            eMt=Math.floor(gameState.score/30); 
+            if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; }else{ let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } } }
         $('game-end-desc').innerHTML=rt; showEl('game-end-modal'); shootConfetti('end-confetti-container',80); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); updateHeaderUI(); saveGame();
         if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
     }
