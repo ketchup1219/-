@@ -107,9 +107,13 @@
             
             <!-- 1. ホーム -->
             <div id="screen-home" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-between gap-2 relative">
+                <button onclick="openRankingModal()" class="absolute top-2 left-2 game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(250,204,21,0.5)] z-20 transition-transform hover:scale-110 flex items-center gap-1 text-xs">
+                    <span>🏆</span> <span>全国RANK</span>
+                </button>
                 <a href="kaizokusetumei.html" class="absolute top-2 right-2 game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 text-xl transition-transform hover:scale-110 tooltip">📖</a>
+                
                 <div class="holy-aura"></div>
-                <div class="logo-container mt-2">
+                <div class="logo-container mt-4">
                     <div class="relative w-full flex justify-center items-center">
                         <div id="title-fallback" class="hidden giant-title">ルージュ<br>ガレオン<br><span class="text-xl text-yellow-300 font-black tracking-widest block mt-4" style="text-shadow: 0 2px 4px #000;">〜伝説の大冒険〜</span></div>
                         <img id="title-logo" src="ルージュ・ガレオン.png" class="absolute logo-enhanced z-10" onerror="showLogoFallback(this)">
@@ -289,6 +293,13 @@
                         <span id="score-slash" class="text-indigo-500 text-sm">/</span>
                         <span id="game-goal" class="text-sm">100</span>
                     </div>
+                    
+                    <!-- スコアアタック用 タイマーUI -->
+                    <div id="time-container" class="hidden bg-indigo-950/90 border-2 border-yellow-500 px-4 py-2 rounded-xl text-white font-black shadow-lg flex items-center gap-2">
+                        <span class="text-xs text-yellow-300">残り時間:</span>
+                        <span id="game-time" class="text-yellow-400 text-xl">60</span>
+                    </div>
+
                     <button id="btn-retreat" onclick="checkStageClear(true)" class="game-btn pointer-events-auto bg-gradient-to-b from-red-500 to-red-700 border-2 border-white px-5 py-2 rounded-xl text-white font-black shadow-lg text-sm">逃げる!! 🏃</button>
                 </div>
                 
@@ -629,6 +640,36 @@
             </div>
         </div>
 
+        <!-- スコアアタック用ランキングモーダル -->
+        <div id="ranking-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-start z-50 p-4 backdrop-blur-sm overflow-y-auto no-scrollbar">
+            <div class="w-full max-w-md bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 relative mt-4 mb-8">
+                <button onclick="hideEl('ranking-modal')" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
+                <div class="text-center">
+                    <span class="text-5xl drop-shadow-md">🏆</span>
+                    <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mt-2">全国ランキング</h3>
+                    <p class="text-[10px] text-yellow-200 mt-1">※毎週月曜0:00にリセット＆報酬配布！</p>
+                </div>
+                <div id="ranking-list-container" class="flex flex-col gap-2 mt-2 max-h-[50vh] overflow-y-auto pr-1">
+                    <!-- ランキングリストがここに入る -->
+                </div>
+            </div>
+        </div>
+
+        <!-- スコアアタック報酬受け取りモーダル -->
+        <div id="ranking-reward-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-6 overflow-hidden">
+            <div class="holy-aura"></div><div id="ranking-confetti-container" class="absolute inset-0 pointer-events-none z-0"></div>
+            <div class="relative z-10 text-center flex flex-col items-center gap-5 pop-in">
+                <div class="text-7xl animate-bounce filter drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]">🏆</div>
+                <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-orange-400 to-yellow-500 tracking-wider drop-shadow-lg">スコアアタック報酬!!</h2>
+                <p class="text-white font-bold bg-indigo-900/80 p-3 rounded-xl border border-indigo-700 shadow-inner">先週の全国ランキングは<br><span id="ranking-reward-rank" class="text-yellow-400 text-3xl font-black">1位</span> でした！</p>
+                <div class="bg-indigo-800/90 border-2 border-yellow-500 rounded-2xl p-4 w-full max-w-xs text-center backdrop-blur shadow-xl">
+                    <span class="text-xs text-yellow-300 font-black block mb-2">🎁 獲得した報酬 🎁</span>
+                    <div id="ranking-reward-items" class="flex justify-center gap-2"></div>
+                </div>
+                <button onclick="hideEl('ranking-reward-modal')" class="game-btn w-full max-w-[240px] py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black rounded-full shadow-2xl border-4 border-white text-xl">受け取る！ 👍</button>
+            </div>
+        </div>
+
     </div>
 
 <script>
@@ -642,8 +683,8 @@ document.addEventListener('click', (e) => {
 let bgmStarted = false;
 function playHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && bgm.paused) { bgm.play().catch(()=>{}); } }
 function stopHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && !bgm.paused) { bgm.pause(); } }
-function playBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && bgm.paused) { bgm.play().catch(()=>{}); } }
-function stopBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && !bgm.paused) { bgm.pause(); } }
+function playBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && bgm.paused) { bgm.volume = 0.5; bgm.play().catch(()=>{}); } }
+function stopBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && !bgm.paused) { bgm.pause(); bgm.currentTime = 0; } }
 
 document.addEventListener('click', () => {
     if (!bgmStarted) {
@@ -667,8 +708,22 @@ function showAlert(msg) { $('custom-alert-text').innerText = msg; showEl('custom
 function closeCustomAlert() { hideEl('custom-alert-modal'); }
 function shootConfetti(cid, count=50) { const c=$(cid); if(!c)return; c.innerHTML=''; const colors=['#ef4444','#3b82f6','#facc15','#22c55e','#a855f7','#ec4899']; for(let i=0;i<count;i++){ const f=document.createElement('div'); f.className='confetti'; f.style.left=`${Math.random()*100}%`; f.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)]; f.style.width=`${Math.random()*10+5}px`; f.style.height=`${Math.random()*20+10}px`; f.style.animationDuration=`${Math.random()*2+2}s`; f.style.animationDelay=`${Math.random()*0.5}s`; c.appendChild(f); } }
 
+// --- スコアアタック（ランキング用週管理） ---
+function getWeeklyString() {
+    const d = new Date();
+    // 日本時間に合わせる (+9時間)
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const jst = new Date(utc + (3600000 * 9));
+    jst.setHours(0, 0, 0, 0);
+    // 月曜始まりの週番号を計算
+    jst.setDate(jst.getDate() + 3 - (jst.getDay() + 6) % 7);
+    const week1 = new Date(jst.getFullYear(), 0, 4);
+    const week = 1 + Math.round(((jst.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    return `${jst.getFullYear()}-W${week}`;
+}
+
 // --- データ定義 ---
-let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[], crewStats:{} };
+let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[], crewStats:{}, lastPlayedRankingWeek:'', lastRankingRewardWeek:'' };
 const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:2,type:'materials',amount:2,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:3,type:'tickets',amount:2,label:'草核',icon:'草核.png',fallback:'✨'}, {day:4,type:'coins',amount:1200,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:5,type:'materials',amount:5,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:6,type:'tickets',amount:3,label:'草核',icon:'草核.png',fallback:'✨'}, {day:7,type:'special',amount:5,coinsBonus:3000,label:'超・船長パック',icon:'草核.png',fallback:'👑'} ];
 const MASTER = {
     systems: { 'stamina_cap': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
@@ -717,7 +772,13 @@ const MASTER = {
     }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
-MASTER.exStages = [ {id:'ex_infinity',name:'インフィニティステージ',goalScore:'∞',enemySpeed:3,spawnRate:30,reward:'お見送り数次第',color:'border-purple-500',isEndless:true,isEx:true,staminaCost:20}, {id:'ex_seimaro_1',name:'せいまろの試練 1',goalScore:50,enemySpeed:2,spawnRate:50,reward:3,rewardCoins:2000,color:'border-pink-400',isEndless:false,isEx:true,reqClearEx:0,staminaCost:10}, {id:'ex_seimaro_2',name:'せいまろの試練 2',goalScore:80,enemySpeed:3,spawnRate:35,reward:5,rewardCoins:3000,color:'border-pink-500',isEndless:false,isEx:true,reqClearEx:1,staminaCost:20}, {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} ];
+MASTER.exStages = [ 
+    {id:'ex_infinity',name:'インフィニティステージ',goalScore:'∞',enemySpeed:3,spawnRate:30,reward:'お見送り数次第',color:'border-purple-500',isEndless:true,isEx:true,staminaCost:20}, 
+    {id:'ex_score_attack',name:'全国スコアアタック',goalScore:'制限時間内で競え！',enemySpeed:2,spawnRate:30,reward:'月曜0時に順位報酬',color:'border-yellow-400',isEndless:true,isScoreAttack:true,timeLimit:60,isEx:true,staminaCost:30},
+    {id:'ex_seimaro_1',name:'せいまろの試練 1',goalScore:50,enemySpeed:2,spawnRate:50,reward:3,rewardCoins:2000,color:'border-pink-400',isEndless:false,isEx:true,reqClearEx:0,staminaCost:10}, 
+    {id:'ex_seimaro_2',name:'せいまろの試練 2',goalScore:80,enemySpeed:3,spawnRate:35,reward:5,rewardCoins:3000,color:'border-pink-500',isEndless:false,isEx:true,reqClearEx:1,staminaCost:20}, 
+    {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} 
+];
 MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
 const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
 
@@ -757,6 +818,8 @@ function loadGame() {
     if(!MASTER.weapons[DB.equippedWeapon]) DB.equippedWeapon='wp_normal'; if(!MASTER.skins[DB.equippedSkin]) DB.equippedSkin='skin_default'; if(!MASTER.crew[DB.equippedCrew]) DB.equippedCrew='crew_none';
     if(!DB.missionProgress) DB.missionProgress={defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0};
     if(!DB.crewStats) DB.crewStats={};
+    if(!DB.lastPlayedRankingWeek) DB.lastPlayedRankingWeek='';
+    if(!DB.lastRankingRewardWeek) DB.lastRankingRewardWeek='';
     saveGame();
 }
 function getItemLevel(id) { return DB.itemLevels[id]||1; }
@@ -771,10 +834,20 @@ function buyStamina() {
     saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを回復したぞ！"); 
 }
 
-// --- Firebase・フレンド ---
+// --- Firebase・フレンド・ランキング ---
 const firebaseConfig={apiKey:"AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",authDomain:"game-685f2.firebaseapp.com",databaseURL:"https://game-685f2-default-rtdb.firebaseio.com",projectId:"game-685f2",storageBucket:"game-685f2.firebasestorage.app",messagingSenderId:"266871071111",appId:"1:266871071111:web:ffff3b65d0234fc5abb322"};
 let isFirebaseInitialized=false, friendRequests={}, friendsList={}, currentFriendTab='list';
-function initFirebase() { try{ firebase.initializeApp(firebaseConfig); window.db=firebase.database(); isFirebaseInitialized=true; updateMyDataOnFirebase(); window.db.ref('friendRequests/'+DB.userId).on('value',snap=>{friendRequests=snap.val()||{};updateFriendReqBadge();if(currentFriendTab==='req')renderFriendList();}); window.db.ref('friends/'+DB.userId).on('value',snap=>{friendsList=snap.val()||{};if(currentFriendTab==='list')renderFriendList();}); let initLoad=true; window.db.ref('global/latest_ur_pull').on('value',s=>{const d=s.val();if(d&&!initLoad&&d.timestamp>DB.lastShareTimestamp&&d.userId!==DB.userId){DB.lastShareTimestamp=d.timestamp;saveGame();triggerHappyShare(d.userName,d.itemName);}initLoad=false;}); }catch(e){} }
+function initFirebase() { 
+    try{ 
+        firebase.initializeApp(firebaseConfig); window.db=firebase.database(); isFirebaseInitialized=true; updateMyDataOnFirebase(); 
+        window.db.ref('friendRequests/'+DB.userId).on('value',snap=>{friendRequests=snap.val()||{};updateFriendReqBadge();if(currentFriendTab==='req')renderFriendList();}); 
+        window.db.ref('friends/'+DB.userId).on('value',snap=>{friendsList=snap.val()||{};if(currentFriendTab==='list')renderFriendList();}); 
+        let initLoad=true; window.db.ref('global/latest_ur_pull').on('value',s=>{const d=s.val();if(d&&!initLoad&&d.timestamp>DB.lastShareTimestamp&&d.userId!==DB.userId){DB.lastShareTimestamp=d.timestamp;saveGame();triggerHappyShare(d.userName,d.itemName);}initLoad=false;}); 
+        
+        // ランキング報酬チェック
+        setTimeout(checkRankingReward, 2000);
+    }catch(e){} 
+}
 function updateMyDataOnFirebase() { if(isFirebaseInitialized) window.db.ref('users/'+DB.userId).set({userName:DB.userName,userIcon:DB.userIcon,clearedStages:DB.clearedStages}); }
 function copyMyId() { const i=document.createElement("input"); i.value=DB.userId; document.body.appendChild(i); i.select(); try{document.execCommand("copy");showAlert("海賊IDをコピーしたぞ！");}catch(e){} document.body.removeChild(i); }
 function switchFriendTab(tab) { currentFriendTab=tab; const bl=$('tab-friend-list'), br=$('tab-friend-req'); if(tab==='list'){bl.className="flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all shadow-md";br.className="flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all relative shadow-md";}else{bl.className="flex-1 py-3 bg-indigo-950 text-indigo-400 font-black rounded-lg border-b-4 border-transparent text-sm transition-all shadow-md";br.className="flex-1 py-3 bg-indigo-600 text-white font-black rounded-lg border-b-4 border-indigo-800 text-sm transition-all relative shadow-md";} renderFriendList(); }
@@ -783,6 +856,57 @@ async function renderFriendList() { const c=$('friend-list-container'); c.innerH
 function sendFriendRequest() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); const v=$('friend-search-input').value.trim().toUpperCase(); if(!v)return showAlert("IDを入力して！"); if(v===DB.userId)return showAlert("自分のIDだ！"); window.db.ref('users/'+v).once('value').then(s=>{if(!s.exists())return showAlert("見つからないぞ！"); window.db.ref('friendRequests/'+v+'/'+DB.userId).set(Date.now()).then(()=>{showAlert("申請したぞ！");$('friend-search-input').value='';});}); }
 function acceptFriend(uid) { if(isFirebaseInitialized){ window.db.ref('friends/'+DB.userId+'/'+uid).set(true); window.db.ref('friends/'+uid+'/'+DB.userId).set(true); window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); } }
 function rejectFriend(uid) { if(isFirebaseInitialized) window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); }
+
+// --- ランキング報酬 ---
+function checkRankingReward() {
+    if (!isFirebaseInitialized) return;
+    const currWeek = getWeeklyString();
+    if (DB.lastPlayedRankingWeek && DB.lastPlayedRankingWeek !== currWeek && DB.lastRankingRewardWeek !== DB.lastPlayedRankingWeek) {
+        window.db.ref('rankings/scoreAttack/' + DB.lastPlayedRankingWeek).once('value').then(snap => {
+            const data = snap.val();
+            if (data) {
+                const list = Object.values(data).sort((a, b) => b.score - a.score);
+                const myRank = list.findIndex(u => u.id === DB.userId) + 1;
+                if (myRank > 0) {
+                    let rTicket=0, rCoin=0, rMat=0;
+                    if (myRank === 1) { rTicket=50; rCoin=50000; rMat=100; }
+                    else if (myRank <= 3) { rTicket=30; rCoin=30000; rMat=50; }
+                    else if (myRank <= 10) { rTicket=10; rCoin=10000; rMat=20; }
+                    else { rTicket=5; rCoin=5000; rMat=5; }
+                    DB.gachaTickets += rTicket; DB.coins += rCoin; DB.materials += rMat; DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek;
+                    saveGame(); updateHeaderUI();
+                    
+                    // 報酬モーダル表示
+                    $('ranking-reward-rank').innerText = `${myRank}位`;
+                    $('ranking-reward-items').innerHTML = `
+                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-yellow-400 font-black">×${rTicket}</span></div>
+                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰')"></span><span class="text-yellow-400 font-black">×${rCoin}</span></div>
+                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴')"></span><span class="text-yellow-400 font-black">×${rMat}</span></div>
+                    `;
+                    showEl('ranking-reward-modal'); shootConfetti('ranking-confetti-container', 100);
+                } else { DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek; saveGame(); }
+            } else { DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek; saveGame(); }
+        });
+    }
+}
+function openRankingModal() {
+    if (!isFirebaseInitialized) return showAlert("通信エラー！ランキングが見れないぞ！");
+    const currWeek = getWeeklyString(); showEl('ranking-modal');
+    $('ranking-list-container').innerHTML = '<div class="text-center text-indigo-300 font-bold mt-4 animate-pulse">ランキング取得中...</div>';
+    window.db.ref('rankings/scoreAttack/' + currWeek).once('value').then(snap => {
+        const data = snap.val();
+        if (!data) { $('ranking-list-container').innerHTML = '<div class="text-center text-yellow-300 font-bold mt-4">今週はまだ誰もプレイしていないぞ！一番乗りを目指せ！</div>'; return; }
+        const list = Object.values(data).sort((a, b) => b.score - a.score);
+        let html = '';
+        list.forEach((u, i) => {
+            const rankStr = i === 0 ? '🥇 1位' : i === 1 ? '🥈 2位' : i === 2 ? '🥉 3位' : `${i+1}位`;
+            const bgClass = i === 0 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : i === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' : i === 2 ? 'bg-gradient-to-r from-amber-600 to-orange-700' : 'bg-indigo-900 border-2 border-indigo-700';
+            const iconHtml = u.icon && u.icon.startsWith('data:image') ? `<img src="${u.icon}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 flex items-center justify-center text-2xl">${u.icon||'👤'}</div>`;
+            html += `<div class="${bgClass} p-2 rounded-xl flex items-center gap-3 shadow-md mb-2"><div class="font-black w-14 text-center text-white drop-shadow-md text-sm">${rankStr}</div>${iconHtml}<div class="flex-1 font-black text-white truncate text-sm">${u.name}</div><div class="font-black text-yellow-300 text-lg mr-2">${u.score} <span class="text-xs">pt</span></div></div>`;
+        });
+        $('ranking-list-container').innerHTML = html;
+    });
+}
 
 // --- ログイン・プロフィール ---
 function checkLoginBonus() { const t=new Date().toDateString(); if(DB.lastLoginDate!==t){ DB.loginStreak=(DB.loginStreak>=7?0:DB.loginStreak)+1; DB.lastLoginDate=t; DB.missionProgress.dailyDefeat=0; DB.missionProgress.dailyGacha=0; DB.missionProgress.dailyPlayMulti=0; DB.claimedMissions=DB.claimedMissions.filter(id=>!id.startsWith('d')); saveGame(); showLoginBonusPopup(); } }
@@ -975,10 +1099,11 @@ function closeGacha10Result() { hideEl('gacha-result-10-modal'); $('gacha-confet
 function closeHappyShareToast() { $('happy-share-toast').classList.remove('show'); if(happyShareTimeoutId){clearTimeout(happyShareTimeoutId);happyShareTimeoutId=null;} }
 function triggerHappyShare(n, i) { const t=$('happy-share-toast'); if(happyShareTimeoutId)clearTimeout(happyShareTimeoutId); $('toast-message').innerHTML=`<span class="text-yellow-200">${n}</span> が<br>超激レア【${i}】を入手！`; t.classList.add('show'); DB.gachaTickets+=1; updateHeaderUI(); saveGame(); happyShareTimeoutId=setTimeout(()=>closeHappyShareToast(),3500); }
 
-// --- ステージ・マルチ ---
+// --- ステージ・マルチ・スコアアタック ---
 function switchStageTab(t) { currentStageTab=t; const bn=$('tab-stage-normal'), be=$('tab-stage-ex'), bm=$('tab-stage-multi'); bn.className=be.className=bm.className="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; showEl('stage-list','flex'); hideEl('multi-lobby-ui'); if(t==='normal'){bn.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";renderStageList(MASTER.stages);}else if(t==='ex'){be.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";renderStageList(MASTER.exStages);}else if(t==='multi'){bm.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";hideEl('stage-list');showEl('multi-lobby-ui','flex');} }
 function initStageSelect() { switchStageTab('normal'); }
 function renderStageList(stgs) { const l=$('stage-list'); l.innerHTML=''; let a=!DB.tutorialCompleted?[{id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0}]:stgs; a.forEach((s,i)=>{ let lk=false; if(!s.isTutorial){if(currentStageTab==='normal')lk=i>0&&DB.clearedStages<i;else if(s.reqClearEx!==undefined)lk=DB.clearedSeimaroStage<s.reqClearEx;} const b=document.createElement('button'); b.id=`stage-btn-${s.id}`; b.className=`p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk?'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed':'bg-indigo-800 '+s.color}`; let rd=s.isTutorial?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`:s.isEndless?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`:`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`; b.innerHTML=`<div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div><div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div><div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless||s.isBossStage?'':'隻 追い払う！'}</div><div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless||s.isBossStage?'報酬:':s.isTutorial?'目標報酬:':'初回お祝い:'}</span>${rd}</div>${lk?'<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>':''}`; if(!lk)b.onclick=()=>{positionTutorialArrow(null);startStage(s);}; l.appendChild(b); }); if(!DB.tutorialCompleted)setTimeout(()=>positionTutorialArrow('stage-btn-999'),100); }
+
 function openCreateRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="遊ぶステージを選択"; showEl('room-create-ui','flex'); hideEl('room-join-ui'); hideEl('room-waiting-ui'); const l=$('multi-stage-select-list'); l.innerHTML=''; MASTER.multiStages.forEach(s=>{ const b=document.createElement('button'); b.className=`w-full text-left p-3 bg-indigo-800 rounded-xl border-2 ${s.color} shadow-md active:scale-95 flex flex-col gap-1`; b.innerHTML=`<span class="font-black text-white text-lg">${s.name}</span><div class="flex justify-between items-center w-full"><span class="text-xs text-indigo-200 font-bold">スタミナ: ⚡${s.staminaCost}</span><span class="text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded">選択！</span></div>`; b.onclick=()=>createRoom(s); l.appendChild(b); }); showEl('multi-room-modal'); }
 function openJoinRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="部屋に入る"; hideEl('room-create-ui'); showEl('room-join-ui','flex'); hideEl('room-waiting-ui'); $('room-id-input').value=''; showEl('multi-room-modal'); }
 function createRoom(s) { if(DB.stamina<s.staminaCost)return showAlert("スタミナ不足！"); const rId=Math.floor(1000+Math.random()*9000).toString(); currentMultiRoom={id:rId,stageId:s.id,isHost:true}; window.db.ref('rooms/'+rId).set({stageId:s.id,status:'waiting',hostId:DB.userId,timestamp:firebase.database.ServerValue.TIMESTAMP,p1:{id:DB.userId,name:DB.userName,icon:DB.userIcon,score:0,ready:false},p2:null}); showWaitingUI(rId); listenToRoom(rId); }
@@ -996,9 +1121,14 @@ function checkMissions() { let hc=false; ['daily','normal','event'].forEach(t=>{
 function renderMissionList() { const l=$('mission-list-container'); l.innerHTML=''; const m=MISSIONS[currentMissionTab]||[]; if(m.length===0){l.innerHTML=`<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">依頼がないぞ。</div>`;return;} m.forEach(x=>{ const ic=DB.claimedMissions.includes(x.id), p=getMissionProgress(x), isC=p>=x.target, d=document.createElement('div'); d.className=`p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic?'bg-indigo-950/60 border-indigo-900 opacity-60':isC?'bg-indigo-800 border-yellow-400':'bg-indigo-900 border-indigo-700'}`; const ri=x.reward.type==='coins'?'💰':x.reward.type==='tickets'?'✨':x.reward.type==='materials'?'🦴':'👑', img=x.reward.type==='coins'?'草コイン.png':x.reward.type==='materials'?'草の化石.png':'草核.png'; d.innerHTML=`<div class="flex justify-between items-start"><div class="font-black text-sm text-white pr-2">${x.desc}</div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0"><span class="inline-flex relative w-4 h-4"><img src="${img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${ri}','text-xs')"></span><span class="text-xs text-yellow-400 font-black">×${x.reward.amount}</span></div></div><div class="flex items-center justify-between mt-1"><div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100,(p/x.target)*100)}%;"></div><div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p,x.target)} / ${x.target}</div></div>${ic?`<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>`:isC?`<button onclick="claimMission('${x.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>`:`<span class="text-xs font-black text-slate-400">挑戦中</span>`}</div>`; l.appendChild(d); }); }
 function claimMission(id) { let m=null; ['daily','normal','event'].forEach(t=>{const f=MISSIONS[t].find(x=>x.id===id);if(f)m=f;}); if(!m||DB.claimedMissions.includes(id))return; DB.claimedMissions.push(id); if(m.reward.type==='coins')DB.coins+=m.reward.amount; else if(m.reward.type==='tickets')DB.gachaTickets+=m.reward.amount; else if(m.reward.type==='materials')DB.materials+=m.reward.amount; else if(m.reward.type==='special'){DB.gachaTickets+=5;DB.coins+=2000;} saveGame(); updateHeaderUI(); renderMissionList(); showAlert("報酬を獲得したぞ！"); }
 
+function closeRankingRewardModal() {
+    hideEl('ranking-reward-modal');
+    $('ranking-confetti-container').innerHTML = '';
+}
+
 // --- ゲームエンジン ---
 let gameLoopId=null, currentStage=null, specialCutinTimeout=null;
-let gameState={score:0,frameCount:0,player:{},bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false};
+let gameState={score:0,frameCount:0,player:{},bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false, timeLeft:0};
 const input={touchX:0,touchY:0,isTouching:false,keys:{}}; window.addEventListener('keydown',e=>input.keys[e.key]=true); window.addEventListener('keyup',e=>input.keys[e.key]=false);
 const canvas=$('gameCanvas'), ctx=canvas.getContext('2d');
 canvas.addEventListener('touchstart',e=>{input.isTouching=true;input.touchX=e.touches[0].clientX-canvas.getBoundingClientRect().left;});
@@ -1010,6 +1140,16 @@ function startStage(stage, isMulti=false) {
     if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game');
     playBattleBGM();
     if(DB.tutorialCompleted) showEl('special-ui-container'); else hideEl('special-ui-container'); hideEl('multi-match-ui');
+    
+    if(stage.isScoreAttack) {
+        showEl('time-container', 'flex');
+        hideEl('score-slash'); hideEl('game-goal');
+        $('score-label').innerText = 'スコア:';
+        $('game-time').innerText = stage.timeLimit;
+    } else {
+        hideEl('time-container');
+    }
+
     setTimeout(()=>{
         const rect=canvas.parentElement.getBoundingClientRect(); canvas.width=rect.width<100?window.innerWidth:rect.width; canvas.height=rect.height<100?window.innerHeight-80:rect.height;
         const w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none'];
@@ -1020,6 +1160,7 @@ function startStage(stage, isMulti=false) {
         const rBonus = 1 + (cStats.reincarnation * 0.5);
 
         gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false, 
+            timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
             player:{
                 x:canvas.width/2-30,y:canvas.height-140,width:60,height:60,
                 speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5)+(cStats.speed*0.2*rBonus), 
@@ -1030,7 +1171,10 @@ function startStage(stage, isMulti=false) {
                 scoreMod:((c.effect==='scoreUp'?2:1)+(cStats.score*0.2))*rBonus
             } 
         };
-        if(stage.type==='coop'){ $('score-label').innerText='ボスの残りHP:'; hideEl('score-slash'); hideEl('game-goal'); }else{ $('score-label').innerText='追い払った数:'; showEl('score-slash','inline'); showEl('game-goal','inline'); $('game-goal').innerText=stage.goalScore; }
+        
+        if(stage.type==='coop'){ $('score-label').innerText='ボスの残りHP:'; hideEl('score-slash'); hideEl('game-goal'); }
+        else if(!stage.isScoreAttack){ $('score-label').innerText='追い払った数:'; showEl('score-slash','inline'); showEl('game-goal','inline'); $('game-goal').innerText=stage.goalScore; }
+        
         $('game-score').innerText='0'; hideEl('game-end-modal'); updateSpecialGaugeUI();
         if(stage.isBossStage){ let bhp=stage.type==='coop'?1000:150; gameState.enemies.push({x:canvas.width/2-75,y:-150,w:150,h:150,speed:stage.enemySpeed,hp:bhp,maxHp:bhp,wobbleOffset:0,isBoss:true}); if(stage.type==='coop') $('game-score').innerText=bhp; }
         const go=$('game-tutorial-overlay'); if(stage.isTutorial){ showEl('game-tutorial-overlay','block'); go.style.opacity=1; $('game-tutorial-text').innerText='左右にスライドで動かそう！'; setTimeout(()=>{go.style.opacity=0;setTimeout(()=>{hideEl('game-tutorial-overlay');go.style.opacity='';},1000);},4000); }else hideEl('game-tutorial-overlay');
@@ -1047,6 +1191,19 @@ function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.pla
 
 function updateGame() {
     const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
+    
+    // スコアアタック用の時間減少処理
+    if(s.isScoreAttack) {
+        gameState.timeLeft--;
+        if(gameState.frameCount % 60 === 0) {
+            $('game-time').innerText = Math.ceil(gameState.timeLeft / 60);
+        }
+        if(gameState.timeLeft <= 0) {
+            checkStageClear(false);
+            return;
+        }
+    }
+
     if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
     if(gameState.specialGauge<100){gameState.specialGauge+=0.05;if(gameState.specialGauge>100)gameState.specialGauge=100;if(gameState.frameCount%5===0)updateSpecialGaugeUI();}
     if(input.keys['ArrowLeft']||input.keys['a'])p.x-=p.speed; if(input.keys['ArrowRight']||input.keys['d'])p.x+=p.speed; p.x=Math.max(0,Math.min(canvas.width-p.width,p.x));
@@ -1079,7 +1236,8 @@ function updateGame() {
             if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} 
             if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} 
             checkStageClear(false); 
-        }else if(!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){
+        }else if(!s.isScoreAttack&&!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){
+            // スコアアタックでは突破されてもゲームオーバーにならない（減点等にするかそのまま）
             triggerGameOver();return;
         }
     }
@@ -1119,16 +1277,51 @@ function drawGame() {
 }
 
 function checkStageClear(isRetreat=false) {
-    const isCleared=currentStage.isBossStage?gameState.bossDefeated:(!currentStage.isEndless&&gameState.score>=currentStage.goalScore);
+    const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (currentStage.isScoreAttack ? true : (!currentStage.isEndless&&gameState.score>=currentStage.goalScore));
+    
+    // スコアアタックの場合のみ、タイムアップまたは逃げるで確定
     if(isRetreat||isCleared){
         stopGame(); stopBattleBGM(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
-        $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
-        let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ 
-            eTk=Math.floor(gameState.score/60); 
-            eCo=Math.floor(gameState.score/5)*50;
-            eMt=Math.floor(gameState.score/30); 
-            if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; }else{ let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } } }
+        
+        $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; 
+        $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
+        
+        let rt=''; 
+        if(currentStage.type==='pvp'){ 
+            const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} 
+        }else if(currentStage.type==='coop'){ 
+            rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } 
+        }else if(currentStage.isScoreAttack) {
+            // スコアアタック終了時
+            $('game-end-title').innerText = 'スコア算出完了!!';
+            rt = `最終スコア: <span class="text-yellow-400 text-2xl font-black">${gameState.score}</span> pt<br><br><span class="text-xs text-indigo-300">全国ランキングに記録されました！</span>`;
+            
+            if (isFirebaseInitialized && !isRetreat) {
+                const currWeek = getWeeklyString();
+                window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).once('value').then(snap => {
+                    const exData = snap.val();
+                    if (!exData || exData.score < gameState.score) {
+                        window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).set({
+                            id: DB.userId, name: DB.userName, icon: DB.userIcon, score: gameState.score, timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                });
+                DB.lastPlayedRankingWeek = currWeek;
+            }
+        }else{ 
+            rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; 
+            if(currentStage.isEndless){ 
+                eTk=Math.floor(gameState.score/60); 
+                eCo=Math.floor(gameState.score/5)*50;
+                eMt=Math.floor(gameState.score/30); 
+                if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; 
+            }else{ 
+                let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} 
+                if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } 
+            } 
+        }
+        
         $('game-end-desc').innerHTML=rt; showEl('game-end-modal'); shootConfetti('end-confetti-container',80); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); updateHeaderUI(); saveGame();
         if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
     }
