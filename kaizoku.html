@@ -62,7 +62,8 @@
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
     <!-- BGM & SE -->
-    <audio id="bgm-home" src="The_Pirates.mp3" loop></audio>
+    <audio id="bgm-home" src="homebgm.mp3" loop></audio>
+    <audio id="bgm-battle" src="kaizokubattle.mp3" loop></audio>
     <audio id="se-click" src="決定ボタンを押す10.mp3"></audio>
 
     <img id="img-seimaro-boss" src="せいまろ.png" class="hidden" alt="boss">
@@ -639,17 +640,15 @@ document.addEventListener('click', (e) => {
     }
 });
 let bgmStarted = false;
-function playHomeBGM() {
-    const bgm = document.getElementById('bgm-home');
-    if (bgm && bgm.paused) { bgm.play().catch(()=>{}); }
-}
-function stopHomeBGM() {
-    const bgm = document.getElementById('bgm-home');
-    if (bgm && !bgm.paused) { bgm.pause(); }
-}
+function playHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && bgm.paused) { bgm.play().catch(()=>{}); } }
+function stopHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && !bgm.paused) { bgm.pause(); } }
+function playBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && bgm.paused) { bgm.play().catch(()=>{}); } }
+function stopBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && !bgm.paused) { bgm.pause(); } }
+
 document.addEventListener('click', () => {
-    if (!bgmStarted && !document.getElementById('screen-home').classList.contains('hidden')) {
-        playHomeBGM(); bgmStarted = true;
+    if (!bgmStarted) {
+        if (!document.getElementById('screen-home').classList.contains('hidden')) { playHomeBGM(); }
+        bgmStarted = true;
     }
 }, { once: true });
 
@@ -820,6 +819,7 @@ function navTo(sid) {
     
     if(sid!=='screen-game'){ 
         stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; 
+        stopBattleBGM();
         playHomeBGM();
     }else{ 
         hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; 
@@ -1008,6 +1008,7 @@ canvas.addEventListener('touchend',()=>input.isTouching=false);
 function startStage(stage, isMulti=false) {
     if(!isMulti&&DB.stamina<stage.staminaCost)return showAlert(`スタミナ不足！(必要: ${stage.staminaCost})`);
     if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game');
+    playBattleBGM();
     if(DB.tutorialCompleted) showEl('special-ui-container'); else hideEl('special-ui-container'); hideEl('multi-match-ui');
     setTimeout(()=>{
         const rect=canvas.parentElement.getBoundingClientRect(); canvas.width=rect.width<100?window.innerWidth:rect.width; canvas.height=rect.height<100?window.innerHeight-80:rect.height;
@@ -1037,7 +1038,7 @@ function startStage(stage, isMulti=false) {
     }, 50);
 }
 function stopGame() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;} if(multiSyncInterval){clearInterval(multiSyncInterval);multiSyncInterval=null;} hideEl('special-cutin'); }
-function triggerGameOver() { stopGame(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
+function triggerGameOver() { stopGame(); stopBattleBGM(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
 let lastGaugeUI=-1;
 function updateSpecialGaugeUI() { let g=Math.floor(gameState.specialGauge); if(g===lastGaugeUI)return; lastGaugeUI=g; $('special-gauge').style.width=`${g}%`; const b=$('btn-special'), i=$('btn-special-icon'); if(g>=100){b.classList.remove('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.add('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.remove('grayscale');b.disabled=false;}else{b.classList.add('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.remove('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.add('grayscale');b.disabled=true;} }
 function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
@@ -1120,7 +1121,7 @@ function drawGame() {
 function checkStageClear(isRetreat=false) {
     const isCleared=currentStage.isBossStage?gameState.bossDefeated:(!currentStage.isEndless&&gameState.score>=currentStage.goalScore);
     if(isRetreat||isCleared){
-        stopGame(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
+        stopGame(); stopBattleBGM(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
         $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
         let rt=''; if(currentStage.type==='pvp'){ const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} }else if(currentStage.type==='coop'){ rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } }else{ rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; if(currentStage.isEndless){ 
