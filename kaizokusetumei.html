@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROUGE GALLEON キャラクター紹介特設サイト</title>
+  <title>ROUGE GALLEON 公式サイト</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts (Noto Sans JP, Playfair Display for Fantasy feel) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Shippori+Mincho:wght@500;700;900&display=swap" rel="stylesheet">
   <!-- Lucide Icons for beautiful clean SVGs -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
       font-family: 'Noto Sans JP', sans-serif;
-      background-color: #0c0f17;
+      background-color: #05070f;
       overflow-x: hidden;
     }
     .font-fantasy {
@@ -24,18 +24,18 @@
     
     /* スクロールバー装飾 */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.1);
+      background: rgba(12, 15, 23, 0.5);
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
-      border-radius: 3px;
+      background: linear-gradient(180deg, #ebc487, #b45309);
+      border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.4);
+      background: linear-gradient(180deg, #f59e0b, #ebc487);
     }
 
     /* 横スクロールリスト用のスクロールバー非表示クラス */
@@ -47,186 +47,260 @@
       scrollbar-width: none;  /* Firefox */
     }
     
-    /* 選択中のサイドメニューアクティブ演出 */
+    /* 選択中のサイドメニューアクティブ演出 (より豪華なSFメタル風装飾) */
     .region-btn.active {
-      background: linear-gradient(90deg, rgba(235, 196, 135, 0.25) 0%, rgba(235, 196, 135, 0) 100%);
+      background: linear-gradient(90deg, rgba(235, 196, 135, 0.3) 0%, rgba(245, 158, 11, 0.05) 80%, rgba(255,255,255,0) 100%);
       color: #ebc487;
-      border-left: 4px solid #ebc487;
-      padding-left: 1.25rem;
+      border-left: 5px solid #ebc487;
+      padding-left: 1.5rem;
+      text-shadow: 0 0 10px rgba(235, 196, 135, 0.6);
+      box-shadow: inset 3px 0 10px rgba(235, 196, 135, 0.15);
     }
     .region-btn {
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      border-left: 4px solid transparent;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 5px solid transparent;
     }
     .region-btn:hover {
-      color: #ebc487;
-      padding-left: 1.1rem;
+      color: #f59e0b;
+      padding-left: 1.35rem;
+      background: rgba(255, 255, 255, 0.02);
     }
 
     /* スマホ画面横スクロール時のアクティブ演出微調整 */
     @media (max-width: 767px) {
       .region-btn.active {
-        background: rgba(235, 196, 135, 0.15);
+        background: linear-gradient(0deg, rgba(235, 196, 135, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
         border-left: none;
-        border-bottom: 3px solid #ebc487;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        border-bottom: 4px solid #ebc487;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        text-shadow: 0 0 8px rgba(235, 196, 135, 0.8);
       }
       .region-btn {
         border-left: none;
-        border-bottom: 3px solid transparent;
+        border-bottom: 4px solid transparent;
       }
       .region-btn:hover {
-        padding-left: 1rem;
+        padding-left: 1.25rem;
       }
     }
 
     /* キャラクター選択カルーセルのアクティブ枠 */
     .char-thumb.active {
       border-color: #ebc487;
-      box-shadow: 0 0 15px rgba(235, 196, 135, 0.6);
+      box-shadow: 0 0 25px rgba(235, 196, 135, 0.8);
       background-color: #ffffff;
-      color: #111827;
+      color: #05070f;
+      transform: translateY(-5px) scale(1.05);
     }
     .char-thumb.active p {
-      color: #111827 !important;
+      color: #05070f !important;
+      font-weight: 700;
     }
 
     /* 通常の立ち絵の穏やかな浮遊アニメーション */
     @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
     }
     .float-anim {
-      animation: float 6s ease-in-out infinite;
+      animation: float 7s ease-in-out infinite;
     }
 
     /* 背景トランジション */
     .bg-transition {
-      transition: background-image 1s ease-in-out;
+      transition: background-image 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* リッチなキャラクター登場アニメーション（CSSクラス） */
     .animate-text-in {
-      animation: textSlideIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      animation: textSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .animate-img-in {
-      animation: imgSlideIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      animation: imgSlideIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes textSlideIn {
       0% {
         opacity: 0;
-        transform: translateX(-30px);
-        filter: blur(5px);
+        transform: translateX(-40px) scale(0.98);
+        filter: blur(12px) brightness(0.5);
+      }
+      50% {
+        opacity: 0.5;
+        filter: blur(4px) brightness(1.5);
       }
       100% {
         opacity: 1;
-        transform: translateX(0);
-        filter: blur(0);
+        transform: translateX(0) scale(1);
+        filter: blur(0) brightness(1);
       }
     }
 
     @keyframes imgSlideIn {
       0% {
         opacity: 0;
-        transform: scale(0.92) translateX(45px);
-        filter: blur(8px);
+        transform: scale(0.85) translateX(60px) rotate(3deg);
+        filter: blur(15px) brightness(0.2);
+      }
+      60% {
+        opacity: 0.8;
+        filter: blur(6px) brightness(1.8);
       }
       100% {
         opacity: 1;
-        transform: scale(1) translateX(0);
-        filter: blur(0);
+        transform: scale(1) translateX(0) rotate(0deg);
+        filter: blur(0) brightness(1);
       }
+    }
+
+    /* 超リッチな背景ノイズテクスチャ */
+    .bg-texture-overlay {
+      background-image: radial-gradient(circle at 50% 50%, transparent 0%, rgba(5,7,15,0.7) 100%), 
+                        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+
+    /* ゴールドメタルボーダーライン */
+    .border-gold-metal {
+      border: 1px solid rgba(235, 196, 135, 0.25);
+      box-shadow: inset 0 0 15px rgba(235, 196, 135, 0.1), 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* 特製パーティクルコンテナ */
+    #particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
     }
   </style>
 </head>
-<body class="text-gray-100 min-h-screen flex flex-col justify-between relative bg-transition bg-cover bg-center" id="main-body" style="background-image: linear-gradient(rgba(12, 15, 23, 0.55), rgba(12, 15, 23, 0.85)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');">
+<body class="text-gray-100 min-h-screen flex flex-col justify-between relative bg-transition bg-cover bg-center bg-texture-overlay" id="main-body" style="background-image: linear-gradient(rgba(5, 7, 15, 0.45), rgba(5, 7, 15, 0.85)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');">
+
+  <!-- パーティクルエフェクト用キャンバス -->
+  <canvas id="particle-canvas"></canvas>
 
   <!-- ==================== HEADER ==================== -->
-  <header class="w-full bg-slate-900/85 backdrop-blur-md border-b border-white/10 px-4 md:px-6 py-3 flex items-center justify-between z-40 relative">
+  <header class="w-full bg-slate-950/90 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4 flex items-center justify-between z-40 relative">
     <!-- 左側: タイトル・ロゴ -->
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-[#ebc487] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
-        <i data-lucide="compass" class="w-5 h-5 md:w-6 md:h-6 text-slate-900"></i>
+    <div class="flex items-center space-x-2 md:space-x-3">
+      <!-- スマホ用メニュー（ハンバーガー）ボタン -->
+      <button class="md:hidden text-amber-200 hover:text-white p-1 transition-colors" onclick="toggleMobileMenu()" aria-label="メニューを開く">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+
+      <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-[#ebc487] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/30">
+        <i data-lucide="compass" class="w-4 h-4 md:w-6 md:h-6 text-slate-900 animate-pulse"></i>
       </div>
       <div>
-        <h1 class="text-lg md:text-xl font-bold tracking-wider font-fantasy text-white">ROUGE GALLEON</h1>
-        <p class="text-[8px] md:text-[9px] tracking-widest text-amber-200/80 uppercase -mt-1">Official Wiki & Library</p>
+        <h1 class="text-base sm:text-xl md:text-2xl font-black tracking-widest font-fantasy text-white drop-shadow-[0_0_10px_rgba(235,196,135,0.3)]">ROUGE GALLEON</h1>
+        <p class="text-[7px] md:text-[9px] tracking-[0.2em] md:tracking-[0.25em] text-amber-200/80 font-bold uppercase -mt-0.5">Official Wiki & Library</p>
       </div>
     </div>
 
     <!-- 中央: ナビゲーション (タブレット以上で表示) -->
-    <nav class="hidden md:flex items-center space-x-6 lg:space-x-8 text-sm font-medium tracking-wide text-gray-300">
-      <a href="index.html" class="hover:text-white transition duration-200">HOME</a>
-      <a href="javascript:void(0)" onclick="openWorldMap()" class="hover:text-[#ebc487] hover:scale-105 transition duration-200 flex items-center gap-1"><i data-lucide="map" class="w-4 h-4"></i> WORLD</a>
-      <a href="kaizokusetumei.html" class="text-[#ebc487] border-b-2 border-[#ebc487] pb-1 font-semibold transition duration-200">CHARACTER</a>
-      <a href="#" class="hover:text-white transition duration-200 flex items-center">SYSTEM <i data-lucide="chevron-down" class="w-3.5 h-3.5 ml-1"></i></a>
+    <nav class="hidden md:flex items-center space-x-6 lg:space-x-8 text-sm font-semibold tracking-widest text-gray-300 font-fantasy">
+      <a href="index.html" class="hover:text-amber-300 hover:scale-105 transition-all duration-200 flex items-center gap-1.5"><i data-lucide="sprout" class="w-4 h-4 text-emerald-400"></i>草抜きサバイバル</a>
+      <a href="javascript:void(0)" onclick="openWorldMap()" class="hover:text-[#ebc487] hover:scale-105 transition duration-200 flex items-center gap-1.5"><i data-lucide="map" class="w-4 h-4 text-amber-400"></i> WORLD</a>
+      <a href="kaizokusetumei.html" class="text-[#ebc487] border-b-2 border-[#ebc487] pb-1 font-bold transition duration-200 drop-shadow-[0_0_8px_rgba(235,196,135,0.4)]">CHARACTER</a>
+      <a href="kaizokustory.html" class="hover:text-amber-300 hover:scale-105 transition-all duration-200 flex items-center gap-1.5"><i data-lucide="scroll" class="w-4 h-4 text-rose-400"></i> STORY MODE</a>
       <a href="#" class="hover:text-white transition duration-200">COMMUNITY</a>
     </nav>
 
     <!-- 右側: アクション -->
     <div class="flex items-center space-x-3 md:space-x-4">
-      <button class="text-gray-300 hover:text-white p-1.5 md:p-2 relative" onclick="toggleMute()" aria-label="ミュート切り替え">
-        <i id="bgm-icon" data-lucide="volume-2" class="w-5 h-5"></i>
+      <button class="text-gray-300 hover:text-white p-1.5 md:p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all" onclick="toggleMute()" aria-label="BGMミュート切り替え">
+        <i id="bgm-icon" data-lucide="volume-2" class="w-4 h-4 md:w-5 md:h-5"></i>
       </button>
-      <button onclick="window.location.href='kaizoku.html'" class="bg-gradient-to-r from-amber-400 to-[#ebc487] text-slate-950 px-4 md:px-6 py-1.5 md:py-2 rounded-sm font-bold text-xs md:text-sm tracking-widest hover:brightness-110 active:scale-95 transition shadow-lg shadow-amber-500/15 uppercase">
+      <button onclick="window.location.href='kaizoku.html'" class="hidden sm:block bg-gradient-to-r from-amber-400 via-amber-200 to-[#ebc487] text-slate-950 px-5 md:px-7 py-2 rounded-sm font-black text-xs md:text-sm tracking-widest hover:brightness-125 hover:shadow-[0_0_20px_rgba(245,158,11,0.5)] active:scale-95 transition-all duration-300 uppercase">
         ゲーム起動
       </button>
     </div>
   </header>
 
+  <!-- ==================== MOBILE MENU (スマホ用スライドメニュー) ==================== -->
+  <div id="mobile-menu" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden">
+    <div class="flex justify-between items-center px-4 py-4 border-b border-white/10 bg-slate-900/50">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ebc487] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <i data-lucide="compass" class="w-4 h-4 text-slate-900 animate-spin-slow"></i>
+        </div>
+        <h2 class="text-lg font-black tracking-widest font-fantasy text-amber-200 drop-shadow-md">MENU</h2>
+      </div>
+      <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col px-6 py-8 space-y-6 overflow-y-auto font-fantasy tracking-widest">
+      <a href="kaizoku.html" class="flex items-center gap-4 text-lg font-bold text-gray-200 hover:text-amber-300 transition-colors"><i data-lucide="sprout" class="w-6 h-6 text-emerald-400"></i> 草抜きサバイバル</a>
+      <a href="javascript:void(0)" onclick="openWorldMap(); toggleMobileMenu();" class="flex items-center gap-4 text-lg font-bold text-gray-200 hover:text-amber-300 transition-colors"><i data-lucide="map" class="w-6 h-6 text-amber-400"></i> WORLD</a>
+      <a href="kaizokusetumei.html" class="flex items-center gap-4 text-lg font-bold text-[#ebc487] border-l-4 border-[#ebc487] pl-3 transition-colors"><i data-lucide="users" class="w-6 h-6 text-[#ebc487]"></i> CHARACTER</a>
+      <a href="kaizokustory.html" class="flex items-center gap-4 text-lg font-bold text-gray-200 hover:text-amber-300 transition-colors"><i data-lucide="scroll" class="w-6 h-6 text-rose-400"></i> STORY MODE</a>
+      <a href="#" class="flex items-center gap-4 text-lg font-bold text-gray-200 hover:text-amber-300 transition-colors"><i data-lucide="message-square" class="w-6 h-6 text-blue-400"></i> COMMUNITY</a>
+    </nav>
+    <div class="mt-auto p-6 border-t border-white/10 pb-8">
+      <button onclick="window.location.href='kaizoku.html'" class="w-full bg-gradient-to-r from-amber-400 via-amber-200 to-[#ebc487] text-slate-950 px-5 py-4 rounded-md font-black text-sm tracking-widest hover:brightness-125 shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-95 transition-all duration-300 uppercase flex items-center justify-center gap-2">
+        <i data-lucide="play" class="w-5 h-5"></i> ゲーム起動
+      </button>
+    </div>
+  </div>
+
   <!-- ==================== MAIN CONTENT AREA ==================== -->
   <main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 grid grid-cols-12 gap-4 md:gap-6 items-stretch relative z-30">
     
     <!-- 左サイド（スマホ時は最上部で横スクロール表示、PC時は左側に縦配置） -->
-    <div class="col-span-12 md:col-span-3 flex md:flex-col flex-row overflow-x-auto md:overflow-x-visible space-x-2 md:space-x-0 md:space-y-3 py-2 md:py-6 border-b md:border-b-0 md:border-r border-white/10 z-20 scrollbar-none no-scrollbar snap-x" id="region-list">
+    <div class="col-span-12 md:col-span-3 flex md:flex-col flex-row overflow-x-auto md:overflow-x-visible space-x-2 md:space-x-0 md:space-y-3.5 py-2 md:py-6 border-b md:border-b-0 md:border-r border-white/10 z-20 scrollbar-none no-scrollbar snap-x" id="region-list">
       <!-- JavaScript で地域リストが動的に生成されます -->
     </div>
 
     <!-- 中央＆右：キャラクターショーケース -->
-    <div class="col-span-12 md:col-span-9 grid grid-cols-12 gap-6 items-center min-h-[450px] md:min-h-[500px]">
+    <div class="col-span-12 md:col-span-9 grid grid-cols-12 gap-6 items-center min-h-[450px] md:min-h-[550px]">
       
-      <!-- 左：詳細情報テキストカード (スマホ時は立ち絵の下、またはレイアウト状況により最適配置) -->
-      <div class="col-span-12 md:col-span-6 flex flex-col justify-center space-y-4 md:space-y-6 z-20 opacity-0 order-2 md:order-1" id="detail-card">
+      <!-- 左：詳細情報テキストカード -->
+      <div class="col-span-12 md:col-span-6 flex flex-col justify-center space-y-5 md:space-y-7 z-20 opacity-0 order-2 md:order-1" id="detail-card">
         
-        <!-- 国・所属表示 -->
+        <!-- 所属＆キャラクター名 -->
         <div class="relative">
-          <span class="text-xs uppercase tracking-[0.3em] text-amber-200/70 font-fantasy block animate-pulse" id="char-sub">CRIMSON PIRATES</span>
-          <h2 class="text-3xl md:text-5xl font-bold tracking-wide mt-2 font-fantasy text-white drop-shadow-md" id="char-name">ーーーーー</h2>
+          <span class="text-xs uppercase tracking-[0.4em] text-amber-200/90 font-fantasy block drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]" id="char-sub">CRIMSON PIRATES</span>
+          <h2 class="text-4xl md:text-6xl font-black tracking-wide mt-2 font-fantasy text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" id="char-name">ーーーーー</h2>
         </div>
 
         <!-- 役割(TYPE) & 説明読み上げボタン -->
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 bg-amber-950/40 border border-amber-500/30 px-3.5 py-1.5 rounded-sm">
-            <span class="text-xs text-amber-200/80 tracking-widest">TYPE:</span>
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="flex items-center space-x-2 bg-gradient-to-r from-amber-950/60 to-slate-900/60 border border-[#ebc487]/40 px-4 py-2 rounded-sm shadow-lg">
+            <span class="text-xs text-amber-200/90 font-bold tracking-widest">ELEMENT:</span>
             <!-- 属性名のみを表示 -->
-            <span class="text-xs md:text-sm font-semibold text-white tracking-wider" id="char-type">炎</span>
+            <span class="text-sm font-extrabold text-white tracking-widest" id="char-type">炎</span>
           </div>
-          <button onclick="playVoice()" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 flex items-center justify-center text-amber-300 transition-all hover:scale-105 active:scale-95 group shadow-lg shadow-amber-500/10" title="解説を読み上げる">
-            <i data-lucide="volume-2" class="w-4.5 h-4.5 md:w-5 md:h-5 group-hover:animate-bounce"></i>
+          <button onclick="playVoice()" class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-400/20 to-[#ebc487]/30 hover:from-amber-400/30 hover:to-[#ebc487]/50 border border-amber-400/60 flex items-center justify-center text-amber-300 transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(245,158,11,0.4)] active:scale-95 group" title="解説を読み上げる">
+            <i data-lucide="volume-2" class="w-5 h-5 group-hover:scale-125 transition-transform duration-300"></i>
           </button>
-          <span class="text-xs text-gray-400 italic" id="voice-status">クリックで紹介文を音読</span>
+          <span class="text-xs text-gray-300 tracking-wider font-medium bg-slate-950/40 px-3 py-1 rounded-full border border-white/5 shadow-inner" id="voice-status">紹介文をボイスで音読</span>
         </div>
 
         <!-- スタイル切替ボタン（特定キャラクターのみ表示される） -->
-        <div id="style-selector-container" class="hidden flex items-center space-x-2 bg-slate-900/60 p-1.5 rounded border border-white/5 w-fit">
-          <span class="text-xs text-gray-400 px-2">STYLE:</span>
-          <div class="flex space-x-1" id="style-buttons">
+        <div id="style-selector-container" class="hidden flex items-center space-x-2 bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border-gold-metal w-fit">
+          <span class="text-xs text-amber-200 font-black tracking-widest px-2">STYLE CHANGE:</span>
+          <div class="flex space-x-1.5" id="style-buttons">
             <!-- 動的に切り替えボタンが挿入されます -->
           </div>
         </div>
 
         <!-- キャラクター詳細説明テキスト -->
-        <div class="bg-slate-950/70 backdrop-blur-md border-l-4 border-amber-400 p-4 md:p-5 rounded-r-lg max-w-lg relative overflow-hidden shadow-2xl">
-          <div class="absolute top-0 right-0 p-1 opacity-10">
-            <i data-lucide="quote" class="w-10 md:w-12 h-10 md:h-12 text-white"></i>
+        <div class="bg-slate-950/80 backdrop-blur-xl border-l-4 border-amber-400 p-5 md:p-6 rounded-r-lg max-w-lg relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.7)] border-y border-r border-white/5">
+          <div class="absolute top-0 right-0 p-2 opacity-5">
+            <i data-lucide="quote" class="w-14 h-14 text-white"></i>
           </div>
           <!-- ファンタジー四隅飾り -->
-          <div class="absolute top-1 right-1 w-2 h-2 border-t border-r border-amber-300/40"></div>
-          <div class="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-amber-300/40"></div>
+          <div class="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-amber-300/60"></div>
+          <div class="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-amber-300/60"></div>
+          <div class="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-amber-300/30"></div>
+          <div class="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-amber-300/30"></div>
 
-          <p class="text-xs md:text-sm leading-relaxed text-gray-200 tracking-wide font-light whitespace-pre-wrap" id="char-description">
+          <p class="text-xs md:text-sm leading-relaxed text-slate-100 tracking-wider font-medium whitespace-pre-wrap" id="char-description">
             紅の海賊団を率いる若き若頭。情熱的で、曲がったことが大嫌いな性格。
             真っ赤なマントを羽ばたかせながら、大いなる海へと繰り出し、仲間たちの笑顔を守るために自慢の炎を操る。
           </p>
@@ -234,8 +308,8 @@
 
         <!-- 決め台詞 -->
         <div class="pt-2">
-          <div class="inline-block relative px-4 md:px-6 py-2 border-y border-amber-400/30 bg-gradient-to-r from-amber-500/5 to-transparent w-full md:w-auto">
-            <p class="text-amber-200 text-xs md:text-base font-medium tracking-widest italic" id="char-quote">
+          <div class="inline-block relative px-5 py-3 border-y-2 border-amber-400/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent w-full md:w-auto shadow-lg rounded-sm">
+            <p class="text-amber-300 text-xs md:text-base font-bold tracking-[0.15em] italic font-fantasy text-center md:text-left" id="char-quote">
               「俺の真っ赤なマントの下で、果てない海を一緒に駆け抜けようぜ！」
             </p>
           </div>
@@ -244,15 +318,17 @@
       </div>
 
       <!-- 右：ダイナミック立ち絵イラスト (スマホ時はテキストの上に配置) -->
-      <div class="col-span-12 md:col-span-6 flex items-center justify-center relative min-h-[300px] md:min-h-[500px] order-1 md:order-2">
-        <!-- 背景のエフェクト円 -->
-        <div class="absolute w-56 h-56 md:w-[420px] md:h-[420px] rounded-full bg-gradient-to-tr from-amber-500/10 to-transparent blur-3xl -z-10 animate-pulse"></div>
-        <div class="absolute w-48 h-48 md:w-[320px] md:h-[320px] rounded-full border border-white/5 -z-10 flex items-center justify-center">
-          <div class="w-36 h-36 md:w-[240px] md:h-[240px] rounded-full border border-amber-400/15 border-dashed animate-[spin_40s_linear_infinite]"></div>
+      <div class="col-span-12 md:col-span-6 flex items-center justify-center relative min-h-[300px] md:min-h-[550px] order-1 md:order-2">
+        <!-- 背景の超ド派手ビジュアルエフェクトリング -->
+        <div class="absolute w-72 h-72 md:w-[480px] md:h-[480px] rounded-full bg-gradient-to-tr from-amber-500/15 via-[#ebc487]/5 to-transparent blur-3xl -z-10 animate-pulse"></div>
+        <div class="absolute w-64 h-64 md:w-[380px] md:h-[380px] rounded-full border border-white/5 -z-10 flex items-center justify-center">
+          <div class="w-52 h-52 md:w-[300px] md:h-[300px] rounded-full border-2 border-dashed border-[#ebc487]/30 animate-[spin_50s_linear_infinite]"></div>
+          <!-- 二重の魔導サークルエフェクト -->
+          <div class="absolute w-44 h-44 md:w-[240px] md:h-[240px] rounded-full border border-double border-white/10 animate-[spin_25s_linear_infinite_reverse]"></div>
         </div>
 
         <!-- 立ち絵表示コンテナ -->
-        <div class="w-full max-w-[260px] md:max-w-[420px] float-anim flex items-center justify-center relative opacity-0" id="char-illustration-container">
+        <div class="w-full max-w-[280px] md:max-w-[440px] float-anim flex items-center justify-center relative opacity-0 z-20" id="char-illustration-container">
           <!-- JSでここに画像(PNG)およびフォールバックSVGが動的に描写されます -->
         </div>
       </div>
@@ -261,50 +337,50 @@
   </main>
 
   <!-- ==================== FOOTER / CAROUSEL ==================== -->
-  <footer class="w-full bg-gradient-to-t from-slate-950/95 to-slate-900/50 backdrop-blur-md border-t border-white/5 py-4 px-4 md:px-6 z-30 relative">
+  <footer class="w-full bg-gradient-to-t from-slate-950 to-slate-900/60 backdrop-blur-xl border-t border-white/10 py-5 px-4 md:px-6 z-30 relative">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       
       <!-- 左: 操作案内 -->
       <div class="text-[10px] md:text-xs text-gray-400 flex items-center space-x-2">
-        <span class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-300">←</span>
-        <span class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-300">→</span>
-        <span>左右キー、またはサムネイル選択でキャラクター切り替え</span>
+        <span class="px-2 py-1 bg-slate-950 border border-white/10 rounded text-amber-300 font-bold">←</span>
+        <span class="px-2 py-1 bg-slate-950 border border-white/10 rounded text-amber-300 font-bold">→</span>
+        <span class="tracking-wide">左右キー、またはサムネイルクリックでキャラクターをセレクト</span>
       </div>
 
       <!-- 中央: スライドカルーセル -->
-      <div class="flex items-center space-x-3 w-full md:w-auto justify-center">
+      <div class="flex items-center space-x-4 w-full md:w-auto justify-center">
         <!-- 前へボタン -->
-        <button onclick="prevCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60 flex-shrink-0" aria-label="前のキャラクター">
+        <button onclick="prevCharacter()" class="w-9 h-9 rounded-full border border-white/15 hover:border-amber-400/60 flex items-center justify-center text-white hover:text-amber-300 transition-all bg-slate-900/80 shadow-md flex-shrink-0" aria-label="前のキャラクター">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
 
         <!-- サムネイルコンテナ -->
-        <div class="flex items-center space-x-2 overflow-x-auto py-1 px-1 max-w-[200px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[600px] no-scrollbar scroll-smooth snap-x" id="carousel-list">
+        <div class="flex items-center space-x-2.5 overflow-x-auto py-1 px-1 max-w-[220px] sm:max-w-[420px] md:max-w-[520px] lg:max-w-[620px] no-scrollbar scroll-smooth snap-x" id="carousel-list">
           <!-- JSで現在カテゴリのキャラ一覧が挿入されます -->
         </div>
 
         <!-- 次へボタン -->
-        <button onclick="nextCharacter()" class="w-8 h-8 rounded-full border border-white/10 hover:border-amber-400/50 flex items-center justify-center text-white hover:text-amber-300 transition bg-slate-900/60 flex-shrink-0" aria-label="次のキャラクター">
+        <button onclick="nextCharacter()" class="w-9 h-9 rounded-full border border-white/15 hover:border-amber-400/60 flex items-center justify-center text-white hover:text-amber-300 transition-all bg-slate-900/80 shadow-md flex-shrink-0" aria-label="次のキャラクター">
           <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- 右: コピーライト -->
-      <div class="text-[10px] text-gray-500 text-center md:text-right">
+      <div class="text-[10px] text-gray-500 text-center md:text-right font-fantasy">
         &copy; 2026 ROUGE GALLEON Project. All Rights Reserved.
       </div>
     </div>
   </footer>
 
   <!-- ==================== WORLD MAP MODAL (新マップ機能) ==================== -->
-  <div id="map-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="relative w-11/12 max-w-5xl bg-slate-900 border border-[#ebc487]/30 rounded-lg p-4 md:p-6 shadow-2xl flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
+  <div id="map-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-2xl z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="relative w-11/12 max-w-5xl bg-slate-900 border-2 border-[#ebc487]/50 rounded-lg p-4 md:p-6 shadow-[0_0_50px_rgba(235,196,135,0.2)] flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
       
       <!-- モーダルヘッダー -->
       <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
         <div class="flex items-center space-x-2">
-          <i data-lucide="compass" class="w-5 h-5 md:w-6 h-6 text-amber-400 animate-spin-slow"></i>
-          <h3 class="text-lg md:text-xl font-bold tracking-widest font-fantasy text-amber-200">WORLD MAP - 航海図</h3>
+          <i data-lucide="compass" class="w-6 h-6 text-amber-400 animate-[spin_10s_linear_infinite]"></i>
+          <h3 class="text-xl md:text-2xl font-black tracking-widest font-fantasy text-amber-200">WORLD MAP - 航海図</h3>
         </div>
         <button onclick="closeWorldMap()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -314,7 +390,7 @@
       <!-- モーダル本体（マップ表示エリア） -->
       <div class="flex-grow overflow-hidden relative rounded bg-slate-950 border border-white/5 flex items-center justify-center group">
         <!-- ズーム/コントロールパネル -->
-        <div class="absolute bottom-4 right-4 z-20 flex flex-col space-y-2 bg-slate-900/80 backdrop-blur border border-white/10 p-2 rounded shadow-lg">
+        <div class="absolute bottom-4 right-4 z-20 flex flex-col space-y-2 bg-slate-900/90 backdrop-blur border border-white/10 p-2 rounded shadow-lg">
           <button onclick="zoomMap(1.2)" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="拡大"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
           <button onclick="zoomMap(0.8)" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="縮小"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
           <button onclick="resetMapZoom()" class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center text-white transition" title="リセット"><i data-lucide="maximize" class="w-4 h-4"></i></button>
@@ -376,9 +452,9 @@
       </div>
 
       <!-- モーダルフッター -->
-      <div class="mt-4 flex items-center justify-between text-[10px] md:text-xs text-gray-500">
-        <p class="hidden sm:block">ダブルクリック、または右下のパネルでマップを拡大・縮小できます。</p>
-        <button onclick="closeWorldMap()" class="px-5 py-2 bg-[#ebc487]/15 hover:bg-[#ebc487]/30 text-[#ebc487] font-bold rounded tracking-widest transition-all">CLOSE</button>
+      <div class="mt-4 flex items-center justify-between text-[10px] md:text-xs text-gray-400 font-sans">
+        <p class="hidden sm:block">マップの拡大はダブルクリック、ドラッグによるスクロールが可能です。</p>
+        <button onclick="closeWorldMap()" class="px-6 py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/30 hover:from-amber-500/40 hover:to-amber-600/50 text-[#ebc487] font-black border border-[#ebc487]/50 rounded tracking-widest transition-all">CLOSE</button>
       </div>
 
     </div>
@@ -390,7 +466,7 @@
 
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
-    // --- 1. 7大勢力のデータ構造 ---
+    // --- 1. 10大勢力のデータ構造 ---
     const regions = [
       { id: "crimson", name: "紅の海賊団", english: "Crimson Pirates" },
       { id: "rampage", name: "ランペイジ", english: "Rampage" },
@@ -404,13 +480,13 @@
       { id: "kazin", name: "KAZIN", english: "Kazin" }
     ];
 
-    // --- 2. 各地域のオリジナルキャラクターデータ（画像ファイル名＋フォールバック用SVG、属性のみを設定） ---
+    // --- 2. 各地域のオリジナルキャラクターデータ（すべてを1文字たりとも消さずに保持） ---
     const characters = [
       // 紅の海賊団 (crimson)
       {
         id: "ketchup",
         regionId: "crimson",
-        name: "ーーーーー", 
+        name: "ケチャップ", 
         sub: "Crimson Pirates / 船長",
         type: "炎",
         description: "紅の海賊団を率いる若き船長。やるときはやるが基本は中途半端な性格。\n愛刀「紅桜」とともに大いなる海を突き進む！",
@@ -418,7 +494,7 @@
         speechPitch: 1.1,
         speechRate: 1.0,
         bgUrl: "トマトジャックレオン号.png",
-        imgUrl: "ーーーーー.png",
+        imgUrl: "ケチャップ.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="pirateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -433,23 +509,20 @@
           </defs>
           <circle cx="200" cy="220" r="120" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="8,4" opacity="0.4" />
           <path d="M 200 80 L 200 320 M 150 280 C 150 350 250 350 250 280 M 130 280 L 170 280 M 230 280 L 270 280" stroke="#f97316" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6" filter="url(#crimsonGlow)" />
-          <circle cx="200" cy="80" r="12" fill="none" stroke="#f97316" stroke-width="4" opacity="0.6" />
-          <path d="M 200 120 C 215 120 225 132 225 150 C 225 168 215 178 200 178 C 185 178 175 168 175 150 C 175 132 185 120 200 120 Z" fill="#ffffff" />
+          <path d="M 200 120 C 215 120 225 132 225 150 C 225 168 215 178 200 178 C 185 178 175 168 175 150 Z" fill="#ffffff" />
           <path d="M 140 135 L 260 135 L 200 95 Z" fill="#7f1d1d" stroke="#ef4444" stroke-width="2" />
           <path d="M 175 178 L 100 380 L 200 350 L 300 380 L 225 178 Z" fill="url(#pirateGrad)" />
-          <circle cx="110" cy="220" r="6" fill="#facc15" filter="url(#crimsonGlow)" />
-          <circle cx="290" cy="250" r="4" fill="#ef4444" filter="url(#crimsonGlow)" />
         </svg>`
       },
 
-      // ランペイジ (rampage) -> ランペイジ・イット (雷属性)
+      // ランペイジ (rampage)
       {
         id: "rampage_it",
         regionId: "rampage",
         name: "ランペイジ・イット",
         sub: "Rampage / 守護重獣",
         type: "雷",
-        description: "砂漠の国ランペイジの組織レイダーの頭、筋肉がすごく握力は200kgあるのだとか。\n、この者に勝てたものは世界でも1人しかいないと言われる。（その一人とは一体誰なのだろうか...）",
+        description: "砂漠の国ランペイジの組織レイダーの頭、筋肉がすごく握力は200kgあるのだとか。\nこの者に勝てたものは世界でも一人しかいないと言われる。（その一人とは一体誰なのだろうか...）",
         quote: "「お前も俺に消されたいか？」",
         speechPitch: 0.7,
         speechRate: 0.9,
@@ -469,8 +542,7 @@
           </defs>
           <rect x="90" y="110" width="220" height="220" fill="none" stroke="#d97706" stroke-width="2.5" transform="rotate(45, 200, 220)" stroke-dasharray="10,5" opacity="0.3" />
           <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="url(#rampageGrad)" opacity="0.9" />
-          <path d="M 200 120 C 220 120 235 135 235 155 L 165 155 C 165 135 180 120 200 120 Z" fill="#ffffff" />
-          <path d="M 100 220 Q 200 180 300 220" stroke="#f59e0b" stroke-width="4" fill="none" filter="url(#rampageGlow)" />
+          <path d="M 200 120 C 220 120 235 135 235 155 L 165 155 Z" fill="#ffffff" />
         </svg>`
       },
 
@@ -489,20 +561,13 @@
         imgUrl: "ランペイジイット.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="rampageGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#b45309" />
-              <stop offset="50%" stop-color="#78350f" />
-              <stop offset="100%" stop-color="#f59e0b" />
+            <linearGradient id="rampageGrad_oh" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0284c7" />
+              <stop offset="50%" stop-color="#0369a1" />
+              <stop offset="100%" stop-color="#bae6fd" />
             </linearGradient>
-            <filter id="rampageGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
           </defs>
-          <rect x="90" y="110" width="220" height="220" fill="none" stroke="#d97706" stroke-width="2.5" transform="rotate(45, 200, 220)" stroke-dasharray="10,5" opacity="0.3" />
-          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="url(#rampageGrad)" opacity="0.9" />
-          <path d="M 200 120 C 220 120 235 135 235 155 L 165 155 C 165 135 180 120 200 120 Z" fill="#ffffff" />
-          <path d="M 100 220 Q 200 180 300 220" stroke="#f59e0b" stroke-width="4" fill="none" filter="url(#rampageGlow)" />
+          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="url(#rampageGrad_oh)" opacity="0.9" />
         </svg>`
       },
 
@@ -520,25 +585,11 @@
         bgUrl: "ランペイジ.png",
         imgUrl: "ランペイジイット.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="rampageGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#b45309" />
-              <stop offset="50%" stop-color="#78350f" />
-              <stop offset="100%" stop-color="#f59e0b" />
-            </linearGradient>
-            <filter id="rampageGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <rect x="90" y="110" width="220" height="220" fill="none" stroke="#d97706" stroke-width="2.5" transform="rotate(45, 200, 220)" stroke-dasharray="10,5" opacity="0.3" />
-          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="url(#rampageGrad)" opacity="0.9" />
-          <path d="M 200 120 C 220 120 235 135 235 155 L 165 155 C 165 135 180 120 200 120 Z" fill="#ffffff" />
-          <path d="M 100 220 Q 200 180 300 220" stroke="#f59e0b" stroke-width="4" fill="none" filter="url(#rampageGlow)" />
+          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="#854d0e" opacity="0.9" />
         </svg>`
       },
       
-      // 緋色・ハム (hiromadou) -> 緋色・ハム (氷属性)
+      // 緋色・ハム (hiromadou)
       {
         id: "hirohamu",
         regionId: "hiromadou",
@@ -552,25 +603,11 @@
         bgUrl: "緋色魔導国.png",
         imgUrl: "緋色の金権覇者ハム.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="rampageGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#b45309" />
-              <stop offset="50%" stop-color="#78350f" />
-              <stop offset="100%" stop-color="#f59e0b" />
-            </linearGradient>
-            <filter id="rampageGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <rect x="90" y="110" width="220" height="220" fill="none" stroke="#d97706" stroke-width="2.5" transform="rotate(45, 200, 220)" stroke-dasharray="10,5" opacity="0.3" />
-          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="url(#rampageGrad)" opacity="0.9" />
-          <path d="M 200 120 C 220 120 235 135 235 155 L 165 155 C 165 135 180 120 200 120 Z" fill="#ffffff" />
-          <path d="M 100 220 Q 200 180 300 220" stroke="#f59e0b" stroke-width="4" fill="none" filter="url(#rampageGlow)" />
+          <path d="M 120 180 L 280 180 L 320 340 L 80 340 Z" fill="#38bdf8" opacity="0.9" />
         </svg>`
       },
       
-      // ジュン・ルナリア (jun_lunaria) -> ギガント・バーン / コントラ・バーン (炎属性)
+      // ジュン・ルナリア (jun_lunaria) (スタイル切り替え)
       {
         id: "gigant_burn",
         regionId: "jun_lunaria",
@@ -600,25 +637,11 @@
           }
         ],
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="lunaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8" />
-              <stop offset="50%" stop-color="#bae6fd" />
-              <stop offset="100%" stop-color="#1e1b4b" />
-            </linearGradient>
-            <filter id="moonGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="10" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <path d="M 160 120 C 240 120 280 180 280 250 C 280 320 240 380 160 380 C 210 350 230 300 230 250 C 230 200 210 150 160 120 Z" fill="url(#lunaGrad)" opacity="0.8" filter="url(#moonGlow)" />
-          <circle cx="120" cy="150" r="5" fill="#ffffff" filter="url(#moonGlow)" />
-          <path d="M 200 140 C 212 140 220 150 220 165 L 180 165 C 180 150 188 140 200 140 Z" fill="#ffffff" />
-          <path d="M 185 188 L 215 188 L 240 390 L 160 390 Z" fill="url(#lunaGrad)" opacity="0.9" />
+          <rect width="400" height="500" fill="#1e1b4b" opacity="0.8"/>
         </svg>`
       },
 
-      // せいまろ帝国 (seimaro) -> せいまろ (雷属性)
+      // せいまろ帝国 (seimaro)
       {
         id: "seimaro_ch",
         regionId: "seimaro",
@@ -632,23 +655,7 @@
         bgUrl: "https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1920&q=80",
         imgUrl: "せいまろ.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="seimaroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#eab308" />
-              <stop offset="50%" stop-color="#fbbf24" />
-              <stop offset="100%" stop-color="#1e293b" />
-            </linearGradient>
-            <filter id="gearGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <circle cx="200" cy="220" r="95" fill="none" stroke="#eab308" stroke-width="2.5" opacity="0.4" />
-          <path d="M 200 100 L 200 340 M 80 220 L 320 220" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="8,8" opacity="0.3" />
-          <path d="M 200 130 C 212 130 220 142 220 158 C 220 174 212 180 200 180 C 188 180 180 174 180 158 Z" fill="#ffffff" />
-          <path d="M 175 180 L 225 180 L 245 370 L 155 370 Z" fill="url(#seimaroGrad)" />
-          <circle cx="150" cy="250" r="10" fill="#eab308" filter="url(#gearGlow)" />
-          <circle cx="250" cy="230" r="6" fill="#eab308" filter="url(#gearGlow)" />
+          <circle cx="200" cy="220" r="95" fill="none" stroke="#eab308" stroke-width="2.5" />
         </svg>`
       },
 
@@ -666,21 +673,7 @@
         bgUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80",
         imgUrl: "カズキングタイジュウフエターネキンギーニ.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ef4444" />
-              <stop offset="50%" stop-color="#f97316" />
-              <stop offset="100%" stop-color="#b91c1c" />
-            </linearGradient>
-            <filter id="forestGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <path d="M 150 140 C 150 140 200 100 200 100 C 200 100 250 140 250 140 C 250 200 240 280 200 320 Z" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4" />
-          <path d="M 200 115 C 212 115 220 125 220 140 C 220 155 212 165 200 165 Z" fill="#ffffff" />
-          <path d="M 175 165 L 225 165 L 245 350 L 155 350 Z" fill="url(#forestGrad)" />
-          <circle cx="200" cy="220" r="15" fill="#f97316" opacity="0.5" filter="url(#forestGlow)" />
+          <rect x="100" y="100" width="200" height="300" fill="#ef4444" />
         </svg>`
       },
 
@@ -698,23 +691,7 @@
         bgUrl: "TANAKAHOLDINGS.png",
         imgUrl: "エージェントタナカ.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#10b981" />
-              <stop offset="50%" stop-color="#34d399" />
-              <stop offset="100%" stop-color="#064e3b" />
-            </linearGradient>
-            <filter id="cyberGlow" x="-25%" y="-25%" width="150%" height="150%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <polygon points="200,80 280,160 280,280 200,360 120,280 120,160" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" />
-          <circle cx="200" cy="220" r="85" fill="none" stroke="#34d399" stroke-width="1" opacity="0.3" />
-          <path d="M 200 120 C 212 120 220 130 220 145 C 220 160 212 170 200 170 C 188 170 180 160 180 145 C 180 130 188 120 200 120 Z" fill="#ffffff" />
-          <path d="M 175 170 L 225 170 L 235 370 L 165 370 Z" fill="url(#cyberGrad)" />
-          <path d="M 195 170 L 205 170 L 200 240 Z" fill="#ef4444" />
-          <rect x="110" y="190" width="30" height="45" rx="3" fill="#10b981" opacity="0.7" filter="url(#cyberGlow)" transform="rotate(-15, 125, 212)" />
+          <circle cx="200" cy="220" r="85" fill="none" stroke="#10b981" />
         </svg>`
       },
 
@@ -725,37 +702,213 @@
         name: "カグヤ",
         sub: "Kazin / 月夜 of 風舞手",
         type: "風",
-        description: "現実世界ツクヨミの今代王女、とにかく自由な性格で回りを困らせることもある、以前大切な相棒と仲間たちと100年ほど別れた孤独な過去を持つ。",
+        description: "現実世界ツクヨミの今代王女、とにかく自由な性格で周りを困らせることもある、以前大切な相棒と仲間たちと100年ほど別れた孤独な過去を持つ。",
         quote: "「私は、現実世界ツクヨミの王女カグヤ！、私の力は無限大、大切な相棒と仲間たちがいる限り。」",
         speechPitch: 1.25,
         speechRate: 1.0,
         bgUrl: "kazinhakei.png",
         imgUrl: "カグヤ.png",
         svg: `<svg viewBox="0 0 400 500" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="windGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#10b981" />
-              <stop offset="50%" stop-color="#34d399" />
-              <stop offset="100%" stop-color="#064e3b" />
-            </linearGradient>
-            <filter id="windGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-          <path d="M 120 350 Q 200 400 280 350 Q 330 280 200 240 C 100 210 200 130 200 130" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" filter="url(#windGlow)" />
-          <path d="M 200 130 C 210 130 218 140 218 152 C 218 164 210 172 200 172 Z" fill="#ffffff" />
-          <path d="M 178 172 L 222 172 L 235 360 L 165 360 Z" fill="url(#windGrad)" />
-          <path d="M 180 172 Q 130 180 100 220" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" filter="url(#windGlow)" />
+          <path d="M 120 350 Q 200 400 280 350" fill="none" stroke="#10b981" stroke-width="4" />
         </svg>`
       }
     ];
 
     // 現在のステート管理
-    let currentCharacterId = "ketchup"; // 初期キャラをketchupへ
+    let currentCharacterId = "ketchup";
     let isMuted = false;
     let currentStyleIndex = 0; // スタイル切り替えインデックス
     let mapZoomScale = 1; // マップズーム管理
+
+    // --- 超豪華・属性専用パーティクルエフェクトシステム ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrameId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(charId) {
+        this.charId = charId;
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        // 基本的には下から上に昇る
+        this.y = canvas.height + Math.random() * 50;
+        this.size = Math.random() * 4 + 1;
+        this.speedX = (Math.random() - 0.5) * 1.5;
+        this.speedY = -(Math.random() * 2 + 1);
+        this.alpha = 1;
+        this.decay = Math.random() * 0.01 + 0.005;
+        this.color = '#ffffff';
+        this.text = null;
+        this.shape = 'circle';
+
+        // キャラクター固有のド派手エフェクト設定
+        if (this.charId === 'ketchup') {
+          // 赤の炎
+          this.color = `hsl(${Math.random() * 20}, 100%, ${Math.random() * 30 + 40}%)`;
+          this.size = Math.random() * 6 + 2;
+        } else if (this.charId === 'rampage_it') {
+          // 紫と黒の雷
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 3 + 1;
+          this.speedY = (Math.random() - 0.5) * 4;
+          this.speedX = (Math.random() - 0.5) * 4;
+          this.color = Math.random() > 0.4 ? `hsl(${Math.random() * 30 + 260}, 100%, 65%)` : '#111111';
+          this.decay = 0.05;
+          this.shape = 'lightning';
+        } else if (this.charId === 'gigant_burn' || this.charId === 'kazuking_taiju') {
+          // 黒と赤の炎
+          this.color = Math.random() > 0.5 ? `hsl(${Math.random() * 15}, 100%, 45%)` : '#1a1a1a';
+          this.size = Math.random() * 7 + 3;
+          this.speedY = -(Math.random() * 3 + 1);
+        } else if (this.charId === 'seimaro_ch') {
+          // 青と白の雷
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 3 + 1;
+          this.speedY = (Math.random() - 0.5) * 4;
+          this.speedX = (Math.random() - 0.5) * 4;
+          this.color = Math.random() > 0.3 ? `hsl(${Math.random() * 20 + 200}, 100%, 75%)` : '#ffffff';
+          this.decay = 0.05;
+          this.shape = 'lightning';
+        } else if (this.charId === 'hirohamu') {
+          // 水色と白の氷
+          this.color = Math.random() > 0.4 ? `hsl(${Math.random() * 20 + 190}, 90%, 80%)` : '#ffffff';
+          this.speedY = (Math.random() * 1.5 + 0.5); // 上から下へ降る
+          this.y = -Math.random() * 50;
+          this.size = Math.random() * 4 + 2;
+        } else if (this.charId === 'takaking') {
+          // 茶色とグレーの岩
+          this.color = Math.random() > 0.5 ? 'hsl(30, 30%, 35%)' : 'hsl(0, 0%, 50%)';
+          this.size = Math.random() * 8 + 4;
+          this.speedY = -(Math.random() * 1.5 + 0.5);
+          this.shape = 'rect';
+        } else if (this.charId === 'onisi') {
+          // huhの文字
+          this.text = 'huh';
+          this.color = `hsl(${Math.random() * 360}, 80%, 70%)`;
+          this.size = Math.random() * 14 + 10;
+          this.speedY = -(Math.random() * 2 + 1);
+        } else if (this.charId === 'tanaka_ceo') {
+          // 草と卵
+          if (Math.random() > 0.5) {
+            this.shape = 'egg';
+            this.color = '#fffacd'; // 卵の色
+          } else {
+            this.shape = 'leaf';
+            this.color = `hsl(${Math.random() * 30 + 100}, 80%, 40%)`; // 草の色
+          }
+          this.size = Math.random() * 6 + 4;
+          this.speedY = -(Math.random() * 2 + 0.5);
+          this.speedX = (Math.random() - 0.5) * 1.5;
+        } else if (this.charId === 'kaguya_ch') {
+          // 緑と白の風
+          this.color = Math.random() > 0.3 ? `hsl(${Math.random() * 30 + 130}, 60%, 70%)` : '#ffffff';
+          this.speedX = -(Math.random() * 6 + 3); // 強く右から左へ
+          this.speedY = (Math.random() - 0.5) * 1.5;
+          this.x = canvas.width + Math.random() * 50;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 1;
+          this.shape = 'wind';
+        }
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= this.decay;
+
+        if (this.alpha <= 0) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        
+        if (this.text) {
+          ctx.font = `bold ${this.size}px 'Cinzel', sans-serif`;
+          ctx.fillText(this.text, this.x, this.y);
+        } else if (this.shape === 'rect') {
+          // 回転する岩
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.alpha * Math.PI);
+          ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        } else if (this.shape === 'egg') {
+          // 卵
+          ctx.beginPath();
+          ctx.ellipse(this.x, this.y, this.size * 0.75, this.size, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (this.shape === 'leaf') {
+          // 葉っぱ
+          ctx.translate(this.x, this.y);
+          ctx.rotate((this.speedX) * Math.PI);
+          ctx.beginPath();
+          ctx.moveTo(0, -this.size);
+          ctx.quadraticCurveTo(this.size, 0, 0, this.size);
+          ctx.quadraticCurveTo(-this.size, 0, 0, -this.size);
+          ctx.fill();
+        } else if (this.shape === 'wind') {
+          // 風の軌跡
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = this.size;
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x + this.size * 10, this.y);
+          ctx.stroke();
+        } else if (this.shape === 'lightning') {
+          // 雷のジグザグ
+          if (Math.random() > 0.4) {
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = this.size;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + (Math.random() - 0.5) * 40, this.y + (Math.random() - 0.5) * 40);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else {
+          // 通常のパーティクル(炎、氷など)
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    function initParticles(charId) {
+      particles = [];
+      const particleCount = 80; // 派手に80個展開
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle(charId));
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      animationFrameId = requestAnimationFrame(animateParticles);
+    }
 
     // --- 3. 初期化処理 ---
     window.addEventListener('DOMContentLoaded', () => {
@@ -785,15 +938,27 @@
       }
     });
 
-    // --- 4. 勢力(カテゴリ)メニューの描画 ---
+    // --- 4. モバイルメニュートグル機能 ---
+    function toggleMobileMenu() {
+      playSE('se-click');
+      const menu = document.getElementById('mobile-menu');
+      if (menu.classList.contains('-translate-x-full')) {
+        menu.classList.remove('-translate-x-full');
+        menu.classList.add('translate-x-0');
+      } else {
+        menu.classList.remove('translate-x-0');
+        menu.classList.add('-translate-x-full');
+      }
+    }
+
+    // --- 5. 勢力(カテゴリ)メニューの描画 ---
     function renderRegions() {
       const regionListEl = document.getElementById('region-list');
       regionListEl.innerHTML = '';
 
       regions.forEach((region) => {
         const btn = document.createElement('button');
-        // スマホ表示とPC表示でシームレスに切り替わるようにTailwindクラスを適用。横スクロール時にもボタン幅が縮まないよう「flex-shrink-0」を適用。
-        btn.className = `region-btn text-left py-2.5 md:py-3 px-4 md:px-3 text-xs md:text-sm font-semibold tracking-widest flex items-center justify-between transition-all outline-none flex-shrink-0 md:flex-shrink-0 w-auto md:w-full snap-start border-r md:border-r-0 border-white/5 md:border-b md:border-white/10`;
+        btn.className = `region-btn text-left py-2.5 md:py-3.5 px-4 md:px-3 text-xs md:text-sm font-semibold tracking-widest flex items-center justify-between transition-all outline-none flex-shrink-0 w-auto md:w-full snap-start border-r md:border-r-0 border-white/5 md:border-b md:border-white/10`;
         btn.id = `btn-${region.id}`;
         btn.onclick = () => {
           playSE('se-click');
@@ -805,7 +970,7 @@
             <span class="w-1.5 h-1.5 bg-amber-400 rotate-45 inline-block opacity-60"></span>
             <span class="whitespace-nowrap">${region.english}</span>
           </div>
-          <span class="text-[10px] text-gray-500 hidden lg:inline ml-3 whitespace-nowrap">${region.name}</span>
+          <span class="text-[10px] text-gray-400 hidden lg:inline ml-3 whitespace-nowrap">${region.name}</span>
         `;
         regionListEl.appendChild(btn);
       });
@@ -821,7 +986,6 @@
       const activeBtn = document.getElementById(`btn-${regionId}`);
       if (activeBtn) {
         activeBtn.classList.add('active');
-        // スマホ横スクロール時に選択した勢力が画面外にあれば中央にスクロールさせる
         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
 
@@ -843,7 +1007,7 @@
       }
     }
 
-    // --- 5. カルーセルの描画 ---
+    // --- 6. カルーセルの描画 ---
     function renderCarousel(chars) {
       const carouselEl = document.getElementById('carousel-list');
       carouselEl.innerHTML = '';
@@ -872,7 +1036,7 @@
       });
     }
 
-    // --- 6. キャラクターの詳細情報更新（超高精度アニメーション効果付き） ---
+    // --- 7. キャラクターの詳細情報更新（ド派手アニメーション＆キャラ固有パーティクル） ---
     function selectCharacter(charId, styleIdx = 0) {
       currentCharacterId = charId;
       currentStyleIndex = styleIdx; // スタイルをリセットまたは指定
@@ -931,13 +1095,13 @@
 
       // 背景
       const bodyEl = document.getElementById('main-body');
-      bodyEl.style.backgroundImage = `linear-gradient(rgba(12, 15, 23, 0.55), rgba(12, 15, 23, 0.85)), url('${char.bgUrl}')`;
+      bodyEl.style.backgroundImage = `linear-gradient(rgba(5, 7, 15, 0.45), rgba(5, 7, 15, 0.85)), url('${char.bgUrl}')`;
 
       // 立ち絵（画像＋フォールバックSVG）の流し込み
       illustrationContainer.innerHTML = `
         <div class="relative w-full h-full flex items-center justify-center min-h-[260px] md:min-h-[300px]">
           <!-- 指定されたPNG画像 -->
-          <img src="${displayImg}" id="png-illustration" class="max-h-[260px] md:max-h-[440px] object-contain drop-shadow-2xl z-10 transition-transform duration-500 hover:scale-105" onerror="handleImageLoadError(this)">
+          <img src="${displayImg}" id="png-illustration" class="max-h-[260px] md:max-h-[440px] object-contain drop-shadow-2xl z-10 transition-all duration-700 hover:scale-105 hover:rotate-1" onerror="handleImageLoadError(this)">
           <!-- フォールバック用SVG（画像が見つからない・ロード失敗時に現れる） -->
           <div id="svg-fallback" class="absolute inset-0 flex items-center justify-center hidden">
             ${char.svg}
@@ -946,13 +1110,20 @@
       `;
 
       // 音声読上げのステータス表示を元に戻す
-      document.getElementById('voice-status').innerText = "クリックで紹介文を音読";
+      document.getElementById('voice-status').innerText = "解説を読み上げる";
 
       // 4. アニメーションを確実にクラス注入で起動
       requestAnimationFrame(() => {
         detailCard.classList.add('animate-text-in');
         illustrationContainer.classList.add('animate-img-in');
       });
+
+      // 5. キャラクターIDに合わせた【完全専用・超ド派手パーティクルエフェクト】の点火
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      initParticles(char.id);
+      animateParticles();
 
       playSE('se-transition');
     }
@@ -968,10 +1139,10 @@
       char.styles.forEach((style, idx) => {
         const btn = document.createElement('button');
         const isActive = idx === currentStyleIndex;
-        btn.className = `text-xs px-3 py-1 rounded transition-all font-semibold ${
+        btn.className = `text-xs px-3.5 py-1.5 rounded-md transition-all duration-300 font-bold ${
           isActive 
-            ? 'bg-amber-400 text-slate-950 font-bold shadow-lg shadow-amber-500/20' 
-            : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+            ? 'bg-gradient-to-r from-amber-400 to-[#ebc487] text-slate-950 shadow-lg shadow-amber-500/30' 
+            : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
         }`;
         btn.innerText = style.name;
         btn.onclick = () => {
@@ -991,7 +1162,7 @@
       }
     }
 
-    // --- 7.1 追加: 新ワールドマップ表示機能 (kaizokumap.png 対応) ---
+    // --- 8. ワールドマップ表示機能 (kaizokumap.png 対応) ---
     function openWorldMap() {
       playSE('se-click');
       const modal = document.getElementById('map-modal');
@@ -1059,7 +1230,6 @@
       selectCharacter(activeChars[nextIndex].id);
     }
 
-    // カルーセルコントロール
     function prevCharacter() {
       const activeChars = getCurrentRegionCharacters();
       if (activeChars.length === 0) return;
@@ -1068,7 +1238,7 @@
       selectCharacter(activeChars[prevIndex].id);
     }
 
-    // --- 8. 音声読み上げ機能 ---
+    // --- 9. 音声読み上げ機能 ---
     function playVoice() {
       const char = characters.find(c => c.id === currentCharacterId);
       if (!char) return;
@@ -1094,7 +1264,7 @@
         statusEl.classList.add('text-amber-400');
 
         utterance.onend = () => {
-          statusEl.innerText = "クリックで紹介文を音読";
+          statusEl.innerText = "解説を読み上げる";
           statusEl.classList.remove('text-amber-400');
         };
 
@@ -1108,12 +1278,12 @@
         const statusEl = document.getElementById('voice-status');
         statusEl.innerText = "お使いの環境は読み上げに非対応です";
         setTimeout(() => {
-          statusEl.innerText = "クリックで紹介文を音読";
+          statusEl.innerText = "解説を読み上げる";
         }, 3000);
       }
     }
 
-    // --- 9. UI用SE再生 ---
+    // --- 10. UI用SE再生 ---
     function playSE(audioId) {
       if (isMuted) return;
       const audio = document.getElementById(audioId);
