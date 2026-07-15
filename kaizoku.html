@@ -107,7 +107,7 @@
             
             <!-- 1. ホーム -->
             <div id="screen-home" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-between gap-2 relative">
-                <button onclick="openRankingModal()" class="absolute top-2 left-2 game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(250,204,21,0.5)] z-20 transition-transform hover:scale-110 flex items-center gap-1 text-xs">
+                <button onclick="openRankingModal()" class="absolute top-2 left-2 game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 transition-transform hover:scale-110 flex items-center gap-1 text-xs">
                     <span>🏆</span> <span>全国RANK</span>
                 </button>
                 <a href="kaizokusetumei.html" class="absolute top-2 right-2 game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 text-xl transition-transform hover:scale-110 tooltip">📖</a>
@@ -272,7 +272,7 @@
                 </div>
                 <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 shadow-inner flex-shrink-0">
                     <button id="tab-mission-daily" onclick="switchMissionTab('daily')" class="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">日替わり</button>
-                    <button id="tab-mission-normal" onclick="switchMissionTab('normal')" class="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all border-b-4 border-transparent">ノーマル</button>
+                    <button id="tab-mission-normal" onclick="switchMissionTab('normal')" class="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">ノーマル</button>
                     <button id="tab-mission-event" onclick="switchMissionTab('event')" class="flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent">イベント</button>
                 </div>
                 <div id="mission-list-container" class="flex flex-col gap-3"></div>
@@ -343,7 +343,7 @@
             </div>
         </main>
 
-        <!-- 下部ナビゲーション -->
+        <!-- 下部ナビゲーション (5列) -->
         <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-1 py-1 pb-4 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
             <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1" data-target="screen-home">
                 <span class="nav-icon mb-1">🏠</span><span class="nav-text">ホーム</span>
@@ -530,6 +530,7 @@
                     <p id="detail-desc" class="text-[11px] text-indigo-200 mt-2 text-center font-bold bg-indigo-950/50 p-2 rounded-xl w-full whitespace-pre-line"></p>
                 </div>
                 
+                <!-- 乗組員専用: 才能強化＆転生UI -->
                 <div id="crew-talent-ui" class="hidden w-full flex-col gap-2 mt-1 bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 shadow-inner">
                     <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（Lvアップで1Pt獲得！）</div>
                     <div class="text-xs text-indigo-200 text-center font-bold">残り才能ポイント: <span id="talent-points-available" class="text-yellow-400 font-black text-sm">0</span></div>
@@ -666,7 +667,7 @@
                     <span class="text-xs text-yellow-300 font-black block mb-2">🎁 獲得した報酬 🎁</span>
                     <div id="ranking-reward-items" class="flex justify-center gap-2"></div>
                 </div>
-                <button onclick="hideEl('ranking-reward-modal')" class="game-btn w-full max-w-[240px] py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black rounded-full shadow-2xl border-4 border-white text-xl">受け取る！ 👍</button>
+                <button onclick="closeRankingRewardModal()" class="game-btn w-full max-w-[240px] py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black rounded-full shadow-2xl border-4 border-white text-xl">受け取る！ 👍</button>
             </div>
         </div>
 
@@ -711,11 +712,9 @@ function shootConfetti(cid, count=50) { const c=$(cid); if(!c)return; c.innerHTM
 // --- スコアアタック（ランキング用週管理） ---
 function getWeeklyString() {
     const d = new Date();
-    // 日本時間に合わせる (+9時間)
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const jst = new Date(utc + (3600000 * 9));
     jst.setHours(0, 0, 0, 0);
-    // 月曜始まりの週番号を計算
     jst.setDate(jst.getDate() + 3 - (jst.getDay() + 6) % 7);
     const week1 = new Date(jst.getFullYear(), 0, 4);
     const week = 1 + Math.round(((jst.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
@@ -987,7 +986,6 @@ window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailK
 function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
 function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
 
-// 🧬 新システム：レベル上昇時に才能ポイントを割り振る機能
 function updateTalentUI(crewId) {
     if(!DB.crewStats) DB.crewStats={};
     if(!DB.crewStats[crewId]) DB.crewStats[crewId] = {reincarnation:0, power:0, speed:0, score:0};
@@ -1128,11 +1126,11 @@ function closeRankingRewardModal() {
 
 // --- ゲームエンジン ---
 let gameLoopId=null, currentStage=null, specialCutinTimeout=null;
-let gameState={score:0,frameCount:0,player:{},bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false, timeLeft:0};
+let gameState={score:0,frameCount:0,player:{},bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, timeLeft:0};
 const input={touchX:0,touchY:0,isTouching:false,keys:{}}; window.addEventListener('keydown',e=>input.keys[e.key]=true); window.addEventListener('keyup',e=>input.keys[e.key]=false);
 const canvas=$('gameCanvas'), ctx=canvas.getContext('2d');
 canvas.addEventListener('touchstart',e=>{input.isTouching=true;input.touchX=e.touches[0].clientX-canvas.getBoundingClientRect().left;});
-canvas.addEventListener('touchmove',e=>{if(!input.isTouching)return;e.preventDefault();const cx=e.touches[0].clientX-canvas.getBoundingClientRect().left;if(!gameState.isPaused)gameState.player.x+=(cx-input.touchX);input.touchX=cx;});
+canvas.addEventListener('touchmove',e=>{if(!input.isTouching)return;e.preventDefault();const cx=e.touches[0].clientX-canvas.getBoundingClientRect().left;if(!gameState.isPaused&&!gameState.isGameOver)gameState.player.x+=(cx-input.touchX);input.touchX=cx;});
 canvas.addEventListener('touchend',()=>input.isTouching=false);
 
 function startStage(stage, isMulti=false) {
@@ -1159,7 +1157,7 @@ function startStage(stage, isMulti=false) {
         const cStats = DB.crewStats[c.id] || {reincarnation:0, power:0, speed:0, score:0};
         const rBonus = 1 + (cStats.reincarnation * 0.5);
 
-        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,screenFlash:0,bossDefeated:false, 
+        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, 
             timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
             player:{
                 x:canvas.width/2-30,y:canvas.height-140,width:60,height:60,
@@ -1182,14 +1180,35 @@ function startStage(stage, isMulti=false) {
     }, 50);
 }
 function stopGame() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;} if(multiSyncInterval){clearInterval(multiSyncInterval);multiSyncInterval=null;} hideEl('special-cutin'); }
-function triggerGameOver() { stopGame(); stopBattleBGM(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
+function triggerGameOver() { 
+    gameState.isGameOver = true;
+    gameState.isPaused = true;
+    stopGame(); stopBattleBGM(); 
+    $('game-end-title').innerText='GAME OVER...'; 
+    $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; 
+    $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; 
+    showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; 
+    DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); 
+    setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); 
+}
 let lastGaugeUI=-1;
 function updateSpecialGaugeUI() { let g=Math.floor(gameState.specialGauge); if(g===lastGaugeUI)return; lastGaugeUI=g; $('special-gauge').style.width=`${g}%`; const b=$('btn-special'), i=$('btn-special-icon'); if(g>=100){b.classList.remove('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.add('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.remove('grayscale');b.disabled=false;}else{b.classList.add('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.remove('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.add('grayscale');b.disabled=true;} }
-function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
+function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused||gameState.isGameOver)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
 function skipSpecial() { if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;executeSpecialEffect();} }
-function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
+function executeSpecialEffect() { 
+    hideEl('special-cutin'); const p=gameState.player; 
+    if(gameState.isGameOver) return; // 既にゲームが終わっている場合はSP処理を行わない
+    if(p.crewId==='crew_seimaro'){ 
+        gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; 
+    }else{ 
+        gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; 
+    } 
+    gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); 
+}
 
 function updateGame() {
+    if(gameState.isGameOver || gameState.isPaused) return; // 🌟 ゲームオーバー / ポーズ中は完全に処理をストップして無限スコア稼ぎを防止！
+    
     const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
     
     // スコアアタック用の時間減少処理
@@ -1237,7 +1256,7 @@ function updateGame() {
             if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} 
             checkStageClear(false); 
         }else if(!s.isScoreAttack&&!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){
-            // スコアアタックでは突破されてもゲームオーバーにならない（減点等にするかそのまま）
+            // スコアアタックでは突破されてもゲームオーバーにならない
             triggerGameOver();return;
         }
     }
@@ -1246,7 +1265,7 @@ function updateGame() {
 
 function drawGame() {
     ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=2; for(let y=(gameState.bgOffset%100)-100;y<canvas.height;y+=100){ctx.beginPath();for(let x=0;x<canvas.width;x+=50)ctx.quadraticCurveTo(x+25,y+10,x+50,y);ctx.stroke();}
-    const p=gameState.player; if(p.crewId==='crew_seimaro'&&!gameState.isPaused&&gameState.frameCount%2===0){ const ox=p.x+p.width/2, oy=p.y+p.height/2; for(let lc=0;lc<3;lc++){ ctx.save();ctx.beginPath();let sx=ox+(Math.random()-0.5)*p.width*0.5, sy=oy+(Math.random()-0.5)*p.height*0.5;ctx.moveTo(sx,sy); for(let seg=0;seg<5;seg++){sx+=(Math.random()-0.5)*60;sy+=(Math.random()-0.5)*60;ctx.lineTo(sx,sy);if(Math.random()>0.5){ctx.fillStyle='#cffafe';ctx.beginPath();ctx.arc(sx,sy,Math.random()*5+2,0,Math.PI*2);ctx.fill();}} const cols=['#fff','#38bdf8','#22d3ee'];ctx.strokeStyle=cols[Math.floor(Math.random()*cols.length)];ctx.lineWidth=Math.random()*4+2;ctx.shadowColor='#0284c7';ctx.shadowBlur=25;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore(); } }
+    const p=gameState.player; if(p.crewId==='crew_seimaro'&&!gameState.isPaused&&!gameState.isGameOver&&gameState.frameCount%2===0){ const ox=p.x+p.width/2, oy=p.y+p.height/2; for(let lc=0;lc<3;lc++){ ctx.save();ctx.beginPath();let sx=ox+(Math.random()-0.5)*p.width*0.5, sy=oy+(Math.random()-0.5)*p.height*0.5;ctx.moveTo(sx,sy); for(let seg=0;seg<5;seg++){sx+=(Math.random()-0.5)*60;sy+=(Math.random()-0.5)*60;ctx.lineTo(sx,sy);if(Math.random()>0.5){ctx.fillStyle='#cffafe';ctx.beginPath();ctx.arc(sx,sy,Math.random()*5+2,0,Math.PI*2);ctx.fill();}} const cols=['#fff','#38bdf8','#22d3ee'];ctx.strokeStyle=cols[Math.floor(Math.random()*cols.length)];ctx.lineWidth=Math.random()*4+2;ctx.shadowColor='#0284c7';ctx.shadowBlur=25;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore(); } }
     ctx.save(); ctx.strokeStyle='rgba(239, 68, 68, 0.6)'; ctx.lineWidth=3; ctx.setLineDash([10,10]); ctx.beginPath(); ctx.moveTo(0,canvas.height-50); ctx.lineTo(canvas.width,canvas.height-50); ctx.stroke(); ctx.fillStyle='rgba(239, 68, 68, 0.2)'; ctx.fillRect(0,canvas.height-50,canvas.width,50); ctx.restore();
     gameState.bullets.forEach(b=>{ ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=15; if(b.type==='laser')ctx.fillRect(b.x,b.y,b.w,b.h);else{ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h/2,b.w/2,b.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(b.x+b.w/2-b.w/6,b.y+b.h/2-b.h/6,b.w/4,0,Math.PI*2);ctx.fill();} }); ctx.shadowBlur=0;
     ctx.textBaseline="middle"; ctx.textAlign="center"; const bi=$('img-seimaro-boss');
@@ -1277,11 +1296,14 @@ function drawGame() {
 }
 
 function checkStageClear(isRetreat=false) {
-    const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (currentStage.isScoreAttack ? true : (!currentStage.isEndless&&gameState.score>=currentStage.goalScore));
-    
-    // スコアアタックの場合のみ、タイムアップまたは逃げるで確定
+    // 🌟 判定ロジックの修正: スコアアタック中は、逃げるボタンか残り時間0になった時のみクリア処理に入る
+    const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (currentStage.isScoreAttack ? (gameState.timeLeft <= 0) : (!currentStage.isEndless&&gameState.score>=currentStage.goalScore));
     if(isRetreat||isCleared){
-        stopGame(); stopBattleBGM(); DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
+        gameState.isGameOver = true; // 🌟 即座にゲームオーバーフラグを立てて、ゲームループ（弾、敵の移動）を完全停止！
+        gameState.isPaused = true;
+        stopGame(); stopBattleBGM(); 
+        
+        DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
         
         $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; 
@@ -1293,7 +1315,6 @@ function checkStageClear(isRetreat=false) {
         }else if(currentStage.type==='coop'){ 
             rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } 
         }else if(currentStage.isScoreAttack) {
-            // スコアアタック終了時
             $('game-end-title').innerText = 'スコア算出完了!!';
             rt = `最終スコア: <span class="text-yellow-400 text-2xl font-black">${gameState.score}</span> pt<br><br><span class="text-xs text-indigo-300">全国ランキングに記録されました！</span>`;
             
@@ -1326,7 +1347,7 @@ function checkStageClear(isRetreat=false) {
         if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
     }
 }
-function gameLoop(){ if(!gameState.isPaused)updateGame();drawGame();gameLoopId=requestAnimationFrame(gameLoop); }
+function gameLoop(){ if(!gameState.isPaused&&!gameState.isGameOver)updateGame();drawGame();gameLoopId=requestAnimationFrame(gameLoop); }
 
 // --- 起動 ---
 window.onload = () => { loadGame(); navTo('screen-home'); setTimeout(checkAndStartTutorial,600); setTimeout(checkLoginBonus,1200); initFirebase(); };
