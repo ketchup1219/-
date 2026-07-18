@@ -26,7 +26,7 @@
       display: flex;
     }
 
-    /* --- わくわくエフェクト (ホーム画面用) --- */
+    /* --- わくわくエフェクト --- */
     .bg-scrolling {
       background-image: url('https://images.unsplash.com/photo-1544644181-1484b3f8c8b1?auto=format&fit=crop&w=800&q=80');
       background-size: 200%;
@@ -49,7 +49,7 @@
       left: -100%;
       width: 50%;
       height: 100%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
       transform: skewX(-25deg);
       animation: shine 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -57,6 +57,20 @@
       0% { left: -100%; }
       20% { left: 200%; }
       100% { left: 200%; }
+    }
+
+    .sparkle-bg {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: floatSparkle 10s linear infinite;
+      pointer-events: none;
+      z-index: 5;
+    }
+    @keyframes floatSparkle {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-20px); }
     }
 
     /* 星ドラ風 CTゲージ */
@@ -87,145 +101,90 @@
     .dmg-normal { color: #fff; }
     .dmg-crit { color: #facc15; font-size: 3rem; }
     .dmg-weak { color: #f87171; font-size: 2.8rem; }
+    .dmg-lvlup { color: #60a5fa; font-size: 1.5rem; text-shadow: 0 0 5px #000; animation: lvlup-float 2s ease-out forwards; }
+    
     @keyframes dmg-float {
       0% { transform: translateY(0) scale(0.5) rotate(calc(var(--rot, 0) * 1deg)); opacity: 1; }
       20% { transform: translateY(-30px) scale(1.2) rotate(calc(var(--rot, 0) * 1deg)); opacity: 1; }
       100% { transform: translateY(-50px) scale(1) rotate(calc(var(--rot, 0) * 1deg)); opacity: 0; }
     }
+    @keyframes lvlup-float {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+      80% { transform: translateY(-40px) scale(1.2); opacity: 1; }
+      100% { transform: translateY(-60px) scale(1); opacity: 0; }
+    }
 
     /* 敵のアニメーション */
     .enemy-idle { animation: enemy-bob 2s infinite ease-in-out; }
-    @keyframes enemy-bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
+    @keyframes enemy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     .enemy-attack { animation: enemy-atk 0.3s ease-out; }
-    @keyframes enemy-atk {
-      0% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(30px) scale(1.1); }
-      100% { transform: translateY(0) scale(1); }
-    }
+    @keyframes enemy-atk { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(30px) scale(1.1); } 100% { transform: translateY(0) scale(1); } }
     .enemy-hurt { animation: enemy-shake 0.2s; filter: brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(5); }
-    @keyframes enemy-shake {
-      0%, 100% { transform: translateX(0) translateY(0); }
-      25% { transform: translateX(-15px) translateY(-5px); }
-      75% { transform: translateX(15px) translateY(5px); }
-    }
-
-    /* ブレイク（BREAK）状態 */
-    .enemy-break {
-      animation: break-shake 0.5s infinite;
-      filter: brightness(0.8) sepia(0.5) hue-rotate(200deg);
-    }
-    @keyframes break-shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-2px); }
-      75% { transform: translateX(2px); }
-    }
+    @keyframes enemy-shake { 0%, 100% { transform: translateX(0) translateY(0); } 25% { transform: translateX(-15px) translateY(-5px); } 75% { transform: translateX(15px) translateY(5px); } }
+    .enemy-break { animation: break-shake 0.5s infinite; filter: brightness(0.8) sepia(0.5) hue-rotate(200deg); }
+    @keyframes break-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 
     /* カットイン演出 */
     .cutin-container {
-      position: absolute;
-      top: 30%;
-      left: 0;
-      width: 100%;
-      height: 100px;
+      position: absolute; top: 30%; left: 0; width: 100%; height: 100px;
       background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8) 20%, rgba(0, 0, 0, 0.8) 80%, transparent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transform: skewY(-5deg) translateX(-100%);
-      z-index: 60;
-      pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: skewY(-5deg) translateX(-100%); z-index: 60; pointer-events: none;
     }
-    .cutin-active {
-      animation: cutin-anim 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-    }
-    @keyframes cutin-anim {
-      0% { transform: skewY(-5deg) translateX(-100%); opacity: 0; }
-      15% { transform: skewY(-5deg) translateX(0); opacity: 1; }
-      85% { transform: skewY(-5deg) translateX(5%); opacity: 1; }
-      100% { transform: skewY(-5deg) translateX(100%); opacity: 0; }
-    }
+    .cutin-active { animation: cutin-anim 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+    @keyframes cutin-anim { 0% { transform: skewY(-5deg) translateX(-100%); opacity: 0; } 15% { transform: skewY(-5deg) translateX(0); opacity: 1; } 85% { transform: skewY(-5deg) translateX(5%); opacity: 1; } 100% { transform: skewY(-5deg) translateX(100%); opacity: 0; } }
 
     /* エフェクト */
     .slash-effect {
-      position: absolute;
-      width: 150%;
-      height: 150%;
-      top: -25%;
-      left: -25%;
+      position: absolute; width: 150%; height: 150%; top: -25%; left: -25%;
       background: linear-gradient(transparent 45%, rgba(255,255,255,0.8) 50%, transparent 55%);
-      transform: rotate(var(--rot, 45deg)) scale(0);
-      animation: slash-anim 0.2s ease-out forwards;
-      pointer-events: none;
-      z-index: 40;
+      transform: rotate(var(--rot, 45deg)) scale(0); animation: slash-anim 0.2s ease-out forwards; pointer-events: none; z-index: 40;
     }
-    @keyframes slash-anim {
-      0% { transform: rotate(var(--rot, 45deg)) scale(0); opacity: 1; filter: brightness(2); }
-      100% { transform: rotate(var(--rot, 45deg)) scale(1.5); opacity: 0; }
-    }
+    @keyframes slash-anim { 0% { transform: rotate(var(--rot, 45deg)) scale(0); opacity: 1; filter: brightness(2); } 100% { transform: rotate(var(--rot, 45deg)) scale(1.5); opacity: 0; } }
+    
     .impact-effect {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100px;
-      height: 100px;
-      margin-top: -50px;
-      margin-left: -50px;
-      background: radial-gradient(circle, #fff 0%, transparent 70%);
-      animation: impact-anim 0.3s ease-out forwards;
-      pointer-events: none;
-      z-index: 41;
+      position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; margin-top: -50px; margin-left: -50px;
+      background: radial-gradient(circle, #fff 0%, transparent 70%); animation: impact-anim 0.3s ease-out forwards; pointer-events: none; z-index: 41;
     }
-    @keyframes impact-anim {
-      0% { transform: scale(0); opacity: 1; }
-      100% { transform: scale(3); opacity: 0; }
-    }
+    @keyframes impact-anim { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-    /* ADVテキスト送り */
-    .adv-text::after {
-      content: '▼';
-      position: absolute;
-      bottom: 10px;
-      right: 15px;
-      animation: blink 1s infinite;
-      color: #facc15;
-    }
+    .adv-text::after { content: '▼'; position: absolute; bottom: 10px; right: 15px; animation: blink 1s infinite; color: #facc15; }
     @keyframes blink { 50% { opacity: 0; } }
 
-    .btn-push {
-      transition: transform 0.1s, box-shadow 0.1s;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.5);
-    }
-    .btn-push:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 rgba(0,0,0,0.5);
-    }
+    .btn-push { transition: transform 0.1s, box-shadow 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5); cursor: pointer; }
+    .btn-push:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.5); }
+    
+    .tab-active { background-color: #4f46e5; border-color: #818cf8; color: #fff; }
+    .tab-inactive { background-color: #1e293b; border-color: #334155; color: #94a3b8; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="flex justify-center items-center h-screen w-screen bg-slate-900">
+<body class="flex justify-center items-center h-screen w-screen bg-slate-900 relative">
+
+  <!-- 音源 (決定ボタン) -->
+  <audio id="se-click" src="決定ボタンを押す10.mp3" preload="auto"></audio>
 
   <div id="game-container" class="relative w-full h-full max-w-md bg-slate-800 shadow-2xl overflow-hidden border-x border-slate-700">
 
     <!-- ==================== TITLE SCREEN ==================== -->
     <div id="screen-title" class="screen active bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center">
       <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="sparkle-bg"></div>
       <div class="relative z-10 flex flex-col items-center justify-center h-full p-6">
-        <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-400 to-amber-600 drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] text-center mb-2 animate-pulse">
-          ROUGE GALLEON
-        </h1>
+        
+        <!-- ロゴ画像 (なければフォールバックでテキスト) -->
+        <img src="ルージュ・ガレオン.png" alt="ROUGE GALLEON" class="w-full max-w-[280px] mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] animate-pulse" onerror="this.outerHTML='<h1 class=\'text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-400 to-amber-600 drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] text-center mb-2 animate-pulse\'>ROUGE GALLEON</h1>'">
+        
         <h2 class="text-lg font-bold text-yellow-200 tracking-widest drop-shadow-md mb-12 bg-black/40 px-4 py-1 rounded-full border border-yellow-500/30">〜 ストーリーモード 〜</h2>
 
-        <button onclick="startGame()" class="btn-push btn-shine bg-gradient-to-b from-blue-400 to-blue-700 border-2 border-white text-white font-black py-4 px-10 rounded-full text-2xl w-full max-w-xs mb-6 shadow-[0_0_20px_rgba(59,130,246,0.8)]">
-          冒険をはじめる！
+        <button onclick="startGame()" class="btn-push btn-shine bg-gradient-to-b from-blue-400 to-blue-700 border-2 border-white text-white font-black py-4 px-10 rounded-full text-2xl w-full max-w-xs mb-6 shadow-[0_0_20px_rgba(59,130,246,0.8)] flex items-center justify-center gap-2">
+          <span>冒険をはじめる！</span>
         </button>
         
-        <button onclick="resetData()" class="text-slate-400 text-xs underline mt-8 hover:text-white transition-colors">セーブデータリセット</button>
+        <button onclick="resetData()" class="text-slate-400 text-xs underline mt-8 hover:text-white transition-colors p-2 cursor-pointer">セーブデータリセット</button>
       </div>
     </div>
 
@@ -234,7 +193,7 @@
       <!-- ヘッダー -->
       <div class="bg-gradient-to-b from-slate-800 to-slate-900 p-2 flex justify-between items-center border-b-2 border-slate-600 shadow-lg z-20">
         <div class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-xl border-2 border-white shadow-inner">👤</div>
+          <div id="ui-player-icon" class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-xl border-2 border-white shadow-inner overflow-hidden">👤</div>
           <div>
             <div class="text-[10px] text-yellow-300 font-bold leading-none tracking-wider">CAPTAIN</div>
             <div id="ui-player-name" class="font-black text-sm text-white drop-shadow-md">プレイヤー</div>
@@ -256,23 +215,53 @@
         </div>
       </div>
 
-      <!-- クエストリスト -->
       <div class="flex-1 overflow-y-auto no-scrollbar p-4 relative bg-scrolling">
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-[2px]"></div>
+        <div class="sparkle-bg"></div>
         
-        <div class="relative z-10">
-          
-          <!-- kaizoku.html への移動ボタン -->
-          <button onclick="location.href='kaizoku.html'" class="btn-push btn-shine w-full bg-gradient-to-b from-emerald-400 to-green-700 border-2 border-white text-white font-black py-3 px-6 rounded-xl text-lg mb-6 shadow-[0_0_15px_rgba(16,185,129,0.6)] flex items-center justify-center gap-2">
-            <span class="text-2xl drop-shadow-md">⚓</span>
-            <span class="drop-shadow-md tracking-widest">本編（出航）へ戻る</span>
-          </button>
+        <div class="relative z-10 flex flex-col">
+          <div class="flex gap-2 mb-6">
+            <button onclick="location.href='kaizoku.html'" class="btn-push btn-shine flex-1 bg-gradient-to-b from-emerald-400 to-green-700 border-2 border-white text-white font-black py-3 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.5)] flex items-center justify-center gap-1 text-sm">
+              <span class="text-xl drop-shadow-md">⚓</span><span class="drop-shadow-md">本編へ戻る</span>
+            </button>
+            <button onclick="switchScreen('screen-manage'); updateManageUI('party');" class="btn-push flex-1 bg-gradient-to-b from-purple-500 to-indigo-700 border-2 border-white text-white font-black py-3 rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.5)] flex items-center justify-center gap-1 text-sm">
+              <span class="text-xl drop-shadow-md">⚔️</span><span class="drop-shadow-md">編成・錬金</span>
+            </button>
+          </div>
 
           <h3 class="text-center font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-amber-500 text-2xl mb-2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">冒険の航路</h3>
           <div class="w-24 h-1 bg-yellow-500/50 mx-auto rounded-full mb-4"></div>
 
-          <div id="quest-list" class="flex flex-col gap-3 pb-8">
-            <!-- JSで動的生成 -->
+          <div id="quest-list" class="flex flex-col gap-3 pb-8"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MANAGE (編成・拠点) ==================== -->
+    <div id="screen-manage" class="screen bg-slate-900">
+      <div class="bg-gradient-to-b from-slate-800 to-slate-900 p-3 flex items-center border-b-2 border-slate-600 shadow-lg z-20 gap-4">
+        <button onclick="switchScreen('screen-home')" class="btn-push bg-slate-700 border-2 border-slate-500 text-white font-black px-4 py-1.5 rounded-full text-sm">◀ 戻る</button>
+        <h2 class="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-400 text-xl flex-1 text-center pr-10 drop-shadow-md">拠点</h2>
+      </div>
+      
+      <!-- タブメニュー -->
+      <div class="flex gap-1 p-2 bg-slate-950 border-b border-slate-700 z-10">
+        <button id="tab-btn-party" onclick="updateManageUI('party')" class="flex-1 py-2 rounded-t-lg font-black text-sm border-2 border-b-0 tab-active cursor-pointer">編成</button>
+        <button id="tab-btn-equip" onclick="updateManageUI('equip')" class="flex-1 py-2 rounded-t-lg font-black text-sm border-2 border-b-0 tab-inactive cursor-pointer">装備</button>
+        <button id="tab-btn-alchemy" onclick="updateManageUI('alchemy')" class="flex-1 py-2 rounded-t-lg font-black text-sm border-2 border-b-0 tab-inactive cursor-pointer">錬金</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto no-scrollbar bg-slate-800 p-4" id="manage-content">
+        <!-- JSでタブコンテンツを描画 -->
+      </div>
+      
+      <!-- 装備/キャラ選択用モーダルパネル -->
+      <div id="select-modal" class="absolute inset-0 bg-black/80 hidden flex-col justify-center items-center z-50 p-4">
+        <div class="bg-slate-800 w-full max-w-sm rounded-xl border-2 border-indigo-500 flex flex-col max-h-[80vh] shadow-2xl">
+          <div class="p-3 border-b border-slate-600 font-black text-center text-yellow-400" id="select-modal-title">選択</div>
+          <div class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-2 content-start no-scrollbar" id="select-modal-list"></div>
+          <div class="p-3 border-t border-slate-600">
+            <button onclick="closeSelectModal()" class="w-full bg-slate-700 text-white font-bold py-3 rounded-lg border border-slate-500 btn-push text-lg">閉じる</button>
           </div>
         </div>
       </div>
@@ -282,13 +271,9 @@
     <div id="screen-adv" class="screen bg-slate-900">
       <div id="adv-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-500"></div>
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/50 to-transparent"></div>
-      
-      <!-- 立ち絵エリア -->
       <div class="absolute bottom-[30%] w-full h-[60%] flex items-end justify-center pointer-events-none">
-        <div id="adv-char-img" class="text-[12rem] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform duration-300 transform translate-y-10 opacity-0">🏴‍☠️</div>
+        <div id="adv-char-img" class="text-[12rem] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform duration-300 transform translate-y-10 opacity-0 flex items-center justify-center">🏴‍☠️</div>
       </div>
-
-      <!-- テキストボックス -->
       <div class="absolute bottom-0 w-full p-4 z-20">
         <div class="bg-slate-900/90 border-2 border-slate-500 rounded-xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.5)] relative min-h-[140px] cursor-pointer" onclick="nextAdv()">
           <div id="adv-speaker" class="absolute -top-4 left-4 bg-gradient-to-r from-blue-600 to-indigo-600 border-2 border-white px-4 py-1 rounded-full text-sm font-black shadow-md drop-shadow-md">
@@ -301,99 +286,82 @@
 
     <!-- ==================== BATTLE SCREEN ==================== -->
     <div id="screen-battle" class="screen bg-black">
-      
-      <!-- 上部：フィールドビュー -->
       <div class="relative h-[55%] w-full bg-[url('https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?auto=format&fit=crop&w=800&q=80')] bg-cover bg-bottom border-b-4 border-slate-700 overflow-hidden" id="battle-field">
         <div class="absolute inset-0 bg-blue-900/40"></div>
-        
-        <!-- コンボ・システムメッセージ表示部 -->
         <div class="absolute top-20 left-4 z-30">
           <div id="combo-display" class="hidden font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 to-yellow-500 drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)] italic">
             <span id="combo-count" class="text-5xl">2</span><span class="text-2xl ml-1">CHAIN!!</span>
             <div id="combo-bonus" class="text-xs text-yellow-300 mt-1">ダメージ +10%</div>
           </div>
         </div>
-
         <div class="absolute top-20 right-4 z-30">
           <div id="break-display" class="hidden text-red-500 font-black text-4xl italic drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] animate-pulse">
             BREAK!
           </div>
         </div>
-        
-        <!-- 敵エリア -->
         <div class="absolute inset-0 flex flex-col items-center justify-center pb-8" id="enemy-container">
           <div id="enemy-sprite" class="text-[8rem] filter drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)] enemy-idle relative">
             💀
             <div id="enemy-action-indicator" class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-red-600 border border-white text-white text-[10px] font-bold px-2 py-0.5 rounded-full opacity-0 transition-opacity whitespace-nowrap shadow-md">攻撃準備!</div>
           </div>
         </div>
-
-        <!-- スキルカットイン -->
         <div id="skill-cutin" class="cutin-container">
           <div class="flex items-center gap-4 px-8">
-            <span id="cutin-icon" class="text-6xl drop-shadow-md">🧑</span>
+            <span id="cutin-icon" class="text-6xl drop-shadow-md flex items-center justify-center w-16 h-16 rounded-full overflow-hidden bg-slate-900">🧑</span>
             <span id="cutin-name" class="text-3xl font-black text-white italic drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">スキル名</span>
           </div>
         </div>
-
-        <!-- 敵HP/シールドバー -->
         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-3/4 max-w-[300px] z-20">
           <div class="flex justify-between items-end mb-1 text-white font-black drop-shadow-md">
             <span id="enemy-name" class="text-sm">敵の名前</span>
             <span class="text-xs bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-600">Lv <span id="enemy-lv">1</span></span>
           </div>
-          <!-- HPバー -->
           <div class="w-full bg-slate-900 h-3 rounded-t-lg border-x-2 border-t-2 border-slate-600 overflow-hidden relative shadow-inner">
             <div id="enemy-hp-bar" class="bg-gradient-to-r from-red-500 to-orange-500 h-full w-full transition-all duration-300"></div>
           </div>
-          <!-- シールドバー (BREAK用) -->
           <div class="w-full bg-slate-900 h-1.5 rounded-b-lg border-x-2 border-b-2 border-slate-600 overflow-hidden relative shadow-inner">
             <div id="enemy-shield-bar" class="bg-gradient-to-r from-blue-300 to-cyan-300 h-full w-full transition-all duration-200"></div>
           </div>
         </div>
-
-        <div class="absolute top-4 right-4 bg-slate-900/80 border border-slate-500 px-2 py-1 rounded text-[10px] font-black text-yellow-300 z-20 shadow-md">
-          BATTLE
-        </div>
+        <div class="absolute top-4 right-4 bg-slate-900/80 border border-slate-500 px-2 py-1 rounded text-[10px] font-black text-yellow-300 z-20 shadow-md">BATTLE</div>
       </div>
-
-      <!-- 下部：キャラパネル (4人分) -->
       <div class="relative h-[45%] w-full bg-slate-800 flex flex-col">
-        <!-- 枠飾り -->
         <div class="w-full h-2 bg-gradient-to-r from-slate-600 via-slate-400 to-slate-600"></div>
-        
-        <div class="flex-1 grid grid-cols-4 gap-1 p-1" id="party-container">
-          <!-- キャラパネルはJSで生成 -->
-        </div>
-
-        <!-- コントロール部 -->
+        <div class="flex-1 grid grid-cols-4 gap-1 p-1" id="party-container"></div>
         <div class="h-12 bg-slate-900 flex justify-between items-center px-4 border-t border-slate-700 shadow-[0_-5px_10px_rgba(0,0,0,0.5)]">
-          <button class="bg-slate-700 border-2 border-slate-500 text-slate-400 text-xs font-bold px-4 py-1.5 rounded-full btn-push opacity-50 cursor-not-allowed">
-            どうぐ
-          </button>
+          <button class="bg-slate-700 border-2 border-slate-500 text-slate-400 text-xs font-bold px-4 py-1.5 rounded-full opacity-50 cursor-not-allowed">どうぐ</button>
           <div class="flex gap-2">
-            <button onclick="toggleAutoBattle()" id="btn-auto" class="bg-slate-700 border-2 border-slate-500 text-white text-xs font-bold px-6 py-1.5 rounded-full btn-push transition-colors shadow-md">
-              オート
-            </button>
+            <button onclick="toggleAutoBattle()" id="btn-auto" class="bg-slate-700 border-2 border-slate-500 text-white text-xs font-bold px-6 py-1.5 rounded-full btn-push transition-colors shadow-md">オート</button>
           </div>
         </div>
       </div>
       
       <!-- バトルリザルトオーバーレイ -->
       <div id="battle-result" class="absolute inset-0 bg-black/80 hidden flex-col items-center justify-center z-50 backdrop-blur-sm">
-        <h2 id="result-title" class="text-6xl font-black text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,1)] animate-bounce">WIN!</h2>
-        <div class="bg-slate-800 border-2 border-yellow-500 rounded-xl p-6 w-3/4 max-w-[300px] text-center mb-8 shadow-2xl">
-          <p class="text-sm text-indigo-300 font-bold mb-3 border-b border-slate-600 pb-1">獲得報酬</p>
-          <div class="flex flex-col gap-3 text-xl font-black text-white">
-            <div class="bg-slate-900 py-2.5 rounded-lg border border-slate-700 flex justify-center items-center gap-2 shadow-inner">
+        <h2 id="result-title" class="text-6xl font-black text-yellow-400 mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,1)] animate-bounce">WIN!</h2>
+        
+        <div class="bg-slate-800 border-2 border-yellow-500 rounded-xl p-5 w-11/12 max-w-[340px] mb-6 shadow-2xl overflow-y-auto max-h-[50vh] no-scrollbar">
+          
+          <div class="flex justify-center gap-4 mb-4 border-b border-slate-600 pb-3">
+            <div class="bg-slate-900 px-4 py-2 rounded-lg border border-slate-700 flex flex-col items-center justify-center gap-1 shadow-inner w-1/2">
               <span class="inline-flex relative w-6 h-6"><img src="草コイン.png" onerror="this.outerHTML='💰'" class="absolute inset-0 w-full h-full object-contain drop-shadow-md"></span>
-              <span id="result-coins" class="text-yellow-400">0</span>
+              <span id="result-coins" class="text-yellow-400 font-black">0</span>
             </div>
-            <div class="bg-slate-900 py-2.5 rounded-lg border border-slate-700 flex justify-center items-center gap-2 shadow-inner">
-              <span class="text-blue-300 text-sm drop-shadow-md">EXP</span><span id="result-exp" class="text-white drop-shadow-md">0</span>
+            <div class="bg-slate-900 px-4 py-2 rounded-lg border border-slate-700 flex flex-col items-center justify-center gap-1 shadow-inner w-1/2">
+              <span class="text-blue-300 text-xs font-black drop-shadow-md">EXP</span>
+              <span id="result-exp-total" class="text-white font-black text-lg">0</span>
             </div>
           </div>
+
+          <div id="result-exp-details" class="flex flex-col gap-2 mb-3"></div>
+
+          <div id="result-drops" class="mt-4 pt-3 border-t border-slate-600 hidden flex-col items-center">
+            <p class="text-xs text-yellow-300 font-bold mb-2">🎁 アイテム獲得！</p>
+            <div id="result-drop-list" class="flex gap-2 flex-wrap justify-center"></div>
+          </div>
+
         </div>
+
         <button onclick="endBattle()" class="btn-push btn-shine bg-gradient-to-b from-blue-500 to-blue-700 border-2 border-white text-white font-black py-4 px-12 rounded-full text-xl shadow-[0_0_15px_rgba(59,130,246,0.8)]">
           次へすすむ
         </button>
@@ -405,295 +373,223 @@
 
 <script>
 // ==========================================
+// SE設定
+// ==========================================
+function playSE() {
+  const se = document.getElementById('se-click');
+  if(se) { se.currentTime = 0; se.play().catch(e=>{}); }
+}
+
+// 画面内のボタンクリックで音を鳴らす
+document.addEventListener('click', (e) => {
+    if (e.target.closest('button') || e.target.closest('.btn-push') || e.target.closest('.cursor-pointer')) {
+        playSE();
+    }
+});
+
+// ==========================================
+// マスターデータ (キャラクター / 武器 / 遺物)
+// ==========================================
+const CHAR_MASTER = {
+  "c1": { id: "c1", name: "主人公", job: "錬金術師", icon: "🧑", baseHp: 120, baseAtk: 20, skill: "多重錬成砲", sIcon: "✨", sPower: 1.5, hits: 3, element: "fire", sColor: "border-red-400", sBg: "bg-red-600", ctSpeed: 1.0, weaponType: "any" },
+  "c2": { id: "c2", name: "シルビア", job: "船医", icon: "💉", baseHp: 100, baseAtk: 10, skill: "完璧な調薬", sIcon: "💖", sPower: -40, hits: 1, element: "light", sColor: "border-green-400", sBg: "bg-green-600", ctSpeed: 0.8, weaponType: "spear" },
+  "c3": { id: "c3", name: "レオン", job: "操縦士", icon: "🗡️", baseHp: 110, baseAtk: 25, skill: "疾風連撃", sIcon: "🌪️", sPower: 1.2, hits: 4, element: "wind", sColor: "border-cyan-400", sBg: "bg-cyan-600", ctSpeed: 1.5, weaponType: "gun" },
+  "c4": { id: "c4", name: "ブルータス", job: "船長", icon: "🏴‍☠️", baseHp: 150, baseAtk: 35, skill: "漆黒の一閃", sIcon: "⚔️", sPower: 4.5, hits: 1, element: "slash", sColor: "border-purple-400", sBg: "bg-purple-600", ctSpeed: 0.6, weaponType: "greatsword" },
+  "c5": { id: "c5", name: "トマス", job: "砲手", icon: "💣", baseHp: 180, baseAtk: 40, skill: "重滅の砲撃", sIcon: "💥", sPower: 3.0, hits: 1, element: "fire", sColor: "border-orange-400", sBg: "bg-orange-600", ctSpeed: 0.7, weaponType: "axe" }
+};
+
+const WEAPON_MASTER = {
+  "w_none": { name: "素手", type: "any", atk: 0, icon: "✊", rarity: "N" },
+  "w_wood_sword": { name: "木の剣", type: "sword", atk: 5, icon: "🗡️", rarity: "N" },
+  "w_iron_spear": { name: "鉄の槍", type: "spear", atk: 12, icon: "🔱", rarity: "R" },
+  "w_pirate_gun": { name: "海賊の銃", type: "gun", atk: 15, icon: "🔫", rarity: "R" },
+  "w_heavy_blade": { name: "重厚な大剣", type: "greatsword", atk: 25, icon: "⚔️", rarity: "SR" },
+  "w_battle_axe": { name: "戦斧", type: "axe", atk: 20, icon: "🪓", rarity: "SR" },
+  "w_gold_sword": { name: "黄金の剣", type: "sword", atk: 40, icon: "✨", rarity: "SSR" }
+};
+
+const RELIC_MASTER = {
+  "r_stone": { name: "不思議な石", hp: 10, atk: 2, icon: "🪨", rarity: "N" },
+  "r_compass": { name: "古い羅針盤", hp: 20, atk: 5, icon: "🧭", rarity: "R" },
+  "r_bell": { name: "星の鈴", hp: 50, atk: 10, icon: "🔔", rarity: "SR" },
+  "r_diamond": { name: "巨大ダイヤモンド", hp: 100, atk: 20, icon: "💎", rarity: "SSR" },
+  "r_book": { name: "古代の禁書", hp: 80, atk: 40, icon: "📖", rarity: "UR" }
+};
+
+// ==========================================
 // データベース・セーブシステム
 // ==========================================
+// バージョンを上げて古いデータを破棄しエラーを防ぐ
 const DEFAULT_SAVE = {
   playerName: "キャプテン",
-  job: "海賊",
-  level: 1,
-  exp: 0,
-  hp: 100,
-  mp: 20,
-  coins: 50000,
-  stones: 1000,
+  playerIcon: "👤",
+  coins: 5000,
   materials: 20,
-  currentChapter: 1,
-  currentStage: 1,
-  equipped: {},
-  inventory: [],
-  questFlags: {} // stage_X_Y_cleared
+  stones: 1000,
+  party: ["c1", "c2", "c3", "c4"], // 4枠
+  crewData: {
+    "c1": { level: 1, exp: 0 },
+    "c2": { level: 1, exp: 0 },
+    "c3": { level: 1, exp: 0 },
+    "c4": { level: 1, exp: 0 },
+    "c5": { level: 1, exp: 0 }
+  },
+  inventory: {
+    weapons: [
+      { uid: "w1", id: "w_wood_sword", plus: 0, equipTo: "c1" },
+      { uid: "w2", id: "w_iron_spear", plus: 0, equipTo: "c2" },
+      { uid: "w3", id: "w_pirate_gun", plus: 0, equipTo: "c3" },
+      { uid: "w4", id: "w_heavy_blade", plus: 0, equipTo: "c4" }
+    ],
+    relics: [
+      { uid: "r1", id: "r_stone", plus: 0, equipTo: null }
+    ]
+  },
+  questFlags: {}
 };
 
 let saveData = {};
 
 function loadData() {
-  const saved = localStorage.getItem('sugoigame');
+  const saved = localStorage.getItem('sugoigame_story_v4');
   if (saved) {
     try {
       saveData = { ...DEFAULT_SAVE, ...JSON.parse(saved) };
-      // questFlagsの初期化漏れ対策
-      if(!saveData.questFlags) saveData.questFlags = {};
+      if(!saveData.inventory || !Array.isArray(saveData.inventory.weapons)) {
+        saveData.inventory = DEFAULT_SAVE.inventory; // 旧互換破棄
+      }
     } catch (e) {
       saveData = JSON.parse(JSON.stringify(DEFAULT_SAVE));
     }
   } else {
     saveData = JSON.parse(JSON.stringify(DEFAULT_SAVE));
   }
+  syncPlayerProfile();
 }
 
 function saveGame() {
-  localStorage.setItem('sugoigame', JSON.stringify(saveData));
+  localStorage.setItem('sugoigame_story_v4', JSON.stringify(saveData));
 }
 
 function resetData() {
   if(confirm('本当にデータをリセットしますか？')) {
-    localStorage.removeItem('sugoigame');
+    localStorage.removeItem('sugoigame_story_v4');
     loadData();
     updateHomeUI();
-    alert('リセットしました。');
   }
 }
 
+// 主人公(c1)のアイコンと名前をホーム画面左上のプロフィールと完全に同期
+function syncPlayerProfile() {
+  // 本編のlocalStorageがあれば引っ張る処理 (シミュレート)
+  const kSave = localStorage.getItem('kaizoku');
+  if(kSave) {
+    try {
+      const kData = JSON.parse(kSave);
+      if(kData.userName) saveData.playerName = kData.userName;
+      if(kData.userIcon) saveData.playerIcon = kData.userIcon;
+    }catch(e){}
+  }
+  CHAR_MASTER["c1"].name = saveData.playerName;
+  CHAR_MASTER["c1"].icon = saveData.playerIcon;
+}
+
 // ==========================================
-// ストーリー＆クエストデータ定義（第1章〜第4章）
+// ストーリー＆クエストデータ定義
 // ==========================================
 const STORY_DATA = [
   // ----------- 第1章 -----------
-  {
-    id: 101, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-1：漆黒の船と見習いの少年",
-    flagKey: "stage_1_1_cleared", reqFlag: null,
-    bg: "https://images.unsplash.com/photo-1518331647614-7a1f04cd34cb?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "いいか、小僧。海に地図なんてねぇ。だがな、あの漆黒の空に輝く星々……あれが俺たちの羅針盤だ。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "お前がどこから来た誰かなんて、海賊の俺にゃあ関係ねぇ。自分で舵を握り、お前の信じた面舵を切るんだ。お前は立派な、俺たちの仲間だ" },
-      { speaker: "トマス", icon: "💣", text: "湿気た火薬を一瞬で乾燥させるなんて、相変わらず手品みたいに便利な手をしてやがるな！ 早く一人前の海賊になれよ！" },
-      { speaker: "シルビア", icon: "💉", text: "完璧な配合よ。雑用にしておくにはもったいない技術ね。" },
-      { speaker: "レオン", icon: "🗡️", text: "お前がいつか見習いを卒業して、いい海賊になる日を楽しみにしてるよ。" }
-    ],
-    battle: { enemyName: "海に漂うスライム", enemyIcon: "💧", enemyHp: 80, shield: 20, enemyAtk: 5, enemyCtSpeed: 0.8, exp: 10, coins: 100 },
-    advPost: [ { speaker: "ブルータス", icon: "🏴‍☠️", text: "よし、準備運動はこれくらいにしておくか。みんな集まれ、面白い噂を聞いたぜ。" } ]
-  },
-  {
-    id: 102, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-2：奇妙な依頼と不穏な噂",
-    flagKey: "stage_1_2_cleared", reqFlag: "stage_1_1_cleared",
-    bg: "https://images.unsplash.com/photo-1544644181-1484b3f8c8b1?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "情報屋から聞いたんだが、近頃デーモンアイランドの『触れたものを魔物に変貌させる不気味な黒い霧』が減少傾向にあるらしい。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "さらに、その霧の奥には、10年前に世界を震撼させた『禁忌の錬金術師』が遺したとされる、謎の古代遺物『禁書』が眠っている可能性が高いそうだ。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "海賊として、お宝があるって聞いたらとりにいかねぇとな！ 出航だ！" }
-    ],
-    battle: { enemyName: "霧の徘徊者", enemyIcon: "🧟", enemyHp: 150, shield: 30, enemyAtk: 8, enemyCtSpeed: 1.0, exp: 20, coins: 300 },
-    advPost: [
-      { speaker: "主人公", icon: "🧑", text: "（周囲が夜のように暗くなり、波の音が消え去った……）" },
-      { speaker: "シルビア", icon: "💉", text: "魔物の質量、通常じゃないわ。気をつけて！" }
-    ]
-  },
-  {
-    id: 103, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-3：霧の中の突破戦",
-    flagKey: "stage_1_3_cleared", reqFlag: "stage_1_2_cleared",
-    bg: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "トマス", icon: "💣", text: "船長！ 霧の奥からアンデッドの群れが来やすぜ！" },
-      { speaker: "主人公", icon: "🧑", text: "（無意識に発揮される錬金術で、特製の火薬と即席の煙幕を作り出さなきゃ！）" },
-      { speaker: "トマス", icon: "💣", text: "小僧の特製火薬でブッ放すぜ！ 進路を切り開く！" },
-      { speaker: "シルビア", icon: "💉", text: "即席の煙幕、重さを瞬時に完璧に計って調合されているわ。これで魔物たちの目を眩ませる！" },
-      { speaker: "レオン", icon: "🗡️", text: "小僧、背中は任せろ！ 防衛線を築くぞ！" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "俺の船の奴らに、気安く触んじゃねぇよアンデッドどもが！ 野郎ども、全力で戦うぞ！！" }
-    ],
-    battle: { enemyName: "巨大怨念アンデッド", enemyIcon: "👻", enemyHp: 300, shield: 50, enemyAtk: 15, enemyCtSpeed: 1.2, exp: 100, coins: 1000 },
-    advPost: [
-      { speaker: "クルー", icon: "🧑‍🤝‍🧑", text: "「「やったぞー！」」" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "よくやった、小僧。今回の旅での見事な働き、見させてもらったぜ。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "これは俺からの祝いだ。ブラックホールの模様が刻まれた『星の鈴』を受け取れ。お前はもう一人前の『ユダ号のクルー』だ！" },
-      { speaker: "システム", icon: "⚙️", text: "最高の仲間たちと共に、ゴールデン・ユダ号の本当の航海がここから始まります。\n―― 第1章 完 ――" }
-    ]
-  },
+  { id: 101, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-1：漆黒の船と見習いの少年", flagKey: "stage_1_1_cleared", reqFlag: null, bg: "https://images.unsplash.com/photo-1518331647614-7a1f04cd34cb?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "いいか、小僧。海に地図なんてねぇ。だがな、あの漆黒の空に輝く星々……あれが俺たちの羅針盤だ。"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "自分で舵を握り、お前の信じた面舵を切るんだ。お前は立派な、俺たちの仲間だ"},{speaker: "トマス", icon: "💣", text: "湿気た火薬を一瞬で乾燥させるなんて、手品みたいに便利な手をしてやがるな！"},{speaker: "レオン", icon: "🗡️", text: "お前がいつか見習いを卒業して、いい海賊になる日を楽しみにしてるよ。"}],
+    battle: { enemyName: "海に漂うスライム", enemyIcon: "💧", enemyHp: 120, shield: 20, enemyAtk: 5, enemyCtSpeed: 0.8, exp: 30, coins: 100, drops: { weapons: ["w_wood_sword"], relics: ["r_stone"] } },
+    advPost: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "よし、準備運動はこれくらいにしておくか。みんな集まれ、面白い噂を聞いたぜ。"}] },
+  { id: 102, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-2：奇妙な依頼と不穏な噂", flagKey: "stage_1_2_cleared", reqFlag: "stage_1_1_cleared", bg: "https://images.unsplash.com/photo-1544644181-1484b3f8c8b1?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "デーモンアイランドの『不気味な黒い霧』が減少傾向にあるらしい。奥には『禁忌の錬金術師』が遺した『禁書』が眠っているそうだ。"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "海賊として、お宝があるって聞いたらとりにいかねぇとな！ 出航だ！"}],
+    battle: { enemyName: "霧の徘徊者", enemyIcon: "🧟", enemyHp: 180, shield: 30, enemyAtk: 8, enemyCtSpeed: 1.0, exp: 50, coins: 300, drops: { weapons: ["w_iron_spear"], relics: ["r_stone"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（周囲が夜のように暗くなり、波の音が消え去った……）"},{speaker: "シルビア", icon: "💉", text: "魔物の質量、通常じゃないわ。気をつけて！"}] },
+  { id: 103, chapter: 1, chapterTitle: "第1章：霧を裂く羅針盤", title: "1-3：霧の中の突破戦", flagKey: "stage_1_3_cleared", reqFlag: "stage_1_2_cleared", bg: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "トマス", icon: "💣", text: "船長！ 霧の奥からアンデッドの群れが来やすぜ！"},{speaker: "シルビア", icon: "💉", text: "即席の煙幕、重さを瞬時に完璧に計って調合されているわ。これで魔物たちの目を眩ませる！"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "俺の船の奴らに、気安く触んじゃねぇよアンデッドどもが！ 野郎ども、全力で戦うぞ！！"}],
+    battle: { enemyName: "巨大怨念アンデッド", enemyIcon: "👻", enemyHp: 350, shield: 50, enemyAtk: 15, enemyCtSpeed: 1.2, exp: 120, coins: 1000, drops: { weapons: ["w_pirate_gun"], relics: ["r_bell"] } },
+    advPost: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "よくやった、小僧。これは俺からの祝いだ。ブラックホールの模様が刻まれた『星の鈴』を受け取れ。お前はもう一人前の『ユダ号のクルー』だ！"},{speaker: "システム", icon: "⚙️", text: "―― 第1章 完 ――"}] },
   // ----------- 第2章 -----------
-  {
-    id: 201, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-1：交易の港町と不気味な霧",
-    flagKey: "stage_2_1_cleared", reqFlag: "stage_1_3_cleared",
-    bg: "https://images.unsplash.com/photo-1520645521318-f06a7241dc39?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ナレーション", icon: "📖", text: "魔物との激闘を切り抜け、ゴールデン・ユダ号は巨大な中継貿易港「リブラ・ポート（天秤港）」に寄港した。" },
-      { speaker: "主人公", icon: "🧑", text: "（シルビア、レオンと一緒に市場へ買い出しだ。活気があっていい街だな）" },
-      { speaker: "シルビア", icon: "💉", text: "ちょっと、この薬草、乾燥が甘いわよ！ こっちの金も重さで偽物ってすぐわかるわ！" },
-      { speaker: "レオン", icon: "🗡️", text: "相変わらずシルビアの『絶対天秤』の能力は容赦ないな……ん？" },
-      { speaker: "主人公", icon: "🧑", text: "（急に港に不気味な灰色の霧が……あれはなんだ！？）" }
-    ],
-    battle: { enemyName: "石化の霧の魔物", enemyIcon: "🌫️", enemyHp: 200, shield: 40, enemyAtk: 12, enemyCtSpeed: 1.0, exp: 50, coins: 400 },
-    advPost: [
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "小僧、シルビア！ こいつはヤベェ、下がれッ！" },
-      { speaker: "主人公", icon: "🧑", text: "（船長や街の人たちが……次々と石像に変わっていく！？）" }
-    ]
-  },
-  {
-    id: 202, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-2：絶対天秤の導き",
-    flagKey: "stage_2_2_cleared", reqFlag: "stage_2_1_cleared",
-    bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "シルビア", icon: "💉", text: "……おかしいわ。この石化の重さ、地球上に存在するどんな鉱物とも違う。" },
-      { speaker: "シルビア", icon: "💉", text: "あの魔物の背中にある奇妙な結晶……あれを壊せば呪いは止まるはずよ。" },
-      { speaker: "主人公", icon: "🧑", text: "（みんなを助けるためだ。あの魔物……『ガルゴイラ』のところへ乗り込もう！）" }
-    ],
-    battle: { enemyName: "ガルゴイラの眷属", enemyIcon: "🦇", enemyHp: 300, shield: 60, enemyAtk: 15, enemyCtSpeed: 1.1, exp: 80, coins: 600 },
-    advPost: [
-      { speaker: "主人公", icon: "🧑", text: "（よし、広場に居座る元凶のガルゴイラまであと少しだ！）" },
-      { speaker: "シルビア", icon: "💉", text: "気を抜かないで。あの結晶を正確に狙い撃つのよ。" }
-    ]
-  },
-  {
-    id: 203, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-3：石化の魔獣と奇跡の再生",
-    flagKey: "stage_2_3_cleared", reqFlag: "stage_2_2_cleared",
-    bg: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "主人公", icon: "🧑", text: "（激しい攻撃をかいくぐって、あの背中の石にピストルの弾丸を……！）" },
-      { speaker: "ガルゴイラ", icon: "🐉", text: "グオオオオオオッ！？" },
-      { speaker: "主人公", icon: "🧑", text: "（命中した！ 石が壊れて、石化エネルギーが内側へ逆流している……！）" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "……う、うぅ……。体が、動く？ やったぞ！ 生き返った！" }
-    ],
-    battle: { enemyName: "石化魔獣ガルゴイラ", enemyIcon: "🐉", enemyHp: 600, shield: 100, enemyAtk: 25, enemyCtSpeed: 1.2, exp: 200, coins: 3000 },
-    advPost: [
-      { speaker: "主人公", icon: "🧑", text: "（砕け散った石の破片を拾い集めて……錬金術で完璧に修復する！ 頼む、石化を解いてくれ！）" },
-      { speaker: "茶色い髪の青年", icon: "👦", text: "僕は、この街で僕だけが茶色い髪をしているという理由だけでいじめられて生きてきたんだ。だから、この世界なんてみんな石になっちゃえって……" },
-      { speaker: "茶色い髪の青年", icon: "👦", text: "でも……ありがとう。こんな僕を、人間として接してくれて。僕の怒りも、悲しみも、やっと消えていく気がするよ。" },
-      { speaker: "システム", icon: "⚙️", text: "青年は光の粒子となって安らかに旅立った。街の人々も過ちを反省し、ゴールデン・ユダ号は次の航海へと進路を取る。\n―― 第2章 完 ――" }
-    ]
-  },
+  { id: 201, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-1：交易の港町と不気味な霧", flagKey: "stage_2_1_cleared", reqFlag: "stage_1_3_cleared", bg: "https://images.unsplash.com/photo-1520645521318-f06a7241dc39?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ナレーション", icon: "📖", text: "ユダ号は巨大な中継貿易港「リブラ・ポート（天秤港）」に寄港した。"},{speaker: "シルビア", icon: "💉", text: "ちょっと、この薬草、乾燥が甘いわよ！ こっちの金も重さで偽物ってすぐわかるわ！"},{speaker: "主人公", icon: "🧑", text: "（急に港に不気味な灰色の霧が……あれはなんだ！？）"}],
+    battle: { enemyName: "石化の霧の魔物", enemyIcon: "🌫️", enemyHp: 250, shield: 40, enemyAtk: 12, enemyCtSpeed: 1.0, exp: 80, coins: 400, drops: { weapons: ["w_heavy_blade"] } },
+    advPost: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "小僧、シルビア！ こいつはヤベェ、下がれッ！"},{speaker: "主人公", icon: "🧑", text: "（船長や街の人たちが……次々と石像に変わっていく！？）"}] },
+  { id: 202, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-2：絶対天秤の導き", flagKey: "stage_2_2_cleared", reqFlag: "stage_2_1_cleared", bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "シルビア", icon: "💉", text: "……おかしいわ。この石化の重さ、地球上に存在するどんな鉱物とも違う。あの魔物の背中にある奇妙な結晶……あれを壊せば呪いは止まるはずよ。"}],
+    battle: { enemyName: "ガルゴイラの眷属", enemyIcon: "🦇", enemyHp: 350, shield: 60, enemyAtk: 15, enemyCtSpeed: 1.1, exp: 100, coins: 600, drops: { relics: ["r_compass"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（よし、広場に居座る元凶のガルゴイラまであと少しだ！）"}] },
+  { id: 203, chapter: 2, chapterTitle: "第2章：石化の魔獣と絶対天秤", title: "2-3：石化の魔獣と奇跡の再生", flagKey: "stage_2_3_cleared", reqFlag: "stage_2_2_cleared", bg: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "主人公", icon: "🧑", text: "（激しい攻撃をかいくぐって、あの背中の石にピストルの弾丸を……！）命中した！ 石が壊れて、石化エネルギーが逆流している……！"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "……う、うぅ……。体が、動く？ やったぞ！ 生き返った！"}],
+    battle: { enemyName: "石化魔獣ガルゴイラ", enemyIcon: "🐉", enemyHp: 700, shield: 100, enemyAtk: 25, enemyCtSpeed: 1.2, exp: 250, coins: 3000, drops: { weapons: ["w_battle_axe"], relics: ["r_compass"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（砕け散った石の破片を拾い集めて……錬金術で完璧に修復する！ 頼む、石化を解いてくれ！）"},{speaker: "茶色い髪の青年", icon: "👦", text: "ありがとう。こんな僕を、人間として接してくれて。僕の怒りも、悲しみも、やっと消えていく気がするよ。"},{speaker: "システム", icon: "⚙️", text: "青年は光の粒子となって安らかに旅立った。\n―― 第2章 完 ――"}] },
   // ----------- 第3章 -----------
-  {
-    id: 301, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-1：拳の祭典と「巨大ダイヤモンド」",
-    flagKey: "stage_3_1_cleared", reqFlag: "stage_2_3_cleared",
-    bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ナレーション", icon: "📖", text: "ゴールデン・ユダ号は、格闘家たちが集う熱き島「アリーナ・アイランド」に寄港した。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "よし、野郎ども！ 優勝賞品のあのデカい石、俺たちの力でもぎ取るぞ！" },
-      { speaker: "トマス", icon: "💣", text: "若いもんにばかり格好いいところは見せられんからな。あのダイヤ、お前にプレゼントしてやるよ、小僧" },
-      { speaker: "主人公", icon: "🧑", text: "（トマスがユダ号を代表して闘技場のリングへ上がっていく……！）" }
-    ],
-    battle: { enemyName: "闘技場のアスリート", enemyIcon: "🥊", enemyHp: 350, shield: 50, enemyAtk: 18, enemyCtSpeed: 1.1, exp: 100, coins: 800 },
-    advPost: [ { speaker: "主人公", icon: "🧑", text: "（トマスは重厚でブレのない拳を武器に、順調に勝ち進んでいく！）" } ]
-  },
-  {
-    id: 302, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-2：トマスの出陣と仕組まれた罠",
-    flagKey: "stage_3_2_cleared", reqFlag: "stage_3_1_cleared",
-    bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "主人公", icon: "🧑", text: "（いよいよ決勝戦……相手は極悪非道なチャンピオンだ）" },
-      { speaker: "極悪チャンピオン", icon: "🦹", text: "（観客のどよめきに紛れ、衣服の袖に隠し持っていた毒ナイフを抜き放つ）" },
-      { speaker: "トマス", icon: "💣", text: "あ、がはっ……！？ お前ら、絶対に夢つかみと……レヨ……" },
-      { speaker: "主人公", icon: "🧑", text: "トマスッ！！" }
-    ],
-    battle: { enemyName: "卑怯なチャンピオン", enemyIcon: "🦹", enemyHp: 500, shield: 80, enemyAtk: 22, enemyCtSpeed: 1.3, exp: 150, coins: 1000 },
-    advPost: [
-      { speaker: "対戦相手の男", icon: "🦹", text: "こんなゴミが仲間にいるとは大変ですな！いや全員落ちこぼれなんですかね（笑）" },
-      { speaker: "シルビア", icon: "💉", text: "右の袖よ。そこにまだ、トマスを刺した『ナイフ』が隠されているわ！" }
-    ]
-  },
-  {
-    id: 303, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-3：鉄槌の錬金術と水葬",
-    flagKey: "stage_3_3_cleared", reqFlag: "stage_3_2_cleared",
-    bg: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "対戦相手の男", icon: "🦹", text: "ルール違反だと！？ ええい、こうなったらこのナイフで……！" },
-      { speaker: "主人公", icon: "🧑", text: "トマスの……、僕たちの絆を、笑うなッ！！" },
-      { speaker: "主人公", icon: "🧑", text: "（トマスの魂が宿ったかのような拳……喰らえッ！！）" }
-    ],
-    battle: { enemyName: "極悪チャンピオン（激怒）", enemyIcon: "🦹", enemyHp: 800, shield: 120, enemyAtk: 30, enemyCtSpeed: 1.4, exp: 300, coins: 5000 },
-    advPost: [
-      { speaker: "ナレーション", icon: "📖", text: "主人公の渾身のストレートが顔面に炸裂し、男は見事に撃破された。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "トマス。お前は最高の砲手だった。この船を、長年その重厚な一撃で守り抜いてくれた。……海の神よ、この猛き男の魂を、どうか安らかに導いてくれ" },
-      { speaker: "主人公", icon: "🧑", text: "トマス、一緒にとったダイヤ、絶対に見届けてね……。ありがとう" },
-      { speaker: "システム", icon: "⚙️", text: "悲しみを乗り越え、ゴールデン・ユダ号は再び、静かに動き出すのでした。\n―― 第3章 完 ――" }
-    ]
-  },
+  { id: 301, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-1：拳の祭典と「巨大ダイヤモンド」", flagKey: "stage_3_1_cleared", reqFlag: "stage_2_3_cleared", bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "よし、野郎ども！ 優勝賞品のあのデカい石、俺たちの力でもぎ取るぞ！"},{speaker: "トマス", icon: "💣", text: "若いもんにばかり格好いいところは見せられんからな。あのダイヤ、お前にプレゼントしてやるよ、小僧"}],
+    battle: { enemyName: "闘技場のアスリート", enemyIcon: "🥊", enemyHp: 400, shield: 50, enemyAtk: 18, enemyCtSpeed: 1.1, exp: 120, coins: 800, drops: { relics: ["r_diamond"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（トマスは重厚でブレのない拳を武器に、順調に勝ち進んでいく！）"}] },
+  { id: 302, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-2：トマスの出陣と仕組まれた罠", flagKey: "stage_3_2_cleared", reqFlag: "stage_3_1_cleared", bg: "https://images.unsplash.com/photo-1542668595-fa9394e5b686?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "主人公", icon: "🧑", text: "（いよいよ決勝戦……相手は極悪非道なチャンピオンだ）"},{speaker: "極悪チャンピオン", icon: "🦹", text: "（観客のどよめきに紛れ、衣服の袖に隠し持っていた毒ナイフを抜き放つ）"},{speaker: "トマス", icon: "💣", text: "あ、がはっ……！？ お前ら、絶対に夢つかみと……レヨ……"},{speaker: "主人公", icon: "🧑", text: "トマスッ！！"}],
+    battle: { enemyName: "卑怯なチャンピオン", enemyIcon: "🦹", enemyHp: 550, shield: 80, enemyAtk: 22, enemyCtSpeed: 1.3, exp: 180, coins: 1000, drops: { weapons: ["w_iron_spear"] } },
+    advPost: [{speaker: "対戦相手の男", icon: "🦹", text: "こんなゴミが仲間にいるとは大変ですな！"},{speaker: "シルビア", icon: "💉", text: "右の袖よ。そこにまだ、トマスを刺した『ナイフ』が隠されているわ！"}] },
+  { id: 303, chapter: 3, chapterTitle: "第3章：血煙の闘技場と誓いの拳", title: "3-3：鉄槌の錬金術と水葬", flagKey: "stage_3_3_cleared", reqFlag: "stage_3_2_cleared", bg: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "主人公", icon: "🧑", text: "トマスの……、僕たちの絆を、笑うなッ！！（トマスの魂が宿ったかのような拳……喰らえッ！！）"}],
+    battle: { enemyName: "極悪チャンピオン（激怒）", enemyIcon: "🦹", enemyHp: 900, shield: 120, enemyAtk: 30, enemyCtSpeed: 1.4, exp: 350, coins: 5000, drops: { weapons: ["w_gold_sword"], relics: ["r_diamond"] } },
+    advPost: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "トマス。お前は最高の砲手だった。この船を、長年その重厚な一撃で守り抜いてくれた。……海の神よ、この猛き男の魂を、どうか安らかに導いてくれ"},{speaker: "主人公", icon: "🧑", text: "トマス、一緒にとったダイヤ、絶対に見届けてね……。ありがとう"},{speaker: "システム", icon: "⚙️", text: "―― 第3章 完 ――"}] },
   // ----------- 第4章 -----------
-  {
-    id: 401, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-1：神秘の国ネプチューニア",
-    flagKey: "stage_4_1_cleared", reqFlag: "stage_3_3_cleared",
-    bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ナレーション", icon: "📖", text: "トマスを海へと還し、ゴールデン・ユダ号は常に青い光に包まれた神秘的な国「ネプチューニア」に辿り着いた。" },
-      { speaker: "ナレーション", icon: "📖", text: "この国は海の神「しらほし」を崇め、海の奥深くには莫大な財宝が眠る『神の城』があるという噂があった。" },
-      { speaker: "主人公", icon: "🧑", text: "（平和で綺麗な街だ。神の城への手がかりを探そう）" }
-    ],
-    battle: { enemyName: "潮騒の魔物", enemyIcon: "🌊", enemyHp: 400, shield: 60, enemyAtk: 20, enemyCtSpeed: 1.1, exp: 150, coins: 1000 },
-    advPost: [ { speaker: "主人公", icon: "🧑", text: "（ん？ 大通りの方から悲鳴が……火の手が上がっている！？）" } ]
-  },
-  {
-    id: 402, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-2：蘇る怒り",
-    flagKey: "stage_4_2_cleared", reqFlag: "stage_4_1_cleared",
-    bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ナレーション", icon: "📖", text: "そこにいたのは、ネプチューニアの住民を人質にとる残虐非道な「百獣海賊団」だった。" },
-      { speaker: "トマスを殺した男", icon: "🦹", text: "ハハハ！ 吐かねぇなら海に沈めてやる！ ……おや？ あの闘技場の落ちこぼれ共じゃねぇか！" },
-      { speaker: "主人公", icon: "🧑", text: "（……あいつは！ トマスを奪った、あの時の……！）" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "見つけたぞ、ドブネズミが。よくも面をさらしやがった。野郎ども、叩き潰せぇッ！！" }
-    ],
-    battle: { enemyName: "百獣海賊団 団員", enemyIcon: "🦹‍♂️", enemyHp: 600, shield: 80, enemyAtk: 25, enemyCtSpeed: 1.2, exp: 200, coins: 1500 },
-    advPost: [ { speaker: "トマスを殺した男", icon: "🦹", text: "おいおい、あの落ちこぼれジジイの仇討ちか？ かかってきな、見習い小僧！" } ]
-  },
-  {
-    id: 403, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-3：黄金の導火線",
-    flagKey: "stage_4_3_cleared", reqFlag: "stage_4_2_cleared",
-    bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-    advPre: [
-      { speaker: "ナレーション", icon: "📖", text: "剣と剣が激しくぶつかり合う。男は再び卑劣な暗器を放つが、今の主人公は見逃さなかった！" },
-      { speaker: "トマスを殺した男", icon: "🦹", text: "が、はっ……！？ な、何だこのガキの力は……！ クソッ、道連れだ！ あのジジイの大砲ごと吹き飛べ！！" },
-      { speaker: "主人公", icon: "🧑", text: "トマスの形見を……これ以上汚させはしない――！" }
-    ],
-    battle: { enemyName: "百獣の幹部", enemyIcon: "🦁", enemyHp: 1200, shield: 200, enemyAtk: 35, enemyCtSpeed: 1.5, exp: 400, coins: 6000 },
-    advPost: [
-      { speaker: "主人公", icon: "🧑", text: "（溢れ出る青い光……多重錬成！）" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "多重錬成か……複数の大砲が一つに溶け合い、『金色に輝く超大型砲』になった……！" },
-      { speaker: "ナレーション", icon: "📖", text: "放たれた一撃は爆炎を吹き飛ばし、男を百獣海賊団ごと遥か彼方へと吹き飛ばした。" },
-      { speaker: "ブルータス", icon: "🏴‍☠️", text: "よくやった、小僧。トマスの意志はお前の中に生きている。さあ、最後の航路『デーモンアイランド』へ行くぞ！" },
-      { speaker: "システム", icon: "⚙️", text: "百獣海賊団を退け、一行はデーモンアイランドへ向け最後の航路へと突き進む。\n―― 第4章 完 ――" }
-    ]
-  }
+  { id: 401, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-1：神秘の国ネプチューニア", flagKey: "stage_4_1_cleared", reqFlag: "stage_3_3_cleared", bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ナレーション", icon: "📖", text: "ゴールデン・ユダ号は常に青い光に包まれた神秘的な国「ネプチューニア」に辿り着いた。"}],
+    battle: { enemyName: "潮騒の魔物", enemyIcon: "🌊", enemyHp: 450, shield: 60, enemyAtk: 20, enemyCtSpeed: 1.1, exp: 150, coins: 1000, drops: { weapons: ["w_pirate_gun"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（ん？ 大通りの方から悲鳴が……火の手が上がっている！？）"}] },
+  { id: 402, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-2：蘇る怒り", flagKey: "stage_4_2_cleared", reqFlag: "stage_4_1_cleared", bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "トマスを殺した男", icon: "🦹", text: "ハハハ！ 吐かねぇなら海に沈めてやる！ ……おや？ あの闘技場の落ちこぼれ共じゃねぇか！"},{speaker: "主人公", icon: "🧑", text: "（……あいつは！ トマスを奪った、あの時の……！）"}],
+    battle: { enemyName: "百獣海賊団 団員", enemyIcon: "🦹‍♂️", enemyHp: 650, shield: 80, enemyAtk: 25, enemyCtSpeed: 1.2, exp: 200, coins: 1500, drops: { weapons: ["w_heavy_blade"] } },
+    advPost: [{speaker: "トマスを殺した男", icon: "🦹", text: "おいおい、あの落ちこぼれジジイの仇討ちか？ かかってきな、見習い小僧！"}] },
+  { id: 403, chapter: 4, chapterTitle: "第4章：海の神と復讐の炎", title: "4-3：黄金の導火線", flagKey: "stage_4_3_cleared", reqFlag: "stage_4_2_cleared", bg: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "トマスを殺した男", icon: "🦹", text: "が、はっ……！？ な、何だこのガキの力は……！ クソッ、道連れだ！ あのジジイの大砲ごと吹き飛べ！！"},{speaker: "主人公", icon: "🧑", text: "トマスの形見を……これ以上汚させはしない――！"}],
+    battle: { enemyName: "百獣の幹部", enemyIcon: "🦁", enemyHp: 1500, shield: 200, enemyAtk: 35, enemyCtSpeed: 1.5, exp: 500, coins: 6000, drops: { weapons: ["w_gold_sword"], relics: ["r_diamond"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（溢れ出る青い光……多重錬成！）"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "多重錬成か……複数の大砲が一つに溶け合い、『金色に輝く超大型砲』になった……！"},{speaker: "システム", icon: "⚙️", text: "百獣海賊団を退け、一行はデーモンアイランドへ向け最後の航路へと突き進む。\n―― 第4章 完 ――"}] },
+  // ----------- 第5章 -----------
+  { id: 501, chapter: 5, chapterTitle: "第5章：砂の王国と十年前の禁忌", title: "5-1：砂漠の王国と十年前の真実", flagKey: "stage_5_1_cleared", reqFlag: "stage_4_3_cleared", bg: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "ブルータス", icon: "🏴‍☠️", text: "十年前の話だ。この世界には、好奇心に抗えず、世界の理を壊しちまった一人の錬金術師がいた。"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "その男の階級は『柱（はしら）』。死体とこの世の怨念を掛け合わせ、魔物として死者を強引に現世に復活させる、神への反逆だ。"},{speaker: "主人公", icon: "🧑", text: "（僕が使える『多重錬成』は、その男が使っていた技術だという……自分は一体、何者なんだ……？）"}],
+    battle: { enemyName: "砂漠の魔獣", enemyIcon: "🦂", enemyHp: 800, shield: 100, enemyAtk: 28, enemyCtSpeed: 1.2, exp: 250, coins: 2000, drops: { weapons: ["w_iron_spear", "w_battle_axe"] } },
+    advPost: [{speaker: "ナレーション", icon: "📖", text: "砂の王国の首都に到着した一行。しかし、百獣海賊団が王宮を襲撃し、王様が連れ去られてしまった！"}] },
+  { id: 502, chapter: 5, chapterTitle: "第5章：砂の王国と十年前の禁忌", title: "5-2：誤解の決闘と新たな同盟", flagKey: "stage_5_2_cleared", reqFlag: "stage_5_1_cleared", bg: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "王子", icon: "🤴", text: "お前たち……！ 父上を連れ去るために、奴らを手引きした内通者だなッ！？ 砂の王族の誇りにかけて成敗する！"},{speaker: "主人公", icon: "🧑", text: "誤解だ！ 僕たちも百獣海賊団を許せないんだ！"}],
+    battle: { enemyName: "砂の王子", enemyIcon: "🤴", enemyHp: 1000, shield: 150, enemyAtk: 30, enemyCtSpeed: 1.4, exp: 300, coins: 2500, drops: { weapons: ["w_gold_sword"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "（王子の宝剣を鮮やかに叩き落とした！）僕たちは君の国を壊しに来たわけじゃない。一緒にお父さんを助け出そう！"},{speaker: "王子", icon: "🤴", text: "……すまない。父上を連れ去った奴らは『王家のピラミッド』に向かったはずだ。僕も共に行く！"}] },
+  { id: 503, chapter: 5, chapterTitle: "第5章：砂の王国と十年前の禁忌", title: "5-3：王家のピラミッド 宿命の決戦", flagKey: "stage_5_3_cleared", reqFlag: "stage_5_2_cleared", bg: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80",
+    advPre: [{speaker: "百獣海賊団の船長", icon: "👹", text: "ヒャーハハハ！ 王家の秘宝は俺たちのものだ！ この古代の墓場で永遠に眠りやがれ！"},{speaker: "ブルータス", icon: "🏴‍☠️", text: "墓場で眠るのはテメェらのほうだ、百獣のイカレ野郎！ 野郎ども、渾身の一撃を叩き込んでやれ！！"}],
+    battle: { enemyName: "百獣海賊団 船長", enemyIcon: "👹", enemyHp: 2000, shield: 300, enemyAtk: 45, enemyCtSpeed: 1.6, exp: 800, coins: 10000, drops: { relics: ["r_book"] } },
+    advPost: [{speaker: "主人公", icon: "🧑", text: "僕たちの旅は……こんなとこでは終わらせない！（ピラミッドの黄金を錬成した大砲の一撃！）"},{speaker: "王様", icon: "🧔", text: "感謝する……。このピラミッドには『宇宙につながる何か』があると言い伝えられておるのじゃ。宇宙に向けて何かをぶっ放すための大砲とも……"},{speaker: "システム", icon: "⚙️", text: "すべての始まりの地「禁忌の島」への道が開かれた……！\n―― 第5章 完 ――\nTO BE CONTINUED..."}] }
 ];
 
 // ==========================================
-// パーティ定義 (ゲーム性強化版)
-// ==========================================
-// - sPower: 基本威力 (回復の場合はマイナス)
-// - hits: 多段ヒット回数（これが多いほどコンボが稼ぎやすい）
-// - element: 属性 (fire, water, wind, light, slash)
-const PARTY_DATA = [
-  { id: "p1", name: "主人公", job: "錬金術師", icon: "🧑", maxHp: 150, atk: 25, 
-    skill: "多重錬成砲", sIcon: "✨", sPower: 1.5, hits: 3, element: "fire",
-    sColor: "border-red-400", sBg: "bg-red-600", ctSpeed: 1.0 },
-  { id: "p2", name: "シルビア", job: "船医", icon: "💉", maxHp: 120, atk: 15, 
-    skill: "完璧な調薬", sIcon: "💖", sPower: -40, hits: 1, element: "light",
-    sColor: "border-green-400", sBg: "bg-green-600", ctSpeed: 0.8 },
-  { id: "p3", name: "レオン", job: "操縦士", icon: "🗡️", maxHp: 140, atk: 30, 
-    skill: "疾風連撃", sIcon: "🌪️", sPower: 1.2, hits: 4, element: "wind",
-    sColor: "border-cyan-400", sBg: "bg-cyan-600", ctSpeed: 1.5 },
-  { id: "p4", name: "ブルータス", job: "船長", icon: "🏴‍☠️", maxHp: 200, atk: 45, 
-    skill: "漆黒の一閃", sIcon: "⚔️", sPower: 4.5, hits: 1, element: "slash",
-    sColor: "border-purple-400", sBg: "bg-purple-600", ctSpeed: 0.6 }
-];
-
-// ==========================================
-// 画面遷移マネージャー
+// 画面遷移・初期化
 // ==========================================
 function switchScreen(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   const targetScreen = document.getElementById(id);
-  if(targetScreen) {
-    targetScreen.classList.add('active');
-  }
+  if(targetScreen) targetScreen.classList.add('active');
 }
 
 function startGame() {
+  playSE();
   loadData();
   updateHomeUI();
   switchScreen('screen-home');
 }
 
-// ==========================================
-// HOME (クエスト選択)
-// ==========================================
 function updateHomeUI() {
+  const elPlayerIcon = document.getElementById('ui-player-icon');
+  if(elPlayerIcon) {
+    if (saveData.playerIcon.startsWith('data:image')) {
+      elPlayerIcon.innerHTML = `<img src="${saveData.playerIcon}" class="w-full h-full object-cover rounded-full">`;
+    } else {
+      elPlayerIcon.innerText = saveData.playerIcon;
+    }
+  }
   const elPlayerName = document.getElementById('ui-player-name');
   if(elPlayerName) elPlayerName.innerText = saveData.playerName;
   
@@ -725,10 +621,8 @@ function updateHomeUI() {
     const isCleared = saveData.questFlags[q.flagKey];
     
     const btn = document.createElement('button');
-    // ホーム画面のボタンを豪華にするクラス設定
     const baseClass = "w-full text-left p-4 rounded-2xl border-2 flex justify-between items-center transition-all duration-300 active:scale-95 relative overflow-hidden";
-    const unlockClass = isUnlocked ? 'bg-gradient-to-r from-slate-800 to-indigo-900 border-indigo-500 hover:border-yellow-400 shadow-[0_4px_15px_rgba(0,0,0,0.5)]' : 'bg-slate-900 border-slate-700 opacity-60 cursor-not-allowed';
-    // キラッと光るエフェクトの追加
+    const unlockClass = isUnlocked ? 'bg-gradient-to-r from-slate-800 to-indigo-900 border-indigo-500 hover:border-yellow-400 shadow-[0_4px_15px_rgba(0,0,0,0.5)] cursor-pointer' : 'bg-slate-900 border-slate-700 opacity-60 cursor-not-allowed';
     const shineClass = isUnlocked && !isCleared ? 'btn-shine' : '';
     
     btn.className = `${baseClass} ${unlockClass} ${shineClass}`;
@@ -742,12 +636,339 @@ function updateHomeUI() {
     `;
 
     if (isUnlocked) {
-      btn.onclick = () => startQuest(q.id);
+      btn.onclick = () => { playSE(); startQuest(q.id); };
     }
     
     list.appendChild(btn);
   });
 }
+
+// ==========================================
+// 編成・拠点コントローラー (Manage UI)
+// ==========================================
+let currentManageTab = 'party';
+let selectingSlotType = null; // 'weapon', 'relic', 'party'
+let selectingTargetId = null; // pid or slotIndex
+
+function updateManageUI(tab) {
+  currentManageTab = tab || currentManageTab;
+  
+  ['party', 'equip', 'alchemy'].forEach(t => {
+    const btn = document.getElementById(`tab-btn-${t}`);
+    if(btn) {
+      if(t === currentManageTab) {
+        btn.classList.remove('tab-inactive', 'border-b-0');
+        btn.classList.add('tab-active', 'border-indigo-500', 'border-b-indigo-500');
+      } else {
+        btn.classList.remove('tab-active', 'border-indigo-500', 'border-b-indigo-500');
+        btn.classList.add('tab-inactive', 'border-b-0');
+      }
+    }
+  });
+
+  const content = document.getElementById('manage-content');
+  if(!content) return;
+  content.innerHTML = '';
+
+  if (currentManageTab === 'party') {
+    renderPartyTab(content);
+  } else if (currentManageTab === 'equip') {
+    renderEquipTab(content);
+  } else if (currentManageTab === 'alchemy') {
+    renderAlchemyTab(content);
+  }
+}
+
+function renderPartyTab(container) {
+  container.innerHTML = `<h3 class="text-center font-black text-yellow-300 mb-4 text-sm">出撃する4人を編成しよう</h3>`;
+  const grid = document.createElement('div');
+  grid.className = "grid grid-cols-2 gap-3";
+  
+  for(let i=0; i<4; i++) {
+    const pid = saveData.party[i];
+    const card = document.createElement('button');
+    card.className = "btn-push bg-slate-800 border-2 border-indigo-500 rounded-xl p-3 flex flex-col items-center shadow-lg relative h-32";
+    card.onclick = () => { playSE(); openSelectModal('party', i); };
+    
+    if (pid && CHAR_MASTER[pid]) {
+      const cMaster = CHAR_MASTER[pid];
+      const cData = saveData.crewData[pid] || {level:1, exp:0};
+      card.innerHTML = `
+        <span class="absolute top-1 left-2 text-[10px] text-slate-400 font-bold">枠 ${i+1}</span>
+        ${cMaster.icon.startsWith('data:image') ? `<img src="${cMaster.icon}" class="w-10 h-10 rounded-full object-cover mt-2">` : `<span class="text-4xl filter drop-shadow mt-2">${cMaster.icon}</span>`}
+        <span class="text-xs font-black text-white mt-1 w-full truncate text-center">${cMaster.name}</span>
+        <span class="text-[9px] text-yellow-300 font-bold bg-slate-900 px-2 py-0.5 rounded-full mt-auto border border-slate-600">Lv ${cData.level}</span>
+      `;
+    } else {
+      card.classList.replace('border-indigo-500', 'border-slate-500');
+      card.classList.replace('bg-slate-800', 'bg-slate-700');
+      card.innerHTML = `
+        <span class="absolute top-1 left-2 text-[10px] text-slate-400 font-bold">枠 ${i+1}</span>
+        <span class="text-3xl text-slate-500 mt-auto mb-auto">+</span>
+        <span class="text-xs font-bold text-slate-400 mt-auto">空き</span>
+      `;
+    }
+    grid.appendChild(card);
+  }
+  container.appendChild(grid);
+}
+
+function renderEquipTab(container) {
+  container.innerHTML = `<h3 class="text-center font-black text-yellow-300 mb-4 text-sm">装備や遺物でキャラクターを強化！</h3>`;
+  const list = document.createElement('div');
+  list.className = "flex flex-col gap-3";
+  
+  Object.keys(CHAR_MASTER).forEach(pid => {
+    const cMaster = CHAR_MASTER[pid];
+    const cData = saveData.crewData[pid] || {level:1, exp:0};
+    
+    // 武器情報 (nullチェック強化)
+    const equipWeaponItem = saveData.inventory.weapons.find(w => w.equipTo === pid);
+    const wMaster = (equipWeaponItem && WEAPON_MASTER[equipWeaponItem.id]) ? WEAPON_MASTER[equipWeaponItem.id] : WEAPON_MASTER["w_none"];
+    const wPlus = equipWeaponItem && equipWeaponItem.plus > 0 ? `+${equipWeaponItem.plus}` : '';
+    const wAtk = wMaster.atk * (1 + (equipWeaponItem ? equipWeaponItem.plus * 0.2 : 0));
+    
+    // 遺物情報 (nullチェック強化)
+    const equipRelicItem = saveData.inventory.relics.find(r => r.equipTo === pid);
+    const rMaster = (equipRelicItem && RELIC_MASTER[equipRelicItem.id]) ? RELIC_MASTER[equipRelicItem.id] : null;
+    const rPlus = equipRelicItem && equipRelicItem.plus > 0 ? `+${equipRelicItem.plus}` : '';
+
+    const hp = cMaster.baseHp + (cData.level - 1) * 10 + (rMaster ? Math.floor(rMaster.hp * (1 + equipRelicItem.plus * 0.2)) : 0);
+    const atk = cMaster.baseAtk + (cData.level - 1) * 2 + Math.floor(wAtk) + (rMaster ? Math.floor(rMaster.atk * (1 + equipRelicItem.plus * 0.2)) : 0);
+
+    const card = document.createElement('div');
+    card.className = "bg-slate-800 border-2 border-indigo-500 rounded-xl p-3 shadow-lg relative";
+    
+    if(saveData.party.includes(pid)) {
+      card.innerHTML += `<div class="absolute -top-2 -left-2 bg-pink-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-md z-10 border border-white">出撃中</div>`;
+    }
+
+    const wTypeName = cMaster.weaponType === 'any' ? '何でも' : 
+                      cMaster.weaponType === 'spear' ? '槍' : 
+                      cMaster.weaponType === 'gun' ? '銃' : 
+                      cMaster.weaponType === 'greatsword' ? '大剣' : 
+                      cMaster.weaponType === 'axe' ? '斧' : cMaster.weaponType;
+
+    card.innerHTML += `
+      <div class="flex items-center gap-3 border-b border-slate-600 pb-2 mb-2">
+        <div class="flex-shrink-0 text-4xl bg-slate-900 border border-slate-600 rounded-xl w-14 h-14 flex items-center justify-center filter drop-shadow-md overflow-hidden">
+          ${cMaster.icon.startsWith('data:image') ? `<img src="${cMaster.icon}" class="w-full h-full object-cover">` : cMaster.icon}
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-end mb-1">
+            <span class="font-black text-white text-sm">${cMaster.name}</span>
+            <span class="text-[10px] text-yellow-300 font-bold bg-slate-900 px-2 py-0.5 rounded-full border border-slate-600">Lv ${cData.level}</span>
+          </div>
+          <div class="text-[10px] text-blue-200 flex justify-between font-bold">
+            <span>HP: ${hp}</span>
+            <span>攻: ${atk}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="playSE(); openSelectModal('weapon', '${pid}')" class="btn-push flex-1 bg-gradient-to-b from-indigo-600 to-indigo-800 border border-indigo-400 rounded-lg p-1.5 flex flex-col items-center">
+          <span class="text-[8px] text-slate-300 mb-0.5">武器 (${wTypeName})</span>
+          <span class="text-2xl filter drop-shadow">${wMaster.icon}</span>
+          <span class="text-[9px] text-white font-bold truncate w-full text-center mt-0.5">${wMaster.name}<span class="text-yellow-300">${wPlus}</span></span>
+        </button>
+        <button onclick="playSE(); openSelectModal('relic', '${pid}')" class="btn-push flex-1 bg-gradient-to-b from-purple-600 to-purple-800 border border-purple-400 rounded-lg p-1.5 flex flex-col items-center">
+          <span class="text-[8px] text-slate-300 mb-0.5">遺物</span>
+          <span class="text-2xl filter drop-shadow">${rMaster ? rMaster.icon : '✨'}</span>
+          <span class="text-[9px] text-white font-bold truncate w-full text-center mt-0.5">${rMaster ? rMaster.name : 'なし'}<span class="text-yellow-300">${rPlus}</span></span>
+        </button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+  container.appendChild(list);
+}
+
+function renderAlchemyTab(container) {
+  container.innerHTML = `
+    <h3 class="text-center font-black text-yellow-300 mb-2 text-sm">錬金（限界突破）</h3>
+    <p class="text-center text-[10px] text-slate-300 mb-4 bg-slate-900 p-2 rounded-lg border border-slate-700">同じ装備や遺物を消費して、最大+4まで強化！<br>ステータスがアップするぞ！</p>
+  `;
+  
+  const list = document.createElement('div');
+  list.className = "grid grid-cols-2 gap-2";
+
+  const renderItems = (items, masterData, typeStr) => {
+    items.forEach(item => {
+      const master = masterData[item.id];
+      if(!master || item.plus >= 4) return;
+
+      const material = items.find(m => m.id === item.id && m.uid !== item.uid && !m.equipTo);
+      
+      const card = document.createElement('div');
+      card.className = `border-2 rounded-xl p-2 flex flex-col items-center relative shadow-md ${material ? 'bg-slate-700 border-yellow-500' : 'bg-slate-800 border-slate-600'}`;
+      
+      if(item.equipTo && CHAR_MASTER[item.equipTo]) {
+        card.innerHTML += `<div class="absolute -top-2 -left-2 bg-indigo-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow z-10">${CHAR_MASTER[item.equipTo].name}</div>`;
+      }
+
+      card.innerHTML += `
+        <span class="text-3xl filter drop-shadow mb-1">${master.icon}</span>
+        <span class="text-[10px] font-black text-white w-full text-center truncate">${master.name}<span class="text-yellow-300">${item.plus > 0 ? '+'+item.plus : ''}</span></span>
+        <span class="text-[8px] text-slate-400 mb-2">${typeStr}</span>
+      `;
+
+      const btn = document.createElement('button');
+      if (material) {
+        btn.className = "btn-push w-full bg-gradient-to-b from-yellow-400 to-orange-500 text-slate-900 font-black text-[10px] py-1.5 rounded-md shadow border border-white";
+        btn.innerText = "錬金する！";
+        btn.onclick = () => doAlchemy(item.uid, material.uid, typeStr === '武器' ? 'weapons' : 'relics');
+      } else {
+        btn.className = "w-full bg-slate-900 text-slate-500 font-bold text-[10px] py-1.5 rounded-md border border-slate-700";
+        btn.innerText = "素材なし";
+        btn.disabled = true;
+      }
+      card.appendChild(btn);
+      list.appendChild(card);
+    });
+  };
+
+  renderItems(saveData.inventory.weapons, WEAPON_MASTER, '武器');
+  renderItems(saveData.inventory.relics, RELIC_MASTER, '遺物');
+  
+  if(list.children.length === 0) {
+    container.innerHTML += `<div class="text-center text-slate-500 font-bold text-sm mt-8">錬金できるアイテムがありません</div>`;
+  } else {
+    container.appendChild(list);
+  }
+}
+
+function doAlchemy(baseUid, materialUid, invType) {
+  const inv = saveData.inventory[invType];
+  const base = inv.find(i => i.uid === baseUid);
+  const matIdx = inv.findIndex(i => i.uid === materialUid);
+  
+  if(!base || matIdx === -1) return;
+  if(base.plus >= 4) return;
+  
+  base.plus++;
+  inv.splice(matIdx, 1);
+  saveGame();
+  playSE();
+  updateManageUI('alchemy');
+}
+
+// 選択モーダルの処理
+function openSelectModal(type, targetId) {
+  selectingSlotType = type;
+  selectingTargetId = targetId;
+  
+  const modal = document.getElementById('select-modal');
+  const title = document.getElementById('select-modal-title');
+  const list = document.getElementById('select-modal-list');
+  if(!modal || !title || !list) return;
+  list.innerHTML = '';
+
+  if (type === 'party') {
+    title.innerText = `枠 ${targetId + 1} のキャラクターを選択`;
+    
+    const btnNone = document.createElement('button');
+    btnNone.className = "btn-push bg-slate-700 border-2 border-slate-500 rounded-xl p-2 flex flex-col items-center justify-center h-24";
+    btnNone.innerHTML = `<span class="text-2xl text-slate-400 mb-1">✕</span><span class="text-[10px] font-bold text-white">はずす</span>`;
+    btnNone.onclick = () => setPartyMember(targetId, null);
+    list.appendChild(btnNone);
+
+    Object.keys(CHAR_MASTER).forEach(pid => {
+      const c = CHAR_MASTER[pid];
+      const isEquipped = saveData.party.includes(pid);
+      
+      const btn = document.createElement('button');
+      btn.className = `btn-push bg-slate-800 border-2 ${isEquipped ? 'border-red-500 opacity-50' : 'border-indigo-500'} rounded-xl p-2 flex flex-col items-center relative h-24 overflow-hidden`;
+      btn.innerHTML = `
+        ${c.icon.startsWith('data:image') ? `<img src="${c.icon}" class="w-8 h-8 rounded-full object-cover mb-1">` : `<span class="text-3xl filter drop-shadow mb-1">${c.icon}</span>`}
+        <span class="text-[10px] font-black text-white w-full text-center truncate">${c.name}</span>
+        <span class="text-[8px] text-yellow-300 mt-auto bg-slate-900 px-1 rounded-full border border-slate-600">Lv ${saveData.crewData[pid] ? saveData.crewData[pid].level : 1}</span>
+        ${isEquipped ? `<span class="absolute inset-0 bg-red-900/50 rounded-lg flex items-center justify-center text-[10px] font-black text-white">編成中</span>` : ''}
+      `;
+      if(!isEquipped) btn.onclick = () => setPartyMember(targetId, pid);
+      list.appendChild(btn);
+    });
+
+  } else if (type === 'weapon' || type === 'relic') {
+    const cMaster = CHAR_MASTER[targetId];
+    title.innerText = `${cMaster.name} の${type === 'weapon'?'武器':'遺物'}を選択`;
+    
+    const invType = type === 'weapon' ? 'weapons' : 'relics';
+    const masterData = type === 'weapon' ? WEAPON_MASTER : RELIC_MASTER;
+
+    const btnNone = document.createElement('button');
+    btnNone.className = "btn-push bg-slate-700 border-2 border-slate-500 rounded-xl p-2 flex flex-col items-center justify-center h-24";
+    btnNone.innerHTML = `<span class="text-2xl mb-1 filter drop-shadow">${type==='weapon'?'✊':'✨'}</span><span class="text-[10px] font-bold text-white">はずす</span>`;
+    btnNone.onclick = () => setEquipItem(invType, null);
+    list.appendChild(btnNone);
+
+    saveData.inventory[invType].forEach(item => {
+      const iMaster = masterData[item.id];
+      if(!iMaster) return;
+
+      if (type === 'weapon' && cMaster.weaponType !== 'any' && iMaster.type !== cMaster.weaponType) {
+        return; // 得意武器以外は非表示
+      }
+
+      const isEquippedByOther = item.equipTo && item.equipTo !== targetId;
+      const isEquippedByMe = item.equipTo === targetId;
+      
+      const btn = document.createElement('button');
+      btn.className = `btn-push bg-slate-800 border-2 ${isEquippedByOther ? 'border-red-500 opacity-60' : isEquippedByMe ? 'border-green-500' : 'border-indigo-500'} rounded-xl p-2 flex flex-col items-center relative h-24`;
+      btn.innerHTML = `
+        <span class="text-3xl filter drop-shadow mb-1">${iMaster.icon}</span>
+        <span class="text-[10px] font-black text-white w-full text-center truncate">${iMaster.name}<span class="text-yellow-300">${item.plus > 0 ? '+'+item.plus : ''}</span></span>
+        <span class="text-[8px] text-slate-300 mt-auto">${type === 'weapon' ? '攻+'+Math.floor(iMaster.atk*(1+item.plus*0.2)) : 'HP+'+Math.floor(iMaster.hp*(1+item.plus*0.2))}</span>
+        ${isEquippedByOther && CHAR_MASTER[item.equipTo] ? `<div class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded shadow">${CHAR_MASTER[item.equipTo].name}</div>` : ''}
+        ${isEquippedByMe ? `<div class="absolute -top-1 -right-1 bg-green-600 text-white text-[8px] px-1 rounded shadow">装備中</div>` : ''}
+      `;
+      btn.onclick = () => setEquipItem(invType, item.uid);
+      list.appendChild(btn);
+    });
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeSelectModal() {
+  const modal = document.getElementById('select-modal');
+  if(modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function setPartyMember(slotIndex, pid) {
+  saveData.party[slotIndex] = pid;
+  saveGame();
+  updateManageUI('party');
+  closeSelectModal();
+  playSE();
+}
+
+function setEquipItem(invType, itemUid) {
+  const inv = saveData.inventory[invType];
+  const pid = selectingTargetId;
+  
+  const currentEquip = inv.find(i => i.equipTo === pid);
+  if(currentEquip) currentEquip.equipTo = null;
+
+  if (itemUid) {
+    const newItem = inv.find(i => i.uid === itemUid);
+    if(newItem) {
+      if(newItem.equipTo && CHAR_MASTER[newItem.equipTo]) {
+        if(!confirm(`${CHAR_MASTER[newItem.equipTo].name}が装備中ですが、外して装備しますか？`)) return;
+      }
+      newItem.equipTo = pid;
+    }
+  }
+
+  saveGame();
+  updateManageUI('equip');
+  closeSelectModal();
+  playSE();
+}
+
 
 // ==========================================
 // ADV / BATTLE コントローラー
@@ -786,7 +1007,11 @@ function showAdvText() {
   
   const charImg = document.getElementById('adv-char-img');
   if(charImg) {
-    charImg.innerText = line.icon;
+    if(line.icon.startsWith('data:image')){
+      charImg.innerHTML = `<img src="${line.icon}" class="w-48 h-48 rounded-full object-cover">`;
+    }else{
+      charImg.innerText = line.icon;
+    }
     charImg.style.transform = 'translateY(10px)';
     charImg.style.opacity = '0';
     setTimeout(() => {
@@ -827,8 +1052,6 @@ function nextAdv() {
 
 function finishQuest() {
   saveData.questFlags[currentQuest.flagKey] = true;
-  saveData.coins += currentQuest.battle.coins;
-  saveData.exp += currentQuest.battle.exp;
   saveGame();
   
   updateHomeUI();
@@ -836,7 +1059,7 @@ function finishQuest() {
 }
 
 // ==========================================
-// BATTLE エンジン (コンボ・ブレイクシステム搭載)
+// BATTLE エンジン
 // ==========================================
 let battleState = {
   active: false,
@@ -851,6 +1074,8 @@ function initBattle() {
   switchScreen('screen-battle');
   const battleResult = document.getElementById('battle-result');
   if(battleResult) battleResult.style.display = 'none';
+  const resultDrops = document.getElementById('result-drops');
+  if(resultDrops) resultDrops.classList.add('hidden');
   
   const bData = currentQuest.battle;
   battleState.enemy = {
@@ -876,7 +1101,37 @@ function initBattle() {
   hideBreakDisplay();
   updateEnemyHpUI();
 
-  battleState.party = PARTY_DATA.map(p => ({ ...p, hp: p.maxHp, ct: 0 }));
+  // パーティ初期化
+  battleState.party = [];
+  saveData.party.forEach((pid, idx) => {
+    if (!pid || !CHAR_MASTER[pid]) return;
+    
+    const cm = CHAR_MASTER[pid];
+    const cd = saveData.crewData[pid] || {level:1, exp:0};
+    
+    const wItem = saveData.inventory.weapons.find(w => w.equipTo === pid);
+    const wm = (wItem && WEAPON_MASTER[wItem.id]) ? WEAPON_MASTER[wItem.id] : WEAPON_MASTER["w_none"];
+    const wAtk = wm.atk * (1 + (wItem ? wItem.plus * 0.2 : 0));
+
+    const rItem = saveData.inventory.relics.find(r => r.equipTo === pid);
+    const rm = (rItem && RELIC_MASTER[rItem.id]) ? RELIC_MASTER[rItem.id] : null;
+    const rHp = rm ? rm.hp * (1 + rItem.plus * 0.2) : 0;
+    const rAtk = rm ? rm.atk * (1 + rItem.plus * 0.2) : 0;
+
+    const maxHp = cm.baseHp + (cd.level - 1) * 10 + Math.floor(rHp);
+    const atk = cm.baseAtk + (cd.level - 1) * 2 + Math.floor(wAtk) + Math.floor(rAtk);
+
+    battleState.party.push({
+      ...cm,
+      id: pid,
+      maxHp: maxHp,
+      hp: maxHp,
+      atk: atk,
+      ct: 0,
+      uiIndex: idx
+    });
+  });
+
   renderPartyUI();
   
   battleState.active = true;
@@ -896,32 +1151,38 @@ function renderPartyUI() {
   if(!container) return;
   container.innerHTML = '';
 
-  battleState.party.forEach((p, i) => {
+  for(let i=0; i<4; i++) {
+    const p = battleState.party[i];
     const panel = document.createElement('div');
-    panel.className = "bg-slate-700 border-2 border-slate-500 rounded-lg flex flex-col items-center p-1 relative overflow-hidden shadow-inner";
     
-    panel.innerHTML = `
-      <div class="w-full text-center z-10 mb-1">
-        <div class="text-[9px] font-black text-white drop-shadow truncate">${p.name}</div>
-        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-600 mt-0.5">
-          <div id="hp-bar-${i}" class="bg-green-500 h-full w-full transition-all"></div>
+    if (p) {
+      panel.className = "bg-slate-700 border-2 border-slate-500 rounded-lg flex flex-col items-center p-1 relative overflow-hidden shadow-inner";
+      panel.innerHTML = `
+        <div class="w-full text-center z-10 mb-1">
+          <div class="text-[9px] font-black text-white drop-shadow truncate">${p.name}</div>
+          <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-600 mt-0.5">
+            <div id="hp-bar-${i}" class="bg-green-500 h-full w-full transition-all"></div>
+          </div>
         </div>
-      </div>
-      <div class="text-3xl filter drop-shadow-md z-10 my-auto mb-2">${p.icon}</div>
-      
-      <div class="relative w-12 h-12 z-10 mt-auto cursor-pointer btn-push" onclick="useSkill(${i})" id="skill-btn-${i}">
-        <div class="absolute inset-0 ${p.sBg} rounded-full border-2 ${p.sColor} opacity-50 shadow-inner"></div>
-        <svg class="absolute inset-0 w-full h-full ct-ring" viewBox="0 0 36 36">
-          <path class="text-slate-900/50" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          <path id="ct-path-${i}" stroke-width="4" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--tw-colors-yellow-400') || '#facc15'}" stroke-dasharray="100, 100" stroke-dashoffset="100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        </svg>
-        <div class="absolute inset-0 flex items-center justify-center text-xl filter drop-shadow-md">${p.sIcon}</div>
-        <div class="absolute -bottom-2 w-[120%] -ml-[10%] bg-slate-900/80 border border-slate-500 text-[8px] font-bold text-center rounded-full truncate px-1 text-white">${p.skill}</div>
-      </div>
-      <div id="dead-overlay-${i}" class="absolute inset-0 bg-red-900/80 z-20 hidden flex-col items-center justify-center"><span class="text-2xl">💀</span></div>
-    `;
+        ${p.icon.startsWith('data:image') ? `<img src="${p.icon}" class="w-8 h-8 rounded-full object-cover z-10 my-auto mb-2">` : `<div class="text-3xl filter drop-shadow-md z-10 my-auto mb-2">${p.icon}</div>`}
+        
+        <div class="relative w-12 h-12 z-10 mt-auto cursor-pointer btn-push" onclick="useSkill(${i})" id="skill-btn-${i}">
+          <div class="absolute inset-0 ${p.sBg} rounded-full border-2 ${p.sColor} opacity-50 shadow-inner"></div>
+          <svg class="absolute inset-0 w-full h-full ct-ring" viewBox="0 0 36 36">
+            <path class="text-slate-900/50" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path id="ct-path-${i}" stroke-width="4" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--tw-colors-yellow-400') || '#facc15'}" stroke-dasharray="100, 100" stroke-dashoffset="100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center text-xl filter drop-shadow-md">${p.sIcon}</div>
+          <div class="absolute -bottom-2 w-[120%] -ml-[10%] bg-slate-900/80 border border-slate-500 text-[8px] font-bold text-center rounded-full truncate px-1 text-white">${p.skill}</div>
+        </div>
+        <div id="dead-overlay-${i}" class="absolute inset-0 bg-red-900/80 z-20 hidden flex-col items-center justify-center"><span class="text-2xl">💀</span></div>
+      `;
+    } else {
+      panel.className = "bg-slate-800 border-2 border-slate-600 rounded-lg flex flex-col items-center justify-center p-1 shadow-inner opacity-50";
+      panel.innerHTML = `<span class="text-xs text-slate-500 font-bold">空き</span>`;
+    }
     container.appendChild(panel);
-  });
+  }
 }
 
 function updateEnemyHpUI() {
@@ -948,7 +1209,6 @@ function battleLoop(time) {
   const dt = (time - battleState.lastTime) / 1000;
   battleState.lastTime = time;
 
-  // コンボタイマーの減少
   if (battleState.combo.count > 0) {
     battleState.combo.timer -= dt;
     if (battleState.combo.timer <= 0) {
@@ -957,9 +1217,8 @@ function battleLoop(time) {
     }
   }
 
-  // ブレイク復帰処理（シールドが徐々に回復）
   if (battleState.enemy.isBroken) {
-    battleState.enemy.shield += (battleState.enemy.maxShield * 0.1) * dt; // 10秒で復帰
+    battleState.enemy.shield += (battleState.enemy.maxShield * 0.1) * dt; 
     if (battleState.enemy.shield >= battleState.enemy.maxShield) {
       battleState.enemy.shield = battleState.enemy.maxShield;
       battleState.enemy.isBroken = false;
@@ -970,9 +1229,8 @@ function battleLoop(time) {
     updateEnemyHpUI();
   }
 
-  // パーティCT進行
   battleState.party.forEach((p, i) => {
-    if (p.hp > 0 && p.ct < 100) {
+    if (p && p.hp > 0 && p.ct < 100) {
       p.ct += 20 * p.ctSpeed * dt;
       if (p.ct >= 100) {
         p.ct = 100;
@@ -987,7 +1245,6 @@ function battleLoop(time) {
     }
   });
 
-  // 敵CT進行 (ブレイク中は進行しない)
   if (battleState.enemy.hp > 0 && !battleState.enemy.isBroken) {
     battleState.enemy.ct += 15 * battleState.enemy.data.enemyCtSpeed * dt;
     const actionInd = document.getElementById('enemy-action-indicator');
@@ -1006,30 +1263,23 @@ function battleLoop(time) {
 
 async function useSkill(index) {
   const p = battleState.party[index];
-  if (p.hp <= 0 || p.ct < 100 || !battleState.active) return;
+  if (!p || p.hp <= 0 || p.ct < 100 || !battleState.active) return;
 
-  // CTリセット
   p.ct = 0;
   const skillBtn = document.getElementById(`skill-btn-${index}`);
   if(skillBtn) skillBtn.classList.remove('ct-glow');
   const ctPath = document.getElementById(`ct-path-${index}`);
   if(ctPath) ctPath.style.strokeDashoffset = 100;
 
-  // カットイン演出
   showSkillCutin(p.icon, p.skill);
 
   if (p.sPower < 0) {
-    // 回復スキル
     executeHeal(p, index);
   } else {
-    // 攻撃スキル（多段ヒット対応）
     const hits = p.hits || 1;
     for (let h = 0; h < hits; h++) {
-      if(battleState.enemy.hp <= 0) break; // 途中で倒れたら止める
-      
-      setTimeout(() => {
-        executeDamage(p);
-      }, h * 200 + 300); // カットインのディレイ(300ms)＋ヒット間隔(200ms)
+      if(battleState.enemy.hp <= 0) break;
+      setTimeout(() => executeDamage(p), h * 200 + 300);
     }
   }
 }
@@ -1040,11 +1290,15 @@ function showSkillCutin(icon, name) {
   const nameEl = document.getElementById('cutin-name');
   if(!cutin || !iconEl || !nameEl) return;
 
-  iconEl.innerText = icon;
+  if (icon.startsWith('data:image')) {
+    iconEl.innerHTML = `<img src="${icon}" class="w-12 h-12 rounded-full object-cover">`;
+  } else {
+    iconEl.innerText = icon;
+  }
   nameEl.innerText = name;
   
   cutin.classList.remove('cutin-active');
-  void cutin.offsetWidth; // リフロー
+  void cutin.offsetWidth;
   cutin.classList.add('cutin-active');
 }
 
@@ -1053,7 +1307,7 @@ function executeHeal(p, index) {
     const heal = Math.floor(p.atk * Math.abs(p.sPower) * 0.5);
     createImpactEffect(false);
     battleState.party.forEach((member, i) => {
-      if (member.hp > 0) {
+      if (member && member.hp > 0) {
         member.hp = Math.min(member.maxHp, member.hp + heal);
         const hpBar = document.getElementById(`hp-bar-${i}`);
         if(hpBar) hpBar.style.width = `${(member.hp / member.maxHp) * 100}%`;
@@ -1068,16 +1322,14 @@ function executeDamage(p) {
 
   createSlashEffect();
   
-  // コンボ加算
   battleState.combo.count++;
-  battleState.combo.timer = 4.0; // 4秒持続
+  battleState.combo.timer = 4.0;
   updateComboDisplay();
 
-  // ダメージ計算
-  let comboMultiplier = 1.0 + (battleState.combo.count - 1) * 0.1; // 1コンボにつき+10%
-  let breakMultiplier = battleState.enemy.isBroken ? 2.0 : 1.0; // ブレイク中は2倍
+  let comboMultiplier = 1.0 + (battleState.combo.count - 1) * 0.1;
+  let breakMultiplier = battleState.enemy.isBroken ? 2.0 : 1.0;
   
-  let baseDmg = (p.atk * p.sPower) / (p.hits || 1); // 1ヒットあたりの威力
+  let baseDmg = (p.atk * p.sPower) / (p.hits || 1);
   let dmg = Math.floor(baseDmg * comboMultiplier * breakMultiplier * (0.9 + Math.random() * 0.2));
   
   const isCrit = Math.random() < 0.15;
@@ -1085,9 +1337,8 @@ function executeDamage(p) {
 
   battleState.enemy.hp -= dmg;
   
-  // シールド削り（ブレイクしてない時のみ）
   if (!battleState.enemy.isBroken) {
-    const shieldDmg = Math.floor(dmg * 0.3); // ダメージの3割削る
+    const shieldDmg = Math.floor(dmg * 0.3);
     battleState.enemy.shield -= shieldDmg;
     if (battleState.enemy.shield <= 0) {
       triggerBreak();
@@ -1116,7 +1367,7 @@ function executeDamage(p) {
 function triggerBreak() {
   battleState.enemy.isBroken = true;
   battleState.enemy.shield = 0;
-  battleState.enemy.ct = 0; // 行動キャンセル
+  battleState.enemy.ct = 0;
   
   const actionInd = document.getElementById('enemy-action-indicator');
   if(actionInd) actionInd.style.opacity = '0';
@@ -1127,7 +1378,6 @@ function triggerBreak() {
   const breakDisplay = document.getElementById('break-display');
   if(breakDisplay) breakDisplay.classList.remove('hidden');
   
-  // 画面揺らし大
   const container = document.getElementById('game-container');
   if(container) {
     container.style.transform = 'translate(10px, 10px)';
@@ -1147,8 +1397,6 @@ function updateComboDisplay() {
     display.classList.remove('hidden');
     count.innerText = battleState.combo.count;
     bonus.innerText = `ダメージ +${(battleState.combo.count - 1) * 10}%`;
-    
-    // アニメーション再トリガー
     display.style.transform = 'scale(1.2)';
     setTimeout(() => display.style.transform = 'scale(1)', 100);
   }
@@ -1177,7 +1425,7 @@ function enemyAttack() {
     }, 300);
   }
 
-  const alive = battleState.party.map((p, i) => ({...p, i})).filter(p => p.hp > 0);
+  const alive = battleState.party.map((p, i) => ({...p, i})).filter(p => p && p.hp > 0);
   if (alive.length === 0) return;
 
   const target = alive[Math.floor(Math.random() * alive.length)];
@@ -1202,7 +1450,7 @@ function enemyAttack() {
       deadOverlay.classList.remove('hidden');
       deadOverlay.classList.add('flex');
     }
-    if (battleState.party.every(p => p.hp <= 0)) {
+    if (battleState.party.every(p => !p || p.hp <= 0)) {
       loseBattle();
     }
   }
@@ -1234,20 +1482,21 @@ function createImpactEffect(isEnemyAtk, partyIndex = -1) {
   setTimeout(() => e.remove(), 300);
 }
 
-function showDamagePopup(amount, isCrit, isHeal, partyIndex = -1) {
+function showDamagePopup(amount, isCrit, isHeal, partyIndex = -1, isLevelUp = false) {
   const p = document.createElement('div');
   p.innerText = amount;
   
   let styleClass = 'dmg-normal';
-  if (isHeal) styleClass = 'dmg-heal';
+  if (isLevelUp) styleClass = 'dmg-lvlup';
+  else if (isHeal) styleClass = 'dmg-heal';
   else if (isCrit) styleClass = 'dmg-crit';
-  else if (battleState.enemy.isBroken && !isHeal && partyIndex === -1) styleClass = 'dmg-weak'; // ブレイク中のダメージは赤字
+  else if (battleState.enemy.isBroken && !isHeal && partyIndex === -1) styleClass = 'dmg-weak';
   
   p.className = `dmg-popup ${styleClass}`;
   p.style.setProperty('--rot', `${(Math.random() - 0.5) * 20}`);
   
   if (partyIndex >= 0) {
-    p.style.bottom = '25%';
+    p.style.bottom = isLevelUp ? '40%' : '25%';
     p.style.left = `${5 + partyIndex * 25}%`;
     const screenBattle = document.getElementById('screen-battle');
     if(screenBattle) screenBattle.appendChild(p);
@@ -1258,7 +1507,7 @@ function showDamagePopup(amount, isCrit, isHeal, partyIndex = -1) {
     if(battleField) battleField.appendChild(p);
   }
   
-  setTimeout(() => p.remove(), 800);
+  setTimeout(() => p.remove(), isLevelUp ? 2000 : 800);
 }
 
 function toggleAutoBattle() {
@@ -1275,6 +1524,98 @@ function toggleAutoBattle() {
   }
 }
 
+// ------------------------------------
+// EXPとドロップ処理
+// ------------------------------------
+function processBattleRewards() {
+  const expGain = currentQuest.battle.exp;
+  saveData.coins += currentQuest.battle.coins;
+  
+  // EXP処理 (生存している出撃キャラのみ)
+  const detailsEl = document.getElementById('result-exp-details');
+  if(detailsEl) detailsEl.innerHTML = '';
+  
+  battleState.party.forEach((p, idx) => {
+    if (p && p.hp > 0) {
+      if(!saveData.crewData[p.id]) saveData.crewData[p.id] = {level:1, exp:0};
+      const cData = saveData.crewData[p.id];
+      cData.exp += expGain;
+      
+      let levelUpCount = 0;
+      let reqExp = cData.level * 100;
+      while (cData.exp >= reqExp) {
+        cData.exp -= reqExp;
+        cData.level++;
+        levelUpCount++;
+        reqExp = cData.level * 100;
+      }
+      
+      if(levelUpCount > 0) {
+        showDamagePopup("LEVEL UP!", false, false, idx, true);
+      }
+
+      if(detailsEl) {
+        const iconHtml = p.icon.startsWith('data:image') ? `<img src="${p.icon}" class="w-6 h-6 rounded-full object-cover">` : `<span class="text-lg filter drop-shadow">${p.icon}</span>`;
+        detailsEl.innerHTML += `
+          <div class="flex justify-between items-center bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
+            <span class="text-xs text-white font-bold flex items-center gap-1">${iconHtml} ${p.name}</span>
+            <span class="text-xs ${levelUpCount > 0 ? 'text-yellow-400 font-black animate-pulse' : 'text-blue-200'}">Lv.${cData.level} ${levelUpCount > 0 ? '(UP!)' : ''}</span>
+          </div>
+        `;
+      }
+    }
+  });
+
+  // ドロップ判定
+  const resultDrops = document.getElementById('result-drops');
+  const dropList = document.getElementById('result-drop-list');
+  if(resultDrops && dropList) {
+    dropList.innerHTML = '';
+    resultDrops.classList.add('hidden');
+    
+    const drops = currentQuest.battle.drops;
+    let droppedItems = [];
+
+    if(drops) {
+      if(drops.weapons) {
+        drops.weapons.forEach(wId => {
+          if(Math.random() < 0.3) {
+            saveData.inventory.weapons.push({ uid: "w"+Date.now()+Math.random(), id: wId, plus: 0, equipTo: null });
+            droppedItems.push(WEAPON_MASTER[wId]);
+          }
+        });
+      }
+      if(drops.relics) {
+        drops.relics.forEach(rId => {
+          if(Math.random() < 0.2) {
+            saveData.inventory.relics.push({ uid: "r"+Date.now()+Math.random(), id: rId, plus: 0, equipTo: null });
+            droppedItems.push(RELIC_MASTER[rId]);
+          }
+        });
+      }
+    }
+
+    if(droppedItems.length > 0) {
+      resultDrops.classList.remove('hidden');
+      droppedItems.forEach(master => {
+        dropList.innerHTML += `
+          <div class="bg-slate-900 border border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] rounded-lg p-2 flex flex-col items-center relative">
+            <span class="absolute -top-2 -right-2 bg-pink-500 text-white text-[8px] font-black px-1 rounded shadow">GET!</span>
+            <span class="text-2xl filter drop-shadow">${master.icon}</span>
+            <span class="text-[10px] text-white font-bold mt-1 max-w-[60px] truncate text-center">${master.name}</span>
+          </div>
+        `;
+      });
+    }
+  }
+
+  const resultExpTotal = document.getElementById('result-exp-total');
+  if(resultExpTotal) resultExpTotal.innerText = expGain;
+  
+  saveGame();
+}
+
+
 function winBattle() {
   if(!battleState.active) return;
   battleState.active = false;
@@ -1290,12 +1631,13 @@ function winBattle() {
     const title = document.getElementById('result-title');
     if(title) {
       title.innerText = "WIN!";
-      title.className = "text-6xl font-black text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,1)] animate-bounce";
+      title.className = "text-6xl font-black text-yellow-400 mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,1)] animate-bounce";
     }
     const coins = document.getElementById('result-coins');
     if(coins) coins.innerText = `${currentQuest.battle.coins}`;
-    const exp = document.getElementById('result-exp');
-    if(exp) exp.innerText = `${currentQuest.battle.exp}`;
+    
+    // 報酬計算＆反映
+    processBattleRewards();
     
     const result = document.getElementById('battle-result');
     if(result) {
@@ -1315,12 +1657,18 @@ function loseBattle() {
     const title = document.getElementById('result-title');
     if(title) {
       title.innerText = "LOSE...";
-      title.className = "text-5xl font-black text-blue-400 mb-6 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]";
+      title.className = "text-5xl font-black text-blue-400 mb-4 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]";
     }
     const coins = document.getElementById('result-coins');
     if(coins) coins.innerText = `0`;
-    const exp = document.getElementById('result-exp');
-    if(exp) exp.innerText = `0`;
+    const expTotal = document.getElementById('result-exp-total');
+    if(expTotal) expTotal.innerText = `0`;
+    
+    const detailsEl = document.getElementById('result-exp-details');
+    if(detailsEl) detailsEl.innerHTML = '<div class="text-center text-xs text-slate-400 font-bold py-2">全滅したため報酬はありません...</div>';
+    
+    const resultDrops = document.getElementById('result-drops');
+    if(resultDrops) resultDrops.classList.add('hidden');
     
     const result = document.getElementById('battle-result');
     if(result) {
@@ -1344,7 +1692,7 @@ function endBattle() {
 }
 
 window.onload = () => {
-  // Init logic
+  // 起動時の初期化はユーザーアクションを待つためボタンで行う
 };
 
 </script>
