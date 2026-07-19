@@ -7,14 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-
+    <script>
+        const $ = id => document.getElementById(id);
+        const showEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.remove('hidden'); e.classList.add(dType);} };
+        const hideEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.add('hidden'); e.classList.remove(dType);} };
+        function fb(el, em, cls="text-sm drop-shadow-md") { el.outerHTML = `<span class='${cls}'>${em}</span>`; }
+        function showLogoFallback(imgEl) { imgEl.style.display = 'none'; showEl('title-fallback', 'block'); }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap');
         body { background-color: #0f172a; color: #f8fafc; overflow: hidden; touch-action: none; user-select: none; font-family: 'M PLUS Rounded 1c', sans-serif; }
         .bubbles-container { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
         .bubble { position: absolute; bottom: -20px; background: rgba(255,255,255,0.15); border-radius: 50%; animation: rise infinite ease-in; }
         @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) scale(1.5); opacity: 0; } }
-        
         #gameCanvas { background: linear-gradient(to bottom, #0284c7, #1e40af, #1e3a8a); display: block; margin: 0 auto; width: 100%; height: 100%; max-width: 500px; box-shadow: inset 0 0 50px rgba(0,0,0,0.6); }
         .game-btn { transition: all 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.4); transform: translateY(0); }
         .game-btn:active { box-shadow: 0 0px 0 rgba(0,0,0,0.4); transform: translateY(6px); }
@@ -61,7 +66,6 @@
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
-    <!-- BGM & SE -->
     <audio id="bgm-home" src="homebgm.mp3" loop></audio>
     <audio id="bgm-battle" src="kaizokubattle.mp3" loop></audio>
     <audio id="se-click" src="決定ボタンを押す10.mp3"></audio>
@@ -71,7 +75,6 @@
 
     <div id="app" class="relative w-full h-full max-w-md bg-indigo-950 shadow-2xl overflow-hidden flex flex-col border-x-4 border-indigo-900">
         
-        <!-- ヘッダー -->
         <header id="app-header" class="bg-indigo-900 p-2 flex justify-between items-center border-b-4 border-indigo-800 z-20 shadow-md">
             <div class="flex items-center gap-2 cursor-pointer transition-transform transform hover:scale-105 active:scale-95" onclick="openProfileModal()">
                 <div id="ui-usericon" class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center font-bold text-xl shadow-[0_2px_0_#9a3412] border-2 border-white overflow-hidden">👤</div>
@@ -102,23 +105,17 @@
             </div>
         </header>
 
-        <!-- メイン領域 -->
         <main class="flex-1 relative overflow-hidden">
             
-            <!-- 1. ホーム -->
             <div id="screen-home" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-between gap-2 relative">
-                
-                <!-- ホーム画面左上ボタン群 -->
                 <div class="absolute top-2 left-2 flex flex-col gap-2 z-20">
                     <button onclick="openRankingModal()" class="game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center gap-1 text-xs">
                         <span>🏆</span> <span>全国RANK</span>
                     </button>
-                    <a href="kaizokuslot.html" class="game-btn bg-gradient-to-b from-pink-400 to-pink-600 text-white font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center justify-center gap-1 text-xs">
-                        <span>🎰</span> <span>カジノ</span>
+                    <a href="kaizokuparty.html" class="game-btn bg-gradient-to-b from-pink-400 to-pink-600 text-white font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center justify-center gap-1 text-xs">
+                        <span>🎰</span> <span>カジノ(近日オープン)</span>
                     </a>
                 </div>
-
-                <!-- ホーム画面右上ボタン群 -->
                 <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
                     <button onclick="openSettingsModal()" class="game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-xl transition-transform hover:scale-110 tooltip">⚙️</button>
                     <a href="kaizokusetumei.html" class="game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-xl transition-transform hover:scale-110 tooltip">📖</a>
@@ -156,7 +153,6 @@
                 </button>
             </div>
 
-            <!-- 2. ステージ選択 -->
             <div id="screen-stage" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-3 flex flex-col gap-3">
                 <div class="bg-indigo-900 rounded-xl p-2 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
                     <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">🗺️ 航路図（ステージ）</h2>
@@ -182,30 +178,34 @@
                 <div id="stage-list" class="flex flex-col gap-3"></div>
             </div>
 
-            <!-- 3. 編成・強化 -->
             <div id="screen-equip" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-4">
-                <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center">
-                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-300">⚓ 編成・強化</h2>
+                <div class="bg-indigo-900 rounded-xl p-2 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-300">⚓ 編成・強化図鑑</h2>
                 </div>
-                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
+                <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 shadow-inner flex-shrink-0">
+                    <button id="tab-equip-skins" onclick="switchEquipTab('skins')" class="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">⛵ 船</button>
+                    <button id="tab-equip-weapons" onclick="switchEquipTab('weapons')" class="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">💣 大砲</button>
+                    <button id="tab-equip-crew" onclick="switchEquipTab('crew')" class="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">🦜 乗組員</button>
+                    <button id="tab-equip-system" onclick="switchEquipTab('system')" class="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent">🔋 強化</button>
+                </div>
+                <div id="container-equip-skins" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
                     <h3 class="text-sm font-black text-blue-300 mb-2">⛵ 海賊船（スピードUP！）</h3>
                     <div id="equip-skins" class="grid grid-cols-2 gap-3"></div>
                 </div>
-                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
+                <div id="container-equip-weapons" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-cyan-300 mb-2">💣 大砲（弾速・連射UP！）</h3>
                     <div id="equip-weapons" class="grid grid-cols-2 gap-3"></div>
                 </div>
-                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
+                <div id="container-equip-crew" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-pink-300 mb-2">🦜 乗組員（才能強化・転生）</h3>
                     <div id="equip-crew" class="grid grid-cols-2 gap-3"></div>
                 </div>
-                <div class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg mt-2 mb-4">
+                <div id="container-equip-system" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-yellow-400 mb-2">🔋 スタミナ上限（最大値UP！）</h3>
                     <div id="equip-system" class="grid grid-cols-1 gap-3"></div>
                 </div>
             </div>
 
-            <!-- 4. ガチャ -->
             <div id="screen-gacha" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-start gap-3 relative">
                 <div class="w-full flex bg-indigo-950 rounded-xl p-1 border-2 border-indigo-800 mt-1 shadow-inner">
                     <button id="tab-gacha-normal" onclick="switchGachaTab('normal')" class="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">🌊 わくわく通常</button>
@@ -251,7 +251,6 @@
                 </div>
             </div>
 
-            <!-- 5. フレンド -->
             <div id="screen-friend" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-4">
                 <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
                     <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-rose-300">🤝 海賊団（フレンド）</h2>
@@ -276,7 +275,6 @@
                 <div id="friend-list-container" class="flex flex-col gap-3"></div>
             </div>
 
-            <!-- 6. ミッション -->
             <div id="screen-mission" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-3">
                 <div class="bg-indigo-900 rounded-xl p-3 border-2 border-indigo-700 shadow-md text-center flex-shrink-0">
                     <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500">📜 ミッション</h2>
@@ -290,11 +288,10 @@
                 <div id="mission-list-container" class="flex flex-col gap-3"></div>
             </div>
 
-            <!-- 7. ゲーム -->
             <div id="screen-game" class="screen hidden h-full w-full relative">
                 <div id="game-tutorial-overlay" class="absolute top-20 left-4 right-4 pointer-events-none hidden z-30 transition-opacity duration-1000">
                     <div class="bg-indigo-900/95 border-2 border-yellow-400 rounded-2xl p-3 text-center shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-                        <span class="text-yellow-400 font-black text-sm block mb-0.5">💡 ナビーのアドバイス！</span>
+                        <span class="text-yellow-400 font-black text-sm block mb-0.5">💡 ポリーのアドバイス！</span>
                         <p id="game-tutorial-text" class="text-white text-xs leading-relaxed font-bold"></p>
                     </div>
                 </div>
@@ -305,23 +302,18 @@
                         <span id="score-slash" class="text-indigo-500 text-sm">/</span>
                         <span id="game-goal" class="text-sm">100</span>
                     </div>
-                    
-                    <!-- スコアアタック用 タイマーUI -->
                     <div id="time-container" class="hidden bg-indigo-950/90 border-2 border-yellow-500 px-4 py-2 rounded-xl text-white font-black shadow-lg flex items-center gap-2">
                         <span class="text-xs text-yellow-300">残り時間:</span>
                         <span id="game-time" class="text-yellow-400 text-xl">60</span>
                     </div>
-
                     <button id="btn-retreat" onclick="checkStageClear(true)" class="game-btn pointer-events-auto bg-gradient-to-b from-red-500 to-red-700 border-2 border-white px-5 py-2 rounded-xl text-white font-black shadow-lg text-sm">逃げる!! 🏃</button>
                 </div>
-                
                 <div id="multi-match-ui" class="absolute top-16 left-0 right-0 hidden flex justify-center z-10 pointer-events-none">
                     <div class="bg-indigo-950/90 border-2 border-pink-500 px-4 py-1.5 rounded-full text-white font-black shadow-lg flex items-center gap-3">
                         <span class="text-xs text-pink-300">ライバルスコア:</span>
                         <span id="rival-score" class="text-pink-400 text-lg">0</span>
                     </div>
                 </div>
-
                 <div id="special-ui-container" class="absolute bottom-6 right-4 z-10 flex flex-col items-end gap-1 pointer-events-auto hidden">
                     <div class="text-[10px] font-black text-cyan-300 drop-shadow-md tracking-widest">SPECIAL</div>
                     <button id="btn-special" onclick="triggerSpecialSkill()" class="game-btn bg-slate-700 w-16 h-16 rounded-full border-4 border-slate-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.8)] transition-all opacity-80 cursor-not-allowed">
@@ -331,11 +323,8 @@
                         <div id="special-gauge" class="bg-gradient-to-r from-cyan-400 to-blue-400 h-full w-[0%] transition-all duration-100"></div>
                     </div>
                 </div>
-
                 <canvas id="gameCanvas"></canvas>
-                
                 <div id="defense-line-warning" class="absolute bottom-[60px] w-full text-center text-red-400 text-xs font-black tracking-widest animate-pulse pointer-events-none opacity-50">▼ 防衛ライン（突破されるとGAME OVER）▼</div>
-
                 <div id="special-cutin" class="absolute inset-0 bg-indigo-950/80 hidden z-40 overflow-hidden cursor-pointer backdrop-blur-sm" onclick="skipSpecial()">
                     <div id="cutin-flash" class="absolute inset-0 bg-white opacity-0 z-0"></div>
                     <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/30 via-transparent to-transparent opacity-80 z-0"></div>
@@ -343,7 +332,6 @@
                     <div id="cutin-name" class="absolute top-[70%] right-[-100%] transform -translate-y-1/2 text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 to-blue-500 drop-shadow-[0_0_15px_rgba(0,150,255,1)] italic tracking-widest whitespace-nowrap z-10"></div>
                     <div class="absolute bottom-6 w-full text-center text-white/50 text-xs tracking-widest animate-pulse pointer-events-none z-10">▶ 画面をタップしてスキップ</div>
                 </div>
-
                 <div id="game-end-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-20 backdrop-blur-md p-6 overflow-y-auto">
                     <div id="end-confetti-container" class="absolute inset-0 pointer-events-none z-0"></div>
                     <h2 id="game-end-title" class="text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10"></h2>
@@ -355,7 +343,6 @@
             </div>
         </main>
 
-        <!-- 下部ナビゲーション (5列) -->
         <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-1 py-1 pb-4 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
             <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1" data-target="screen-home">
                 <span class="nav-icon mb-1 flex justify-center items-center h-6"><img src="ホームボタン.png" class="h-full object-contain" alt="🏠" onerror="fb(this,'🏠','text-2xl drop-shadow-md')"></span><span class="nav-text">ホーム</span>
@@ -379,13 +366,10 @@
             </button>
         </nav>
 
-        <!-- モーダル群 -->
-        <!-- 設定(BGM・SE)モーダル -->
         <div id="settings-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col gap-4 pop-in relative text-center">
                 <button onclick="closeSettingsModal()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
                 <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-400 tracking-wider border-b-2 border-indigo-700 pb-2 mb-1 w-full">⚙️ 設定</h3>
-                
                 <div class="w-full flex flex-col gap-4 text-left px-2 mt-2">
                     <div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
                         <label class="block text-sm text-yellow-300 font-bold mb-3 flex justify-between items-center">
@@ -400,7 +384,6 @@
                         <input type="range" id="se-volume" min="0" max="1" step="0.05" class="w-full accent-pink-400" oninput="updateVolume()">
                     </div>
                 </div>
-                
                 <button onclick="closeSettingsModal()" class="game-btn w-full bg-gradient-to-b from-blue-400 to-blue-600 text-white font-black py-3 rounded-xl border-2 border-white shadow-md text-lg mt-4">閉じる</button>
             </div>
         </div>
@@ -418,9 +401,7 @@
                 <button onclick="nextTutorialStep()" class="game-btn w-full py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black text-lg rounded-2xl shadow-lg border-2 border-white">OK！わかった！ 👍</button>
             </div>
         </div>
-        
         <div id="tutorial-arrow" class="absolute hidden z-50 pointer-events-none bounce-arrow"><span class="text-6xl text-yellow-400 drop-shadow-[0_5px_15px_rgba(234,179,8,1)]">👇</span></div>
-        
         <div id="custom-alert-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-center z-[9999] p-4 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-yellow-400 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col gap-4 pop-in text-center">
                 <span class="text-6xl mb-2 animate-bounce drop-shadow-md">🦜</span>
@@ -567,7 +548,6 @@
                     <p id="detail-desc" class="text-[11px] text-indigo-200 mt-2 text-center font-bold bg-indigo-950/50 p-2 rounded-xl w-full whitespace-pre-line"></p>
                 </div>
                 
-                <!-- 乗組員専用: 才能強化＆転生UI -->
                 <div id="crew-talent-ui" class="hidden w-full flex-col gap-2 mt-1 bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 shadow-inner">
                     <div class="text-[10px] text-yellow-300 font-black text-center border-b border-indigo-700 pb-1">🧬 才能強化（Lvアップで1Pt獲得！）</div>
                     <div class="text-xs text-indigo-200 text-center font-bold">残り才能ポイント: <span id="talent-points-available" class="text-yellow-400 font-black text-sm">0</span></div>
@@ -642,7 +622,6 @@
             <button onclick="closeHappyShareToast()" class="absolute top-2 right-2 text-white bg-black/40 hover:bg-black/60 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow-md transition-colors active:scale-95 select-none z-10">✕</button>
         </div>
 
-        <!-- マルチプレイルームモーダル -->
         <div id="multi-room-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center gap-4 pop-in relative text-center">
                 <button onclick="leaveRoom()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
@@ -678,7 +657,6 @@
             </div>
         </div>
 
-        <!-- スコアアタック用ランキングモーダル -->
         <div id="ranking-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-start z-50 p-4 backdrop-blur-sm overflow-y-auto no-scrollbar">
             <div class="w-full max-w-md bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 relative mt-4 mb-8">
                 <button onclick="hideEl('ranking-modal')" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
@@ -687,13 +665,10 @@
                     <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mt-2">全国ランキング</h3>
                     <p class="text-[10px] text-yellow-200 mt-1">※毎週月曜0:00にリセット＆報酬配布！</p>
                 </div>
-                <div id="ranking-list-container" class="flex flex-col gap-2 mt-2 max-h-[50vh] overflow-y-auto pr-1">
-                    <!-- ランキングリストがここに入る -->
-                </div>
+                <div id="ranking-list-container" class="flex flex-col gap-2 mt-2 max-h-[50vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <!-- スコアアタック報酬受け取りモーダル -->
         <div id="ranking-reward-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-6 overflow-hidden">
             <div class="holy-aura"></div><div id="ranking-confetti-container" class="absolute inset-0 pointer-events-none z-0"></div>
             <div class="relative z-10 text-center flex flex-col items-center gap-5 pop-in">
@@ -707,39 +682,26 @@
                 <button onclick="closeRankingRewardModal()" class="game-btn w-full max-w-[240px] py-4 bg-gradient-to-b from-yellow-300 to-orange-500 text-indigo-950 font-black rounded-full shadow-2xl border-4 border-white text-xl">受け取る！ 👍</button>
             </div>
         </div>
-
     </div>
 
 <script>
 // --- 音声制御 (BGM & SE) ---
 function playSE() {
     const se = document.getElementById('se-click');
-    if (se) { 
-        se.volume = DB.seVolume !== undefined ? DB.seVolume : 0.5; 
-        se.currentTime = 0; 
-        se.play().catch(()=>{}); 
-    }
+    if (se) { se.volume = DB.seVolume !== undefined ? DB.seVolume : 0.5; se.currentTime = 0; se.play().catch(()=>{}); }
 }
 document.addEventListener('click', (e) => {
-    if (e.target.closest('button') || e.target.closest('.game-btn') || e.target.closest('.icon-sel-btn') || e.target.closest('a.game-btn')) {
-        playSE();
-    }
+    if (e.target.closest('button') || e.target.closest('.game-btn') || e.target.closest('.icon-sel-btn') || e.target.closest('a.game-btn')) { playSE(); }
 });
 let bgmStarted = false;
 function playHomeBGM() { 
     const bgm = document.getElementById('bgm-home'); 
-    if (bgm && bgm.paused) { 
-        bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; 
-        bgm.play().catch(()=>{}); 
-    } 
+    if (bgm && bgm.paused) { bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; bgm.play().catch(()=>{}); } 
 }
 function stopHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && !bgm.paused) { bgm.pause(); } }
 function playBattleBGM() { 
     const bgm = document.getElementById('bgm-battle'); 
-    if (bgm && bgm.paused) { 
-        bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; 
-        bgm.play().catch(()=>{}); 
-    } 
+    if (bgm && bgm.paused) { bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; bgm.play().catch(()=>{}); } 
 }
 function stopBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && !bgm.paused) { bgm.pause(); bgm.currentTime = 0; } }
 
@@ -753,10 +715,8 @@ document.addEventListener('click', () => {
 function updateVolume() {
     DB.bgmVolume = parseFloat($('bgm-volume').value);
     DB.seVolume = parseFloat($('se-volume').value);
-    
     $('bgm-vol-disp').innerText = Math.round(DB.bgmVolume * 100) + '%';
     $('se-vol-disp').innerText = Math.round(DB.seVolume * 100) + '%';
-    
     const bgmHome = document.getElementById('bgm-home');
     const bgmBattle = document.getElementById('bgm-battle');
     if(bgmHome) bgmHome.volume = DB.bgmVolume;
@@ -770,17 +730,9 @@ function openSettingsModal() {
     $('se-vol-disp').innerText = Math.round($('se-volume').value * 100) + '%';
     showEl('settings-modal');
 }
-function closeSettingsModal() {
-    hideEl('settings-modal');
-}
-
+function closeSettingsModal() { hideEl('settings-modal'); }
 
 // --- 短縮・ユーティリティ関数 ---
-const $ = id => document.getElementById(id);
-const showEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.remove('hidden'); e.classList.add(dType);} };
-const hideEl = (id, dType='flex') => { const e=$(id); if(e){e.classList.add('hidden'); e.classList.remove(dType);} };
-function fb(el, em, cls="text-sm drop-shadow-md") { el.outerHTML = `<span class='${cls}'>${em}</span>`; }
-function showLogoFallback(imgEl) { imgEl.style.display = 'none'; showEl('title-fallback', 'block'); }
 function checkRectCollision(r1, r2) { const w1=r1.w||r1.width; const h1=r1.h||r1.height; const w2=r2.w||r2.width; const h2=r2.h||r2.height; return r1.x<r2.x+w2 && r1.x+w1>r2.x && r1.y<r2.y+h2 && r1.y+h1>r2.y; }
 function createPopParticles(x, y, color, isStar=false) { const count=isStar?12:8; for(let i=0;i<count;i++){ gameState.particles.push({ x:x,y:y,dx:(Math.random()-0.5)*12,dy:(Math.random()-0.5)*12-2,life:20+Math.random()*20,color:isStar&&Math.random()>0.5?'#fff':color,size:Math.random()*6+3,isStar:isStar&&Math.random()>0.3 }); } }
 function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) { let rot=Math.PI/2*3; let x=cx; let y=cy; let step=Math.PI/spikes; ctx.beginPath(); ctx.moveTo(cx, cy-outerRadius); for(let i=0;i<spikes;i++){ x=cx+Math.cos(rot)*outerRadius; y=cy+Math.sin(rot)*outerRadius; ctx.lineTo(x,y); rot+=step; x=cx+Math.cos(rot)*innerRadius; y=cy+Math.sin(rot)*innerRadius; ctx.lineTo(x,y); rot+=step; } ctx.lineTo(cx, cy-outerRadius); ctx.closePath(); ctx.fillStyle=color; ctx.fill(); }
@@ -790,13 +742,10 @@ function showAlert(msg) { $('custom-alert-text').innerText = msg; showEl('custom
 function closeCustomAlert() { hideEl('custom-alert-modal'); }
 function shootConfetti(cid, count=50) { const c=$(cid); if(!c)return; c.innerHTML=''; const colors=['#ef4444','#3b82f6','#facc15','#22c55e','#a855f7','#ec4899']; for(let i=0;i<count;i++){ const f=document.createElement('div'); f.className='confetti'; f.style.left=`${Math.random()*100}%`; f.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)]; f.style.width=`${Math.random()*10+5}px`; f.style.height=`${Math.random()*20+10}px`; f.style.animationDuration=`${Math.random()*2+2}s`; f.style.animationDelay=`${Math.random()*0.5}s`; c.appendChild(f); } }
 
-// --- スコアアタック（ランキング用週管理） ---
+// --- スコアアタック ---
 function getWeeklyString() {
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const jst = new Date(utc + (3600000 * 9));
-    jst.setHours(0, 0, 0, 0);
-    jst.setDate(jst.getDate() + 3 - (jst.getDay() + 6) % 7);
+    const d = new Date(); const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const jst = new Date(utc + (3600000 * 9)); jst.setHours(0, 0, 0, 0); jst.setDate(jst.getDate() + 3 - (jst.getDay() + 6) % 7);
     const week1 = new Date(jst.getFullYear(), 0, 4);
     const week = 1 + Math.round(((jst.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
     return `${jst.getFullYear()}-W${week}`;
@@ -808,48 +757,8 @@ const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン'
 const MASTER = {
     systems: { 'stamina_cap': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
     weapons: { 'wp_normal': {id:'wp_normal',name:'木の大砲',rarity:'N',fireRate:15,speed:6,type:'single',color:'#60a5fa',desc:'普通の弾を撃ち出す！'}, 'wp_spread': {id:'wp_spread',name:'鉄の散弾砲',rarity:'R',fireRate:20,speed:5,type:'spread',color:'#38bdf8',desc:'3方向に弾をばらまく！'}, 'wp_machine':{id:'wp_machine',name:'ガトリング砲',rarity:'SR',fireRate:5,speed:8,type:'single',color:'#2dd4bf',desc:'超すごいスピードで弾を連射！'}, 'wp_legend': {id:'wp_legend',name:'海神の光条',rarity:'UR',fireRate:10,speed:15,type:'laser',color:'#a78bfa',desc:'全てを貫通する最強のレーザー大砲！'} },
-    skins: { 
-        'skin_default': {id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 
-        'skin_ironwind': {id:'skin_ironwind',name:'アイアンウィンド',rarity:'R',icon:'🌬️'},
-        'skin_seasurge': {id:'skin_seasurge',name:'シーサージ',rarity:'R',icon:'🌊'},
-        'skin_aquastriker': {id:'skin_aquastriker',name:'アクアストライカー',rarity:'R',icon:'🔱'},
-        'skin_bronzemoon': {id:'skin_bronzemoon',name:'ブロンズムーン',rarity:'R',icon:'🌙'},
-        'skin_pirate': {id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 
-        'skin_wood': {id:'skin_wood',name:'木の船',rarity:'SR',icon:'🪵'},
-        'skin_iron': {id:'skin_iron',name:'鉄の船',rarity:'SR',icon:'🚢'},
-        'skin_benzai': {id:'skin_benzai',name:'弁才船',rarity:'SR',icon:'🏯'},
-        'skin_higaki': {id:'skin_higaki',name:'菱垣廻船',rarity:'SR',icon:'⛴️'},
-        'skin_vortexgear': {id:'skin_vortexgear',name:'ヴォルテックスギア',rarity:'SR',icon:'⚙️'},
-        'skin_silvermoon': {id:'skin_silvermoon',name:'シルバームーン',rarity:'SR',icon:'🌙'},
-        'skin_blazeanchor': {id:'skin_blazeanchor',name:'ブレイズアンカー',rarity:'SR',icon:'⚓'},
-        'skin_ghost': {id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 
-        'skin_titanic': {id:'skin_titanic',name:'タイタニック',rarity:'SSR',icon:'🛳️'},
-        'skin_yamato': {id:'skin_yamato',name:'ヤマト',rarity:'SSR',icon:'🛥️'},
-        'skin_titus': {id:'skin_titus',name:'グランドタイタス',rarity:'SSR',icon:'🚢'},
-        'skin_leviathan': {id:'skin_leviathan',name:'リヴァイアサン',rarity:'SSR',icon:'🐉'},
-        'skin_goldmoon': {id:'skin_goldmoon',name:'ゴールドムーン',rarity:'SSR',icon:'🌙'},
-        'skin_shisa': {id:'skin_shisa',name:'シーサー',rarity:'SSR',icon:'🦁'},
-        'skin_king': {id:'skin_king',name:'伝説 of 海賊船',rarity:'UR',icon:'🏴‍☠️'},
-        'skin_kitamae': {id:'skin_kitamae',name:'北前船',rarity:'UR',icon:'🏮'},
-        'skin_seimaro': {id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'せいまろ旗.png',fallbackIcon:'⚡',type:'image'}
-    },
-    crew: { 
-        'crew_none': {id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 
-        'crew_tom': {id:'crew_tom',name:'トム',rarity:'R',effect:'speedUp',skillName:'トムズ・ダッシュ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍✈️',type:'text'},
-        'crew_alex': {id:'crew_alex',name:'アレックス',rarity:'R',effect:'scoreUp',skillName:'アレックスサーチ',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🔧',type:'text'},
-        'crew_steve': {id:'crew_steve',name:'スティーブ',rarity:'R',effect:'powerUp',skillName:'スティーブパンチ',desc:'パワーが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🌾',type:'text'},
-        'crew_bob': {id:'crew_bob',name:'ボブ',rarity:'R',effect:'speedUp',skillName:'ボブズウェーブ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🍳',type:'text'},
-        'crew_mark': {id:'crew_mark',name:'マーク',rarity:'R',effect:'scoreUp',skillName:'マークトレジャー',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🎨',type:'text'},
-        'crew_speed': {id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
-        'crew_john': {id:'crew_john',name:'ジョン',rarity:'SR',effect:'powerUp',skillName:'ジョンズキヤノン',desc:'パワーが中アップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'},
-        'crew_jack': {id:'crew_jack',name:'ジャック',rarity:'SR',effect:'speedUp',skillName:'ジャックストーム',desc:'スピードが中アップ！\n【SP】画面の敵を一掃！',icon:'🕵️',type:'text'},
-        'crew_leon': {id:'crew_leon',name:'レオン',rarity:'SR',effect:'scoreUp',skillName:'レオンハンター',desc:'スコアが中アップ！\n【SP】画面の敵を一掃！',icon:'💂',type:'text'},
-        'crew_luke': {id:'crew_luke',name:'ルーク',rarity:'SR',effect:'doubleShot',skillName:'ルークツイン',desc:'たまに弾が2列に！？\n【SP】画面の敵を一掃！',icon:'🤵',type:'text'},
-        'crew_bill': {id:'crew_bill',name:'ビル',rarity:'SR',effect:'powerUp',skillName:'ビルズアーマー',desc:'弾サイズ中アップ！\n【SP】画面の敵を一掃！',icon:'👲',type:'text'},
-        'crew_score': {id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払ったポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 
-        'crew_power': {id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 
-        'crew_seimaro': {id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} 
-    }
+    skins: { 'skin_default':{id:'skin_default',name:'丸太 of イカダ',rarity:'N',icon:'🛶'}, 'skin_ironwind':{id:'skin_ironwind',name:'アイアンウィンド',rarity:'R',icon:'🌬️'}, 'skin_seasurge':{id:'skin_seasurge',name:'シーサージ',rarity:'R',icon:'🌊'}, 'skin_aquastriker':{id:'skin_aquastriker',name:'アクアストライカー',rarity:'R',icon:'🔱'}, 'skin_bronzemoon':{id:'skin_bronzemoon',name:'ブロンズムーン',rarity:'R',icon:'🌙'}, 'skin_pirate':{id:'skin_pirate',name:'アドベンチャー船',rarity:'R',icon:'⛵'}, 'skin_wood':{id:'skin_wood',name:'木の船',rarity:'SR',icon:'🪵'}, 'skin_iron':{id:'skin_iron',name:'鉄の船',rarity:'SR',icon:'🚢'}, 'skin_benzai':{id:'skin_benzai',name:'弁才船',rarity:'SR',icon:'🏯'}, 'skin_higaki':{id:'skin_higaki',name:'菱垣廻船',rarity:'SR',icon:'⛴️'}, 'skin_vortexgear':{id:'skin_vortexgear',name:'ヴォルテックスギア',rarity:'SR',icon:'⚙️'}, 'skin_silvermoon':{id:'skin_silvermoon',name:'シルバームーン',rarity:'SR',icon:'🌙'}, 'skin_blazeanchor':{id:'skin_blazeanchor',name:'ブレイズアンカー',rarity:'SR',icon:'⚓'}, 'skin_ghost':{id:'skin_ghost',name:'ふしぎなオバケ船',rarity:'SR',icon:'👻'}, 'skin_titanic':{id:'skin_titanic',name:'タイタニック',rarity:'SSR',icon:'🛳️'}, 'skin_yamato':{id:'skin_yamato',name:'ヤマト',rarity:'SSR',icon:'🛥️'}, 'skin_titus':{id:'skin_titus',name:'グランドタイタス',rarity:'SSR',icon:'🚢'}, 'skin_leviathan':{id:'skin_leviathan',name:'リヴァイアサン',rarity:'SSR',icon:'🐉'}, 'skin_goldmoon':{id:'skin_goldmoon',name:'ゴールドムーン',rarity:'SSR',icon:'🌙'}, 'skin_shisa':{id:'skin_shisa',name:'シーサー',rarity:'SSR',icon:'🦁'}, 'skin_king':{id:'skin_king',name:'伝説 of 海賊船',rarity:'UR',icon:'🏴‍☠️'}, 'skin_kitamae':{id:'skin_kitamae',name:'北前船',rarity:'UR',icon:'🏮'}, 'skin_seimaro':{id:'skin_seimaro',name:'雷戦艦せいまろ号',rarity:'UR',icon:'せいまろ旗.png',fallbackIcon:'⚡',type:'image'} },
+    crew: { 'crew_none':{id:'crew_none',name:'ひとりぼっち',rarity:'N',effect:'none',skillName:'がむしゃらアタック',desc:'乗組員なし。\n【SP】画面の敵を一掃！',icon:'🧑‍🦲',type:'text'}, 'crew_tom':{id:'crew_tom',name:'トム',rarity:'R',effect:'speedUp',skillName:'トムズ・ダッシュ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍✈️',type:'text'}, 'crew_alex':{id:'crew_alex',name:'アレックス',rarity:'R',effect:'scoreUp',skillName:'アレックスサーチ',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🔧',type:'text'}, 'crew_steve':{id:'crew_steve',name:'スティーブ',rarity:'R',effect:'powerUp',skillName:'スティーブパンチ',desc:'パワーが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🌾',type:'text'}, 'crew_bob':{id:'crew_bob',name:'ボブ',rarity:'R',effect:'speedUp',skillName:'ボブズウェーブ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🍳',type:'text'}, 'crew_mark':{id:'crew_mark',name:'マーク',rarity:'R',effect:'scoreUp',skillName:'マークトレジャー',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🎨',type:'text'}, 'crew_speed':{id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 'crew_john':{id:'crew_john',name:'ジョン',rarity:'SR',effect:'powerUp',skillName:'ジョンズキヤノン',desc:'パワーが中アップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'}, 'crew_jack':{id:'crew_jack',name:'ジャック',rarity:'SR',effect:'speedUp',skillName:'ジャックストーム',desc:'スピードが中アップ！\n【SP】画面の敵を一掃！',icon:'🕵️',type:'text'}, 'crew_leon':{id:'crew_leon',name:'レオン',rarity:'SR',effect:'scoreUp',skillName:'レオンハンター',desc:'スコアが中アップ！\n【SP】画面の敵を一掃！',icon:'💂',type:'text'}, 'crew_luke':{id:'crew_luke',name:'ルーク',rarity:'SR',effect:'doubleShot',skillName:'ルークツイン',desc:'たまに弾が2列に！？\n【SP】画面の敵を一掃！',icon:'🤵',type:'text'}, 'crew_bill':{id:'crew_bill',name:'ビル',rarity:'SR',effect:'powerUp',skillName:'ビルズアーマー',desc:'弾サイズ中アップ！\n【SP】画面の敵を一掃！',icon:'👲',type:'text'}, 'crew_score':{id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払ったポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 'crew_power':{id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'}, 'crew_seimaro':{id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'} }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
 MASTER.exStages = [ 
@@ -862,28 +771,11 @@ MASTER.exStages = [
 MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
 const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
 
-MASTER.gachaPool = [
-    {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'},
-    {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'},
-    {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'},
-    {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'},
-    {type:'skins',id:'skin_king'},{type:'skins',id:'skin_kitamae'},
-    {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'},
-    {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'},
-    {type:'crew',id:'crew_power'}
-];
-MASTER.exGachaPool = [
-    {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},
-    {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'},
-    {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'},
-    {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'},{type:'skins',id:'skin_seimaro'},
-    {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'},
-    {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'},
-    {type:'crew',id:'crew_seimaro'}
-];
+MASTER.gachaPool = [ {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'},{type:'weapons',id:'wp_legend'}, {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'}, {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'}, {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'}, {type:'skins',id:'skin_king'},{type:'skins',id:'skin_kitamae'}, {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'}, {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'}, {type:'crew',id:'crew_power'} ];
+MASTER.exGachaPool = [ {type:'weapons',id:'wp_spread'},{type:'weapons',id:'wp_machine'}, {type:'skins',id:'skin_ironwind'},{type:'skins',id:'skin_seasurge'},{type:'skins',id:'skin_aquastriker'},{type:'skins',id:'skin_bronzemoon'},{type:'skins',id:'skin_pirate'}, {type:'skins',id:'skin_wood'},{type:'skins',id:'skin_iron'},{type:'skins',id:'skin_benzai'},{type:'skins',id:'skin_higaki'},{type:'skins',id:'skin_vortexgear'},{type:'skins',id:'skin_silvermoon'},{type:'skins',id:'skin_blazeanchor'},{type:'skins',id:'skin_ghost'}, {type:'skins',id:'skin_titanic'},{type:'skins',id:'skin_yamato'},{type:'skins',id:'skin_titus'},{type:'skins',id:'skin_leviathan'},{type:'skins',id:'skin_goldmoon'},{type:'skins',id:'skin_shisa'},{type:'skins',id:'skin_seimaro'}, {type:'crew',id:'crew_tom'},{type:'crew',id:'crew_alex'},{type:'crew',id:'crew_steve'},{type:'crew',id:'crew_bob'},{type:'crew',id:'crew_mark'},{type:'crew',id:'crew_speed'}, {type:'crew',id:'crew_john'},{type:'crew',id:'crew_jack'},{type:'crew',id:'crew_leon'},{type:'crew',id:'crew_luke'},{type:'crew',id:'crew_bill'},{type:'crew',id:'crew_score'}, {type:'crew',id:'crew_seimaro'} ];
 const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','SSR':'text-yellow-200 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
 
-let currentGachaTab='normal', happyShareTimeoutId=null, currentStageTab='normal', currentMissionTab='daily', currentMultiRoom=null, roomListener=null, multiSyncInterval=null;
+let currentGachaTab='normal', happyShareTimeoutId=null, currentStageTab='normal', currentMissionTab='daily', currentMultiRoom=null, roomListener=null, multiSyncInterval=null, currentEquipTab='skins';
 const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！オレ様はポリーだ！\n「大冒険へ出発!!」を押して初航海に出よう！',targetId:'btn-start-navigation'}], 'gacha': [{character:'🦜',text:'手に入れた「草核」を使って宝箱をあけよう！\n新しい装備が手に入るかも！？',targetId:'btn-draw-gacha-1'}], 'gacha_done': [{character:'🦜',text:'すっげーお宝だ！！\n下の「強化」ボタンを押して、船にセットしようぜ！',targetId:'nav-btn-equip'}], 'equip': [{character:'🦜',text:'手に入れたお宝のボタンをタップして、\n船をパワーアップさせてみよう！！',targetId:'tutorial-target-equip'}], 'all_done': [{character:'🦜',text:'カンペキだ船長！！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！',targetId:null}] };
 let currentTutorialScenario=null, tutorialStep=0;
 
@@ -898,23 +790,15 @@ function loadGame() {
     if(!MASTER.weapons[DB.equippedWeapon]) DB.equippedWeapon='wp_normal'; if(!MASTER.skins[DB.equippedSkin]) DB.equippedSkin='skin_default'; if(!MASTER.crew[DB.equippedCrew]) DB.equippedCrew='crew_none';
     if(!DB.missionProgress) DB.missionProgress={defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0};
     if(!DB.crewStats) DB.crewStats={};
-    if(!DB.lastPlayedRankingWeek) DB.lastPlayedRankingWeek='';
-    if(!DB.lastRankingRewardWeek) DB.lastRankingRewardWeek='';
-    if(DB.bgmVolume === undefined) DB.bgmVolume = 0.5;
-    if(DB.seVolume === undefined) DB.seVolume = 0.5;
+    if(!DB.lastPlayedRankingWeek) DB.lastPlayedRankingWeek=''; if(!DB.lastRankingRewardWeek) DB.lastRankingRewardWeek='';
+    if(DB.bgmVolume === undefined) DB.bgmVolume = 0.5; if(DB.seVolume === undefined) DB.seVolume = 0.5;
     saveGame();
 }
 function getItemLevel(id) { return DB.itemLevels[id]||1; }
 function getMaxStamina() { return 100+(getItemLevel('stamina_cap')-1)*10; }
 setInterval(() => { if(!DB)return; const maxSt=getMaxStamina(); if(DB.stamina<maxSt){ const diff=Date.now()-DB.lastStaminaUpdateTime; const add=Math.floor(diff/60000); if(add>0){ DB.stamina=Math.min(maxSt,DB.stamina+add); DB.lastStaminaUpdateTime=DB.stamina===maxSt?Date.now():DB.lastStaminaUpdateTime+(add*60000); saveGame(); if($('ui-stamina')) $('ui-stamina').innerText=`${DB.stamina}/${maxSt}`; } }else{ DB.lastStaminaUpdateTime=Date.now(); } }, 1000);
 function openStaminaModal() { showEl('stamina-modal'); } function closeStaminaModal() { hideEl('stamina-modal'); }
-function buyStamina() { 
-    const maxSt = getMaxStamina();
-    if(DB.stamina >= maxSt){ showAlert("スタミナは既に満タンだぞ！"); return; }
-    if(DB.coins<500){ showAlert("草コインが足りないぞ！"); return; } 
-    DB.coins-=500; DB.stamina = Math.min(DB.stamina + 50, maxSt); 
-    saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを回復したぞ！"); 
-}
+function buyStamina() { const maxSt = getMaxStamina(); if(DB.stamina >= maxSt){ showAlert("スタミナは既に満タンだぞ！"); return; } if(DB.coins<500){ showAlert("草コインが足りないぞ！"); return; } DB.coins-=500; DB.stamina = Math.min(DB.stamina + 50, maxSt); saveGame(); updateHeaderUI(); closeStaminaModal(); showAlert("スタミナを回復したぞ！"); }
 
 // --- Firebase・フレンド・ランキング ---
 const firebaseConfig={apiKey:"AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",authDomain:"game-685f2.firebaseapp.com",databaseURL:"https://game-685f2-default-rtdb.firebaseio.com",projectId:"game-685f2",storageBucket:"game-685f2.firebasestorage.app",messagingSenderId:"266871071111",appId:"1:266871071111:web:ffff3b65d0234fc5abb322"};
@@ -925,8 +809,6 @@ function initFirebase() {
         window.db.ref('friendRequests/'+DB.userId).on('value',snap=>{friendRequests=snap.val()||{};updateFriendReqBadge();if(currentFriendTab==='req')renderFriendList();}); 
         window.db.ref('friends/'+DB.userId).on('value',snap=>{friendsList=snap.val()||{};if(currentFriendTab==='list')renderFriendList();}); 
         let initLoad=true; window.db.ref('global/latest_ur_pull').on('value',s=>{const d=s.val();if(d&&!initLoad&&d.timestamp>DB.lastShareTimestamp&&d.userId!==DB.userId){DB.lastShareTimestamp=d.timestamp;saveGame();triggerHappyShare(d.userName,d.itemName);}initLoad=false;}); 
-        
-        // ランキング報酬チェック
         setTimeout(checkRankingReward, 2000);
     }catch(e){} 
 }
@@ -939,7 +821,6 @@ function sendFriendRequest() { if(!isFirebaseInitialized)return showAlert("通�
 function acceptFriend(uid) { if(isFirebaseInitialized){ window.db.ref('friends/'+DB.userId+'/'+uid).set(true); window.db.ref('friends/'+uid+'/'+DB.userId).set(true); window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); } }
 function rejectFriend(uid) { if(isFirebaseInitialized) window.db.ref('friendRequests/'+DB.userId+'/'+uid).remove(); }
 
-// --- ランキング報酬 ---
 function checkRankingReward() {
     if (!isFirebaseInitialized) return;
     const currWeek = getWeeklyString();
@@ -951,20 +832,10 @@ function checkRankingReward() {
                 const myRank = list.findIndex(u => u.id === DB.userId) + 1;
                 if (myRank > 0) {
                     let rTicket=0, rCoin=0, rMat=0;
-                    if (myRank === 1) { rTicket=50; rCoin=50000; rMat=100; }
-                    else if (myRank <= 3) { rTicket=30; rCoin=30000; rMat=50; }
-                    else if (myRank <= 10) { rTicket=10; rCoin=10000; rMat=20; }
-                    else { rTicket=5; rCoin=5000; rMat=5; }
-                    DB.gachaTickets += rTicket; DB.coins += rCoin; DB.materials += rMat; DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek;
-                    saveGame(); updateHeaderUI();
-                    
-                    // 報酬モーダル表示
+                    if (myRank === 1) { rTicket=50; rCoin=50000; rMat=100; } else if (myRank <= 3) { rTicket=30; rCoin=30000; rMat=50; } else if (myRank <= 10) { rTicket=10; rCoin=10000; rMat=20; } else { rTicket=5; rCoin=5000; rMat=5; }
+                    DB.gachaTickets += rTicket; DB.coins += rCoin; DB.materials += rMat; DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek; saveGame(); updateHeaderUI();
                     $('ranking-reward-rank').innerText = `${myRank}位`;
-                    $('ranking-reward-items').innerHTML = `
-                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-yellow-400 font-black">×${rTicket}</span></div>
-                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰')"></span><span class="text-yellow-400 font-black">×${rCoin}</span></div>
-                        <div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴')"></span><span class="text-yellow-400 font-black">×${rMat}</span></div>
-                    `;
+                    $('ranking-reward-items').innerHTML = `<div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-yellow-400 font-black">×${rTicket}</span></div><div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰')"></span><span class="text-yellow-400 font-black">×${rCoin}</span></div><div class="flex items-center gap-1 bg-indigo-950 px-3 py-1.5 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴')"></span><span class="text-yellow-400 font-black">×${rMat}</span></div>`;
                     showEl('ranking-reward-modal'); shootConfetti('ranking-confetti-container', 100);
                 } else { DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek; saveGame(); }
             } else { DB.lastRankingRewardWeek = DB.lastPlayedRankingWeek; saveGame(); }
@@ -972,20 +843,11 @@ function checkRankingReward() {
     }
 }
 function openRankingModal() {
-    if (!isFirebaseInitialized) return showAlert("通信エラー！ランキングが見れないぞ！");
-    const currWeek = getWeeklyString(); showEl('ranking-modal');
-    $('ranking-list-container').innerHTML = '<div class="text-center text-indigo-300 font-bold mt-4 animate-pulse">ランキング取得中...</div>';
+    if (!isFirebaseInitialized) return showAlert("通信エラー！"); const currWeek = getWeeklyString(); showEl('ranking-modal'); $('ranking-list-container').innerHTML = '<div class="text-center text-indigo-300 font-bold mt-4 animate-pulse">ランキング取得中...</div>';
     window.db.ref('rankings/scoreAttack/' + currWeek).once('value').then(snap => {
-        const data = snap.val();
-        if (!data) { $('ranking-list-container').innerHTML = '<div class="text-center text-yellow-300 font-bold mt-4">今週はまだ誰もプレイしていないぞ！一番乗りを目指せ！</div>'; return; }
-        const list = Object.values(data).sort((a, b) => b.score - a.score);
-        let html = '';
-        list.forEach((u, i) => {
-            const rankStr = i === 0 ? '🥇 1位' : i === 1 ? '🥈 2位' : i === 2 ? '🥉 3位' : `${i+1}位`;
-            const bgClass = i === 0 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : i === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' : i === 2 ? 'bg-gradient-to-r from-amber-600 to-orange-700' : 'bg-indigo-900 border-2 border-indigo-700';
-            const iconHtml = u.icon && u.icon.startsWith('data:image') ? `<img src="${u.icon}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 flex items-center justify-center text-2xl">${u.icon||'👤'}</div>`;
-            html += `<div class="${bgClass} p-2 rounded-xl flex items-center gap-3 shadow-md mb-2"><div class="font-black w-14 text-center text-white drop-shadow-md text-sm">${rankStr}</div>${iconHtml}<div class="flex-1 font-black text-white truncate text-sm">${u.name}</div><div class="font-black text-yellow-300 text-lg mr-2">${u.score} <span class="text-xs">pt</span></div></div>`;
-        });
+        const data = snap.val(); if (!data) { $('ranking-list-container').innerHTML = '<div class="text-center text-yellow-300 font-bold mt-4">今週はまだ誰もプレイしていないぞ！</div>'; return; }
+        const list = Object.values(data).sort((a, b) => b.score - a.score); let html = '';
+        list.forEach((u, i) => { const rankStr = i === 0 ? '🥇 1位' : i === 1 ? '🥈 2位' : i === 2 ? '🥉 3位' : `${i+1}位`; const bgClass = i === 0 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : i === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' : i === 2 ? 'bg-gradient-to-r from-amber-600 to-orange-700' : 'bg-indigo-900 border-2 border-indigo-700'; const iconHtml = u.icon && u.icon.startsWith('data:image') ? `<img src="${u.icon}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 flex items-center justify-center text-2xl">${u.icon||'👤'}</div>`; html += `<div class="${bgClass} p-2 rounded-xl flex items-center gap-3 shadow-md mb-2"><div class="font-black w-14 text-center text-white drop-shadow-md text-sm">${rankStr}</div>${iconHtml}<div class="flex-1 font-black text-white truncate text-sm">${u.name}</div><div class="font-black text-yellow-300 text-lg mr-2">${u.score} <span class="text-xs">pt</span></div></div>`; });
         $('ranking-list-container').innerHTML = html;
     });
 }
@@ -1009,6 +871,58 @@ function updateHeaderUI() {
     $('ui-stamina').innerText=`${DB.stamina}/${getMaxStamina()}`; checkMissions();
 }
 
+// --- ミッション ---
+function switchMissionTab(t) {
+    currentMissionTab = t;
+    const bd = $('tab-mission-daily'), bn = $('tab-mission-normal'), be = $('tab-mission-event');
+    bd.className = bn.className = "flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all border-b-4 border-transparent";
+    be.className = "flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent";
+    if (t === 'daily') bd.className = "flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";
+    else if (t === 'normal') bn.className = "flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";
+    else be.className = "flex-1 py-2 rounded-lg font-black text-xs bg-pink-600 text-white shadow-md transition-all border-b-4 border-pink-800";
+    renderMissionList();
+}
+function getMissionProgress(m) {
+    if (m.targetType === 'dailyDefeat') return DB.missionProgress.dailyDefeat;
+    if (m.targetType === 'dailyGacha') return DB.missionProgress.dailyGacha;
+    if (m.targetType === 'dailyPlayMulti') return DB.missionProgress.dailyPlayMulti;
+    if (m.targetType === 'defeatTotal') return DB.missionProgress.defeatTotal;
+    if (m.targetType === 'stage') return Math.min(DB.clearedStages, m.target);
+    if (m.targetType === 'exClear') return DB.clearedSeimaroStage >= m.target ? 1 : 0;
+    return 0;
+}
+function checkMissions() {
+    let hc = false;
+    ['daily', 'normal', 'event'].forEach(t => { MISSIONS[t].forEach(m => { if (!DB.claimedMissions.includes(m.id) && getMissionProgress(m) >= m.target) hc = true; }); });
+    const bg = $('nav-mission-badge');
+    if (bg) { if (hc) showEl('nav-mission-badge', 'block'); else hideEl('nav-mission-badge'); }
+}
+function renderMissionList() {
+    const l = $('mission-list-container'); l.innerHTML = '';
+    const m = MISSIONS[currentMissionTab] || [];
+    if (m.length === 0) { l.innerHTML = `<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">依頼がないぞ。</div>`; return; }
+    m.forEach(x => {
+        const ic = DB.claimedMissions.includes(x.id), p = getMissionProgress(x), isC = p >= x.target;
+        const d = document.createElement('div');
+        d.className = `p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : isC ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
+        const ri = x.reward.type === 'coins' ? '💰' : x.reward.type === 'tickets' ? '✨' : x.reward.type === 'materials' ? '🦴' : '👑';
+        const img = x.reward.type === 'coins' ? '草コイン.png' : x.reward.type === 'materials' ? '草の化石.png' : '草核.png';
+        d.innerHTML = `<div class="flex justify-between items-start"><div class="font-black text-sm text-white pr-2">${x.desc}</div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0"><span class="inline-flex relative w-4 h-4"><img src="${img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${ri}','text-xs')"></span><span class="text-xs text-yellow-400 font-black">×${x.reward.amount}</span></div></div><div class="flex items-center justify-between mt-1"><div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100, (p / x.target) * 100)}%;"></div><div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p, x.target)} / ${x.target}</div></div>${ic ? `<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>` : isC ? `<button onclick="claimMission('${x.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>` : `<span class="text-xs font-black text-slate-400">挑戦中</span>`}</div>`;
+        l.appendChild(d);
+    });
+}
+function claimMission(id) {
+    let m = null;
+    ['daily', 'normal', 'event'].forEach(t => { const f = MISSIONS[t].find(x => x.id === id); if (f) m = f; });
+    if (!m || DB.claimedMissions.includes(id)) return;
+    DB.claimedMissions.push(id);
+    if (m.reward.type === 'coins') DB.coins += m.reward.amount;
+    else if (m.reward.type === 'tickets') DB.gachaTickets += m.reward.amount;
+    else if (m.reward.type === 'materials') DB.materials += m.reward.amount;
+    else if (m.reward.type === 'special') { DB.gachaTickets += 5; DB.coins += 2000; }
+    saveGame(); updateHeaderUI(); renderMissionList(); showAlert("報酬を獲得したぞ！");
+}
+
 // --- 画面遷移・チュートリアル ---
 function navTo(sid) {
     positionTutorialArrow(null); document.querySelectorAll('.animate-pulse').forEach(e=>e.classList.remove('animate-pulse'));
@@ -1023,14 +937,8 @@ function navTo(sid) {
     if(sid==='screen-friend'&&currentFriendTab==='list') renderFriendList(); 
     if(sid==='screen-mission') renderMissionList();
     
-    if(sid!=='screen-game'){ 
-        stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; 
-        stopBattleBGM();
-        playHomeBGM();
-    }else{ 
-        hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; 
-        stopHomeBGM();
-    }
+    if(sid!=='screen-game'){ stopGame(); showEl('app-header'); showEl('app-nav'); $('bubbles-layer').style.display='block'; stopBattleBGM(); playHomeBGM(); }
+    else { hideEl('app-header'); hideEl('app-nav'); $('bubbles-layer').style.display='none'; stopHomeBGM(); }
 
     if(sid==='screen-gacha'&&DB.tutorialCompleted&&!DB.tutorialGachaCompleted) setTimeout(()=>startSpecificTutorial('gacha'),500); else if(sid==='screen-equip'&&DB.tutorialGachaCompleted&&!DB.tutorialEquipCompleted) setTimeout(()=>startSpecificTutorial('equip'),500); else if(sid==='screen-home') checkAndStartTutorial();
 }
@@ -1052,102 +960,109 @@ function initHome() {
     const s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none']; 
     const skinIconContainer = $('home-skin-icon');
     if (skinIconContainer) {
-        if (s.type === 'image') {
-            skinIconContainer.innerHTML = `<span class="inline-flex relative w-10 h-10 filter drop-shadow-lg"><img src="${s.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${s.fallbackIcon}','text-4xl filter drop-shadow-lg')"></span>`;
-        } else {
-            skinIconContainer.innerHTML = `<span class="text-4xl filter drop-shadow-lg">${s.icon}</span>`;
-        }
+        if (s.type === 'image') { skinIconContainer.innerHTML = `<span class="inline-flex relative w-10 h-10 filter drop-shadow-lg"><img src="${s.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${s.fallbackIcon}','text-4xl filter drop-shadow-lg')"></span>`; } 
+        else { skinIconContainer.innerHTML = `<span class="text-4xl filter drop-shadow-lg">${s.icon}</span>`; }
     }
-    $('home-skin').innerText=s.name; 
-    $('home-weapon-icon').innerText='💣'; 
-    $('home-weapon').innerText=w.name; 
+    $('home-skin').innerText=s.name; $('home-weapon-icon').innerText='💣'; $('home-weapon').innerText=w.name; 
     const cc=$('home-crew-container'); 
     cc.innerHTML=c.type==='image'?`<span class="inline-flex relative w-10 h-10 filter drop-shadow-md"><img src="${c.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${c.fallbackIcon}','text-3xl filter drop-shadow-md')"></span>`:`<span class="text-4xl filter drop-shadow-md">${c.icon}</span>`; 
     $('home-crew').innerText=c.name; 
 }
+
+function switchEquipTab(t) {
+    currentEquipTab = t; const tabs = ['skins', 'weapons', 'crew', 'system'];
+    tabs.forEach(id => {
+        const btn = $('tab-equip-' + id); const cnt = $('container-equip-' + id);
+        if (!btn || !cnt) return;
+        if (id === t) { btn.className = "flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; cnt.classList.remove('hidden'); cnt.classList.add('block'); } 
+        else { btn.className = "flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; hideEl('container-equip-' + id); }
+    });
+}
+
 window._tutorialEquipTargetSet=false; let currentDetailItem=null, currentDetailKey=null;
-function initEquip() { window._tutorialEquipTargetSet=false; updateHeaderUI(); renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); }
-function renderEquipList(cid, md, oList, eId, dKey) { const c=$(cid); c.innerHTML=''; if(!oList)return; oList.forEach(id=>{ const m=md[id]; if(!m)return; const ie=id===eId, lv=getItemLevel(id), b=document.createElement('button'); b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]':'bg-indigo-950 border-indigo-700 shadow-md'}`; const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-sm')"></div>`:`<span class="text-2xl filter drop-shadow-md">${m.icon||'⚔️'}</span>`; if(dKey==='system') b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; else b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; if(!ie&&dKey!=='system'&&!window._tutorialEquipTargetSet&&!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){b.id='tutorial-target-equip';window._tutorialEquipTargetSet=true;} b.onclick=()=>openItemDetail(id,dKey); c.appendChild(b); }); }
+function initEquip() { 
+    window._tutorialEquipTargetSet=false; updateHeaderUI(); 
+    let targetTab = currentEquipTab;
+    if (!DB.tutorialEquipCompleted && currentTutorialScenario === 'equip') {
+        if (DB.ownedWeapons.find(id => id !== DB.equippedWeapon)) targetTab = 'weapons';
+        else if (DB.ownedCrew.find(id => id !== DB.equippedCrew)) targetTab = 'crew';
+        else targetTab = 'skins';
+    }
+    renderEquipList('equip-weapons',MASTER.weapons,DB.ownedWeapons,DB.equippedWeapon,'equippedWeapon'); 
+    renderEquipList('equip-skins',MASTER.skins,DB.ownedSkins,DB.equippedSkin,'equippedSkin'); 
+    renderEquipList('equip-crew',MASTER.crew,DB.ownedCrew,DB.equippedCrew,'equippedCrew'); 
+    renderEquipList('equip-system',MASTER.systems,['stamina_cap'],null,'system'); 
+    switchEquipTab(targetTab);
+}
+
+function renderEquipList(cid, md, oList, eId, dKey) { 
+    const c=$(cid); c.innerHTML=''; if(!md)return; 
+    let allIds = Object.keys(md);
+    allIds.sort((a, b) => { const aOwned = dKey === 'system' ? true : oList.includes(a); const bOwned = dKey === 'system' ? true : oList.includes(b); if (aOwned === bOwned) return 0; return aOwned ? -1 : 1; });
+
+    allIds.forEach(id=>{ 
+        const m=md[id]; if(!m)return; 
+        const isOwned = dKey === 'system' ? true : oList.includes(id); const ie = id===eId, lv = isOwned ? getItemLevel(id) : 1; 
+        const b=document.createElement('button'); 
+        b.className=`p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ${ie?'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]': isOwned ? 'bg-indigo-950 border-indigo-700 shadow-md' : 'bg-slate-900 border-slate-700 shadow-inner opacity-80 cursor-not-allowed'}`; 
+        
+        let viClass = m.type==='image' ? 'absolute inset-0 w-full h-full object-contain' : 'text-2xl filter drop-shadow-md';
+        if (!isOwned) viClass += ' brightness-0 opacity-50';
+        const vi=m.type==='image'?`<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="${m.icon}" class="${viClass}" onerror="fb(this,'${m.fallbackIcon}','text-sm ${!isOwned ? 'brightness-0 opacity-50' : ''}')"></div>`:`<span class="${viClass}">${m.icon||'⚔️'}</span>`; 
+        
+        if(dKey==='system') { b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div></div><div class="flex items-center gap-2">${vi}<div class="font-bold text-white text-xs leading-tight">${m.name}<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>`; } 
+        else { b.innerHTML=`<div class="flex justify-between items-start mb-1"><div class="${rarityColors[m.rarity]} font-black text-[10px] drop-shadow-sm">[${m.rarity}]</div>${isOwned ? `<div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.${lv}</div>` : `<div class="text-slate-400 text-[9px] font-black bg-slate-800 px-1 rounded-sm border border-slate-600">未取得</div>`}</div><div class="flex items-center gap-2">${vi}<div class="font-bold ${isOwned ? 'text-white' : 'text-slate-400'} text-xs leading-tight">${m.name}</div></div>${ie?'<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>':''}`; } 
+        
+        if(isOwned && !ie && dKey!=='system' && !window._tutorialEquipTargetSet && !DB.tutorialEquipCompleted && currentTutorialScenario==='equip'){ b.id='tutorial-target-equip'; window._tutorialEquipTargetSet=true; } 
+        b.onclick=()=> { if (isOwned) { openItemDetail(id,dKey); } else { showAlert('ガチャで手に入れよう！'); } }; 
+        c.appendChild(b); 
+    }); 
+}
 
 function updateTalentUI(crewId) {
-    if(!DB.crewStats) DB.crewStats={};
-    if(!DB.crewStats[crewId]) DB.crewStats[crewId] = {reincarnation:0, power:0, speed:0, score:0};
-    const st = DB.crewStats[crewId];
-    const lv = getItemLevel(crewId);
-    
-    const totalPoints = (lv - 1) + (st.reincarnation * 10);
-    const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0);
-    const availablePoints = Math.max(0, totalPoints - usedPoints);
-    
-    $('talent-val-power').innerText = st.power || 0; 
-    $('talent-val-speed').innerText = st.speed || 0; 
-    $('talent-val-score').innerText = st.score || 0;
-    $('talent-points-available').innerText = availablePoints;
-    
-    ['power', 'speed', 'score'].forEach(type => {
-        const btn = $(`btn-talent-${type}`);
-        if (btn) {
-            if (availablePoints > 0) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); } 
-            else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
-        }
-    });
-    
+    if(!DB.crewStats) DB.crewStats={}; if(!DB.crewStats[crewId]) DB.crewStats[crewId] = {reincarnation:0, power:0, speed:0, score:0};
+    const st = DB.crewStats[crewId]; const lv = getItemLevel(crewId);
+    const totalPoints = (lv - 1) + (st.reincarnation * 10); const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0); const availablePoints = Math.max(0, totalPoints - usedPoints);
+    $('talent-val-power').innerText = st.power || 0; $('talent-val-speed').innerText = st.speed || 0; $('talent-val-score').innerText = st.score || 0; $('talent-points-available').innerText = availablePoints;
+    ['power', 'speed', 'score'].forEach(type => { const btn = $(`btn-talent-${type}`); if (btn) { if (availablePoints > 0) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); } else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); } } });
     $('reincarnation-count-display').innerText = `🔄 転生回数: ${st.reincarnation}`;
     if (lv >= 100) showEl('btn-reincarnate', 'block'); else hideEl('btn-reincarnate');
 }
 
 function upgradeTalent(type) {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
-    const crewId = currentDetailItem.id; const st = DB.crewStats[crewId];
-    const lv = getItemLevel(crewId);
-    
-    const totalPoints = (lv - 1) + (st.reincarnation * 10);
-    const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0);
-    const availablePoints = totalPoints - usedPoints;
-    
+    const crewId = currentDetailItem.id; const st = DB.crewStats[crewId]; const lv = getItemLevel(crewId);
+    const totalPoints = (lv - 1) + (st.reincarnation * 10); const usedPoints = (st.power || 0) + (st.speed || 0) + (st.score || 0); const availablePoints = totalPoints - usedPoints;
     if (availablePoints <= 0) return showAlert("才能ポイントがないぞ！\nレベルを上げてポイントをゲットしよう！");
-    
-    st[type] = (st[type] || 0) + 1; 
-    saveGame(); updateHeaderUI(); updateTalentUI(crewId);
+    st[type] = (st[type] || 0) + 1; saveGame(); updateHeaderUI(); updateTalentUI(crewId);
 }
 
 function reincarnateCrew() {
     if(!currentDetailItem || currentDetailKey !== 'equippedCrew') return;
-    const crewId = currentDetailItem.id;
-    if(getItemLevel(crewId) < 100) return showAlert("レベル100にならないと転生できないぞ！");
-    
-    DB.crewStats[crewId].reincarnation += 1; 
-    DB.crewStats[crewId].power = 0; DB.crewStats[crewId].speed = 0; DB.crewStats[crewId].score = 0;
-    DB.itemLevels[crewId] = 1; saveGame();
-    showAlert(`【${currentDetailItem.name}】が転生した！！\nレベルは1に戻ったが、転生ボーナスポイントとして\n才能ポイント+10を永続獲得したぞ！`);
-    openItemDetail(crewId, currentDetailKey);
+    const crewId = currentDetailItem.id; if(getItemLevel(crewId) < 100) return showAlert("レベル100にならないと転生できないぞ！");
+    DB.crewStats[crewId].reincarnation += 1; DB.crewStats[crewId].power = 0; DB.crewStats[crewId].speed = 0; DB.crewStats[crewId].score = 0; DB.itemLevels[crewId] = 1; saveGame();
+    showAlert(`【${currentDetailItem.name}】が転生した！！\nレベルは1に戻ったが、転生ボーナスポイントとして\n才能ポイント+10を永続獲得したぞ！`); openItemDetail(crewId, currentDetailKey);
 }
 
 function openItemDetail(id, k) { 
     const ty=k==='equippedWeapon'?'weapons':k==='equippedSkin'?'skins':k==='equippedCrew'?'crew':'systems'; 
-    const m=MASTER[ty][id]; if(!m)return; currentDetailItem=m; currentDetailKey=k; 
-    const lv=getItemLevel(m.id); 
+    const m=MASTER[ty][id]; if(!m)return; currentDetailItem=m; currentDetailKey=k; const lv=getItemLevel(m.id); 
     $('detail-rarity').innerText=m.rarity||'System'; $('detail-rarity').className=`font-black text-lg ${m.rarity?rarityColors[m.rarity]:'text-yellow-400'}`; $('detail-level').innerText=`Lv.${lv}`; 
     const ic=$('detail-icon'); ic.innerHTML=m.type==='image'?`<span class="inline-flex relative w-16 h-16 filter drop-shadow-md"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${m.fallbackIcon}','text-5xl')"></span>`:`<span class="text-6xl filter drop-shadow-md">${m.icon}</span>`; 
     $('detail-name').innerText=m.name; $('detail-desc').innerText=m.desc; 
-
     const isCrew = k === 'equippedCrew'; const maxLevel = isCrew ? 100 : 10;
     const reqCoins = isCrew ? lv * 50 : lv * 200; const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
-
     $('req-coins').innerText=reqCoins; $('req-materials').innerText=reqMats; 
     const bu=$('btn-upgrade'); 
     if(lv>=maxLevel){ bu.innerHTML="MAX レベル!! 🌟";bu.disabled=true;bu.classList.add('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.remove('from-green-400','to-green-600','active:scale-95'); }
     else{ bu.innerHTML="パワーアップ!! ✨";bu.disabled=false;bu.classList.remove('opacity-50','cursor-not-allowed','from-gray-500','to-gray-700');bu.classList.add('from-green-400','to-green-600','active:scale-95'); } 
-
     if(isCrew){ showEl('crew-talent-ui', 'flex'); updateTalentUI(m.id); } else { hideEl('crew-talent-ui'); }
     if(k==='system')hideEl('btn-equip');else showEl('btn-equip'); showEl('item-detail-modal'); 
 }
 function closeItemDetail() { hideEl('item-detail-modal'); }
 function equipItem() { if(!currentDetailItem||!currentDetailKey||currentDetailKey==='system')return; DB[currentDetailKey]=currentDetailItem.id; saveGame(); initEquip(); closeItemDetail(); if(!DB.tutorialEquipCompleted&&currentTutorialScenario==='equip'){DB.tutorialEquipCompleted=true;saveGame();positionTutorialArrow(null);setTimeout(()=>startSpecificTutorial('all_done'),300);} }
 function upgradeItem() { 
-    if(!currentDetailItem)return; const lv=getItemLevel(currentDetailItem.id); 
-    const isCrew = currentDetailKey === 'equippedCrew';
-    if(lv>=(isCrew?100:10))return; 
+    if(!currentDetailItem)return; const lv=getItemLevel(currentDetailItem.id); const isCrew = currentDetailKey === 'equippedCrew'; if(lv>=(isCrew?100:10))return; 
     const reqCoins = isCrew ? lv * 50 : lv * 200; const reqMats = isCrew ? Math.floor(lv / 10) : Math.floor(lv / 2) + 1;
     if(DB.coins<reqCoins||DB.materials<reqMats)return showAlert("素材が足りないぞ！"); 
     DB.coins-=reqCoins; DB.materials-=reqMats; DB.itemLevels[currentDetailItem.id]=lv+1; saveGame(); updateHeaderUI(); openItemDetail(currentDetailItem.id,currentDetailKey); initEquip(); 
@@ -1159,20 +1074,19 @@ function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), 
 function updateGachaUI() { updateHeaderUI(); $('gacha-rate').innerText=`${Math.min(1.0+(DB.pityCounter*0.5),100.0).toFixed(1)}%`; $('pity-bar').style.width=`${Math.min((DB.pityCounter/50)*100,100)}%`; }
 let currentGachaResults=[];
 function startGachaAnim(times) { 
-    if(!$('tutorial-overlay').classList.contains('hidden'))return; 
-    if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！ミッション等で集めよう！"); 
-    DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; 
+    if(!$('tutorial-overlay').classList.contains('hidden'))return; if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！"); DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; 
     for(let i=0;i<times;i++){ 
         let ur=0.01+(DB.pityCounter*0.005), ssr=0.05, sr=0.10, r=0.25, rand=Math.random(), rr='N'; 
         if(rand<ur)rr='UR';else if(rand<ur+ssr)rr='SSR';else if(rand<ur+ssr+sr)rr='SR';else if(rand<ur+ssr+sr+r)rr='R'; 
-        const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; 
-        let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} 
+        const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} 
         let d=pool[Math.floor(Math.random()*pool.length)], m=MASTER[d.type][d.id], ok=d.type==='weapons'?'ownedWeapons':d.type==='skins'?'ownedSkins':'ownedCrew', isNew=!DB[ok].includes(d.id); 
         if(isNew)DB[ok].push(d.id);else{DB.coins+=500;DB.materials+=1;} 
         if(rr==='UR'){hasUR=true;hItem=m;DB.pityCounter=0;}else DB.pityCounter++; 
         currentGachaResults.push({item:m,isNew:isNew}); 
     } 
-    saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); }
+    saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; 
+    setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); 
+}
 function showGachaResult(item, isNew) { document.querySelectorAll('.gacha-result-text').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=null;}); shootConfetti('gacha-confetti-container',80); $('gacha-result-rarity').innerText=item.rarity; $('gacha-result-rarity').className=`text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`; const vc=$('gacha-result-visual-container'); vc.innerHTML=item.type==='image'?`<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`:`<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon||'⚔️'}</span>`; $('gacha-result-name').innerHTML=`${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew?'🎉 初ゲット！！':'持ってるぞ！(+500/化石+1)'}</span>`; $('gacha-result-desc').innerText=item.desc||''; showEl('gacha-result-modal'); }
 function closeGachaResult() { hideEl('gacha-result-modal'); $('gacha-confetti-container').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
 function showGacha10Result() { const g=$('gacha-10-grid'); g.innerHTML=''; shootConfetti('gacha-confetti-container-10',120); currentGachaResults.forEach((r,i)=>{ const m=r.item, d=document.createElement('div'); d.className=`bg-indigo-900 border-2 border-indigo-500 rounded-xl p-2 flex flex-col items-center justify-center relative shadow-lg pop-in`; d.style.animationDelay=`${i*0.1}s`; d.style.animationFillMode='both'; const vi=m.type==='image'?`<span class="inline-flex relative w-12 h-12"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain drop-shadow-md z-10" onerror="fb(this,'${m.fallbackIcon}','text-2xl drop-shadow-md')"></span>`:`<span class="text-5xl drop-shadow-md">${m.icon||'⚔️'}</span>`; d.innerHTML=`<div class="absolute top-1 left-1 ${rarityColors[m.rarity]} font-black text-[10px] bg-indigo-950/80 px-1 rounded">${m.rarity}</div>${r.isNew?'<div class="absolute top-1 right-1 text-[8px] bg-pink-500 text-white font-black px-1 rounded shadow-md">NEW</div>':'<div class="absolute top-1 right-1 text-[8px] bg-slate-500 text-white font-black px-1 rounded shadow-md">ダブり</div>'}<div class="mt-4 mb-2 h-12 flex items-center justify-center">${vi}</div><div class="text-[9px] text-white font-bold text-center w-full truncate px-1">${m.name}</div>`; g.appendChild(d); }); showEl('gacha-result-10-modal'); }
@@ -1184,7 +1098,6 @@ function triggerHappyShare(n, i) { const t=$('happy-share-toast'); if(happyShare
 function switchStageTab(t) { currentStageTab=t; const bn=$('tab-stage-normal'), be=$('tab-stage-ex'), bm=$('tab-stage-multi'); bn.className=be.className=bm.className="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; showEl('stage-list','flex'); hideEl('multi-lobby-ui'); if(t==='normal'){bn.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";renderStageList(MASTER.stages);}else if(t==='ex'){be.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";renderStageList(MASTER.exStages);}else if(t==='multi'){bm.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";hideEl('stage-list');showEl('multi-lobby-ui','flex');} }
 function initStageSelect() { switchStageTab('normal'); }
 function renderStageList(stgs) { const l=$('stage-list'); l.innerHTML=''; let a=!DB.tutorialCompleted?[{id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0}]:stgs; a.forEach((s,i)=>{ let lk=false; if(!s.isTutorial){if(currentStageTab==='normal')lk=i>0&&DB.clearedStages<i;else if(s.reqClearEx!==undefined)lk=DB.clearedSeimaroStage<s.reqClearEx;} const b=document.createElement('button'); b.id=`stage-btn-${s.id}`; b.className=`p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk?'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed':'bg-indigo-800 '+s.color}`; let rd=s.isTutorial?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`:s.isEndless?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`:`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`; b.innerHTML=`<div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div><div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div><div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless||s.isBossStage?'':'隻 追い払う！'}</div><div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless||s.isBossStage?'報酬:':s.isTutorial?'目標報酬:':'初回お祝い:'}</span>${rd}</div>${lk?'<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>':''}`; if(!lk)b.onclick=()=>{positionTutorialArrow(null);startStage(s);}; l.appendChild(b); }); if(!DB.tutorialCompleted)setTimeout(()=>positionTutorialArrow('stage-btn-999'),100); }
-
 function openCreateRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="遊ぶステージを選択"; showEl('room-create-ui','flex'); hideEl('room-join-ui'); hideEl('room-waiting-ui'); const l=$('multi-stage-select-list'); l.innerHTML=''; MASTER.multiStages.forEach(s=>{ const b=document.createElement('button'); b.className=`w-full text-left p-3 bg-indigo-800 rounded-xl border-2 ${s.color} shadow-md active:scale-95 flex flex-col gap-1`; b.innerHTML=`<span class="font-black text-white text-lg">${s.name}</span><div class="flex justify-between items-center w-full"><span class="text-xs text-indigo-200 font-bold">スタミナ: ⚡${s.staminaCost}</span><span class="text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded">選択！</span></div>`; b.onclick=()=>createRoom(s); l.appendChild(b); }); showEl('multi-room-modal'); }
 function openJoinRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="部屋に入る"; hideEl('room-create-ui'); showEl('room-join-ui','flex'); hideEl('room-waiting-ui'); $('room-id-input').value=''; showEl('multi-room-modal'); }
 function createRoom(s) { if(DB.stamina<s.staminaCost)return showAlert("スタミナ不足！"); const rId=Math.floor(1000+Math.random()*9000).toString(); currentMultiRoom={id:rId,stageId:s.id,isHost:true}; window.db.ref('rooms/'+rId).set({stageId:s.id,status:'waiting',hostId:DB.userId,timestamp:firebase.database.ServerValue.TIMESTAMP,p1:{id:DB.userId,name:DB.userName,icon:DB.userIcon,score:0,ready:false},p2:null}); showWaitingUI(rId); listenToRoom(rId); }
@@ -1194,18 +1107,6 @@ function listenToRoom(rId) { if(roomListener) window.db.ref('rooms/'+currentMult
 function startMultiStage() { if(currentMultiRoom&&currentMultiRoom.isHost) window.db.ref('rooms/'+currentMultiRoom.id+'/status').set('playing'); }
 function leaveRoom() { hideEl('multi-room-modal'); if(currentMultiRoom&&roomListener){window.db.ref('rooms/'+currentMultiRoom.id).off('value',roomListener);roomListener=null;if(currentMultiRoom.isHost)window.db.ref('rooms/'+currentMultiRoom.id).remove();} currentMultiRoom=null; }
 function startMultiSync() { if(!currentMultiRoom||!isFirebaseInitialized)return; showEl('multi-match-ui'); const mk=currentMultiRoom.isHost?'p1':'p2', rk=currentMultiRoom.isHost?'p2':'p1'; multiSyncInterval=setInterval(()=>{ if(!gameState||gameState.isPaused)return; window.db.ref(`rooms/${currentMultiRoom.id}/${mk}/score`).set(gameState.score); window.db.ref(`rooms/${currentMultiRoom.id}/${rk}/score`).once('value').then(s=>{ const rs=s.val()||0; $('rival-score').innerText=rs; if(currentStage.type==='coop'&&currentStage.isBossStage&&gameState.enemies.length>0){ const b=gameState.enemies.find(e=>e.isBoss); if(b){ b.hp=Math.max(0,b.maxHp-(gameState.score+rs)); if(b.hp<=0)checkStageClear(false); } } }); }, 2000); }
-
-// --- ミッション ---
-function switchMissionTab(t) { currentMissionTab=t; const bd=$('tab-mission-daily'), bn=$('tab-mission-normal'), be=$('tab-mission-event'); bd.className=bn.className="flex-1 py-2 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all border-b-4 border-transparent"; be.className="flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent"; if(t==='daily')bd.className="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; else if(t==='normal')bn.className="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800"; else be.className="flex-1 py-2 rounded-lg font-black text-xs bg-pink-600 text-white shadow-md transition-all border-b-4 border-pink-800"; renderMissionList(); }
-function getMissionProgress(m) { if(m.targetType==='dailyDefeat')return DB.missionProgress.dailyDefeat; if(m.targetType==='dailyGacha')return DB.missionProgress.dailyGacha; if(m.targetType==='dailyPlayMulti')return DB.missionProgress.dailyPlayMulti; if(m.targetType==='defeatTotal')return DB.missionProgress.defeatTotal; if(m.targetType==='stage')return Math.min(DB.clearedStages,m.target); if(m.targetType==='exClear')return DB.clearedSeimaroStage>=m.target?1:0; return 0; }
-function checkMissions() { let hc=false; ['daily','normal','event'].forEach(t=>{ MISSIONS[t].forEach(m=>{ if(!DB.claimedMissions.includes(m.id)&&getMissionProgress(m)>=m.target) hc=true; }); }); const bg=$('nav-mission-badge'); if(bg){if(hc)showEl('nav-mission-badge','block');else hideEl('nav-mission-badge');} }
-function renderMissionList() { const l=$('mission-list-container'); l.innerHTML=''; const m=MISSIONS[currentMissionTab]||[]; if(m.length===0){l.innerHTML=`<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">依頼がないぞ。</div>`;return;} m.forEach(x=>{ const ic=DB.claimedMissions.includes(x.id), p=getMissionProgress(x), isC=p>=x.target, d=document.createElement('div'); d.className=`p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic?'bg-indigo-950/60 border-indigo-900 opacity-60':isC?'bg-indigo-800 border-yellow-400':'bg-indigo-900 border-indigo-700'}`; const ri=x.reward.type==='coins'?'💰':x.reward.type==='tickets'?'✨':x.reward.type==='materials'?'🦴':'👑', img=x.reward.type==='coins'?'草コイン.png':x.reward.type==='materials'?'草の化石.png':'草核.png'; d.innerHTML=`<div class="flex justify-between items-start"><div class="font-black text-sm text-white pr-2">${x.desc}</div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0"><span class="inline-flex relative w-4 h-4"><img src="${img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${ri}','text-xs')"></span><span class="text-xs text-yellow-400 font-black">×${x.reward.amount}</span></div></div><div class="flex items-center justify-between mt-1"><div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100,(p/x.target)*100)}%;"></div><div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p,x.target)} / ${x.target}</div></div>${ic?`<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>`:isC?`<button onclick="claimMission('${x.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>`:`<span class="text-xs font-black text-slate-400">挑戦中</span>`}</div>`; l.appendChild(d); }); }
-function claimMission(id) { let m=null; ['daily','normal','event'].forEach(t=>{const f=MISSIONS[t].find(x=>x.id===id);if(f)m=f;}); if(!m||DB.claimedMissions.includes(id))return; DB.claimedMissions.push(id); if(m.reward.type==='coins')DB.coins+=m.reward.amount; else if(m.reward.type==='tickets')DB.gachaTickets+=m.reward.amount; else if(m.reward.type==='materials')DB.materials+=m.reward.amount; else if(m.reward.type==='special'){DB.gachaTickets+=5;DB.coins+=2000;} saveGame(); updateHeaderUI(); renderMissionList(); showAlert("報酬を獲得したぞ！"); }
-
-function closeRankingRewardModal() {
-    hideEl('ranking-reward-modal');
-    $('ranking-confetti-container').innerHTML = '';
-}
 
 // --- ゲームエンジン ---
 let gameLoopId=null, currentStage=null, specialCutinTimeout=null;
@@ -1218,43 +1119,25 @@ canvas.addEventListener('touchend',()=>input.isTouching=false);
 
 function startStage(stage, isMulti=false) {
     if(!isMulti&&DB.stamina<stage.staminaCost)return showAlert(`スタミナ不足！(必要: ${stage.staminaCost})`);
-    if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game');
-    playBattleBGM();
+    if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game'); playBattleBGM();
     if(DB.tutorialCompleted) showEl('special-ui-container'); else hideEl('special-ui-container'); hideEl('multi-match-ui');
-    
-    if(stage.isScoreAttack) {
-        showEl('time-container', 'flex');
-        hideEl('score-slash'); hideEl('game-goal');
-        $('score-label').innerText = 'スコア:';
-        $('game-time').innerText = stage.timeLimit;
-    } else {
-        hideEl('time-container');
-    }
+    if(stage.isScoreAttack) { showEl('time-container', 'flex'); hideEl('score-slash'); hideEl('game-goal'); $('score-label').innerText = 'スコア:'; $('game-time').innerText = stage.timeLimit; } else { hideEl('time-container'); }
 
     setTimeout(()=>{
         const rect=canvas.parentElement.getBoundingClientRect(); canvas.width=rect.width<100?window.innerWidth:rect.width; canvas.height=rect.height<100?window.innerHeight-80:rect.height;
         const w=MASTER.weapons[DB.equippedWeapon]||MASTER.weapons['wp_normal'], s=MASTER.skins[DB.equippedSkin]||MASTER.skins['skin_default'], c=MASTER.crew[DB.equippedCrew]||MASTER.crew['crew_none'];
         const wl=getItemLevel(w.id), sl=getItemLevel(s.id), cl=getItemLevel(c.id);
-        
-        if(!DB.crewStats) DB.crewStats={};
-        const cStats = DB.crewStats[c.id] || {reincarnation:0, power:0, speed:0, score:0};
-        const rBonus = 1 + (cStats.reincarnation * 0.5);
+        if(!DB.crewStats) DB.crewStats={}; const cStats = DB.crewStats[c.id] || {reincarnation:0, power:0, speed:0, score:0}; const rBonus = 1 + (cStats.reincarnation * 0.5);
 
-        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, 
-            timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
+        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
             player:{
-                x:canvas.width/2-30,y:canvas.height-140,width:60,height:60,
-                speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5)+(cStats.speed*0.2*rBonus), 
-                skinIcon:s.icon, skinType:s.type||'text', skinFallback:s.fallbackIcon||'⚡', skinId:s.id,
-                weapon:{...w,fireRate:Math.max(2,w.fireRate-Math.floor(wl/2)),speed:w.speed+(wl*0.5)},
-                crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect,
-                bulletSizeMod:((c.effect==='powerUp'?2:1)+(cStats.power*0.1))*rBonus, 
-                scoreMod:((c.effect==='scoreUp'?2:1)+(cStats.score*0.2))*rBonus
+                x:canvas.width/2-30,y:canvas.height-140,width:60,height:60, speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5)+(cStats.speed*0.2*rBonus), 
+                skinIcon:s.icon, skinType:s.type||'text', skinFallback:s.fallbackIcon||'⚡', skinId:s.id, weapon:{...w,fireRate:Math.max(2,w.fireRate-Math.floor(wl/2)),speed:w.speed+(wl*0.5)},
+                crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect, bulletSizeMod:((c.effect==='powerUp'?2:1)+(cStats.power*0.1))*rBonus, scoreMod:((c.effect==='scoreUp'?2:1)+(cStats.score*0.2))*rBonus
             } 
         };
         
-        if(stage.type==='coop'){ $('score-label').innerText='ボスの残りHP:'; hideEl('score-slash'); hideEl('game-goal'); }
-        else if(!stage.isScoreAttack){ $('score-label').innerText='追い払った数:'; showEl('score-slash','inline'); showEl('game-goal','inline'); $('game-goal').innerText=stage.goalScore; }
+        if(stage.type==='coop'){ $('score-label').innerText='ボスの残りHP:'; hideEl('score-slash'); hideEl('game-goal'); } else if(!stage.isScoreAttack){ $('score-label').innerText='追い払った数:'; showEl('score-slash','inline'); showEl('game-goal','inline'); $('game-goal').innerText=stage.goalScore; }
         
         $('game-score').innerText='0'; hideEl('game-end-modal'); updateSpecialGaugeUI();
         if(stage.isBossStage){ let bhp=stage.type==='coop'?1000:150; gameState.enemies.push({x:canvas.width/2-75,y:-150,w:150,h:150,speed:stage.enemySpeed,hp:bhp,maxHp:bhp,wobbleOffset:0,isBoss:true}); if(stage.type==='coop') $('game-score').innerText=bhp; }
@@ -1263,74 +1146,31 @@ function startStage(stage, isMulti=false) {
     }, 50);
 }
 function stopGame() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;} if(multiSyncInterval){clearInterval(multiSyncInterval);multiSyncInterval=null;} hideEl('special-cutin'); }
-function triggerGameOver() { 
-    gameState.isGameOver = true;
-    gameState.isPaused = true;
-    stopGame(); stopBattleBGM(); 
-    $('game-end-title').innerText='GAME OVER...'; 
-    $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; 
-    $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; 
-    showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; 
-    DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); 
-    setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); 
-}
+function triggerGameOver() { gameState.isGameOver = true; gameState.isPaused = true; stopGame(); stopBattleBGM(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
 let lastGaugeUI=-1;
 function updateSpecialGaugeUI() { let g=Math.floor(gameState.specialGauge); if(g===lastGaugeUI)return; lastGaugeUI=g; $('special-gauge').style.width=`${g}%`; const b=$('btn-special'), i=$('btn-special-icon'); if(g>=100){b.classList.remove('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.add('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.remove('grayscale');b.disabled=false;}else{b.classList.add('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.remove('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.add('grayscale');b.disabled=true;} }
 function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused||gameState.isGameOver)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
 function skipSpecial() { if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;executeSpecialEffect();} }
-function executeSpecialEffect() { 
-    hideEl('special-cutin'); const p=gameState.player; 
-    if(gameState.isGameOver) return; // 既にゲームが終わっている場合はSP処理を行わない
-    if(p.crewId==='crew_seimaro'){ 
-        gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; 
-    }else{ 
-        gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; 
-    } 
-    gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); 
-}
+function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(gameState.isGameOver) return; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
 
 function updateGame() {
-    if(gameState.isGameOver || gameState.isPaused) return; // 🌟 ゲームオーバー / ポーズ中は完全に処理をストップして無限スコア稼ぎを防止！
-    
+    if(gameState.isGameOver || gameState.isPaused) return; 
     const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
-    
-    // スコアアタック用の時間減少処理
-    if(s.isScoreAttack) {
-        gameState.timeLeft--;
-        if(gameState.frameCount % 60 === 0) {
-            $('game-time').innerText = Math.ceil(gameState.timeLeft / 60);
-        }
-        if(gameState.timeLeft <= 0) {
-            checkStageClear(false);
-            return;
-        }
-    }
-
+    if(s.isScoreAttack) { gameState.timeLeft--; if(gameState.frameCount % 60 === 0) { $('game-time').innerText = Math.ceil(gameState.timeLeft / 60); } if(gameState.timeLeft <= 0) { checkStageClear(false); return; } }
     if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
     if(gameState.specialGauge<100){gameState.specialGauge+=0.05;if(gameState.specialGauge>100)gameState.specialGauge=100;if(gameState.frameCount%5===0)updateSpecialGaugeUI();}
     if(input.keys['ArrowLeft']||input.keys['a'])p.x-=p.speed; if(input.keys['ArrowRight']||input.keys['d'])p.x+=p.speed; p.x=Math.max(0,Math.min(canvas.width-p.width,p.x));
     
     if(gameState.frameCount%p.weapon.fireRate===0){ 
         const bx=p.x+p.width/2, by=p.y+10, bw=12*p.bulletSizeMod, bh=(p.weapon.type==='laser'?100:20)*p.bulletSizeMod; 
-        if(p.crewEffect==='doubleShot'){
-            gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
-            gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
-        }else if(p.weapon.type==='spread'){
-            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
-            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
-            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'});
-        }else{
-            gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type});
-        } 
+        if(p.crewEffect==='doubleShot'){ gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); }else if(p.weapon.type==='spread'){ gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); }else{ gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); } 
     }
     for(let i=gameState.bullets.length-1;i>=0;i--){let b=gameState.bullets[i];b.x+=b.dx;b.y+=b.dy;if(b.y<-100||b.x<-50||b.x>canvas.width+50)gameState.bullets.splice(i,1);}
     if(!s.isBossStage&&gameState.frameCount%s.spawnRate===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:s.enemySpeed+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }else if(s.isBossStage&&gameState.frameCount%(s.spawnRate/10)===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:3+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }
     for(let i=gameState.enemies.length-1;i>=0;i--){ 
-        let e=gameState.enemies[i]; 
-        if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} 
+        let e=gameState.enemies[i]; if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} 
         if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} 
-        let hit=false; 
-        for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
+        let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
         if(hit&&e.hp<=0){ 
             gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); 
             if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} 
@@ -1338,10 +1178,7 @@ function updateGame() {
             if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} 
             if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} 
             checkStageClear(false); 
-        }else if(!s.isScoreAttack&&!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){
-            // スコアアタックでは突破されてもゲームオーバーにならない
-            triggerGameOver();return;
-        }
+        }else if(!s.isScoreAttack&&!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){ triggerGameOver();return; }
     }
     for(let i=gameState.particles.length-1;i>=0;i--){let pt=gameState.particles[i];pt.x+=pt.dx;pt.y+=pt.dy;pt.life--;pt.dy+=0.2;if(pt.life<=0)gameState.particles.splice(i,1);}
 }
@@ -1353,79 +1190,39 @@ function drawGame() {
     gameState.bullets.forEach(b=>{ ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=15; if(b.type==='laser')ctx.fillRect(b.x,b.y,b.w,b.h);else{ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h/2,b.w/2,b.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(b.x+b.w/2-b.w/6,b.y+b.h/2-b.h/6,b.w/4,0,Math.PI*2);ctx.fill();} }); ctx.shadowBlur=0;
     ctx.textBaseline="middle"; ctx.textAlign="center"; const bi=$('img-seimaro-boss');
     gameState.enemies.forEach(e=>{ ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2); if(e.isBoss){ctx.rotate(Math.sin(gameState.frameCount/20)*0.1);if(bi.complete&&bi.naturalHeight!==0)ctx.drawImage(bi,-e.w/2,-e.h/2,e.w,e.h);else{ctx.font=`${e.w*0.8}px serif`;ctx.fillText('🐾',0,0);}ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(-e.w/2,-e.h/2-20,e.w,10);ctx.fillStyle='#ef4444';ctx.fillRect(-e.w/2,-e.h/2-20,e.w*(e.hp/e.maxHp),10);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(-e.w/2,-e.h/2-20,e.w,10);}else{ctx.font="40px serif";ctx.rotate(Math.sin(gameState.frameCount/10+e.wobbleOffset)*0.2);ctx.fillText('🚢',0,0);} ctx.restore(); });
-    
-    ctx.save();
-    ctx.translate(p.x+p.width/2, p.y+p.height/2);
-    ctx.rotate(Math.sin(gameState.frameCount / 15) * 0.05);
-    if (p.skinType === 'image') {
-        window._skinImgCache = window._skinImgCache || {};
-        if (!window._skinImgCache[p.skinId]) {
-            window._skinImgCache[p.skinId] = new Image();
-            window._skinImgCache[p.skinId].src = p.skinIcon;
-        }
-        const img = window._skinImgCache[p.skinId];
-        if (img.complete && img.naturalHeight !== 0) {
-            ctx.drawImage(img, -p.width/2, -p.height/2, p.width, p.height);
-        } else {
-            ctx.font=`${p.width}px serif`; ctx.fillText(p.skinFallback||'⚡', 0, 0);
-        }
-    } else {
-        ctx.font=`${p.width}px serif`; ctx.fillText(p.skinIcon, 0, 0);
-    }
+    ctx.save(); ctx.translate(p.x+p.width/2, p.y+p.height/2); ctx.rotate(Math.sin(gameState.frameCount / 15) * 0.05);
+    if (p.skinType === 'image') { window._skinImgCache = window._skinImgCache || {}; if (!window._skinImgCache[p.skinId]) { window._skinImgCache[p.skinId] = new Image(); window._skinImgCache[p.skinId].src = p.skinIcon; } const img = window._skinImgCache[p.skinId]; if (img.complete && img.naturalHeight !== 0) { ctx.drawImage(img, -p.width/2, -p.height/2, p.width, p.height); } else { ctx.font=`${p.width}px serif`; ctx.fillText(p.skinFallback||'⚡', 0, 0); } } else { ctx.font=`${p.width}px serif`; ctx.fillText(p.skinIcon, 0, 0); }
     ctx.restore();
-    
     gameState.particles.forEach(pt=>{ ctx.globalAlpha=pt.life/30; if(pt.isStar)drawStar(ctx,pt.x,pt.y,5,pt.size,pt.size/2,pt.color);else{ctx.fillStyle=pt.color;ctx.beginPath();ctx.arc(pt.x,pt.y,pt.size,0,Math.PI*2);ctx.fill();} }); ctx.globalAlpha=1.0;
     if(gameState.screenFlash>0){ const fp=gameState.screenFlash/25; if(p.crewId==='crew_seimaro'){ ctx.fillStyle=`rgba(0,10,30,${fp*0.8})`;ctx.fillRect(0,0,canvas.width,canvas.height); if(gameState.screenFlash>10){for(let i=0;i<8;i++){const tx=Math.random()*canvas.width, topX=tx+(Math.random()-0.5)*300;drawLightningLine(ctx,topX,0,tx,canvas.height,'#0284c7',25,60,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#22d3ee',12,30,true);drawLightningLine(ctx,topX,0,tx,canvas.height,'#fff',5,15,false);shootLightningImpactConfetti(tx,canvas.height-40);}ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.6+0.4})`;ctx.fillRect(0,0,canvas.width,canvas.height);}else{ctx.fillStyle=`rgba(255,255,255,${(gameState.screenFlash/10)*0.6})`;ctx.fillRect(0,0,canvas.width,canvas.height);} }else{ ctx.fillStyle=`rgba(255,255,255,${gameState.screenFlash/5})`;ctx.fillRect(0,0,canvas.width,canvas.height); } gameState.screenFlash--; }
 }
 
 function checkStageClear(isRetreat=false) {
-    // 🌟 判定ロジックの修正: スコアアタック中は、逃げるボタンか残り時間0になった時のみクリア処理に入る
     const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (currentStage.isScoreAttack ? (gameState.timeLeft <= 0) : (!currentStage.isEndless&&gameState.score>=currentStage.goalScore));
     if(isRetreat||isCleared){
-        gameState.isGameOver = true; // 🌟 即座にゲームオーバーフラグを立てて、ゲームループ（弾、敵の移動）を完全停止！
-        gameState.isPaused = true;
-        stopGame(); stopBattleBGM(); 
-        
+        gameState.isGameOver = true; gameState.isPaused = true; stopGame(); stopBattleBGM(); 
         DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
-        
         $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; 
         $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
-        
         let rt=''; 
         if(currentStage.type==='pvp'){ 
             const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} 
         }else if(currentStage.type==='coop'){ 
             rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } 
         }else if(currentStage.isScoreAttack) {
-            $('game-end-title').innerText = 'スコア算出完了!!';
-            rt = `最終スコア: <span class="text-yellow-400 text-2xl font-black">${gameState.score}</span> pt<br><br><span class="text-xs text-indigo-300">全国ランキングに記録されました！</span>`;
-            
-            if (isFirebaseInitialized && !isRetreat) {
-                const currWeek = getWeeklyString();
-                window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).once('value').then(snap => {
-                    const exData = snap.val();
-                    if (!exData || exData.score < gameState.score) {
-                        window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).set({
-                            id: DB.userId, name: DB.userName, icon: DB.userIcon, score: gameState.score, timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    }
-                });
-                DB.lastPlayedRankingWeek = currWeek;
-            }
+            $('game-end-title').innerText = 'スコア算出完了!!'; rt = `最終スコア: <span class="text-yellow-400 text-2xl font-black">${gameState.score}</span> pt<br><br><span class="text-xs text-indigo-300">全国ランキングに記録されました！</span>`;
+            if (isFirebaseInitialized && !isRetreat) { const currWeek = getWeeklyString(); window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).once('value').then(snap => { const exData = snap.val(); if (!exData || exData.score < gameState.score) { window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).set({ id: DB.userId, name: DB.userName, icon: DB.userIcon, score: gameState.score, timestamp: firebase.database.ServerValue.TIMESTAMP }); } }); DB.lastPlayedRankingWeek = currWeek; }
         }else{ 
             rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; 
             if(currentStage.isEndless){ 
-                eTk=Math.floor(gameState.score/60); 
-                eCo=Math.floor(gameState.score/5)*50;
-                eMt=Math.floor(gameState.score/30); 
+                eTk=Math.floor(gameState.score/60); eCo=Math.floor(gameState.score/5)*50; eMt=Math.floor(gameState.score/30); 
                 if(eTk>0||eCo>0){ DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 探索ご褒美 🎊<br><div class="flex justify-center gap-2 mt-2">${eTk>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div>`:''}${eCo>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div>`:''}${eMt>0?`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div>`:''}</div>`; }else rt+=`<br><br><span class="text-sm text-indigo-300">たくさんお見送りするとご褒美を獲得できます</span>`; 
             }else{ 
                 let isFC=false; if(currentStage.isEx){if(DB.clearedSeimaroStage<currentStage.reqClearEx+1&&!isRetreat){DB.clearedSeimaroStage=currentStage.reqClearEx+1;isFC=true;}}else{if(DB.clearedStages<currentStage.id&&!isRetreat){DB.clearedStages=currentStage.id;isFC=true;}} 
                 if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } 
             } 
         }
-        
         $('game-end-desc').innerHTML=rt; showEl('game-end-modal'); shootConfetti('end-confetti-container',80); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); updateHeaderUI(); saveGame();
         if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
     }
