@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カジノ</title>
+<style>
+body{margin:0;background:#1a1a1a;font-family:Arial;color:#fff}
+.machine{max-width:900px;margin:auto;background:#c00;border:12px solid #800;padding:8px}
+.top{text-align:center;background:#a00;padding:6px;font-weight:bold}
+.credit{background:#000;color:#0f0;padding:8px;text-align:center;font-size:22px}
+.bet{text-align:center;padding:8px}
+.reels{display:flex;justify-content:center;gap:10px;background:#111;padding:15px;border:8px solid #ff4d88}
+.window{width:180px;height:220px;overflow:hidden;background:#ddd;border:5px solid #333;position:relative}
+.strip{position:absolute;width:100%;left:0;top:0}
+.sym{height:220px;display:flex;align-items:center;justify-content:center;font-size:90px}
+.sym img{max-width:120px}
+.controls{text-align:center;padding:10px}
+button{padding:10px 18px;margin:4px;font-weight:bold}
+#result{text-align:center;font-size:32px;min-height:60px}
+.jackpot{animation:rb .5s linear infinite;font-weight:bold}
+@keyframes rb{0%{color:red}20%{color:orange}40%{color:yellow}60%{color:lime}80%{color:cyan}100%{color:magenta}}
+
+.jackpot-rainbow{
+position:fixed;inset:0;pointer-events:none;
+animation:flashbg .15s linear 25;
+z-index:9999;
+}
+@keyframes flashbg{
+0%{background:red}14%{background:orange}28%{background:yellow}
+42%{background:lime}56%{background:cyan}70%{background:blue}
+84%{background:violet}100%{background:red}
+}
+.confetti{
+position:fixed;width:14px;height:14px;top:-20px;
+animation:fall 4s linear forwards;
+z-index:10000;
+}
+@keyframes fall{
+to{transform:translateY(120vh) rotate(1440deg)}
+}
+.superjackpot{
+font-size:48px;
+font-weight:900;
+animation:rb .3s linear infinite;
+text-shadow:
+0 0 10px #fff,
+0 0 20px gold,
+0 0 40px gold,
+0 0 60px #ff00ff,
+0 0 90px #00ffff;
+}
+
+
+.superjackpot{
+font-size:56px!important;
+letter-spacing:3px;
+animation:rb .15s linear infinite, pulse .4s infinite alternate;
+}
+@keyframes pulse{
+from{transform:scale(1)}
+to{transform:scale(1.15)}
+}
+.jackpot-aura{
+position:fixed;inset:-50%;
+background:conic-gradient(red,orange,yellow,lime,cyan,blue,violet,red);
+animation:spinAura 2s linear infinite;
+opacity:.35;
+z-index:9998;
+pointer-events:none;
+}
+@keyframes spinAura{
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
+}
+
+
+.win-flash{animation:winflash .2s linear 10;}
+@keyframes winflash{
+0%{filter:brightness(1)}
+50%{filter:brightness(2)}
+100%{filter:brightness(1)}
+}
+.win-text{
+font-size:42px;
+font-weight:900;
+animation:pulse .4s infinite alternate;
+}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
+</style>
+</head>
+<body>
+<div class="machine">
+<div class="top">7がそろえばビッグチャンス！</div>
+<div class="credit">草コイン: <span id="coins">0</span></div>
+<div class="bet">BET:
+<select id="bet"><option>100</option><option>1000</option><option>10000</option><option>50000</option></select>
+</div>
+<div style="background:#000;color:#fff;padding:10px;text-align:center;font-weight:bold">
+🎰 配当表 🎰<br>
+🌈 777 ×3 → 5倍<br>
+🍇 ×3 → 3倍<br>
+🍎 ×3 → 1倍<br>
+🍒 🍉 🔔 ×3 → 2倍
+</div>
+
+<div class="reels">
+<div class="window" onclick="stopReelClick(0)" style="cursor:pointer"><div class="strip" id="strip0"></div></div>
+<div class="window" onclick="stopReelClick(1)" style="cursor:pointer"><div class="strip" id="strip1"></div></div>
+<div class="window" onclick="stopReelClick(2)" style="cursor:pointer"><div class="strip" id="strip2"></div></div>
+</div>
+
+
+<div class="controls" style="text-align:center">
+  <button id="start" style="font-size:24px;padding:14px 30px">MAX BET</button>
+</div>
+<div id="result"></div>
+</div>
+
+
+<audio id="bgm" src="ジャックポット.mp3" loop></audio>
+<audio id="jackpotBgm" src="ジャックポット.mp3"></audio>
+<script>
+
+function megaJackpot(win){
+
+ const aura=document.createElement('div');
+ aura.className='jackpot-aura';
+ document.body.appendChild(aura);
+
+ const ov=document.createElement('div');
+ ov.className='jackpot-rainbow';
+ document.body.appendChild(ov);
+
+ for(let i=0;i<600;i++){
+   const c=document.createElement('div');
+   c.className='confetti';
+   c.style.left=Math.random()*100+'vw';
+   c.style.background='hsl('+(Math.random()*360)+'deg 100% 50%)';
+   c.style.animationDuration=(2+Math.random()*3)+'s';
+   document.body.appendChild(c);
+   setTimeout(()=>c.remove(),5000);
+ }
+
+ const bgm=document.getElementById('jackpotBgm');
+ if(bgm){bgm.currentTime=0;bgm.play().catch(()=>{});}
+
+ navigator.vibrate?.([300,100,300,100,300,100,800]);
+
+ result.innerHTML=`<div class="superjackpot">
+ 🌈💥 777 JACKPOT 💥🌈<br>
+ ${win.toLocaleString()} 草コイン獲得！<br>
+ 🔥🔥🔥 MAX BONUS 🔥🔥🔥
+ </div>`;
+
+ 
+ document.body.animate(
+ [
+  {transform:'translateX(-12px)'},
+  {transform:'translateX(12px)'},
+  {transform:'translateX(-12px)'},
+  {transform:'translateX(12px)'},
+  {transform:'translateX(0px)'}
+ ],
+ {duration:120,repetitions:40}
+ );
+
+ result.innerHTML=`<div class="superjackpot">
+ 🌈👑⚡ 777 JACKPOT ⚡👑🌈<br>
+ 💎 ${win.toLocaleString()} 草コイン獲得 💎<br>
+ 🔥 ULTRA RAINBOW BONUS 🔥<br>
+ ✨ MAX MAX MAX ✨
+ </div>`;
+
+ setTimeout(()=>{
+   ov.remove();
+   aura.remove();
+ },7000);
+
+}
+
+const SAVE_NAME="kaizoku";
+const symbols=["777","🍇","🍒","🍎","🍉","🔔"];
+let coins=50000;
+try{
+ let d=JSON.parse(localStorage.getItem(SAVE_NAME)||"{}");
+ if(typeof d.coins==="number") coins=d.coins;
+}catch(e){}
+function saveCoins(){
+ let d={};
+ try{d=JSON.parse(localStorage.getItem(SAVE_NAME)||"{}")}catch(e){}
+ d.coins=coins;
+ localStorage.setItem(SAVE_NAME,JSON.stringify(d));
+ coinsEl.textContent=coins.toLocaleString();
+}
+const coinsEl=document.getElementById("coins");
+saveCoins();
+
+const strips=[];
+for(let i=0;i<3;i++){
+ const st=document.getElementById("strip"+i);
+ let h="";
+ for(let r=0;r<20;r++){
+   symbols.forEach(s=>h+=`<div class="sym">${s==="777"?"<img src='777.jpg'>":s}</div>`);
+ }
+ st.innerHTML=h;
+ strips.push({el:st,pos:0,run:false,id:null,result:null});
+}
+
+function animate(idx){
+ const r=strips[idx];
+ r.id=setInterval(()=>{
+   r.pos+=35;
+   r.el.style.transform=`translateY(${-r.pos}px)`;
+   const limit=220*symbols.length*15;
+   if(r.pos>limit){
+      r.pos=0;
+      r.el.style.transition="none";
+      r.el.style.transform="translateY(0px)";
+   }
+ },16);
+}
+
+document.getElementById("start").onclick=()=>{
+ document.getElementById("start").disabled=true;
+ const bgm=document.getElementById("bgm");
+ if(bgm && bgm.paused){
+   bgm.volume=0.5;
+   bgm.play().catch(()=>{});
+ }
+ const bet=+document.getElementById("bet").value;
+ if(coins<bet){alert("草コイン不足");return;}
+ coins-=bet; saveCoins();
+ result.textContent="";
+ for(let i=0;i<3;i++){
+   strips[i].run=true;
+   animate(i);
+   
+ }
+};
+
+for(let i=0;i<3;i++){
+ document.getElementById("s"+i).onclick=()=>{
+   const r=strips[i];
+   clearInterval(r.id);
+   r.run=false;
+   r.result=symbols[Math.floor(Math.random()*symbols.length)];
+   const stopIndex = symbols.indexOf(r.result);
+   const baseCycle = 12 * symbols.length;
+   const targetIndex = baseCycle + stopIndex;
+   r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
+   r.el.style.transform=`translateY(${-targetIndex*220}px)`;
+   r.pos = targetIndex*220;
+   
+   if(strips.every(x=>!x.run)){
+    setTimeout(()=>{
+        judge();
+        document.getElementById("start").disabled=false;
+    },750);
+}
+ };
+}
+
+
+function stopReelClick(i){
+   if(!strips[i].run) return;
+   const r=strips[i];
+   clearInterval(r.id);
+   r.run=false;
+   r.result=symbols[Math.floor(Math.random()*symbols.length)];
+   const stopIndex = symbols.indexOf(r.result);
+   const baseCycle = 12 * symbols.length;
+   const targetIndex = baseCycle + stopIndex;
+   r.el.style.transition="transform .7s cubic-bezier(.15,1.1,.25,1)";
+   r.el.style.transform=`translateY(${-targetIndex*220}px)`;
+   r.pos = targetIndex*220;
+   if(strips.every(x=>!x.run)){
+    setTimeout(()=>{
+        judge();
+        document.getElementById("start").disabled=false;
+    },750);
+}
+}
+
+
+function winEffect(symbol, win){
+ document.body.classList.add('win-flash');
+ navigator.vibrate?.([150,80,150]);
+
+ let msg = `🎉 ${symbol} ×3<br>${win.toLocaleString()} 草コイン獲得!`;
+ if(symbol==='🍇') msg='🍇 GRAPE BONUS!<br>'+win.toLocaleString()+' 草コイン';
+ if(symbol==='777') return; // jackpot uses its own effect
+
+ result.innerHTML='<div class="win-text">'+msg+'</div>';
+
+ setTimeout(()=>document.body.classList.remove('win-flash'),2000);
+}
+
+function judge(){
+ const a=strips.map(x=>x.result);
+ const bet=+document.getElementById("bet").value;
+ if(a[0]===a[1]&&a[1]===a[2]){
+   let m=2;
+   if(a[0]==="777") m=5;
+   else if(a[0]==="🍇") m=3;
+   else if(a[0]==="🍎") m=1;
+   const win=bet*m;
+   coins+=win; saveCoins();
+   if(a[0]==="777"){
+      megaJackpot(win);
+   }else{
+      winEffect(a[0], win);
+   }
+ }else{
+   result.textContent="アタリ";
+ }
+}
+</script>
+</body>
+</html>
