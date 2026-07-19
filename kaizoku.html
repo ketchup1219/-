@@ -107,10 +107,22 @@
             
             <!-- 1. ホーム -->
             <div id="screen-home" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col items-center justify-between gap-2 relative">
-                <button onclick="openRankingModal()" class="absolute top-2 left-2 game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 transition-transform hover:scale-110 flex items-center gap-1 text-xs">
-                    <span>🏆</span> <span>全国RANK</span>
-                </button>
-                <a href="kaizokusetumei.html" class="absolute top-2 right-2 game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] z-20 text-xl transition-transform hover:scale-110 tooltip">📖</a>
+                
+                <!-- ホーム画面左上ボタン群 -->
+                <div class="absolute top-2 left-2 flex flex-col gap-2 z-20">
+                    <button onclick="openRankingModal()" class="game-btn bg-gradient-to-b from-yellow-400 to-yellow-600 text-indigo-950 font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center gap-1 text-xs">
+                        <span>🏆</span> <span>全国RANK</span>
+                    </button>
+                    <a href="kaizokuslot.html" class="game-btn bg-gradient-to-b from-pink-400 to-pink-600 text-white font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center justify-center gap-1 text-xs">
+                        <span>🎰</span> <span>カジノ</span>
+                    </a>
+                </div>
+
+                <!-- ホーム画面右上ボタン群 -->
+                <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
+                    <button onclick="openSettingsModal()" class="game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-xl transition-transform hover:scale-110 tooltip">⚙️</button>
+                    <a href="kaizokusetumei.html" class="game-btn bg-indigo-700 hover:bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center border-2 border-indigo-400 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-xl transition-transform hover:scale-110 tooltip">📖</a>
+                </div>
                 
                 <div class="holy-aura"></div>
                 <div class="logo-container mt-4">
@@ -282,7 +294,7 @@
             <div id="screen-game" class="screen hidden h-full w-full relative">
                 <div id="game-tutorial-overlay" class="absolute top-20 left-4 right-4 pointer-events-none hidden z-30 transition-opacity duration-1000">
                     <div class="bg-indigo-900/95 border-2 border-yellow-400 rounded-2xl p-3 text-center shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-                        <span class="text-yellow-400 font-black text-sm block mb-0.5">💡 ポリーのアドバイス！</span>
+                        <span class="text-yellow-400 font-black text-sm block mb-0.5">💡 ナビーのアドバイス！</span>
                         <p id="game-tutorial-text" class="text-white text-xs leading-relaxed font-bold"></p>
                     </div>
                 </div>
@@ -346,7 +358,7 @@
         <!-- 下部ナビゲーション (5列) -->
         <nav id="app-nav" class="bg-indigo-950 border-t-4 border-indigo-900 flex justify-between px-1 py-1 pb-4 absolute bottom-0 w-full z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
             <button id="nav-btn-home" onclick="navTo('screen-home')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1" data-target="screen-home">
-                <span class="nav-icon mb-1">🏠</span><span class="nav-text">ホーム</span>
+                <span class="nav-icon mb-1 flex justify-center items-center h-6"><img src="ホームボタン.png" class="h-full object-contain" alt="🏠" onerror="fb(this,'🏠','text-2xl drop-shadow-md')"></span><span class="nav-text">ホーム</span>
             </button>
             <button id="nav-btn-equip" onclick="tryAccessLockedScreen('screen-equip')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-equip">
                 <span id="nav-equip-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
@@ -354,7 +366,7 @@
             </button>
             <button id="nav-btn-gacha" onclick="tryAccessLockedScreen('screen-gacha')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-gacha">
                 <span id="nav-gacha-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
-                <span class="nav-icon mb-1">🎁</span><span class="nav-text">宝箱</span>
+                <span class="nav-icon mb-1 flex justify-center items-center h-6"><img src="ガチャボタン.png" class="h-full object-contain" alt="🎁" onerror="fb(this,'🎁','text-2xl drop-shadow-md')"></span><span class="nav-text">宝箱</span>
             </button>
             <button id="nav-btn-friend" onclick="tryAccessLockedScreen('screen-friend')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-friend">
                 <span id="nav-friend-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
@@ -368,6 +380,31 @@
         </nav>
 
         <!-- モーダル群 -->
+        <!-- 設定(BGM・SE)モーダル -->
+        <div id="settings-modal" class="absolute inset-0 bg-indigo-950/90 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-indigo-900 border-4 border-indigo-500 rounded-3xl p-6 w-full max-w-[320px] shadow-2xl flex flex-col gap-4 pop-in relative text-center">
+                <button onclick="closeSettingsModal()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
+                <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-400 tracking-wider border-b-2 border-indigo-700 pb-2 mb-1 w-full">⚙️ 設定</h3>
+                
+                <div class="w-full flex flex-col gap-4 text-left px-2 mt-2">
+                    <div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
+                        <label class="block text-sm text-yellow-300 font-bold mb-3 flex justify-between items-center">
+                            <span>🎵 BGM音量</span> <span id="bgm-vol-disp" class="bg-indigo-900 px-2 py-1 rounded text-white">50%</span>
+                        </label>
+                        <input type="range" id="bgm-volume" min="0" max="1" step="0.05" class="w-full accent-yellow-400" oninput="updateVolume()">
+                    </div>
+                    <div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
+                        <label class="block text-sm text-pink-300 font-bold mb-3 flex justify-between items-center">
+                            <span>🔊 効果音(SE)音量</span> <span id="se-vol-disp" class="bg-indigo-900 px-2 py-1 rounded text-white">50%</span>
+                        </label>
+                        <input type="range" id="se-volume" min="0" max="1" step="0.05" class="w-full accent-pink-400" oninput="updateVolume()">
+                    </div>
+                </div>
+                
+                <button onclick="closeSettingsModal()" class="game-btn w-full bg-gradient-to-b from-blue-400 to-blue-600 text-white font-black py-3 rounded-xl border-2 border-white shadow-md text-lg mt-4">閉じる</button>
+            </div>
+        </div>
+
         <div id="tutorial-overlay" class="absolute inset-0 bg-indigo-950/80 hidden flex-col items-center justify-center z-50 p-6 backdrop-blur-sm">
             <div class="bg-indigo-900 border-4 border-yellow-400 rounded-3xl p-6 w-full max-w-[340px] shadow-2xl flex flex-col gap-5 pop-in">
                 <div class="flex justify-between items-center border-b-2 border-indigo-700 pb-3">
@@ -675,16 +712,35 @@
 
 <script>
 // --- 音声制御 (BGM & SE) ---
+function playSE() {
+    const se = document.getElementById('se-click');
+    if (se) { 
+        se.volume = DB.seVolume !== undefined ? DB.seVolume : 0.5; 
+        se.currentTime = 0; 
+        se.play().catch(()=>{}); 
+    }
+}
 document.addEventListener('click', (e) => {
-    if (e.target.closest('button') || e.target.closest('.game-btn') || e.target.closest('.icon-sel-btn')) {
-        const se = document.getElementById('se-click');
-        if (se) { se.currentTime = 0; se.play().catch(()=>{}); }
+    if (e.target.closest('button') || e.target.closest('.game-btn') || e.target.closest('.icon-sel-btn') || e.target.closest('a.game-btn')) {
+        playSE();
     }
 });
 let bgmStarted = false;
-function playHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && bgm.paused) { bgm.play().catch(()=>{}); } }
+function playHomeBGM() { 
+    const bgm = document.getElementById('bgm-home'); 
+    if (bgm && bgm.paused) { 
+        bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; 
+        bgm.play().catch(()=>{}); 
+    } 
+}
 function stopHomeBGM() { const bgm = document.getElementById('bgm-home'); if (bgm && !bgm.paused) { bgm.pause(); } }
-function playBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && bgm.paused) { bgm.volume = 0.5; bgm.play().catch(()=>{}); } }
+function playBattleBGM() { 
+    const bgm = document.getElementById('bgm-battle'); 
+    if (bgm && bgm.paused) { 
+        bgm.volume = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5; 
+        bgm.play().catch(()=>{}); 
+    } 
+}
 function stopBattleBGM() { const bgm = document.getElementById('bgm-battle'); if (bgm && !bgm.paused) { bgm.pause(); bgm.currentTime = 0; } }
 
 document.addEventListener('click', () => {
@@ -693,6 +749,31 @@ document.addEventListener('click', () => {
         bgmStarted = true;
     }
 }, { once: true });
+
+function updateVolume() {
+    DB.bgmVolume = parseFloat($('bgm-volume').value);
+    DB.seVolume = parseFloat($('se-volume').value);
+    
+    $('bgm-vol-disp').innerText = Math.round(DB.bgmVolume * 100) + '%';
+    $('se-vol-disp').innerText = Math.round(DB.seVolume * 100) + '%';
+    
+    const bgmHome = document.getElementById('bgm-home');
+    const bgmBattle = document.getElementById('bgm-battle');
+    if(bgmHome) bgmHome.volume = DB.bgmVolume;
+    if(bgmBattle) bgmBattle.volume = DB.bgmVolume;
+    saveGame();
+}
+function openSettingsModal() {
+    $('bgm-volume').value = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5;
+    $('se-volume').value = DB.seVolume !== undefined ? DB.seVolume : 0.5;
+    $('bgm-vol-disp').innerText = Math.round($('bgm-volume').value * 100) + '%';
+    $('se-vol-disp').innerText = Math.round($('se-volume').value * 100) + '%';
+    showEl('settings-modal');
+}
+function closeSettingsModal() {
+    hideEl('settings-modal');
+}
+
 
 // --- 短縮・ユーティリティ関数 ---
 const $ = id => document.getElementById(id);
@@ -722,7 +803,7 @@ function getWeeklyString() {
 }
 
 // --- データ定義 ---
-let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[], crewStats:{}, lastPlayedRankingWeek:'', lastRankingRewardWeek:'' };
+let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[], crewStats:{}, lastPlayedRankingWeek:'', lastRankingRewardWeek:'', bgmVolume: 0.5, seVolume: 0.5 };
 const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:2,type:'materials',amount:2,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:3,type:'tickets',amount:2,label:'草核',icon:'草核.png',fallback:'✨'}, {day:4,type:'coins',amount:1200,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:5,type:'materials',amount:5,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:6,type:'tickets',amount:3,label:'草核',icon:'草核.png',fallback:'✨'}, {day:7,type:'special',amount:5,coinsBonus:3000,label:'超・船長パック',icon:'草核.png',fallback:'👑'} ];
 const MASTER = {
     systems: { 'stamina_cap': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
@@ -819,6 +900,8 @@ function loadGame() {
     if(!DB.crewStats) DB.crewStats={};
     if(!DB.lastPlayedRankingWeek) DB.lastPlayedRankingWeek='';
     if(!DB.lastRankingRewardWeek) DB.lastRankingRewardWeek='';
+    if(DB.bgmVolume === undefined) DB.bgmVolume = 0.5;
+    if(DB.seVolume === undefined) DB.seVolume = 0.5;
     saveGame();
 }
 function getItemLevel(id) { return DB.itemLevels[id]||1; }
