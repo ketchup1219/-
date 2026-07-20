@@ -45,7 +45,7 @@
         .skill-icon-anim { animation: skill-icon-pop 0.3s infinite linear !important; z-index: 1000; }
         @keyframes skill-icon-pop { 0% { transform: scale(2.2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 50px gold); } 100% { transform: scale(2.2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 50px white); } }
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; backdrop-filter: blur(8px); padding-bottom: 20px; pointer-events: none; }
-        #start-screen { background-image: url('ネオン.jpg'); background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 150px; overflow-y: auto; }
+        #start-screen { background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 150px; overflow-y: auto; }
         #cockpit-screen { background: radial-gradient(circle at bottom, #112233, #050505); background-size: cover; border: 4px solid #445566; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); }
         .col-tabs { display: flex; width: 95%; gap: 8px; margin-bottom: 12px; }
         .tab-btn { flex: 1; padding: 12px 5px; font-size: 13px; background: linear-gradient(to bottom, #555, #333); color: white; border: 1px solid #666; border-radius: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0.7; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; overflow: hidden;}
@@ -177,8 +177,7 @@
                 <button class="btn btn-col" onclick="openLayer('col-screen')">📖 コレクション</button>
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
-                <button class="btn" style="background: linear-gradient(135deg, #139, #242); color: #00ffff; border: 2px solid var(--grass-light); grid-column: span 2;" onclick="location.href='kaizokusetumei.html'">🏴ROUGE GALLEON</button>
-                <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
+                <button class="btn" style="background: linear-gradient(135deg, #139, #242); color: #00ffff; border: 2px solid var(--grass-light); grid-column: span 2;" onclick="location.href='kaizoku.html'">🏴 港 (本編) へ戻る</button>
                 <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
             </div>
         </div>
@@ -459,7 +458,10 @@
             { id: 'crew_62', type: 'char', name: 'ローグ', icon: '🏃', owned: false, rarity: 'SR', info: '大義のための犠牲となれ', rate: 1.5 },
             { id: 'crew_63', type: 'char', name: 'シンジ', icon: '🏃', owned: false, rarity: 'SR', info: 'ヱヴァに乗れ', rate: 1.5 },
             { id: 'crew_64', type: 'char', name: 'ショウヘイ', icon: '🏃', owned: false, rarity: 'SR', info: 'オオタニサァーン！', rate: 1.5 },
-            { id: 'c20', type: 'char', name: 'ひとりぼっち', icon: '🧑‍🦲', owned: true, rarity: 'BASIC', info: '乗組員ひとり', rate: 1 }, 
+            { id: 'crew_birthday', type: 'char', name: 'バースデーラビット', icon: '🎂', owned: false, rarity: 'UR', info: 'ハッピーバースデー！', rate: 3 },
+            { id: 'crew_santa', type: 'char', name: 'サンタラビット', icon: '🎅', owned: false, rarity: 'UR', info: 'メリークリスマス！', rate: 3 },
+            { id: 'c20', type: 'char', name: 'ひとりぼっち (草抜き)', icon: '🧑‍🦲', owned: true, rarity: 'BASIC', info: '乗組員ひとり', rate: 1 }, 
+            { id: 'crew_none', type: 'char', name: 'ひとりぼっち', icon: '🧑‍🦲', owned: true, rarity: 'BASIC', info: '乗組員なし', rate: 1 }, 
 
             { id: 'boss_char_0', type: 'char', name: '屍花の主 ラフレシアン', icon: '🌺', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 30, skillName: '捕食' },
             { id: 'boss_char_1', type: 'char', name: '鋼鉄の審判官 ユニット-000', icon: '🤖', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 35, skillName: 'パージ' },
@@ -1248,11 +1250,38 @@
         });
 
         window.saveGame = function() { 
-            localStorage.setItem('zenSurvival_Final_v30', JSON.stringify({ 
-                money: money.toString(), fossilCount, kusakakuCount, gameSettings, charLevels, leaderId,
-                owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
-                userName, defeatedBosses, todayBossBonusDate
-            })); 
+            let dataStr = localStorage.getItem('kaizoku');
+            let DB = dataStr ? JSON.parse(dataStr) : {};
+            
+            // 通貨データを本編フォーマットと同期
+            DB.coins = Number(money);
+            DB.materials = fossilCount;
+            DB.gachaTickets = kusakakuCount;
+            
+            // 草抜き独自のデータも保持
+            DB.money = money.toString();
+            DB.fossilCount = fossilCount;
+            DB.kusakakuCount = kusakakuCount;
+            DB.gameSettings = gameSettings;
+            DB.charLevels = charLevels;
+            DB.leaderId = leaderId;
+            
+            // 所持キャラ・アイテムの同期
+            DB.owned = items.filter(i=>i.owned).map(i=>i.id);
+            if (!DB.ownedCrew) DB.ownedCrew = ['crew_none'];
+            items.filter(i => i.type === 'char' && i.owned).forEach(item => {
+                if (!DB.ownedCrew.includes(item.id)) {
+                    DB.ownedCrew.push(item.id);
+                }
+            });
+
+            DB.eq = {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}; 
+            DB.userName = userName;
+            DB.defeatedBosses = defeatedBosses;
+            DB.todayBossBonusDate = todayBossBonusDate;
+            
+            localStorage.setItem('kaizoku', JSON.stringify(DB)); 
+            
             if(window.dbUpdate && window.dbRef && window.db) {
                 const uid = "local_" + userName;
                 window.dbUpdate(window.dbRef(window.db, `users/${uid}`), { money: money.toString(), fossilCount, kusakakuCount, leaderId });
@@ -1261,15 +1290,35 @@
         
         window.loadGame = function() {
             try {
-                let dataStr = localStorage.getItem('zenSurvival_Final_v30');
+                let dataStr = localStorage.getItem('kaizoku');
                 let data = dataStr ? JSON.parse(dataStr) : null;
                 if(data) {
-                    money = parseBigInt(data.money, 2000n); fossilCount = parseInt(data.fossilCount) || 0; kusakakuCount = parseInt(data.kusakakuCount) || 0;
-                    if(data.gameSettings) gameSettings = {...gameSettings, ...data.gameSettings}; if(data.charLevels) charLevels = data.charLevels; if(data.leaderId) leaderId = data.leaderId;
-                    if(data.owned) data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
-                    if(data.eq) { equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm; }
+                    // 通貨の読み込み (本編のデータがあれば優先)
+                    let loadedCoins = data.coins !== undefined ? data.coins : (data.money ? data.money : 2000);
+                    money = parseBigInt(loadedCoins, 2000n);
+                    fossilCount = data.materials !== undefined ? data.materials : (parseInt(data.fossilCount) || 0);
+                    kusakakuCount = data.gachaTickets !== undefined ? data.gachaTickets : (parseInt(data.kusakakuCount) || 0);
+
+                    if(data.gameSettings) gameSettings = {...gameSettings, ...data.gameSettings}; 
+                    if(data.charLevels) charLevels = data.charLevels; 
+                    if(data.leaderId) leaderId = data.leaderId;
+                    
+                    // 所持キャラの読み込み (本編と草抜きの両方から統合)
+                    let ownedSet = new Set();
+                    if (data.owned) data.owned.forEach(id => ownedSet.add(id));
+                    if (data.ownedCrew) data.ownedCrew.forEach(id => ownedSet.add(id));
+                    
+                    ownedSet.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
+                    
+                    if(data.eq) { 
+                        equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; 
+                        equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; 
+                        equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; 
+                        equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm; 
+                    }
                     userName = data.userName || "ぜん"; 
-                    defeatedBosses = data.defeatedBosses || []; todayBossBonusDate = data.todayBossBonusDate || "";
+                    defeatedBosses = data.defeatedBosses || []; 
+                    todayBossBonusDate = data.todayBossBonusDate || "";
                 }
             } catch (e) { console.error(e); }
             document.getElementById('game-field').className = equipped.bg.className;
