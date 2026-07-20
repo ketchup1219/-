@@ -3,69 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('Service Worker Registered'));
-  }
-</script>
-    <title>草抜きモード </title>
+    <title>草抜きモード</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        /* ロゴを置く箱の設定 */
-.logo-container {
-    position: relative;
-    display: inline-block;
-    margin-top: 20px;
-}
-
-/* ロゴ本体の設定（ふわふわ浮いて、影が光る） */
-#game-title-img {
-    width: 85%;
-    max-width: 500px;
-    height: auto;
-    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); /* 金色の光 */
-    animation: floating 3s ease-in-out infinite, shine-glitter 2s linear infinite;
-}
-
-/* ふわふわ浮く動き */
-@keyframes floating {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-/* ロゴの表面をキラッと光が走る演出 */
-@keyframes shine-glitter {
-    0% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1); }
-    50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 1)) brightness(1.3); }
-    100% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1); }
-}
+        .logo-container { position: relative; display: inline-block; margin-top: 20px; }
+        #game-title-img { width: 85%; max-width: 500px; height: auto; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); animation: floating 3s ease-in-out infinite, shine-glitter 2s linear infinite; }
+        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shine-glitter { 0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1); } 50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 1)) brightness(1.3); } }
         :root { --zen-red: #ff0033; --gold: #ffd700; --grass-light: #7cfc00; --grass-dark: #2d5a27; --blue: #00d2ff; --fever-pink: #ff00ff; --bonus-color: #00ffcc; --uz-color: #ff0000; --x-color: #ffffff; --og-color: #ff00ff; --fossil: #d2b48c; --ex-green: #00ff88; --boss-color: #ff0044; }
-        body { text-align: center; font-family: 'Arial Black', sans-serif; background-color: #050505; color: white; margin: 0; min-height: 100vh; overflow-y: visible !important; overflow-x: hidden; touch-action: auto !important; user-select: none; background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px); }
-        .header { background: linear-gradient(to bottom, rgba(40,40,40,0.9), rgba(10,10,10,0.95)); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #444; font-size: 14px; position: relative; box-shadow: 0 5px 25px rgba(0,0,0,0.9); z-index: 10; backdrop-filter: blur(5px); }
-        #fever-container { position: absolute; bottom: -6px; left: 0; width: 100%; height: 6px; background: #0a0a0a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); }
-        #fever-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--fever-pink), #ffffff, var(--fever-pink)); background-size: 200% 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 0 20px var(--fever-pink), 0 0 40px var(--fever-pink), inset 0 0 10px rgba(255,255,255,0.8); animation: bg-scroll 0.5s linear infinite; }
-        #game-field { position: relative; width: 95vw; height: 55vh; background: linear-gradient(135deg, #1a2a1a 0%, #0f1c0f 100%); margin: 10px auto; border: 3px solid #444; border-radius: 20px; overflow: hidden; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.05); }
-        #game-field::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 100; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); border-radius: 17px; }
-        #game-field.bg-desert { background: radial-gradient(circle, #8b5a2b 0%, #4d3319 100%); border-color: #e6c2a0; box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 30px rgba(210,180,140,0.3); }
-        #game-field.bg-cyber { background: radial-gradient(circle, #001540 0%, #000520 100%); border-color: #00d2ff; box-shadow: inset 0 0 50px #00d2ff44, 0 0 30px #00d2ff; }
-        #game-field.bg-cyber::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,210,255,0.08) 0, rgba(0,210,255,0.08) 2px, transparent 2px, transparent 4px); pointer-events: none; }
-        #game-field.bg-volcano { background: radial-gradient(circle, #5a0000 0%, #2b0000 100%); border-color: #ff5500; box-shadow: inset 0 0 80px #ff450088, 0 0 40px #ff4500; }
+        body { text-align: center; font-family: 'Arial Black', sans-serif; background-color: #050505; color: white; margin: 0; min-height: 100vh; overflow-x: hidden; user-select: none; background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px); }
+        .header { background: linear-gradient(to bottom, rgba(40,40,40,0.9), rgba(10,10,10,0.95)); padding: 10px; display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid #444; font-size: 14px; position: relative; z-index: 10; backdrop-filter: blur(5px); }
+        #fever-container { position: absolute; bottom: -6px; left: 0; width: 100%; height: 6px; background: #0a0a0a; }
+        #fever-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--fever-pink), #ffffff, var(--fever-pink)); background-size: 200% 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 0 20px var(--fever-pink); animation: bg-scroll 0.5s linear infinite; }
+        #game-field { position: relative; width: 95vw; height: 55vh; background: linear-gradient(135deg, #1a2a1a 0%, #0f1c0f 100%); margin: 10px auto; border: 3px solid #444; border-radius: 20px; overflow: hidden; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.8); }
+        #game-field.bg-desert { background: radial-gradient(circle, #8b5a2b 0%, #4d3319 100%); border-color: #e6c2a0; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); }
+        #game-field.bg-cyber { background: radial-gradient(circle, #001540 0%, #000520 100%); border-color: #00d2ff; box-shadow: inset 0 0 50px #00d2ff44; }
+        #game-field.bg-volcano { background: radial-gradient(circle, #5a0000 0%, #2b0000 100%); border-color: #ff5500; box-shadow: inset 0 0 80px #ff450088; }
         #game-field.bg-night { background: radial-gradient(circle, #20204a 0%, #0a0a20 100%); border-color: #5c52a0; }
         #game-field.bg-sakura { background: radial-gradient(circle, #4a2f2f 0%, #2d1a1a 100%); border-color: #ffc2ce; box-shadow: inset 0 0 70px #ffb7c588; }
-        #game-field.bg-gold { background: radial-gradient(circle, #6a5800 0%, #3d3300 100%); border-color: #ffdf00; box-shadow: inset 0 0 80px rgba(255,215,0,0.5), 0 0 20px rgba(255,215,0,0.3); }
-        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; box-shadow: inset 0 0 100px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
+        #game-field.bg-gold { background: radial-gradient(circle, #6a5800 0%, #3d3300 100%); border-color: #ffdf00; box-shadow: inset 0 0 80px rgba(255,215,0,0.5); }
+        #game-field.bg-space { background: radial-gradient(circle, #1a1a3a 0%, #000 100%); border-color: #fff; box-shadow: inset 0 0 100px rgba(255,255,255,0.3); }
         #game-field.bg-deepsea { background: radial-gradient(circle, #002b40 0%, #00121a 100%); border-color: #00aaaa; box-shadow: inset 0 0 70px rgba(0,139,139,0.7); }
-        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 100px #9400d388, 0 0 30px #9400d3; }
+        #game-field.bg-dimension { background: #1a001a; border-color: #9400d3; animation: dim-pulse 3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 100px #9400d388; }
         #game-field.bg-universe { background: radial-gradient(circle at center, #2b0044 0%, #000011 100%); border-color: #8a2be2; box-shadow: inset 0 0 80px rgba(138,43,226,0.6); }
-        #game-field.bg-universe::before { content:''; position:absolute; inset:0; background-image: radial-gradient(white 1px, transparent 1px); background-size: 30px 30px; opacity: 0.3; animation: star-move 20s linear infinite; pointer-events: none;}
-        @keyframes star-move { from { background-position: 0 0; } to { background-position: -100px 100px; } }
-        #game-field.bg-neon { background: #050510; border-color: #ff00ff; box-shadow: inset 0 0 60px #ff00ff, 0 0 20px #00ffff; }
-        #game-field.bg-neon::after { content:''; position:absolute; inset:0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px); pointer-events:none; }
-        @keyframes dim-pulse { 0% { background: radial-gradient(circle, #3a003a 0%, #1a001a 100%); filter: hue-rotate(0deg); } 100% { background: radial-gradient(circle, #00002a 0%, #00004a 100%); filter: hue-rotate(45deg); } }
+        #game-field.bg-neon { background: #050510; border-color: #ff00ff; box-shadow: inset 0 0 60px #ff00ff; }
+        @keyframes dim-pulse { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(45deg); } }
         .og-time-stop { filter: invert(1) grayscale(1) brightness(1.8) contrast(1.2) !important; transition: filter 0.1s; }
         .og-shake { animation: og-shake-anim 0.1s infinite; }
         @keyframes og-shake-anim { 0% { transform: translate(15px, 15px) rotate(2deg); } 50% { transform: translate(-15px, -15px) rotate(-2deg); } 100% { transform: translate(15px, -15px) rotate(0deg); } }
@@ -81,40 +44,12 @@
         @keyframes skill-flash { from { box-shadow: inset 0 0 80px rgba(255,255,255,0.6); border-color: #fff; } to { box-shadow: inset 0 0 200px rgba(255,255,255,1); border-color: #ff00ff; } }
         .skill-icon-anim { animation: skill-icon-pop 0.3s infinite linear !important; z-index: 1000; }
         @keyframes skill-icon-pop { 0% { transform: scale(2.2) rotate(0deg); filter: brightness(3) drop-shadow(0 0 50px gold); } 100% { transform: scale(2.2) rotate(360deg); filter: brightness(3) drop-shadow(0 0 50px white); } }
-        
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; backdrop-filter: blur(8px); padding-bottom: 20px; pointer-events: none; }
-        
-        /* ここでスクロール可能にし、下の余白を大幅に増やして設定ボタンを押せるようにする */
         #start-screen { background-image: url('ネオン.jpg'); background-size: cover; background-position: center; background-color: rgba(0,0,0,0.7); background-blend-mode: overlay; justify-content: flex-start; padding-top: 40px; padding-bottom: 150px; overflow-y: auto; }
-        #game-title { margin-bottom: 20px; }
         #cockpit-screen { background: radial-gradient(circle at bottom, #112233, #050505); background-size: cover; border: 4px solid #445566; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); }
-        #gacha-result-display { width: 90%; height: 400px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-y: auto; padding: 10px; scrollbar-width: none; align-content: start; z-index: 600; position: relative; }
-        .gacha-card { background: linear-gradient(135deg, #2a2a2a, #111); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; border: 2px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.8); animation: card-flip 0.5s ease-out forwards; opacity: 0; transform: perspective(400px) rotateY(90deg); }
-        .gacha-card.SSR { border-color: var(--gold); box-shadow: 0 0 15px rgba(255,215,0,0.5); background: linear-gradient(135deg, #443300, #221a00); }
-        .gacha-card.UZ { border-color: var(--uz-color); box-shadow: 0 0 20px rgba(255,0,0,0.6); background: linear-gradient(135deg, #440000, #110000); }
-        .gacha-card.X { border-color: var(--x-color); box-shadow: 0 0 25px rgba(255,255,255,0.8); background: linear-gradient(135deg, #222, #000); animation: card-flip 0.5s ease-out forwards, x-glow 1s infinite alternate; }
-        .gacha-card.OG { border-color: var(--og-color); box-shadow: 0 0 35px var(--og-color); background: linear-gradient(135deg, #303, #101); animation: card-flip 0.5s ease-out forwards, og-glow 0.5s infinite alternate; }
-        .gacha-card.BOSS { border-color: var(--boss-color); box-shadow: 0 0 30px var(--boss-color); background: linear-gradient(135deg, #330000, #110000); }
-        .gacha-card-icon { font-size: 40px; margin-bottom: 5px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
-        .gacha-card-name { font-size: 12px; font-weight: 900; color: #fff; text-align: center; }
-        .gacha-card-rarity { font-size: 10px; font-weight: bold; margin-top: 5px; padding: 2px 8px; border-radius: 10px; background: rgba(0,0,0,0.5); }
-        @keyframes card-flip { to { opacity: 1; transform: perspective(400px) rotateY(0deg); } }
-        
-        #gacha-anim-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 800; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
-        .gacha-egg { font-size: 100px; animation: egg-shake-gacha 0.1s infinite; filter: drop-shadow(0 0 20px #fff); transition: 0.5s; }
-        .gacha-egg.egg-red { filter: drop-shadow(0 0 50px red) hue-rotate(300deg); }
-        .gacha-egg.egg-rainbow { filter: drop-shadow(0 0 80px #ff00ff); animation: egg-shake-gacha 0.05s infinite, ultimate-rainbow 1s infinite linear; }
-        .gacha-egg.egg-ex { background-image: url('草核.png'); background-size: cover; width: 120px; height: 120px; border-radius: 50%; font-size: 0; box-shadow: 0 0 50px var(--ex-green); animation: egg-shake-gacha 0.05s infinite, og-glow 0.5s infinite alternate; }
-        @keyframes egg-shake-gacha { 0% { transform: translate(5px, 5px) rotate(5deg) scale(1.1); } 50% { transform: translate(-5px, -5px) rotate(-5deg) scale(1.1); } 100% { transform: translate(5px, -5px) rotate(0deg) scale(1.1); } }
-        @keyframes x-glow { from { box-shadow: 0 0 20px #fff, 0 0 40px #0ff, inset 0 0 15px #0ff; } to { box-shadow: 0 0 40px #fff, 0 0 80px #f0f, inset 0 0 30px #f0f; } }
-        @keyframes og-glow { from { box-shadow: 0 0 25px var(--og-color); } to { box-shadow: 0 0 50px #fff, 0 0 100px var(--og-color); } }
-        
-        .col-tabs, .gacha-tabs, .mission-tabs { display: flex; width: 95%; gap: 8px; margin-bottom: 12px; }
+        .col-tabs { display: flex; width: 95%; gap: 8px; margin-bottom: 12px; }
         .tab-btn { flex: 1; padding: 12px 5px; font-size: 13px; background: linear-gradient(to bottom, #555, #333); color: white; border: 1px solid #666; border-radius: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0.7; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; overflow: hidden;}
-        .tab-btn::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent); pointer-events: none; }
-        .tab-btn.active { background: linear-gradient(to bottom, var(--blue), #007799); border-color: #fff; opacity: 1; font-weight: bold; box-shadow: 0 0 20px var(--blue), inset 0 0 15px rgba(255,255,255,0.4); transform: translateY(-3px); }
-        .tab-btn.ex-tab.active { background: linear-gradient(to bottom, #00aa55, #005522); border-color: var(--ex-green); box-shadow: 0 0 20px var(--ex-green); }
-        
+        .tab-btn.active { background: linear-gradient(to bottom, var(--blue), #007799); border-color: #fff; opacity: 1; font-weight: bold; box-shadow: 0 0 20px var(--blue); transform: translateY(-3px); }
         .col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 10px; width: 90%; height: 45%; overflow-y: auto; background: linear-gradient(135deg, rgba(25,25,25,0.9), rgba(15,15,15,0.9)); border-radius: 12px; padding: 12px; border: 1px solid #555; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); scrollbar-width: thin; scrollbar-color: var(--blue) #111; align-content: start; }
         .col-card { background: linear-gradient(135deg, #333, #1a1a1a); border: 2px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 5px; height: 90px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; }
         .col-card:active { transform: scale(0.95); }
@@ -122,198 +57,119 @@
         .col-card.owned { border-color: #555; }
         .col-card.equipped-card { border-color: var(--grass-light); box-shadow: 0 0 15px var(--grass-light); background: linear-gradient(135deg, #3a8a00, #113300); }
         .col-card.UZ.owned { border-color: var(--uz-color); box-shadow: 0 0 10px var(--uz-color); }
-        .col-card.X.owned { border-color: var(--x-color); box-shadow: 0 0 15px var(--x-color); animation: x-border 1s infinite; }
+        .col-card.X.owned { border-color: var(--x-color); box-shadow: 0 0 15px var(--x-color); }
         .col-card.OG.owned { border-color: var(--og-color); box-shadow: 0 0 15px var(--og-color); }
         .col-card.BOSS.owned { border-color: var(--boss-color); box-shadow: 0 0 10px var(--boss-color); }
         .col-card-icon { font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); margin-bottom: 5px; }
         .col-card-name { font-size: 9px; font-weight: bold; color: #fff; text-align: center; line-height: 1.2; }
         .col-card-rarity { position: absolute; top: 2px; left: 2px; font-size: 8px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px; border-radius: 3px; color: #ccc; }
-        
         .equip-btn { padding: 8px 16px; border-radius: 20px; border: none; font-size: 12px; font-weight: bold; cursor: pointer; background: linear-gradient(to bottom, #eee, #aaa); color: #111; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 -2px 5px rgba(0,0,0,0.2); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 10; position: relative;}
-        .equip-btn:active { transform: scale(0.9) translateY(2px); box-shadow: 0 1px 3px rgba(0,0,0,0.6), inset 0 2px 5px rgba(0,0,0,0.4); }
-        .equipped { background: linear-gradient(to bottom, var(--grass-light), #3a8a00) !important; color: #000; box-shadow: 0 0 15px var(--grass-light), inset 0 2px 5px rgba(255,255,255,0.5) !important; border: 1px solid #fff; }
-.btn-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 15px;
-    width: 85%;
-}
-        .btn { padding: 14px; font-size: 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; font-weight: 900; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); text-shadow: 1px 1px 3px rgba(0,0,0,0.8); box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3); position: relative; overflow: hidden; z-index: 10; }
-        .btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .btn:hover::after { opacity: 1; }
-        .btn:active { transform: scale(0.92) translateY(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.8), inset 0 3px 8px rgba(0,0,0,0.6); }
-        .btn-start { background: linear-gradient(135deg, var(--gold), #e69900); color: #111; grid-column: span 2; font-size: 24px; box-shadow: 0 0 25px rgba(255,215,0,0.6), inset 0 2px 10px rgba(255,255,255,0.5); border: 2px solid #fff; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
-        .btn-gacha { background: linear-gradient(135deg, #ff4500, #aa0000); color: white; }
+        .equip-btn:active { transform: scale(0.9) translateY(2px); }
+        .equipped { background: linear-gradient(to bottom, var(--grass-light), #3a8a00) !important; color: #000; border: 1px solid #fff; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; width: 85%; }
+        .btn { padding: 14px; font-size: 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; font-weight: 900; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 12px rgba(0,0,0,0.6); position: relative; overflow: hidden; z-index: 10; }
+        .btn:active { transform: scale(0.92) translateY(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .btn-start { background: linear-gradient(135deg, var(--gold), #e69900); color: #111; grid-column: span 2; font-size: 24px; box-shadow: 0 0 25px rgba(255,215,0,0.6); border: 2px solid #fff; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
         .btn-col { background: linear-gradient(135deg, var(--blue), #0044cc); color: white; }
         .btn-evolve { background: linear-gradient(135deg, #9933ff, #4b0082); color: white; font-size: 13px; }
-        .btn-fusion { background: linear-gradient(135deg, #ff00ff, #00ffff); color: white; font-size: 13px; text-shadow: 1px 1px 4px #000; box-shadow: 0 0 20px rgba(255,0,255,0.6); border: 1px solid #fff; animation: bg-scroll 2s linear infinite; background-size: 200% 200%; }
-        .btn-mission { background: linear-gradient(135deg, #00d26a, #006b36); color: white; grid-column: span 1; font-size: 13px; }
-        .btn-profile { background: linear-gradient(135deg, #777, #222); color: white; grid-column: span 1; font-size: 13px; }
+        .btn-fusion { background: linear-gradient(135deg, #ff00ff, #00ffff); color: white; font-size: 13px; box-shadow: 0 0 20px rgba(255,0,255,0.6); border: 1px solid #fff; }
         .btn-settings { background: linear-gradient(135deg, #555, #222); color: white; grid-column: span 2; } 
-        
-        .koto-dama-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 55px; font-weight: 900; font-family: 'Yu Mincho', 'Arial', serif; color: #fff; text-shadow: 0 0 20px #f0f, 0 0 40px #0ff, 0 5px 10px #000; z-index: 1000; pointer-events: none; white-space: nowrap; animation: koto-dama-anim 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes koto-dama-anim { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-10deg); opacity: 0; filter: blur(10px); } 15% { transform: translate(-50%, -50%) scale(1.6) rotate(5deg); opacity: 1; filter: blur(0); } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); } 70% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5) rotate(10deg); opacity: 0; filter: blur(10px); } }
-        
+        .koto-dama-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 55px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #f0f, 0 0 40px #0ff, 0 5px 10px #000; z-index: 1000; pointer-events: none; white-space: nowrap; animation: koto-dama-anim 1.5s forwards; }
+        @keyframes koto-dama-anim { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.6); opacity: 1; } 30% { transform: translate(-50%, -50%) scale(1.2); } 70% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
         #skill-cutin { display:none; position:absolute; z-index:9999; top:0; left:0; width:100%; height:100%; align-items:center; justify-content:center; flex-direction:column; background:rgba(0,0,0,0.4); pointer-events:none; }
         #cutin-bg { width:100%; height:180px; background:linear-gradient(90deg, transparent, rgba(255,0,85,0.8), transparent); display:flex; align-items:center; justify-content:center; flex-direction:column; transform:scaleY(0); transition:0.1s; }
         #cutin-char { font-size:20px; color:white; font-style:italic; font-weight:bold; text-shadow:0 0 10px black; margin-bottom:5px;}
         #cutin-skill { font-size:36px; color:gold; font-weight:900; letter-spacing:5px; text-shadow:0 0 20px red, 0 0 10px white, 2px 2px 0px black; }
-
-        .pop-text { position: absolute; font-weight: 900; font-style: italic; pointer-events: none; animation: pop-up-enhanced 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; z-index: 100; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 8px 10px rgba(0,0,0,0.9); font-size: 26px; letter-spacing: 1px; }
-        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.2) rotate(var(--rot, -10deg)); opacity: 0; filter: drop-shadow(0 0 5px currentColor); } 30% { opacity: 1; transform: translateY(-40px) scale(1.6) rotate(var(--rot, 5deg)); filter: drop-shadow(0 0 15px currentColor); } 50% { transform: translateY(-50px) scale(1.3) rotate(0deg); filter: drop-shadow(0 0 10px currentColor); } 100% { transform: translateY(-110px) scale(1.1); opacity: 0; filter: blur(3px); } }
+        .pop-text { position: absolute; font-weight: 900; font-style: italic; pointer-events: none; animation: pop-up-enhanced 0.7s forwards; z-index: 100; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; font-size: 26px; }
+        @keyframes pop-up-enhanced { 0% { transform: translateY(0) scale(0.2); opacity: 0; } 30% { opacity: 1; transform: translateY(-40px) scale(1.6); } 50% { transform: translateY(-50px) scale(1.3); } 100% { transform: translateY(-110px) scale(1.1); opacity: 0; } }
         .particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 90; box-shadow: 0 0 12px currentColor; }
         @keyframes scatter { 0% { transform: scale(1) translate(0,0); opacity: 1; } 100% { transform: scale(0) translate(var(--dx), var(--dy)) rotate(720deg); opacity: 0; } }
-        .rain-capsule { position: absolute; width: 15px; height: 15px; background: #fff; border-radius: 50%; animation: rain-fall linear forwards; pointer-events: none; z-index: 790; box-shadow: 0 0 10px #fff; }
-        @keyframes rain-fall { 0% { transform: translateY(-50px); opacity: 1; } 100% { transform: translateY(110vh); opacity: 0; } }
-        
-        .light-mode-active .particle, .light-mode-active #fever-fill, .light-mode-active .x-aura, .light-mode-active .glitch-noise, .light-mode-active .ultimate-field-bg, .light-mode-active #game-field.bg-universe::before, .light-mode-active .getsuga { animation: none !important; box-shadow: none !important; }
-
+        .light-mode-active .particle, .light-mode-active #fever-fill, .light-mode-active .x-aura, .light-mode-active .glitch-noise, .light-mode-active .ultimate-field-bg, .light-mode-active .getsuga { animation: none !important; box-shadow: none !important; }
         .bottom-ui { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); position: relative; z-index: 10;}
-        #tsum-icon { width: 80px; height: 80px; border: 4px solid #555; border-radius: 50%; font-size: 42px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #444 0%, #111 100%); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 20px rgba(0,0,0,0.9), inset 0 2px 10px rgba(255,255,255,0.2); cursor: pointer; z-index: 20;}
-        .ready #tsum-icon { border-color: var(--zen-red); animation: pulse-ready 0.4s infinite alternate; box-shadow: 0 0 30px var(--zen-red), inset 0 0 20px var(--zen-red); background: radial-gradient(circle, #600 0%, #200 100%); transform: scale(1.1); }
-        #skill-bar { width: 170px; height: 24px; background: #111; border-radius: 12px; overflow: hidden; border: 2px solid #666; box-shadow: inset 0 3px 6px rgba(0,0,0,0.9), 0 2px 5px rgba(0,0,0,0.5); }
-        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #ff6600, #ff0); background-size: 200% 100%; transition: width 0.1s linear; animation: bg-scroll 1s linear infinite; box-shadow: 0 0 15px #f00, inset 0 2px 5px rgba(255,255,255,0.5); }
+        #tsum-icon { width: 80px; height: 80px; border: 4px solid #555; border-radius: 50%; font-size: 42px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #444 0%, #111 100%); transition: all 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.9); cursor: pointer; z-index: 20;}
+        .ready #tsum-icon { border-color: var(--zen-red); box-shadow: 0 0 30px var(--zen-red); background: radial-gradient(circle, #600 0%, #200 100%); transform: scale(1.1); }
+        #skill-bar { width: 170px; height: 24px; background: #111; border-radius: 12px; overflow: hidden; border: 2px solid #666; }
+        #skill-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f00, #ff6600, #ff0); transition: width 0.1s linear; }
         .item { position: absolute; z-index: 10; cursor: pointer; transition: transform 0.1s; }
-        .plucking { animation: slice-anim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
-        @keyframes slice-anim { 0% { transform: scale(1) rotate(0deg); filter: brightness(1); } 40% { transform: scale(1.7) rotate(20deg); filter: brightness(3) drop-shadow(0 0 25px #fff); } 100% { transform: scale(0) rotate(-25deg); opacity: 0; filter: blur(5px); } }
-        .grass { width: 75px; height: 75px; filter: drop-shadow(0 8px 6px rgba(0,0,0,0.8)); animation: grass-base-sway 3s ease-in-out infinite alternate; }
+        .plucking { animation: slice-anim 0.3s forwards; pointer-events: none; }
+        @keyframes slice-anim { 0% { transform: scale(1) rotate(0deg); filter: brightness(1); } 40% { transform: scale(1.7) rotate(20deg); filter: brightness(3); } 100% { transform: scale(0) rotate(-25deg); opacity: 0; filter: blur(5px); } }
+        .grass { width: 75px; height: 75px; filter: drop-shadow(0 8px 6px rgba(0,0,0,0.8)); animation: grass-base-sway 3s infinite alternate; }
         @keyframes grass-base-sway { 0% { transform: translateY(0); } 100% { transform: translateY(3px); } }
-        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; background: linear-gradient(to top, #0f2b0f, var(--grass-dark)); box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6); }
-        .grass::before { transform: rotate(-35deg); left: 10px; animation: sway-left 2s ease-in-out infinite alternate; transform-origin: bottom center; }
-        .grass::after { transform: rotate(35deg); right: 10px; animation: sway-right 2.2s ease-in-out infinite alternate; transform-origin: bottom center; }
-        .grass-center { position: absolute; width: 30px; height: 60px; border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; background: linear-gradient(to top, var(--grass-dark), var(--grass-light)); box-shadow: inset 2px 2px 6px rgba(255,255,255,0.5), inset -2px -2px 6px rgba(0,0,0,0.6); animation: sway-center 2.5s ease-in-out infinite alternate; transform-origin: bottom center; z-index: 2; }
-        @keyframes sway-left { 0% { transform: rotate(-35deg) skewX(2deg); } 100% { transform: rotate(-30deg) skewX(-2deg); } }
-        @keyframes sway-right { 0% { transform: rotate(35deg) skewX(-2deg); } 100% { transform: rotate(30deg) skewX(2deg); } }
-        @keyframes sway-center { 0% { transform: translateX(-50%) rotate(-3deg); } 100% { transform: translateX(-50%) rotate(3deg); } }
-        .egg { width: 70px; height: 70px; font-size: 55px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 25px rgba(255,255,255,1), 0 0 50px var(--gold); animation: egg-pulse-glow 1s infinite alternate, egg-shake 0.3s ease-in-out infinite alternate; z-index: 15; }
-        @keyframes egg-pulse-glow { from { filter: drop-shadow(0 8px 8px rgba(0,0,0,0.7)) brightness(1); } to { filter: drop-shadow(0 0 25px var(--gold)) drop-shadow(0 0 40px #ff0) brightness(1.3); } }
-        @keyframes egg-shake { 0% { transform: rotate(-15deg) scale(0.95); } 100% { transform: rotate(15deg) scale(1.05); } }
-        @keyframes pulse-ready { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.15); filter: brightness(1.4); } }
-        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,255,255,0.2) 50%, rgba(255,0,255,0.2) 100%); animation: aura-spin 3s linear infinite; mix-blend-mode: screen; }
-        @keyframes aura-spin { from { transform: rotate(0deg) scale(1.5); filter: hue-rotate(0deg); } to { transform: rotate(360deg) scale(1.5); filter: hue-rotate(360deg); } }
-        #profile-info-display { font-size: 15px; color: #fff; margin-top: 5px; background: rgba(255,255,255,0.1); padding: 10px 25px; border-radius: 25px; display: inline-block; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 5px 15px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
-        #profile-info-display span { color: var(--gold); font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); }
-        .mission-item { background: linear-gradient(135deg, #2a2a2a, #111); border: 1px solid #555; border-radius: 12px; margin: 10px 0; padding: 15px; width: 85%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
-        .mission-item.mission-clear { border-color: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.3); background: linear-gradient(135deg, #113311, #001100); }
-        .mission-item.mission-clear::after { content: 'CLEAR!'; position: absolute; right: -20px; top: 10px; background: red; color: white; padding: 5px 30px; transform: rotate(45deg); font-weight: 900; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; pointer-events: none; }
-        .mission-progress { width: 100%; height: 14px; background: #000; border-radius: 7px; overflow: hidden; border: 1px solid #444; box-shadow: inset 0 3px 6px rgba(0,0,0,0.9); }
-        .mission-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #00cc66); transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 15px #00ff88, inset 0 2px 5px rgba(255,255,255,0.5); }
-        .mission-reward-btn { padding: 8px 15px; border-radius: 20px; border: none; font-weight: 900; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.6); z-index: 10; position: relative;}
-        .mission-reward-btn:active { transform: scale(0.9) translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.6); }
-        .can-claim { background: linear-gradient(135deg, var(--gold), #ffaa00); color: #111; animation: pulse-ready 0.5s infinite alternate; border: 1px solid #fff; }
-        .claimed { background: #222; color: #555; cursor: default; box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); border: 1px solid #333;}
-        .mission-reward-btn.can-claim.ex-reward { background: linear-gradient(135deg, var(--ex-green), #00aa55); color: #000; box-shadow: 0 0 15px var(--ex-green); border-color: #fff;}
+        .grass::before, .grass::after { content: ''; position: absolute; width: 25px; height: 45px; border-radius: 50% / 80% 80% 20% 20%; bottom: 5px; pointer-events: none; background: linear-gradient(to top, #0f2b0f, var(--grass-dark)); }
+        .grass::before { transform: rotate(-35deg); left: 10px; }
+        .grass::after { transform: rotate(35deg); right: 10px; }
+        .grass-center { position: absolute; width: 30px; height: 60px; border-radius: 50% / 80% 80% 20% 20%; left: 50%; transform: translateX(-50%); bottom: 10px; pointer-events: none; background: linear-gradient(to top, var(--grass-dark), var(--grass-light)); z-index: 2; }
+        .egg { width: 70px; height: 70px; font-size: 55px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 25px rgba(255,255,255,1), 0 0 50px var(--gold); z-index: 15; }
+        .x-aura { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 400; display: none; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,255,255,0.2) 50%, rgba(255,0,255,0.2) 100%); mix-blend-mode: screen; }
+        #profile-info-display { font-size: 15px; color: #fff; margin-top: 5px; background: rgba(255,255,255,0.1); padding: 10px 25px; border-radius: 25px; display: inline-block; border: 1px solid rgba(255,255,255,0.3); }
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 8px; border: 1px solid #444; }
         .setting-btn { padding: 8px 15px; border-radius: 5px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; transition: 0.2s; font-weight: bold;}
         .setting-btn.active { background: linear-gradient(135deg, var(--gold), #ff8c00); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--gold); transform: scale(1.05);}
         .boss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 95%; margin-top: 15px; overflow-y: auto; max-height: 60vh; padding: 10px; }
         .boss-card { border: 2px solid #555; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 15px rgba(0,0,0,0.8); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; height: 120px; }
         .boss-card:hover { border-color: var(--gold); box-shadow: 0 8px 20px rgba(255,215,0,0.3); transform: translateY(-2px); }
-        .boss-card:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
         .boss-card h3 { margin: 8px 0; font-size: 14px; color: var(--gold); text-shadow: 2px 2px 4px #000, -2px -2px 4px #000; z-index: 2;}
-        .lobby-list-item { background: linear-gradient(90deg, #112233, #001122); border: 1px solid #00d2ff; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .lobby-list-item:hover { box-shadow: 0 0 15px rgba(0,210,255,0.5); transform: translateY(-2px); }
+        .lobby-list-item { background: linear-gradient(90deg, #112233, #001122); border: 1px solid #00d2ff; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .lobby-player-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 10px; margin-bottom: 8px; border-radius: 6px; }
         .lobby-player-row.ready { border-color: #00ff00; box-shadow: inset 0 0 10px rgba(0,255,0,0.3); }
         .cockpit-view { background: radial-gradient(circle at bottom, #001122 0%, #000 100%) !important; border: 4px solid #445566 !important; box-shadow: inset 0 0 100px rgba(0, 255, 255, 0.1) !important; }
-        .cockpit-view::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 1; }
         #arena-boss-image { width: 100%; height: 180px; background-size: cover; background-position: center; border-bottom: 2px solid #00ffff; position: relative; box-shadow: inset 0 -20px 30px rgba(0,0,0,0.8); transition: filter 0.3s; z-index: 2; margin-top: 5px; }
         .boss-hp-bg { width: 90%; height: 24px; background: #111; border: 2px solid #fff; border-radius: 12px; margin: 10px auto; overflow: hidden; position: relative; box-shadow: 0 0 15px #f00, inset 0 3px 6px rgba(0,0,0,0.9); z-index: 2; }
-        .boss-hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5); }
-        .boss-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 13px; font-weight: bold; color: white; line-height: 24px; text-shadow: 1px 1px 3px #000, 0 0 5px #000; }
+        .boss-hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .boss-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 13px; font-weight: bold; color: white; line-height: 24px; text-shadow: 1px 1px 3px #000; }
         #leader-showcase { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 2; width: 100%; margin-top: 10px; }
-        .leader-sprite-large { font-size: 120px; filter: drop-shadow(0 0 25px rgba(0,255,255,0.6)); animation: float-anim 3s infinite ease-in-out; text-shadow: 0 0 20px #000; z-index: 5; }
-        @keyframes float-anim { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
-        .player-status-panel { background: rgba(0,0,0,0.7); border: 2px solid #00d2ff; border-radius: 8px; padding: 10px; color: #fff; width: 80%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,210,255,0.3); margin-top: 10px; }
+        .leader-sprite-large { font-size: 120px; filter: drop-shadow(0 0 25px rgba(0,255,255,0.6)); text-shadow: 0 0 20px #000; z-index: 5; }
+        .player-status-panel { background: rgba(0,0,0,0.7); border: 2px solid #00d2ff; border-radius: 8px; padding: 10px; color: #fff; width: 80%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .player-hp-bar { width: 60%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #555; }
         .player-hp-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #00ffff); transition: width 0.2s; }
-        .cockpit-controls { display: flex; gap: 15px; margin-top: 15px; z-index: 10; }
-        .cockpit-btn { background: linear-gradient(135deg, #112233, #001122); border: 1px solid #00ffff; color: #00ffff; padding: 8px 20px; border-radius: 5px; font-weight: bold; font-family: monospace; box-shadow: 0 0 10px rgba(0,255,255,0.3); cursor: pointer; transition: 0.2s; }
-        .cockpit-btn:active { transform: scale(0.9); box-shadow: 0 0 5px rgba(0,255,255,0.5); }
-        .skill-slot-container { position: absolute; bottom: 10px; width: 95%; display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; background: rgba(0,0,0,0.7); border-top: 2px solid #00d2ff; border-radius: 15px 15px 0 0; z-index: 200; box-shadow: 0 -5px 20px rgba(0,210,255,0.3); scrollbar-width: none; align-items: center; }
+        .skill-slot-container { position: absolute; bottom: 10px; width: 95%; display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; background: rgba(0,0,0,0.7); border-top: 2px solid #00d2ff; border-radius: 15px 15px 0 0; z-index: 200; align-items: center; }
         .star-skill-btn { width: 65px; height: 65px; border-radius: 50%; background: radial-gradient(circle, #333, #111); border: 3px solid #555; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; overflow: hidden; box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
-        .star-skill-btn.ready { border-color: #ffd700; box-shadow: 0 0 20px #ffd700, inset 0 0 10px rgba(255,215,0,0.5); animation: pulse-ready 0.8s infinite alternate; }
-        .star-skill-btn:active { transform: scale(0.9); }
-        .skill-icon-inner { font-size: 30px; z-index: 2; pointer-events: none; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
+        .star-skill-btn.ready { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; }
+        .skill-icon-inner { font-size: 30px; z-index: 2; pointer-events: none; }
         .ct-ring { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; overflow: hidden; z-index: 1; }
         .ct-ring-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: rgba(0,255,255,0.4); transition: height 0.1s linear; }
         .ready .ct-ring-fill { background: rgba(255,215,0,0.4); height: 100% !important; }
-        .skill-name-label { position: absolute; bottom: -18px; width: 100%; text-align: center; font-size: 10px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
+        .skill-name-label { position: absolute; bottom: -18px; width: 100%; text-align: center; font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; }
         .multi-ally-list { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10; width: 80px; }
         .multi-ally-item { background: rgba(0,0,0,0.6); border: 1px solid #555; border-radius: 5px; padding: 3px; font-size: 12px; display: flex; flex-direction: column; align-items: center; }
         .multi-ally-hp { width: 100%; height: 4px; background: #f00; margin-top: 2px; }
         .multi-ally-hp-fill { height: 100%; background: #0f0; }
-        .speed-toggle { position: absolute; top: 12px; left: 12px; background: linear-gradient(to bottom, #fff, #ddd); color: #111; padding: 6px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 150; border: 2px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.6); transition: all 0.2s; }
-        .speed-toggle:active { transform: scale(0.9); }
-        .speed-toggle.active { background: linear-gradient(to bottom, #ff3366, #cc0033); color: #fff; border-color: #fff; animation: glow-boss 0.5s infinite alternate; box-shadow: 0 0 15px #ff0044; }
-        .damage-text, .heal-text, .critical-text, .miss-text { position: absolute; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: dmg-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; z-index: 300; }
-        .damage-text { color: #fff; filter: drop-shadow(0 0 10px #f00); font-size: 34px; }
-        .heal-text { color: #0f0; filter: drop-shadow(0 0 10px #0f0); font-size: 34px; }
-        .critical-text { color: #ffcc00; filter: drop-shadow(0 0 15px #ff0000); font-size: 44px; font-style: italic; }
-        .miss-text { color: #00ffff; filter: drop-shadow(0 0 15px #0088ff); font-size: 34px; animation: miss-pop 0.8s ease-out forwards; }
-        .barrier-effect { position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 3px solid #00ffff; box-shadow: 0 0 30px #00ffff, inset 0 0 30px #00ffff; pointer-events: none; z-index: 150; animation: barrier-flash 0.4s ease-out forwards; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-        .boss-warning { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.4); pointer-events: none; z-index: 150; display: none; animation: flash-warn 0.4s infinite alternate; mix-blend-mode: overlay; }
-        .glitch-noise { filter: grayscale(1) contrast(2) brightness(0.7) sepia(1) hue-rotate(180deg); animation: glitch-skew 0.3s infinite alternate; mix-blend-mode: hard-light; }
-        @keyframes glitch-skew { 0% { transform: skewX(2deg); opacity: 0.8;} 50% { transform: skewX(-5deg) translateY(-2px); opacity: 0.5;} 100% { transform: skewX(3deg) translateY(2px); opacity: 0.9;} }
-        .unknown-boss-text { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:red; font-size:24px; font-weight:900; text-shadow:0 0 10px #000; z-index:5; pointer-events:none; letter-spacing:5px;}
+        .speed-toggle { position: absolute; top: 12px; left: 12px; background: linear-gradient(to bottom, #fff, #ddd); color: #111; padding: 6px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 150; border: 2px solid #333; }
+        .damage-text, .heal-text, .critical-text, .miss-text { position: absolute; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: dmg-pop 0.8s forwards; pointer-events: none; z-index: 300; }
+        .damage-text { color: #fff; font-size: 34px; }
+        .heal-text { color: #0f0; font-size: 34px; }
+        .critical-text { color: #ffcc00; font-size: 44px; font-style: italic; }
+        .miss-text { color: #00ffff; font-size: 34px; }
+        .boss-warning { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.4); pointer-events: none; z-index: 150; display: none; }
+        .glitch-noise { filter: grayscale(1) contrast(2) brightness(0.7) sepia(1) hue-rotate(180deg); mix-blend-mode: hard-light; }
         .cpt-char-item { background: linear-gradient(90deg, #222, #111); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #444; cursor: pointer; transition: 0.2s; }
-        .cpt-char-item.active { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); background: linear-gradient(90deg, #443300, #111); }
+        .cpt-char-item.active { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
         .cpt-char-item.leader { border-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .upgrade-btn { padding: 5px 10px; background: linear-gradient(135deg, #00d2ff, #0044cc); color: white; border: 1px solid #fff; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 11px; z-index:10; position:relative; }
         .upgrade-btn:disabled { background: #555; color: #888; border-color: #444; cursor: not-allowed; }
         .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; border: 1px solid #333; }
-        .boss-list-item { background: linear-gradient(90deg, #331111, #110000); border: 1px solid #ff4444; padding: 10px; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; cursor: pointer; }
-        .boss-list-item:hover { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.5); }   
         #despair-screen { background: #000; z-index: 2000; }
-        .glitch-text { font-size: 60px; color: #ff0000; font-weight: 900; letter-spacing: 5px; position: relative; animation: glitch-anim 0.2s infinite; text-shadow: 2px 0 blue, -2px 0 green; }
-        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-5px, 5px); } 40% { transform: translate(-5px, -5px); } 60% { transform: translate(5px, 5px); } 80% { transform: translate(5px, -5px); } 100% { transform: translate(0); } }
+        .glitch-text { font-size: 60px; color: #ff0000; font-weight: 900; letter-spacing: 5px; position: relative; text-shadow: 2px 0 blue, -2px 0 green; }
         #chest-screen { background: rgba(0,0,0,0.9); z-index: 1500; }
-        .chest-box { font-size: 120px; cursor: pointer; animation: chest-shake 1s infinite alternate; filter: drop-shadow(0 0 30px gold); transition: transform 0.2s; }
-        .chest-box:active { transform: scale(0.9); }
-        @keyframes chest-shake { 0% { transform: rotate(-5deg) scale(1); } 100% { transform: rotate(5deg) scale(1.05); } }
-        #gacha-prob-modal .prob-row { display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0; font-size:12px; }
-        #gacha-prob-modal .prob-row.header { font-weight:bold; color:var(--gold); border-bottom:2px solid var(--gold); }
+        .chest-box { font-size: 120px; cursor: pointer; filter: drop-shadow(0 0 30px gold); transition: transform 0.2s; }
     </style>
 </head>
 <body onload="loadGame()">
-    <div id="skill-cutin">
-        <div id="cutin-bg">
-            <div id="cutin-char"></div>
-            <div id="cutin-skill"></div>
-        </div>
-    </div>
-
+    <div id="skill-cutin"><div id="cutin-bg"><div id="cutin-char"></div><div id="cutin-skill"></div></div></div>
     <div class="header">
         <button onclick="giveUp()" style="background:linear-gradient(to bottom, #666, #444); color:white; border:1px solid #888; padding:8px 12px; font-size:12px; border-radius:6px; font-weight:bold; box-shadow:0 3px 6px rgba(0,0,0,0.6); pointer-events: auto;">リタイア</button>
-        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
-            <img src="草コイン.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--gold);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22gold%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>¥</text></svg>'">
-            <span id="m-val" style="color:var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.5);">0</span>
-        </div>
-        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
-            <img src="草の化石.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--fossil);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22tan%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🦴</text></svg>'">
-            <span id="fossil-val" style="color:var(--fossil); text-shadow: 0 0 8px rgba(210,180,140,0.8);">0</span>
-        </div>
-        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;">
-            <img src="草核.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 8px var(--ex-green);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%2300ff88%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🌿</text></svg>'">
-            <span id="kusakaku-val" style="color:var(--ex-green); text-shadow: 0 0 8px rgba(0,255,136,0.8);">0</span>
-        </div>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;"><img src="草コイン.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--gold);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22gold%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>¥</text></svg>'"><span id="m-val" style="color:var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.5);">0</span></div>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;"><img src="草の化石.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 5px var(--fossil);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22tan%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🦴</text></svg>'"><span id="fossil-val" style="color:var(--fossil); text-shadow: 0 0 8px rgba(210,180,140,0.8);">0</span></div>
+        <div style="font-size:16px; font-weight:900; display:flex; align-items:center; gap:5px;"><img src="草核.png" style="width:24px; height:24px; border-radius:50%; box-shadow: 0 0 8px var(--ex-green);" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%2300ff88%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22>🌿</text></svg>'"><span id="kusakaku-val" style="color:var(--ex-green); text-shadow: 0 0 8px rgba(0,255,136,0.8);">0</span></div>
         <div style="font-size: 20px; font-weight: 900; color: #ffcc00; text-shadow:0 0 10px rgba(255,204,0,0.6);">⏳ <span id="t-val">30.0</span></div>
         <div id="fever-container"><div id="fever-fill"></div></div>
     </div>
 
     <div id="game-field">
         <div id="x-aura-effect" class="x-aura"></div>
-        <div id="gacha-anim-overlay">
-            <div id="gacha-anim-egg" class="gacha-egg">🎁</div>
-        </div>
-
-       <div id="start-screen" class="overlay" style="display: flex; pointer-events: auto;">
-<div class="logo-container">
-    <img src="草抜きサバイバルのロゴ2.png" alt="草抜きサバイバル" id="game-title-img">
-    <div class="sparkle-effect"></div>
-</div>
-            <div id="profile-info-display"><span id="u-name-display">ぜん</span> <br> <small style="color:#ddd;">称号：<span id="u-title-display" style="color:#fff;">なし</span></small></div>
+        <div id="start-screen" class="overlay" style="display: flex; pointer-events: auto;">
+            <div class="logo-container"><img src="ルージュ・ガレオン.png" alt="草抜きサバイバル" id="game-title-img" onerror="this.style.display='none'"></div>
+            <div id="profile-info-display"><span id="u-name-display">ぜん</span></div>
             <p id="passive-info" style="font-size:13px; color:var(--blue); margin-bottom:18px; font-weight:bold; text-shadow:0 0 8px rgba(0,210,255,0.6); background:linear-gradient(90deg, transparent, rgba(0,0,0,0.7), transparent); padding:8px 20px; border-radius:10px;">動く卵に触れたら即終了...</p>
             <div class="btn-group">
                 <button class="btn btn-start" onclick="startGame()">▶ 草を抜く (START)</button>
@@ -321,9 +177,7 @@
                 <button class="btn btn-col" onclick="openLayer('col-screen')">📖 コレクション</button>
                 <button class="btn btn-evolve" onclick="openLayer('evolve-screen')">🧬 進化</button>
                 <button class="btn btn-fusion" onclick="openLayer('fusion-screen')">🌀 合体</button>
-<button class="btn" style="background: linear-gradient(135deg, #139, #242); color: #00ffff; border: 2px solid var(--grass-light); grid-column: span 2;" onclick="location.href='kaizokusetumei.html'">
-    🏴ROUGE GALLEON
-</button>
+                <button class="btn" style="background: linear-gradient(135deg, #139, #242); color: #00ffff; border: 2px solid var(--grass-light); grid-column: span 2;" onclick="location.href='kaizokusetumei.html'">🏴ROUGE GALLEON</button>
                 <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
                 <button class="btn btn-settings" onclick="openLayer('settings-screen')" style="grid-column: span 2; background: #333; border: 1px solid #777;">⚙️ システム設定</button>
             </div>
@@ -334,14 +188,10 @@
             <div style="display:flex; width:95%; height:75%; gap:10px;">
                 <div style="width:45%; background:rgba(0,0,0,0.7); border:2px solid #555; border-radius:10px; overflow-y:auto; padding:10px;" id="cpt-char-list"></div>
                 <div style="width:55%; background:rgba(0,0,0,0.7); border:2px solid var(--gold); border-radius:10px; padding:10px; display:flex; flex-direction:column;">
-                    <div id="cpt-content-train" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding:5px;">
-                        <div id="cpt-char-detail" style="text-align:left;">
-                            <p style="color:#aaa; text-align:center; margin-top:50px;">左からキャラクターを選択してください</p>
-                        </div>
-                    </div>
+                    <div id="cpt-content-train" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding:5px;"><div id="cpt-char-detail" style="text-align:left;"><p style="color:#aaa; text-align:center; margin-top:50px;">左からキャラクターを選択してください</p></div></div>
                 </div>
             </div>
-            <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
+            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
         </div>
 
         <div id="multi-menu-screen" class="overlay">
@@ -358,9 +208,8 @@
             <h2 style="color:#fff; text-shadow:0 0 10px #fff;">討伐対象の選択</h2>
             <div id="create-boss-grid" class="boss-grid" style="height:60%;"></div>
             <button class="btn" onclick="openLayer('multi-menu-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
-
             <div id="multi-difficulty-dialog" style="display:none; flex-direction:column; align-items:center; width:90%; position:absolute; z-index:600; background:rgba(0,0,0,0.95); padding:20px; border-radius:10px; border:2px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3); pointer-events: auto;">
-                <img id="multi-diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;">
+                <img id="multi-diff-boss-img" src="" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:2px solid #f00;" onerror="this.style.display='none'">
                 <h3 id="multi-diff-boss-name" style="color:var(--gold); margin:10px 0; text-shadow: 1px 1px 2px #000;"></h3>
                 <p style="color:#ddd; font-size:12px; margin-bottom:10px;">難易度を選択</p>
                 <div style="display:flex; width:100%; gap:5px; margin-bottom:15px;">
@@ -395,85 +244,6 @@
             </div>
         </div>
 
-        <div id="gacha-prob-modal" class="overlay" style="background:rgba(0,0,0,0.9); z-index:1000; justify-content:center;">
-            <div style="background:#111; border:2px solid var(--gold); border-radius:10px; width:85%; max-height:80%; display:flex; flex-direction:column; padding:15px; box-shadow:0 0 30px rgba(255,215,0,0.3); pointer-events: auto;">
-                <h3 style="color:var(--gold); margin-top:0;">提供割合・ラインナップ</h3>
-                <div id="gacha-prob-content" style="flex-grow:1; overflow-y:auto; text-align:left; padding-right:10px;"></div>
-                <button class="btn" onclick="document.getElementById('gacha-prob-modal').style.display='none'" style="background:#444; color:#fff; margin-top:15px;">閉じる</button>
-            </div>
-        </div>
-
-        <div id="chest-screen" class="overlay">
-            <h2 style="color:lime; font-size:40px; text-shadow:0 0 20px lime;">BOSS CLEARED!</h2>
-            <p style="color:#ddd; font-weight:bold;">宝箱をタップして開けろ！</p>
-            <div class="chest-box" onclick="openChest()">🎁</div>
-        </div>
-
-        <div id="despair-screen" class="overlay">
-            <div class="glitch-text">GAME OVER</div>
-            <p style="color:#888; font-size:12px; margin-top:20px;">生存者がいません...</p>
-        </div>
-
-        <div id="settings-screen" class="overlay">
-            <h2 style="color:#ddd; text-shadow:0 0 15px #fff; font-size: 32px; letter-spacing: 2px;">⚙️ SETTINGS</h2>
-            <div style="width: 85%; max-width: 400px; text-align: left;">
-                <div class="setting-row"><label style="font-weight:bold;">🎵 BGM音量</label><input type="range" id="set-bgm-vol" min="0" max="100" value="50" onchange="updateSettings()" style="width: 120px;"></div>
-                <div class="setting-row"><label style="font-weight:bold;">🔊 SE音量</label><input type="range" id="set-se-vol" min="0" max="100" value="50" onchange="updateSettings()" style="width: 120px;"></div>
-                <div class="setting-row"><label style="font-weight:bold;">✨ エフェクト</label><div><button class="setting-btn" id="eff-0" onclick="setEffect(0)">低</button><button class="setting-btn" id="eff-1" onclick="setEffect(1)">中</button><button class="setting-btn active" id="eff-2" onclick="setEffect(2)">高</button></div></div>
-                <div class="setting-row"><label style="font-weight:bold;">🖼️ テクスチャ</label><div><button class="setting-btn" id="tex-0" onclick="setTexture(0)">低</button><button class="setting-btn" id="tex-1" onclick="setTexture(1)">中</button><button class="setting-btn active" id="tex-2" onclick="setTexture(2)">高</button></div></div>
-                <div class="setting-row"><label style="font-weight:bold;">⚡ 軽量モード</label><div><button class="setting-btn active" id="light-off" onclick="setLightMode(false)">OFF</button><button class="setting-btn" id="light-on" onclick="setLightMode(true)">ON</button></div></div>
-            </div>
-            <p style="font-size:11px; color:#888; margin-top:20px;">※動作が重い場合は、軽量モードをONにするかエフェクトを低くしてください。</p>
-            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:20px;">閉じる</button>
-        </div>
-
-        <div id="boss-arena-screen" class="overlay cockpit-view" style="padding:0; justify-content:flex-start;">
-            <div id="arena-boss-image">
-                <div class="boss-warning" id="boss-warning-overlay"></div>
-                <div class="speed-toggle" id="speed-btn" onclick="toggleSpeed()">⏩ 1倍速</div>
-                <div style="position:absolute; bottom:5px; right:5px; display:flex; flex-direction:column; align-items:flex-end; gap:5px; z-index:100;">
-                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(0,150,0,0.8); color:white;" onclick="useBattleItem('herb')">🌿特やく</button>
-                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(0,100,200,0.8); color:white;" onclick="useBattleItem('drop')">💧しずく</button>
-                    <button class="btn" style="padding:5px 10px; font-size:10px; background:rgba(200,100,0,0.8); color:white;" onclick="useBattleItem('star')">✨蘇生</button>
-                </div>
-            </div>
-            <div style="width:100%; text-align:center; padding:5px 0; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index:2;"><div style="font-size:16px; font-weight:900; color:var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.8);" id="arena-boss-name">ボス名</div></div>
-            <div class="boss-hp-bg"><div class="boss-hp-fill" id="arena-boss-hp-fill"></div><div class="boss-hp-text" id="arena-boss-hp-text">10000 / 10000</div></div>
-            <div id="multi-ally-container" class="multi-ally-list"></div>
-            <div id="leader-showcase">
-                <div id="arena-leader-sprite" class="leader-sprite-large">👤</div>
-                <div class="player-status-panel" id="leader-status-panel">
-                    <div style="font-size:12px; font-weight:bold;">HP</div>
-                    <div class="player-hp-bar"><div class="player-hp-fill" id="leader-hp-fill"></div></div>
-                    <div style="font-size:10px; width:40px; text-align:right;" id="leader-hp-text">1000</div>
-                </div>
-            </div>
-            <div id="skill-dock" class="skill-slot-container"></div>
-        </div>
-
-        <div id="profile-screen" class="overlay">
-            <h2 style="color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.6); font-size: 30px;">👤 プロフィール</h2>
-            <div class="profile-input-group" style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #555;">
-                <label style="font-weight:bold;">名前の変更</label><br>
-                <input type="text" id="name-input" maxlength="10" placeholder="なまえを入力" onchange="updateName(this.value)" style="padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-top: 5px; background: #222; color: #fff; text-align: center;">
-            </div>
-            <div style="width:100%; height:50%; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top: 10px;">
-                <label style="font-size:14px; color:#ddd; margin-bottom:10px; font-weight:bold; text-shadow: 1px 1px 2px #000;">称号の選択</label>
-                <div id="title-list" style="width:90%; padding-bottom: 20px; display:flex; flex-direction:column; gap:10px;"></div>
-            </div>
-            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
-        </div>
-
-        <div id="mission-screen" class="overlay">
-            <h2 style="color:#00ff88; text-shadow:0 0 20px rgba(0,255,136,0.6); font-size: 28px; margin-top:10px;">銀河の指令ボード</h2>
-            <div class="mission-tabs">
-                <button class="tab-btn active" id="tab-mission-def" onclick="setMissionTab('DEFAULT')">通常任務</button>
-                <button class="tab-btn ex-tab" id="tab-mission-ex" onclick="setMissionTab('EX')">EX 任務</button>
-            </div>
-            <div id="mission-list" style="width: 100%; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 60%; padding-top: 10px; padding-bottom: 20px;"></div>
-            <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px; margin-top:15px;">戻る</button>
-        </div>
-
         <div id="fusion-screen" class="overlay">
             <h2 style="color:cyan; text-shadow: 0 0 25px cyan, 0 0 50px #00d2ff; font-size:32px;">🌀 キャラクター合体</h2>
             <div style="background:linear-gradient(135deg, rgba(30,30,30,0.95), rgba(15,15,15,0.95)); padding:25px; border-radius:15px; width:85%; font-size:14px; border:1px solid #00d2ff; box-shadow:0 0 30px rgba(0,210,255,0.3), inset 0 0 30px rgba(0,0,0,0.9);">
@@ -504,41 +274,9 @@
             <button class="btn" onclick="openLayer('start-screen')" style="background:linear-gradient(135deg, #666, #444); width:140px;">戻る</button>
         </div>
 
-        <!-- 🎰 ガチャ画面 -->
-<div id="gacha-screen" class="overlay">
-    <h2 style="color:var(--gold); font-size:32px; margin-top:10px;">SUMMON</h2>
-    <div class="gacha-tabs">
-        <button class="tab-btn active" id="gacha-tab-default" onclick="setGachaTab('DEFAULT')">通常 ガチャ</button>
-        <button class="tab-btn ex-tab" id="gacha-tab-ex" onclick="setGachaTab('EX')">EX ガチャ</button>
-    </div>
-    
-    <div id="gacha-result-display" style="display:none; height: 300px; overflow-y: auto;"></div>
-    
-    <div id="gacha-controls" style="display:flex; flex-direction:column; align-items:center; width:100%; z-index:100; position:relative;">
-        <div id="gacha-currency-display" style="font-size:16px; margin-bottom:5px; font-weight:bold; background:rgba(0,0,0,0.6); padding:10px 20px; border-radius:20px; border:1px solid #555;">
-            <img src="草コイン.png" style="width:24px; vertical-align:middle;"> 所持金: <span style="color:gold;">0</span>
-        </div>
-        <div id="gacha-prob-display" style="font-size:11px; color:#aaa; margin-bottom:10px;">SSR: 1% / SR: 20% / R: 79%</div>
-        <button class="btn" onclick="openGachaProb()" style="background:transparent; border:1px solid #00d2ff; color:#00d2ff; padding:5px 15px; font-size:12px; margin-bottom:15px; border-radius:15px;">提供割合を確認</button>
-
-        <div style="display:flex; flex-direction:column; gap:12px; width: 280px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.3);">
-            <button class="btn btn-gacha" id="gacha-btn-1" onclick="runGacha(1)">1回 (1K円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-10" onclick="runGacha(10)" style="background:linear-gradient(135deg, #ff8c00, #e65c00);">10連 (10K円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-100" onclick="runGacha(100)" style="background:linear-gradient(135deg, #800080, #4d004d);">100連 (100K円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-1000" onclick="runGacha(1000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1000連 (1M円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-10000" onclick="runGacha(10000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1万連 (10M円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-100000" onclick="runGacha(100000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">10万連 (100M円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-1000000" onclick="runGacha(1000000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">100万連 (1B円)</button>
-            <button class="btn btn-gacha" id="gacha-btn-10000000" onclick="runGacha(10000000)" style="background:linear-gradient(135deg, #4b0082, #29004d); border: 2px solid var(--gold);">1000万連 (10B円)</button>
-        </div>
-    </div>
-            <button class="btn" id="gacha-back-btn" onclick="closeGachaResult()" style="margin-top:20px; background:linear-gradient(135deg, #666, #444); width:140px; z-index:900; position:relative;">戻る</button>
-        </div>
-
         <div id="col-screen" class="overlay">
             <h2 style="text-shadow:0 0 20px rgba(255,255,255,0.6); letter-spacing:3px; font-size: 28px;">COLLECTION</h2>
             <div class="bonus-info" id="collection-bonus-display" style="color: var(--gold); font-weight:bold; margin-bottom:5px;"></div>
-            
             <div class="col-tabs" style="margin-bottom: 5px;">
                 <button class="tab-btn active" id="tab-char" onclick="setTab('char')">キャラ</button>
                 <button class="tab-btn" id="tab-bg" onclick="setTab('bg')">背景</button>
@@ -556,9 +294,7 @@
         <div id="end-screen" class="overlay">
             <h2 id="end-title" style="color:#ff3333; font-size:54px; text-shadow: 0 0 35px #ff0000, 0 8px 15px rgba(0,0,0,0.9); margin-bottom:15px; font-weight: 900;">TIME UP</h2>
             <p style="font-size:20px; font-weight:900; margin-top:25px; text-shadow: 1px 1px 3px #000;">最終金額</p>
-            <div style="font-size:38px; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.8); font-weight:bold;">
-                <img src="草コイン.png" style="width:40px; vertical-align:middle;"> <span id="res-money">0</span>
-            </div>
+            <div style="font-size:38px; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.8); font-weight:bold;"><img src="草コイン.png" style="width:40px; vertical-align:middle;"> <span id="res-money">0</span></div>
             <button class="btn btn-start" onclick="openLayer('start-screen')" style="width:260px; margin-top:40px;">拠点に戻る</button>
         </div>
 
@@ -623,11 +359,10 @@
         let money = 2000n, fossilCount = 0, kusakakuCount = 0;
         let gameSettings = { bgmVol: 50, seVol: 50, effectLevel: 2, textureLevel: 2, lightMode: false };
         let timeLeft = 30.0, isPlaying = false, skillCount = 0;
-        let currentTab = 'char', currentColCharTab = 'DEFAULT', currentGachaTab = 'DEFAULT', currentMissionTab = 'DEFAULT';
+        let currentTab = 'char', currentColCharTab = 'DEFAULT';
         let feverPoints = 0, isFever = false, isSkillActive = false;
-        let missions = [], exMissions = [], missionStats = { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 }, lastMissionDate = "";
         let isGoldenDomain = false, goldenDomainTimer = null;
-        let userName = "ぜん", currentTitle = "なし";
+        let userName = "主人公";
         let fuseSelection = [null, null], currentFuseSlot = 1;
         let defeatedBosses = [], todayBossBonusDate = "";
         let currentCptTab = 'train', selectedCptCharId = null, leaderId = 'c20', charLevels = {}; 
@@ -638,154 +373,94 @@
         let arenaSkills = []; 
         let currentPlayRateMultiplier = 1;
 
-        const titles = [
-            { name: "草抜き初心者", cond: "所持金が1,000円を超える", check: () => money > 1000n },
-            { name: "草抜き中級者", cond: "所持金が10万を超える", check: () => money > 100000n },
-        　  { name: "草抜き上級者", cond: "所持金が1億円を超える", check: () => money > 100000000n },
-            { name: "草抜き職人", cond: "所持金が100億円を超える", check: () => money > 10000000000n },
-            { name: "草抜き師", cond: "所持金が1兆円を超える", check: () => money > 1000000000000n },
-            { name: "伝説の草抜き師", cond: "所持金が100兆円を超える", check: () => money > 100000000000000n },
-            { name: "古のCEO", cond: "所持金が9999兆円を超える", check: () => money > 9999000000000000n },
-    　      { name: "ガチャ初心者", cond: "累計1回ガチャを回す", check: () => missionStats.gachaed >= 1 },
-            { name: "ガチャ中級者", cond: "累計100回ガチャを回す", check: () => missionStats.gachaed >= 100 },
-            { name: "ガチャ上級者", cond: "累計1万回ガチャを回す", check: () => missionStats.gachaed >= 10000 },
-            { name: "ガチャマスター", cond: "累計100万回ガチャを回す", check: () => missionStats.gachaed >= 1000000 },
-            { name: "ガチャ廃人", cond: "累計1億回ガチャを回す", check: () => missionStats.gachaed >= 100000000 },
-            { name: "化石発掘者", cond: "草の化石を手に入れる", check: () => fossilCount > 0 },
-            { name: "草核の共鳴", cond: "草核を手に入れる", check: () => kusakakuCount > 0 },
-            { name: "ZENの友達", cond: "キャラを15種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 15 },
-            { name: "ZENの親友", cond: "キャラを30種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 30 },
-            { name: "ZENの大親友", cond: "キャラを50種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 50 },
-            { name: "ZENの相棒", cond: "キャラを75種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 75 },
-            { name: "ZENの理解者", cond: "キャラを100種類集める", check: () => items.filter(i => i.type==='char' && i.owned).length >= 100 },
-            { name: "初心者", cond: "SRキャラを所持する", check: () => items.some(i=>i.rarity==='SR' && i.owned) },
-            { name: "中級者", cond: "SSRキャラを所持する", check: () => items.some(i=>i.rarity==='SSR' && i.owned) },
-    　　    { name: "神の領域", cond: "UZキャラを所持する", check: () => items.some(i=>i.rarity==='UZ' && i.owned) },
-         　 { name: "合体の神", cond: "Xキャラを所持する", check: () => items.some(i=>i.rarity==='X' && i.owned) },
-            { name: "管理者", cond: "OGキャラを所持する", check: () => items.some(i=>i.rarity==='OG' && i.owned) },
-            { name: "王", cond: "BOSSキャラを所持する", check: () => items.some(i=>i.rarity==='BOSS' && i.owned) },
-            { name: "世界の覇者", cond: "OMEGAキャラを所持する", check: () => items.some(i=>i.rarity==='OMEGA' && i.owned) },
-            { name: "世界の創生者", cond: "GODキャラを所持する", check: () => items.some(i=>i.rarity==='GOD' && i.owned) }
-        ];
-
         const items = [
-            { id: 'Adomin', type: 'char', name: 'Adomin', icon: '👑', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: "9999999999999999999999999999999999999999999999", hp: "9999999999999",      // ボス戦の体力
-    bossDmg: "99999999999999999", // ボスへのダメージ
-    speed: 99999,           // 攻撃スピード
-},
-            { id: 'kazusan', type: 'char', name: 'ギャンブラーカズキング', icon: '🎰', owned: false, rarity: 'OMEGA', info: '777', rate: 92.8, isEvolved: true, },
-            { id: 'seimarotuyoi', type: 'char', name: '創世神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OMEGA', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 100, isEvolved: true, },
-            { id: 'kaguya_ssr', type: 'char', name: 'かぐや', icon: '🌙', rarity: 'SSR', isEX: true, info: 'スキル: 私はわたしのことが好き。', rate: 16.8, skillName: '私はわたしのことが好き。' },
-            { id: 'yachiyo_uz', type: 'char', name: 'やちよ', icon: '🥞', rarity: 'UZ', isEX: true, isEvolved: true, info: 'スキル: Remember', rate: 80.00, skillName: 'Remember' },
-            { id: 'irohasakayori', type: 'char', name: 'いろは', icon: '🦊', rarity: 'OG', isEX: true, isEvolved: true, info: 'スキル: reply', rate: 168, skillName: 'reply' },
-            { id: 'sei_god', type: 'char', name: '究極膳神せいまろ', icon: '⚡🐕', owned: false, rarity: 'OG', info: '卵抜きで5秒間金75倍/雷霆蒼破', rate: 35, isEvolved: true, },
-    　      { id: 'tuyoban', type: 'char', name: 'ギガントバーン', icon: '🏐', owned: false, rarity: 'OG', info: '強すぎる', rate: 50, isEvolved: true, },
-            { id: 'vector_kinguini', type: 'char', name: 'ベクター・キンギーニ', icon: '🌌', owned: false, rarity: 'OG', info: '全技から卵排除/月牙天衝', rate: 40, isEvolved: true, },
-            { id: 'ket_og', type: 'char', name: '不滅のケチャップ', icon: '🍅', rarity: 'OG', mult: 1000, cost: 0, owned: false, rate: 25, },
-            { id: 'deus_ex', type: 'char', name: '⭐ゴッド👑キング⭐', icon: '⭐', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: 100, },
-            { id: 'fusion_zen_kazu', type: 'char', name: 'アルティメット・カズキング・ZEN', icon: '☯️', owned: false, rarity: 'X', info: '合体：金20倍/卵抜き/huh卵消去/必殺即チャージ', rate: 20, isEvolved: true, },
-            { id: 'c_rampage_venom', type: 'char', name: 'ランペイジ・イット(ヴェノム)', icon: '☣️', owned: false, rarity: 'UZ', info: '進化：金15倍/全スキル自動発動', rate: 15, isEvolved: true, },
-            { id: 'ket_x', type: 'char', name: '究極ケチャップ', icon: '⑨', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 30, },
-            { id: 'sei_cook', type: 'char', name: 'キングオブクッキングせいまろ', icon: '🍳', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 30, },
-            { id: 'sei_dragon', type: 'char', name: '紅蓮犬・せいまろ', icon: '🐉', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 25, },
-            { id: 'ket_royal_k', type: 'char', name: 'アルティメット・カズケチャ', icon: '🎮', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 28, },
-            { id: 'zen_omelette', type: 'char', name: '緋色のオムレツZEN', icon: '🥚', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 23, info: '卵抜きで倍率半減/なぞり消し' },
-            { id: 'ham_pork', type: 'char', name: '緋色のロイヤル・ポーク', icon: '🐷', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 25, info: '卵で5秒間倍率UP/なぞり消しで一掃' },
-            { id: 'ven_kazu', type: 'char', name: 'ランペイジカズキング（ヴェノム）', icon: '👑', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 20, },
-            { id: 'ven_seimaro', type: 'char', name: 'ランペイジせいまろ', icon: '☣️', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 22, },
-            { id: 'ven_ket', type: 'char', name: 'ブラッドケチャップ（ヴェノム）', icon: '🩸', rarity: 'X', mult: 100, cost: 0, owned: false, rate: 20, },
-            { id: 'c_scarlet_ham_uz', type: 'char', name: '緋色の金権覇王：ハム', icon: '🐹🔥', owned: false, rarity: 'UZ', info: '進化：金15倍/なぞり消し/全画面一掃', rate: 15, isEvolved: true, },
-            { id: 'ev_kazu_ultimate', type: 'char', name: 'ゴッドネスカズキングタイジュウフエターネキンギーニ', icon: '🌌', owned: false, rarity: 'UZ', info: '進化：金15倍/全スキル自動発動/不死身', rate: 15, isEvolved: true, },
-            { id: 'huhto2', type: 'char', name: 'BIGhuh翔', icon: '🐈', owned: false, rarity: 'UZ', info: '限定：卵抜きOK/金15倍/huh強化/必殺超速', rate: 15, isEvolved: true},
-    　      { id: 'taka1', type: 'char', name: 'デカタカキング', icon: '㌀', owned: false, rarity: 'UZ', info: '金15倍/マジでイケメン', rate: 15 },
-            { id: 'c1_ultimate', type: 'char', name: 'マキシマムZEN', icon: '👹', owned: false, rarity: 'UZ', info: '進化：金15倍/卵無効', rate: 15, isEvolved: true },
-            { id: 'c13_ultimate', type: 'char', name: '大泥棒ぜん', icon: '💰', owned: false, rarity: 'UZ', info: '進化：金10倍/卵で+1000円', rate: 10, isEvolved: true },
-            { id: 'c7_ultimate', type: 'char', name: '精霊ぜん', icon: '👼', owned: false, rarity: 'UZ', info: '進化：金10倍/卵無効', rate: 10, isEvolved: true },
-            { id: 'c2_ultimate', type: 'char', name: '億万長者ぜん', icon: '🏢', owned: false, rarity: 'UZ', info: '進化：金10倍', rate: 10, isEvolved: true },
-            { id: 'c_seimaro_uz', type: 'char', name: 'ゴッドネスせいまろ', icon: '⚡🐕', owned: false, rarity: 'UZ', info: '進化：金15倍/卵で5秒30倍/雷霆蒼破', rate: 15, isEvolved: true },
-            { id: 'ket_uz', type: 'char', name: '伝説のケチャップ', icon: '✨', rarity: 'UZ', owned: false, rate: 15 },
-            { id: 'c_scarlet_ham', type: 'char', name: '緋色の金権覇者：ハム', icon: '🐹👑', owned: false, rarity: 'SSR', info: '金10倍/必殺：画面の草と卵を一掃', rate: 10, },
-            { id: 'ev_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '👑', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金10倍/huh強化/必殺超速', rate: 10, },
-            { id: 'hahto', type: 'char', name: 'huh翔', icon: '🐈', owned: false, rarity: 'SSR', info: '限定：卵抜きOK/金10倍/huh強化/必殺超速', rate: 10, },
-            { id: 'c_seimaro', type: 'char', name: 'せいまろ', icon: '🐕‍🦺', owned: false, rarity: 'SSR', info: '金10倍/卵で5秒100倍/huhで雷', rate: 10 },
-            { id: 'c1', type: 'char', name: '覚醒ぜん', icon: '🔥', owned: false, rarity: 'SSR', info: '金10倍/卵を抜けるが倍率半減', rate: 10 },
-            { id: 'taka', type: 'char', name: 'タカキング', icon: '㌀', owned: false, rarity: 'SSR', info: '金10倍/イケメン', rate: 10 },
-            { id: 'c13', type: 'char', name: '泥棒ぜん', icon: '👤', owned: false, rarity: 'SSR', info: '金5倍/卵で+100円', rate: 5 },
-            { id: 'c7', type: 'char', name: '幽霊ぜん', icon: '👻', owned: false, rarity: 'SSR', info: '金5倍/卵無効', rate: 5 },
-            { id: 'c2', type: 'char', name: '大富豪ぜん', icon: '💎', owned: false, rarity: 'SSR', info: '金5倍', rate: 5 },
-            { id: 'c_dragon', type: 'char', name: '龍神ぜん', icon: '🐉', image: '龍神ぜん.png', owned: false, rarity: 'SSR', info: '金5倍/必殺短縮', rate: 5 },
-            { id: 'c_mech', type: 'char', name: '機甲ぜんTYPE-Z', icon: '🤖', image: '機甲ぜんTYPE-Z.png', owned: false, rarity: 'SSR', info: '金5倍/huh強化', rate: 5 },
-            { id: 'c_dark', type: 'char', name: 'ダークネスぜん', icon: '🌑', owned: false, rarity: 'SSR', info: '金5倍/卵反転', rate: 5 },
-            { id: 'c_rampage', type: 'char', name: 'ランペイジイット', icon: '🦖', owned: false, rarity: 'SSR', info: '金10倍/草を抜くほど速度UP', rate: 10 },
-            { id: 'ket_ssr', type: 'char', name: '覚醒ケチャップ', icon: '🔥', rarity: 'SSR', mult: 15, cost: 0, owned: false, rate: 10 },
-            { id: 'ze1', type: 'char', name: 'ウシぜん', icon: '🐄', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze2', type: 'char', name: 'イノシシイット', icon: '🐗', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze3', type: 'char', name: 'ひつじハム', icon: '🐏', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze4', type: 'char', name: 'ヤギカズ', icon: '🐐', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze5', type: 'char', name: 'ラクダぜん', icon: '🐫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze6', type: 'char', name: 'キリンカズ', icon: '🦒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze6', type: 'char', name: 'カバぜん', icon: '🦛', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze7', type: 'char', name: 'ビーバーぜん', icon: '🦫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze8', type: 'char', name: 'ハリネズミぜん', icon: '🦔', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze9', type: 'char', name: 'クマぜん', icon: '🐻', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze10', type: 'char', name: 'シロクマぜん', icon: '🐻‍❄️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze11', type: 'char', name: 'パンダぜん', icon: '🐼', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze12', type: 'char', name: 'カニぜん', icon: '🦀', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze13', type: 'char', name: 'カエルぜん', icon: '🐸', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze14', type: 'char', name: 'ぶどうカズ', icon: '🍇', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze15', type: 'char', name: 'スイカせいまろ', icon: '🍉', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze16', type: 'char', name: 'ココナッツイット', icon: '🥥', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze17', type: 'char', name: 'キウイhuh翔', icon: '🥝', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze18', type: 'char', name: 'ブルーベリーぜん', icon: '🫐', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze19', type: 'char', name: 'チェリーぜん', icon: '🍒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze20', type: 'char', name: 'ピーチハム', icon: '🍑', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze21', type: 'char', name: 'りんごぜん', icon: '🍎', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze22', type: 'char', name: 'マンゴーぜん', icon: '🥭', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze23', type: 'char', name: 'バナナカズ', icon: '🍌', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze24', type: 'char', name: 'みかんぜん', icon: '🍊', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze25', type: 'char', name: 'ペッパーせいまろ', icon: '🌶️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze26', type: 'char', name: 'キノコカズ', icon: '🍄‍', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze27', type: 'char', name: 'チョコせいまろ', icon: '🍫', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze28', type: 'char', name: 'ケーキせいまろ', icon: '🍰', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze29', type: 'char', name: 'クッキーせいまろ', icon: '🍪', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze30', type: 'char', name: 'ドーナツせいまろ', icon: '🍩', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze31', type: 'char', name: 'アイスぜん', icon: '🍦', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze32', type: 'char', name: 'アメカズ', icon: '🍬', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze33', type: 'char', name: 'パズルぜん', icon: '🧩', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze34', type: 'char', name: 'スペードイット', icon: '♠', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze35', type: 'char', name: 'ハートぜん', icon: '♥', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze36', type: 'char', name: 'ダイヤせいまろ', icon: '♦', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze37', type: 'char', name: 'クラブカズ', icon: '♣', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze38', type: 'char', name: 'ウッドぜん', icon: '🪵', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze39', type: 'char', name: 'ストーンイット', icon: '🪨', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze40', type: 'char', name: 'ポリスぜん', icon: '🚔', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze41', type: 'char', name: 'ファイヤーぜん', icon: '🚒', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze42', type: 'char', name: '救急ぜん', icon: '🚑', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze43', type: 'char', name: '爆走ぜん', icon: '🏍️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze44', type: 'char', name: 'ローラーぜん', icon: '🛼', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze45', type: 'char', name: 'チャリぜん', icon: '🚲', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze46', type: 'char', name: 'サングラスぜん', icon: '🕶️', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze47', type: 'char', name: 'メガネカズ', icon: '👓', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze48', type: 'char', name: '歌い手ぜん', icon: '🎤', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze49', type: 'char', name: 'ハッカーぜん', icon: '⌨', image: '.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'ze50', type: 'char', name: 'バッドイット', icon: '🗑️', image: '.png', owned: false, rarity: 'SR', info: '金0.1倍', rate: 0.1 },
-            { id: 'c9', type: 'char', name: '黄金ぜん', icon: '✨', image: '黄金ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'c3', type: 'char', name: '社長ぜん', icon: '💼', image: '社長ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'c4', type: 'char', name: '地主ぜん', icon: '🏰', image: '地主ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'c5', type: 'char', name: '投資家ぜん', icon: '📈', image: '投資家ぜん.png', owned: false, rarity: 'SR', info: '金3倍', rate: 3 },
-            { id: 'sr_shodo', type: 'char', name: '書道家ぜん', icon: '🖌️', image: '書道家ぜん.png', owned: false, rarity: 'SR', info: '金3倍/美しい筆致', rate: 3.0 },
-            { id: 'sr_adv', type: 'char', name: '冒険家ぜん', icon: '🤠', image: '冒険家ぜん.png', owned: false, rarity: 'SR', info: '金3倍/お宝発見', rate: 3.0 },
-            { id: 'sr_guitar', type: 'char', name: 'ギタリストぜん', icon: '🎸', owned: false, rarity: 'SR', info: '金3倍/爆音抜き', rate: 3.0 },
-            { id: 'ket_sr', type: 'char', name: '普通のケチャップ', icon: '👤', rarity: 'SR', mult: 5, cost: 0, owned: false, rate: 3 },
-            { id: 'c6', type: 'char', name: '商人ぜん', icon: '⚖️', image: '商人ぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
-            { id: 'c8', type: 'char', name: '侍ぜん', icon: '⚔️', image: '侍ぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
-            { id: 'r_farm', type: 'char', name: '農家ぜん', icon: '👨‍🌾', image: '農家ぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
-            { id: 'crew_bob', type: 'char', name: 'ボブ', icon: '🧑‍🍳', image: '応援団ぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
-            { id: 'crew_steve', type: 'char', name: 'スティーブ', icon: '📖', image: '普通のぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
+            { id: 'Adomin', type: 'char', name: 'Adomin', icon: '👑', rarity: 'OMEGA', mult: 1200, cost: 0, owned: false, rate: "9999999999999999999999999999999999999999999999", hp: "9999999999999", bossDmg: "99999999999999999", speed: 99999 },
+            { id: 'crew_adomin', type: 'char', name: 'Adomin', icon: '🐾', owned: false, rarity: 'OG', info: '雷霆蒼破', rate: 100, isEvolved: true },
+            { id: 'crew_kazu', type: 'char', name: 'カズキングタイジュウフエターネキンギーニ', icon: '🍕', owned: false, rarity: 'UR', info: '月牙天衝', rate: 3, isEvolved: true },
+            { id: 'crew_power', type: 'char', name: '伝説のキャプテン', icon: '👑', rarity: 'UZ', mult: 1200, cost: 0, owned: false, rate: 2 },
+            { id: 'crew_ito', type: 'char', name: 'ランペイジ・イット', icon: '👍', owned: false, rarity: 'UZ', info: '無駄無駄無駄無駄', rate: 3, isEvolved: true },
+            { id: 'crew_ketchup', type: 'char', name: 'ケチャップ', icon: '🍅', rarity: 'UZ', owned: false, rate: 5 },
+            { id: 'crew_zen', type: 'char', name: 'ZEN', icon: '🥚', owned: false, rarity: 'UZ', info: '卵くたばれ', rate: 3, isEvolved: true },
+            { id: 'crew_seimaro', type: 'char', name: 'せいまろ', icon: '🐾', rarity: 'UZ', mult: 100, cost: 0, owned: false, rate: 3 },
+            { id: 'crew_john', type: 'char', name: 'ジョン', icon: '👮', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_jack', type: 'char', name: 'ジャック', icon: '🕵️', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_leon', type: 'char', name: 'レオン', icon: '💂', owned: false, rarity: 'R', info: 'チャンネル', rate: 1.2 },
+            { id: 'crew_luke', type: 'char', name: 'ルーク', icon: '🤵', owned: false, rarity: 'R', info: 'スカイウォーカー', rate: 1.2 },
+            { id: 'crew_bill', type: 'char', name: 'ビル', icon: '👲', owned: false, rarity: 'R', info: 'ド', rate: 1.2 },
+            { id: 'crew_score', type: 'char', name: 'ナビゲーター', icon: '🗺️', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_taka', type: 'char', name: 'タカキング', icon: '㌀', owned: false, rarity: 'UZ', info: '最強', rate: 1.2 },
+            { id: 'crew_tom', type: 'char', name: 'トム', icon: '🧑‍✈️', owned: false, rarity: 'R', info: 'とジェリー', rate: 1.2 },
             { id: 'crew_alex', type: 'char', name: 'アレックス', icon: '🧑‍🔧', rarity: 'R', mult: 1.0, cost: 500, owned: false, rate: 1.2 },
-            { id: 'crew_tom', type: 'char', name: 'トム', icon: '🧑‍✈️', image: '普通のぜん.png', owned: false, rarity: 'R', info: '金1.2倍', rate: 1.2 },
-　　　　{ id: 'crew_none', type: 'char', name: 'ひとりぼっち', icon: '🧑‍🦲', image: '普通のぜん.png', owned: true, rarity: 'BASIC', info: '金1倍', rate: 1 },
-            
+            { id: 'crew_steve', type: 'char', name: 'スティーブ', icon: '📖', owned: false, rarity: 'R', info: 'マ〇クラ！', rate: 1.2 },
+            { id: 'crew_bob', type: 'char', name: 'ボブ', icon: '🧑‍🍳', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_mark', type: 'char', name: 'マーク', icon: '🧑‍🎨', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_speed', type: 'char', name: 'ダッシュマン', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_1', type: 'char', name: 'セナ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_2', type: 'char', name: 'リク', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_3', type: 'char', name: 'ソラ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_4', type: 'char', name: 'リト', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_5', type: 'char', name: 'ソウタ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_6', type: 'char', name: 'ハル', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_7', type: 'char', name: 'ナツ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_8', type: 'char', name: 'アキ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_9', type: 'char', name: 'フユ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_10', type: 'char', name: 'サクナ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_11', type: 'char', name: 'アオイ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_12', type: 'char', name: 'アカイ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_13', type: 'char', name: 'アサヒ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_14', type: 'char', name: 'ユウリ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_15', type: 'char', name: 'レン', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_16', type: 'char', name: 'レオ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_17', type: 'char', name: 'アキラ', icon: '👹', owned: false, rarity: 'R', info: 'やりゃできんじゃん', rate: 1.2 },
+            { id: 'crew_18', type: 'char', name: 'ライ', icon: '👹', owned: false, rarity: 'R', info: '祭りが始まるな', rate: 1.2 },
+            { id: 'crew_19', type: 'char', name: 'ノイ', icon: '👹', owned: false, rarity: 'R', info: '今日もビジュよすぎ', rate: 1.2 },
+            { id: 'crew_20', type: 'char', name: 'フミオ', icon: '👓', owned: false, rarity: 'R', info: '増税増税増税増税', rate: 1.2 },
+            { id: 'crew_21', type: 'char', name: 'シンイチ', icon: '⚽', owned: false, rarity: 'R', info: 'バァロォー！', rate: 1.2 },
+            { id: 'crew_22', type: 'char', name: 'ミッキ', icon: '🐭', owned: false, rarity: 'R', info: 'ハハハハハハハハハハハハ！', rate: 1.2 },
+            { id: 'crew_23', type: 'char', name: 'アカリ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_24', type: 'char', name: 'ユカリ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_25', type: 'char', name: 'クオン', icon: '🔫', owned: false, rarity: 'R', info: '結婚しようよぉぉぉぉぉぉ！！！', rate: 1.2 },
+            { id: 'crew_26', type: 'char', name: 'タクミ', icon: '🏃', owned: false, rarity: 'R', info: 'すごい', rate: 1.2 },
+            { id: 'crew_27', type: 'char', name: 'タクマ', icon: '🏃', owned: false, rarity: 'R', info: 'しゃの', rate: 1.2 },
+            { id: 'crew_28', type: 'char', name: 'フブキ', icon: '🏃', owned: false, rarity: 'R', info: 'コンコンキーツネ', rate: 1.2 },
+            { id: 'crew_29', type: 'char', name: 'いちごラビット', icon: '🏃', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_30', type: 'char', name: 'パインラビット', icon: '🍍', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_31', type: 'char', name: 'メロンラビット', icon: '🍈', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_32', type: 'char', name: 'キウイラビット', icon: '🥝', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_33', type: 'char', name: 'みかんラビット', icon: '🍊', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_34', type: 'char', name: 'ぶどうラビット', icon: '🍇', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_35', type: 'char', name: 'スイカラビット', icon: '🍉', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_36', type: 'char', name: 'レモンラビット', icon: '🍋', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_37', type: 'char', name: 'ライムラビット', icon: '🍋‍🟩', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_38', type: 'char', name: 'バナナラビット', icon: '🍌', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_39', type: 'char', name: 'マンゴーラビット', icon: '🥭', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_40', type: 'char', name: 'リンゴラビット', icon: '🍎', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_41', type: 'char', name: 'ナシラビット', icon: '🍐', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_42', type: 'char', name: 'ももラビット', icon: '🍑', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_43', type: 'char', name: 'チェリーラビット', icon: '🍒', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_44', type: 'char', name: 'ブルーベリーラビット', icon: '🫐', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_45', type: 'char', name: 'ココナッツラビット', icon: '🥥', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_46', type: 'char', name: 'ピーマンラビット', icon: '🫑', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_47', type: 'char', name: 'アボカドラビット', icon: '🥑', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_48', type: 'char', name: 'ナスラビット', icon: '🍆', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_49', type: 'char', name: 'ポテトラビット', icon: '🥔', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_50', type: 'char', name: 'ニンジンラビット', icon: '🥕', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_51', type: 'char', name: 'コーンラビット', icon: '🌽', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_52', type: 'char', name: 'ペッパーラビット', icon: '🌶️', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_53', type: 'char', name: 'キュウリラビット', icon: '🥒', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_54', type: 'char', name: 'ブロッコリーラビット', icon: '🥦', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_55', type: 'char', name: 'たまねぎラビット', icon: '🧅', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_56', type: 'char', name: 'まめラビット', icon: '🫘', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_57', type: 'char', name: 'ピーナッツラビット', icon: '🥜', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_58', type: 'char', name: 'くりラビット', icon: '🌰', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_59', type: 'char', name: 'キノコラビット', icon: '🍄‍🟫', owned: false, rarity: 'R', info: 'すごい！', rate: 1.2 },
+            { id: 'crew_60', type: 'char', name: 'タカシ', icon: '🏃', owned: false, rarity: 'SR', info: 'すごすぎる', rate: 1.5 },
+            { id: 'crew_61', type: 'char', name: 'グリス', icon: '🏃', owned: false, rarity: 'SR', info: '進化を燃やしてぶっ潰す', rate: 1.5 },
+            { id: 'crew_62', type: 'char', name: 'ローグ', icon: '🏃', owned: false, rarity: 'SR', info: '大義のための犠牲となれ', rate: 1.5 },
+            { id: 'crew_63', type: 'char', name: 'シンジ', icon: '🏃', owned: false, rarity: 'SR', info: 'ヱヴァに乗れ', rate: 1.5 },
+            { id: 'crew_64', type: 'char', name: 'ショウヘイ', icon: '🏃', owned: false, rarity: 'SR', info: 'オオタニサァーン！', rate: 1.5 },
+            { id: 'c20', type: 'char', name: 'ひとりぼっち', icon: '🧑‍🦲', owned: true, rarity: 'BASIC', info: '乗組員ひとり', rate: 1 }, 
+
             { id: 'boss_char_0', type: 'char', name: '屍花の主 ラフレシアン', icon: '🌺', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 30, skillName: '捕食' },
             { id: 'boss_char_1', type: 'char', name: '鋼鉄の審判官 ユニット-000', icon: '🤖', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 35, skillName: 'パージ' },
             { id: 'boss_char_2', type: 'char', name: '禁忌の賢者 メルキオール', icon: '🔮', rarity: 'BOSS', mult: 60, cost: 0, owned: false, rate: 40, skillName: '禁呪' },
@@ -833,17 +508,12 @@
         let equipped = { char: items.find(i => i.id === 'c20'), bg: items.find(i => i.id === 'b1'), skill: items.find(i => i.id === 's1'), bgm: items.find(i => i.id === 'bgm1') };
         const charStats = { 'BOSS (LEGEND)':{hp:60000, atk:15000}, 'BOSS':{hp:6000, atk:1500}, 'OG':{hp:3500, atk:850}, 'OMEGA':{hp:3500, atk:850}, 'X':{hp:2800, atk:700}, 'UZ':{hp:2200, atk:550}, 'SSR':{hp:1800, atk:450}, 'SR':{hp:1200, atk:250}, 'R':{hp:1200, atk:250}, 'BASIC':{hp:800, atk:100} };
         const bosses = [
-            { id: 'boss1', name: '屍花の主 ラフレシアン', hp: 3500, atk: 100, img: '屍花の主 ラフレシアン.png', diff: '初級', dropMultiplier: 1 },
-            { id: 'boss2', name: '鋼鉄の審判官 ユニット-000', hp: 5000, atk: 250, img: '鋼鉄の審判官 ユニット-000.png', diff: '中級', dropMultiplier: 2 },
-            { id: 'boss3', name: '禁忌の賢者 メルキオール', hp: 7500, atk: 350, img: '禁忌の賢者 メルキオール.png', diff: '上級', dropMultiplier: 3 },
+            { id: 'boss1', name: '屍花の主 ラフレシアン', hp: 1500, atk: 100, img: '屍花の主 ラフレシアン.png', diff: '初級', dropMultiplier: 1 },
+            { id: 'boss2', name: '鋼鉄の審判官 ユニット-000', hp: 3500, atk: 250, img: '鋼鉄の審判官 ユニット-000.png', diff: '中級', dropMultiplier: 2 },
+            { id: 'boss3', name: '禁忌の賢者 メルキオール', hp: 5000, atk: 350, img: '禁忌の賢者 メルキオール.png', diff: '上級', dropMultiplier: 3 },
             { id: 'boss4', name: '道化師 ジャック・ザ・リッパー', hp: 8000, atk: 450, img: '狂い咲きの道化師 ジャック・ザ・リッパー.png', diff: '鬼級', dropMultiplier: 5 },
             { id: 'boss5', name: '破滅の化身 終焉王テラ・ガイア', hp: 10000, atk: 600, img: '破滅の化身 終焉王テラ・ガイア.png', diff: '超鬼級', dropMultiplier: 8 },
             { id: 'boss6', name: '命竜アルバナム', hp: 35000, atk: 2000, img: 'アルバナム.png', diff: '神級', dropMultiplier: 15 },
-            { id: 'boss7', name: 'せいまろ', hp: 25000, atk: 1000, img: 'せいまろ.png', diff: 'イベント級', dropMultiplier: 12 },
-            { id: 'boss8', name: 'カズキングタイジュウフエターネキンギーニ', hp: 35000, atk: 1500, img: 'カズキングタイジュウフエターネキンギーニ.png', diff: 'イベント級', dropMultiplier: 14 },
-            { id: 'boss9', name: 'ランペイジ・イット', hp: 50000, atk: 1800, img: 'ランペイジイット.png', diff: 'イベント級', dropMultiplier: 16 },
-            { id: 'boss10', name: 'いろP（酒寄博士）', hp: 168000000000, atk: 168000, img: 'いろは.jpg', diff: 'イベント級', dropMultiplier: 18 },
-            { id: 'boss11', name: '超せいまろ', hp: 51200000000, atk: 51200, img: 'せいまろ.png', diff: 'イベント級', dropMultiplier: 14 }
         ];
 
         document.addEventListener('click', (e) => {
@@ -856,15 +526,9 @@
 
         function getCollectionBonus() { return items.filter(it => it.type === 'char' && it.owned).length * 0.02; }
         function getCharFinalStats(charId) {
-            // --- ここから追加 ---
-    if (charId === 'Adomin') {
-        return {
-            hp: 9999999,      // ボス戦のHPを9億にする
-            atk: 99999999999, // ボスへのダメージを1000億にする
-            data: items.find(i => i.id === 'Adomin'),
-            level: {atk:0, hp:0, skill:0, dup:0}
-        };
-    }
+            if (charId === 'Adomin') {
+                return { hp: 9999999, atk: 99999999999, data: items.find(i => i.id === 'Adomin'), level: {atk:0, hp:0, skill:0, dup:0} };
+            }
             const charData = items.find(i => i.id === charId) || items.find(i=>i.id==='c20');
             const base = charStats[charData.rarity] || charStats['BASIC'];
             const cl = charLevels[charId] || {atk:0, hp:0, skill:0, dup:0};
@@ -880,25 +544,14 @@
             document.getElementById('m-val').innerText = formatMoney(money);
             document.getElementById('fossil-val').innerText = fossilCount.toLocaleString();
             document.getElementById('kusakaku-val').innerText = kusakakuCount.toLocaleString();
-            if(currentGachaTab === 'DEFAULT') {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle; border-radius:50%;"> 所持金: <span style="color:gold;">${formatMoney(money)}</span>`;
-            } else {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
-            }
             document.getElementById('t-val').innerText = Math.max(0, timeLeft).toFixed(1);
             document.getElementById('fever-fill').style.width = feverPoints + "%";
             if(!isBossBattle) {
                 document.getElementById('skill-fill').style.width = skillCount + "%";
                 document.querySelector('#main-bottom-ui').classList.toggle('ready', skillCount >= 100);
             }
-            document.getElementById('u-name-display').innerText = userName;
-            document.getElementById('u-title-display').innerText = currentTitle;
-            const hasDefClaimable = missions.some(m => !m.claimed && BigInt(missionStats[m.key] || 0) >= m.goal);
-            const hasExClaimable = exMissions.some(m => !m.claimed && BigInt(missionStats[m.key] || 0) >= m.goal);
-            const alertEl = document.getElementById('mission-alert');
-            if(hasExClaimable) { alertEl.style.display = 'inline'; alertEl.style.color = '#00ffff'; alertEl.style.textShadow = '0 0 10px #00ffff'; alertEl.style.animation = 'ultimate-rainbow 1s infinite linear'; } 
-            else if (hasDefClaimable) { alertEl.style.display = 'inline'; alertEl.style.color = '#ff0033'; alertEl.style.textShadow = '0 0 10px #ff0033'; alertEl.style.animation = 'none'; } 
-            else { alertEl.style.display = 'none'; }
+            const nameDisp = document.getElementById('u-name-display');
+            if(nameDisp) nameDisp.innerText = userName;
         }
 
         window.updateSettings = function() {
@@ -984,22 +637,17 @@
             if(id === 'evolve-screen') renderEvolve();
             if(id === 'fusion-screen') renderFusion();
             if(id === 'fuse-select-screen') renderFuseSelect(); 
-            if(id === 'mission-screen') renderMissions();
-            if(id === 'gacha-screen') { document.getElementById('gacha-result-display').style.display = 'none'; document.getElementById('gacha-controls').style.display = 'flex'; setGachaTab(currentGachaTab); }
-            if(id === 'profile-screen') { document.getElementById('name-input').value = userName; renderTitles(); }
             if(id === 'settings-screen') { document.getElementById('set-bgm-vol').value = gameSettings.bgmVol; document.getElementById('set-se-vol').value = gameSettings.seVol; setEffect(gameSettings.effectLevel); setTexture(gameSettings.textureLevel); setLightMode(gameSettings.lightMode); }
             if(id === 'start-screen') {
-                document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info}`;
-const tsumIcon = document.getElementById('tsum-icon');
-if (equipped.char.image) {
-    // 画像がある場合はimgタグを入れる
-    tsumIcon.innerHTML = `<img src="${equipped.char.image}" style="width:100%; height:100%; object-fit:contain;">`;
-    tsumIcon.innerText = ''; // テキスト（絵文字）を消す
-} else {
-    // 画像がない場合は今まで通り絵文字を入れる
-    tsumIcon.innerText = equipped.char.icon;
-    tsumIcon.innerHTML = equipped.char.icon; // 念のため上書き
-}
+                document.getElementById('passive-info').innerText = `${equipped.char.name}: ${equipped.char.info || '効果なし'}`;
+                const tsumIcon = document.getElementById('tsum-icon');
+                if (equipped.char.image) {
+                    tsumIcon.innerHTML = `<img src="${equipped.char.image}" style="width:100%; height:100%; object-fit:contain;" onerror="this.style.display='none'">`;
+                    tsumIcon.innerText = '';
+                } else {
+                    tsumIcon.innerText = equipped.char.icon;
+                    tsumIcon.innerHTML = equipped.char.icon;
+                }
                 document.getElementById('skill-display-name').innerText = equipped.char.id === 'vector_kinguini' ? '月牙天衝' : equipped.skill.name;
                 document.getElementById('main-bottom-ui').style.display = 'flex';
                 isBossBattle = false; clearRoomListeners();
@@ -1300,7 +948,7 @@ if (equipped.char.image) {
                     todayBossBonusDate = today;
                 }
                 
-                fossilCount += fossilDrops; missionStats.bossDefeated = (missionStats.bossDefeated || 0) + 1;
+                fossilCount += fossilDrops; 
             }
             document.getElementById('boss-res-title').innerText = isWin ? "VICTORY" : "GAME OVER"; document.getElementById('boss-res-title').style.color = isWin ? "lime" : "red";
             document.getElementById('boss-res-msg').innerText = isWin ? `${currentBoss.name} を撃破した！` : 'パーティが全滅した...';
@@ -1319,44 +967,6 @@ if (equipped.char.image) {
             saveGame();
         }
         window.closeBossResult = function() { document.getElementById('boss-result-screen').style.display = 'none'; openLayer('multi-menu-screen'); }
-
-        window.updateName = function(val) { if(val.trim() === "") return; userName = val; saveGame(); updateUI(); }
-        window.renderTitles = function() {
-            const list = document.getElementById('title-list'); list.innerHTML = '';
-            titles.forEach(t => {
-                const unlocked = t.check(); const div = document.createElement('div'); div.className = `title-item ${unlocked ? '' : 'locked'}`;
-                div.style = `background: ${unlocked ? 'linear-gradient(90deg, #333, #111)' : '#111'}; border:1px solid #444; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; opacity:${unlocked?1:0.5};`;
-                div.innerHTML = `<div class="title-info" style="text-align:left;"><div class="title-name" style="color:var(--gold); font-weight:bold;">${unlocked ? t.name : '？？？？'}</div><div class="title-cond" style="font-size:11px; color:#aaa;">条件: ${t.cond}</div></div>${unlocked ? `<button class="equip-btn ${currentTitle === t.name ? 'equipped' : ''}" onclick="setTitle('${t.name}')">${currentTitle === t.name ? '使用中' : '変更'}</button>` : '🔒'}`;
-                list.appendChild(div);
-            });
-        }
-        window.setTitle = function(name) { currentTitle = name; renderTitles(); updateUI(); saveGame(); }
-        window.setMissionTab = function(tab) { currentMissionTab = tab; document.getElementById('tab-mission-def').classList.toggle('active', tab === 'DEFAULT'); document.getElementById('tab-mission-ex').classList.toggle('active', tab === 'EX'); renderMissions(); }
-        window.initMissions = function() {
-            const today = new Date().toLocaleDateString();
-            if(lastMissionDate !== today) {
-                lastMissionDate = today; missionStats = { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 };
-                missions = [ { id: 1, title: "草を抜きまくれ", goal: 100n, reward: 50000n, key: "plucked", unit: "本", claimed: false }, { id: 2, title: "ガチャを回せ", goal: 10n, reward: 20000n, key: "gachaed", unit: "回", claimed: false }, { id: 3, title: "今日稼げ", goal: 100000n, reward: 100000n, key: "earned", unit: "円", claimed: false } ];
-                exMissions = [ { id: 101, title: "EX: 草を500本抜く", goal: 500n, reward: 100n, key: "plucked", unit: "本", claimed: false }, { id: 102, title: "EX: ボスを撃破せよ", goal: 1n, reward: 50n, key: "bossDefeated", unit: "回", claimed: false } ];
-                saveGame();
-            }
-        }
-        window.renderMissions = function() {
-            const container = document.getElementById('mission-list'); container.innerHTML = '';
-            const listToRender = currentMissionTab === 'DEFAULT' ? missions : exMissions; const isEx = currentMissionTab === 'EX';
-            listToRender.forEach(m => {
-                let currentVal = parseBigInt(missionStats[m.key]); let numGoal = Number(m.goal); const prog = Math.min(100, (Number(currentVal) / numGoal) * 100); const canClaim = !m.claimed && prog >= 100;
-                const item = document.createElement('div'); item.className = 'mission-item ' + (canClaim ? 'mission-clear' : ''); if(isEx && canClaim) item.style.borderColor = "var(--ex-green)";
-                const iconHTML = isEx ? `<img src="草核.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--ex-green);">` : `<img src="草コイン.png" style="width:40px; border-radius:50%; box-shadow:0 0 10px var(--gold);">`;
-                const rewardHTML = isEx ? `報酬: 草核 × ${m.reward.toLocaleString()}` : `報酬: ${formatMoney(m.reward)}`;
-                item.innerHTML = `<div style="display:flex; width:100%; justify-content:space-between; align-items:center;"><div style="width:15%; text-align:center;">${iconHTML}</div><div style="width:55%; text-align:left; padding-left:10px;"><div style="font-size:14px; font-weight:900; color:#fff;">${m.title}</div><div style="font-size:10px; color:#ccc;">進捗: ${currentVal.toLocaleString()}/${m.goal.toLocaleString()}${m.unit}</div><div class="mission-progress" style="margin-top:5px;"><div class="mission-fill" style="width:${prog}%; ${isEx ? 'background: linear-gradient(90deg, #00ff88, #00ffff); box-shadow: 0 0 15px #00ff88;' : ''}"></div></div></div><div style="width:25%; text-align:right;"><button class="mission-reward-btn ${m.claimed ? 'claimed' : (canClaim ? 'can-claim' : '')} ${isEx && canClaim ? 'ex-reward' : ''}" onclick="${canClaim ? `claimMission(${m.id}, ${isEx})` : ''}" ${m.claimed || !canClaim ? 'disabled' : ''}>${m.claimed ? '受取済' : (canClaim ? '受取る' : '挑戦中')}</button></div></div><div style="font-size:11px; color:${isEx ? 'var(--ex-green)' : 'var(--gold)'}; font-weight:bold; width:100%; text-align:right; margin-top:5px;">${rewardHTML}</div>`;
-                container.appendChild(item);
-            });
-        }
-        window.claimMission = function(id, isEx) {
-            const list = isEx ? exMissions : missions; const m = list.find(x => x.id === id);
-            if(m && !m.claimed) { m.claimed = true; if(isEx) { kusakakuCount += Number(m.reward); showKotoDama(`希少素材 獲得`, 'var(--ex-green)'); } else { money += m.reward; popText("50%", "50%", `REWARD +${formatMoney(m.reward)}!`, "lime"); } renderMissions(); updateUI(); saveGame(); }
-        }
 
         window.openFuseSelect = function(slot) { currentFuseSlot = slot; openLayer('fuse-select-screen'); }
         window.renderFuseSelect = function() {
@@ -1454,155 +1064,9 @@ if (equipped.char.image) {
             showKotoDama("魂 の 進 化", "var(--blue)"); setTimeout(() => openLayer('start-screen'), 1500); saveGame(); updateUI();
         }
 
-        window.setGachaTab = function(tab) {
-            currentGachaTab = tab;
-            document.getElementById('gacha-tab-default').classList.toggle('active', tab === 'DEFAULT');
-            document.getElementById('gacha-tab-ex').classList.toggle('active', tab === 'EX');
-            
-            if(tab === 'DEFAULT') {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草コイン.png" style="width:24px; vertical-align:middle; border-radius:50%;"> 所持金: <span style="color:gold;">${formatMoney(money)}</span>`;
-                document.getElementById('gacha-prob-display').innerText = "SSR: 1% / SR: 20% / R: 79%";
-                document.getElementById('gacha-btn-1').innerText = "1回 (1K円)";
-                document.getElementById('gacha-btn-10').innerText = "10連 (10K円)";
-                document.getElementById('gacha-btn-100').innerText = "100連 (100K万円)";
-                document.getElementById('gacha-btn-1000').innerText = " 1000連 (1M円)";
-                document.getElementById('gacha-btn-10000').innerText = " 1万連 (10M円)";
-                document.getElementById('gacha-btn-100000').innerText = " 10万連 (100M円)";
-                document.getElementById('gacha-btn-1000000').innerText = " 100万連 (1B円)";
-                document.getElementById('gacha-btn-10000000').innerText = " 1000万連 (10B円)";
-            } else {
-                document.getElementById('gacha-currency-display').innerHTML = `<img src="草核.png" style="width:24px; border-radius:50%; vertical-align:middle; box-shadow: 0 0 5px var(--ex-green);"> 草核: <span style="color:var(--ex-green); text-shadow:0 0 5px var(--ex-green);">${kusakakuCount.toLocaleString()}</span>`;
-                document.getElementById('gacha-prob-display').innerText = "かぐや(SSR): 0.01% / SSR通常: 10% / SR: 30% / R: 59%";
-                document.getElementById('gacha-btn-1').innerText = "1回 (1個)";
-                document.getElementById('gacha-btn-10').innerText = "10連 (10個)";
-                document.getElementById('gacha-btn-100').innerText = "100連 (100個)";
-                document.getElementById('gacha-btn-1000').innerText = " 1000連 (1K個)";
-                document.getElementById('gacha-btn-10000').innerText = " 1万連 (10K個)";
-                document.getElementById('gacha-btn-100000').innerText = " 10万連 (100K個)";
-                document.getElementById('gacha-btn-1000000').innerText = " 100万連 (1M個)";
-                document.getElementById('gacha-btn-10000000').innerText = " 1000万連 (10M個)";
-            }
-        }
-
-        window.runGacha = async function(times) {
-            let isEX = currentGachaTab === 'EX';
-            if(isEX) {
-                if(kusakakuCount < times) return alert("草核が足りません！EXミッションで集めよう！");
-                kusakakuCount -= times;
-            } else {
-                const cost = BigInt((times === 1000) ? 1000000 : 1000 * times);
-                if(money < cost) return alert("金欠みたいやわぁ！");
-                money -= cost;
-            }
-            
-            updateUI(); missionStats.gachaed += times;
-            document.getElementById('gacha-controls').style.display = 'none';
-            document.getElementById('gacha-result-display').style.display = 'none';
-            
-            const overlay = document.getElementById('gacha-anim-overlay');
-            overlay.style.display = 'flex';
-            overlay.style.pointerEvents = 'auto';
-            
-            let results = [];
-            let pool = items.filter(it => ((it.type === 'char' && !it.isEvolved) || (it.type === 'skill' && it.id !== 's_muda')) && it.rarity !== 'OG' && it.rarity !== 'OMEGA' && it.rarity !== 'X' && it.rarity !== 'UZ' && !it.rarity.includes('BOSS'));
-            let ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'kaguya_ssr');
-            let srPool = pool.filter(it => it.rarity === 'SR');
-            let rPool = pool.filter(it => it.rarity === 'R' || it.rarity === 'BASIC');
-            let kaguya = items.find(it => it.id === 'kaguya_ssr');
-
-            for(let i=0; i<times; i++) {
-                const r = Math.random() * 100; let pick;
-                if(isEX) {
-                    if(r < 1) pick = kaguya;
-                    else if (r < 11) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-                    else if (r < 41) pick = srPool[Math.floor(Math.random() * srPool.length)];
-                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
-                } else {
-                    if (r < 1) pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-                    else if (r < 21) pick = srPool[Math.floor(Math.random() * srPool.length)];
-                    else pick = rPool[Math.floor(Math.random() * rPool.length)];
-                }
-                if(!pick) pick = items.find(it => it.id === 'c20'); 
-                
-                if(pick.owned && pick.type === 'char') {
-                    if(!charLevels[pick.id]) charLevels[pick.id] = {atk:0, hp:0, skill:0, dup:0};
-                    charLevels[pick.id].dup++;
-                } else { pick.owned = true; }
-                results.push(pick);
-            }
-            
-            const hasSuperRare = results.some(p => p.rarity === 'UZ' || p.rarity === 'X' || p.rarity === 'SSR');
-            const hasOG = results.some(p => p.rarity === 'OG' || p.rarity === 'X');
-            const egg = document.getElementById('gacha-anim-egg');
-            
-            if(isEX) { egg.className = 'gacha-egg egg-ex'; egg.innerText = ''; } 
-            else { egg.className = 'gacha-egg ' + (hasOG ? 'egg-rainbow' : (hasSuperRare ? 'egg-red' : '')); egg.innerText = '🎁'; }
-
-            if(times >= 1000 && gameSettings.effectLevel > 0 && !gameSettings.lightMode) {
-                for(let i=0; i<100; i++) {
-                    setTimeout(() => {
-                        const rain = document.createElement('div'); rain.className = 'rain-capsule'; rain.style.left = Math.random() * 100 + "vw"; rain.style.background = (Math.random() > 0.9) ? "radial-gradient(circle, #fff, #f0f)" : "#ddd";
-                        overlay.appendChild(rain); setTimeout(() => rain.remove(), 1000);
-                    }, i * 15);
-                }
-            }
-            
-            await new Promise(r => setTimeout(r, 2000));
-            if(hasSuperRare && gameSettings.effectLevel >= 1 && !gameSettings.lightMode) { showKotoDama(isEX ? "神 降 臨" : "覚醒", "rainbow"); if(gameSettings.effectLevel === 2) shakeScreen(0.5); await new Promise(r => setTimeout(r, 1000)); }
-
-            overlay.style.display = 'none';
-            overlay.style.pointerEvents = 'none';
-            const display = document.getElementById('gacha-result-display'); display.innerHTML = ''; display.style.display = 'grid';
-
-            results.sort((a,b) => { const score = { 'BOSS (LEGEND)':8, 'BOSS':7, 'OMEGA': 6, 'OG': 5, 'X': 4, 'UZ': 3, 'SSR': 2, 'SR': 1.5, 'R': 1, 'BASIC': 0 }; return (score[b.rarity]||0) - (score[a.rarity]||0); });
-
-            if(times >= 100) {
-                results.slice(0, 50).forEach((p, idx) => {
-                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity.replace(' (LEGEND)','')}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || (p.type==='skill'?'⚡':'🎁')}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${(idx % 10) * 0.05}s`; display.appendChild(l);
-                });
-                const info = document.createElement('div'); info.style="grid-column: span 2; text-align:center; padding: 20px; color:#aaa;"; info.innerText = `...他 ${times - 50} 個獲得`; display.appendChild(info);
-            } else {
-                results.forEach((p, idx) => { 
-                    const l = document.createElement('div'); l.className = `gacha-card ${p.rarity.replace(' (LEGEND)','')}`; l.innerHTML = `<div class="gacha-card-icon">${p.icon || (p.type==='skill'?'⚡':'🎁')}</div><div class="gacha-card-name">${p.name}</div><div class="gacha-card-rarity">${p.rarity}</div>`; l.style.animationDelay = `${idx * 0.1}s`; display.appendChild(l); 
-                });
-            }
-            saveGame(); updateUI();
-        }
-
-        window.closeGachaResult = function() {
-            if(document.getElementById('gacha-result-display').style.display !== 'none') {
-                document.getElementById('gacha-result-display').style.display = 'none';
-                document.getElementById('gacha-controls').style.display = 'flex';
-                setGachaTab(currentGachaTab); 
-            } else {
-                openLayer('start-screen');
-            }
-        }
-        
-        window.openGachaProb = function() {
-            const modal = document.getElementById('gacha-prob-modal');
-            const content = document.getElementById('gacha-prob-content');
-            content.innerHTML = '';
-            let isEX = currentGachaTab === 'EX';
-            let pool = items.filter(it => ((it.type === 'char' && !it.isEvolved) || (it.type === 'skill' && it.id !== 's_muda')) && it.rarity !== 'OG' && it.rarity !== 'OMEGA' && it.rarity !== 'X' && it.rarity !== 'UZ' && !it.rarity.includes('BOSS'));
-            let ssrPool = pool.filter(it => it.rarity === 'SSR' && it.id !== 'kaguya_ssr'); let srPool = pool.filter(it => it.rarity === 'SR'); let rPool = pool.filter(it => it.rarity === 'R' || it.rarity === 'BASIC'); let kaguya = items.find(it => it.id === 'kaguya_ssr');
-            const addRow = (name, rate) => { content.innerHTML += `<div class="prob-row"><span>${name}</span><span>${rate}</span></div>`; };
-            const addHeader = (text) => { content.innerHTML += `<div class="prob-row header" style="margin-top:10px;"><span>${text}</span><span>割合</span></div>`; };
-            if(isEX) {
-                addHeader('SSR (計11.0%)'); addRow(`【EX限定】${kaguya.name}`, '0.01%'); ssrPool.forEach(c => addRow(c.name, (10.0 / ssrPool.length).toFixed(2) + '%'));
-                addHeader('SR (計30.0%)'); srPool.forEach(c => addRow(c.name, (30.0 / srPool.length).toFixed(2) + '%'));
-                addHeader('R (計59.0%)'); rPool.forEach(c => addRow(c.name, (59.0 / rPool.length).toFixed(2) + '%'));
-            } else {
-                addHeader('SSR (計1.0%)'); ssrPool.forEach(c => addRow(c.name, (1.0 / ssrPool.length).toFixed(2) + '%'));
-                addHeader('SR (計20.0%)'); srPool.forEach(c => addRow(c.name, (20.0 / srPool.length).toFixed(2) + '%'));
-                addHeader('R (計79.0%)'); rPool.forEach(c => addRow(c.name, (79.0 / rPool.length).toFixed(2) + '%'));
-            }
-            modal.style.display = 'flex';
-        }
-
         window.setTab = function(tab) { 
             currentTab = tab; 
-            document.querySelectorAll('.tab-btn:not(.ex-tab):not(#gacha-tab-default):not(#cpt-tab-train):not(#cpt-tab-boss)').forEach(b => b.classList.remove('active')); 
+            document.querySelectorAll('.tab-btn:not(.ex-tab):not(#cpt-tab-train):not(#cpt-tab-boss)').forEach(b => b.classList.remove('active')); 
             document.getElementById('tab-' + tab).classList.add('active'); 
             document.getElementById('char-sub-tabs').style.display = tab === 'char' ? 'flex' : 'none';
             renderCol(); 
@@ -1693,11 +1157,10 @@ if (equipped.char.image) {
                     egg.remove();
                 } else if(id === 'c_rampage_venom' || id === 'ven_ket' || id === 'kazusan') { 
                     let randomGain = BigInt(Math.floor(Math.random() * (1000 - 100 + 1)) + 100); 
-                    money += randomGain; missionStats.earned = (parseBigInt(missionStats.earned) + randomGain).toString(); 
-                    popText(egg.style.left, egg.style.top, `+${formatMoney(randomGain)}`, "white"); updateUI(); egg.remove(); 
+                    money += randomGain; popText(egg.style.left, egg.style.top, `+${formatMoney(randomGain)}`, "white"); updateUI(); egg.remove(); 
                 } else if(equipped.char.rarity==='SSR'||equipped.char.rarity==='UZ'||equipped.char.rarity==='X'||equipped.char.rarity==='OG'||equipped.char.rarity.includes('BOSS')) { 
                     let b = (equipped.char.isEvolved || equipped.char.rarity==='X' || equipped.char.rarity==='OG' || equipped.char.rarity.includes('BOSS'))?1000n:0n; 
-                    if(b>0n){ money+=b; missionStats.earned = (parseBigInt(missionStats.earned) + b).toString(); updateUI(); } 
+                    if(b>0n){ money+=b; updateUI(); } 
                     egg.remove(); 
                 } else { endGame("卵だ！"); } 
             }; field.appendChild(egg);
@@ -1712,9 +1175,9 @@ if (equipped.char.image) {
             if (isGoldenDomain && equipped.char.id === 'sei_god') currentRate = 75;
             if (equipped.char.id === 'seimarotuyoi') { if (!eggExists || isVectorEquipped) { isGoldenDomain = true; clearTimeout(goldenDomainTimer); goldenDomainTimer = setTimeout(() => isGoldenDomain = false, 5000); } }
             if (isGoldenDomain && equipped.char.id === 'seimarotuyoi') currentRate = 150;
-            let speedBonus = (equipped.char.id === 'c_rampage') ? (missionStats.plucked % 100) / 100 : 0; let feverMult = (isFever) ? 3 : 1;
+            let speedBonus = 0; let feverMult = (isFever) ? 3 : 1;
             let gain = BigInt(Math.floor(100 * (currentRate + speedBonus) * feverMult * (1+getCollectionBonus()) * currentPlayRateMultiplier));
-            money += gain; missionStats.earned = (parseBigInt(missionStats.earned) + gain).toString(); missionStats.plucked++;
+            money += gain; 
             feverPoints = Math.min(100, feverPoints+7); if(feverPoints>=100 && !isFever) startFever();
             if(gameSettings.effectLevel >= 1 && !gameSettings.lightMode) createParticles(el.style.left, el.style.top); 
             let popMsg = (isSkillActive && equipped.skill.id === 's_muda') ? "無駄" : `+${formatMoney(gain)}`;
@@ -1785,12 +1248,10 @@ if (equipped.char.image) {
         });
 
         window.saveGame = function() { 
-            const missionsToSave = missions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
-            const exMissionsToSave = exMissions.map(m => ({...m, goal: m.goal.toString(), reward: m.reward.toString()}));
             localStorage.setItem('zenSurvival_Final_v30', JSON.stringify({ 
                 money: money.toString(), fossilCount, kusakakuCount, gameSettings, charLevels, leaderId,
                 owned: items.filter(i=>i.owned).map(i=>i.id), eq: {c:equipped.char.id, b:equipped.bg.id, s:equipped.skill.id, bgm:equipped.bgm.id}, 
-                missions: missionsToSave, exMissions: exMissionsToSave, missionStats, lastMissionDate, currentTitle, userName, defeatedBosses, todayBossBonusDate
+                userName, defeatedBosses, todayBossBonusDate
             })); 
             if(window.dbUpdate && window.dbRef && window.db) {
                 const uid = "local_" + userName;
@@ -1800,23 +1261,20 @@ if (equipped.char.image) {
         
         window.loadGame = function() {
             try {
-                let dataStr = localStorage.getItem('zenSurvival_Final_v30') || localStorage.getItem('zenSurvival_Final_v30') || localStorage.getItem('zenSurvival_Final_v30');
+                let dataStr = localStorage.getItem('zenSurvival_Final_v30');
                 let data = dataStr ? JSON.parse(dataStr) : null;
                 if(data) {
                     money = parseBigInt(data.money, 2000n); fossilCount = parseInt(data.fossilCount) || 0; kusakakuCount = parseInt(data.kusakakuCount) || 0;
                     if(data.gameSettings) gameSettings = {...gameSettings, ...data.gameSettings}; if(data.charLevels) charLevels = data.charLevels; if(data.leaderId) leaderId = data.leaderId;
                     if(data.owned) data.owned.forEach(id => { const it=items.find(i=>i.id===id); if(it)it.owned=true; });
                     if(data.eq) { equipped.char=items.find(i=>i.id===data.eq.c)||equipped.char; equipped.bg=items.find(i=>i.id===data.eq.b)||equipped.bg; equipped.skill=items.find(i=>i.id===data.eq.s)||equipped.skill; equipped.bgm=items.find(i=>i.id===data.eq.bgm)||equipped.bgm; }
-                    if (data.missions) missions = data.missions.map(m => ({...m, goal: parseBigInt(m.goal), reward: parseBigInt(m.reward)}));
-                    if (data.exMissions) exMissions = data.exMissions.map(m => ({...m, goal: parseBigInt(m.goal), reward: parseBigInt(m.reward)}));
-                    missionStats = data.missionStats || { plucked: 0, gachaed: 0, earned: "0", bossDefeated: 0 }; 
-                    lastMissionDate = data.lastMissionDate || ""; currentTitle = data.currentTitle || "なし"; userName = data.userName || "ぜん"; 
+                    userName = data.userName || "ぜん"; 
                     defeatedBosses = data.defeatedBosses || []; todayBossBonusDate = data.todayBossBonusDate || "";
                 }
             } catch (e) { console.error(e); }
             document.getElementById('game-field').className = equipped.bg.className;
             items.filter(i=>i.type==='char').forEach(c => { if(!charLevels[c.id]) charLevels[c.id] = {atk:0, hp:0, skill:0, dup:0}; });
-            initMissions(); updateUI(); openLayer('start-screen');
+            updateUI(); openLayer('start-screen');
         }
     </script>
 </body>
