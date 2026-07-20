@@ -28,9 +28,9 @@
         .logo-enhanced { width: 160%; max-width: 500px; max-height: 280px; object-fit: contain; animation: superGiantFloat 4s ease-in-out infinite, metallicShineSuper 5s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
         @keyframes superGiantFloat { 0%, 100% { transform: scale(1.1) translateY(0px) rotate(-2deg); } 50% { transform: scale(1.15) translateY(-15px) rotate(2deg); } }
         @keyframes metallicShineSuper { 0%, 85%, 100% { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) brightness(1); } 90% { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) brightness(1.5) hue-rotate(-10deg); } 95% { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) brightness(1.5) hue-rotate(10deg); } }
-        .giant-title { font-size: 14vw; font-weight: 900; line-height: 1.1; letter-spacing: 0.05em; text-align: center; background: linear-gradient(to bottom, #fffde7 0%, #ffd700 30%, #ff4500 70%, #8b0000 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 0 #b45309, 0 4px 0 #92400e, 0 6px 0 #78350f, 0 8px 0 #451a03, 0 10px 0 #000000, 0 15px 30px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.6); animation: textFloatSuperUltra 3s ease-in-out infinite alternate; }
+        .giant-title { font-size: 14vw; font-weight: 900; line-height: 1.1; letter-spacing: 0.05em; text-align: center; background: linear-gradient(to bottom, #fffde7 0%, #ffd700 30%, #ff4500 70%, #8b0000 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 0 #b45309, 0 4px 0 #92400e, 0 6px 0 #78350f, 0 8px 0 #451a03, 0 10px 0 #000000, 0 15px 30px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.6); animation: textFloatSuperUltra 3s ease-in-out infinite alternate; }
         @keyframes textFloatSuperUltra { from { transform: translateY(0px) scale(1) rotate(-1.5deg); } to { transform: translateY(-10px) scale(1.05) rotate(1.5deg); } }
-        .holy-aura { position: absolute; top: 50%; left: 50%; width: 150vw; height: 150vw; max-width: 800px; max-height: 800px; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,69,0,0.1) 40%, transparent 70%); animation: rotateAura 20s linear infinite; pointer-events: none; z-index: 1; mix-blend-screen: screen; }
+        .holy-aura { position: absolute; top: 50%; left: 50%; width: 150vw; height: 150vw; max-width: 800px; max-height: 800px; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,69,0,0.1) 40%, transparent 70%); animation: rotateAura 20s linear infinite; pointer-events: none; z-index: 1; mix-blend-mode: screen; }
         @keyframes rotateAura { from { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.1); } to { transform: translate(-50%, -50%) rotate(360deg) scale(1); } }
         .screen { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -113,7 +113,7 @@
                         <span>🏆</span> <span>全国RANK</span>
                     </button>
                     <a href="kaizokuparty.html" class="game-btn bg-gradient-to-b from-pink-400 to-pink-600 text-white font-black rounded-full px-3 py-2 border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform hover:scale-110 flex items-center justify-center gap-1 text-xs">
-                        <span>🎰</span> <span>カジノ(近日オープン)</span>
+                        <span>💎</span> <span>パーティー</span>
                     </a>
                 </div>
                 <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
@@ -383,6 +383,40 @@
                         </label>
                         <input type="range" id="se-volume" min="0" max="1" step="0.05" class="w-full accent-pink-400" oninput="updateVolume()">
                     </div>
+<!-- === ここから追加 === -->
+<div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
+    <label class="block text-sm text-cyan-300 font-bold mb-2 flex justify-between items-center">
+        <span>🖼️ グラフィック品質</span>
+    </label>
+    <select id="graphic-quality" class="w-full bg-indigo-900 border border-indigo-700 text-white rounded-lg p-2 font-bold text-xs focus:outline-none focus:border-yellow-400" onchange="updateQualitySettings()">
+        <option value="high">高（快適・美麗）</option>
+        <option value="medium">中（標準）</option>
+        <option value="low">低（軽量化重視）</option>
+    </select>
+</div>
+
+<div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
+    <label class="block text-sm text-purple-300 font-bold mb-2 flex justify-between items-center">
+        <span>⚡ エフェクト品質</span>
+    </label>
+    <select id="effect-quality" class="w-full bg-indigo-900 border border-indigo-700 text-white rounded-lg p-2 font-bold text-xs focus:outline-none focus:border-yellow-400" onchange="updateQualitySettings()">
+        <option value="high">高（フルエフェクト）</option>
+        <option value="medium">中（シンプル）</option>
+        <option value="low">低（なし）</option>
+    </select>
+</div>
+
+<div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner">
+    <label class="block text-sm text-emerald-300 font-bold mb-2 flex justify-between items-center">
+        <span>🎨 テクスチャ品質</span>
+    </label>
+    <select id="texture-quality" class="w-full bg-indigo-900 border border-indigo-700 text-white rounded-lg p-2 font-bold text-xs focus:outline-none focus:border-yellow-400" onchange="updateQualitySettings()">
+        <option value="high">高解像度</option>
+        <option value="medium">中解像度</option>
+        <option value="low">低解像度</option>
+    </select>
+</div>
+<!-- === ここまで追加 === -->
                 </div>
                 <button onclick="closeSettingsModal()" class="game-btn w-full bg-gradient-to-b from-blue-400 to-blue-600 text-white font-black py-3 rounded-xl border-2 border-white shadow-md text-lg mt-4">閉じる</button>
             </div>
@@ -724,10 +758,24 @@ function updateVolume() {
     saveGame();
 }
 function openSettingsModal() {
-    $('bgm-volume').value = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5;
-    $('se-volume').value = DB.seVolume !== undefined ? DB.seVolume : 0.5;
-    $('bgm-vol-disp').innerText = Math.round($('bgm-volume').value * 100) + '%';
-    $('se-vol-disp').innerText = Math.round($('se-volume').value * 100) + '%';
+    // BGM音量
+    if ($('bgm-volume')) {
+        $('bgm-volume').value = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5;
+        if ($('bgm-vol-disp')) $('bgm-vol-disp').innerText = Math.round($('bgm-volume').value * 100) + '%';
+    }
+    
+    // SE音量
+    if ($('se-volume')) {
+        $('se-volume').value = DB.seVolume !== undefined ? DB.seVolume : 0.5;
+        if ($('se-vol-disp')) $('se-vol-disp').innerText = Math.round($('se-volume').value * 100) + '%';
+    }
+
+    // 画質・エフェクト・テクスチャ設定（要素が存在するかチェックして安全にセット）
+    if ($('graphic-quality')) $('graphic-quality').value = DB.graphicQuality || 'high';
+    if ($('effect-quality')) $('effect-quality').value = DB.effectQuality || 'high';
+    if ($('texture-quality')) $('texture-quality').value = DB.textureQuality || 'high';
+
+    // モーダル表示
     showEl('settings-modal');
 }
 function closeSettingsModal() { hideEl('settings-modal'); }
@@ -752,8 +800,53 @@ function getWeeklyString() {
 }
 
 // --- データ定義 ---
-let DB = { userId:'user_001', userName:'新米船長', userIcon:'👤', gachaTickets:0, coins:0, materials:0, itemLevels:{}, pityCounter:0, ownedWeapons:['wp_normal'], ownedSkins:['skin_default'], ownedCrew:['crew_none'], equippedWeapon:'wp_normal', equippedSkin:'skin_default', equippedCrew:'crew_none', clearedStages:0, clearedSeimaroStage:0, tutorialCompleted:false, tutorialGachaCompleted:false, tutorialEquipCompleted:false, lastLoginDate:'', loginStreak:0, lastShareTimestamp:0, stamina:100, lastStaminaUpdateTime:Date.now(), missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, claimedMissions:[], crewStats:{}, lastPlayedRankingWeek:'', lastRankingRewardWeek:'', bgmVolume: 0.5, seVolume: 0.5 };
-const LOGIN_BONUS_MASTER = [ {day:1,type:'coins',amount:500,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:2,type:'materials',amount:2,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:3,type:'tickets',amount:2,label:'草核',icon:'草核.png',fallback:'✨'}, {day:4,type:'coins',amount:1200,label:'草コイン',icon:'草コイン.png',fallback:'💰'}, {day:5,type:'materials',amount:5,label:'草の化石',icon:'草の化石.png',fallback:'🦴'}, {day:6,type:'tickets',amount:3,label:'草核',icon:'草核.png',fallback:'✨'}, {day:7,type:'special',amount:5,coinsBonus:3000,label:'超・船長パック',icon:'草核.png',fallback:'👑'} ];
+let DB = { 
+    userId:'user_001', 
+    userName:'新米船長', 
+    userIcon:'👤', 
+    gachaTickets:0, 
+    coins:0, 
+    materials:0, 
+    itemLevels:{}, 
+    pityCounter:0, 
+    ownedWeapons:['wp_normal'], 
+    ownedSkins:['skin_default'], 
+    ownedCrew:['crew_none'], 
+    equippedWeapon:'wp_normal', 
+    equippedSkin:'skin_default', 
+    equippedCrew:'crew_none', 
+    clearedStages:0, 
+    clearedSeimaroStage:0, 
+    tutorialCompleted:false, 
+    tutorialGachaCompleted:false, 
+    tutorialEquipCompleted:false, 
+    lastLoginDate:'', 
+    loginStreak:0, 
+    lastShareTimestamp:0, 
+    stamina:100, 
+    lastStaminaUpdateTime:Date.now(), 
+    missionProgress:{defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0}, 
+    claimedMissions:[], 
+    crewStats:{}, 
+    lastPlayedRankingWeek:'', 
+    lastRankingRewardWeek:'', 
+    bgmVolume: 0.5, 
+    seVolume: 0.5,
+    graphicQuality: 'high',
+    effectQuality: 'high',
+    textureQuality: 'high'
+};
+
+const LOGIN_BONUS_DATA = [
+    {day:1,type:'coins',amount:500,label:'草コイン',icon:'草コイン.png',fallback:'💰'},
+    {day:2,type:'materials',amount:2,label:'草の化石',icon:'草の化石.png',fallback:'🦴'},
+    {day:3,type:'tickets',amount:2,label:'草核',icon:'草核.png',fallback:'✨'},
+    {day:4,type:'coins',amount:1200,label:'草コイン',icon:'草コイン.png',fallback:'💰'},
+    {day:5,type:'materials',amount:5,label:'草の化石',icon:'草の化石.png',fallback:'🦴'},
+    {day:6,type:'tickets',amount:3,label:'草核',icon:'草核.png',fallback:'✨'},
+    {day:7,type:'special',amount:5,coinsBonus:3000,label:'超・船長パック',icon:'草核.png',fallback:'👑'}
+];
+
 const MASTER = {
     systems: { '': {id:'stamina_cap',name:'スタミナタンク',rarity:'SR',icon:'🔋',fallbackIcon:'🔋',type:'text',desc:'最大スタミナUP！\nレベル1につき上限が+10される！'} },
     weapons: { 'wp_normal': {id:'wp_normal',name:'木の大砲',rarity:'N',fireRate:15,speed:6,type:'single',color:'#60a5fa',desc:'普通の弾を撃ち出す！'}, 
@@ -790,7 +883,13 @@ const MASTER = {
             'crew_bob':{id:'crew_bob',name:'ボブ',rarity:'R',effect:'speedUp',skillName:'ボブズウェーブ',desc:'スピードが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🍳',type:'text'}, 
             'crew_mark':{id:'crew_mark',name:'マーク',rarity:'R',effect:'scoreUp',skillName:'マークトレジャー',desc:'スコアが少しアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🎨',type:'text'}, 
             'crew_speed':{id:'crew_speed',name:'ダッシュマン',rarity:'R',effect:'speedUp',skillName:'音速ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
-    　　    'crew_1':{id:'crew_1',name:'セナ',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
+            'crew_john':{id:'crew_john',name:'ジョン',rarity:'SR',effect:'powerUp',skillName:'ジョンズキヤノン',desc:'パワーが中アップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'},
+            'crew_jack':{id:'crew_jack',name:'ジャック',rarity:'SR',effect:'speedUp',skillName:'ジャックストーム',desc:'スピードが中アップ！\n【SP】画面の敵を一掃！',icon:'🕵️',type:'text'}, 
+            'crew_leon':{id:'crew_leon',name:'レオン',rarity:'SR',effect:'scoreUp',skillName:'レオンハンター',desc:'スコアが中アップ！\n【SP】画面の敵を一掃！',icon:'💂',type:'text'},
+            'crew_luke':{id:'crew_luke',name:'ルーク',rarity:'SR',effect:'doubleShot',skillName:'ルークツイン',desc:'たまに弾が2列に！？\n【SP】画面の敵を一掃！',icon:'🤵',type:'text'},
+            'crew_bill':{id:'crew_bill',name:'ビル',rarity:'SR',effect:'powerUp',skillName:'ビルズアーマー',desc:'弾サイズ中アップ！\n【SP】画面の敵を一掃！',icon:'👲',type:'text'}, 
+            'crew_score':{id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払ったポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 
+                　　    'crew_1':{id:'crew_1',name:'セナ',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_2':{id:'crew_2',name:'リク',rarity:'R',effect:'speedUp',skillName:'小さい林',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_3':{id:'crew_3',name:'ソラ',rarity:'R',effect:'speedUp',skillName:'燃えろー',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_4':{id:'crew_4',name:'リト',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
@@ -848,18 +947,43 @@ const MASTER = {
             'crew_56':{id:'crew_56',name:'まめラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🫘',type:'text'}, 
             'crew_57':{id:'crew_57',name:'ピーナッツラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🥜',type:'text'}, 
             'crew_58':{id:'crew_58',name:'くりラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🌰',type:'text'}, 
-            'crew_59':{id:'crew_59',name:'キノコラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍄‍🟫',type:'text'}, 
+            'crew_59':{id:'crew_59',name:'キノコラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍄‍',type:'text'}, 
             'crew_60':{id:'crew_60',name:'タカシ',rarity:'SR',effect:'speedUp',skillName:'タカシブレイク',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_61':{id:'crew_61',name:'グリス',rarity:'SR',effect:'speedUp',skillName:'進化を燃やしてぶっ潰す',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_62':{id:'crew_62',name:'ローグ',rarity:'SR',effect:'speedUp',skillName:'大義のための犠牲となれ',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
             'crew_63':{id:'crew_63',name:'シンジ',rarity:'SR',effect:'speedUp',skillName:'オンドゥル',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
-            'crew_64':{id:'crew_64',name:'ショウヘイ',rarity:'SR',effect:'speedUp',skillName:'オオタニサーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'}, 
-            'crew_john':{id:'crew_john',name:'ジョン',rarity:'SR',effect:'powerUp',skillName:'ジョンズキヤノン',desc:'パワーが中アップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'},
-            'crew_jack':{id:'crew_jack',name:'ジャック',rarity:'SR',effect:'speedUp',skillName:'ジャックストーム',desc:'スピードが中アップ！\n【SP】画面の敵を一掃！',icon:'🕵️',type:'text'}, 
-            'crew_leon':{id:'crew_leon',name:'レオン',rarity:'SR',effect:'scoreUp',skillName:'レオンハンター',desc:'スコアが中アップ！\n【SP】画面の敵を一掃！',icon:'💂',type:'text'},
-            'crew_luke':{id:'crew_luke',name:'ルーク',rarity:'SR',effect:'doubleShot',skillName:'ルークツイン',desc:'たまに弾が2列に！？\n【SP】画面の敵を一掃！',icon:'🤵',type:'text'},
-            'crew_bill':{id:'crew_bill',name:'ビル',rarity:'SR',effect:'powerUp',skillName:'ビルズアーマー',desc:'弾サイズ中アップ！\n【SP】画面の敵を一掃！',icon:'👲',type:'text'}, 
-            'crew_score':{id:'crew_score',name:'ナビゲーター',rarity:'SR',effect:'scoreUp',skillName:'お宝ディスカバリー',desc:'敵を追い払ったポイント2倍！\n【SP】画面の敵を一掃！',icon:'🗺️',type:'text'}, 
+            'crew_64':{id:'crew_64',name:'ショウヘイ',rarity:'SR',effect:'speedUp',skillName:'オオタニサーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🏃',type:'text'},          
+            'crew_65':{id:'crew_65',name:'ボーンラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💀',type:'text'}, 
+            'crew_66':{id:'crew_66',name:'デビルラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'😈',type:'text'}, 
+            'crew_67':{id:'crew_67',name:'ピエロラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🤡',type:'text'}, 
+            'crew_68':{id:'crew_68',name:'オニラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👹',type:'text'}, 
+            'crew_69':{id:'crew_69',name:'テングラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👺',type:'text'}, 
+            'crew_70':{id:'crew_70',name:'ゴーストラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👻',type:'text'}, 
+            'crew_71':{id:'crew_71',name:'エイリアンラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👽',type:'text'}, 
+            'crew_72':{id:'crew_72',name:'ロボラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🤖',type:'text'}, 
+            'crew_73':{id:'crew_73',name:'ルビーラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_74':{id:'crew_74',name:'エメラルドラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_75':{id:'crew_75',name:'サファイアラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_76':{id:'crew_76',name:'ゴールドラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_77':{id:'crew_77',name:'パールラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_78':{id:'crew_78',name:'ダイヤラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_79':{id:'crew_79',name:'アメジストラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'💎',type:'text'}, 
+            'crew_80':{id:'crew_80',name:'モアイラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🗿',type:'text'}, 
+            'crew_81':{id:'crew_81',name:'アイスラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍦',type:'text'}, 
+            'crew_82':{id:'crew_82',name:'ベビーラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍼',type:'text'}, 
+            'crew_83':{id:'crew_83',name:'ダンゴラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍡',type:'text'}, 
+            'crew_84':{id:'crew_84',name:'ナルトラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍥',type:'text'}, 
+            'crew_85':{id:'crew_85',name:'オデンラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍢',type:'text'}, 
+            'crew_86':{id:'crew_86',name:'カレーラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🍛',type:'text'}, 
+            'crew_87':{id:'crew_87',name:'タコスラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🌮',type:'text'}, 
+            'crew_88':{id:'crew_88',name:'チーズラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧀',type:'text'}, 
+            'crew_89':{id:'crew_89',name:'エンジェルラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👼',type:'text'}, 
+            'crew_90':{id:'crew_90',name:'ゾンビラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧟',type:'text'}, 
+            'crew_91':{id:'crew_91',name:'ヴァンパイアラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧛',type:'text'}, 
+            'crew_92':{id:'crew_92',name:'ドクターラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍⚕️',type:'text'}, 
+            'crew_93':{id:'crew_93',name:'ティーチャーラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍🏫',type:'text'}, 
+            'crew_94':{id:'crew_94',name:'ジャッジマン',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'🧑‍⚖️',type:'text'}, 
+            'crew_95':{id:'crew_95',name:'ポリスラビット',rarity:'R',effect:'speedUp',skillName:'ハリケーン',desc:'スピードアップ！\n【SP】画面の敵を一掃！',icon:'👮',type:'text'}, 
             'crew_power':{id:'crew_power',name:'伝説のキャプテン',rarity:'UR',effect:'powerUp',skillName:'覇王の号令',desc:'弾のサイズと判定が巨大化\n【SP】画面の敵を一掃！',icon:'👑',type:'text'},
             'crew_seimaro':{id:'crew_seimaro',name:'せいまろ',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'せいまろ.png',fallbackIcon:'🐾',type:'image'},
             'crew_ito':{id:'crew_ito',name:'ランペイジ・イット',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】拳で敵を一掃！',icon:'ランペイジイット.png',fallbackIcon:'👍',type:'image'},
@@ -867,6 +991,8 @@ const MASTER = {
             'crew_zen':{id:'crew_zen',name:'ZEN',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'ZEN.png',fallbackIcon:'🥚',type:'image'},
             'crew_taka':{id:'crew_taka',name:'タカキング',rarity:'UR',effect:'doubleShot',skillName:'雷霆蒼破',desc:'大砲が2コになりパワー2倍！\n【SP】いなずまで敵を一掃！',icon:'タカキング.png',fallbackIcon:'㌀',type:'image'},
             'crew_ketchup':{id:'crew_ketchup',name:'ケチャップ',rarity:'UR',effect:'doubleShot',skillName:'紅桜抜刀斬',desc:'大砲が2コになりパワー2倍！\n【SP】刀で敵を一掃！',icon:'ケチャップ.png',fallbackIcon:'🍅',type:'image'},
+            'crew_birthday':{id:'crew_birthday',name:'バースデーラビット',rarity:'UR',effect:'doubleShot',skillName:'🎂HAPPY BIRTHDAY!!!',desc:'誕生日おめでとう！\n【SP】画面の敵を一掃！',icon:'🎂',type:'text'}, 
+'crew_santa':{id:'crew_santa',name:'サンタラビット',rarity:'UR',effect:'doubleShot',skillName:'🎂HAPPY BIRTHDAY!!!',desc:'誕生日おめでとう！\n【SP】画面の敵を一掃！',icon:'🎅',type:'text'}, 
             'crew_':{id:'crew_',name:'せ',rarity:'UR',effect:'doubleShot',skillName:'雷',desc:'大\n【SP】い',icon:'せ.png',fallbackIcon:'🐾',type:'image'} }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
@@ -1463,14 +1589,71 @@ function checkStageClear(isRetreat=false) {
                 if(isFC){ eTk=currentStage.reward;eCo=currentStage.rewardCoins||1000;eMt=currentStage.rewardMats||2; DB.gachaTickets+=eTk;DB.coins+=eCo;DB.materials+=eMt; rt+=`<br><br>🎊 財宝ザックザク！お祝い！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×${eTk}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${eCo}</span></div><div class="flex flex-col items-center bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-5 h-5 mb-1"><img src="草の化石.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'🦴','text-xs')"></span><span class="text-yellow-400 font-black">×${eMt}</span></div></div>`; } 
             } 
         }
-        $('game-end-desc').innerHTML=rt; showEl('game-end-modal'); shootConfetti('end-confetti-container',80); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); updateHeaderUI(); saveGame();
-        if(currentMultiRoom){window.db.ref('rooms/'+currentMultiRoom.id).remove();currentMultiRoom=null;}
+$('game-end-desc').innerHTML=rt; 
+        showEl('game-end-modal'); 
+        shootConfetti('end-confetti-container',80); 
+        setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); 
+        updateHeaderUI(); 
+        saveGame();
+        if(currentMultiRoom){
+            window.db.ref('rooms/'+currentMultiRoom.id).remove();
+            currentMultiRoom=null;
+        }
     }
 }
-function gameLoop(){ if(!gameState.isPaused&&!gameState.isGameOver)updateGame();drawGame();gameLoopId=requestAnimationFrame(gameLoop); }
+
+// === 画質・エフェクト設定更新 ===
+function updateQualitySettings() {
+    if (typeof DB !== 'undefined') {
+        if ($('graphic-quality')) DB.graphicQuality = $('graphic-quality').value;
+        if ($('effect-quality')) DB.effectQuality = $('effect-quality').value;
+        if ($('texture-quality')) DB.textureQuality = $('texture-quality').value;
+    }
+    if (typeof saveGame === 'function') {
+        saveGame();
+    }
+}
+
+function openSettingsModal() {
+    if ($('bgm-volume')) $('bgm-volume').value = DB.bgmVolume !== undefined ? DB.bgmVolume : 0.5;
+    if ($('se-volume')) $('se-volume').value = DB.seVolume !== undefined ? DB.seVolume : 0.5;
+    if ($('bgm-vol-disp') && $('bgm-volume')) $('bgm-vol-disp').innerText = Math.round($('bgm-volume').value * 100) + '%';
+    if ($('se-vol-disp') && $('se-volume')) $('se-vol-disp').innerText = Math.round($('se-volume').value * 100) + '%';
+    
+    if ($('graphic-quality')) $('graphic-quality').value = DB.graphicQuality || 'high';
+    if ($('effect-quality')) $('effect-quality').value = DB.effectQuality || 'high';
+    if ($('texture-quality')) $('texture-quality').value = DB.textureQuality || 'high';
+    
+    showEl('settings-modal');
+}
+
+function gameLoop(){ 
+    if(!gameState.isPaused && !gameState.isGameOver) updateGame();
+    drawGame();
+    gameLoopId = requestAnimationFrame(gameLoop); 
+}
+
+// 鍵がかかっているコンテンツへのアクセス時の処理
+function tryAccessLockedScreen(sid) {
+    if (typeof sid === 'string' && sid.startsWith('screen-')) {
+        if (!DB.tutorialCompleted) {
+            showEl('locked-alert-overlay');
+            return;
+        }
+        navTo(sid);
+    } else {
+        alert(sid || 'このコンテンツはまだ解放されていません！');
+    }
+}
 
 // --- 起動 ---
-window.onload = () => { loadGame(); navTo('screen-home'); setTimeout(checkAndStartTutorial,600); setTimeout(checkLoginBonus,1200); initFirebase(); };
+window.onload = () => { 
+    loadGame(); 
+    navTo('screen-home'); 
+    setTimeout(checkAndStartTutorial, 600); 
+    setTimeout(checkLoginBonus, 1200); 
+    initFirebase(); 
+};
 </script>
 </body>
 </html>
