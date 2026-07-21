@@ -1327,6 +1327,69 @@ pointer-events:none;
 
 }
 
+/* 追加: ジャックポット強化用パーティクル/演出 */
+.jackpotBurstContainer{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:0;height:0;
+  pointer-events:none;
+  z-index:10002;
+}
+
+.particle.confetti{
+  width:16px;
+  height:24px;
+  border-radius:2px;
+}
+
+.jackpotTitle{
+  filter:drop-shadow(0 0 30px rgba(255,255,255,0.7));
+}
+
+.reel.rainbowFast{
+  animation-duration:0.22s;
+}
+
+.jackpotFlashOverlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at 50% 30%, rgba(255,255,255,0.9), rgba(255,0,255,0.02));
+  pointer-events:none;
+  z-index:10003;
+  mix-blend-mode:screen;
+  opacity:0;
+}
+
+/* 目押しピッカー */
+.targetPicker{
+  position:fixed;
+  background:rgba(0,0,0,0.85);
+  border:2px solid rgba(255,255,255,0.12);
+  padding:8px;
+  border-radius:12px;
+  display:flex;
+  gap:6px;
+  z-index:10005;
+}
+.targetPicker button{
+  background:transparent;
+  border:none;
+  font-size:28px;
+  padding:6px 8px;
+  cursor:pointer;
+  border-radius:8px;
+  transition:transform .08s ease, box-shadow .12s ease;
+}
+.targetPicker button:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+
+@keyframes jackpotPulseBG{
+  0%{filter:brightness(1);}
+  50%{filter:brightness(2.2);} 
+  100%{filter:brightness(1);}
+}
+
 
 
 
@@ -2195,8 +2258,9 @@ function startSpin() {
     strip.style.transform = "translateY(0)";
     strip.style.transition = "none";
     strip.style.animation = "reelMove 0.12s linear infinite";
-    // clear any previous final-symbol marker so DOM is source-of-truth
+    // clear any previous final-symbol/target marker so DOM is source-of-truth
     reelEl.removeAttribute('data-symbol');
+    reelEl.removeAttribute('data-target');
   });
 }
 
@@ -2204,7 +2268,13 @@ function stopReel(index) {
   if (!roundActive || !spinning[index]) return;
 
   spinning[index] = false;
-  reels[index] = Math.floor(Math.random() * symbolNames.length);
+  // if a target was set by the player (目押し), use it; otherwise random
+  const target = reelEls[index].getAttribute('data-target');
+  if (target) {
+    reels[index] = symbolNames.indexOf(target);
+  } else {
+    reels[index] = Math.floor(Math.random() * symbolNames.length);
+  }
 
   const strip = getReelStrip(index);
   if (!strip) return;
@@ -2216,6 +2286,8 @@ function stopReel(index) {
 
   // mark the visible symbol on the reel element so result checks the actual display
   reelEls[index].setAttribute('data-symbol', symbolNames[reels[index]]);
+  // clear any target once stopped
+  reelEls[index].removeAttribute('data-target');
 
   stopSE.currentTime = 0;
   stopSE.play();
@@ -2257,6 +2329,94 @@ function createFlash() {
   setTimeout(() => flash.remove(), 700);
 }
 
+// spawn colorful particles from center
+function spawnParticles(count = 40) {
+  const container = document.createElement('div');
+  container.className = 'jackpotBurstContainer';
+  document.body.appendChild(container);
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle confetti';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 200 + Math.random() * 260;
+    const x = Math.cos(angle) * dist + (Math.random() * 40 - 20);
+    const y = Math.sin(angle) * dist + (Math.random() * 40 - 20);
+    p.style.setProperty('--x', x + 'px');
+    p.style.setProperty('--y', y + 'px');
+    const hue = Math.floor(Math.random() * 360);
+    p.style.background = `linear-gradient(135deg, hsl(${hue} 100% 60%), hsl(${(hue+60)%360} 100% 60%))`;
+    p.style.left = '50%';
+    p.style.top = '50%';
+    p.style.transform = 'translate(-50%,-50%)';
+    p.style.opacity = '1';
+    container.appendChild(p);
+    // remove after animation
+    setTimeout(() => p.remove(), 2200 + Math.random() * 600);
+  }
+  setTimeout(() => container.remove(), 2600);
+}
+
+function startJackpotShow() {
+  // bright overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'jackpotFlashOverlay';
+  document.body.appendChild(overlay);
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 0.12s ease';
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    overlay.style.transition = 'opacity 0.8s ease';
+  });
+
+  // title
+  const title = document.createElement('div');
+  title.className = 'jackpotTitle';
+  title.textContent = '🌈 JACKPOT!!! 🌈';
+  document.body.appendChild(title);
+  // big glowing effect on slot
+  slotMachineEl.classList.add('jackpotGold');
+
+  // rainbow reels
+  reelEls.forEach((r) => {
+    r.classList.add('rainbow');
+    r.classList.add('rainbowFast');
+  });
+
+  spawnParticles(70);
+
+  // extra lamp flashes
+  const lamp = document.createElement('div');
+  lamp.className = 'jackpotLamp';
+  lamp.style.position = 'fixed';
+  lamp.style.top = '10%';
+  lamp.style.left = '50%';
+  lamp.style.transform = 'translateX(-50%)';
+  lamp.style.width = '260px';
+  lamp.style.height = '16px';
+  lamp.style.borderRadius = '8px';
+  lamp.style.pointerEvents = 'none';
+  lamp.style.zIndex = 10004;
+  lamp.style.boxShadow = '0 0 40px rgba(255,200,0,0.9)';
+  document.body.appendChild(lamp);
+
+  // large pulse on machine
+  slotMachineEl.style.animation = 'jackpotPulseBG 0.6s ease-in-out 6';
+
+  // cleanup after show
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    title.remove();
+    lamp.remove();
+    reelEls.forEach((r) => {
+      r.classList.remove('rainbowFast');
+    });
+    slotMachineEl.style.animation = '';
+    slotMachineEl.classList.remove('jackpotGold');
+    setTimeout(() => overlay.remove(), 500);
+  }, 4200);
+}
+
 function triggerWinEffect(payout, result, roundBet) {
   createFlash();
 
@@ -2274,12 +2434,12 @@ function triggerWinEffect(payout, result, roundBet) {
       showResult("🌈 JACKPOT 777 🌈");
       jackpotSE.currentTime = 0;
       jackpotSE.play();
-      slotMachineEl.classList.add("jackpotGold");
+      // enhanced jackpot show
+      startJackpotShow();
       document.body.classList.add("shake");
       setTimeout(() => {
-        slotMachineEl.classList.remove("jackpotGold");
         document.body.classList.remove("shake");
-      }, 4000);
+      }, 4200);
       return;
     }
     showResult("🎉 BIG WIN 🎉");
@@ -2350,9 +2510,52 @@ leverEl.onclick = function () {
 document.getElementById("stop1").onclick = function () { stopReel(0); };
 document.getElementById("stop2").onclick = function () { stopReel(1); };
 document.getElementById("stop3").onclick = function () { stopReel(2); };
-reelEls[0].onclick = function () { stopReel(0); };
-reelEls[1].onclick = function () { stopReel(1); };
-reelEls[2].onclick = function () { stopReel(2); };
+
+// 目押し:  回転中にリールをクリックするとターゲット選択ピッカーを表示
+let currentPicker = null;
+function showTargetPicker(reelEl, index, evt) {
+  hideTargetPicker();
+  const picker = document.createElement('div');
+  picker.className = 'targetPicker';
+
+  symbolNames.forEach((sym) => {
+    const btn = document.createElement('button');
+    btn.innerHTML = sym === '777' ? '<img src="777.png" style="width:48px;height:48px;object-fit:contain;">' : sym;
+    btn.title = sym;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      reelEl.setAttribute('data-target', sym);
+      hideTargetPicker();
+    };
+    picker.appendChild(btn);
+  });
+
+  document.body.appendChild(picker);
+  currentPicker = picker;
+  // position near the reel
+  const rect = reelEl.getBoundingClientRect();
+  const left = rect.left + rect.width / 2 - picker.offsetWidth / 2;
+  const top = rect.top + rect.height + 8;
+  picker.style.left = Math.max(8, left) + 'px';
+  picker.style.top = Math.min(window.innerHeight - 60, top) + 'px';
+}
+
+function hideTargetPicker() {
+  if (currentPicker) { currentPicker.remove(); currentPicker = null; }
+}
+
+// show picker on reel click while spinning; ctrl/cmd+click will stop immediately
+reelEls.forEach((reelEl, idx) => {
+  reelEl.addEventListener('click', (ev) => {
+    if (!spinning[idx]) return;
+    if (ev.ctrlKey || ev.metaKey) {
+      // immediate stop
+      stopReel(idx);
+      return;
+    }
+    showTargetPicker(reelEl, idx, ev);
+  });
+});
 
 setSpinControls(false);
 updateStatus("🎰 BETしてレバーを引く！", "#ffd700");
