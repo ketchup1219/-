@@ -2033,7 +2033,7 @@ MAX BET
 <h3>🎰 配当表</h3>
 
 <p>🌈 777 → BET ×10</p>
-<p>🍇 🍒 🍎 🍉 🔔 → BET ×3</p>
+<p>🍇 🍒 🍎 🍉 🔔 → BET ×3（3つ揃いのみ）</p>
 
 </div>
 
@@ -2195,6 +2195,8 @@ function startSpin() {
     strip.style.transform = "translateY(0)";
     strip.style.transition = "none";
     strip.style.animation = "reelMove 0.12s linear infinite";
+    // clear any previous final-symbol marker so DOM is source-of-truth
+    reelEl.removeAttribute('data-symbol');
   });
 }
 
@@ -2211,6 +2213,9 @@ function stopReel(index) {
   strip.classList.add("reelStopping");
   strip.style.animation = "none";
   strip.innerHTML = `<div>${symbolNames[reels[index]] === "777" ? '<img src="777.png" style="width:90px;height:90px;object-fit:contain;">' : symbolNames[reels[index]]}</div>`;
+
+  // mark the visible symbol on the reel element so result checks the actual display
+  reelEls[index].setAttribute('data-symbol', symbolNames[reels[index]]);
 
   stopSE.currentTime = 0;
   stopSE.play();
@@ -2230,9 +2235,9 @@ function addCoins(amount) {
 }
 
 function evaluatePayout(result, roundBet) {
+  // only pay out for three of a kind
   if (result.every((symbol) => symbol === "777")) return roundBet * 10;
   if (result.every((symbol) => symbol === result[0])) return roundBet * 3;
-  if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) return roundBet;
   return 0;
 }
 
@@ -2252,35 +2257,50 @@ function createFlash() {
   setTimeout(() => flash.remove(), 700);
 }
 
-function triggerWinEffect(payout, result) {
+function triggerWinEffect(payout, result, roundBet) {
   createFlash();
-  showResult(result.every((symbol) => symbol === "777") ? "🌈 JACKPOT 777 🌈" : "🎉 BIG WIN 🎉");
 
-  if (result.every((symbol) => symbol === "777")) {
-    jackpotSE.currentTime = 0;
-    jackpotSE.play();
-    slotMachineEl.classList.add("jackpotGold");
-    document.body.classList.add("shake");
-    setTimeout(() => {
-      slotMachineEl.classList.remove("jackpotGold");
-      document.body.classList.remove("shake");
-    }, 4000);
-  } else {
+  // count symbols to avoid relying on payout math
+  const counts = result.reduce((acc, s) => {
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+  const maxCount = Math.max(...Object.values(counts));
+
+  if (maxCount === 3) {
+    // three of a kind
+    const threeSymbol = Object.keys(counts).find((k) => counts[k] === 3);
+    if (threeSymbol === "777") {
+      showResult("🌈 JACKPOT 777 🌈");
+      jackpotSE.currentTime = 0;
+      jackpotSE.play();
+      slotMachineEl.classList.add("jackpotGold");
+      document.body.classList.add("shake");
+      setTimeout(() => {
+        slotMachineEl.classList.remove("jackpotGold");
+        document.body.classList.remove("shake");
+      }, 4000);
+      return;
+    }
+    showResult("🎉 BIG WIN 🎉");
     winSE.currentTime = 0;
     winSE.play();
     slotMachineEl.classList.add("win");
     setTimeout(() => slotMachineEl.classList.remove("win"), 1800);
+    return;
   }
+
 }
 
 function checkResult() {
   const roundBet = bet;
-  const result = reels.map((index) => symbolNames[index]);
+  // prefer the symbol recorded on the DOM (what's actually shown). Fallback to internal `reels`.
+  const result = reelEls.map((el, idx) => el.getAttribute('data-symbol') || symbolNames[reels[idx]]);
   const payout = evaluatePayout(result, roundBet);
 
   if (payout > 0) {
     addCoins(payout);
-    triggerWinEffect(payout, result);
+    triggerWinEffect(payout, result, roundBet);
     updateStatus(`🎉 ${payout.toLocaleString()} COIN 獲得！`, "#00ff99");
   } else {
     saveCoins();
