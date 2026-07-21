@@ -1461,6 +1461,26 @@ function closeHappyShareToast() { $('happy-share-toast').classList.remove('show'
 function triggerHappyShare(n, i) { const t=$('happy-share-toast'); if(happyShareTimeoutId)clearTimeout(happyShareTimeoutId); $('toast-message').innerHTML=`<span class="text-yellow-200">${n}</span> が<br>超激レア【${i}】を入手！`; t.classList.add('show'); DB.gachaTickets+=1; updateHeaderUI(); saveGame(); happyShareTimeoutId=setTimeout(()=>closeHappyShareToast(),3500); }
 
 // --- ステージ・マルチ・スコアアタック ---
+// ステージリストが非常に大きい場合に一度に大量のDOMを生成すると低メモリ端末でクラッシュするため
+// 安全にチャンク表示するヘルパーを追加する
+function renderStageListSafe(stgs, offset = 0) {
+    const l = $('stage-list');
+    const max = 50;
+    if (!Array.isArray(stgs)) return renderStageList(stgs);
+    // offset がある場合は残りを続けて描画
+    const slice = stgs.slice(offset, offset + max);
+    renderStageList(slice);
+    if (offset + max < stgs.length) {
+        const moreWrap = document.createElement('div');
+        moreWrap.className = 'w-full flex justify-center mt-3';
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'game-btn bg-indigo-700 text-white font-black px-4 py-3 rounded-xl border-2 border-indigo-500 shadow-md';
+        moreBtn.innerText = 'もっと見る';
+        moreBtn.onclick = () => { l.innerHTML = ''; renderStageListSafe(stgs, offset + max); window.scrollTo({ top: l.offsetTop || 0, behavior: 'smooth' }); };
+        moreWrap.appendChild(moreBtn);
+        l.appendChild(moreWrap);
+    }
+}
 function switchStageTab(t) { currentStageTab=t; const bn=$('tab-stage-normal'), be=$('tab-stage-ex'), bm=$('tab-stage-multi'); bn.className=be.className=bm.className="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; showEl('stage-list','flex'); hideEl('multi-lobby-ui'); if(t==='normal'){bn.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";renderStageList(MASTER.stages);}else if(t==='ex'){be.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";renderStageList(MASTER.exStages);}else if(t==='multi'){bm.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";hideEl('stage-list');showEl('multi-lobby-ui','flex');} }
 function initStageSelect() { switchStageTab('normal'); }
 function renderStageList(stgs) { const l=$('stage-list'); l.innerHTML=''; let a=!DB.tutorialCompleted?[{id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0}]:stgs; a.forEach((s,i)=>{ let lk=false; if(!s.isTutorial){if(currentStageTab==='normal')lk=i>0&&DB.clearedStages<i;else if(s.reqClearEx!==undefined)lk=DB.clearedSeimaroStage<s.reqClearEx;} const b=document.createElement('button'); b.id=`stage-btn-${s.id}`; b.className=`p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk?'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed':'bg-indigo-800 '+s.color}`; let rd=s.isTutorial?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`:s.isEndless?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`:`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`; b.innerHTML=`<div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div><div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div><div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless||s.isBossStage?'':'隻 追い払う！'}</div><div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless||s.isBossStage?'報酬:':s.isTutorial?'目標報酬:':'初回お祝い:'}</span>${rd}</div>${lk?'<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>':''}`; if(!lk)b.onclick=()=>{positionTutorialArrow(null);startStage(s);}; l.appendChild(b); }); if(!DB.tutorialCompleted)setTimeout(()=>positionTutorialArrow('stage-btn-999'),100); }
