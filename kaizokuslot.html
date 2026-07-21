@@ -1362,28 +1362,6 @@ pointer-events:none;
   opacity:0;
 }
 
-/* 目押しピッカー */
-.targetPicker{
-  position:fixed;
-  background:rgba(0,0,0,0.85);
-  border:2px solid rgba(255,255,255,0.12);
-  padding:8px;
-  border-radius:12px;
-  display:flex;
-  gap:6px;
-  z-index:10005;
-}
-.targetPicker button{
-  background:transparent;
-  border:none;
-  font-size:28px;
-  padding:6px 8px;
-  cursor:pointer;
-  border-radius:8px;
-  transition:transform .08s ease, box-shadow .12s ease;
-}
-.targetPicker button:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,0.5)}
-
 @keyframes jackpotPulseBG{
   0%{filter:brightness(1);}
   50%{filter:brightness(2.2);} 
@@ -1981,7 +1959,7 @@ BET:
 <div>🍉</div>
 
 <div>
-<img src="777.jpg">
+<img src="777.jpg" onerror="this.onerror=null;this.src='777.png'" style="width:90px;height:90px;object-fit:contain;">
 </div>
 
 <div>🍎</div>
@@ -2005,7 +1983,7 @@ BET:
 <div>🍉</div>
 
 <div>
-<img src="777.jpg">
+<img src="777.jpg" onerror="this.onerror=null;this.src='777.png'" style="width:90px;height:90px;object-fit:contain;">
 </div>
 
 <div>🍎</div>
@@ -2028,7 +2006,7 @@ BET:
 <div>🍉</div>
 
 <div>
-<img src="777.jpg">
+<img src="777.jpg" onerror="this.onerror=null;this.src='777.png'" style="width:90px;height:90px;object-fit:contain;">
 </div>
 
 <div>🍎</div>
@@ -2148,7 +2126,7 @@ src="当たり.mp3">
 
 
 <audio id="jackpotSE"
-src="超当たり.mp3">
+src="超当たり音.mp3">
 </audio>
 
 
@@ -2219,7 +2197,7 @@ function setSpinControls(spinningNow) {
 }
 
 function buildReelMarkup() {
-  return reelItems.map((item) => `<div>${item === "777" ? '<img src="777.jpg" style="width:90px;height:90px;object-fit:contain;">' : item}</div>`).join("");
+  return reelItems.map((item) => `<div>${item === "777" ? '<img src="777.jpg" onerror="this.onerror=null;this.src=\'777.png\'" style="width:90px;height:90px;object-fit:contain;">' : item}</div>`).join("");
 }
 
 function getReelStrip(index) {
@@ -2258,9 +2236,8 @@ function startSpin() {
     strip.style.transform = "translateY(0)";
     strip.style.transition = "none";
     strip.style.animation = "reelMove 0.12s linear infinite";
-    // clear any previous final-symbol/target marker so DOM is source-of-truth
+    // clear any previous final-symbol marker so DOM is source-of-truth
     reelEl.removeAttribute('data-symbol');
-    reelEl.removeAttribute('data-target');
   });
 }
 
@@ -2268,13 +2245,7 @@ function stopReel(index) {
   if (!roundActive || !spinning[index]) return;
 
   spinning[index] = false;
-  // if a target was set by the player (目押し), use it; otherwise random
-  const target = reelEls[index].getAttribute('data-target');
-  if (target) {
-    reels[index] = symbolNames.indexOf(target);
-  } else {
-    reels[index] = Math.floor(Math.random() * symbolNames.length);
-  }
+  reels[index] = Math.floor(Math.random() * symbolNames.length);
 
   const strip = getReelStrip(index);
   if (!strip) return;
@@ -2282,12 +2253,10 @@ function stopReel(index) {
   strip.classList.remove("reelRolling");
   strip.classList.add("reelStopping");
   strip.style.animation = "none";
-  strip.innerHTML = `<div>${symbolNames[reels[index]] === "777" ? '<img src="777.jpg" style="width:90px;height:90px;object-fit:contain;">' : symbolNames[reels[index]]}</div>`;
+  strip.innerHTML = `<div>${symbolNames[reels[index]] === "777" ? '<img src="777.jpg" onerror="this.onerror=null;this.src=\'777.png\'" style="width:90px;height:90px;object-fit:contain;">' : symbolNames[reels[index]]}</div>`;
 
   // mark the visible symbol on the reel element so result checks the actual display
   reelEls[index].setAttribute('data-symbol', symbolNames[reels[index]]);
-  // clear any target once stopped
-  reelEls[index].removeAttribute('data-target');
 
   stopSE.currentTime = 0;
   stopSE.play();
@@ -2510,52 +2479,9 @@ leverEl.onclick = function () {
 document.getElementById("stop1").onclick = function () { stopReel(0); };
 document.getElementById("stop2").onclick = function () { stopReel(1); };
 document.getElementById("stop3").onclick = function () { stopReel(2); };
-
-// 目押し:  回転中にリールをクリックするとターゲット選択ピッカーを表示
-let currentPicker = null;
-function showTargetPicker(reelEl, index, evt) {
-  hideTargetPicker();
-  const picker = document.createElement('div');
-  picker.className = 'targetPicker';
-
-  symbolNames.forEach((sym) => {
-    const btn = document.createElement('button');
-    btn.innerHTML = sym === '777' ? '<img src="777.jpg" style="width:48px;height:48px;object-fit:contain;">' : sym;
-    btn.title = sym;
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      reelEl.setAttribute('data-target', sym);
-      hideTargetPicker();
-    };
-    picker.appendChild(btn);
-  });
-
-  document.body.appendChild(picker);
-  currentPicker = picker;
-  // position near the reel
-  const rect = reelEl.getBoundingClientRect();
-  const left = rect.left + rect.width / 2 - picker.offsetWidth / 2;
-  const top = rect.top + rect.height + 8;
-  picker.style.left = Math.max(8, left) + 'px';
-  picker.style.top = Math.min(window.innerHeight - 60, top) + 'px';
-}
-
-function hideTargetPicker() {
-  if (currentPicker) { currentPicker.remove(); currentPicker = null; }
-}
-
-// show picker on reel click while spinning; ctrl/cmd+click will stop immediately
-reelEls.forEach((reelEl, idx) => {
-  reelEl.addEventListener('click', (ev) => {
-    if (!spinning[idx]) return;
-    if (ev.ctrlKey || ev.metaKey) {
-      // immediate stop
-      stopReel(idx);
-      return;
-    }
-    showTargetPicker(reelEl, idx, ev);
-  });
-});
+reelEls[0].onclick = function () { stopReel(0); };
+reelEls[1].onclick = function () { stopReel(1); };
+reelEls[2].onclick = function () { stopReel(2); };
 
 setSpinControls(false);
 updateStatus("🎰 BETしてレバーを引く！", "#ffd700");
