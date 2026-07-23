@@ -62,6 +62,817 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .nav-text { font-size: 10px; font-weight: 900; margin-top: 2px; }
         .nav-icon { font-size: 1.5rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+
+        :root {
+            --bg-deep: #120c07;
+            --bg-mid: #1a1410;
+            --panel: #231b15;
+            --panel-2: #2b2016;
+            --panel-3: #140e09;
+            --border: #6b4e2a;
+            --border-strong: #d4af37;
+            --text: #f0e2c4;
+            --text-soft: #dcc9a3;
+            --muted: #a5895c;
+            --accent: #d4af37;
+            --accent-2: #b8860b;
+            --shadow: rgba(0,0,0,0.65);
+            --leather: #3a2817;
+            --leather-dark: #241608;
+            --wood: #3f2c19;
+            --brass: #c8a24a;
+            --crimson: #6e1414;
+            --parchment: #e7d4a8;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=M+PLUS+Rounded+1c:wght@700;900&display=swap');
+
+        body {
+            background:
+                radial-gradient(circle at 18% 14%, rgba(212,175,55,0.10), transparent 34%),
+                radial-gradient(circle at 82% 88%, rgba(110,20,20,0.14), transparent 40%),
+                linear-gradient(150deg, #1a1410 0%, #120c07 48%, #080503 100%);
+            color: var(--text);
+            font-family: 'Cinzel', 'M PLUS Rounded 1c', serif;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(94deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 6px),
+                repeating-linear-gradient(2deg, rgba(255,240,200,0.02) 0 1px, transparent 1px 9px),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+            background-size: auto, auto, 160px 160px;
+            opacity: 0.22;
+            mix-blend-mode: overlay;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.28) 66%, rgba(0,0,0,0.6) 100%);
+            opacity: 0.75;
+            mix-blend-mode: multiply;
+        }
+
+        #app {
+            background:
+                linear-gradient(160deg, #241a11 0%, #1a130c 55%, #0f0a06 100%),
+                radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 42%);
+            border: 1px solid rgba(122,88,44,0.6);
+            box-shadow:
+                inset 0 1px 0 rgba(255,235,190,0.08),
+                inset 0 -24px 44px rgba(0,0,0,0.5),
+                0 0 70px rgba(0,0,0,0.8),
+                0 0 0 2px rgba(212,175,55,0.22);
+        }
+
+        #app::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0 3px, transparent 3px 9px),
+                repeating-linear-gradient(0deg, rgba(255,235,190,0.015) 0 1px, transparent 1px 10px);
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        #app-header,
+        .bg-indigo-900,
+        .bg-indigo-950,
+        .bg-indigo-900\/80,
+        .bg-indigo-950\/80,
+        .bg-indigo-900\/90,
+        .bg-indigo-950\/90,
+        .bg-indigo-800,
+        .bg-indigo-800\/90 {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(160deg, rgba(255,235,190,0.05), transparent 34%),
+                radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 40%),
+                linear-gradient(160deg, var(--panel-2) 0%, var(--panel-3) 100%) !important;
+            border-color: rgba(212,175,55,0.45) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,235,190,0.08),
+                inset 0 -12px 26px rgba(0,0,0,0.45),
+                0 12px 24px rgba(0,0,0,0.4);
+        }
+
+        #app-header::before,
+        .bg-indigo-900::before,
+        .bg-indigo-950::before,
+        .bg-indigo-900\/80::before,
+        .bg-indigo-950\/80::before,
+        .bg-indigo-900\/90::before,
+        .bg-indigo-950\/90::before,
+        .bg-indigo-800::before,
+        .bg-indigo-800\/90::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            pointer-events: none;
+            border-radius: inherit;
+            border: 1px solid rgba(212,175,55,0.28);
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
+        }
+
+        .border-indigo-700,
+        .border-indigo-800,
+        .border-indigo-500,
+        .border-indigo-400,
+        .border-indigo-900 {
+            border-color: rgba(212,175,55,0.40) !important;
+        }
+
+        .text-white { color: var(--text) !important; }
+        .text-indigo-200, .text-indigo-300, .text-indigo-400, .text-indigo-500 { color: var(--text-soft) !important; }
+        .text-yellow-100, .text-yellow-200, .text-yellow-300, .text-yellow-400 { color: var(--accent) !important; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+        .text-cyan-300, .text-cyan-400, .text-blue-300, .text-blue-400, .text-pink-300, .text-pink-400, .text-purple-300 { color: var(--brass) !important; }
+        .text-slate-300, .text-slate-400, .text-slate-500 { color: var(--text-soft) !important; }
+
+        h1, h2, h3, h4, .font-black, .font-bold {
+            letter-spacing: 0.04em;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.6), 0 0 8px rgba(212,175,55,0.10);
+        }
+
+        .game-btn {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(255,235,190,0.16), transparent 28%),
+                linear-gradient(180deg, #52381f 0%, #3a2817 55%, #241608 100%) !important;
+            color: var(--parchment) !important;
+            border: 2px solid rgba(212,175,55,0.7) !important;
+            border-radius: 0.85rem;
+            box-shadow:
+                inset 0 1px 0 rgba(255,235,190,0.22),
+                inset 0 -10px 16px rgba(0,0,0,0.5),
+                0 8px 16px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(0,0,0,0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+            letter-spacing: 0.04em;
+            transition: transform 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.16s ease, filter 0.16s ease;
+        }
+
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255,235,190,0.18) 0%, transparent 42%, rgba(212,175,55,0.14) 100%);
+            pointer-events: none;
+            transform: translateX(-100%);
+            transition: transform 0.55s ease;
+        }
+
+        .game-btn::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 0.7rem;
+            border: 1px solid rgba(212,175,55,0.22);
+            pointer-events: none;
+        }
+
+        .game-btn:hover {
+            filter: brightness(1.08) saturate(1.05);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow:
+                inset 0 1px 0 rgba(255,235,190,0.26),
+                inset 0 -10px 16px rgba(0,0,0,0.5),
+                0 12px 22px rgba(0,0,0,0.55),
+                0 0 14px rgba(212,175,55,0.28);
+        }
+
+        .game-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .game-btn:active,
+        button:active,
+        a:active,
+        .icon-sel-btn:active,
+        .nav-btn:active,
+        input[type="button"]:active,
+        input[type="submit"]:active {
+            transform: scale(0.94) translateY(2px);
+            box-shadow:
+                inset 0 8px 16px rgba(0,0,0,0.58),
+                inset 0 1px 0 rgba(255,255,255,0.08),
+                0 2px 8px rgba(0,0,0,0.28);
+            filter: brightness(0.96) saturate(0.95);
+            animation: buttonPop 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes buttonPop {
+            0% { transform: scale(0.94) translateY(2px); }
+            50% { transform: scale(0.97) translateY(1px); }
+            100% { transform: scale(0.94) translateY(2px); }
+        }
+
+        button,
+        a,
+        .icon-sel-btn,
+        .nav-btn,
+        input[type="button"],
+        input[type="submit"] {
+            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        input, select, textarea {
+            background: linear-gradient(160deg, rgba(20,14,9,0.96), rgba(36,22,8,0.96)) !important;
+            color: var(--parchment) !important;
+            border: 1px solid rgba(212,175,55,0.4) !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.6), inset 0 -3px 6px rgba(255,235,190,0.03);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(212,175,55,0.9) !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.3);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(248,237,201,0.55) !important;
+        }
+
+        .nav-btn {
+            color: var(--muted) !important;
+            border-radius: 0.95rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            left: 20%;
+            right: 20%;
+            bottom: 0;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transform: scaleX(0.7);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn.active,
+        .nav-btn:hover {
+            color: var(--accent) !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+            background: rgba(212,175,55,0.10);
+        }
+
+        .nav-btn.active::after,
+        .nav-btn:hover::after {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        .screen {
+            animation: screenFadeIn 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: scale(0.97) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .screen > * {
+            animation: cardRiseIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        .screen > *:nth-child(2n) { animation-delay: 0.04s; }
+        .screen > *:nth-child(3n) { animation-delay: 0.08s; }
+        .screen > *:nth-child(4n) { animation-delay: 0.12s; }
+
+        @keyframes cardRiseIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .ui-scroll-panel {
+            max-height: min(56vh, 460px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+            padding-right: 0.25rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(212,175,55,0.6) transparent;
+        }
+
+        .ui-scroll-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ui-scroll-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(212,175,55,0.75), rgba(139,90,20,0.55));
+            border-radius: 999px;
+        }
+
+        /* ステージ一覧はflexの残り領域いっぱいにスクロール */
+        .stage-scroll {
+            max-height: none;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+
+        .tutorial-highlight {
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 24px rgba(212,175,55,0.5), inset 0 0 24px rgba(139,90,20,0.35) !important;
+        }
+
+        #settings-modal,
+        #tutorial-overlay,
+        #custom-alert-modal,
+        #stamina-modal,
+        #locked-alert-overlay,
+        #tutorial-clear-modal,
+        #profile-modal,
+        #login-bonus-modal,
+        #gacha-probability-modal,
+        #item-detail-modal,
+        #gacha-anim-container,
+        #gacha-result-modal,
+        #gacha-result-10-modal,
+        #multi-room-modal,
+        #ranking-modal,
+        #ranking-reward-modal {
+            opacity: 0;
+            transform: scale(0.96);
+            transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        #settings-modal:not(.hidden),
+        #tutorial-overlay:not(.hidden),
+        #custom-alert-modal:not(.hidden),
+        #stamina-modal:not(.hidden),
+        #locked-alert-overlay:not(.hidden),
+        #tutorial-clear-modal:not(.hidden),
+        #profile-modal:not(.hidden),
+        #login-bonus-modal:not(.hidden),
+        #gacha-probability-modal:not(.hidden),
+        #item-detail-modal:not(.hidden),
+        #gacha-anim-container:not(.hidden),
+        #gacha-result-modal:not(.hidden),
+        #gacha-result-10-modal:not(.hidden),
+        #multi-room-modal:not(.hidden),
+        #ranking-modal:not(.hidden),
+        #ranking-reward-modal:not(.hidden) {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #settings-modal > div,
+        #tutorial-overlay > div,
+        #custom-alert-modal > div,
+        #stamina-modal > div,
+        #locked-alert-overlay > div,
+        #tutorial-clear-modal > div,
+        #profile-modal > div,
+        #login-bonus-modal > div,
+        #gacha-probability-modal > div,
+        #item-detail-modal > div,
+        #multi-room-modal > div,
+        #ranking-modal > div,
+        #ranking-reward-modal > div,
+        #gacha-result-modal > div,
+        #gacha-result-10-modal > div,
+        #gacha-anim-container > div,
+        #happy-share-toast {
+            background:
+                radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 42%),
+                linear-gradient(160deg, #2b2016 0%, #140e09 100%) !important;
+            border: 1px solid rgba(212,175,55,0.5) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,235,190,0.08),
+                inset 0 -10px 24px rgba(0,0,0,0.45),
+                0 16px 34px rgba(0,0,0,0.55);
+        }
+
+        #happy-share-toast {
+            border-width: 2px;
+        }
+
+        .logo-enhanced,
+        .logo-container img,
+        .nav-icon img {
+            filter: drop-shadow(0 10px 18px rgba(0,0,0,0.6)) sepia(0.32) saturate(1.05) brightness(0.98) contrast(1.05);
+        }
+        /* === AAA級 海賊UI オーバーレイ & 細部強化 === */
+        /* ステージ背景画像（ステージ画面 & バトルの背景） */
+        #screen-stage { position: relative; overflow: hidden; }
+        #screen-stage::before {
+            content: '';
+            position: absolute; inset: 0; z-index: 0;
+            background-image: url('ステージ背景.png');
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            filter: contrast(0.9) saturate(0.9) brightness(0.95);
+            transform: translateZ(0);
+        }
+        /* キャンバスにも背景を合わせる（JS描画の上に見える画像） */
+        #gameCanvas { background-image: url('ステージ背景.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+        /* 暗いアンバー〜黒のグラデーションオーバーレイで重厚感と可読性を確保 */
+        #screen-stage::after,
+        #gameCanvas::after {
+            content: '';
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: linear-gradient(180deg, rgba(6,4,2,0.55), rgba(43,32,22,0.28));
+            mix-blend-mode: multiply;
+        }
+        /* 画面中の要素を上に出す */
+        #screen-stage > *, #screen-stage .bg-indigo-900, #screen-stage .bg-indigo-950 { position: relative; z-index: 2; }
+
+        /* 羊皮紙パネル + 真鍮フレームの質感 */
+        .bg-indigo-900, .bg-indigo-950, #app-header, #app, .bg-indigo-900\/80, .bg-indigo-900\/95 {
+            background: linear-gradient(180deg, #2b2016 0%, #1d1610 50%);
+            color: #f8eddc !important;
+            border-radius: 14px;
+            border: 6px solid rgba(43,32,22,0.9) !important;
+            box-shadow:
+                inset 0 6px 18px rgba(0,0,0,0.7),
+                inset 0 -14px 40px rgba(0,0,0,0.55),
+                0 18px 40px rgba(0,0,0,0.75),
+                0 0 0 6px rgba(212,175,55,0.06),
+                0 2px 0 rgba(0,0,0,0.9);
+            backdrop-filter: blur(8px) saturate(1.02);
+        }
+        /* 真鍮フレーム（インナーシャドウで立体的に） */
+        .bg-indigo-900::before, .bg-indigo-950::before, #app-header::before {
+            content: '';
+            position: absolute; inset: 6px; pointer-events: none; z-index: 3;
+            border-radius: inherit;
+            box-shadow: inset 0 2px 0 rgba(255,245,205,0.06), inset 0 -6px 18px rgba(0,0,0,0.6);
+            border: 3px solid rgba(212,175,55,0.14);
+            mix-blend-mode: multiply;
+        }
+
+        /* 金色テキスト・タイトルの強調 */
+        .giant-title, h1, h2, h3, h4 {
+            background: linear-gradient(180deg, #fff7d6 0%, #f6e28b 25%, #d4af37 50%, #b8860b 75%, #8B0000 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 6px 20px rgba(0,0,0,0.6), 0 0 24px rgba(212,175,55,0.25);
+        }
+
+        /* ボタンの押し心地（Juiciness） - 3D押し込み */
+        .game-btn {
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            will-change: transform, box-shadow, filter;
+        }
+        .game-btn:active,
+        button:active,
+        a:active,
+        .icon-sel-btn:active,
+        .nav-btn:active,
+        input[type="button"]:active,
+        input[type="submit"]:active {
+            transform: scale(0.93) translateY(3px) !important;
+            box-shadow: inset 0 12px 24px rgba(0,0,0,0.68), 0 2px 8px rgba(0,0,0,0.3) !important;
+            filter: brightness(0.96) saturate(0.96) !important;
+        }
+        /* ボタンの光る破片エフェクト（クリック時に短く表示） */
+        .game-btn::after {
+            content: '';
+            position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-radius: 50%; transform: translate(-50%, -50%) scale(0);
+            background: radial-gradient(circle, rgba(255,245,200,0.95) 0%, rgba(212,175,55,0.9) 30%, rgba(255,255,255,0) 70%);
+            opacity: 0; pointer-events: none; z-index: 6;
+        }
+        .game-btn:active::after {
+            animation: btn-burst 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes btn-burst { 0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; } 60% { transform: translate(-50%, -50%) scale(1.6); opacity: 0.9; } 100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; } }
+
+        /* モーダル・ダイアログのポップ演出（滑らかな拡大フェード） */
+        .popInSmooth { animation: popIn 420ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        @keyframes fadeInUp { 0% { transform: translateY(12px) scale(0.985); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+
+        /* 攻撃や撃破時のフラッシュ＆シェイク演出 */
+        #screen-game::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none; z-index: 40; opacity: 0; mix-blend-mode: screen; background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.85), rgba(255,200,120,0.25) 30%, transparent 60%);
+            transition: opacity 160ms ease-out;
+        }
+        /* JSが追加するクラスに合わせて発動（既存の .flash-anim / .shake-box と共存） */
+        #screen-game.impact-flash::before, #screen-game .impact-flash::before { animation: flashScreen 360ms ease-out forwards; }
+        @keyframes flashScreen { 0% { opacity: 0; transform: scale(1); } 30% { opacity: 1; transform: scale(1.01); } 100% { opacity: 0; transform: scale(1); } }
+        /* 画面の一瞬の振動（CSSのみ。JSが .impact-shake を付与した時に使える） */
+        .impact-shake { animation: impactShake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+        @keyframes impactShake { 0% { transform: translateX(0) } 20% { transform: translateX(-8px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(2px) } 100% { transform: translateX(0) } }
+
+        /* 微かなパーティクル・グロー（ボタン押下や技発動感を強化） */
+        .glow-pop { position: absolute; border-radius: 50%; pointer-events: none; z-index: 60; mix-blend-mode: screen; box-shadow: 0 6px 40px rgba(212,175,55,0.65), 0 2px 10px rgba(255,245,200,0.2); }
+
+        /* 多重シャドウでAAA感を向上 */
+        .elevated { box-shadow: 0 6px 10px rgba(0,0,0,0.6), 0 18px 40px rgba(0,0,0,0.72), 0 0 24px rgba(212,175,55,0.06); }
+
+        /* 高品質モードのための軽い微調整 */
+        :root { --pirate-gold: #D4AF37; --pirate-deep: #1d1610; --pirate-crimson: #8B0000; }
+
+        /* === ヴィンテージ海賊テーマ 仕上げ（ネオン/サイバー撲滅） === */
+        /* アクセント系インディゴボタン → 真鍮・アンティークゴールド */
+        .bg-indigo-600, .bg-indigo-700,
+        .hover\:bg-indigo-600:hover, .hover\:bg-indigo-800:hover, .hover\:bg-indigo-600, .hover\:bg-indigo-800 {
+            background:
+                linear-gradient(180deg, rgba(255,240,200,0.28), transparent 34%),
+                linear-gradient(180deg, #caa64b 0%, #a67c2b 55%, #7c5a1c 100%) !important;
+            color: #241608 !important;
+            border-color: rgba(120,86,28,0.9) !important;
+            box-shadow: inset 0 1px 0 rgba(255,245,205,0.5), inset 0 -6px 12px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.4) !important;
+            text-shadow: 0 1px 0 rgba(255,245,205,0.4) !important;
+        }
+
+        /* 非アクティブタブ等の暗いインディゴ地 → 深いダークブラウン */
+        .bg-indigo-950, .bg-indigo-950\/80, .bg-indigo-950\/90, .bg-indigo-950\/95 {
+            background: linear-gradient(180deg, #1a1410 0%, #0f0a06 100%) !important;
+        }
+
+        /* 半透明のインディゴ地（内側テキストボックス等）→ くすんだ革色 */
+        .bg-indigo-950\/50, .bg-indigo-950\/60, .bg-indigo-950\/40,
+        .bg-indigo-900\/50, .bg-indigo-900\/60, .bg-indigo-900\/40 {
+            background: rgba(20,14,9,0.55) !important;
+        }
+
+        /* クリップテキストの見出しはすべてアンティークゴールドの箔押し風に統一 */
+        .bg-clip-text.text-transparent,
+        h1.bg-clip-text, h2.bg-clip-text, h3.bg-clip-text, h4.bg-clip-text {
+            background-image: linear-gradient(180deg, #fff7d6 0%, #f2dc8f 28%, #d4af37 58%, #a97d1e 100%) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            color: transparent !important;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.45);
+        }
+
+        /* 各種ネオン発光バー → 真鍮グラデーション */
+        #pity-bar, #special-gauge {
+            background: linear-gradient(90deg, #a97d1e, #d4af37 50%, #f2dc8f) !important;
+        }
+
+        /* 小さなカラー系バッジは色を抑えて重厚に（発光を排除） */
+        .bg-green-500, .bg-pink-500, .bg-red-500 {
+            filter: saturate(0.7) brightness(0.9);
+        }
+
+        /* 画面全体の残ったガラス（backdrop-blur）を除去してマット質感に */
+        .backdrop-blur, .backdrop-blur-sm, .backdrop-blur-md {
+            backdrop-filter: none !important;
+        }
+
+        /* ヘッダーのユーザーアイコン枠を真鍮に */
+        #ui-usericon {
+            background: linear-gradient(180deg, #e6c65a, #a67c2b) !important;
+            border-color: rgba(120,86,28,0.95) !important;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,245,205,0.5) !important;
+        }
+
+        /* ホームの後光（holy-aura）を金色の淡いランタン光に落ち着かせる */
+        .holy-aura {
+            background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, rgba(110,20,20,0.08) 42%, transparent 70%) !important;
+            mix-blend-mode: screen;
+        }
+
+        /* ステージ一覧のカード（JS生成 .bg-indigo-800 / .bg-indigo-900）を革張り風に */
+        #stage-list button {
+            border-left-width: 8px;
+        }
+
+        /* ==================================================================== */
+        /* ===============  超豪華ガチャ演出（宝物庫スタイル）  =============== */
+        /* ==================================================================== */
+
+        /* モーダル切替をヌルヌルの cubic-bezier に */
+        #gacha-anim-container,
+        #gacha-result-modal,
+        #gacha-result-10-modal {
+            transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
+        }
+        #gacha-anim-container { background:
+                radial-gradient(circle at 50% 42%, rgba(60,40,18,0.55), transparent 55%),
+                linear-gradient(160deg, #150f08 0%, #0a0603 100%) !important; }
+
+        /* 演出レイヤー共通 */
+        .gacha-fx { position: absolute; inset: 0; pointer-events: none; }
+
+        /* パネル装飾（>div の羊皮紙背景）を演出レイヤー等から打ち消す */
+        #gacha-anim-container > #gacha-chest,
+        #gacha-anim-container > #ur-flash-text,
+        #gacha-anim-container > .gacha-fx,
+        #gacha-result-modal > .gacha-fx,
+        #gacha-result-10-modal > .gacha-fx {
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        #gacha-anim-container > #gacha-chest,
+        #gacha-anim-container > #ur-flash-text,
+        #gacha-anim-container > .gacha-particles,
+        #gacha-anim-container > .gacha-cutin-confirm {
+            background: none !important;
+        }
+
+        /* --- 召喚グロー（中央から広がる光） --- */
+        #gacha-anim-container > .gacha-summon-glow {
+            z-index: 1; mix-blend-mode: screen;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(255,238,180,0.55) 0%, rgba(212,175,55,0.30) 22%,
+                rgba(110,20,20,0.12) 42%, transparent 62%) !important;
+            animation: gSummonGlow 1.8s ease-in-out infinite alternate;
+        }
+        @keyframes gSummonGlow { from { opacity: 0.5; transform: scale(0.9); } to { opacity: 1; transform: scale(1.12); } }
+
+        /* --- 放射状の光条（銀→金へ昇格） --- */
+        #gacha-anim-container > .gacha-summon-rays {
+            z-index: 2; mix-blend-mode: screen;
+            background: repeating-conic-gradient(from 0deg,
+                rgba(255,240,200,0) 0deg 6deg,
+                rgba(255,240,200,0.18) 6deg 9deg,
+                rgba(212,175,55,0) 9deg 15deg) !important;
+            -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 62%);
+                    mask-image: radial-gradient(circle, #000 12%, transparent 62%);
+            animation: gRaysSpin 12s linear infinite, gRaysPromote 1.6s ease-out both;
+        }
+        @keyframes gRaysSpin { to { transform: rotate(360deg); } }
+        @keyframes gRaysPromote {
+            0%   { filter: hue-rotate(200deg) brightness(0.75); opacity: 0.2; }
+            60%  { filter: hue-rotate(70deg)  brightness(1.10); opacity: 0.9; }
+            100% { filter: hue-rotate(0deg)   brightness(1.25); opacity: 1; }
+        }
+
+        /* --- 召喚陣リング --- */
+        #gacha-anim-container > .gacha-summon-ring {
+            z-index: 3; mix-blend-mode: screen;
+            background: radial-gradient(circle,
+                transparent 0 30%, rgba(212,175,55,0.85) 30% 31.5%,
+                transparent 31.5% 35%, rgba(255,225,140,0.55) 35% 35.8%,
+                transparent 36%) !important;
+            animation: gRingSpawn 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes gRingSpawn {
+            0%   { opacity: 0; transform: scale(0.35) rotate(-20deg); }
+            60%  { opacity: 1; }
+            100% { opacity: 0.9; transform: scale(1) rotate(15deg); }
+        }
+
+        /* --- 光の粒子（パーティクル） --- */
+        #gacha-anim-container > .gacha-particles { z-index: 6; }
+        .gacha-particles span {
+            position: absolute; left: 50%; top: 50%;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #ffe9a8 42%, rgba(212,175,55,0) 72%);
+            opacity: 0; transform: translate(-50%,-50%);
+            animation: gParticle 2.2s ease-out infinite;
+            animation-delay: inherit;
+        }
+        @keyframes gParticle {
+            0%   { opacity: 0; transform: translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(0.3); }
+            15%  { opacity: 1; }
+            80%  { opacity: 0.85; }
+            100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--a)) translateY(calc(var(--dist,200px) * -1)) scale(1.1); }
+        }
+
+        /* --- UR：虹色オーラに差し替え --- */
+        #gacha-anim-container > #ur-anim-layer {
+            background: conic-gradient(from 0deg,
+                #ff3b3b, #ffa63b, #ffe23b, #7bff5a, #4fe3ff, #7a6bff, #ff6be1, #ff3b3b) !important;
+            filter: saturate(1.25);
+            mix-blend-mode: screen;
+        }
+
+        /* --- UR確定カットイン（ur-anim-layer.active のときだけ発火） --- */
+        .gacha-cutin-confirm { z-index: 25; display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0; }
+        #ur-anim-layer.active ~ .gacha-cutin-confirm { animation: gCutinSlam 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both; }
+        .gacha-cutin-confirm .gacha-cutin-word {
+            font-family: 'Cinzel', serif; font-weight: 900; font-style: italic;
+            font-size: 22vw; letter-spacing: 0.04em; transform: skewX(-8deg);
+            background: linear-gradient(180deg, #fff7d6, #ffe14d 40%, #ff7b00 75%, #c81e1e);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7)) drop-shadow(0 0 24px rgba(255,210,80,0.85));
+        }
+        .gacha-cutin-confirm .gacha-cutin-badge { font-size: 13vw; filter: drop-shadow(0 0 18px rgba(255,220,90,0.9)); }
+        @keyframes gCutinSlam {
+            0%   { opacity: 0; transform: scale(2.6) rotate(-6deg); filter: blur(8px); }
+            22%  { opacity: 1; transform: scale(0.92) rotate(0deg); filter: blur(0); }
+            34%  { transform: scale(1.08); }
+            48%  { transform: scale(1); }
+            86%  { opacity: 1; }
+            100% { opacity: 0; transform: scale(1.12); }
+        }
+
+        /* --- UR：ホワイトフラッシュ＆画面シェイク --- */
+        #gacha-anim-container > .gacha-summon-flash { z-index: 30; background: #fff !important; opacity: 0; }
+        #ur-anim-layer.active ~ .gacha-summon-flash { animation: gUrFlash 1.4s ease-out 0.35s 2; }
+        @keyframes gUrFlash { 0% { opacity: 0; } 8% { opacity: 0.92; } 32% { opacity: 0; } 100% { opacity: 0; } }
+        #gacha-anim-container:has(#ur-anim-layer.active) { animation: gGachaShake 0.5s ease-in-out 0.35s 3; }
+        @keyframes gGachaShake {
+            0%,100% { transform: translate(0,0) scale(1); }
+            20% { transform: translate(-9px,5px) scale(1.01); }
+            40% { transform: translate(8px,-6px) scale(1.01); }
+            60% { transform: translate(-6px,-3px) scale(1); }
+            80% { transform: translate(5px,6px) scale(1); }
+        }
+
+        /* ================= リザルト（1連） ================= */
+        #gacha-result-modal { perspective: 1200px; }
+
+        /* カード/キャラが 3D フリップして出現（JS が .gacha-result-text の animation をリセットして毎回再生） */
+        .gacha-result-text { animation: gCardReveal 0.75s cubic-bezier(0.2, 0.9, 0.25, 1.35) both; }
+        #gacha-result-visual-container.gacha-result-text { animation-delay: 0.12s; }
+        #gacha-result-modal > .bg-indigo-900.gacha-result-text { animation-delay: 0.22s; }
+        @keyframes gCardReveal {
+            0%   { opacity: 0; transform: perspective(1200px) rotateY(-115deg) scale(0.6); }
+            55%  { opacity: 1; transform: perspective(1200px) rotateY(18deg) scale(1.08); }
+            75%  { transform: perspective(1200px) rotateY(-7deg) scale(1); }
+            100% { opacity: 1; transform: perspective(1200px) rotateY(0deg) scale(1); }
+        }
+
+        /* 背景の光芒（サンバースト）とグロー */
+        #gacha-result-modal > .gacha-result-rays,
+        #gacha-result-10-modal > .gacha-result-rays {
+            z-index: 0; opacity: 0; mix-blend-mode: screen;
+            background: repeating-conic-gradient(from 0deg,
+                rgba(255,225,120,0) 0 4deg,
+                rgba(255,225,120,0.22) 4deg 7deg,
+                rgba(255,225,120,0) 7deg 12deg) !important;
+            -webkit-mask-image: radial-gradient(circle, #000 6%, transparent 66%);
+                    mask-image: radial-gradient(circle, #000 6%, transparent 66%);
+            animation: gRaysSpin 16s linear infinite;
+        }
+        #gacha-result-modal > .gacha-result-burst {
+            z-index: 0; opacity: 0; mix-blend-mode: screen;
+            background: radial-gradient(circle at 50% 45%,
+                rgba(255,220,120,0.35), rgba(212,175,55,0.12) 30%, transparent 60%) !important;
+            animation: gSummonGlow 2s ease-in-out infinite alternate;
+        }
+
+        /* レア度別（rarityColors の class を :has で判定） */
+        #gacha-result-modal:has(#gacha-result-rarity.text-slate-400) .gacha-result-burst,
+        #gacha-result-modal:has(#gacha-result-rarity.text-blue-400)  .gacha-result-burst { opacity: 0.45; }
+        #gacha-result-modal:has(#gacha-result-rarity.text-blue-400)  .gacha-result-rays { opacity: 0.35; filter: hue-rotate(180deg); }
+        #gacha-result-modal:has(#gacha-result-rarity.text-purple-400) .gacha-result-rays { opacity: 0.55; filter: hue-rotate(235deg); }
+        #gacha-result-modal:has(#gacha-result-rarity.text-purple-400) .gacha-result-burst { opacity: 0.7; filter: hue-rotate(235deg); }
+        #gacha-result-modal:has(#gacha-result-rarity.text-yellow-200) .gacha-result-rays { opacity: 0.95; }
+        #gacha-result-modal:has(#gacha-result-rarity.text-yellow-200) .gacha-result-burst { opacity: 1; }
+        #gacha-result-modal:has(#gacha-result-rarity.from-red-500) .gacha-result-rays {
+            opacity: 1; animation: gRaysSpin 10s linear infinite, gResultRainbow 3s linear infinite;
+        }
+        #gacha-result-modal:has(#gacha-result-rarity.from-red-500) .gacha-result-burst { opacity: 1; }
+        @keyframes gResultRainbow { from { filter: saturate(1.5) hue-rotate(0deg); } to { filter: saturate(1.5) hue-rotate(360deg); } }
+
+        /* SSR / UR：メダルフレームがキラキラとパルス発光（::after で pointer/JS に干渉しない） */
+        #gacha-result-modal:has(#gacha-result-rarity.text-yellow-200) #gacha-result-visual-container::after,
+        #gacha-result-modal:has(#gacha-result-rarity.from-red-500) #gacha-result-visual-container::after {
+            content: ''; position: absolute; inset: -12px; border-radius: 9999px; pointer-events: none; z-index: -1;
+            border: 3px solid rgba(255,225,140,0.9);
+            box-shadow: 0 0 45px 6px rgba(255,215,90,0.85), inset 0 0 22px rgba(255,225,140,0.6);
+            animation: gMedallionPulse 1.4s ease-in-out infinite;
+        }
+        #gacha-result-modal:has(#gacha-result-rarity.from-red-500) #gacha-result-visual-container::after {
+            border-color: rgba(255,180,90,0.95);
+            box-shadow: 0 0 55px 8px rgba(255,120,80,0.9), inset 0 0 24px rgba(255,200,120,0.7);
+        }
+        @keyframes gMedallionPulse { 0%,100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.07); } }
+
+        /* ================= リザルト（10連） ================= */
+        #gacha-result-10-modal > .gacha-result-rays { opacity: 0.5; }
+        #gacha-10-grid { perspective: 1000px; }
+        #gacha-10-grid > div {
+            animation-name: gCard10Flip !important;
+            animation-duration: 0.6s !important;
+            animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.3) !important;
+        }
+        @keyframes gCard10Flip {
+            0%   { opacity: 0; transform: perspective(800px) rotateY(-100deg) scale(0.7); }
+            60%  { opacity: 1; transform: perspective(800px) rotateY(15deg) scale(1.05); }
+            100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); }
+        }
+        #gacha-10-grid > div:has(.text-purple-400) { border-color: rgba(190,150,230,0.9) !important; box-shadow: 0 0 14px rgba(150,90,220,0.55) !important; }
+        #gacha-10-grid > div:has(.text-yellow-200) { border-color: rgba(255,220,120,0.95) !important; box-shadow: 0 0 20px rgba(255,210,90,0.75) !important; }
+        #gacha-10-grid > div:has(.from-red-500)    { border-color: rgba(255,180,90,0.95) !important; box-shadow: 0 0 24px rgba(255,120,80,0.85) !important; }
+
+        /* ================= ガチャ画面（宝物庫の宝箱に光背） ================= */
+        #gacha-chest-emoji { position: relative; z-index: 10; animation: gChestBob 3.2s ease-in-out infinite; }
+        @keyframes gChestBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+        #gacha-chest-emoji::before {
+            content: ''; position: absolute; inset: -55%; z-index: -1; pointer-events: none;
+            background: repeating-conic-gradient(from 0deg,
+                rgba(255,225,120,0) 0 8deg, rgba(255,225,120,0.16) 8deg 12deg, rgba(255,225,120,0) 12deg 20deg);
+            -webkit-mask-image: radial-gradient(circle, #000 10%, transparent 66%);
+                    mask-image: radial-gradient(circle, #000 10%, transparent 66%);
+            animation: gRaysSpin 14s linear infinite;
+        }
+
     </style>
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
@@ -175,7 +986,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="stage-list" class="flex flex-col gap-3"></div>
+                <div id="stage-list" class="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto ui-scroll-panel stage-scroll"></div>
             </div>
 
             <div id="screen-equip" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-4">
@@ -190,19 +1001,19 @@
                 </div>
                 <div id="container-equip-skins" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg">
                     <h3 class="text-sm font-black text-blue-300 mb-2">⛵ 海賊船（スピードUP！）</h3>
-                    <div id="equip-skins" class="grid grid-cols-2 gap-3"></div>
+                    <div id="equip-skins" class="grid grid-cols-2 gap-3 ui-scroll-panel"></div>
                 </div>
                 <div id="container-equip-weapons" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-cyan-300 mb-2">💣 大砲（弾速・連射UP！）</h3>
-                    <div id="equip-weapons" class="grid grid-cols-2 gap-3"></div>
+                    <div id="equip-weapons" class="grid grid-cols-2 gap-3 ui-scroll-panel"></div>
                 </div>
                 <div id="container-equip-crew" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-pink-300 mb-2">🦜 乗組員（才能強化・転生）</h3>
-                    <div id="equip-crew" class="grid grid-cols-2 gap-3"></div>
+                    <div id="equip-crew" class="grid grid-cols-2 gap-3 ui-scroll-panel"></div>
                 </div>
                 <div id="container-equip-system" class="bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg hidden">
                     <h3 class="text-sm font-black text-yellow-400 mb-2">🔋 スタミナ上限（最大値UP！）</h3>
-                    <div id="equip-system" class="grid grid-cols-1 gap-3"></div>
+                    <div id="equip-system" class="grid grid-cols-1 gap-3 ui-scroll-panel"></div>
                 </div>
             </div>
 
@@ -228,7 +1039,7 @@
                             <span class="absolute text-lg">🐾</span>
                             <img src="せいまろ.png" class="absolute inset-0 w-full h-full object-contain z-10" onerror="this.style.opacity='0';">
                         </div>
-                        <div class="text-left"><div class="text-[10px] text-yellow-300 font-black leading-none">超・大当り中!!</div><div class="text-sm text-white font-black">せいまろ</div></div>
+                        <div class="text-left"><div class="text-[10px] text-yellow-300 font-black leading-none">ピックアップ!!</div><div class="text-sm text-white font-black">せいまろ</div></div>
                     </div>
                 </div>
                 <div class="w-full bg-indigo-900/90 p-3 rounded-2xl border-2 border-indigo-700 shadow-xl backdrop-blur mt-2">
@@ -272,7 +1083,7 @@
                         届いた申請 <span id="friend-req-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[11px] px-2 py-0.5 rounded-full font-black shadow-md border border-white hidden">!</span>
                     </button>
                 </div>
-                <div id="friend-list-container" class="flex flex-col gap-3"></div>
+                <div id="friend-list-container" class="flex flex-col gap-3 ui-scroll-panel"></div>
             </div>
 
             <div id="screen-mission" class="screen hidden h-full w-full overflow-y-auto no-scrollbar pb-28 p-4 flex flex-col gap-3">
@@ -285,7 +1096,7 @@
                     <button id="tab-mission-normal" onclick="switchMissionTab('normal')" class="flex-1 py-2 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800">ノーマル</button>
                     <button id="tab-mission-event" onclick="switchMissionTab('event')" class="flex-1 py-2 rounded-lg font-black text-xs text-pink-400 hover:text-pink-200 transition-all border-b-4 border-transparent">イベント</button>
                 </div>
-                <div id="mission-list-container" class="flex flex-col gap-3"></div>
+                <div id="mission-list-container" class="flex flex-col gap-3 ui-scroll-panel"></div>
             </div>
 
             <div id="screen-game" class="screen hidden h-full w-full relative">
@@ -620,11 +1431,34 @@
 
         <div id="gacha-anim-container" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-40 overflow-hidden">
             <div id="ur-anim-layer" class="absolute inset-0 w-[200%] h-[200%] left-[-50%] top-[-50%]"></div>
+            <div class="gacha-fx gacha-summon-glow" aria-hidden="true"></div>
+            <div class="gacha-fx gacha-summon-rays" aria-hidden="true"></div>
+            <div class="gacha-fx gacha-summon-ring" aria-hidden="true"></div>
+            <div class="gacha-fx gacha-particles" aria-hidden="true">
+                <span style="--a:5deg;--dist:210px;animation-delay:.05s"></span>
+                <span style="--a:32deg;--dist:250px;animation-delay:.35s"></span>
+                <span style="--a:64deg;--dist:190px;animation-delay:.15s"></span>
+                <span style="--a:96deg;--dist:260px;animation-delay:.5s"></span>
+                <span style="--a:128deg;--dist:200px;animation-delay:.25s"></span>
+                <span style="--a:160deg;--dist:240px;animation-delay:.6s"></span>
+                <span style="--a:192deg;--dist:210px;animation-delay:.1s"></span>
+                <span style="--a:214deg;--dist:270px;animation-delay:.45s"></span>
+                <span style="--a:246deg;--dist:185px;animation-delay:.2s"></span>
+                <span style="--a:278deg;--dist:255px;animation-delay:.55s"></span>
+                <span style="--a:310deg;--dist:205px;animation-delay:.3s"></span>
+                <span style="--a:342deg;--dist:245px;animation-delay:.65s"></span>
+                <span style="--a:18deg;--dist:300px;animation-delay:.4s"></span>
+                <span style="--a:200deg;--dist:310px;animation-delay:.7s"></span>
+            </div>
             <div id="gacha-chest" class="text-[9rem] relative z-10 transition-transform drop-shadow-[0_20px_30px_rgba(255,255,0,0.8)] filter">📦</div>
-            <div id="ur-flash-text" class="absolute top-1/4 w-full text-center hidden z-20"><div class="text-7xl font-black text-white ur-text-flash tracking-widest italic drop-shadow-2xl">超・大当り!!</div></div>
+            <div id="ur-flash-text" class="absolute top-1/4 w-full text-center hidden z-20"><div class="text-7xl font-black text-white ur-text-flash tracking-widest italic drop-shadow-2xl">超大当り!!</div></div>
+            <div class="gacha-fx gacha-cutin-confirm" aria-hidden="true"><span class="gacha-cutin-badge">☠️</span><span class="gacha-cutin-word">確定！</span></div>
+            <div class="gacha-fx gacha-summon-flash" aria-hidden="true"></div>
         </div>
 
         <div id="gacha-result-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-6 overflow-hidden">
+            <div class="gacha-fx gacha-result-rays" aria-hidden="true"></div>
+            <div class="gacha-fx gacha-result-burst" aria-hidden="true"></div>
             <div id="gacha-confetti-container" class="absolute inset-0 pointer-events-none z-0"></div>
             <h3 id="gacha-result-rarity" class="text-6xl font-black mb-4 gacha-result-text italic tracking-wider drop-shadow-lg relative z-10"></h3>
             <div id="gacha-result-visual-container" class="w-32 h-32 flex items-center justify-center mb-6 gacha-result-text relative z-10 bg-indigo-900/50 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.2)]"></div>
@@ -636,6 +1470,7 @@
         </div>
 
         <div id="gacha-result-10-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-start z-50 p-4 overflow-y-auto no-scrollbar">
+            <div class="gacha-fx gacha-result-rays" aria-hidden="true"></div>
             <div id="gacha-confetti-container-10" class="absolute inset-0 pointer-events-none z-0"></div>
             <h3 class="text-3xl font-black mt-4 mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-400 italic tracking-wider drop-shadow-lg relative z-10 text-center">10連ガチャ結果!!</h3>
             <div id="gacha-10-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-sm mb-6 relative z-10"></div>
@@ -854,6 +1689,806 @@ const MASTER = {
                'wp_machine':{id:'wp_machine',name:'ガトリング砲',rarity:'SR',fireRate:5,speed:8,type:'single',color:'#2dd4bf',desc:'超すごいスピードで弾を連射！'}, 
                'wp_legend': {id:'wp_legend',name:'海神の光条',rarity:'UR',fireRate:10,speed:15,type:'laser',color:'#a78bfa',desc:'全てを貫通する最強のレーザー大砲！'} },
     skins: { 'skin_default':{id:'skin_default',name:'丸太のイカダ',rarity:'N',icon:'🛶'}, 
+    'skin_1':{id:'skin_1',name:'アイアンストライク',rarity:'R',icon:'🌬️'}, 
+'skin_2':{id:'skin_2',name:'バーニングフレイム',rarity:'R',icon:'🔥'}, 
+'skin_3':{id:'skin_3',name:'アクアスプラッシュ',rarity:'R',icon:'💧'}, 
+'skin_4':{id:'skin_4',name:'アースクエイク',rarity:'R',icon:'🪨'}, 
+'skin_5':{id:'skin_5',name:'ライトニングボルト',rarity:'R',icon:'⚡'}, 
+'skin_6':{id:'skin_6',name:'フロストバイト',rarity:'R',icon:'❄️'}, 
+'skin_7':{id:'skin_7',name:'シャドウブレイド',rarity:'R',icon:'🗡️'}, 
+'skin_8':{id:'skin_8',name:'ホーリーライト',rarity:'R',icon:'✨'}, 
+'skin_9':{id:'skin_9',name:'ヴェノムファング',rarity:'R',icon:'🐍'}, 
+'skin_10':{id:'skin_10',name:'サイバーパルス',rarity:'R',icon:'🤖'}, 
+'skin_11':{id:'skin_11',name:'コズミックレイ',rarity:'R',icon:'🌌'}, 
+'skin_12':{id:'skin_12',name:'ワイルドファング',rarity:'R',icon:'🐾'}, 
+'skin_13':{id:'skin_13',name:'ソーラーフレア',rarity:'R',icon:'☀️'}, 
+'skin_14':{id:'skin_14',name:'ルナ eclipse',rarity:'R',icon:'🌙'}, 
+'skin_15':{id:'skin_15',name:'オーシャンタイド',rarity:'R',icon:'🌊'}, 
+'skin_16':{id:'skin_16',name:'マグマバースト',rarity:'R',icon:'🌋'}, 
+'skin_17':{id:'skin_17',name:'ブロッサムブリーズ',rarity:'R',icon:'🌸'}, 
+'skin_18':{id:'skin_18',name:'ゴールデンクラウン',rarity:'R',icon:'👑'}, 
+'skin_19':{id:'skin_19',name:'ナイトメアハント',rarity:'R',icon:'💀'}, 
+'skin_20':{id:'skin_20',name:'クリスタルハート',rarity:'R',icon:'💎'}, 
+'skin_21':{id:'skin_21',name:'タイムリワインド',rarity:'R',icon:'⏳'}, 
+'skin_22':{id:'skin_22',name:'メテオストライク',rarity:'R',icon:'☄️'}, 
+'skin_23':{id:'skin_23',name:'バブルポップ',rarity:'R',icon:'🫧'}, 
+'skin_24':{id:'skin_24',name:'フォレストシェルター',rarity:'R',icon:'🌲'}, 
+'skin_25':{id:'skin_25',name:'ファントムアイ',rarity:'R',icon:'👁️'}, 
+'skin_26':{id:'skin_26',name:'ソニックウエーブ',rarity:'R',icon:'🔊'}, 
+'skin_27':{id:'skin_27',name:'マグネティック',rarity:'R',icon:'🧲'}, 
+'skin_28':{id:'skin_28',name:'スターライト',rarity:'R',icon:'⭐'}, 
+'skin_29':{id:'skin_29',name:'ダイナマイト',rarity:'R',icon:'🧨'}, 
+'skin_30':{id:'skin_30',name:'レインボーアーク',rarity:'R',icon:'🌈'}, 
+'skin_31':{id:'skin_31',name:'ラッキーチャーム',rarity:'R',icon:'🍀'}, 
+'skin_32':{id:'skin_32',name:'ファイナルフロンティア',rarity:'R',icon:'🚀'},
+'skin_33':{id:'skin_33',name:'ヴォイドウォーカー',rarity:'R',icon:'🌀'}, 
+'skin_34':{id:'skin_34',name:'プラズマキャノン',rarity:'R',icon:'🔫'}, 
+'skin_35':{id:'skin_35',name:'ゴールデンコイン',rarity:'R',icon:'🪙'}, 
+'skin_36':{id:'skin_36',name:'アザーワールド',rarity:'R',icon:'🪐'}, 
+'skin_37':{id:'skin_37',name:'ミスティッククリスタル',rarity:'R',icon:'🔮'}, 
+'skin_38':{id:'skin_38',name:'タイムボム',rarity:'R',icon:'💣'}, 
+'skin_39':{id:'skin_39',name:'アシッドレイン',rarity:'R',icon:'🧪'}, 
+'skin_40':{id:'skin_40',name:'ワイルドフラワー',rarity:'R',icon:'🌻'}, 
+'skin_41':{id:'skin_41',name:'ブレイズドラゴンテイル',rarity:'R',icon:'🐲'}, 
+'skin_42':{id:'skin_42',name:'ナイトメアウィング',rarity:'R',icon:'🦇'}, 
+'skin_43':{id:'skin_43',name:'アイスシールド',rarity:'R',icon:'🛡️'}, 
+'skin_44':{id:'skin_44',name:'ゴールデンベル',rarity:'R',icon:'🔔'}, 
+'skin_45':{id:'skin_45',name:'シャドウクロー',rarity:'R',icon:'🦅'}, 
+'skin_46':{id:'skin_46',name:'エレキギター',rarity:'R',icon:'🎸'}, 
+'skin_47':{id:'skin_47',name:'マジックダイス',rarity:'R',icon:'🎲'}, 
+'skin_48':{id:'skin_48',name:'ブラッドムーン',rarity:'R',icon:'🔴'}, 
+'skin_49':{id:'skin_49',name:'シルクスパイダー',rarity:'R',icon:'🕷️'}, 
+'skin_50':{id:'skin_50',name:'キングダムキー',rarity:'R',icon:'🔑'},
+'skin_51':{id:'skin_51',name:'クリムゾンローズ',rarity:'R',icon:'🌹'},
+'skin_52':{id:'skin_52',name:'スノーフレーク',rarity:'R',icon:'❄️'},
+'skin_53':{id:'skin_53',name:'ゴールデンハープ',rarity:'R',icon:'🎼'},
+'skin_54':{id:'skin_54',name:'ダークナイト',rarity:'R',icon:'🛡️'},
+'skin_55':{id:'skin_55',name:'フェニックス',rarity:'R',icon:'🐦‍🔥'},
+'skin_56':{id:'skin_56',name:'ネビュラバースト',rarity:'R',icon:'🌌'},
+'skin_57':{id:'skin_57',name:'オーシャンパール',rarity:'R',icon:'🦪'},
+'skin_58':{id:'skin_58',name:'サンダーボルト',rarity:'R',icon:'⚡'},
+'skin_59':{id:'skin_59',name:'エメラルドリーフ',rarity:'R',icon:'🍃'},
+'skin_60':{id:'skin_60',name:'ミステリーボックス',rarity:'R',icon:'🎁'},
+'skin_61':{id:'skin_61',name:'サイバーグラス',rarity:'R',icon:'🕶️'},
+'skin_62':{id:'skin_62',name:'スカルクロス',rarity:'R',icon:'☠️'},
+'skin_63':{id:'skin_63',name:'ワイルドキャット',rarity:'R',icon:'🐱'},
+'skin_64':{id:'skin_64',name:'キャンディポップ',rarity:'R',icon:'🍬'},
+'skin_65':{id:'skin_65',name:'マジックウィンド',rarity:'R',icon:'🪄'},
+'skin_66':{id:'skin_66',name:'フレイムウィング',rarity:'R',icon:'🪽'},
+'skin_67':{id:'skin_67',name:'アイアンコープス',rarity:'R',icon:'🦾'},
+'skin_68':{id:'skin_68',name:'ドリームキャッチャー',rarity:'R',icon:'💭'},
+'skin_69':{id:'skin_69',name:'ブレイズアンカー',rarity:'R',icon:'⚓'},
+'skin_70':{id:'skin_70',name:'ルナシールド',rarity:'R',icon:'🌙'},
+'skin_71':{id:'skin_71',name:'ソーラーコア',rarity:'R',icon:'☀️'},
+'skin_72':{id:'skin_72',name:'フローズンクリスタル',rarity:'R',icon:'🧊'},
+'skin_73':{id:'skin_73',name:'カオスインク',rarity:'R',icon:'🖋️'},
+'skin_74':{id:'skin_74',name:'ゴールデンフェザー',rarity:'R',icon:'🪶'},
+'skin_75':{id:'skin_75',name:'ハイパーランタン',rarity:'R',icon:'🏮'},
+'skin_76':{id:'skin_76',name:'ミッドナイトマスク',rarity:'R',icon:'🎭'},
+'skin_77':{id:'skin_77',name:'ポイズンボトル',rarity:'R',icon:'🧪'},
+'skin_78':{id:'skin_78',name:'コズミックコンパス',rarity:'R',icon:'🧭'},
+'skin_79':{id:'skin_79',name:'ギアホイール',rarity:'R',icon:'⚙️'},
+'skin_80':{id:'skin_80',name:'エンジェルハロー',rarity:'R',icon:'😇'},
+'skin_81':{id:'skin_81',name:'デビルホーン',rarity:'R',icon:'😈'},
+'skin_82':{id:'skin_82',name:'クリスタルクラウン',rarity:'R',icon:'👑'},
+'skin_83':{id:'skin_83',name:'ネオンライト',rarity:'R',icon:'💡'},
+'skin_84':{id:'skin_84',name:'ストームクラウド',rarity:'R',icon:'🌩️'},
+'skin_85':{id:'skin_85',name:'アースコア',rarity:'R',icon:'🌍'},
+'skin_86':{id:'skin_86',name:'チェスキング',rarity:'R',icon:'♔'},
+'skin_87':{id:'skin_87',name:'ラッキースター',rarity:'R',icon:'🌟'},
+'skin_88':{id:'skin_88',name:'タイム hourglass',rarity:'R',icon:'⌛'},
+'skin_89':{id:'skin_89',name:'ファントムキャンドル',rarity:'R',icon:'🕯️'},
+'skin_90':{id:'skin_90',name:'ミスティックミラー',rarity:'R',icon:'🪞'},
+'skin_91':{id:'skin_91',name:'ブラッドローズ',rarity:'R',icon:'🥀'},
+'skin_92':{id:'skin_92',name:'ワイルドウルフ',rarity:'R',icon:'🐺'},
+'skin_93':{id:'skin_93',name:'サイバーブレイン',rarity:'R',icon:'🧠'},
+'skin_94':{id:'skin_94',name:'ゴールデンリング',rarity:'R',icon:'💍'},
+'skin_95':{id:'skin_95',name:'シャドウカイト',rarity:'R',icon:'🪁'},
+'skin_96':{id:'skin_96',name:'バブルシールド',rarity:'R',icon:'🫧'},
+'skin_97':{id:'skin_97',name:'フレイムトルネード',rarity:'R',icon:'🌪️'},
+'skin_98':{id:'skin_98',name:'アイスドール',rarity:'R',icon:'🧸'},
+'skin_99':{id:'skin_99',name:'マジックポット',rarity:'R',icon:'🏺'},
+'skin_100':{id:'skin_100',name:'センチュリークラウン',rarity:'R',icon:'🏆'},
+'skin_101':{id:'skin_101',name:'ギャラクシーボール',rarity:'R',icon:'🔮'},
+'skin_102':{id:'skin_102',name:'ホーリーベル',rarity:'R',icon:'🔔'},
+'skin_103':{id:'skin_103',name:'ヴァルキリーシールド',rarity:'R',icon:'🛡️'},
+'skin_104':{id:'skin_104',name:'スパークラー',rarity:'R',icon:'❇️'},
+'skin_105':{id:'skin_105',name:'ミステリースクロール',rarity:'R',icon:'📜'},
+'skin_106':{id:'skin_106',name:'アイアンチェスト',rarity:'R',icon:'🧰'},
+'skin_107':{id:'skin_107',name:'シャドウクレセント',rarity:'R',icon:'🌘'},
+'skin_108':{id:'skin_108',name:'ゴールデントロフィー',rarity:'R',icon:'🥇'},
+'skin_109':{id:'skin_109',name:'サイバーアイ',rarity:'R',icon:'👁️‍🗨️'},
+'skin_110':{id:'skin_110',name:'アクアシェル',rarity:'R',icon:'🐚'},
+'skin_111':{id:'skin_111',name:'ブレイズハート',rarity:'R',icon:'❤️‍🔥'},
+'skin_112':{id:'skin_112',name:'フローズンウィング',rarity:'R',icon:'🪽'},
+'skin_113':{id:'skin_113',name:'ワイルドタイガー',rarity:'R',icon:'🐯'},
+'skin_114':{id:'skin_114',name:'コズミックサン',rarity:'R',icon:'🌞'},
+'skin_115':{id:'skin_115',name:'ナイトメアクロウ',rarity:'R',icon:'🦅'},
+'skin_116':{id:'skin_116',name:'ライトニングストライク',rarity:'R',icon:'🌩️'},
+'skin_117':{id:'skin_117',name:'フォレストクリスタル',rarity:'R',icon:'🟩'},
+'skin_118':{id:'skin_118',name:'ポイズンキノコ',rarity:'R',icon:'🍄'},
+'skin_119':{id:'skin_119',name:'マジックトランプ',rarity:'R',icon:'🃏'},
+'skin_120':{id:'skin_120',name:'ゴールデンキー',rarity:'R',icon:'🗝️'},
+'skin_121':{id:'skin_121',name:'ソーラーシールド',rarity:'R',icon:'🛡️'},
+'skin_122':{id:'skin_122',name:'ルナクリスタル',rarity:'R',icon:'🌙'},
+'skin_123':{id:'skin_123',name:'サイバーコイル',rarity:'R',icon:'🌀'},
+'skin_124':{id:'skin_124',name:'ファントムゲート',rarity:'R',icon:'⛩️'},
+'skin_125':{id:'skin_125',name:'オーシャンハーープ',rarity:'R',icon:'🎵'},
+'skin_126':{id:'skin_126',name:'マグマクリスタル',rarity:'R',icon:'🟧'},
+'skin_127':{id:'skin_127',name:'ブロッサムファン',rarity:'R',icon:'🪭'},
+'skin_128':{id:'skin_128',name:'タイムギア',rarity:'R',icon:'⚙️'},
+'skin_129':{id:'skin_129',name:'ホーリーウィング',rarity:'R',icon:'🕊️'},
+'skin_130':{id:'skin_130',name:'カオスアイ',rarity:'R',icon:'🧿'},
+'skin_131':{id:'skin_131',name:'スターダスト',rarity:'R',icon:'✨'},
+'skin_132':{id:'skin_132',name:'アシッドボトル',rarity:'R',icon:'🧪'},
+'skin_133':{id:'skin_133',name:'ワイルドイーグル',rarity:'R',icon:'🦅'},
+'skin_134':{id:'skin_134',name:'ネオンキューブ',rarity:'R',icon:'🧊'},
+'skin_135':{id:'skin_135',name:'ゴールデンアップル',rarity:'R',icon:'🍎'},
+'skin_136':{id:'skin_136',name:'クリスタルローズ',rarity:'R',icon:'🌹'},
+'skin_137':{id:'skin_137',name:'シャドウファントム',rarity:'R',icon:'👻'},
+'skin_138':{id:'skin_138',name:'サンダースピリット',rarity:'R',icon:'⚡'},
+'skin_139':{id:'skin_139',name:'フローズンハート',rarity:'R',icon:'💙'},
+'skin_140':{id:'skin_140',name:'ミスティックブック',rarity:'R',icon:'📖'},
+'skin_141':{id:'skin_141',name:'ブレイズボム',rarity:'R',icon:'💣'},
+'skin_142':{id:'skin_142',name:'サイバーマスク',rarity:'R',icon:'🎭'},
+'skin_143':{id:'skin_143',name:'コズミックウィング',rarity:'R',icon:'🪽'},
+'skin_144':{id:'skin_144',name:'フォレストスピリット',rarity:'R',icon:'🌿'},
+'skin_145':{id:'skin_145',name:'ナイトメアリーフ',rarity:'R',icon:'🍂'},
+'skin_146':{id:'skin_146',name:'アクアトライデント',rarity:'R',icon:'🔱'},
+'skin_147':{id:'skin_147',name:'ゴールデンメダル',rarity:'R',icon:'🏅'},
+'skin_148':{id:'skin_148',name:'バブルハート',rarity:'R',icon:'🫧'},
+'skin_149':{id:'skin_149',name:'ルナフェザー',rarity:'R',icon:'🪶'},
+'skin_150':{id:'skin_150',name:'オメガコア',rarity:'R',icon:'⚛️'},
+'skin_151':{id:'skin_151',name:'クリスタルペンダント',rarity:'R',icon:'💎'},
+'skin_152':{id:'skin_152',name:'サンダースピアー',rarity:'R',icon:'⚡'},
+'skin_153':{id:'skin_153',name:'フローズンベア',rarity:'R',icon:'🐻‍❄️'},
+'skin_154':{id:'skin_154',name:'ヴォイドゲート',rarity:'R',icon:'🌀'},
+'skin_155':{id:'skin_155',name:'ゴールデンキャッスル',rarity:'R',icon:'🏰'},
+'skin_156':{id:'skin_156',name:'ソーラーランタン',rarity:'R',icon:'☀️'},
+'skin_157':{id:'skin_157',name:'ミステリーキューブ',rarity:'R',icon:'🧊'},
+'skin_158':{id:'skin_158',name:'ブレイズフェニックス',rarity:'R',icon:'🔥'},
+'skin_159':{id:'skin_159',name:'サイバーバイザー',rarity:'R',icon:'🥽'},
+'skin_160':{id:'skin_160',name:'ルナラビット',rarity:'R',icon:'🐇'},
+'skin_161':{id:'skin_161',name:'コズミックコメット',rarity:'R',icon:'☄️'},
+'skin_162':{id:'skin_162',name:'オーシャンイルカ',rarity:'R',icon:'🐬'},
+'skin_163':{id:'skin_163',name:'シャドウクローク',rarity:'R',icon:'🧥'},
+'skin_164':{id:'skin_164',name:'フォレストフォックス',rarity:'R',icon:'🦊'},
+'skin_165':{id:'skin_165',name:'マジッククリスタル',rarity:'R',icon:'🔮'},
+'skin_166':{id:'skin_166',name:'アクアクラゲ',rarity:'R',icon:'🪼'},
+'skin_167':{id:'skin_167',name:'ゴールデンコーラ',rarity:'R',icon:'🥤'},
+'skin_168':{id:'skin_168',name:'ナイトメアバット',rarity:'R',icon:'🦇'},
+'skin_169':{id:'skin_169',name:'アシッドスライム',rarity:'R',icon:'🧪'},
+'skin_170':{id:'skin_170',name:'ネオンキャット',rarity:'R',icon:'🐾'},
+'skin_171':{id:'skin_171',name:'ハイパースペード',rarity:'R',icon:'♠️'},
+'skin_172':{id:'skin_172',name:'キングダイヤ',rarity:'R',icon:'♦️'},
+'skin_173':{id:'skin_173',name:'クイーンクラブ',rarity:'R',icon:'♣️'},
+'skin_174':{id:'skin_174',name:'エースハート',rarity:'R',icon:'♥️'},
+'skin_175':{id:'skin_175',name:'タイムクロック',rarity:'R',icon:'⏰'},
+'skin_176':{id:'skin_176',name:'ポイズンスパイダー',rarity:'R',icon:'🕷️'},
+'skin_177':{id:'skin_177',name:'ワイルドパンダ',rarity:'R',icon:'🐼'},
+'skin_178':{id:'skin_178',name:'スターシップ',rarity:'R',icon:'🚀'},
+'skin_179':{id:'skin_179',name:'アイアンハンマー',rarity:'R',icon:'🔨'},
+'skin_180':{id:'skin_180',name:'ホーリークロス',rarity:'R',icon:'✝️'},
+'skin_181':{id:'skin_181',name:'カオスハート',rarity:'R',icon:'🖤'},
+'skin_182':{id:'skin_182',name:'フレイムキャンドル',rarity:'R',icon:'🕯️'},
+'skin_183':{id:'skin_183',name:'スノーマン',rarity:'R',icon:'☃️'},
+'skin_184':{id:'skin_184',name:'ゴールデンベルペンダント',rarity:'R',icon:'🔔'},
+'skin_185':{id:'skin_185',name:'サイバーウイング',rarity:'R',icon:'🪽'},
+'skin_186':{id:'skin_186',name:'ミスティックファン',rarity:'R',icon:'🪭'},
+'skin_187':{id:'skin_187',name:'フローズンフィッシュ',rarity:'R',icon:'🐟'},
+'skin_188':{id:'skin_188',name:'ソーラークラウン',rarity:'R',icon:'👑'},
+'skin_189':{id:'skin_189',name:'ルナバタフライ',rarity:'R',icon:'🦋'},
+'skin_190':{id:'skin_190',name:'ダークナイトシールド',rarity:'R',icon:'🛡️'},
+'skin_191':{id:'skin_191',name:'バブルペンギン',rarity:'R',icon:'🐧'},
+'skin_192':{id:'skin_192',name:'コズミックアイ',rarity:'R',icon:'👁️'},
+'skin_193':{id:'skin_193',name:'ブロッサムツリー',rarity:'R',icon:'🌳'},
+'skin_194':{id:'skin_194',name:'ゴールデンフェニックス',rarity:'R',icon:'🐦‍🔥'},
+'skin_195':{id:'skin_195',name:'シャドウウルフ',rarity:'R',icon:'🐺'},
+'skin_196':{id:'skin_196',name:'ライトニングソード',rarity:'R',icon:'⚔️'},
+'skin_197':{id:'skin_197',name:'フォレストフクロウ',rarity:'R',icon:'🦉'},
+'skin_198':{id:'skin_198',name:'マジックワンド',rarity:'R',icon:'🪄'},
+'skin_199':{id:'skin_199',name:'オーシャンタートル',rarity:'R',icon:'🐢'},
+'skin_200':{id:'skin_200',name:'ミレニアムコア',rarity:'R',icon:'💠'},
+'skin_201':{id:'skin_201',name:'アクアクリスタル',rarity:'R',icon:'🔷'},
+'skin_202':{id:'skin_202',name:'ブレイズタイガー',rarity:'R',icon:'🐅'},
+'skin_203':{id:'skin_203',name:'ナイトメアスカル',rarity:'R',icon:'💀'},
+'skin_204':{id:'skin_204',name:'ネオンシティ',rarity:'R',icon:'🏙️'},
+'skin_205':{id:'skin_205',name:'サイバーブレイド',rarity:'R',icon:'🗡️'},
+'skin_206':{id:'skin_206',name:'ゴールデンチェス',rarity:'R',icon:'♔'},
+'skin_207':{id:'skin_207',name:'ルナシールド',rarity:'R',icon:'🛡️'},
+'skin_208':{id:'skin_208',name:'ソーラーレイ',rarity:'R',icon:'🔆'},
+'skin_209':{id:'skin_209',name:'フローズンウイング',rarity:'R',icon:'🪽'},
+'skin_210':{id:'skin_210',name:'ポイズンスネーク',rarity:'R',icon:'🐍'},
+'skin_211':{id:'skin_211',name:'ミスティックキャット',rarity:'R',icon:'🐈‍⬛'},
+'skin_212':{id:'skin_212',name:'ワイルドベア',rarity:'R',icon:'🐻'},
+'skin_213':{id:'skin_213',name:'コズミックムーン',rarity:'R',icon:'🌔'},
+'skin_214':{id:'skin_214',name:'ゴールデンバルーン',rarity:'R',icon:'🎈'},
+'skin_215':{id:'skin_215',name:'シャドウファング',rarity:'R',icon:'🦷'},
+'skin_216':{id:'skin_216',name:'ハイパーマグネット',rarity:'R',icon:'🧲'},
+'skin_217':{id:'skin_217',name:'バブルキャンディ',rarity:'R',icon:'🍬'},
+'skin_218':{id:'skin_218',name:'タイムストップ',rarity:'R',icon:'⏱️'},
+'skin_219':{id:'skin_219',name:'アシッドポーション',rarity:'R',icon:'🧪'},
+'skin_220':{id:'skin_220',name:'ホーリーウィング',rarity:'R',icon:'🪽'},
+'skin_221':{id:'skin_221',name:'カオススター',rarity:'R',icon:'💥'},
+'skin_222':{id:'skin_222',name:'アイアンシールド',rarity:'R',icon:'🛡️'},
+'skin_223':{id:'skin_223',name:'スノーキャンディ',rarity:'R',icon:'🍭'},
+'skin_224':{id:'skin_224',name:'ゴールデンハット',rarity:'R',icon:'🎩'},
+'skin_225':{id:'skin_225',name:'サイバーマスク',rarity:'R',icon:'🎭'},
+'skin_226':{id:'skin_226',name:'フォレストマッシュルーム',rarity:'R',icon:'🍄'},
+'skin_227':{id:'skin_227',name:'ブロッサムペタル',rarity:'R',icon:'🌸'},
+'skin_228':{id:'skin_228',name:'オーシャンウェーブ',rarity:'R',icon:'🌊'},
+'skin_229':{id:'skin_229',name:'ブレイズボム',rarity:'R',icon:'💣'},
+'skin_230':{id:'skin_230',name:'ナイトメアローズ',rarity:'R',icon:'🥀'},
+'skin_231':{id:'skin_231',name:'クリスタルハート',rarity:'R',icon:'💖'},
+'skin_232':{id:'skin_232',name:'ライトニングクラウド',rarity:'R',icon:'🌩️'},
+'skin_233':{id:'skin_233',name:'ルナキャンドル',rarity:'R',icon:'🕯️'},
+'skin_234':{id:'skin_234',name:'ソーラーフラワー',rarity:'R',icon:'🌻'},
+'skin_235':{id:'skin_235',name:'ゴールデンフェザー',rarity:'R',icon:'🪶'},
+'skin_236':{id:'skin_236',name:'マジックハット',rarity:'R',icon:'🧙'},
+'skin_237':{id:'skin_237',name:'ミスティックポーション',rarity:'R',icon:'🧪'},
+'skin_238':{id:'skin_238',name:'シャドウゲート',rarity:'R',icon:'⛩️'},
+'skin_239':{id:'skin_239',name:'アクアシェルペンダント',rarity:'R',icon:'🐚'},
+'skin_240':{id:'skin_240',name:'ネオンサイバー',rarity:'R',icon:'⚡'},
+'skin_241':{id:'skin_241',name:'コズミックサテライト',rarity:'R',icon:'📡'},
+'skin_242':{id:'skin_242',name:'ワイルドライオン',rarity:'R',icon:'🦁'},
+'skin_243':{id:'skin_243',name:'フローズンペンダント',rarity:'R',icon:'🧊'},
+'skin_244':{id:'skin_244',name:'ポイズンフラワー',rarity:'R',icon:'🌺'},
+'skin_245':{id:'skin_245',name:'ハイパースター',rarity:'R',icon:'🌟'},
+'skin_246':{id:'skin_246',name:'タイムギアクロック',rarity:'R',icon:'⚙️'},
+'skin_247':{id:'skin_247',name:'ゴールデンカップ',rarity:'R',icon:'🏆'},
+'skin_248':{id:'skin_248',name:'バブルポップル',rarity:'R',icon:'🫧'},
+'skin_249':{id:'skin_249',name:'ホーリーエンジェル',rarity:'R',icon:'👼'},
+'skin_250':{id:'skin_250',name:'クォンタムコア',rarity:'R',icon:'⚛️'},
+'skin_251':{id:'skin_251',name:'カオスブレイド',rarity:'R',icon:'🗡️'},
+'skin_252':{id:'skin_252',name:'スノードーム',rarity:'R',icon:'🔮'},
+'skin_253':{id:'skin_253',name:'アイアンギア',rarity:'R',icon:'⚙️'},
+'skin_254':{id:'skin_254',name:'ブレイズドラゴン',rarity:'R',icon:'🐲'},
+'skin_255':{id:'skin_255',name:'サイバーチップ',rarity:'R',icon:'💾'},
+'skin_256':{id:'skin_256',name:'フォレストディア',rarity:'R',icon:'🦌'},
+'skin_257':{id:'skin_257',name:'ルナクリスタルボール',rarity:'R',icon:'🔮'},
+'skin_258':{id:'skin_258',name:'ソーラーエナジー',rarity:'R',icon:'⚡'},
+'skin_259':{id:'skin_259',name:'オーシャンクジラ',rarity:'R',icon:'🐳'},
+'skin_260':{id:'skin_260',name:'シャドウバット',rarity:'R',icon:'🦇'},
+'skin_261':{id:'skin_261',name:'ゴールデンクラウンキー',rarity:'R',icon:'🔑'},
+'skin_262':{id:'skin_262',name:'ナイトメアチェスト',rarity:'R',icon:'🧰'},
+'skin_263':{id:'skin_263',name:'クリスタルウイング',rarity:'R',icon:'🪽'},
+'skin_264':{id:'skin_264',name:'ライトニングボール',rarity:'R',icon:'⚡'},
+'skin_265':{id:'skin_265',name:'ミスティックルーン',rarity:'R',icon:'📜'},
+'skin_266':{id:'skin_266',name:'アシッドドロップ',rarity:'R',icon:'💧'},
+'skin_267':{id:'skin_267',name:'ネオンハート',rarity:'R',icon:'💜'},
+'skin_268':{id:'skin_268',name:'マジックミラー',rarity:'R',icon:'🪞'},
+'skin_269':{id:'skin_269',name:'ワイルドサソリ',rarity:'R',icon:'🦂'},
+'skin_270':{id:'skin_270',name:'コズミックプラネット',rarity:'R',icon:'🪐'},
+'skin_271':{id:'skin_271',name:'フローズンローズ',rarity:'R',icon:'🌹'},
+'skin_272':{id:'skin_272',name:'ポイズンアップル',rarity:'R',icon:'🍏'},
+'skin_273':{id:'skin_273',name:'ゴールデンハーベスト',rarity:'R',icon:'🌾'},
+'skin_274':{id:'skin_274',name:'アクアトライデント',rarity:'R',icon:'🔱'},
+'skin_275':{id:'skin_275',name:'タイム hourglass',rarity:'R',icon:'⏳'},
+'skin_276':{id:'skin_276',name:'ホーリーベルペンダント',rarity:'R',icon:'🔔'},
+'skin_277':{id:'skin_277',name:'カオスアイ',rarity:'R',icon:'🧿'},
+'skin_278':{id:'skin_278',name:'ブロッサムリボン',rarity:'R',icon:'🎀'},
+'skin_279':{id:'skin_279',name:'アイアンアーマー',rarity:'R',icon:'🛡️'},
+'skin_280':{id:'skin_280',name:'スノーウルフ',rarity:'R',icon:'🐺'},
+'skin_281':{id:'skin_281',name:'ブレイズトルネード',rarity:'R',icon:'🌪️'},
+'skin_282':{id:'skin_282',name:'サイバーメガネ',rarity:'R',icon:'👓'},
+'skin_283':{id:'skin_283',name:'ルナペンダント',rarity:'R',icon:'🌙'},
+'skin_284':{id:'skin_284',name:'ソーラーフレア',rarity:'R',icon:'💥'},
+'skin_285':{id:'skin_285',name:'フォレストリーフ',rarity:'R',icon:'🍃'},
+'skin_286':{id:'skin_286',name:'ゴールデンダイス',rarity:'R',icon:'🎲'},
+'skin_287':{id:'skin_287',name:'シャドウキャンドル',rarity:'R',icon:'🕯️'},
+'skin_288':{id:'skin_288',name:'ナイトメアウイング',rarity:'R',icon:'🪽'},
+'skin_289':{id:'skin_289',name:'クリスタルシールド',rarity:'R',icon:'🛡️'},
+'skin_290':{id:'skin_290',name:'ライトニングスピリット',rarity:'R',icon:'⚡'},
+'skin_291':{id:'skin_291',name:'ミスティックゲート',rarity:'R',icon:'⛩️'},
+'skin_292':{id:'skin_292',name:'オーシャンパールリング',rarity:'R',icon:'💍'},
+'skin_293':{id:'skin_293',name:'バブルシールド',rarity:'R',icon:'🫧'},
+'skin_294':{id:'skin_294',name:'ネオンダイヤモンド',rarity:'R',icon:'🔷'},
+'skin_295':{id:'skin_295',name:'マジックブック',rarity:'R',icon:'📖'},
+'skin_296':{id:'skin_296',name:'ワイルドイーグル',rarity:'R',icon:'🦅'},
+'skin_297':{id:'skin_297',name:'コズミックコア',rarity:'R',icon:'🔮'},
+'skin_298':{id:'skin_298',name:'フローズンクリスタルシールド',rarity:'R',icon:'🧊'},
+'skin_299':{id:'skin_299',name:'ポイズンボトル',rarity:'R',icon:'🧪'},
+'skin_300':{id:'skin_300',name:'インフィニティコア',rarity:'R',icon:'♾️'},
+'skin_301':{id:'skin_301',name:'コズミックオーブ',rarity:'R',icon:'🔮'},
+'skin_302':{id:'skin_302',name:'スターダストウィング',rarity:'R',icon:'🪽'},
+'skin_303':{id:'skin_303',name:'サイバーブレイン',rarity:'R',icon:'🤖'},
+'skin_304':{id:'skin_304',name:'ヴォイドクリスタル',rarity:'R',icon:'💎'},
+'skin_305':{id:'skin_305',name:'ゴールデンフェニックス',rarity:'R',icon:'🐦‍🔥'},
+'skin_306':{id:'skin_306',name:'シャドウブレイド',rarity:'R',icon:'🗡️'},
+'skin_307':{id:'skin_307',name:'フローズンフレイム',rarity:'R',icon:'🧊'},
+'skin_308':{id:'skin_308',name:'ソーラーレイ',rarity:'R',icon:'☀️'},
+'skin_309':{id:'skin_309',name:'ルナブレイド',rarity:'R',icon:'🌙'},
+'skin_310':{id:'skin_310',name:'フォレストベア',rarity:'R',icon:'🐻'},
+'skin_311':{id:'skin_311',name:'オーシャンシャーク',rarity:'R',icon:'🦈'},
+'skin_312':{id:'skin_312',name:'ナイトメアクラウン',rarity:'R',icon:'👑'},
+'skin_313':{id:'skin_313',name:'ブレイズトルネード',rarity:'R',icon:'🔥'},
+'skin_314':{id:'skin_314',name:'マジックランタン',rarity:'R',icon:'🏮'},
+'skin_315':{id:'skin_315',name:'タイムリワインド',rarity:'R',icon:'⏳'},
+'skin_316':{id:'skin_316',name:'アシッドポイズン',rarity:'R',icon:'🧪'},
+'skin_317':{id:'skin_317',name:'ネオンライトニング',rarity:'R',icon:'⚡'},
+'skin_318':{id:'skin_318',name:'ホーリーシールド',rarity:'R',icon:'🛡️'},
+'skin_319':{id:'skin_319',name:'カオスキー',rarity:'R',icon:'🔑'},
+'skin_320':{id:'skin_320',name:'ワイルドパンサー',rarity:'R',icon:'🐆'},
+'skin_321':{id:'skin_321',name:'ブロッサムファン',rarity:'R',icon:'🪭'},
+'skin_322':{id:'skin_322',name:'ライトニングストライク',rarity:'R',icon:'🌩️'},
+'skin_323':{id:'skin_323',name:'アイアンチェスト',rarity:'R',icon:'🧰'},
+'skin_324':{id:'skin_324',name:'バブルポップ',rarity:'R',icon:'🫧'},
+'skin_325':{id:'skin_325',name:'ゴールデンベル',rarity:'R',icon:'🔔'},
+'skin_326':{id:'skin_326',name:'ミスティックミラー',rarity:'R',icon:'🪞'},
+'skin_327':{id:'skin_327',name:'スノーフレーク',rarity:'R',icon:'❄️'},
+'skin_328':{id:'skin_328',name:'ポイズンスパイダー',rarity:'R',icon:'🕷️'},
+'skin_329':{id:'skin_329',name:'ハイパーマグネット',rarity:'R',icon:'🧲'},
+'skin_330':{id:'skin_330',name:'クォンタムゲート',rarity:'R',icon:'🌀'},
+'skin_331':{id:'skin_331',name:'クリスタルハート',rarity:'R',icon:'💖'},
+'skin_332':{id:'skin_332',name:'サンダースピリット',rarity:'R',icon:'⚡'},
+'skin_333':{id:'skin_333',name:'フローズンローズ',rarity:'R',icon:'🌹'},
+'skin_334':{id:'skin_334',name:'ヴォイドクロー',rarity:'R',icon:'🦅'},
+'skin_335':{id:'skin_335',name:'ゴールデンアップル',rarity:'R',icon:'🍎'},
+'skin_336':{id:'skin_336',name:'ソーラーコア',rarity:'R',icon:'☀️'},
+'skin_337':{id:'skin_337',name:'ミステリーボックス',rarity:'R',icon:'🎁'},
+'skin_338':{id:'skin_338',name:'ブレイズドラゴン',rarity:'R',icon:'🐲'},
+'skin_339':{id:'skin_339',name:'サイバーマスク',rarity:'R',icon:'🎭'},
+'skin_340':{id:'skin_340',name:'ルナシールド',rarity:'R',icon:'🛡️'},
+'skin_341':{id:'skin_341',name:'コズミックサテライト',rarity:'R',icon:'📡'},
+'skin_342':{id:'skin_342',name:'オーシャンエイ',rarity:'R',icon:'🪼'},
+'skin_343':{id:'skin_343',name:'シャドウキャンドル',rarity:'R',icon:'🕯️'},
+'skin_344':{id:'skin_344',name:'フォレストキノコ',rarity:'R',icon:'🍄'},
+'skin_345':{id:'skin_345',name:'マジックトランプ',rarity:'R',icon:'🃏'},
+'skin_346':{id:'skin_346',name:'アクアトライデント',rarity:'R',icon:'🔱'},
+'skin_347':{id:'skin_347',name:'ゴールデンハープ',rarity:'R',icon:'🎼'},
+'skin_348':{id:'skin_348',name:'ナイトメアバット',rarity:'R',icon:'🦇'},
+'skin_349':{id:'skin_349',name:'アシッドドロップ',rarity:'R',icon:'🧪'},
+'skin_350':{id:'skin_350',name:'ネオンキューブ',rarity:'R',icon:'🧊'},
+'skin_351':{id:'skin_351',name:'ハイパースペード',rarity:'R',icon:'♠️'},
+'skin_352':{id:'skin_352',name:'キングダイヤ',rarity:'R',icon:'♦️'},
+'skin_353':{id:'skin_353',name:'クイーンクラブ',rarity:'R',icon:'♣️'},
+'skin_354':{id:'skin_354',name:'エースハート',rarity:'R',icon:'♥️'},
+'skin_355':{id:'skin_355',name:'タイムクロック',rarity:'R',icon:'⏰'},
+'skin_356':{id:'skin_356',name:'ポイズンスネーク',rarity:'R',icon:'🐍'},
+'skin_357':{id:'skin_357',name:'ワイルドライオン',rarity:'R',icon:'🦁'},
+'skin_358':{id:'skin_358',name:'スターシップ',rarity:'R',icon:'🚀'},
+'skin_359':{id:'skin_359',name:'アイアンハンマー',rarity:'R',icon:'🔨'},
+'skin_360':{id:'skin_360',name:'ホーリークロス',rarity:'R',icon:'✝️'},
+'skin_361':{id:'skin_361',name:'カオススター',rarity:'R',icon:'💥'},
+'skin_362':{id:'skin_362',name:'フレイムキャンドル',rarity:'R',icon:'🕯️'},
+'skin_363':{id:'skin_363',name:'スノーマン',rarity:'R',icon:'☃️'},
+'skin_364':{id:'skin_364',name:'ゴールデンリング',rarity:'R',icon:'💍'},
+'skin_365':{id:'skin_365',name:'サイバーウイング',rarity:'R',icon:'🪽'},
+'skin_366':{id:'skin_366',name:'ミスティックルーン',rarity:'R',icon:'📜'},
+'skin_367':{id:'skin_367',name:'フローズンペンダント',rarity:'R',icon:'🧊'},
+'skin_368':{id:'skin_368',name:'ソーラークラウン',rarity:'R',icon:'👑'},
+'skin_369':{id:'skin_369',name:'ルナバタフライ',rarity:'R',icon:'🦋'},
+'skin_370':{id:'skin_370',name:'ダークナイトシールド',rarity:'R',icon:'🛡️'},
+'skin_371':{id:'skin_371',name:'バブルペンギン',rarity:'R',icon:'🐧'},
+'skin_372':{id:'skin_372',name:'コズミックアイ',rarity:'R',icon:'👁️'},
+'skin_373':{id:'skin_373',name:'ブロッサムツリー',rarity:'R',icon:'🌳'},
+'skin_374':{id:'skin_374',name:'ゴールデンカップ',rarity:'R',icon:'🏆'},
+'skin_375':{id:'skin_375',name:'シャドウウルフ',rarity:'R',icon:'🐺'},
+'skin_376':{id:'skin_376',name:'ライトニングソード',rarity:'R',icon:'⚔️'},
+'skin_377':{id:'skin_377',name:'フォレストフクロウ',rarity:'R',icon:'🦉'},
+'skin_378':{id:'skin_378',name:'マジックワンド',rarity:'R',icon:'🪄'},
+'skin_379':{id:'skin_379',name:'オーシャンタートル',rarity:'R',icon:'🐢'},
+'skin_380':{id:'skin_380',name:'ミレニアムコア',rarity:'R',icon:'💠'},
+'skin_381':{id:'skin_381',name:'アクアクリスタル',rarity:'R',icon:'🔷'},
+'skin_382':{id:'skin_382',name:'ブレイズタイガー',rarity:'R',icon:'🐅'},
+'skin_383':{id:'skin_383',name:'ナイトメアスカル',rarity:'R',icon:'💀'},
+'skin_384':{id:'skin_384',name:'ネオンシティ',rarity:'R',icon:'🏙️'},
+'skin_385':{id:'skin_385',name:'サイバーブレイド',rarity:'R',icon:'🗡️'},
+'skin_386':{id:'skin_386',name:'ゴールデンチェス',rarity:'R',icon:'♔'},
+'skin_387':{id:'skin_387',name:'ルナクリスタル',rarity:'R',icon:'🔮'},
+'skin_388':{id:'skin_388',name:'ソーラーフレア',rarity:'R',icon:'💥'},
+'skin_389':{id:'skin_389',name:'フローズンウイング',rarity:'R',icon:'🪽'},
+'skin_390':{id:'skin_390',name:'ポイズンボトル',rarity:'R',icon:'🧪'},
+'skin_391':{id:'skin_391',name:'ミスティックキャット',rarity:'R',icon:'🐈‍⬛'},
+'skin_392':{id:'skin_392',name:'ワイルドベア',rarity:'R',icon:'🐻'},
+'skin_393':{id:'skin_393',name:'コズミックムーン',rarity:'R',icon:'🌔'},
+'skin_394':{id:'skin_394',name:'ゴールデンバルーン',rarity:'R',icon:'🎈'},
+'skin_395':{id:'skin_395',name:'シャドウファング',rarity:'R',icon:'🦷'},
+'skin_396':{id:'skin_396',name:'ハイパーギア',rarity:'R',icon:'⚙️'},
+'skin_397':{id:'skin_397',name:'バブルキャンディ',rarity:'R',icon:'🍬'},
+'skin_398':{id:'skin_398',name:'タイムストップ',rarity:'R',icon:'⏱️'},
+'skin_399':{id:'skin_399',name:'アシッドポーション',rarity:'R',icon:'🧪'},
+'skin_400':{id:'skin_400',name:'オメガスター',rarity:'R',icon:'🌟'},
+'skin_401':{id:'skin_401',name:'クリスタルクラウン',rarity:'R',icon:'👑'},
+'skin_402':{id:'skin_402',name:'サンダースピア',rarity:'R',icon:'⚡'},
+'skin_403':{id:'skin_403',name:'フローズンベア',rarity:'R',icon:'🐻‍❄️'},
+'skin_404':{id:'skin_404',name:'ヴォイドスピリット',rarity:'R',icon:'🌀'},
+'skin_405':{id:'skin_405',name:'ゴールデンキャッスル',rarity:'R',icon:'🏰'},
+'skin_406':{id:'skin_406',name:'ソーラーフラワー',rarity:'R',icon:'🌻'},
+'skin_407':{id:'skin_407',name:'ミステリースクロール',rarity:'R',icon:'📜'},
+'skin_408':{id:'skin_408',name:'ブレイズフェニックス',rarity:'R',icon:'🔥'},
+'skin_409':{id:'skin_409',name:'サイバーバイザー',rarity:'R',icon:'🥽'},
+'skin_410':{id:'skin_410',name:'ルナラビット',rarity:'R',icon:'🐇'},
+'skin_411':{id:'skin_411',name:'コズミックコメット',rarity:'R',icon:'☄️'},
+'skin_412':{id:'skin_412',name:'オーシャンイルカ',rarity:'R',icon:'🐬'},
+'skin_413':{id:'skin_413',name:'シャドウクローク',rarity:'R',icon:'🧥'},
+'skin_414':{id:'skin_414',name:'フォレストディア',rarity:'R',icon:'🦌'},
+'skin_415':{id:'skin_415',name:'マジックブック',rarity:'R',icon:'📖'},
+'skin_416':{id:'skin_416',name:'アクアクラゲ',rarity:'R',icon:'🪼'},
+'skin_417':{id:'skin_417',name:'ゴールデンダイス',rarity:'R',icon:'🎲'},
+'skin_418':{id:'skin_418',name:'ナイトメアローズ',rarity:'R',icon:'🥀'},
+'skin_419':{id:'skin_419',name:'アシッドスライム',rarity:'R',icon:'🧪'},
+'skin_420':{id:'skin_420',name:'ネオンハート',rarity:'R',icon:'💜'},
+'skin_421':{id:'skin_421',name:'ホーリーエンジェル',rarity:'R',icon:'👼'},
+'skin_422':{id:'skin_422',name:'カオスブレイド',rarity:'R',icon:'🗡️'},
+'skin_423':{id:'skin_423',name:'アイアンアーマー',rarity:'R',icon:'🛡️'},
+'skin_424':{id:'skin_424',name:'スノードーム',rarity:'R',icon:'🔮'},
+'skin_425':{id:'skin_425',name:'ゴールデンフェザー',rarity:'R',icon:'🪶'},
+'skin_426':{id:'skin_426',name:'ミスティックポーション',rarity:'R',icon:'🧪'},
+'skin_427':{id:'skin_427',name:'ブロッサムリボン',rarity:'R',icon:'🎀'},
+'skin_428':{id:'skin_428',name:'オーシャンウェーブ',rarity:'R',icon:'🌊'},
+'skin_429':{id:'skin_429',name:'ブレイズボム',rarity:'R',icon:'💣'},
+'skin_430':{id:'skin_430',name:'ナイトメアチェスト',rarity:'R',icon:'🧰'},
+'skin_431':{id:'skin_431',name:'クリスタルウイング',rarity:'R',icon:'🪽'},
+'skin_432':{id:'skin_432',name:'ライトニングボール',rarity:'R',icon:'⚡'},
+'skin_433':{id:'skin_433',name:'ルナペンダント',rarity:'R',icon:'🌙'},
+'skin_434':{id:'skin_434',name:'ソーラーエナジー',rarity:'R',icon:'⚡'},
+'skin_435':{id:'skin_435',name:'ゴールデンクラウンキー',rarity:'R',icon:'🔑'},
+'skin_436':{id:'skin_436',name:'マジックハット',rarity:'R',icon:'🧙'},
+'skin_437':{id:'skin_437',name:'ミスティックゲート',rarity:'R',icon:'⛩️'},
+'skin_438':{id:'skin_438',name:'シャドウバット',rarity:'R',icon:'🦇'},
+'skin_439':{id:'skin_439',name:'アクアシェルペンダント',rarity:'R',icon:'🐚'},
+'skin_440':{id:'skin_440',name:'ネオンダイヤモンド',rarity:'R',icon:'🔷'},
+'skin_441':{id:'skin_441',name:'コズミックプラネット',rarity:'R',icon:'🪐'},
+'skin_442':{id:'skin_442',name:'ワイルドサソリ',rarity:'R',icon:'🦂'},
+'skin_443':{id:'skin_443',name:'フローズンクリスタルシールド',rarity:'R',icon:'🧊'},
+'skin_444':{id:'skin_444',name:'ポイズンアップル',rarity:'R',icon:'🍏'},
+'skin_445':{id:'skin_445',name:'ハイパースター',rarity:'R',icon:'🌟'},
+'skin_446':{id:'skin_446',name:'タイム hourglass',rarity:'R',icon:'⏳'},
+'skin_447':{id:'skin_447',name:'ゴールデンメダル',rarity:'R',icon:'🏅'},
+'skin_448':{id:'skin_448',name:'バブルシールド',rarity:'R',icon:'🫧'},
+'skin_449':{id:'skin_449',name:'ホーリーベルペンダント',rarity:'R',icon:'🔔'},
+'skin_450':{id:'skin_450',name:'クォンタムコア',rarity:'R',icon:'⚛️'},
+'skin_451':{id:'skin_451',name:'クリスタルペンダント',rarity:'R',icon:'💎'},
+'skin_452':{id:'skin_452',name:'サンダースピアー',rarity:'R',icon:'⚡'},
+'skin_453':{id:'skin_453',name:'フローズンハート',rarity:'R',icon:'💙'},
+'skin_454':{id:'skin_454',name:'ヴォイドゲート',rarity:'R',icon:'🌀'},
+'skin_455':{id:'skin_455',name:'ゴールデンキー',rarity:'R',icon:'🗝️'},
+'skin_456':{id:'skin_456',name:'ソーラーシールド',rarity:'R',icon:'🛡️'},
+'skin_457':{id:'skin_457',name:'ミステリーキューブ',rarity:'R',icon:'🧊'},
+'skin_458':{id:'skin_458',name:'ブレイズハート',rarity:'R',icon:'❤️‍🔥'},
+'skin_459':{id:'skin_459',name:'サイバーコイル',rarity:'R',icon:'🌀'},
+'skin_460':{id:'skin_460',name:'ルナフェザー',rarity:'R',icon:'🪶'},
+'skin_461':{id:'skin_461',name:'コズミックコア',rarity:'R',icon:'🔮'},
+'skin_462':{id:'skin_462',name:'オーシャンクジラ',rarity:'R',icon:'🐳'},
+'skin_463':{id:'skin_463',name:'シャドウゲート',rarity:'R',icon:'⛩️'},
+'skin_464':{id:'skin_464',name:'フォレストリーフ',rarity:'R',icon:'🍃'},
+'skin_465':{id:'skin_465',name:'マジックミラー',rarity:'R',icon:'🪞'},
+'skin_466':{id:'skin_466',name:'アクアハーープ',rarity:'R',icon:'🎵'},
+'skin_467':{id:'skin_467',name:'ゴールデンハーベスト',rarity:'R',icon:'🌾'},
+'skin_468':{id:'skin_468',name:'ナイトメアウイング',rarity:'R',icon:'🪽'},
+'skin_469':{id:'skin_469',name:'アシッドボトル',rarity:'R',icon:'🧪'},
+'skin_470':{id:'skin_470',name:'ネオンサイバー',rarity:'R',icon:'⚡'},
+'skin_471':{id:'skin_471',name:'ハイパーギアクロック',rarity:'R',icon:'⚙️'},
+'skin_472':{id:'skin_472',name:'カオスアイ',rarity:'R',icon:'🧿'},
+'skin_473':{id:'skin_473',name:'アイアンシールド',rarity:'R',icon:'🛡️'},
+'skin_474':{id:'skin_474',name:'スノーウルフ',rarity:'R',icon:'🐺'},
+'skin_475':{id:'skin_475',name:'ゴールデンバルーンポップ',rarity:'R',icon:'🎈'},
+'skin_476':{id:'skin_476',name:'ミスティックファン',rarity:'R',icon:'🪭'},
+'skin_477':{id:'skin_477',name:'ブロッサムペタル',rarity:'R',icon:'🌸'},
+'skin_478':{id:'skin_478',name:'オーシャンパールリング',rarity:'R',icon:'💍'},
+'skin_479':{id:'skin_479',name:'ブレイズトルネード',rarity:'R',icon:'🌪️'},
+'skin_480':{id:'skin_480',name:'ナイトメアバットウイング',rarity:'R',icon:'🦇'},
+'skin_481':{id:'skin_481',name:'クリスタルシールド',rarity:'R',icon:'🛡️'},
+'skin_482':{id:'skin_482',name:'ライトニングスピリット',rarity:'R',icon:'⚡'},
+'skin_483':{id:'skin_483',name:'ルナクリスタルボール',rarity:'R',icon:'🔮'},
+'skin_484':{id:'skin_484',name:'ソーラーランタン',rarity:'R',icon:'☀️'},
+'skin_485':{id:'skin_485',name:'ゴールデンベルペンダント',rarity:'R',icon:'🔔'},
+'skin_486':{id:'skin_486',name:'マジックポット',rarity:'R',icon:'🏺'},
+'skin_487':{id:'skin_487',name:'ミスティックキャンドル',rarity:'R',icon:'🕯️'},
+'skin_488':{id:'skin_488',name:'シャドウファントム',rarity:'R',icon:'👻'},
+'skin_489':{id:'skin_489',name:'アクアシェル',rarity:'R',icon:'🐚'},
+'skin_490':{id:'skin_490',name:'ネオンメガネ',rarity:'R',icon:'👓'},
+'skin_491':{id:'skin_491',name:'コズミックウィング',rarity:'R',icon:'🪽'},
+'skin_492':{id:'skin_492',name:'ワイルドイーグル',rarity:'R',icon:'🦅'},
+'skin_493':{id:'skin_493',name:'フローズンローズペンダント',rarity:'R',icon:'🌹'},
+'skin_494':{id:'skin_494',name:'ポイズンフラワー',rarity:'R',icon:'🌺'},
+'skin_495':{id:'skin_495',name:'ハイパーマグネットコア',rarity:'R',icon:'🧲'},
+'skin_496':{id:'skin_496',name:'タイムクロックギア',rarity:'R',icon:'⚙️'},
+'skin_497':{id:'skin_497',name:'ゴールデンコーラ',rarity:'R',icon:'🥤'},
+'skin_498':{id:'skin_498',name:'バブルポップル',rarity:'R',icon:'🫧'},
+'skin_499':{id:'skin_499',name:'ホーリーウィング',rarity:'R',icon:'🪽'},
+'skin_500':{id:'skin_500',name:'アルティメットインフィニティコア',rarity:'R',icon:'♾️'},
+'skin_501':{id:'skin_501',name:'スターライトオーブ',rarity:'R',icon:'🌟'},
+'skin_502':{id:'skin_502',name:'サンダーウイング',rarity:'R',icon:'⚡'},
+'skin_503':{id:'skin_503',name:'サイバータイガー',rarity:'R',icon:'🐅'},
+'skin_504':{id:'skin_504',name:'ヴォイドスター',rarity:'R',icon:'🌀'},
+'skin_505':{id:'skin_505',name:'ゴールデンペガサス',rarity:'R',icon:'🦄'},
+'skin_506':{id:'skin_506',name:'シャドウダガー',rarity:'R',icon:'🗡️'},
+'skin_507':{id:'skin_507',name:'フローズンクリスタルペンダント',rarity:'R',icon:'🧊'},
+'skin_508':{id:'skin_508',name:'ソーラークラウンペンダント',rarity:'R',icon:'☀️'},
+'skin_509':{id:'skin_509',name:'ルナハーープ',rarity:'R',icon:'🎵'},
+'skin_510':{id:'skin_510',name:'フォレストライオン',rarity:'R',icon:'🦁'},
+'skin_511':{id:'skin_511',name:'オーシャンクジラ',rarity:'R',icon:'🐋'},
+'skin_512':{id:'skin_512',name:'ナイトメアマスク',rarity:'R',icon:'🎭'},
+'skin_513':{id:'skin_513',name:'ブレイズスピリット',rarity:'R',icon:'🔥'},
+'skin_514':{id:'skin_514',name:'マジッククリスタルボール',rarity:'R',icon:'🔮'},
+'skin_515':{id:'skin_515',name:'タイム hourglass',rarity:'R',icon:'⌛'},
+'skin_516':{id:'skin_516',name:'アシッドポーションボトル',rarity:'R',icon:'🧪'},
+'skin_517':{id:'skin_517',name:'ネオンシティライト',rarity:'R',icon:'🏙️'},
+'skin_518':{id:'skin_518',name:'ホーリーエンジェルウイング',rarity:'R',icon:'👼'},
+'skin_519':{id:'skin_519',name:'カオススターコア',rarity:'R',icon:'💥'},
+'skin_520':{id:'skin_520',name:'ワイルドフォックス',rarity:'R',icon:'🦊'},
+'skin_521':{id:'skin_521',name:'ブロッサムツリーペタル',rarity:'R',icon:'🌸'},
+'skin_522':{id:'skin_522',name:'ライトニングストライククラウド',rarity:'R',icon:'🌩️'},
+'skin_523':{id:'skin_523',name:'アイアンギアホイール',rarity:'R',icon:'⚙️'},
+'skin_524':{id:'skin_524',name:'バブルポップキャンディ',rarity:'R',icon:'🍬'},
+'skin_525':{id:'skin_525',name:'ゴールデンカップトロフィー',rarity:'R',icon:'🏆'},
+'skin_526':{id:'skin_526',name:'ミスティックルーンスクロール',rarity:'R',icon:'📜'},
+'skin_527':{id:'skin_527',name:'スノーウルフパック',rarity:'R',icon:'🐺'},
+'skin_528':{id:'skin_528',name:'ポイズンスパイダーウェブ',rarity:'R',icon:'🕷️'},
+'skin_529':{id:'skin_529',name:'ハイパーマグネットフィールド',rarity:'R',icon:'🧲'},
+'skin_530':{id:'skin_530',name:'クォンタムプラズマ',rarity:'R',icon:'⚛️'},
+'skin_531':{id:'skin_531',name:'クリスタルローズガーデン',rarity:'R',icon:'🌹'},
+'skin_532':{id:'skin_532',name:'サンダースピアボルト',rarity:'R',icon:'⚡'},
+'skin_533':{id:'skin_533',name:'フローズンベアポー',rarity:'R',icon:'🐾'},
+'skin_534':{id:'skin_534',name:'ヴォイドクローク',rarity:'R',icon:'🧥'},
+'skin_535':{id:'skin_535',name:'ゴールデンアップルツリー',rarity:'R',icon:'🍎'},
+'skin_536':{id:'skin_536',name:'ソーラーフレアスター',rarity:'R',icon:'☀️'},
+'skin_537':{id:'skin_537',name:'ミステリーギフトボックス',rarity:'R',icon:'🎁'},
+'skin_538':{id:'skin_538',name:'ブレイズドラゴンフレイム',rarity:'R',icon:'🐲'},
+'skin_539':{id:'skin_539',name:'サイバーバイザーメガネ',rarity:'R',icon:'👓'},
+'skin_540':{id:'skin_540',name:'ルナクレセントムーン',rarity:'R',icon:'🌙'},
+'skin_541':{id:'skin_541',name:'コズミックギャラクシー',rarity:'R',icon:'🌌'},
+'skin_542':{id:'skin_542',name:'オーシャンイルカスイム',rarity:'R',icon:'🐬'},
+'skin_543':{id:'skin_543',name:'シャドウバットウイング',rarity:'R',icon:'🦇'},
+'skin_544':{id:'skin_544',name:'フォレストマッシュルームツリー',rarity:'R',icon:'🍄'},
+'skin_545':{id:'skin_545',name:'マジックトランプカード',rarity:'R',icon:'🃏'},
+'skin_546':{id:'skin_546',name:'アクアシェルネックレス',rarity:'R',icon:'🐚'},
+'skin_547':{id:'skin_547',name:'ゴールデンダイスロール',rarity:'R',icon:'🎲'},
+'skin_548':{id:'skin_548',name:'ナイトメアスカルボーン',rarity:'R',icon:'💀'},
+'skin_549':{id:'skin_549',name:'アシッドポイズンドロップ',rarity:'R',icon:'🧪'},
+'skin_550':{id:'skin_550',name:'ネオンハートビート',rarity:'R',icon:'💖'},
+'skin_551':{id:'skin_551',name:'ハイパーキャノン',rarity:'R',icon:'🔫'},
+'skin_552':{id:'skin_552',name:'キングダムキーホール',rarity:'R',icon:'🗝️'},
+'skin_553':{id:'skin_553',name:'クイーンクラウンジュエリー',rarity:'R',icon:'👑'},
+'skin_554':{id:'skin_554',name:'エーススペードキング',rarity:'R',icon:'♠️'},
+'skin_555':{id:'skin_555',name:'タイムアラームクロック',rarity:'R',icon:'⏰'},
+'skin_556':{id:'skin_556',name:'ポイズンスネークファング',rarity:'R',icon:'🐍'},
+'skin_557':{id:'skin_557',name:'ワイルドパンダ竹',rarity:'R',icon:'🐼'},
+'skin_558':{id:'skin_558',name:'スターシップロケット',rarity:'R',icon:'🚀'},
+'skin_559':{id:'skin_559',name:'アイアンハンガークロス',rarity:'R',icon:'🛠️'},
+'skin_560':{id:'skin_560',name:'ホーリーベルリング',rarity:'R',icon:'🔔'},
+'skin_561':{id:'skin_561',name:'カオスフレイムコア',rarity:'R',icon:'❤️‍🔥'},
+'skin_562':{id:'skin_562',name:'フレイムキャンドルライト',rarity:'R',icon:'🕯️'},
+'skin_563':{id:'skin_563',name:'スノーマンフロスト',rarity:'R',icon:'☃️'},
+'skin_564':{id:'skin_564',name:'ゴールデンダイヤモンドリング',rarity:'R',icon:'💍'},
+'skin_565':{id:'skin_565',name:'サイバーマスクシェード',rarity:'R',icon:'🎭'},
+'skin_566':{id:'skin_566',name:'ミスティックポーションボトル',rarity:'R',icon:'🧪'},
+'skin_567':{id:'skin_567',name:'フローズンアイスキューブ',rarity:'R',icon:'🧊'},
+'skin_568':{id:'skin_568',name:'ソーラーサンライズ',rarity:'R',icon:'🌅'},
+'skin_569':{id:'skin_569',name:'ルナバタフライウイング',rarity:'R',icon:'🦋'},
+'skin_570':{id:'skin_570',name:'ダークナイトアーマー',rarity:'R',icon:'🛡️'},
+'skin_571':{id:'skin_571',name:'バブルペンギンアイス',rarity:'R',icon:'🐧'},
+'skin_572':{id:'skin_572',name:'コズミックプラネットリング',rarity:'R',icon:'🪐'},
+'skin_573':{id:'skin_573',name:'ブロッサムチェリーブロッサム',rarity:'R',icon:'🌸'},
+'skin_574':{id:'skin_574',name:'ゴールデンメダルリボン',rarity:'R',icon:'🏅'},
+'skin_575':{id:'skin_575',name:'シャドウウルフアイ',rarity:'R',icon:'👁️'},
+'skin_576':{id:'skin_576',name:'ライトニングボルトスパーク',rarity:'R',icon:'⚡'},
+'skin_577':{id:'skin_577',name:'フォレストフクロウナイト',rarity:'R',icon:'🦉'},
+'skin_578':{id:'skin_578',name:'マジックワンドスター',rarity:'R',icon:'🪄'},
+'skin_579':{id:'skin_579',name:'オーシャンタートルシェル',rarity:'R',icon:'🐢'},
+'skin_580':{id:'skin_580',name:'ミレニアムクリスタル',rarity:'R',icon:'💎'},
+'skin_581':{id:'skin_581',name:'アクアクリスタルキューブ',rarity:'R',icon:'🔷'},
+'skin_582':{id:'skin_582',name:'ブレイズタイガークロー',rarity:'R',icon:'🐅'},
+'skin_583':{id:'skin_583',name:'ナイトメアスカルキャンドル',rarity:'R',icon:'🕯️'},
+'skin_584':{id:'skin_584',name:'ネオンサイバーシティ',rarity:'R',icon:'🏙️'},
+'skin_585':{id:'skin_585',name:'サイバーブレイドソード',rarity:'R',icon:'🗡️'},
+'skin_586':{id:'skin_586',name:'ゴールデンチェスピース',rarity:'R',icon:'♔'},
+'skin_587':{id:'skin_587',name:'ルナクリスタルペンダント',rarity:'R',icon:'🔮'},
+'skin_588':{id:'skin_588',name:'ソーラーフレアバースト',rarity:'R',icon:'💥'},
+'skin_589':{id:'skin_589',name:'フローズンウイングフェザー',rarity:'R',icon:'🪽'},
+'skin_590':{id:'skin_590',name:'ポイズンフラワーペタル',rarity:'R',icon:'🌺'},
+'skin_591':{id:'skin_591',name:'ミスティックキャットアイ',rarity:'R',icon:'🐈‍⬛'},
+'skin_592':{id:'skin_592',name:'ワイルドベアクロー',rarity:'R',icon:'🐻'},
+'skin_593':{id:'skin_593',name:'コズミックムーンフェイズ',rarity:'R',icon:'🌔'},
+'skin_594':{id:'skin_594',name:'ゴールデンバルーンパーティー',rarity:'R',icon:'🎈'},
+'skin_595':{id:'skin_595',name:'シャドウファングウルフ',rarity:'R',icon:'🐺'},
+'skin_596':{id:'skin_596',name:'ハイパーギアホイール',rarity:'R',icon:'⚙️'},
+'skin_597':{id:'skin_597',name:'バブルキャンディポップ',rarity:'R',icon:'🍭'},
+'skin_598':{id:'skin_598',name:'タイムストップタイマー',rarity:'R',icon:'⏱️'},
+'skin_599':{id:'skin_599',name:'アシッドポーションフラスコ',rarity:'R',icon:'🧪'},
+'skin_600':{id:'skin_600',name:'アルティメットオメガコア',rarity:'R',icon:'⚛️'},
+'skin_601':{id:'skin_601',name:'チェリーポップ',rarity:'R',icon:'🍒'},
+'skin_602':{id:'skin_602',name:'ストロベリースイート',rarity:'R',icon:'🍓'},
+'skin_603':{id:'skin_603',name:'パイナップルパイン',rarity:'R',icon:'🍍'},
+'skin_604':{id:'skin_604',name:'メロンソーダ',rarity:'R',icon:'🍈'},
+'skin_605':{id:'skin_605',name:'ウォーターメロン夏',rarity:'R',icon:'🍉'},
+'skin_606':{id:'skin_606',name:'ピーチブロッサム',rarity:'R',icon:'🍑'},
+'skin_607':{id:'skin_607',name:'バナナジュース',rarity:'R',icon:'🍌'},
+'skin_608':{id:'skin_608',name:'レモンスプラッシュ',rarity:'R',icon:'🍋'},
+'skin_609':{id:'skin_609',name:'オレンジフレッシュ',rarity:'R',icon:'🍊'},
+'skin_610':{id:'skin_610',name:'グレープジュエル',rarity:'R',icon:'🍇'},
+'skin_611':{id:'skin_611',name:'キウイフルーツ',rarity:'R',icon:'🥝'},
+'skin_612':{id:'skin_612',name:'アボカドグリーン',rarity:'R',icon:'🥑'},
+'skin_613':{id:'skin_613',name:'ココナッツビーチ',rarity:'R',icon:'🥥'},
+'skin_614':{id:'skin_614',name:'ドーナツリング',rarity:'R',icon:'🍩'},
+'skin_615':{id:'skin_615',name:'アイスクリームコーン',rarity:'R',icon:'🍦'},
+'skin_616':{id:'skin_616',name:'ショートケーキデコレーション',rarity:'R',icon:'🍰'},
+'skin_617':{id:'skin_617',name:'チョコバー',rarity:'R',icon:'🍫'},
+'skin_618':{id:'skin_618',name:'クッキータイム',rarity:'R',icon:'🍪'},
+'skin_619':{id:'skin_619',name:'ポップコーンバケット',rarity:'R',icon:'🍿'},
+'skin_620':{id:'skin_620',name:'パンケーキタワー',rarity:'R',icon:'🥞'},
+'skin_621':{id:'skin_621',name:'ハニーポット',rarity:'R',icon:'🍯'},
+'skin_622':{id:'skin_622',name:'コーヒーカップ',rarity:'R',icon:'☕'},
+'skin_623':{id:'skin_623',name:'ティータイムポット',rarity:'R',icon:'🫖'},
+'skin_624':{id:'skin_624',name:'ミルクボトル',rarity:'R',icon:'🥛'},
+'skin_625':{id:'skin_625',name:'トロピカルドリンク',rarity:'R',icon:'🍹'},
+'skin_626':{id:'skin_626',name:'サッカーボール',rarity:'R',icon:'⚽'},
+'skin_627':{id:'skin_627',name:'バスケットボール',rarity:'R',icon:'🏀'},
+'skin_628':{id:'skin_628',name:'ベースボール',rarity:'R',icon:'⚾'},
+'skin_629':{id:'skin_629',name:'テニスボール',rarity:'R',icon:'🎾'},
+'skin_630':{id:'skin_630',name:'バレーボール',rarity:'R',icon:'🏐'},
+'skin_631':{id:'skin_631',name:'ラグビーボール',rarity:'R',icon:'🏉'},
+'skin_632':{id:'skin_632',name:'ビリヤードエイトボール',rarity:'R',icon:'🎱'},
+'skin_633':{id:'skin_633',name:'ボーリングピン',rarity:'R',icon:'🎳'},
+'skin_634':{id:'skin_634',name:'ゴルフボール',rarity:'R',icon:'⛳'},
+'skin_635':{id:'skin_635',name:'スノーボード',rarity:'R',icon:'🏂'},
+'skin_636':{id:'skin_636',name:'スケートボード',rarity:'R',icon:'🛹'},
+'skin_637':{id:'skin_637',name:'サーフボード',rarity:'R',icon:'🏄'},
+'skin_638':{id:'skin_638',name:'バイシクル',rarity:'R',icon:'🚲'},
+'skin_639':{id:'skin_639',name:'レースカー',rarity:'R',icon:'🏎️'},
+'skin_640':{id:'skin_640',name:'スポーツバイク',rarity:'R',icon:'🏍️'},
+'skin_641':{id:'skin_641',name:'ヘリコプター',rarity:'R',icon:'🚁'},
+'skin_642':{id:'skin_642',name:'ジェット機',rarity:'R',icon:'✈️'},
+'skin_643':{id:'skin_643',name:'スピードボート',rarity:'R',icon:'🚤'},
+'skin_644':{id:'skin_644',name:'パイレーツシップ',rarity:'R',icon:'🏴‍☠️'},
+'skin_645':{id:'skin_645',name:'スペースシャトル',rarity:'R',icon:'🚀'},
+'skin_646':{id:'skin_646',name:'UFOディスク',rarity:'R',icon:'🛸'},
+'skin_647':{id:'skin_647',name:'ロケットバースト',rarity:'R',icon:'💥'},
+'skin_648':{id:'skin_648',name:'サテライトアンテナ',rarity:'R',icon:'📡'},
+'skin_649':{id:'skin_649',name:'テレスコープ',rarity:'R',icon:'🔭'},
+'skin_650':{id:'skin_650',name:'マイクロスコープ',rarity:'R',icon:'🔬'},
+'skin_651':{id:'skin_651',name:'パレットアート',rarity:'R',icon:'🎨'},
+'skin_652':{id:'skin_652',name:'バイオリン',rarity:'R',icon:'🎻'},
+'skin_653':{id:'skin_653',name:'サックス',rarity:'R',icon:'🎷'},
+'skin_654':{id:'skin_654',name:'トランペット',rarity:'R',icon:'🎺'},
+'skin_655':{id:'skin_655',name:'ドラムキット',rarity:'R',icon:'🥁'},
+'skin_656':{id:'skin_656',name:'ピアノキー',rarity:'R',icon:'🎹'},
+'skin_657':{id:'skin_657',name:'ヘッドフォン',rarity:'R',icon:'🎧'},
+'skin_658':{id:'skin_658',name:'マイクスタンド',rarity:'R',icon:'🎤'},
+'skin_659':{id:'skin_659',name:'ムービーカメラ',rarity:'R',icon:'🎥'},
+'skin_660':{id:'skin_660',name:'クラッパーボード',rarity:'R',icon:'🎬'},
+'skin_661':{id:'skin_661',name:'ゲームコントローラー',rarity:'R',icon:'🎮'},
+'skin_662':{id:'skin_662',name:'アーケードキャビネット',rarity:'R',icon:'🕹️'},
+'skin_663':{id:'skin_663',name:'スロットマシン',rarity:'R',icon:'🎰'},
+'skin_664':{id:'skin_664',name:'パズルピース',rarity:'R',icon:'🧩'},
+'skin_665':{id:'skin_665',name:'テディベア',rarity:'R',icon:'🧸'},
+'skin_666':{id:'skin_666',name:'ロボットドール',rarity:'R',icon:'🤖'},
+'skin_667':{id:'skin_667',name:'バルーンアート',rarity:'R',icon:'🎈'},
+'skin_668':{id:'skin_668',name:'クラッカーポップ',rarity:'R',icon:'🎉'},
+'skin_669':{id:'skin_669',name:'コンフェッティボール',rarity:'R',icon:'🎊'},
+'skin_670':{id:'skin_670',name:'タナバタツリー',rarity:'R',icon:'🎋'},
+'skin_671':{id:'skin_671',name:'ツリーデコレーション',rarity:'R',icon:'🎄'},
+'skin_672':{id:'skin_672',name:'ファイアワークス',rarity:'R',icon:'🎆'},
+'skin_673':{id:'skin_673',name:'スパークラー花火',rarity:'R',icon:'❇️'},
+'skin_674':{id:'skin_674',name:'ムーンビューイング',rarity:'R',icon:'🍡'},
+'skin_675':{id:'skin_675',name:'ジャックオランタン',rarity:'R',icon:'🎃'},
+'skin_676':{id:'skin_676',name:'ゴーストシーツ',rarity:'R',icon:'👻'},
+'skin_677':{id:'skin_677',name:'サンタクロース',rarity:'R',icon:'🎅'},
+'skin_678':{id:'skin_678',name:'ギフトリボン',rarity:'R',icon:'🎀'},
+'skin_679':{id:'skin_679',name:'レッドエンベロープ',rarity:'R',icon:'🧧'},
+'skin_680':{id:'skin_680',name:'クリスタルボール',rarity:'R',icon:'🔮'},
+'skin_681':{id:'skin_681',name:'オリガミツル',rarity:'R',icon:'🕊️'},
+'skin_682':{id:'skin_682',name:'マネキネコ',rarity:'R',icon:'🐱'},
+'skin_683':{id:'skin_683',name:'ダルマ',rarity:'R',icon:'🔴'},
+'skin_684':{id:'skin_684',name:'サクラペタル',rarity:'R',icon:'🌸'},
+'skin_685':{id:'skin_685',name:'モミジリーフ',rarity:'R',icon:'🍁'},
+'skin_686':{id:'skin_686',name:'イチョウリーフ',rarity:'R',icon:'🍂'},
+'skin_687':{id:'skin_687',name:'ハイビスカス',rarity:'R',icon:'🌺'},
+'skin_688':{id:'skin_688',name:'サンフラワー',rarity:'R',icon:'🌻'},
+'skin_689':{id:'skin_689',name:'チューリップ',rarity:'R',icon:'🌷'},
+'skin_690':{id:'skin_690',name:'ローズレッド',rarity:'R',icon:'🌹'},
+'skin_691':{id:'skin_691',name:'ロータスフラワー',rarity:'R',icon:'🪷'},
+'skin_692':{id:'skin_692',name:'サボテン',rarity:'R',icon:'🌵'},
+'skin_693':{id:'skin_693',name:'パームツリー',rarity:'R',icon:'🌴'},
+'skin_694':{id:'skin_694',name:'エバーグリーン',rarity:'R',icon:'🌲'},
+'skin_695':{id:'skin_695',name:'バンブーシュート',rarity:'R',icon:'🎍'},
+'skin_696':{id:'skin_696',name:'クローバーリーフ',rarity:'R',icon:'🍀'},
+'skin_697':{id:'skin_697',name:'ハーブスプラウト',rarity:'R',icon:'🌿'},
+'skin_698':{id:'skin_698',name:'シーウィード',rarity:'R',icon:'🪸'},
+'skin_699':{id:'skin_699',name:'シェルパール',rarity:'R',icon:'🦪'},
+'skin_700':{id:'skin_700',name:'ネイチャーコア',rarity:'R',icon:'🌱'},
+'skin_701':{id:'skin_701',name:'アクアフィッシュ',rarity:'R',icon:'🐟'},
+'skin_702':{id:'skin_702',name:'トロピカルフィッシュ',rarity:'R',icon:'🐠'},
+'skin_703':{id:'skin_703',name:'ブロウフィッシュ',rarity:'R',icon:'🐡'},
+'skin_704':{id:'skin_704',name:'オクトパス',rarity:'R',icon:'🐙'},
+'skin_705':{id:'skin_705',name:'イカ',rarity:'R',icon:'🦑'},
+'skin_706':{id:'skin_706',name:'ロブスター',rarity:'R',icon:'🦞'},
+'skin_707':{id:'skin_707',name:'クラブカニ',rarity:'R',icon:'🦀'},
+'skin_708':{id:'skin_708',name:'シュリンプエビ',rarity:'R',icon:'🦐'},
+'skin_709':{id:'skin_709',name:'フラミンゴピンク',rarity:'R',icon:'🦩'},
+'skin_710':{id:'skin_710',name:'スワンホワイト',rarity:'R',icon:'🦢'},
+'skin_711':{id:'skin_711',name:'ピーコッククジャク',rarity:'R',icon:'🦚'},
+'skin_712':{id:'skin_712',name:'パロットインコ',rarity:'R',icon:'🦜'},
+'skin_713':{id:'skin_713',name:'ハチドリ',rarity:'R',icon:'🐦'},
+'skin_714':{id:'skin_714',name:'バタフライイエロー',rarity:'R',icon:'🦋'},
+'skin_715':{id:'skin_715',name:'レディバグテントウムシ',rarity:'R',icon:'🐞'},
+'skin_716':{id:'skin_716',name:'ハニービーハチ',rarity:'R',icon:'🐝'},
+'skin_717':{id:'skin_717',name:'アントアリ',rarity:'R',icon:'🐜'},
+'skin_718':{id:'skin_718',name:'カブトムシ',rarity:'R',icon:'🪲'},
+'skin_719':{id:'skin_719',name:'クワガタムシ',rarity:'R',icon:'🪵'},
+'skin_720':{id:'skin_720',name:'バッタ',rarity:'R',icon:'🦗'},
+'skin_721':{id:'skin_721',name:'カマキリ',rarity:'R',icon:'🌿'},
+'skin_722':{id:'skin_722',name:'キャタピラーイモムシ',rarity:'R',icon:'🐛'},
+'skin_723':{id:'skin_723',name:'スネイルカタツムリ',rarity:'R',icon:'🐌'},
+'skin_724':{id:'skin_724',name:'トカゲ',rarity:'R',icon:'🦎'},
+'skin_725':{id:'skin_725',name:'カメレオン',rarity:'R',icon:'🦎'},
+'skin_726':{id:'skin_726',name:'フロッグカエル',rarity:'R',icon:'🐸'},
+'skin_727':{id:'skin_727',name:'クロコダイルワニ',rarity:'R',icon:'🐊'},
+'skin_728':{id:'skin_728',name:'ヒッポカバ',rarity:'R',icon:'🦛'},
+'skin_729':{id:'skin_729',name:'サイ',rarity:'R',icon:'🦏'},
+'skin_730':{id:'skin_730',name:'エレファントゾウ',rarity:'R',icon:'🐘'},
+'skin_731':{id:'skin_731',name:'ジラフキリン',rarity:'R',icon:'🦒'},
+'skin_732':{id:'skin_732',name:'ラクダ',rarity:'R',icon:'🐪'},
+'skin_733':{id:'skin_733',name:'カンガルー',rarity:'R',icon:'🦘'},
+'skin_734':{id:'skin_734',name:'コアラ',rarity:'R',icon:'🐨'},
+'skin_735':{id:'skin_735',name:'スラッシュナマケモノ',rarity:'R',icon:'🦥'},
+'skin_736':{id:'skin_736',name:'アルパカ',rarity:'R',icon:'🦙'},
+'skin_737':{id:'skin_737',name:'シープヒツジ',rarity:'R',icon:'🐑'},
+'skin_738':{id:'skin_738',name:'ゴートヤギ',rarity:'R',icon:'🐐'},
+'skin_739':{id:'skin_739',name:'ホースウマ',rarity:'R',icon:'🐴'},
+'skin_740':{id:'skin_740',name:'ユニコーンホーン',rarity:'R',icon:'🦄'},
+'skin_741':{id:'skin_741',name:'ピッグブタ',rarity:'R',icon:'🐷'},
+'skin_742':{id:'skin_742',name:'カウウシ',rarity:'R',icon:'🐮'},
+'skin_743':{id:'skin_743',name:'ドッグイヌ',rarity:'R',icon:'🐶'},
+'skin_744':{id:'skin_744',name:'キャットネコ',rarity:'R',icon:'🐱'},
+'skin_745':{id:'skin_745',name:'ラビットウサギ',rarity:'R',icon:'🐰'},
+'skin_746':{id:'skin_746',name:'ハムスター',rarity:'R',icon:'🐹'},
+'skin_747':{id:'skin_747',name:'マウスネズミ',rarity:'R',icon:'🐭'},
+'skin_748':{id:'skin_748',name:'リス',rarity:'R',icon:'🐿️'},
+'skin_749':{id:'skin_749',name:'ハリネズミ',rarity:'R',icon:'🦔'},
+'skin_750':{id:'skin_750',name:'アニマルキングダム',rarity:'R',icon:'🐾'},
+'skin_751':{id:'skin_751',name:'ルビーレッドジュエル',rarity:'R',icon:'♦️'},
+'skin_752':{id:'skin_752',name:'サファイアブルー',rarity:'R',icon:'🔷'},
+'skin_753':{id:'skin_753',name:'エメラルドグリーンジュエル',rarity:'R',icon:'🟩'},
+'skin_754':{id:'skin_754',name:'アメジストパープル',rarity:'R',icon:'🟪'},
+'skin_755':{id:'skin_755',name:'トパーズイエロー',rarity:'R',icon:'🟨'},
+'skin_756':{id:'skin_756',name:'アクアマリン',rarity:'R',icon:'🌊'},
+'skin_757':{id:'skin_757',name:'オパールレインボー',rarity:'R',icon:'🌈'},
+'skin_758':{id:'skin_758',name:'ガーネットダークレッド',rarity:'R',icon:'🔴'},
+'skin_759':{id:'skin_759',name:'ペリドットライトグリーン',rarity:'R',icon:'🟢'},
+'skin_760':{id:'skin_760',name:'ターコイズブルー',rarity:'R',icon:'🟦'},
+'skin_761':{id:'skin_761',name:'ブロンズコイン',rarity:'R',icon:'🥉'},
+'skin_762':{id:'skin_762',name:'シルバーメダル',rarity:'R',icon:'🥈'},
+'skin_763':{id:'skin_763',name:'ゴールドインゴット',rarity:'R',icon:'🥇'},
+'skin_764':{id:'skin_764',name:'プラチナリング',rarity:'R',icon:'💍'},
+'skin_765':{id:'skin_765',name:'チタンシールド',rarity:'R',icon:'🛡️'},
+'skin_766':{id:'skin_766',name:'カーボンファイバー',rarity:'R',icon:'⬛'},
+'skin_767':{id:'skin_767',name:'ネオンライトピンク',rarity:'R',icon:'🩷'},
+'skin_768':{id:'skin_768',name:'ネオンライトシアン',rarity:'R',icon:'🩵'},
+'skin_769':{id:'skin_769',name:'ネオンライトオレンジ',rarity:'R',icon:'🟠'},
+'skin_770':{id:'skin_770',name:'ネオンライトライム',rarity:'R',icon:'🟢'},
+'skin_771':{id:'skin_771',name:'モノクロームブラック',rarity:'R',icon:'🖤'},
+'skin_772':{id:'skin_772',name:'モノクロームホワイト',rarity:'R',icon:'🤍'},
+'skin_773':{id:'skin_773',name:'パステルピンク',rarity:'R',icon:'🩷'},
+'skin_774':{id:'skin_774',name:'パステルブルー',rarity:'R',icon:'🩵'},
+'skin_775':{id:'skin_775',name:'パステルイエロー',rarity:'R',icon:'🟡'},
+'skin_776':{id:'skin_776',name:'パステルグリーン',rarity:'R',icon:'🟢'},
+'skin_777':{id:'skin_777',name:'ラッキーセブン',rarity:'R',icon:'🎰'},
+'skin_778':{id:'skin_778',name:'トリプルスター',rarity:'R',icon:'🌟'},
+'skin_779':{id:'skin_779',name:'インフィニティループ',rarity:'R',icon:'♾️'},
+'skin_780':{id:'skin_780',name:'ピースサイン',rarity:'R',icon:'✌️'},
+'skin_781':{id:'skin_781',name:'サムズアップ',rarity:'R',icon:'👍'},
+'skin_782':{id:'skin_782',name:'クラップハンド',rarity:'R',icon:'👏'},
+'skin_783':{id:'skin_783',name:'オープンハート',rarity:'R',icon:'🫶'},
+'skin_784':{id:'skin_784',name:'ファイヤーフレイムアイコン',rarity:'R',icon:'🔥'},
+'skin_785':{id:'skin_785',name:'ウォータードロップアイコン',rarity:'R',icon:'💧'},
+'skin_786':{id:'skin_786',name:'スパークライト',rarity:'R',icon:'✨'},
+'skin_787':{id:'skin_787',name:'グローイングスター',rarity:'R',icon:'⭐'},
+'skin_788':{id:'skin_788',name:'シューティングスター',rarity:'R',icon:'🌠'},
+'skin_789':{id:'skin_789',name:'サンシャインイエロー',rarity:'R',icon:'☀️'},
+'skin_790':{id:'skin_790',name:'ムーンライトシルバー',rarity:'R',icon:'🌙'},
+'skin_791':{id:'skin_791',name:'レインボーブリッジ',rarity:'R',icon:'🌈'},
+'skin_792':{id:'skin_792',name:'クラウドホワイト',rarity:'R',icon:'☁️'},
+'skin_793':{id:'skin_793',name:'サンダークラウドグレー',rarity:'R',icon:'🌩️'},
+'skin_794':{id:'skin_794',name:'スノークリスタルブルー',rarity:'R',icon:'❄️'},
+'skin_795':{id:'skin_795',name:'ウインドブリーズ',rarity:'R',icon:'🌬️'},
+'skin_796':{id:'skin_796',name:'トルネードスワール',rarity:'R',icon:'🌪️'},
+'skin_797':{id:'skin_797',name:'アースストーン',rarity:'R',icon:'🪨'},
+'skin_798':{id:'skin_798',name:'マグマボケーノ',rarity:'R',icon:'🌋'},
+'skin_799':{id:'skin_799',name:'オーシャンツナミ',rarity:'R',icon:'🌊'},
+'skin_800':{id:'skin_800',name:'グランドマスターコア',rarity:'R',icon:'👑'},
              'skin_ironwind':{id:'skin_ironwind',name:'アイアンウィンド',rarity:'R',icon:'🌬️'}, 
              'skin_seasurge':{id:'skin_seasurge',name:'シーサージ',rarity:'R',icon:'🌊'}, 
              'skin_aquastriker':{id:'skin_aquastriker',name:'アクアストライカー',rarity:'R',icon:'🔱'}, 
@@ -1315,6 +2950,806 @@ MASTER.gachaPool = [ {type:'weapons',id:'wp_spread'},
                     {type:'skins',id:'skin_shisa'}, 
                     {type:'skins',id:'skin_king'},
                     {type:'skins',id:'skin_kitamae'}, 
+                    {type:'skins',id:'skin_1'},
+{type:'skins',id:'skin_2'},
+{type:'skins',id:'skin_3'},
+{type:'skins',id:'skin_4'},
+{type:'skins',id:'skin_5'},
+{type:'skins',id:'skin_6'},
+{type:'skins',id:'skin_7'},
+{type:'skins',id:'skin_8'},
+{type:'skins',id:'skin_9'},
+{type:'skins',id:'skin_10'},
+{type:'skins',id:'skin_11'},
+{type:'skins',id:'skin_12'},
+{type:'skins',id:'skin_13'},
+{type:'skins',id:'skin_14'},
+{type:'skins',id:'skin_15'},
+{type:'skins',id:'skin_16'},
+{type:'skins',id:'skin_17'},
+{type:'skins',id:'skin_18'},
+{type:'skins',id:'skin_19'},
+{type:'skins',id:'skin_20'},
+{type:'skins',id:'skin_21'},
+{type:'skins',id:'skin_22'},
+{type:'skins',id:'skin_23'},
+{type:'skins',id:'skin_24'},
+{type:'skins',id:'skin_25'},
+{type:'skins',id:'skin_26'},
+{type:'skins',id:'skin_27'},
+{type:'skins',id:'skin_28'},
+{type:'skins',id:'skin_29'},
+{type:'skins',id:'skin_30'},
+{type:'skins',id:'skin_31'},
+{type:'skins',id:'skin_32'},
+{type:'skins',id:'skin_33'},
+{type:'skins',id:'skin_34'},
+{type:'skins',id:'skin_35'},
+{type:'skins',id:'skin_36'},
+{type:'skins',id:'skin_37'},
+{type:'skins',id:'skin_38'},
+{type:'skins',id:'skin_39'},
+{type:'skins',id:'skin_40'},
+{type:'skins',id:'skin_41'},
+{type:'skins',id:'skin_42'},
+{type:'skins',id:'skin_43'},
+{type:'skins',id:'skin_44'},
+{type:'skins',id:'skin_45'},
+{type:'skins',id:'skin_46'},
+{type:'skins',id:'skin_47'},
+{type:'skins',id:'skin_48'},
+{type:'skins',id:'skin_49'},
+{type:'skins',id:'skin_50'},
+{type:'skins',id:'skin_51'},
+{type:'skins',id:'skin_52'},
+{type:'skins',id:'skin_53'},
+{type:'skins',id:'skin_54'},
+{type:'skins',id:'skin_55'},
+{type:'skins',id:'skin_56'},
+{type:'skins',id:'skin_57'},
+{type:'skins',id:'skin_58'},
+{type:'skins',id:'skin_59'},
+{type:'skins',id:'skin_60'},
+{type:'skins',id:'skin_61'},
+{type:'skins',id:'skin_62'},
+{type:'skins',id:'skin_63'},
+{type:'skins',id:'skin_64'},
+{type:'skins',id:'skin_65'},
+{type:'skins',id:'skin_66'},
+{type:'skins',id:'skin_67'},
+{type:'skins',id:'skin_68'},
+{type:'skins',id:'skin_69'},
+{type:'skins',id:'skin_70'},
+{type:'skins',id:'skin_71'},
+{type:'skins',id:'skin_72'},
+{type:'skins',id:'skin_73'},
+{type:'skins',id:'skin_74'},
+{type:'skins',id:'skin_75'},
+{type:'skins',id:'skin_76'},
+{type:'skins',id:'skin_77'},
+{type:'skins',id:'skin_78'},
+{type:'skins',id:'skin_79'},
+{type:'skins',id:'skin_80'},
+{type:'skins',id:'skin_81'},
+{type:'skins',id:'skin_82'},
+{type:'skins',id:'skin_83'},
+{type:'skins',id:'skin_84'},
+{type:'skins',id:'skin_85'},
+{type:'skins',id:'skin_86'},
+{type:'skins',id:'skin_87'},
+{type:'skins',id:'skin_88'},
+{type:'skins',id:'skin_89'},
+{type:'skins',id:'skin_90'},
+{type:'skins',id:'skin_91'},
+{type:'skins',id:'skin_92'},
+{type:'skins',id:'skin_93'},
+{type:'skins',id:'skin_94'},
+{type:'skins',id:'skin_95'},
+{type:'skins',id:'skin_96'},
+{type:'skins',id:'skin_97'},
+{type:'skins',id:'skin_98'},
+{type:'skins',id:'skin_99'},
+{type:'skins',id:'skin_100'},
+{type:'skins',id:'skin_101'},
+{type:'skins',id:'skin_102'},
+{type:'skins',id:'skin_103'},
+{type:'skins',id:'skin_104'},
+{type:'skins',id:'skin_105'},
+{type:'skins',id:'skin_106'},
+{type:'skins',id:'skin_107'},
+{type:'skins',id:'skin_108'},
+{type:'skins',id:'skin_109'},
+{type:'skins',id:'skin_110'},
+{type:'skins',id:'skin_111'},
+{type:'skins',id:'skin_112'},
+{type:'skins',id:'skin_113'},
+{type:'skins',id:'skin_114'},
+{type:'skins',id:'skin_115'},
+{type:'skins',id:'skin_116'},
+{type:'skins',id:'skin_117'},
+{type:'skins',id:'skin_118'},
+{type:'skins',id:'skin_119'},
+{type:'skins',id:'skin_120'},
+{type:'skins',id:'skin_121'},
+{type:'skins',id:'skin_122'},
+{type:'skins',id:'skin_123'},
+{type:'skins',id:'skin_124'},
+{type:'skins',id:'skin_125'},
+{type:'skins',id:'skin_126'},
+{type:'skins',id:'skin_127'},
+{type:'skins',id:'skin_128'},
+{type:'skins',id:'skin_129'},
+{type:'skins',id:'skin_130'},
+{type:'skins',id:'skin_131'},
+{type:'skins',id:'skin_132'},
+{type:'skins',id:'skin_133'},
+{type:'skins',id:'skin_134'},
+{type:'skins',id:'skin_135'},
+{type:'skins',id:'skin_136'},
+{type:'skins',id:'skin_137'},
+{type:'skins',id:'skin_138'},
+{type:'skins',id:'skin_139'},
+{type:'skins',id:'skin_140'},
+{type:'skins',id:'skin_141'},
+{type:'skins',id:'skin_142'},
+{type:'skins',id:'skin_143'},
+{type:'skins',id:'skin_144'},
+{type:'skins',id:'skin_145'},
+{type:'skins',id:'skin_146'},
+{type:'skins',id:'skin_147'},
+{type:'skins',id:'skin_148'},
+{type:'skins',id:'skin_149'},
+{type:'skins',id:'skin_150'},
+{type:'skins',id:'skin_151'},
+{type:'skins',id:'skin_152'},
+{type:'skins',id:'skin_153'},
+{type:'skins',id:'skin_154'},
+{type:'skins',id:'skin_155'},
+{type:'skins',id:'skin_156'},
+{type:'skins',id:'skin_157'},
+{type:'skins',id:'skin_158'},
+{type:'skins',id:'skin_159'},
+{type:'skins',id:'skin_160'},
+{type:'skins',id:'skin_161'},
+{type:'skins',id:'skin_162'},
+{type:'skins',id:'skin_163'},
+{type:'skins',id:'skin_164'},
+{type:'skins',id:'skin_165'},
+{type:'skins',id:'skin_166'},
+{type:'skins',id:'skin_167'},
+{type:'skins',id:'skin_168'},
+{type:'skins',id:'skin_169'},
+{type:'skins',id:'skin_170'},
+{type:'skins',id:'skin_171'},
+{type:'skins',id:'skin_172'},
+{type:'skins',id:'skin_173'},
+{type:'skins',id:'skin_174'},
+{type:'skins',id:'skin_175'},
+{type:'skins',id:'skin_176'},
+{type:'skins',id:'skin_177'},
+{type:'skins',id:'skin_178'},
+{type:'skins',id:'skin_179'},
+{type:'skins',id:'skin_180'},
+{type:'skins',id:'skin_181'},
+{type:'skins',id:'skin_182'},
+{type:'skins',id:'skin_183'},
+{type:'skins',id:'skin_184'},
+{type:'skins',id:'skin_185'},
+{type:'skins',id:'skin_186'},
+{type:'skins',id:'skin_187'},
+{type:'skins',id:'skin_188'},
+{type:'skins',id:'skin_189'},
+{type:'skins',id:'skin_190'},
+{type:'skins',id:'skin_191'},
+{type:'skins',id:'skin_192'},
+{type:'skins',id:'skin_193'},
+{type:'skins',id:'skin_194'},
+{type:'skins',id:'skin_195'},
+{type:'skins',id:'skin_196'},
+{type:'skins',id:'skin_197'},
+{type:'skins',id:'skin_198'},
+{type:'skins',id:'skin_199'},
+{type:'skins',id:'skin_200'},
+{type:'skins',id:'skin_201'},
+{type:'skins',id:'skin_202'},
+{type:'skins',id:'skin_203'},
+{type:'skins',id:'skin_204'},
+{type:'skins',id:'skin_205'},
+{type:'skins',id:'skin_206'},
+{type:'skins',id:'skin_207'},
+{type:'skins',id:'skin_208'},
+{type:'skins',id:'skin_209'},
+{type:'skins',id:'skin_210'},
+{type:'skins',id:'skin_211'},
+{type:'skins',id:'skin_212'},
+{type:'skins',id:'skin_213'},
+{type:'skins',id:'skin_214'},
+{type:'skins',id:'skin_215'},
+{type:'skins',id:'skin_216'},
+{type:'skins',id:'skin_217'},
+{type:'skins',id:'skin_218'},
+{type:'skins',id:'skin_219'},
+{type:'skins',id:'skin_220'},
+{type:'skins',id:'skin_221'},
+{type:'skins',id:'skin_222'},
+{type:'skins',id:'skin_223'},
+{type:'skins',id:'skin_224'},
+{type:'skins',id:'skin_225'},
+{type:'skins',id:'skin_226'},
+{type:'skins',id:'skin_227'},
+{type:'skins',id:'skin_228'},
+{type:'skins',id:'skin_229'},
+{type:'skins',id:'skin_230'},
+{type:'skins',id:'skin_231'},
+{type:'skins',id:'skin_232'},
+{type:'skins',id:'skin_233'},
+{type:'skins',id:'skin_234'},
+{type:'skins',id:'skin_235'},
+{type:'skins',id:'skin_236'},
+{type:'skins',id:'skin_237'},
+{type:'skins',id:'skin_238'},
+{type:'skins',id:'skin_239'},
+{type:'skins',id:'skin_240'},
+{type:'skins',id:'skin_241'},
+{type:'skins',id:'skin_242'},
+{type:'skins',id:'skin_243'},
+{type:'skins',id:'skin_244'},
+{type:'skins',id:'skin_245'},
+{type:'skins',id:'skin_246'},
+{type:'skins',id:'skin_247'},
+{type:'skins',id:'skin_248'},
+{type:'skins',id:'skin_249'},
+{type:'skins',id:'skin_250'},
+{type:'skins',id:'skin_251'},
+{type:'skins',id:'skin_252'},
+{type:'skins',id:'skin_253'},
+{type:'skins',id:'skin_254'},
+{type:'skins',id:'skin_255'},
+{type:'skins',id:'skin_256'},
+{type:'skins',id:'skin_257'},
+{type:'skins',id:'skin_258'},
+{type:'skins',id:'skin_259'},
+{type:'skins',id:'skin_260'},
+{type:'skins',id:'skin_261'},
+{type:'skins',id:'skin_262'},
+{type:'skins',id:'skin_263'},
+{type:'skins',id:'skin_264'},
+{type:'skins',id:'skin_265'},
+{type:'skins',id:'skin_266'},
+{type:'skins',id:'skin_267'},
+{type:'skins',id:'skin_268'},
+{type:'skins',id:'skin_269'},
+{type:'skins',id:'skin_270'},
+{type:'skins',id:'skin_271'},
+{type:'skins',id:'skin_272'},
+{type:'skins',id:'skin_273'},
+{type:'skins',id:'skin_274'},
+{type:'skins',id:'skin_275'},
+{type:'skins',id:'skin_276'},
+{type:'skins',id:'skin_277'},
+{type:'skins',id:'skin_278'},
+{type:'skins',id:'skin_279'},
+{type:'skins',id:'skin_280'},
+{type:'skins',id:'skin_281'},
+{type:'skins',id:'skin_282'},
+{type:'skins',id:'skin_283'},
+{type:'skins',id:'skin_284'},
+{type:'skins',id:'skin_285'},
+{type:'skins',id:'skin_286'},
+{type:'skins',id:'skin_287'},
+{type:'skins',id:'skin_288'},
+{type:'skins',id:'skin_289'},
+{type:'skins',id:'skin_290'},
+{type:'skins',id:'skin_291'},
+{type:'skins',id:'skin_292'},
+{type:'skins',id:'skin_293'},
+{type:'skins',id:'skin_294'},
+{type:'skins',id:'skin_295'},
+{type:'skins',id:'skin_296'},
+{type:'skins',id:'skin_297'},
+{type:'skins',id:'skin_298'},
+{type:'skins',id:'skin_299'},
+{type:'skins',id:'skin_300'},
+{type:'skins',id:'skin_301'},
+{type:'skins',id:'skin_302'},
+{type:'skins',id:'skin_303'},
+{type:'skins',id:'skin_304'},
+{type:'skins',id:'skin_305'},
+{type:'skins',id:'skin_306'},
+{type:'skins',id:'skin_307'},
+{type:'skins',id:'skin_308'},
+{type:'skins',id:'skin_309'},
+{type:'skins',id:'skin_310'},
+{type:'skins',id:'skin_311'},
+{type:'skins',id:'skin_312'},
+{type:'skins',id:'skin_313'},
+{type:'skins',id:'skin_314'},
+{type:'skins',id:'skin_315'},
+{type:'skins',id:'skin_316'},
+{type:'skins',id:'skin_317'},
+{type:'skins',id:'skin_318'},
+{type:'skins',id:'skin_319'},
+{type:'skins',id:'skin_320'},
+{type:'skins',id:'skin_321'},
+{type:'skins',id:'skin_322'},
+{type:'skins',id:'skin_323'},
+{type:'skins',id:'skin_324'},
+{type:'skins',id:'skin_325'},
+{type:'skins',id:'skin_326'},
+{type:'skins',id:'skin_327'},
+{type:'skins',id:'skin_328'},
+{type:'skins',id:'skin_329'},
+{type:'skins',id:'skin_330'},
+{type:'skins',id:'skin_331'},
+{type:'skins',id:'skin_332'},
+{type:'skins',id:'skin_333'},
+{type:'skins',id:'skin_334'},
+{type:'skins',id:'skin_335'},
+{type:'skins',id:'skin_336'},
+{type:'skins',id:'skin_337'},
+{type:'skins',id:'skin_338'},
+{type:'skins',id:'skin_339'},
+{type:'skins',id:'skin_340'},
+{type:'skins',id:'skin_341'},
+{type:'skins',id:'skin_342'},
+{type:'skins',id:'skin_343'},
+{type:'skins',id:'skin_344'},
+{type:'skins',id:'skin_345'},
+{type:'skins',id:'skin_346'},
+{type:'skins',id:'skin_347'},
+{type:'skins',id:'skin_348'},
+{type:'skins',id:'skin_349'},
+{type:'skins',id:'skin_350'},
+{type:'skins',id:'skin_351'},
+{type:'skins',id:'skin_352'},
+{type:'skins',id:'skin_353'},
+{type:'skins',id:'skin_354'},
+{type:'skins',id:'skin_355'},
+{type:'skins',id:'skin_356'},
+{type:'skins',id:'skin_357'},
+{type:'skins',id:'skin_358'},
+{type:'skins',id:'skin_359'},
+{type:'skins',id:'skin_360'},
+{type:'skins',id:'skin_361'},
+{type:'skins',id:'skin_362'},
+{type:'skins',id:'skin_363'},
+{type:'skins',id:'skin_364'},
+{type:'skins',id:'skin_365'},
+{type:'skins',id:'skin_366'},
+{type:'skins',id:'skin_367'},
+{type:'skins',id:'skin_368'},
+{type:'skins',id:'skin_369'},
+{type:'skins',id:'skin_370'},
+{type:'skins',id:'skin_371'},
+{type:'skins',id:'skin_372'},
+{type:'skins',id:'skin_373'},
+{type:'skins',id:'skin_374'},
+{type:'skins',id:'skin_375'},
+{type:'skins',id:'skin_376'},
+{type:'skins',id:'skin_377'},
+{type:'skins',id:'skin_378'},
+{type:'skins',id:'skin_379'},
+{type:'skins',id:'skin_380'},
+{type:'skins',id:'skin_381'},
+{type:'skins',id:'skin_382'},
+{type:'skins',id:'skin_383'},
+{type:'skins',id:'skin_384'},
+{type:'skins',id:'skin_385'},
+{type:'skins',id:'skin_386'},
+{type:'skins',id:'skin_387'},
+{type:'skins',id:'skin_388'},
+{type:'skins',id:'skin_389'},
+{type:'skins',id:'skin_390'},
+{type:'skins',id:'skin_391'},
+{type:'skins',id:'skin_392'},
+{type:'skins',id:'skin_393'},
+{type:'skins',id:'skin_394'},
+{type:'skins',id:'skin_395'},
+{type:'skins',id:'skin_396'},
+{type:'skins',id:'skin_397'},
+{type:'skins',id:'skin_398'},
+{type:'skins',id:'skin_399'},
+{type:'skins',id:'skin_400'},
+{type:'skins',id:'skin_401'},
+{type:'skins',id:'skin_402'},
+{type:'skins',id:'skin_403'},
+{type:'skins',id:'skin_404'},
+{type:'skins',id:'skin_405'},
+{type:'skins',id:'skin_406'},
+{type:'skins',id:'skin_407'},
+{type:'skins',id:'skin_408'},
+{type:'skins',id:'skin_409'},
+{type:'skins',id:'skin_410'},
+{type:'skins',id:'skin_411'},
+{type:'skins',id:'skin_412'},
+{type:'skins',id:'skin_413'},
+{type:'skins',id:'skin_414'},
+{type:'skins',id:'skin_415'},
+{type:'skins',id:'skin_416'},
+{type:'skins',id:'skin_417'},
+{type:'skins',id:'skin_418'},
+{type:'skins',id:'skin_419'},
+{type:'skins',id:'skin_420'},
+{type:'skins',id:'skin_421'},
+{type:'skins',id:'skin_422'},
+{type:'skins',id:'skin_423'},
+{type:'skins',id:'skin_424'},
+{type:'skins',id:'skin_425'},
+{type:'skins',id:'skin_426'},
+{type:'skins',id:'skin_427'},
+{type:'skins',id:'skin_428'},
+{type:'skins',id:'skin_429'},
+{type:'skins',id:'skin_430'},
+{type:'skins',id:'skin_431'},
+{type:'skins',id:'skin_432'},
+{type:'skins',id:'skin_433'},
+{type:'skins',id:'skin_434'},
+{type:'skins',id:'skin_435'},
+{type:'skins',id:'skin_436'},
+{type:'skins',id:'skin_437'},
+{type:'skins',id:'skin_438'},
+{type:'skins',id:'skin_439'},
+{type:'skins',id:'skin_440'},
+{type:'skins',id:'skin_441'},
+{type:'skins',id:'skin_442'},
+{type:'skins',id:'skin_443'},
+{type:'skins',id:'skin_444'},
+{type:'skins',id:'skin_445'},
+{type:'skins',id:'skin_446'},
+{type:'skins',id:'skin_447'},
+{type:'skins',id:'skin_448'},
+{type:'skins',id:'skin_449'},
+{type:'skins',id:'skin_450'},
+{type:'skins',id:'skin_451'},
+{type:'skins',id:'skin_452'},
+{type:'skins',id:'skin_453'},
+{type:'skins',id:'skin_454'},
+{type:'skins',id:'skin_455'},
+{type:'skins',id:'skin_456'},
+{type:'skins',id:'skin_457'},
+{type:'skins',id:'skin_458'},
+{type:'skins',id:'skin_459'},
+{type:'skins',id:'skin_460'},
+{type:'skins',id:'skin_461'},
+{type:'skins',id:'skin_462'},
+{type:'skins',id:'skin_463'},
+{type:'skins',id:'skin_464'},
+{type:'skins',id:'skin_465'},
+{type:'skins',id:'skin_466'},
+{type:'skins',id:'skin_467'},
+{type:'skins',id:'skin_468'},
+{type:'skins',id:'skin_469'},
+{type:'skins',id:'skin_470'},
+{type:'skins',id:'skin_471'},
+{type:'skins',id:'skin_472'},
+{type:'skins',id:'skin_473'},
+{type:'skins',id:'skin_474'},
+{type:'skins',id:'skin_475'},
+{type:'skins',id:'skin_476'},
+{type:'skins',id:'skin_477'},
+{type:'skins',id:'skin_478'},
+{type:'skins',id:'skin_479'},
+{type:'skins',id:'skin_480'},
+{type:'skins',id:'skin_481'},
+{type:'skins',id:'skin_482'},
+{type:'skins',id:'skin_483'},
+{type:'skins',id:'skin_484'},
+{type:'skins',id:'skin_485'},
+{type:'skins',id:'skin_486'},
+{type:'skins',id:'skin_487'},
+{type:'skins',id:'skin_488'},
+{type:'skins',id:'skin_489'},
+{type:'skins',id:'skin_490'},
+{type:'skins',id:'skin_491'},
+{type:'skins',id:'skin_492'},
+{type:'skins',id:'skin_493'},
+{type:'skins',id:'skin_494'},
+{type:'skins',id:'skin_495'},
+{type:'skins',id:'skin_496'},
+{type:'skins',id:'skin_497'},
+{type:'skins',id:'skin_498'},
+{type:'skins',id:'skin_499'},
+{type:'skins',id:'skin_500'},
+{type:'skins',id:'skin_501'},
+{type:'skins',id:'skin_502'},
+{type:'skins',id:'skin_503'},
+{type:'skins',id:'skin_504'},
+{type:'skins',id:'skin_505'},
+{type:'skins',id:'skin_506'},
+{type:'skins',id:'skin_507'},
+{type:'skins',id:'skin_508'},
+{type:'skins',id:'skin_509'},
+{type:'skins',id:'skin_510'},
+{type:'skins',id:'skin_511'},
+{type:'skins',id:'skin_512'},
+{type:'skins',id:'skin_513'},
+{type:'skins',id:'skin_514'},
+{type:'skins',id:'skin_515'},
+{type:'skins',id:'skin_516'},
+{type:'skins',id:'skin_517'},
+{type:'skins',id:'skin_518'},
+{type:'skins',id:'skin_519'},
+{type:'skins',id:'skin_520'},
+{type:'skins',id:'skin_521'},
+{type:'skins',id:'skin_522'},
+{type:'skins',id:'skin_523'},
+{type:'skins',id:'skin_524'},
+{type:'skins',id:'skin_525'},
+{type:'skins',id:'skin_526'},
+{type:'skins',id:'skin_527'},
+{type:'skins',id:'skin_528'},
+{type:'skins',id:'skin_529'},
+{type:'skins',id:'skin_530'},
+{type:'skins',id:'skin_531'},
+{type:'skins',id:'skin_532'},
+{type:'skins',id:'skin_533'},
+{type:'skins',id:'skin_534'},
+{type:'skins',id:'skin_535'},
+{type:'skins',id:'skin_536'},
+{type:'skins',id:'skin_537'},
+{type:'skins',id:'skin_538'},
+{type:'skins',id:'skin_539'},
+{type:'skins',id:'skin_540'},
+{type:'skins',id:'skin_541'},
+{type:'skins',id:'skin_542'},
+{type:'skins',id:'skin_543'},
+{type:'skins',id:'skin_544'},
+{type:'skins',id:'skin_545'},
+{type:'skins',id:'skin_546'},
+{type:'skins',id:'skin_547'},
+{type:'skins',id:'skin_548'},
+{type:'skins',id:'skin_549'},
+{type:'skins',id:'skin_550'},
+{type:'skins',id:'skin_551'},
+{type:'skins',id:'skin_552'},
+{type:'skins',id:'skin_553'},
+{type:'skins',id:'skin_554'},
+{type:'skins',id:'skin_555'},
+{type:'skins',id:'skin_556'},
+{type:'skins',id:'skin_557'},
+{type:'skins',id:'skin_558'},
+{type:'skins',id:'skin_559'},
+{type:'skins',id:'skin_560'},
+{type:'skins',id:'skin_561'},
+{type:'skins',id:'skin_562'},
+{type:'skins',id:'skin_563'},
+{type:'skins',id:'skin_564'},
+{type:'skins',id:'skin_565'},
+{type:'skins',id:'skin_566'},
+{type:'skins',id:'skin_567'},
+{type:'skins',id:'skin_568'},
+{type:'skins',id:'skin_569'},
+{type:'skins',id:'skin_570'},
+{type:'skins',id:'skin_571'},
+{type:'skins',id:'skin_572'},
+{type:'skins',id:'skin_573'},
+{type:'skins',id:'skin_574'},
+{type:'skins',id:'skin_575'},
+{type:'skins',id:'skin_576'},
+{type:'skins',id:'skin_577'},
+{type:'skins',id:'skin_578'},
+{type:'skins',id:'skin_579'},
+{type:'skins',id:'skin_580'},
+{type:'skins',id:'skin_581'},
+{type:'skins',id:'skin_582'},
+{type:'skins',id:'skin_583'},
+{type:'skins',id:'skin_584'},
+{type:'skins',id:'skin_585'},
+{type:'skins',id:'skin_586'},
+{type:'skins',id:'skin_587'},
+{type:'skins',id:'skin_588'},
+{type:'skins',id:'skin_589'},
+{type:'skins',id:'skin_590'},
+{type:'skins',id:'skin_591'},
+{type:'skins',id:'skin_592'},
+{type:'skins',id:'skin_593'},
+{type:'skins',id:'skin_594'},
+{type:'skins',id:'skin_595'},
+{type:'skins',id:'skin_596'},
+{type:'skins',id:'skin_597'},
+{type:'skins',id:'skin_598'},
+{type:'skins',id:'skin_599'},
+{type:'skins',id:'skin_600'},
+{type:'skins',id:'skin_601'},
+{type:'skins',id:'skin_602'},
+{type:'skins',id:'skin_603'},
+{type:'skins',id:'skin_604'},
+{type:'skins',id:'skin_605'},
+{type:'skins',id:'skin_606'},
+{type:'skins',id:'skin_607'},
+{type:'skins',id:'skin_608'},
+{type:'skins',id:'skin_609'},
+{type:'skins',id:'skin_610'},
+{type:'skins',id:'skin_611'},
+{type:'skins',id:'skin_612'},
+{type:'skins',id:'skin_613'},
+{type:'skins',id:'skin_614'},
+{type:'skins',id:'skin_615'},
+{type:'skins',id:'skin_616'},
+{type:'skins',id:'skin_617'},
+{type:'skins',id:'skin_618'},
+{type:'skins',id:'skin_619'},
+{type:'skins',id:'skin_620'},
+{type:'skins',id:'skin_621'},
+{type:'skins',id:'skin_622'},
+{type:'skins',id:'skin_623'},
+{type:'skins',id:'skin_624'},
+{type:'skins',id:'skin_625'},
+{type:'skins',id:'skin_626'},
+{type:'skins',id:'skin_627'},
+{type:'skins',id:'skin_628'},
+{type:'skins',id:'skin_629'},
+{type:'skins',id:'skin_630'},
+{type:'skins',id:'skin_631'},
+{type:'skins',id:'skin_632'},
+{type:'skins',id:'skin_633'},
+{type:'skins',id:'skin_634'},
+{type:'skins',id:'skin_635'},
+{type:'skins',id:'skin_636'},
+{type:'skins',id:'skin_637'},
+{type:'skins',id:'skin_638'},
+{type:'skins',id:'skin_639'},
+{type:'skins',id:'skin_640'},
+{type:'skins',id:'skin_641'},
+{type:'skins',id:'skin_642'},
+{type:'skins',id:'skin_643'},
+{type:'skins',id:'skin_644'},
+{type:'skins',id:'skin_645'},
+{type:'skins',id:'skin_646'},
+{type:'skins',id:'skin_647'},
+{type:'skins',id:'skin_648'},
+{type:'skins',id:'skin_649'},
+{type:'skins',id:'skin_650'},
+{type:'skins',id:'skin_651'},
+{type:'skins',id:'skin_652'},
+{type:'skins',id:'skin_653'},
+{type:'skins',id:'skin_654'},
+{type:'skins',id:'skin_655'},
+{type:'skins',id:'skin_656'},
+{type:'skins',id:'skin_657'},
+{type:'skins',id:'skin_658'},
+{type:'skins',id:'skin_659'},
+{type:'skins',id:'skin_660'},
+{type:'skins',id:'skin_661'},
+{type:'skins',id:'skin_662'},
+{type:'skins',id:'skin_663'},
+{type:'skins',id:'skin_664'},
+{type:'skins',id:'skin_665'},
+{type:'skins',id:'skin_666'},
+{type:'skins',id:'skin_667'},
+{type:'skins',id:'skin_668'},
+{type:'skins',id:'skin_669'},
+{type:'skins',id:'skin_670'},
+{type:'skins',id:'skin_671'},
+{type:'skins',id:'skin_672'},
+{type:'skins',id:'skin_673'},
+{type:'skins',id:'skin_674'},
+{type:'skins',id:'skin_675'},
+{type:'skins',id:'skin_676'},
+{type:'skins',id:'skin_677'},
+{type:'skins',id:'skin_678'},
+{type:'skins',id:'skin_679'},
+{type:'skins',id:'skin_680'},
+{type:'skins',id:'skin_681'},
+{type:'skins',id:'skin_682'},
+{type:'skins',id:'skin_683'},
+{type:'skins',id:'skin_684'},
+{type:'skins',id:'skin_685'},
+{type:'skins',id:'skin_686'},
+{type:'skins',id:'skin_687'},
+{type:'skins',id:'skin_688'},
+{type:'skins',id:'skin_689'},
+{type:'skins',id:'skin_690'},
+{type:'skins',id:'skin_691'},
+{type:'skins',id:'skin_692'},
+{type:'skins',id:'skin_693'},
+{type:'skins',id:'skin_694'},
+{type:'skins',id:'skin_695'},
+{type:'skins',id:'skin_696'},
+{type:'skins',id:'skin_697'},
+{type:'skins',id:'skin_698'},
+{type:'skins',id:'skin_699'},
+{type:'skins',id:'skin_700'},
+{type:'skins',id:'skin_701'},
+{type:'skins',id:'skin_702'},
+{type:'skins',id:'skin_703'},
+{type:'skins',id:'skin_704'},
+{type:'skins',id:'skin_705'},
+{type:'skins',id:'skin_706'},
+{type:'skins',id:'skin_707'},
+{type:'skins',id:'skin_708'},
+{type:'skins',id:'skin_709'},
+{type:'skins',id:'skin_710'},
+{type:'skins',id:'skin_711'},
+{type:'skins',id:'skin_712'},
+{type:'skins',id:'skin_713'},
+{type:'skins',id:'skin_714'},
+{type:'skins',id:'skin_715'},
+{type:'skins',id:'skin_716'},
+{type:'skins',id:'skin_717'},
+{type:'skins',id:'skin_718'},
+{type:'skins',id:'skin_719'},
+{type:'skins',id:'skin_720'},
+{type:'skins',id:'skin_721'},
+{type:'skins',id:'skin_722'},
+{type:'skins',id:'skin_723'},
+{type:'skins',id:'skin_724'},
+{type:'skins',id:'skin_725'},
+{type:'skins',id:'skin_726'},
+{type:'skins',id:'skin_727'},
+{type:'skins',id:'skin_728'},
+{type:'skins',id:'skin_729'},
+{type:'skins',id:'skin_730'},
+{type:'skins',id:'skin_731'},
+{type:'skins',id:'skin_732'},
+{type:'skins',id:'skin_733'},
+{type:'skins',id:'skin_734'},
+{type:'skins',id:'skin_735'},
+{type:'skins',id:'skin_736'},
+{type:'skins',id:'skin_737'},
+{type:'skins',id:'skin_738'},
+{type:'skins',id:'skin_739'},
+{type:'skins',id:'skin_740'},
+{type:'skins',id:'skin_741'},
+{type:'skins',id:'skin_742'},
+{type:'skins',id:'skin_743'},
+{type:'skins',id:'skin_744'},
+{type:'skins',id:'skin_745'},
+{type:'skins',id:'skin_746'},
+{type:'skins',id:'skin_747'},
+{type:'skins',id:'skin_748'},
+{type:'skins',id:'skin_749'},
+{type:'skins',id:'skin_750'},
+{type:'skins',id:'skin_751'},
+{type:'skins',id:'skin_752'},
+{type:'skins',id:'skin_753'},
+{type:'skins',id:'skin_754'},
+{type:'skins',id:'skin_755'},
+{type:'skins',id:'skin_756'},
+{type:'skins',id:'skin_757'},
+{type:'skins',id:'skin_758'},
+{type:'skins',id:'skin_759'},
+{type:'skins',id:'skin_760'},
+{type:'skins',id:'skin_761'},
+{type:'skins',id:'skin_762'},
+{type:'skins',id:'skin_763'},
+{type:'skins',id:'skin_764'},
+{type:'skins',id:'skin_765'},
+{type:'skins',id:'skin_766'},
+{type:'skins',id:'skin_767'},
+{type:'skins',id:'skin_768'},
+{type:'skins',id:'skin_769'},
+{type:'skins',id:'skin_770'},
+{type:'skins',id:'skin_771'},
+{type:'skins',id:'skin_772'},
+{type:'skins',id:'skin_773'},
+{type:'skins',id:'skin_774'},
+{type:'skins',id:'skin_775'},
+{type:'skins',id:'skin_776'},
+{type:'skins',id:'skin_777'},
+{type:'skins',id:'skin_778'},
+{type:'skins',id:'skin_779'},
+{type:'skins',id:'skin_780'},
+{type:'skins',id:'skin_781'},
+{type:'skins',id:'skin_782'},
+{type:'skins',id:'skin_783'},
+{type:'skins',id:'skin_784'},
+{type:'skins',id:'skin_785'},
+{type:'skins',id:'skin_786'},
+{type:'skins',id:'skin_787'},
+{type:'skins',id:'skin_788'},
+{type:'skins',id:'skin_789'},
+{type:'skins',id:'skin_790'},
+{type:'skins',id:'skin_791'},
+{type:'skins',id:'skin_792'},
+{type:'skins',id:'skin_793'},
+{type:'skins',id:'skin_794'},
+{type:'skins',id:'skin_795'},
+{type:'skins',id:'skin_796'},
+{type:'skins',id:'skin_797'},
+{type:'skins',id:'skin_798'},
+{type:'skins',id:'skin_799'},
+{type:'skins',id:'skin_800'},
                     {type:'crew',id:'crew_tom'},
                     {type:'crew',id:'crew_alex'},
                     {type:'crew',id:'crew_steve'},
@@ -2037,7 +4472,7 @@ function upgradeItem() {
 
 // --- ガチャ ---
 function openGachaProbabilityModal() { showEl('gacha-probability-modal'); } function closeGachaProbabilityModal() { hideEl('gacha-probability-modal'); }
-function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), be=$('tab-gacha-ex'), ti=$('gacha-title'), su=$('gacha-sub'), em=$('gacha-chest-emoji'), ba=$('ex-pickup-badge'); if(t==='normal'){bn.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";be.className="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";ti.innerText="わくわく通常ガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md";su.innerText="いろんなお宝が眠っているぞ！";em.innerText="🏴‍☠️";hideEl('ex-pickup-badge');}else{bn.className="flex-1 py-2 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent";be.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";ti.innerText="⭐ 超・限定EXガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md";su.innerText="今だけ！すごい乗組員がゲットできるかも！";em.innerText="⭐";showEl('ex-pickup-badge');} }
+function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), be=$('tab-gacha-ex'), ti=$('gacha-title'), su=$('gacha-sub'), em=$('gacha-chest-emoji'), ba=$('ex-pickup-badge'); if(t==='normal'){bn.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";be.className="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";ti.innerText="わくわく通常ガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md";su.innerText="いろんなお宝が眠っているぞ！";em.innerText="🏴‍☠️";hideEl('ex-pickup-badge');}else{bn.className="flex-1 py-2 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent";be.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";ti.innerText="⭐ 超限定EXガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md";su.innerText="今だけ！すごい乗組員がゲットできるかも！";em.innerText="⭐";showEl('ex-pickup-badge');} }
 function updateGachaUI() { updateHeaderUI(); $('gacha-rate').innerText=`${Math.min(1.0+(DB.pityCounter*0.5),100.0).toFixed(1)}%`; $('pity-bar').style.width=`${Math.min((DB.pityCounter/50)*100,100)}%`; }
 let currentGachaResults=[];
 function startGachaAnim(times) { 
@@ -2052,7 +4487,7 @@ function startGachaAnim(times) {
         currentGachaResults.push({item:m,isNew:isNew}); 
     } 
     saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; 
-    setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨🎁✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); 
+    setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); 
 }
 function showGachaResult(item, isNew) { document.querySelectorAll('.gacha-result-text').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=null;}); shootConfetti('gacha-confetti-container',80); $('gacha-result-rarity').innerText=item.rarity; $('gacha-result-rarity').className=`text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`; const vc=$('gacha-result-visual-container'); vc.innerHTML=item.type==='image'?`<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`:`<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon||'⚔️'}</span>`; $('gacha-result-name').innerHTML=`${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew?'🎉 初ゲット！！':'持ってるぞ！(+500/化石+1)'}</span>`; $('gacha-result-desc').innerText=item.desc||''; showEl('gacha-result-modal'); }
 function closeGachaResult() { hideEl('gacha-result-modal'); $('gacha-confetti-container').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
