@@ -209,7 +209,7 @@
     <div class="hidden md:block absolute bottom-4 right-4 text-sm font-bold text-slate-300 pointer-events-none text-right bg-slate-900/70 p-3 rounded-xl border border-slate-600 backdrop-blur-sm z-10">
       <span class="text-cyan-400">[W][A][S][D]</span> 移動<br>
       <span class="text-cyan-400">[マウス]</span> 照準 & クリックで攻撃<br>
-      <span class="text-yellow-400 text-xs mt-1 block">スマホ：左画面スワイプで移動 / 右画面で攻撃</span>
+      <span class="text-yellow-400 text-xs mt-1 block">スマホ：左画面ドラッグで移動 / 右画面をタップで攻撃</span>
     </div>
   </div>
 
@@ -320,7 +320,7 @@
     // --- Game Constants ---
     const CANVAS_W = 1800; 
     const CANVAS_H = 1200; 
-    const BASE_MAX_HP = 1000;
+    const BASE_MAX_HP = 1500;
     const PLAYER_MAX_HP = 100;
     const GAME_TIME = 150; 
     
@@ -331,15 +331,15 @@
     const CENTER_Y = 600;
 
     const SPEED_NORMAL = 500; 
-    const SPEED_PENALTY = 0.6; 
+    const SPEED_PENALTY = 0.3; // 💎 クリスタル所持時のスピードをさらに遅く（30%）に変更
     
     // --- Local State ---
     let localPlayer = { x: 0, y: 0, team: -1, hp: 100, crystals: 0, maxCrystals: 1 };
     let camera = { x: 0, y: 0 };
-    let mouse = { screenX: 0, screenY: 0, worldX: 0, worldY: 0, down: false };
+    let mouse = { screenX: 0, screenY: 0, worldX: 0, worldY: 0, down: false, touchId: null };
     
+    // 左画面の移動用可変式ジョイスティック
     let joystickL = { active: false, id: null, originX: 0, originY: 0, x: 0, y: 0, dx: 0, dy: 0 };
-    let joystickR = { active: false, id: null, originX: 0, originY: 0, x: 0, y: 0, dx: 0, dy: 0 };
 
     let localBullets = []; 
     let particles = [];
@@ -356,10 +356,10 @@
     let lastSyncY = -1000;
     let lastShootTime = 0; 
 
-    // --- ⭐ 新機能：復活システムの変数 ⭐ ---
-    let respawnsLeft = 3;   // 残り復活回数（最大3回）
-    let respawnTimer = 0;   // 復活までのカウントダウン（ミリ秒）
-    let isDead = false;     // 現在死んでいるかどうか
+    // --- 復活システムの変数 ---
+    let respawnsLeft = 3;   
+    let respawnTimer = 0;   
+    let isDead = false;     
 
     const cmdBtnHTML = {
       3: `<span class="absolute -top-2 md:-top-4 -right-2 md:-right-4 bg-slate-900 border-2 border-yellow-400 text-yellow-400 text-[10px] md:text-sm px-1.5 md:px-2 rounded-full font-black">💎3</span><span class="text-xl md:text-3xl mb-0 md:mb-1 mt-1 md:mt-2">☄️</span><span class="text-[8px] md:text-xs font-black text-purple-400 bg-purple-900/50 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">大砲</span>`,
@@ -514,13 +514,16 @@
     canvas.addEventListener('mousedown', () => mouse.down = true);
     canvas.addEventListener('mouseup', () => mouse.down = false);
 
+    // ⭐ スマホの操作変更: 左画面ジョイスティック / 右画面タップで攻撃 ⭐
     const handleTouch = (e) => {
       e.preventDefault();
       const hw = window.innerWidth / 2;
+      
       if (e.type === 'touchstart' || e.type === 'touchmove') {
         for(let i=0; i<e.changedTouches.length; i++) {
           const t = e.changedTouches[i];
           if (t.clientX < hw) { 
+            // 左画面: 可変式ジョイスティック
             if (!joystickL.active || joystickL.id === t.identifier) {
               if(!joystickL.active) {
                 joystickL.active = true; joystickL.id = t.identifier;
@@ -530,22 +533,23 @@
               joystickL.dx = joystickL.x - joystickL.originX; joystickL.dy = joystickL.y - joystickL.originY;
             }
           } else { 
-            if (!joystickR.active || joystickR.id === t.identifier) {
-              if(!joystickR.active) {
-                joystickR.active = true; joystickR.id = t.identifier;
-                joystickR.originX = t.clientX; joystickR.originY = t.clientY;
-              }
-              joystickR.x = t.clientX; joystickR.y = t.clientY;
-              joystickR.dx = joystickR.x - joystickR.originX; joystickR.dy = joystickR.y - joystickR.originY;
-            }
+            // 右画面: タップ/ドラッグで攻撃
+            mouse.down = true;
+            mouse.screenX = t.clientX;
+            mouse.screenY = t.clientY;
+            mouse.touchId = t.identifier; 
           }
         }
       }
       if (e.type === 'touchend' || e.type === 'touchcancel') {
         for(let i=0; i<e.changedTouches.length; i++) {
           const t = e.changedTouches[i];
+          // 指が離れたら非表示＆移動停止
           if (joystickL.id === t.identifier) joystickL.active = false;
-          if (joystickR.id === t.identifier) joystickR.active = false;
+          if (mouse.touchId === t.identifier) {
+            mouse.down = false;
+            mouse.touchId = null;
+          }
         }
       }
     };
@@ -623,7 +627,8 @@
       updates['time'] = newTime;
       if (newTime === 0) { updates['status'] = 'result'; updateDoc(roomRef, updates).catch(()=>{}); return; }
 
-      if (now - lastSpawn > 15000 && Object.keys(gameState.crystals||{}).length < 6) {
+      // ⭐ クリスタルスポーン制限: マップ上に1つも無い時だけ湧くように変更 ⭐
+      if (now - lastSpawn > 15000 && Object.keys(gameState.crystals||{}).length === 0) {
         updates[`crystals.c_${now}`] = { x: CENTER_X + (Math.random()-0.5)*500, y: CENTER_Y + (Math.random()-0.5)*500 };
         lastSpawn = now;
       }
@@ -673,7 +678,7 @@
           
           Object.keys(gameState.players).forEach(eUid => {
             const ep = gameState.players[eUid];
-            if (ep.team !== p.team && ep.hp > 0) {
+            if (ep.team !== p.team && ep.hp > 0 && Math.hypot(ep.x - p.x, ep.y - p.y) < 800) { // 索敵範囲を広げる
               const d = Math.hypot(ep.x - p.x, ep.y - p.y);
               if (d < nearEnemyDist) { nearEnemyDist = d; nearEnemy = ep; }
             }
@@ -696,7 +701,7 @@
             ai.state = 'return'; ai.targetX = myBaseX; ai.targetY = BASE_Y;
           } else if (nearEnemy && nearEnemyDist < 400) {
             ai.state = 'attack'; ai.targetX = nearEnemy.x; ai.targetY = nearEnemy.y;
-          } else if (nearCrystal && nearCrystalDist < 800) {
+          } else if (nearCrystal) {
             ai.state = 'gather'; ai.targetX = nearCrystal.x; ai.targetY = nearCrystal.y;
           } else {
             ai.state = 'wander'; 
@@ -831,37 +836,44 @@
       if (gameState[`t${localPlayer.team}_cmd8`]) localPlayer.maxCrystals = 2;
 
       let moveDirX = 0, moveDirY = 0;
+      let isAnalog = false;
+      let analogPower = 1.0;
+
       if (keys['KeyW'] || keys['ArrowUp']) moveDirY -= 1;
       if (keys['KeyS'] || keys['ArrowDown']) moveDirY += 1;
       if (keys['KeyA'] || keys['ArrowLeft']) moveDirX -= 1;
       if (keys['KeyD'] || keys['ArrowRight']) moveDirX += 1;
 
+      // ⭐ 可変式ジョイスティックの移動計算 ⭐
       if (joystickL.active) {
         const jLen = Math.hypot(joystickL.dx, joystickL.dy);
         if (jLen > 10) { 
           moveDirX += joystickL.dx / jLen; 
           moveDirY += joystickL.dy / jLen; 
+          isAnalog = true;
+          analogPower = Math.min(jLen, 60) / 60; // 距離に応じてスピードを変える
         }
       }
 
       const dirLen = Math.hypot(moveDirX, moveDirY);
       if (dirLen > 0) {
-        const speed = SPEED_NORMAL * (localPlayer.crystals > 0 ? SPEED_PENALTY : 1.0);
+        const finalPower = isAnalog ? analogPower : 1.0;
+        const speed = SPEED_NORMAL * (localPlayer.crystals > 0 ? SPEED_PENALTY : 1.0) * finalPower;
+        
         localPlayer.x += (moveDirX / dirLen) * speed * dt;
         localPlayer.y += (moveDirY / dirLen) * speed * dt;
         
         localPlayer.x = Math.max(50, Math.min(CANVAS_W-50, localPlayer.x));
         localPlayer.y = Math.max(50, Math.min(CANVAS_H-50, localPlayer.y));
         
-        if (Math.random() < 0.1) createParticles(localPlayer.x, localPlayer.y + 25, 1, '#94a3b8', 0.2);
+        if (Math.random() < 0.1 * finalPower) createParticles(localPlayer.x, localPlayer.y + 25, 1, '#94a3b8', 0.2);
       }
 
-      const isRightStickAttack = joystickR.active && Math.hypot(joystickR.dx, joystickR.dy) > 20;
-      if ((mouse.down || isRightStickAttack) && performance.now() - lastShootTime > 450) {
+      // ⭐ 攻撃処理：mouse.down(タップ含む)だけで攻撃する ⭐
+      if (mouse.down && performance.now() - lastShootTime > 450) {
         lastShootTime = performance.now();
-        let dx = 0, dy = 0;
-        if (isRightStickAttack) { dx = joystickR.dx; dy = joystickR.dy; } 
-        else { dx = mouse.worldX - localPlayer.x; dy = mouse.worldY - localPlayer.y; }
+        let dx = mouse.worldX - localPlayer.x;
+        let dy = mouse.worldY - localPlayer.y; 
         
         const len = Math.hypot(dx, dy);
         if (len > 0) {
@@ -1022,14 +1034,28 @@
 
       ctx.restore();
 
-      // UI等
+      // ⭐ 可変式ジョイスティックの描画 ⭐
       if (joystickL.active && !isDead) {
-        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.beginPath(); ctx.arc(joystickL.originX, joystickL.originY, 60, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(joystickL.x, joystickL.y, 30, 0, Math.PI*2); ctx.fill();
-      }
-      if (joystickR.active && !isDead) {
-        ctx.fillStyle = 'rgba(239,68,68,0.1)'; ctx.beginPath(); ctx.arc(joystickR.originX, joystickR.originY, 60, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(239,68,68,0.4)'; ctx.beginPath(); ctx.arc(joystickR.x, joystickR.y, 30, 0, Math.PI*2); ctx.fill();
+        const maxR = 60; // 外円の半径
+        let drawX = joystickL.x;
+        let drawY = joystickL.y;
+        const dist = Math.hypot(joystickL.dx, joystickL.dy);
+        
+        // 内円が外円から出ないようにクランプ
+        if (dist > maxR) {
+          drawX = joystickL.originX + (joystickL.dx / dist) * maxR;
+          drawY = joystickL.originY + (joystickL.dy / dist) * maxR;
+        }
+
+        // 外円
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'; 
+        ctx.beginPath(); ctx.arc(joystickL.originX, joystickL.originY, maxR, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
+
+        // 内円
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; 
+        ctx.beginPath(); ctx.arc(drawX, drawY, 25, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
       }
     }
 
