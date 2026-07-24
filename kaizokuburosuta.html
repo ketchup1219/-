@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>クラッシュ・クリスタル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      touch-action: none;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #game-canvas {
+      image-rendering: pixelated;
+    }
+    .btn-command {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-command:active:not(:disabled) {
+      transform: scale(0.90);
+    }
+    .btn-command:disabled {
+      opacity: 0.4;
+      filter: grayscale(100%);
+      transform: none;
+      cursor: not-allowed;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .bg-animated {
+      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #020617, #082f49);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+    }
+    .float-anim {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(-5deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
+      100% { transform: translateY(0px) rotate(-5deg); }
+    }
+    /* スマホ用UI調整 */
+    @media (max-width: 768px) {
+      .hud-scale { transform: scale(0.85); transform-origin: top; }
+      .hud-scale-bottom { transform: scale(0.85); transform-origin: bottom; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-white h-screen w-screen relative">
+
+  <!-- トースト通知 -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 md:px-8 md:py-4 rounded-full z-[100] transform -translate-y-32 transition-transform duration-300 font-bold flex items-center gap-3 border-2 border-red-400 shadow-lg pointer-events-none">
+    <span class="text-xl md:text-2xl" id="toast-icon">⚠️</span>
+    <span id="toast-msg" class="text-sm md:text-lg tracking-wide">メッセージ</span>
+  </div>
+
+  <!-- UI: ログイン中 -->
+  <div id="ui-loading" class="absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center">
+    <div class="animate-spin rounded-full h-16 w-16 md:h-20 md:w-20 border-t-4 border-b-4 border-cyan-500 mb-6"></div>
+    <h2 class="text-xl md:text-2xl font-bold text-cyan-300 animate-pulse">サーバーに接続中...</h2>
+    <p class="text-slate-500 text-sm mt-4">※時間がかかる場合は自動でスキップします</p>
+  </div>
+
+  <!-- UI: タイトル＆ロビー -->
+  <div id="ui-lobby" class="absolute inset-0 z-40 hidden flex-col items-center justify-center bg-animated px-4">
+    <div class="absolute top-10 left-10 text-4xl md:text-6xl float-anim opacity-50 blur-[2px]">💎</div>
+    <div class="absolute bottom-20 right-10 text-6xl md:text-8xl float-anim opacity-30 blur-[4px]" style="animation-delay: -1.5s;">💎</div>
+
+    <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-500 to-purple-600 mb-2 tracking-widest text-center leading-tight">
+      CRASH<br>CRYSTAL
+    </h1>
+    <p class="text-sm md:text-lg text-cyan-200 mb-8 font-bold tracking-widest border-b-2 border-cyan-500/50 pb-2">陣取りアクション × 拠点防衛</p>
+
+    <div class="bg-slate-800/80 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-slate-600 w-full max-w-md shadow-2xl">
+      <div class="mb-4 md:mb-6">
+        <label class="block text-xs md:text-sm font-bold text-slate-300 mb-2">対戦モード</label>
+        <select id="select-mode" class="w-full bg-slate-900/80 border-2 border-slate-600 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-cyan-500 transition-colors">
+          <option value="1">1 vs 1 (タイマン決戦)</option>
+          <option value="2">2 vs 2 (タッグマッチ)</option>
+          <option value="3" selected>3 vs 3 (チーム総力戦)</option>
+        </select>
+      </div>
+      <div class="mb-6 md:mb-8 flex items-center bg-slate-900/50 p-3 rounded-xl border border-slate-700">
+        <input type="checkbox" id="check-bot" class="w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 border-slate-600 text-cyan-500 cursor-pointer" checked>
+        <label for="check-bot" class="ml-3 text-sm md:text-base text-slate-200 font-bold cursor-pointer">不足人数をBOTで埋める</label>
+      </div>
+
+      <div class="space-y-4 md:space-y-5">
+        <button id="btn-create-room" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black py-3 md:py-4 px-4 rounded-xl transition-all transform hover:-translate-y-1 active:scale-95 text-base md:text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+          ✨ ルームを作成して遊ぶ ✨
+        </button>
+        
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-600"></div>
+          <span class="flex-shrink-0 mx-4 text-slate-400 text-xs md:text-sm font-bold">友達のルームに入る</span>
+          <div class="flex-grow border-t border-slate-600"></div>
+        </div>
+        
+        <div class="flex space-x-2 md:space-x-3">
+          <input type="text" id="input-room-id" placeholder="ルームID" class="flex-1 w-0 bg-slate-900/80 border-2 border-slate-600 rounded-xl p-3 text-white font-bold text-center tracking-widest uppercase focus:outline-none focus:border-green-500 transition-colors">
+          <button id="btn-join-room" class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white font-black py-3 px-6 md:px-8 rounded-xl transition-all transform hover:-translate-y-1 active:scale-95 whitespace-nowrap shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            参加！
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI: 待機室 -->
+  <div id="ui-waiting" class="absolute inset-0 bg-slate-900/95 backdrop-blur-md z-30 hidden flex-col items-center justify-center bg-animated px-4 text-center">
+    <h2 class="text-3xl md:text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500">メンバー集結中...</h2>
+    <p class="text-slate-300 mb-6 md:mb-8 font-bold text-sm md:text-base">このIDを友達に教えよう！</p>
+    
+    <div class="bg-slate-800 border-2 border-cyan-500 p-3 md:p-4 rounded-2xl mb-8 md:mb-10 shadow-lg">
+      <p id="waiting-room-id" class="text-4xl md:text-5xl font-black text-cyan-400 tracking-widest select-all"></p>
+    </div>
+
+    <div id="waiting-players" class="flex flex-wrap gap-4 md:gap-6 justify-center max-w-3xl mb-10 md:mb-12"></div>
+    
+    <button id="btn-start-game" class="hidden bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-slate-900 font-black py-3 md:py-4 px-8 md:px-12 rounded-2xl transition-all transform hover:scale-105 active:scale-95 text-xl md:text-2xl animate-bounce shadow-lg">
+      ⚔️ ゲーム開始！ ⚔️
+    </button>
+    <p id="waiting-host-msg" class="text-slate-400 font-bold bg-slate-800 px-4 py-2 md:px-6 md:py-3 rounded-full border border-slate-600 text-sm md:text-base">ホストが開始するのを待っています...</p>
+  </div>
+
+  <!-- UI: 死亡時の復活カウントダウン -->
+  <div id="respawn-ui" class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-30 hidden pointer-events-none backdrop-blur-sm">
+    <h2 class="text-5xl md:text-7xl font-black text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">YOU DIED</h2>
+    <p id="respawn-timer-text" class="text-7xl md:text-9xl font-black text-white drop-shadow-lg mb-8">5.0</p>
+    <p id="respawn-left-text" class="text-2xl md:text-4xl font-bold text-yellow-400 drop-shadow-lg bg-slate-900/80 px-6 py-2 rounded-full border-2 border-yellow-500 transition-colors">残り復活回数: 3</p>
+  </div>
+
+  <!-- UI: リザルト -->
+  <div id="ui-result" class="absolute inset-0 bg-slate-900/95 z-40 hidden flex-col items-center justify-center backdrop-blur-sm px-4 text-center">
+    <h1 id="result-title" class="text-5xl md:text-7xl font-black mb-4 md:mb-6 transform scale-0 transition-transform duration-500"></h1>
+    <div class="bg-slate-800/80 p-6 md:p-8 rounded-3xl border-2 border-slate-600 mb-8 md:mb-10 w-full max-w-md shadow-2xl">
+      <p id="result-desc" class="text-xl md:text-3xl text-white font-bold mb-4"></p>
+      <p class="text-slate-400 text-sm md:text-base">お疲れ様でした！</p>
+    </div>
+    <button id="btn-return-lobby" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-bold py-3 px-8 md:py-4 md:px-12 rounded-2xl transition-all transform hover:-translate-y-1 active:scale-95 text-lg md:text-xl border border-slate-500 shadow-lg">
+      ロビーに戻る
+    </button>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="game-container" class="absolute inset-0 bg-[#0f172a] hidden overflow-hidden">
+    <canvas id="game-canvas" class="block"></canvas>
+    
+    <!-- HUD: ヘッダー情報 -->
+    <div class="absolute top-0 left-0 w-full p-2 md:p-4 flex justify-between items-start pointer-events-none hud-scale z-10">
+      <div class="bg-slate-900/90 p-2 md:p-3 rounded-xl border-2 border-blue-500 w-32 md:w-56 backdrop-blur-sm shadow-md" id="hud-base-0">
+        <div class="text-blue-400 font-black mb-1 text-[10px] md:text-sm flex justify-between">
+          <span>自陣</span><span id="hud-hp-val-0" class="text-white">1000</span>
+        </div>
+        <div class="w-full bg-slate-700 h-3 md:h-5 rounded-full overflow-hidden border border-slate-800">
+          <div id="hud-hp-0" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full transition-all duration-300" style="width: 100%"></div>
+        </div>
+        <div class="mt-1 md:mt-2 bg-slate-800 rounded-lg p-1 px-2 flex items-center justify-between border border-slate-700">
+          <span class="text-[8px] md:text-xs text-slate-300 font-bold hidden md:inline">拠点クリスタル</span>
+          <span class="text-sm md:text-2xl font-black text-yellow-400 mx-auto md:mx-0">💎 <span id="hud-stock-0">0</span></span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 px-4 py-1 md:px-8 md:py-3 rounded-full border-2 border-slate-500 text-xl md:text-3xl font-black tracking-widest text-center min-w-[80px] md:min-w-[140px] backdrop-blur-sm text-white mt-1 shadow-md">
+        <span id="hud-time">2:30</span>
+      </div>
+
+      <div class="bg-slate-900/90 p-2 md:p-3 rounded-xl border-2 border-red-500 w-32 md:w-56 backdrop-blur-sm shadow-md" id="hud-base-1">
+        <div class="text-red-400 font-black mb-1 text-[10px] md:text-sm flex justify-between flex-row-reverse">
+          <span>敵陣</span><span id="hud-hp-val-1" class="text-white">1000</span>
+        </div>
+        <div class="w-full bg-slate-700 h-3 md:h-5 rounded-full overflow-hidden border border-slate-800 flex justify-end">
+          <div id="hud-hp-1" class="bg-gradient-to-l from-red-600 to-orange-400 h-full transition-all duration-300" style="width: 100%"></div>
+        </div>
+        <div class="mt-1 md:mt-2 bg-slate-800 rounded-lg p-1 px-2 flex items-center justify-between flex-row-reverse border border-slate-700">
+          <span class="text-[8px] md:text-xs text-slate-300 font-bold hidden md:inline">拠点クリスタル</span>
+          <span class="text-sm md:text-2xl font-black text-yellow-400 mx-auto md:mx-0">💎 <span id="hud-stock-1">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD: プレイヤー所持クリスタル -->
+    <div class="absolute bottom-[90px] md:bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none hud-scale-bottom z-10">
+      <div class="bg-slate-900/90 px-4 py-2 md:px-6 md:py-3 rounded-full border-2 border-slate-600 flex items-center gap-2 md:gap-4 backdrop-blur-sm shadow-md">
+        <span class="text-slate-300 text-xs md:text-sm font-bold">所持</span>
+        <div class="flex gap-1 md:gap-2" id="hud-player-crystals">
+          <div class="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-slate-500 flex items-center justify-center opacity-50"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD: コマンドボタン -->
+    <div id="command-palette" class="absolute bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-1 md:gap-3 pointer-events-auto z-20 hud-scale-bottom">
+      <button id="cmd-btn-3" class="btn-command bg-slate-800/90 border-2 border-purple-500 rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col items-center w-16 md:w-24 opacity-50 relative group backdrop-blur-sm shadow-md" disabled></button>
+      <button id="cmd-btn-5" class="btn-command bg-slate-800/90 border-2 border-green-500 rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col items-center w-16 md:w-24 opacity-50 relative group backdrop-blur-sm shadow-md" disabled></button>
+      <button id="cmd-btn-8" class="btn-command bg-slate-800/90 border-2 border-blue-400 rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col items-center w-16 md:w-24 opacity-50 relative group backdrop-blur-sm shadow-md" disabled></button>
+      <button id="cmd-btn-10" class="btn-command bg-slate-800/90 border-2 border-red-500 rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col items-center w-16 md:w-24 opacity-50 relative group backdrop-blur-sm shadow-md" disabled></button>
+    </div>
+
+    <!-- PC操作ヒント -->
+    <div class="hidden md:block absolute bottom-4 right-4 text-sm font-bold text-slate-300 pointer-events-none text-right bg-slate-900/70 p-3 rounded-xl border border-slate-600 backdrop-blur-sm z-10">
+      <span class="text-cyan-400">[W][A][S][D]</span> 移動<br>
+      <span class="text-cyan-400">[マウス]</span> 照準 & クリックで攻撃<br>
+      <span class="text-yellow-400 text-xs mt-1 block">スマホ：左画面スワイプで移動 / 右画面で攻撃</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Toast Notification ---
+    function showToast(msg, type = 'error') {
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toast-icon');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = msg;
+      
+      if(type === 'error') {
+        toast.className = "fixed top-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 md:px-8 md:py-4 rounded-full z-[100] transform transition-transform duration-300 font-bold flex items-center gap-3 border-2 border-red-400 shadow-lg pointer-events-none";
+        toastIcon.innerText = "⚠️";
+      } else if (type === 'success') {
+        toast.className = "fixed top-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 md:px-8 md:py-4 rounded-full z-[100] transform transition-transform duration-300 font-bold flex items-center gap-3 border-2 border-green-400 shadow-lg pointer-events-none";
+        toastIcon.innerText = "✨";
+      }
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('-translate-y-32');
+        toast.classList.add('translate-y-4');
+      });
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4');
+        toast.classList.add('-translate-y-32');
+      }, 4000);
+    }
+
+    const withTimeout = (promise, ms, timeoutMsg = '通信タイムアウトが発生しました') => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), ms))
+      ]);
+    };
+
+    // --- 🚨 Firebase 設定 🚨 ---
+    let firebaseConfig = {};
+    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+      firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+    } else {
+      firebaseConfig = {
+        apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
+        authDomain: "game-685f2.firebaseapp.com",
+        databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
+        projectId: "game-685f2",
+        storageBucket: "game-685f2.firebasestorage.app",
+        messagingSenderId: "266871071111",
+        appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
+      };
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'crash-crystal-app';
+    const collPath = `artifacts/${appId}/public/data/rooms`;
+
+    let myUid = null;
+    let roomRef = null;
+    let unsubscribeRoom = null;
+    let isHost = false;
+    let gameState = null;
+    let isGameStarted = false; 
+
+    const authTimeout = setTimeout(() => {
+      if (!myUid) {
+        myUid = 'guest_' + Math.floor(Math.random() * 1000000);
+        document.getElementById('ui-loading').classList.add('hidden');
+        document.getElementById('ui-lobby').classList.remove('hidden');
+        document.getElementById('ui-lobby').classList.add('flex');
+        showToast("オフラインモード（ゲスト）で起動しました", "success");
+      }
+    }, 3000);
+
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          try {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } catch(e) {
+            await signInAnonymously(auth);
+          }
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      }
+    };
+    initAuth();
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && !myUid) {
+        clearTimeout(authTimeout);
+        myUid = user.uid;
+        document.getElementById('ui-loading').classList.add('hidden');
+        document.getElementById('ui-lobby').classList.remove('hidden');
+        document.getElementById('ui-lobby').classList.add('flex');
+      }
+    });
+
+    // --- Game Constants ---
+    const CANVAS_W = 1800; 
+    const CANVAS_H = 1200; 
+    const BASE_MAX_HP = 1000;
+    const PLAYER_MAX_HP = 100;
+    const GAME_TIME = 150; 
+    
+    const BASE0_X = 200;
+    const BASE1_X = 1600;
+    const BASE_Y = 600;
+    const CENTER_X = 900;
+    const CENTER_Y = 600;
+
+    const SPEED_NORMAL = 500; 
+    const SPEED_PENALTY = 0.6; 
+    
+    // --- Local State ---
+    let localPlayer = { x: 0, y: 0, team: -1, hp: 100, crystals: 0, maxCrystals: 1 };
+    let camera = { x: 0, y: 0 };
+    let mouse = { screenX: 0, screenY: 0, worldX: 0, worldY: 0, down: false };
+    
+    let joystickL = { active: false, id: null, originX: 0, originY: 0, x: 0, y: 0, dx: 0, dy: 0 };
+    let joystickR = { active: false, id: null, originX: 0, originY: 0, x: 0, y: 0, dx: 0, dy: 0 };
+
+    let localBullets = []; 
+    let particles = [];
+    let keys = {};
+    let lastTime = performance.now();
+    let syncTimer = null;
+    let hostTimer = null;
+    let gameLoopId = null;
+
+    const botAI = {};
+    let lastMyHp = 100;
+    let respawnProtectionTime = 0; 
+    let lastSyncX = -1000; 
+    let lastSyncY = -1000;
+    let lastShootTime = 0; 
+
+    // --- ⭐ 新機能：復活システムの変数 ⭐ ---
+    let respawnsLeft = 3;   // 残り復活回数（最大3回）
+    let respawnTimer = 0;   // 復活までのカウントダウン（ミリ秒）
+    let isDead = false;     // 現在死んでいるかどうか
+
+    const cmdBtnHTML = {
+      3: `<span class="absolute -top-2 md:-top-4 -right-2 md:-right-4 bg-slate-900 border-2 border-yellow-400 text-yellow-400 text-[10px] md:text-sm px-1.5 md:px-2 rounded-full font-black">💎3</span><span class="text-xl md:text-3xl mb-0 md:mb-1 mt-1 md:mt-2">☄️</span><span class="text-[8px] md:text-xs font-black text-purple-400 bg-purple-900/50 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">大砲</span>`,
+      5: `<span class="absolute -top-2 md:-top-4 -right-2 md:-right-4 bg-slate-900 border-2 border-yellow-400 text-yellow-400 text-[10px] md:text-sm px-1.5 md:px-2 rounded-full font-black">💎5</span><span class="text-xl md:text-3xl mb-0 md:mb-1 mt-1 md:mt-2">💖</span><span class="text-[8px] md:text-xs font-black text-green-400 bg-green-900/50 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">回復</span>`,
+      8: `<span class="absolute -top-2 md:-top-4 -right-2 md:-right-4 bg-slate-900 border-2 border-yellow-400 text-yellow-400 text-[10px] md:text-sm px-1.5 md:px-2 rounded-full font-black">💎8</span><span class="text-xl md:text-3xl mb-0 md:mb-1 mt-1 md:mt-2">🎒</span><span class="text-[8px] md:text-xs font-black text-blue-400 bg-blue-900/50 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">拡張</span>`,
+      10: `<span class="absolute -top-2 md:-top-4 -right-2 md:-right-4 bg-slate-900 border-2 border-yellow-400 text-yellow-400 text-[10px] md:text-sm px-1.5 md:px-2 rounded-full font-black">💎10</span><span class="text-xl md:text-3xl mb-0 md:mb-1 mt-1 md:mt-2">🗿</span><span class="text-[8px] md:text-xs font-black text-red-400 bg-red-900/50 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">ゴーレム</span>`
+    };
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // --- Lobby Logic ---
+    document.getElementById('btn-create-room').addEventListener('click', async (e) => {
+      if (!myUid) return;
+      const btn = e.target;
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = "作成中...";
+
+      const mode = parseInt(document.getElementById('select-mode').value);
+      const useBot = document.getElementById('check-bot').checked;
+      const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      roomRef = doc(db, collPath, roomId);
+      const initialData = {
+        hostId: myUid, status: 'waiting', mode: mode, useBot: useBot, time: GAME_TIME,
+        players: { [myUid]: { team: 0, x: 250, y: 600, hp: PLAYER_MAX_HP, crystals: 0, isBot: false, active: true } },
+        crystals: {}, golems: {}, cmdEffects: {}, 
+        t0_hp: BASE_MAX_HP, t0_stock: 0, t0_cmd3: false, t0_cmd5: false, t0_cmd8: false, t0_cmd10: false,
+        t1_hp: BASE_MAX_HP, t1_stock: 0, t1_cmd3: false, t1_cmd5: false, t1_cmd8: false, t1_cmd10: false
+      };
+
+      try {
+        await withTimeout(setDoc(roomRef, initialData), 5000, "データベースの応答がありません。Firestoreが作成されているか確認してください。");
+        showToast("ルームを作成しました！", "success");
+        joinRoomUI(roomId);
+      } catch (err) {
+        showToast(err.message.includes("データベース") ? err.message : "ルームの作成に失敗しました", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    });
+
+    document.getElementById('btn-join-room').addEventListener('click', async (e) => {
+      if (!myUid) return;
+      const roomId = document.getElementById('input-room-id').value.toUpperCase().trim();
+      if (!roomId) { showToast("ルームIDを入力してください！", "error"); return; }
+      
+      const btn = e.target;
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = "参加中...";
+
+      roomRef = doc(db, collPath, roomId);
+      try {
+        const snap = await withTimeout(getDoc(roomRef), 5000, "データベースの応答がありません。");
+        if (snap.exists() && snap.data().status === 'waiting') {
+          const data = snap.data();
+          let t0Count = 0, t1Count = 0;
+          Object.values(data.players).forEach(p => p.team === 0 ? t0Count++ : t1Count++);
+          if (t0Count + t1Count >= data.mode * 2) { 
+            showToast("このルームは満員です！", "error"); 
+            btn.disabled = false; btn.innerText = originalText;
+            return; 
+          }
+          const myTeam = t1Count < t0Count ? 1 : 0;
+          await withTimeout(updateDoc(roomRef, {
+            [`players.${myUid}`]: { team: myTeam, x: myTeam===0?250:1550, y: 600, hp: PLAYER_MAX_HP, crystals: 0, isBot: false, active: true }
+          }), 5000);
+          showToast("ルームに参加しました！", "success");
+          joinRoomUI(roomId);
+        } else {
+          showToast("IDが違います！（または開始済）", "error");
+        }
+      } catch (err) {
+        showToast(err.message.includes("データベース") ? err.message : "通信エラーが発生しました", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    });
+
+    document.getElementById('btn-start-game').addEventListener('click', async () => {
+      if (!isHost || !gameState) return;
+      const updates = { status: 'playing' };
+      if (gameState.useBot) {
+        let t0Count = 0, t1Count = 0;
+        Object.values(gameState.players).forEach(p => p.team === 0 ? t0Count++ : t1Count++);
+        for(let i=t0Count; i<gameState.mode; i++) updates[`players.bot_0_${i}`] = { team: 0, x: 250, y: 500 + i*100, hp: PLAYER_MAX_HP, crystals: 0, isBot: true, active: true };
+        for(let i=t1Count; i<gameState.mode; i++) updates[`players.bot_1_${i}`] = { team: 1, x: 1550, y: 500 + i*100, hp: PLAYER_MAX_HP, crystals: 0, isBot: true, active: true };
+      }
+      try {
+        await withTimeout(updateDoc(roomRef, updates), 5000);
+      } catch (e) {
+        showToast("ゲームの開始に失敗しました", "error");
+      }
+    });
+
+    function joinRoomUI(roomId) {
+      document.getElementById('ui-lobby').classList.add('hidden');
+      document.getElementById('ui-lobby').classList.remove('flex');
+      document.getElementById('ui-waiting').classList.remove('hidden');
+      document.getElementById('ui-waiting').classList.add('flex');
+      document.getElementById('waiting-room-id').innerText = `${roomId}`;
+      
+      unsubscribeRoom = onSnapshot(roomRef, (snap) => {
+        if (!snap.exists()) {
+          showToast("ルームが解散されました", "error");
+          document.getElementById('btn-return-lobby').click(); return;
+        }
+        gameState = snap.data();
+        isHost = (gameState.hostId === myUid);
+        updateWaitingUI();
+        
+        if (gameState.status === 'playing' && !isGameStarted) {
+          startGame();
+        } else if (gameState.status === 'result' && !document.getElementById('ui-result').classList.contains('flex')) {
+          showResult();
+        }
+      });
+    }
+
+    function updateWaitingUI() {
+      const container = document.getElementById('waiting-players');
+      container.innerHTML = '';
+      if (!gameState || !gameState.players) return;
+      Object.keys(gameState.players).forEach(uid => {
+        const p = gameState.players[uid];
+        const div = document.createElement('div');
+        div.className = `px-4 py-2 md:px-6 md:py-3 rounded-xl font-black text-sm md:text-xl border-2 ${p.team === 0 ? 'bg-blue-600 border-blue-400' : 'bg-red-600 border-red-400'} text-white flex items-center gap-2 shadow-md`;
+        div.innerHTML = uid === myUid ? '👤 あなた' : (p.isBot ? '🤖 BOT' : '🎮 プレイヤー');
+        container.appendChild(div);
+      });
+      if (isHost) {
+        document.getElementById('btn-start-game').classList.remove('hidden');
+        document.getElementById('waiting-host-msg').classList.add('hidden');
+      }
+    }
+
+    // --- Input Handling ---
+    window.addEventListener('keydown', (e) => keys[e.code] = true);
+    window.addEventListener('keyup', (e) => keys[e.code] = false);
+    canvas.addEventListener('mousemove', (e) => { mouse.screenX = e.clientX; mouse.screenY = e.clientY; });
+    canvas.addEventListener('mousedown', () => mouse.down = true);
+    canvas.addEventListener('mouseup', () => mouse.down = false);
+
+    const handleTouch = (e) => {
+      e.preventDefault();
+      const hw = window.innerWidth / 2;
+      if (e.type === 'touchstart' || e.type === 'touchmove') {
+        for(let i=0; i<e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (t.clientX < hw) { 
+            if (!joystickL.active || joystickL.id === t.identifier) {
+              if(!joystickL.active) {
+                joystickL.active = true; joystickL.id = t.identifier;
+                joystickL.originX = t.clientX; joystickL.originY = t.clientY;
+              }
+              joystickL.x = t.clientX; joystickL.y = t.clientY;
+              joystickL.dx = joystickL.x - joystickL.originX; joystickL.dy = joystickL.y - joystickL.originY;
+            }
+          } else { 
+            if (!joystickR.active || joystickR.id === t.identifier) {
+              if(!joystickR.active) {
+                joystickR.active = true; joystickR.id = t.identifier;
+                joystickR.originX = t.clientX; joystickR.originY = t.clientY;
+              }
+              joystickR.x = t.clientX; joystickR.y = t.clientY;
+              joystickR.dx = joystickR.x - joystickR.originX; joystickR.dy = joystickR.y - joystickR.originY;
+            }
+          }
+        }
+      }
+      if (e.type === 'touchend' || e.type === 'touchcancel') {
+        for(let i=0; i<e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (joystickL.id === t.identifier) joystickL.active = false;
+          if (joystickR.id === t.identifier) joystickR.active = false;
+        }
+      }
+    };
+    canvas.addEventListener('touchstart', handleTouch, {passive: false});
+    canvas.addEventListener('touchmove', handleTouch, {passive: false});
+    canvas.addEventListener('touchend', handleTouch, {passive: false});
+    canvas.addEventListener('touchcancel', handleTouch, {passive: false});
+
+    // --- Game Logic ---
+    function startGame() {
+      isGameStarted = true; 
+
+      const uiWaiting = document.getElementById('ui-waiting');
+      uiWaiting.classList.add('hidden');
+      uiWaiting.classList.remove('flex'); 
+
+      document.getElementById('game-container').classList.remove('hidden');
+      resizeCanvas();
+
+      const initialP = gameState.players[myUid] || { team: 0, x: 250, y: 600, hp: 100 };
+      localPlayer = { ...initialP, hp: PLAYER_MAX_HP, crystals: 0, maxCrystals: 1 };
+      localBullets = []; particles = [];
+      lastTime = performance.now();
+      lastShootTime = 0; 
+      lastMyHp = PLAYER_MAX_HP;
+      respawnProtectionTime = 0;
+      lastSyncX = -1000;
+      lastSyncY = -1000;
+
+      // 復活システムの初期化
+      respawnsLeft = 3;
+      respawnTimer = 0;
+      isDead = false;
+      document.getElementById('respawn-ui').classList.add('hidden');
+
+      [3, 5, 8, 10].forEach(cost => {
+        const btn = document.getElementById(`cmd-btn-${cost}`);
+        const newBtn = btn.cloneNode(true);
+        newBtn.innerHTML = cmdBtnHTML[cost]; newBtn.disabled = true;
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', () => executeCommand(cost));
+      });
+
+      if (syncTimer) clearInterval(syncTimer);
+      if (hostTimer) clearInterval(hostTimer);
+
+      syncTimer = setInterval(syncLocalState, 200);
+      if (isHost) hostTimer = setInterval(hostLoop, 300);
+      
+      if (gameLoopId) cancelAnimationFrame(gameLoopId);
+      gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function syncLocalState() {
+      // 死んでいる間は座標を同期しない（死んだ場所にとどまる）
+      if (!myUid || isDead) return;
+      
+      if (Math.abs(localPlayer.x - lastSyncX) < 3 && Math.abs(localPlayer.y - lastSyncY) < 3) return;
+      
+      lastSyncX = localPlayer.x;
+      lastSyncY = localPlayer.y;
+
+      updateDoc(roomRef, {
+        [`players.${myUid}.x`]: Math.round(localPlayer.x),
+        [`players.${myUid}.y`]: Math.round(localPlayer.y)
+      }).catch(()=>{});
+    }
+
+    let lastSpawn = 0;
+    function hostLoop() {
+      if (!gameState || gameState.status !== 'playing') return;
+      const updates = {}; const now = Date.now();
+
+      const newTime = Math.max(0, gameState.time - 0.3);
+      updates['time'] = newTime;
+      if (newTime === 0) { updates['status'] = 'result'; updateDoc(roomRef, updates).catch(()=>{}); return; }
+
+      if (now - lastSpawn > 15000 && Object.keys(gameState.crystals||{}).length < 6) {
+        updates[`crystals.c_${now}`] = { x: CENTER_X + (Math.random()-0.5)*500, y: CENTER_Y + (Math.random()-0.5)*500 };
+        lastSpawn = now;
+      }
+
+      Object.keys(gameState.players||{}).forEach(uid => {
+        const p = gameState.players[uid];
+        if (!p.isBot) return; // 以下BOTのみの処理
+        
+        // BOTにも復活システムを適用
+        if (!botAI[uid]) botAI[uid] = { state: 'idle', targetX: p.x, targetY: p.y, lastThink: 0, lastAttack: 0, respawnsLeft: 3, isDead: false, respawnTimer: 0 };
+        const ai = botAI[uid];
+
+        // BOTが死んだ時の処理
+        if (p.hp <= 0 && !ai.isDead) {
+            if (p.crystals > 0) {
+                for(let i=0; i<p.crystals; i++) {
+                    updates[`crystals.c_${now}_${uid}_${i}`] = { x: p.x + (Math.random()*150-75), y: p.y + (Math.random()*150-75) };
+                }
+                updates[`players.${uid}.crystals`] = 0;
+            }
+            if (ai.respawnsLeft > 0) {
+                ai.isDead = true;
+                ai.respawnTimer = now + 5000;
+                ai.respawnsLeft--;
+            } else {
+                ai.isDead = true;
+                ai.respawnTimer = -1; // 完全に死亡
+            }
+        }
+
+        if (ai.isDead) {
+            // 5秒経過でBOT復活
+            if (ai.respawnTimer > 0 && now >= ai.respawnTimer) {
+                ai.isDead = false;
+                const myBaseX = p.team === 0 ? BASE0_X : BASE1_X;
+                updates[`players.${uid}.hp`] = PLAYER_MAX_HP;
+                updates[`players.${uid}.x`] = myBaseX + (Math.random()*100-50);
+                updates[`players.${uid}.y`] = BASE_Y + (Math.random()*100-50);
+            }
+            return; // 死んでいる間はAI思考をスキップ
+        }
+        
+        // --- BOTのAI思考 ---
+        if (now - ai.lastThink > 1200) {
+          ai.lastThink = now + Math.random() * 500;
+          let nearEnemy = null, nearEnemyDist = Infinity;
+          
+          Object.keys(gameState.players).forEach(eUid => {
+            const ep = gameState.players[eUid];
+            if (ep.team !== p.team && ep.hp > 0) {
+              const d = Math.hypot(ep.x - p.x, ep.y - p.y);
+              if (d < nearEnemyDist) { nearEnemyDist = d; nearEnemy = ep; }
+            }
+          });
+          
+          let nearCrystal = null, nearCrystalDist = Infinity;
+          if (gameState.crystals && p.crystals < 2) {
+            Object.values(gameState.crystals).forEach(c => {
+              const d = Math.hypot(c.x - p.x, c.y - p.y);
+              if (d < nearCrystalDist) { nearCrystalDist = d; nearCrystal = c; }
+            });
+          }
+
+          const myBaseX = p.team === 0 ? BASE0_X : BASE1_X;
+          const enemyBaseX = p.team === 0 ? BASE1_X : BASE0_X;
+          
+          if (p.hp < 40) {
+            ai.state = 'retreat'; ai.targetX = myBaseX + (Math.random()*200-100); ai.targetY = BASE_Y + (Math.random()*200-100);
+          } else if (p.crystals > 0 && nearEnemyDist > 300) {
+            ai.state = 'return'; ai.targetX = myBaseX; ai.targetY = BASE_Y;
+          } else if (nearEnemy && nearEnemyDist < 400) {
+            ai.state = 'attack'; ai.targetX = nearEnemy.x; ai.targetY = nearEnemy.y;
+          } else if (nearCrystal && nearCrystalDist < 800) {
+            ai.state = 'gather'; ai.targetX = nearCrystal.x; ai.targetY = nearCrystal.y;
+          } else {
+            ai.state = 'wander'; 
+            ai.targetX = p.x + (enemyBaseX - p.x)*0.4 + (Math.random()*600-300); ai.targetY = p.y + (BASE_Y - p.y)*0.4 + (Math.random()*600-300);
+          }
+          ai.targetX = Math.max(100, Math.min(CANVAS_W-100, ai.targetX)); ai.targetY = Math.max(100, Math.min(CANVAS_H-100, ai.targetY));
+        }
+        
+        const dx = ai.targetX - p.x; const dy = ai.targetY - p.y; const dist = Math.hypot(dx, dy);
+        if (dist > 30) {
+          const speed = (p.crystals > 0 ? (SPEED_NORMAL * SPEED_PENALTY) : SPEED_NORMAL) * 0.4;
+          const moveX = dx/dist + (Math.random()-0.5)*0.2, moveY = dy/dist + (Math.random()-0.5)*0.2;
+          const mLen = Math.hypot(moveX, moveY) || 1;
+          p.x += (moveX/mLen) * speed * 0.3; p.y += (moveY/mLen) * speed * 0.3;
+          updates[`players.${uid}.x`] = Math.round(p.x); updates[`players.${uid}.y`] = Math.round(p.y);
+        }
+
+        if (ai.state === 'attack' && dist < 80 && now - ai.lastAttack > 2500) {
+          ai.lastAttack = now;
+          Object.keys(gameState.players).forEach(eUid => {
+            const ep = gameState.players[eUid];
+            if (ep.team !== p.team && ep.hp > 0 && Math.hypot(ep.x - p.x, ep.y - p.y) < 80) {
+              updates[`players.${eUid}.hp`] = Math.max(0, ep.hp - 15);
+            }
+          });
+        }
+      });
+
+      Object.keys(gameState.golems||{}).forEach(gid => {
+        const g = gameState.golems[gid]; const targetX = g.team === 0 ? BASE1_X : BASE0_X;
+        const dx = targetX - g.x; const dy = BASE_Y - g.y; const dist = Math.hypot(dx, dy);
+        if (dist > 5) {
+          g.x += (dx/dist) * 80 * 0.3; g.y += (dy/dist) * 80 * 0.3;
+          updates[`golems.${gid}.x`] = Math.round(g.x); updates[`golems.${gid}.y`] = Math.round(g.y);
+        }
+        if (dist < 200) {
+          const hpKey = `t${g.team === 0 ? 1 : 0}_hp`;
+          updates[hpKey] = Math.max(0, (gameState[hpKey] || BASE_MAX_HP) - 20);
+          if (updates[hpKey] <= 0) updates['status'] = 'result';
+        }
+      });
+
+      if (Object.keys(updates).length > 0) updateDoc(roomRef, updates).catch(()=>{});
+    }
+
+    function gameLoop(timestamp) {
+      if (!gameState || gameState.status !== 'playing') {
+        if (gameState && gameState.status === 'result') showResult();
+        return;
+      }
+      
+      const dt = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      mouse.worldX = mouse.screenX + camera.x; mouse.worldY = mouse.screenY + camera.y;
+
+      updateLocal(dt);
+      draw();
+      updateHUD();
+
+      gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function updateLocal(dt) {
+      const now = performance.now();
+
+      // サーバーからのダメージを同期
+      if (gameState.players && gameState.players[myUid]) {
+        const currentMyHp = gameState.players[myUid].hp;
+        // リスポーン無敵状態(1.5秒)および死んでいる間はダメージ更新を無視
+        if (now - respawnProtectionTime > 1500 && !isDead) {
+          if (currentMyHp < lastMyHp) {
+            createParticles(localPlayer.x, localPlayer.y, 8, '#ef4444', 0.3);
+          }
+          localPlayer.hp = currentMyHp;
+          lastMyHp = currentMyHp;
+        }
+      }
+
+      // 💥 ローカルプレイヤーの死亡判定 💥
+      if (localPlayer.hp <= 0 && !isDead) {
+        // クリスタルを落とす処理
+        if (localPlayer.crystals > 0) {
+          const dropUpdates = { [`players.${myUid}.crystals`]: 0, [`players.${myUid}.hp`]: 0 };
+          for(let i=0; i<localPlayer.crystals; i++) {
+            dropUpdates[`crystals.c_${Date.now()}_${i}`] = { x: localPlayer.x + (Math.random()*150-75), y: localPlayer.y + (Math.random()*150-75) };
+          }
+          localPlayer.crystals = 0; 
+          updateDoc(roomRef, dropUpdates).catch(()=>{});
+        } else {
+          updateDoc(roomRef, { [`players.${myUid}.hp`]: 0 }).catch(()=>{});
+        }
+
+        if (respawnsLeft > 0) {
+            isDead = true;
+            respawnTimer = 5000; // 5秒のカウントダウン
+            respawnsLeft--;
+        } else {
+            isDead = true;
+            respawnTimer = -1; // 復活回数ゼロ（観戦モード）
+        }
+      }
+
+      // 💥 死んでいる時の処理（カウントダウン） 💥
+      if (isDead) {
+        if (respawnTimer > 0) {
+            respawnTimer -= dt * 1000;
+            // 復活の瞬間！
+            if (respawnTimer <= 0) {
+                isDead = false;
+                respawnProtectionTime = performance.now();
+                localPlayer.hp = PLAYER_MAX_HP; 
+                lastMyHp = PLAYER_MAX_HP;
+                
+                // 拠点で復活
+                localPlayer.x = localPlayer.team === 0 ? BASE0_X + 50 : BASE1_X - 50; 
+                localPlayer.y = BASE_Y;
+                lastSyncX = localPlayer.x;
+                lastSyncY = localPlayer.y;
+                
+                updateDoc(roomRef, { 
+                  [`players.${myUid}.hp`]: PLAYER_MAX_HP, 
+                  [`players.${myUid}.x`]: localPlayer.x,
+                  [`players.${myUid}.y`]: localPlayer.y
+                }).catch(()=>{});
+            }
+        }
+        // 死んでいる間は移動や攻撃をさせないためにここで終了
+        return;
+      }
+
+      if (gameState[`t${localPlayer.team}_cmd8`]) localPlayer.maxCrystals = 2;
+
+      let moveDirX = 0, moveDirY = 0;
+      if (keys['KeyW'] || keys['ArrowUp']) moveDirY -= 1;
+      if (keys['KeyS'] || keys['ArrowDown']) moveDirY += 1;
+      if (keys['KeyA'] || keys['ArrowLeft']) moveDirX -= 1;
+      if (keys['KeyD'] || keys['ArrowRight']) moveDirX += 1;
+
+      if (joystickL.active) {
+        const jLen = Math.hypot(joystickL.dx, joystickL.dy);
+        if (jLen > 10) { 
+          moveDirX += joystickL.dx / jLen; 
+          moveDirY += joystickL.dy / jLen; 
+        }
+      }
+
+      const dirLen = Math.hypot(moveDirX, moveDirY);
+      if (dirLen > 0) {
+        const speed = SPEED_NORMAL * (localPlayer.crystals > 0 ? SPEED_PENALTY : 1.0);
+        localPlayer.x += (moveDirX / dirLen) * speed * dt;
+        localPlayer.y += (moveDirY / dirLen) * speed * dt;
+        
+        localPlayer.x = Math.max(50, Math.min(CANVAS_W-50, localPlayer.x));
+        localPlayer.y = Math.max(50, Math.min(CANVAS_H-50, localPlayer.y));
+        
+        if (Math.random() < 0.1) createParticles(localPlayer.x, localPlayer.y + 25, 1, '#94a3b8', 0.2);
+      }
+
+      const isRightStickAttack = joystickR.active && Math.hypot(joystickR.dx, joystickR.dy) > 20;
+      if ((mouse.down || isRightStickAttack) && performance.now() - lastShootTime > 450) {
+        lastShootTime = performance.now();
+        let dx = 0, dy = 0;
+        if (isRightStickAttack) { dx = joystickR.dx; dy = joystickR.dy; } 
+        else { dx = mouse.worldX - localPlayer.x; dy = mouse.worldY - localPlayer.y; }
+        
+        const len = Math.hypot(dx, dy);
+        if (len > 0) {
+          localBullets.push({ x: localPlayer.x, y: localPlayer.y, vx: (dx/len) * 1200, vy: (dy/len) * 1200, team: localPlayer.team, life: 0.2 });
+          createParticles(localPlayer.x + (dx/len)*30, localPlayer.y + (dy/len)*30, 4, localPlayer.team===0?'#60a5fa':'#f87171', 0.2);
+        }
+      }
+
+      for (let i = localBullets.length - 1; i >= 0; i--) {
+        let b = localBullets[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; let hit = false;
+        Object.keys(gameState.players||{}).forEach(uid => {
+          if (hit) return; const p = gameState.players[uid];
+          const px = (uid === myUid) ? localPlayer.x : p.x;
+          const py = (uid === myUid) ? localPlayer.y : p.y;
+
+          if (p.team !== b.team && p.hp > 0 && Math.hypot(b.x - px, b.y - py) < 50) {
+            hit = true; createParticles(b.x, b.y, 6, '#ffffff', 0.3);
+            if (b.team === localPlayer.team) updateDoc(roomRef, { [`players.${uid}.hp`]: Math.max(0, p.hp - 25) }).catch(()=>{});
+          }
+        });
+        
+        const enemyBaseX = b.team === 0 ? BASE1_X : BASE0_X;
+        if (!hit && Math.hypot(b.x - enemyBaseX, b.y - BASE_Y) < 150) {
+          hit = true; createParticles(b.x, b.y, 8, '#ffaa00', 0.3);
+          if (b.team === localPlayer.team) {
+            const hpKey = `t${b.team === 0 ? 1 : 0}_hp`; const newHp = Math.max(0, gameState[hpKey] - 15);
+            const updates = { [hpKey]: newHp }; if (newHp <= 0) updates['status'] = 'result';
+            updateDoc(roomRef, updates).catch(()=>{});
+          }
+        }
+        if (hit || b.life <= 0) localBullets.splice(i, 1);
+      }
+
+      if (gameState.crystals) {
+        let picked = 0;
+        Object.keys(gameState.crystals).forEach(cid => {
+          if (localPlayer.crystals + picked >= localPlayer.maxCrystals) return;
+          const c = gameState.crystals[cid];
+          if (Math.hypot(localPlayer.x - c.x, localPlayer.y - c.y) < 60) {
+            picked++;
+            updateDoc(roomRef, { [`crystals.${cid}`]: deleteField(), [`players.${myUid}.crystals`]: localPlayer.crystals + picked })
+            .then(() => { localPlayer.crystals++; createParticles(c.x, c.y, 15, '#fde047', 0.4); }).catch(()=>{});
+          }
+        });
+      }
+
+      const myBaseX = localPlayer.team === 0 ? BASE0_X : BASE1_X;
+      if (localPlayer.crystals > 0 && Math.hypot(localPlayer.x - myBaseX, localPlayer.y - BASE_Y) < 150) {
+        const amount = localPlayer.crystals; localPlayer.crystals = 0; const stockKey = `t${localPlayer.team}_stock`;
+        updateDoc(roomRef, { [stockKey]: (gameState[stockKey] || 0) + amount, [`players.${myUid}.crystals`]: 0 }).catch(()=>{});
+        createParticles(myBaseX, BASE_Y, 20, '#4ade80', 0.5);
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function draw() {
+      camera.x = Math.max(0, Math.min(CANVAS_W - canvas.width, localPlayer.x - canvas.width / 2));
+      camera.y = Math.max(0, Math.min(CANVAS_H - canvas.height, localPlayer.y - canvas.height / 2));
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
+      for(let i=0; i<=CANVAS_W; i+=150) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_H); ctx.stroke(); }
+      for(let i=0; i<=CANVAS_H; i+=150) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_W, i); ctx.stroke(); }
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 10; ctx.strokeRect(0, 0, CANVAS_W, CANVAS_H);
+
+      const drawBase = (x, y, team) => {
+        ctx.fillStyle = team === 0 ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+        ctx.beginPath(); ctx.arc(x, y, 150, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = team === 0 ? '#1e3a8a' : '#7f1d1d';
+        ctx.beginPath(); ctx.moveTo(x, y-80); ctx.lineTo(x+80, y); ctx.lineTo(x, y+80); ctx.lineTo(x-80, y); ctx.fill();
+      };
+      drawBase(BASE0_X, BASE_Y, 0); drawBase(BASE1_X, BASE_Y, 1);
+
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.2)'; ctx.lineWidth = 10; ctx.setLineDash([20, 20]);
+      ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, 150, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+
+      if (gameState.crystals) {
+        ctx.fillStyle = '#facc15';
+        Object.values(gameState.crystals).forEach(c => {
+          const bounce = Math.sin(Date.now()/200 + c.x)*10;
+          ctx.beginPath(); ctx.moveTo(c.x, c.y-25 + bounce); ctx.lineTo(c.x+20, c.y + bounce); ctx.lineTo(c.x, c.y+25 + bounce); ctx.lineTo(c.x-20, c.y + bounce); ctx.fill();
+        });
+      }
+
+      if (gameState.golems) {
+        Object.values(gameState.golems).forEach(g => {
+          ctx.fillStyle = g.team === 0 ? '#1e3a8a' : '#7f1d1d';
+          ctx.beginPath(); ctx.arc(g.x, g.y, 60, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#94a3b8'; ctx.fillRect(g.x-25, g.y-25, 50, 50);
+          ctx.fillStyle = '#facc15'; ctx.fillRect(g.x+(g.team===0?10:-25), g.y-10, 15, 15);
+        });
+      }
+
+      Object.keys(gameState.players||{}).forEach(uid => {
+        const p = uid === myUid ? localPlayer : gameState.players[uid];
+        // 死亡中のプレイヤー（幽霊状態）は描画をスキップ
+        if (p.hp <= 0) return;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath(); ctx.arc(p.x, p.y+20, 20, 0, Math.PI*2); ctx.fill();
+        
+        if (uid === myUid && performance.now() - respawnProtectionTime < 1500 && !isDead) {
+          ctx.globalAlpha = Math.sin(Date.now() / 100) * 0.5 + 0.5; 
+        }
+        
+        ctx.fillStyle = p.team === 0 ? '#3b82f6' : '#ef4444';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 30, 0, Math.PI*2); ctx.fill();
+        
+        ctx.globalAlpha = 1.0;
+        
+        if (uid === myUid) {
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 42, 0, Math.PI*2); ctx.stroke();
+        }
+
+        if (p.crystals > 0) {
+          ctx.fillStyle = '#facc15';
+          for(let i=0; i<p.crystals; i++) { ctx.beginPath(); ctx.arc(p.x - 15 + i*30, p.y - 45, 10, 0, Math.PI*2); ctx.fill(); }
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 38, 0, Math.PI*2); ctx.stroke();
+        }
+
+        ctx.fillStyle = 'black'; ctx.fillRect(p.x-30, p.y+35, 60, 8);
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(p.x-30, p.y+35, 60 * (p.hp/PLAYER_MAX_HP), 8);
+      });
+
+      localBullets.forEach(b => {
+        ctx.fillStyle = b.team === 0 ? '#93c5fd' : '#fca5a5';
+        ctx.beginPath(); ctx.arc(b.x, b.y, 20, 0, Math.PI*2); ctx.fill();
+      });
+
+      if (gameState.cmdEffects) {
+        Object.values(gameState.cmdEffects).forEach(eff => {
+          const age = Date.now() - eff.time;
+          if (age < 600) {
+            ctx.fillStyle = `rgba(168, 85, 247, ${1 - age/600})`;
+            ctx.beginPath(); ctx.arc(eff.x, eff.y, 400 + (age/3), 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = `rgba(216, 180, 254, ${1 - age/600})`; ctx.lineWidth = 8;
+            ctx.beginPath(); ctx.arc(eff.x, eff.y, 400 + (age/2), 0, Math.PI*2); ctx.stroke();
+          }
+        });
+      }
+
+      particles.forEach(p => {
+        ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
+      });
+
+      ctx.restore();
+
+      // UI等
+      if (joystickL.active && !isDead) {
+        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.beginPath(); ctx.arc(joystickL.originX, joystickL.originY, 60, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(joystickL.x, joystickL.y, 30, 0, Math.PI*2); ctx.fill();
+      }
+      if (joystickR.active && !isDead) {
+        ctx.fillStyle = 'rgba(239,68,68,0.1)'; ctx.beginPath(); ctx.arc(joystickR.originX, joystickR.originY, 60, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(239,68,68,0.4)'; ctx.beginPath(); ctx.arc(joystickR.x, joystickR.y, 30, 0, Math.PI*2); ctx.fill();
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-hp-0').style.width = `${(gameState.t0_hp / BASE_MAX_HP) * 100}%`;
+      document.getElementById('hud-hp-val-0').innerText = Math.floor(gameState.t0_hp || 0);
+      document.getElementById('hud-stock-0').innerText = gameState.t0_stock || 0;
+      
+      document.getElementById('hud-hp-1').style.width = `${(gameState.t1_hp / BASE_MAX_HP) * 100}%`;
+      document.getElementById('hud-hp-val-1').innerText = Math.floor(gameState.t1_hp || 0);
+      document.getElementById('hud-stock-1').innerText = gameState.t1_stock || 0;
+
+      const t = Math.ceil(gameState.time || 0), m = Math.floor(t / 60), s = t % 60;
+      const timeEl = document.getElementById('hud-time');
+      timeEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+      if (t <= 30) timeEl.classList.add('bg-red-900/90', 'border-red-500', 'animate-pulse');
+
+      const cContainer = document.getElementById('hud-player-crystals');
+      cContainer.innerHTML = '';
+      for (let i = 0; i < localPlayer.maxCrystals; i++) {
+        const div = document.createElement('div');
+        div.className = `w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-yellow-500 flex items-center justify-center text-sm md:text-xl transition-all ${i < localPlayer.crystals && !isDead ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 shadow-md transform scale-110' : 'opacity-40 bg-slate-800'}`;
+        div.innerText = i < localPlayer.crystals && !isDead ? '💎' : '';
+        cContainer.appendChild(div);
+      }
+
+      const stock = gameState[`t${localPlayer.team}_stock`] || 0;
+      [3, 5, 8, 10].forEach(cost => {
+        const btn = document.getElementById(`cmd-btn-${cost}`);
+        if (gameState[`t${localPlayer.team}_cmd${cost}`]) {
+          btn.disabled = true; btn.innerHTML = `<span class="text-xl md:text-3xl mt-1 md:mt-3">✅</span><span class="text-[8px] md:text-xs mt-1 md:mt-2 font-black text-slate-400 bg-slate-900/80 px-1 md:px-2 py-0.5 md:py-1 rounded w-full text-center">使用済</span>`;
+        } else if (stock >= cost && !isDead) { btn.disabled = false; } else { btn.disabled = true; }
+      });
+
+      // 💀 死亡時のカウントダウンUI更新 💀
+      const respawnUI = document.getElementById('respawn-ui');
+      if (isDead) {
+          respawnUI.classList.remove('hidden');
+          if (respawnTimer > 0) {
+              document.getElementById('respawn-timer-text').innerText = (respawnTimer / 1000).toFixed(1);
+              document.getElementById('respawn-left-text').innerText = `残り復活回数: ${respawnsLeft}`;
+          } else if (respawnTimer < 0) {
+              document.getElementById('respawn-timer-text').innerText = "SPECTATING";
+              document.getElementById('respawn-timer-text').classList.add('text-slate-400');
+              document.getElementById('respawn-left-text').innerText = "復活回数を使い切りました";
+              document.getElementById('respawn-left-text').classList.replace('text-yellow-400', 'text-slate-400');
+              document.getElementById('respawn-left-text').classList.replace('border-yellow-500', 'border-slate-500');
+          }
+      } else {
+          respawnUI.classList.add('hidden');
+          // スタイルリセット
+          document.getElementById('respawn-timer-text').classList.remove('text-slate-400');
+          document.getElementById('respawn-left-text').classList.replace('text-slate-400', 'text-yellow-400');
+          document.getElementById('respawn-left-text').classList.replace('border-slate-500', 'border-yellow-500');
+      }
+    }
+
+    function executeCommand(cost) {
+      if (isDead) return;
+      const stockKey = `t${localPlayer.team}_stock`; const currentStock = gameState[stockKey] || 0;
+      if (currentStock < cost || gameState[`t${localPlayer.team}_cmd${cost}`]) return;
+      const updates = { [stockKey]: currentStock - cost, [`t${localPlayer.team}_cmd${cost}`]: true };
+      if (cost === 3) {
+        updates[`cmdEffects.eff_${Date.now()}`] = { type: 'cannon', x: CENTER_X, y: CENTER_Y, time: Date.now() };
+        Object.keys(gameState.players).forEach(uid => {
+          const p = gameState.players[uid]; if (p.team !== localPlayer.team && Math.hypot(p.x - CENTER_X, p.y - CENTER_Y) < 400) updates[`players.${uid}.hp`] = 0; 
+        });
+      } else if (cost === 5) {
+        const hpKey = `t${localPlayer.team}_hp`; updates[hpKey] = Math.min(BASE_MAX_HP, gameState[hpKey] + 300);
+      } else if (cost === 10) {
+        updates[`golems.g_${Date.now()}`] = { team: localPlayer.team, x: localPlayer.team === 0 ? BASE0_X : BASE1_X, y: BASE_Y };
+      }
+      updateDoc(roomRef, updates).catch(()=>{});
+    }
+
+    function createParticles(x, y, count, color, maxLife=0.5) {
+      for(let i=0; i<count; i++) {
+        const angle = Math.random() * Math.PI * 2, speed = Math.random() * 200 + 100;
+        particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: Math.random() * maxLife + 0.1, color });
+      }
+    }
+
+    function showResult() {
+      cancelAnimationFrame(gameLoopId); clearInterval(syncTimer); clearInterval(hostTimer);
+      document.getElementById('game-container').classList.add('hidden');
+      document.getElementById('ui-result').classList.remove('hidden'); document.getElementById('ui-result').classList.add('flex');
+      const title = document.getElementById('result-title');
+      const myBaseHp = gameState[`t${localPlayer.team}_hp`], enemyBaseHp = gameState[`t${localPlayer.team===0?1:0}_hp`];
+      setTimeout(() => title.classList.remove('scale-0'), 100);
+      if (myBaseHp > enemyBaseHp) { title.innerHTML = "🏆 VICTORY! 🏆"; title.className = "text-5xl md:text-7xl font-black mb-6 text-yellow-400 transform transition-transform duration-500 scale-100"; }
+      else if (myBaseHp < enemyBaseHp) { title.innerHTML = "💀 DEFEAT... 💀"; title.className = "text-5xl md:text-7xl font-black mb-6 text-blue-500 transform transition-transform duration-500 scale-100"; }
+      else { title.innerHTML = "DRAW"; title.className = "text-5xl md:text-7xl font-black mb-6 text-slate-400 transform transition-transform duration-500 scale-100"; }
+      document.getElementById('result-desc').innerText = `自陣 HP: ${Math.floor(myBaseHp)} / 敵陣 HP: ${Math.floor(enemyBaseHp)}`;
+    }
+
+    document.getElementById('btn-return-lobby').addEventListener('click', () => {
+      isGameStarted = false; 
+      document.getElementById('ui-result').classList.add('hidden'); document.getElementById('ui-result').classList.remove('flex');
+      document.getElementById('ui-lobby').classList.remove('hidden'); document.getElementById('ui-lobby').classList.add('flex');
+      document.getElementById('result-title').classList.add('scale-0'); 
+      if (unsubscribeRoom) unsubscribeRoom();
+    });
+  </script>
+</body>
+</html>
