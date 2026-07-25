@@ -873,6 +873,293 @@
             animation: gRaysSpin 14s linear infinite;
         }
 
+
+        /* ==================================================================== */
+        /* ===============  2026 CINEMATIC POLISH / JUICINESS PACK  =========== */
+        /* ==================================================================== */
+        html { scroll-behavior: smooth; }
+        .screen, .pop-in, .bg-indigo-900, .bg-indigo-950, .bg-indigo-800, .bg-indigo-900\/90, .bg-indigo-950\/90 {
+            animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+        }
+        .screen { animation-duration: 0.38s !important; }
+        .pop-in { animation-duration: 0.58s !important; }
+
+        .game-btn,
+        button,
+        .nav-btn,
+        .icon-sel-btn,
+        input[type="button"],
+        input[type="submit"] {
+            will-change: transform, filter, box-shadow;
+            transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease, filter 0.16s ease, opacity 0.2s ease !important;
+        }
+        .game-btn:active,
+        button:active,
+        .nav-btn:active,
+        .icon-sel-btn:active,
+        input[type="button"]:active,
+        input[type="submit"]:active {
+            transform: scale(0.93) translateY(1px) !important;
+        }
+
+        .locked-stage-overlay {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, rgba(12,8,22,0.50), rgba(10,8,18,0.88));
+            backdrop-filter: blur(4px);
+            z-index: 20; pointer-events: none;
+        }
+        .locked-stage-overlay > span {
+            display: inline-flex; align-items: center; gap: .55rem;
+            padding: .7rem 1rem; border-radius: 999px;
+            border: 1px solid rgba(170, 190, 255, 0.32);
+            background: rgba(28, 33, 64, 0.82);
+            color: #d4defc; font-weight: 900; font-size: 1.15rem; letter-spacing: .12em;
+            box-shadow: 0 0 24px rgba(80, 110, 255, 0.14), inset 0 0 0 1px rgba(255,255,255,0.06);
+        }
+        #screen-stage {
+            scroll-behavior: smooth;
+        }
+
+        #gacha-anim-container {
+            perspective: 1200px;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        #gacha-anim-container::before,
+        #gacha-anim-container::after {
+            content: '';
+            position: absolute;
+            inset: -10%;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity .25s ease, transform .45s cubic-bezier(0.22, 1, 0.36, 1), filter .25s ease;
+        }
+        #gacha-anim-container::before {
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, rgba(0,0,0,0.55) 36%, rgba(0,0,0,0.88) 72%);
+            mix-blend-mode: multiply;
+        }
+        #gacha-anim-container::after {
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.0) 42%);
+            transform: scale(0.3);
+        }
+        #gacha-anim-container.gacha-charge::before { opacity: 1; animation: gDramaticVeil 0.9s ease both; }
+        #gacha-anim-container.gacha-charge::after { opacity: 0.35; animation: gChargePulse 0.95s ease both; }
+        #gacha-anim-container.gacha-flash::after { opacity: 1; animation: gWhiteFlash 0.55s ease-out both; }
+        #gacha-anim-container.gacha-tier-blue .gacha-summon-glow,
+        #gacha-anim-container.gacha-tier-blue .gacha-summon-rays,
+        #gacha-anim-container.gacha-tier-blue .gacha-summon-ring { filter: hue-rotate(185deg) saturate(1.2) brightness(1.05); }
+        #gacha-anim-container.gacha-tier-gold .gacha-summon-glow,
+        #gacha-anim-container.gacha-tier-gold .gacha-summon-rays,
+        #gacha-anim-container.gacha-tier-gold .gacha-summon-ring { filter: hue-rotate(-8deg) saturate(1.2) brightness(1.18); }
+        #gacha-anim-container.gacha-tier-rainbow .gacha-summon-glow,
+        #gacha-anim-container.gacha-tier-rainbow .gacha-summon-rays,
+        #gacha-anim-container.gacha-tier-rainbow .gacha-summon-ring { animation: gRaysSpin 9s linear infinite, gRainbowAura 1.1s linear infinite; }
+        #gacha-anim-container.gacha-tier-rainbow .gacha-particles span { animation-duration: 1.2s; }
+
+        #gacha-charge-text {
+            position: absolute; left: 50%; top: 26%; transform: translate(-50%, -50%) scale(0.7);
+            z-index: 18; opacity: 0; pointer-events: none; white-space: nowrap;
+            font-weight: 900; letter-spacing: .22em; text-align: center;
+            color: #fff8cf; text-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 28px rgba(255,190,70,0.65), 0 8px 14px rgba(0,0,0,0.65);
+            filter: drop-shadow(0 0 18px rgba(255,220,100,0.35));
+        }
+        #gacha-anim-container.gacha-charge #gacha-charge-text { animation: gChargeTextIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        #gacha-anim-container.gacha-rainbow-upgrade #gacha-charge-text { animation: gChargeTextUpgrade 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        #gacha-charge-text .sub {
+            display: block; margin-top: .4rem; font-size: .9rem; letter-spacing: .34em; color: rgba(255,245,200,0.88);
+        }
+
+        #gacha-chest {
+            transform-style: preserve-3d;
+            transform-origin: center 72%;
+            filter: drop-shadow(0 20px 28px rgba(255,193,7,0.28));
+        }
+        #gacha-chest.gacha-prep { animation: gChestCharge 0.88s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        #gacha-chest.gacha-open { animation: gChestBurstOpen 0.88s cubic-bezier(0.2, 0.9, 0.24, 1.2) both; }
+
+        #gacha-anim-container .gacha-sunburst {
+            position: absolute; inset: -24%; z-index: 8; opacity: 0; pointer-events: none; mix-blend-mode: screen;
+            background: repeating-conic-gradient(from 0deg,
+                rgba(255,235,170,0) 0deg 5deg,
+                rgba(255,235,170,0.22) 5deg 8deg,
+                rgba(255,235,170,0) 8deg 16deg);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 13%, #000 22%, transparent 62%);
+                    mask-image: radial-gradient(circle, transparent 0 13%, #000 22%, transparent 62%);
+        }
+        #gacha-anim-container.gacha-opening .gacha-sunburst { animation: gSunburstExplode 1.15s ease-out both; }
+        #gacha-anim-container.gacha-rainbow-upgrade .gacha-sunburst { animation: gSunburstExplode 1.15s ease-out both, gRainbowAura 1.2s linear infinite; }
+
+        #gacha-anim-container.gacha-rainbow-upgrade .gacha-cutin-confirm { animation: gCutinSlam 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both; }
+        #gacha-anim-container.gacha-rainbow-upgrade .gacha-summon-flash { animation: gUrFlash 1.15s ease-out 0.05s 2; }
+        #gacha-anim-container.gacha-rainbow-upgrade { animation: gGachaShake 0.42s ease-in-out 0s 4; }
+        #gacha-anim-container.gacha-tier-gold.gacha-flash { animation: gGoldShake 0.32s ease-in-out 0s 2; }
+
+        @keyframes gDramaticVeil {
+            0% { opacity: 0; transform: scale(1.08); }
+            35% { opacity: 1; }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes gChargePulse {
+            0% { opacity: 0; transform: scale(0.15); }
+            35% { opacity: 0.75; }
+            100% { opacity: 0.15; transform: scale(1.4); }
+        }
+        @keyframes gWhiteFlash {
+            0% { opacity: 0; transform: scale(0.55); }
+            18% { opacity: 1; }
+            100% { opacity: 0; transform: scale(1.85); }
+        }
+        @keyframes gRainbowAura { from { filter: hue-rotate(0deg) saturate(1.35) brightness(1.18); } to { filter: hue-rotate(360deg) saturate(1.35) brightness(1.22); } }
+        @keyframes gChargeTextIn {
+            0% { opacity: 0; transform: translate(-50%, -60%) scale(1.55); letter-spacing: .55em; filter: blur(12px); }
+            55% { opacity: 1; transform: translate(-50%, -50%) scale(0.95); letter-spacing: .3em; filter: blur(0px); }
+            100% { opacity: 0.95; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes gChargeTextUpgrade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); }
+        }
+        @keyframes gChestCharge {
+            0% { transform: scale(0.72) translateY(22px) rotateX(15deg); opacity: 0; filter: brightness(0.7); }
+            45% { opacity: 1; }
+            70% { transform: scale(1.07) translateY(-4px) rotateX(0deg); filter: brightness(1.22); }
+            100% { transform: scale(1) translateY(0) rotateX(0deg); }
+        }
+        @keyframes gChestBurstOpen {
+            0% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(0.94) rotate(-6deg); }
+            55% { transform: scale(1.16) rotate(8deg) translateY(-14px); }
+            70% { transform: scale(1.08) rotate(-4deg) translateY(-8px); }
+            100% { transform: scale(1.26) rotate(0deg) translateY(-22px); opacity: 1; }
+        }
+        @keyframes gSunburstExplode {
+            0% { opacity: 0; transform: scale(0.35) rotate(-35deg); }
+            38% { opacity: 1; }
+            100% { opacity: 0.92; transform: scale(1.2) rotate(12deg); }
+        }
+        @keyframes gGoldShake {
+            0%,100% { transform: translate(0,0); }
+            25% { transform: translate(-5px,2px); }
+            50% { transform: translate(4px,-3px); }
+            75% { transform: translate(-3px,-1px); }
+        }
+
+        #screen-game .battle-fx-layer {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 25;
+        }
+        #battle-hit-flash {
+            position: absolute; inset: 0; opacity: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 35%, transparent 70%);
+            mix-blend-mode: screen;
+        }
+        #battle-hit-flash.active { animation: battleHitFlash 0.18s ease-out; }
+        @keyframes battleHitFlash { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+
+        .damage-pop {
+            position: absolute; transform: translate(-50%, -50%) scale(0.4);
+            font-weight: 900; letter-spacing: .05em; white-space: nowrap;
+            color: #fff4c1; text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 18px rgba(255,160,45,0.9), 0 3px 0 rgba(50,0,0,0.4);
+            animation: damagePopBounce 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .damage-pop.boss-hit {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 18px rgba(14,165,233,0.92), 0 0 32px rgba(14,165,233,0.65);
+        }
+        @keyframes damagePopBounce {
+            0% { opacity: 0; transform: translate(-50%, 0%) scale(0.3); }
+            28% { opacity: 1; transform: translate(-50%, -18px) scale(1.28); }
+            62% { opacity: 1; transform: translate(-50%, -26px) scale(0.98); }
+            100% { opacity: 0; transform: translate(-50%, -58px) scale(0.82); }
+        }
+
+        #battle-combo-counter {
+            position: absolute; top: 8.8rem; right: .8rem; opacity: 0; transform: scale(0.78);
+            padding: .5rem .8rem; border-radius: 999px; z-index: 26;
+            background: linear-gradient(180deg, rgba(255,220,120,0.22), rgba(35,15,0,0.78));
+            border: 1px solid rgba(255,220,140,0.4);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.42), 0 0 20px rgba(255,170,20,0.24);
+            backdrop-filter: blur(6px);
+        }
+        #battle-combo-counter.active { animation: comboPulse 0.48s cubic-bezier(0.22, 1, 0.36, 1); opacity: 1; }
+        #battle-combo-counter .n { display: block; font-size: 1.35rem; line-height: 1; font-weight: 900; color: #ffe8a3; }
+        #battle-combo-counter .t { display: block; font-size: .6rem; line-height: 1; letter-spacing: .24em; color: rgba(255,250,220,0.82); }
+        @keyframes comboPulse {
+            0% { opacity: 0; transform: scale(0.62); }
+            45% { opacity: 1; transform: scale(1.12); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        #battle-skill-slash {
+            position: absolute; inset: 0; opacity: 0; z-index: 31; overflow: hidden;
+        }
+        #battle-skill-slash.active { animation: none; opacity: 1; }
+        #battle-skill-slash::before,
+        #battle-skill-slash::after {
+            content: ''; position: absolute; inset: auto -28% auto -28%; height: 42%; top: 30%;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(125,211,252,0.9) 22%, rgba(255,255,255,1) 50%, rgba(125,211,252,0.9) 78%, rgba(255,255,255,0));
+            transform: translateX(-120%) skewX(-24deg);
+            filter: blur(2px) drop-shadow(0 0 18px rgba(125,211,252,0.72));
+        }
+        #battle-skill-slash.active::before { animation: skillSlash 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        #battle-skill-slash.active::after { animation: skillSlash 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards reverse; opacity: .55; }
+        #battle-skill-name {
+            position: absolute; left: 50%; top: 28%; transform: translate(-50%, -50%) scale(0.85);
+            font-size: clamp(1.2rem, 4vw, 1.9rem); font-weight: 900; letter-spacing: .18em; white-space: nowrap;
+            color: #f0fbff; text-shadow: 0 0 12px rgba(255,255,255,0.5), 0 0 24px rgba(56,189,248,0.85), 0 8px 16px rgba(0,0,0,0.5);
+            opacity: 0;
+        }
+        #battle-skill-slash.active #battle-skill-name { animation: skillNameBurst 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @keyframes skillSlash {
+            0% { transform: translateX(-120%) skewX(-24deg); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translateX(120%) skewX(-24deg); opacity: 0; }
+        }
+        @keyframes skillNameBurst {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); filter: blur(10px); }
+            25% { opacity: 1; transform: translate(-50%, -50%) scale(0.92); filter: blur(0); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); }
+        }
+
+        #stage-clear-finish {
+            position: absolute; inset: 0; z-index: 35; opacity: 0; pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.18), rgba(255,255,255,0.02) 32%, rgba(255,255,255,0) 62%);
+        }
+        #stage-clear-finish.active { animation: clearFinishFade 1.05s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        #stage-clear-finish .logo {
+            font-weight: 900; text-align: center; letter-spacing: .2em;
+            color: #fff8cf; text-shadow: 0 0 10px rgba(255,255,255,0.65), 0 0 24px rgba(255,190,70,0.92), 0 10px 24px rgba(0,0,0,0.55);
+            transform: scale(0.45); opacity: 0;
+        }
+        #stage-clear-finish.active .logo { animation: clearLogoBoom 0.9s cubic-bezier(0.18, 1.1, 0.32, 1) .05s both; }
+        #stage-clear-finish .sub {
+            display: block; font-size: .72rem; letter-spacing: .34em; margin-top: .6rem; color: rgba(255,250,220,0.86);
+        }
+        #stage-clear-whiteout {
+            position: absolute; inset: 0; background: #fff; opacity: 0; mix-blend-mode: screen;
+        }
+        #stage-clear-finish.active #stage-clear-whiteout { animation: clearWhiteout 0.82s ease-out both; }
+        @keyframes clearWhiteout {
+            0% { opacity: 0; }
+            18% { opacity: .94; }
+            44% { opacity: .24; }
+            100% { opacity: 0; }
+        }
+        @keyframes clearLogoBoom {
+            0% { opacity: 0; transform: scale(0.32); filter: blur(10px); }
+            40% { opacity: 1; transform: scale(1.18); filter: blur(0); }
+            72% { transform: scale(0.96); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes clearFinishFade {
+            0% { opacity: 0; }
+            12% { opacity: 1; }
+            72% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
     </style>
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
@@ -4475,20 +4762,83 @@ function openGachaProbabilityModal() { showEl('gacha-probability-modal'); } func
 function switchGachaTab(t) { currentGachaTab=t; const bn=$('tab-gacha-normal'), be=$('tab-gacha-ex'), ti=$('gacha-title'), su=$('gacha-sub'), em=$('gacha-chest-emoji'), ba=$('ex-pickup-badge'); if(t==='normal'){bn.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";be.className="flex-1 py-2 rounded-lg font-black text-sm text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent";ti.innerText="わくわく通常ガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-blue-500 drop-shadow-md";su.innerText="いろんなお宝が眠っているぞ！";em.innerText="🏴‍☠️";hideEl('ex-pickup-badge');}else{bn.className="flex-1 py-2 rounded-lg font-black text-sm text-slate-400 hover:text-white transition-all border-b-4 border-transparent";be.className="flex-1 py-2 rounded-lg font-black text-sm bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";ti.innerText="⭐ 超限定EXガチャ";ti.className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-pink-300 to-yellow-400 drop-shadow-md";su.innerText="今だけ！すごい乗組員がゲットできるかも！";em.innerText="⭐";showEl('ex-pickup-badge');} }
 function updateGachaUI() { updateHeaderUI(); $('gacha-rate').innerText=`${Math.min(1.0+(DB.pityCounter*0.5),100.0).toFixed(1)}%`; $('pity-bar').style.width=`${Math.min((DB.pityCounter/50)*100,100)}%`; }
 let currentGachaResults=[];
+
 function startGachaAnim(times) { 
-    if(!$('tutorial-overlay').classList.contains('hidden'))return; if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！"); DB.gachaTickets-=times; DB.missionProgress.dailyGacha+=times; currentGachaResults=[]; let hasUR=false, hItem=null; 
+    ensureCinematicFxLayers();
+    if(!$('tutorial-overlay').classList.contains('hidden'))return; 
+    if(DB.gachaTickets<times)return showAlert("草核が足りないぞ！"); 
+    DB.gachaTickets-=times; 
+    DB.missionProgress.dailyGacha+=times; 
+    currentGachaResults=[]; 
+    let hasUR=false, hItem=null; 
     for(let i=0;i<times;i++){ 
         let ur=0.01+(DB.pityCounter*0.005), ssr=0.05, sr=0.10, r=0.25, rand=Math.random(), rr='N'; 
         if(rand<ur)rr='UR';else if(rand<ur+ssr)rr='SSR';else if(rand<ur+ssr+sr)rr='SR';else if(rand<ur+ssr+sr+r)rr='R'; 
-        const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} 
+        const ap=currentGachaTab==='normal'?MASTER.gachaPool:MASTER.exGachaPool; 
+        let pool=ap.filter(x=>MASTER[x.type][x.id].rarity===rr); 
+        if(pool.length===0){rr='R';pool=ap.filter(x=>MASTER[x.type][x.id].rarity==='R');} 
         let d=pool[Math.floor(Math.random()*pool.length)], m=MASTER[d.type][d.id], ok=d.type==='weapons'?'ownedWeapons':d.type==='skins'?'ownedSkins':'ownedCrew', isNew=!DB[ok].includes(d.id); 
         if(isNew)DB[ok].push(d.id);else{DB.coins+=500;DB.materials+=1;} 
         if(rr==='UR'){hasUR=true;hItem=m;DB.pityCounter=0;}else DB.pityCounter++; 
         currentGachaResults.push({item:m,isNew:isNew}); 
     } 
-    saveGame(); positionTutorialArrow(null); const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'); showEl('gacha-anim-container'); ch.innerText=times===10?'📦📦':'📦'; ch.classList.add('shake-box'); ul.classList.remove('active'); hideEl('ur-flash-text'); ch.style.transform='scale(1)'; 
-    setTimeout(()=>{ ch.classList.remove('shake-box'); if(hasUR){ ul.classList.add('active'); ch.innerText='✨'; ch.style.transform='scale(1.5)'; showEl('ur-flash-text','block'); if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},3000); }else{ ch.innerText=currentGachaResults.some(r=>r.item.rarity==='SR'||r.item.rarity==='SSR')?'🎁':'📦'; setTimeout(()=>{hideEl('gacha-anim-container');if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();},1000); } updateGachaUI(); saveGame(); },1500); 
+    saveGame(); 
+    positionTutorialArrow(null); 
+    const ac=$('gacha-anim-container'), ch=$('gacha-chest'), ul=$('ur-anim-layer'), ft=$('ur-flash-text'), ct=$('gacha-charge-text'); 
+    const highest = getHighestRarityFromResults(currentGachaResults);
+    const isHighRare = highest==='SSR' || highest==='UR';
+    const isGoldRare = highest==='SR';
+    resetGachaCinematicClasses();
+    showEl('gacha-anim-container'); 
+    ac.classList.add(isHighRare ? 'gacha-tier-rainbow' : (isGoldRare ? 'gacha-tier-gold' : 'gacha-tier-blue'));
+    ch.innerText=times===10?'📦📦':'📦'; 
+    ch.style.transform='scale(1)';
+    ch.classList.add('gacha-prep');
+    ul.classList.remove('active'); 
+    hideEl('ur-flash-text'); 
+    if (ct) {
+        ct.innerHTML = isHighRare
+            ? '確定の気配…<span class="sub">RAINBOW PROMOTION</span>'
+            : (isGoldRare ? '黄金の予感…<span class="sub">GOLD TREASURE</span>' : '静寂のタメ…<span class="sub">TREASURE OPEN</span>');
+    }
+    void ac.offsetWidth;
+    ac.classList.add('gacha-charge');
+    setTimeout(()=>{
+        ac.classList.add('gacha-opening');
+        ch.classList.remove('gacha-prep');
+        ch.classList.add('gacha-open');
+    }, 820);
+    setTimeout(()=>{ 
+        ac.classList.add('gacha-flash');
+        if(isHighRare){ 
+            ac.classList.add('gacha-rainbow-upgrade');
+            ul.classList.add('active'); 
+            ch.innerText='✨'; 
+            ch.style.transform='scale(1.5)'; 
+            ft.innerText = highest === 'UR' ? '超激レア確定!!' : 'SSR確定!!';
+            showEl('ur-flash-text','block'); 
+        }else if(isGoldRare){
+            ft.innerText = 'SR GET!';
+            showEl('ur-flash-text','block');
+            setTimeout(()=>hideEl('ur-flash-text'), 900);
+            ch.innerText='🎁';
+        }else{
+            ch.innerText=currentGachaResults.some(r=>r.item.rarity==='R')?'🎁':'📦';
+        }
+        if(hasUR){ 
+            if(isFirebaseInitialized) window.db.ref('global/latest_ur_pull').set({userId:DB.userId,userName:DB.userName,itemName:hItem.name,timestamp:firebase.database.ServerValue.TIMESTAMP}); 
+            else setTimeout(()=>triggerHappyShare(DB.userName,hItem.name),1000); 
+        }
+        updateGachaUI(); 
+        saveGame(); 
+    }, 1320); 
+    setTimeout(()=>{
+        resetGachaCinematicClasses();
+        hideEl('gacha-anim-container');
+        if(times===1)showGachaResult(currentGachaResults[0].item,currentGachaResults[0].isNew);else showGacha10Result();
+    }, isHighRare ? 3200 : (isGoldRare ? 2500 : 2050)); 
 }
+
 function showGachaResult(item, isNew) { document.querySelectorAll('.gacha-result-text').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=null;}); shootConfetti('gacha-confetti-container',80); $('gacha-result-rarity').innerText=item.rarity; $('gacha-result-rarity').className=`text-7xl font-black mb-2 gacha-result-text italic tracking-wider ${rarityColors[item.rarity]}`; const vc=$('gacha-result-visual-container'); vc.innerHTML=item.type==='image'?`<span class="inline-flex relative w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10"><img src="${item.icon}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${item.fallbackIcon}','text-5xl')"></span>`:`<span class="text-8xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">${item.icon||'⚔️'}</span>`; $('gacha-result-name').innerHTML=`${item.name} <br><span class="text-base text-yellow-400 mt-2 block font-black border-t border-indigo-500 pt-2">${isNew?'🎉 初ゲット！！':'持ってるぞ！(+500/化石+1)'}</span>`; $('gacha-result-desc').innerText=item.desc||''; showEl('gacha-result-modal'); }
 function closeGachaResult() { hideEl('gacha-result-modal'); $('gacha-confetti-container').innerHTML=''; if(!DB.tutorialGachaCompleted){DB.tutorialGachaCompleted=true;saveGame();setTimeout(()=>startSpecificTutorial('gacha_done'),300);} }
 function showGacha10Result() { const g=$('gacha-10-grid'); g.innerHTML=''; shootConfetti('gacha-confetti-container-10',120); currentGachaResults.forEach((r,i)=>{ const m=r.item, d=document.createElement('div'); d.className=`bg-indigo-900 border-2 border-indigo-500 rounded-xl p-2 flex flex-col items-center justify-center relative shadow-lg pop-in`; d.style.animationDelay=`${i*0.1}s`; d.style.animationFillMode='both'; const vi=m.type==='image'?`<span class="inline-flex relative w-12 h-12"><img src="${m.icon}" class="absolute inset-0 w-full h-full object-contain drop-shadow-md z-10" onerror="fb(this,'${m.fallbackIcon}','text-2xl drop-shadow-md')"></span>`:`<span class="text-5xl drop-shadow-md">${m.icon||'⚔️'}</span>`; d.innerHTML=`<div class="absolute top-1 left-1 ${rarityColors[m.rarity]} font-black text-[10px] bg-indigo-950/80 px-1 rounded">${m.rarity}</div>${r.isNew?'<div class="absolute top-1 right-1 text-[8px] bg-pink-500 text-white font-black px-1 rounded shadow-md">NEW</div>':'<div class="absolute top-1 right-1 text-[8px] bg-slate-500 text-white font-black px-1 rounded shadow-md">ダブり</div>'}<div class="mt-4 mb-2 h-12 flex items-center justify-center">${vi}</div><div class="text-[9px] text-white font-bold text-center w-full truncate px-1">${m.name}</div>`; g.appendChild(d); }); showEl('gacha-result-10-modal'); }
@@ -4499,27 +4849,63 @@ function triggerHappyShare(n, i) { const t=$('happy-share-toast'); if(happyShare
 // --- ステージ・マルチ・スコアアタック ---
 // ステージリストが非常に大きい場合に一度に大量のDOMを生成すると低メモリ端末でクラッシュするため
 // 安全にチャンク表示するヘルパーを追加する
+
 function renderStageListSafe(stgs, offset = 0) {
     const l = $('stage-list');
     const max = 50;
-    if (!Array.isArray(stgs)) return renderStageList(stgs);
-    // offset がある場合は残りを続けて描画
+    __stageRenderSource = Array.isArray(stgs) ? stgs.slice() : stgs;
+    if (!Array.isArray(stgs)) return renderStageList(stgs, false, stgs);
+    if (offset === 0) l.innerHTML = '';
+    const prevMore = l.querySelector('.stage-more-wrap');
+    if (prevMore) prevMore.remove();
     const slice = stgs.slice(offset, offset + max);
-    renderStageList(slice);
+    renderStageList(slice, offset > 0, stgs);
     if (offset + max < stgs.length) {
         const moreWrap = document.createElement('div');
-        moreWrap.className = 'w-full flex justify-center mt-3';
+        moreWrap.className = 'stage-more-wrap w-full flex justify-center mt-3';
         const moreBtn = document.createElement('button');
         moreBtn.className = 'game-btn bg-indigo-700 text-white font-black px-4 py-3 rounded-xl border-2 border-indigo-500 shadow-md';
         moreBtn.innerText = 'もっと見る';
-        moreBtn.onclick = () => { l.innerHTML = ''; renderStageListSafe(stgs, offset + max); window.scrollTo({ top: l.offsetTop || 0, behavior: 'smooth' }); };
+        moreBtn.onclick = () => {
+            renderStageListSafe(stgs, offset + max);
+            scrollStageContainerToTop();
+        };
         moreWrap.appendChild(moreBtn);
         l.appendChild(moreWrap);
     }
 }
+
 function switchStageTab(t) { currentStageTab=t; const bn=$('tab-stage-normal'), be=$('tab-stage-ex'), bm=$('tab-stage-multi'); bn.className=be.className=bm.className="flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent"; showEl('stage-list','flex'); hideEl('multi-lobby-ui'); if(t==='normal'){bn.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all border-b-4 border-indigo-800";renderStageListSafe(MASTER.stages);}else if(t==='ex'){be.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";renderStageListSafe(MASTER.exStages);}else if(t==='multi'){bm.className="flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800";hideEl('stage-list');showEl('multi-lobby-ui','flex');} }
 function initStageSelect() { switchStageTab('normal'); }
-function renderStageList(stgs) { const l=$('stage-list'); l.innerHTML=''; let a=!DB.tutorialCompleted?[{id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0}]:stgs; a.forEach((s,i)=>{ let lk=false; if(!s.isTutorial){if(currentStageTab==='normal')lk=i>0&&DB.clearedStages<i;else if(s.reqClearEx!==undefined)lk=DB.clearedSeimaroStage<s.reqClearEx;} const b=document.createElement('button'); b.id=`stage-btn-${s.id}`; b.className=`p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk?'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed':'bg-indigo-800 '+s.color}`; let rd=s.isTutorial?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`:s.isEndless?`<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`:`<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`; b.innerHTML=`<div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div><div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div><div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless||s.isBossStage?'':'隻 追い払う！'}</div><div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless||s.isBossStage?'報酬:':s.isTutorial?'目標報酬:':'初回お祝い:'}</span>${rd}</div>${lk?'<div class="absolute inset-0 bg-indigo-950/80 flex items-center justify-center font-black text-3xl tracking-widest text-indigo-400 backdrop-blur-sm z-20">LOCKED 🔒</div>':''}`; if(!lk)b.onclick=()=>{positionTutorialArrow(null);startStage(s);}; l.appendChild(b); }); if(!DB.tutorialCompleted)setTimeout(()=>positionTutorialArrow('stage-btn-999'),100); }
+
+function renderStageList(stgs, append = false, sourceStgs = null) {
+    const l = $('stage-list');
+    if (!append) l.innerHTML = '';
+    const tutorialStage = {id:999,name:'ワクワク初航海！',goalScore:3,enemySpeed:1.5,spawnRate:80,reward:0,color:'border-yellow-400',isEndless:false,isTutorial:true,staminaCost:0};
+    const a = !DB.tutorialCompleted ? [tutorialStage] : (Array.isArray(stgs) ? stgs : []);
+    const sourceList = !DB.tutorialCompleted ? [tutorialStage] : getStageSourceListFor(a[0], sourceStgs || stgs);
+    a.forEach((s) => {
+        const lk = isStageLockedStrict(s, sourceList);
+        const b = document.createElement('button');
+        b.id = `stage-btn-${s.id}`;
+        b.className = `p-4 rounded-2xl border-l-8 text-left shadow-lg relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 flex-shrink-0 ${lk ? 'bg-indigo-900 border-slate-600 opacity-60 cursor-not-allowed pointer-events-none grayscale' : 'bg-indigo-800 ' + s.color}`;
+        const rd = s.isTutorial
+            ? `<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">ライセンス アンロック 🔑</span>`
+            : s.isEndless
+                ? `<span class="text-xs text-yellow-300 font-black bg-indigo-950 px-2 py-1 rounded-md">${s.reward}</span>`
+                : `<div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-md"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-sm text-yellow-400 font-black">×${s.reward}</span></div>`;
+        b.innerHTML = `
+            <div class="absolute top-2 right-2 text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded-full shadow border border-indigo-700">⚡ ${s.staminaCost}</div>
+            <div class="font-black text-xl text-white mb-2 pr-12 drop-shadow-md truncate">${s.name}</div>
+            <div class="text-sm text-indigo-200 font-bold bg-indigo-950/50 inline-block px-2 py-0.5 rounded-full mb-2">目標: ${s.goalScore}${s.isEndless || s.isBossStage ? '' : '隻 追い払う！'}</div>
+            <div class="flex items-center gap-2 mt-1"><span class="text-xs text-indigo-300 font-bold">${s.isEndless || s.isBossStage ? '報酬:' : s.isTutorial ? '目標報酬:' : '初回お祝い:'}</span>${rd}</div>
+            ${lk ? '<div class="locked-stage-overlay"><span>🔒 LOCKED</span></div>' : ''}
+        `;
+        if (!lk) b.onclick = () => { positionTutorialArrow(null); startStage(s); };
+        l.appendChild(b);
+    });
+    if (!DB.tutorialCompleted) setTimeout(() => positionTutorialArrow('stage-btn-999'), 100);
+}
 function openCreateRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="遊ぶステージを選択"; showEl('room-create-ui','flex'); hideEl('room-join-ui'); hideEl('room-waiting-ui'); const l=$('multi-stage-select-list'); l.innerHTML=''; MASTER.multiStages.forEach(s=>{ const b=document.createElement('button'); b.className=`w-full text-left p-3 bg-indigo-800 rounded-xl border-2 ${s.color} shadow-md active:scale-95 flex flex-col gap-1`; b.innerHTML=`<span class="font-black text-white text-lg">${s.name}</span><div class="flex justify-between items-center w-full"><span class="text-xs text-indigo-200 font-bold">スタミナ: ⚡${s.staminaCost}</span><span class="text-xs font-black text-yellow-300 bg-indigo-950 px-2 py-0.5 rounded">選択！</span></div>`; b.onclick=()=>createRoom(s); l.appendChild(b); }); showEl('multi-room-modal'); }
 function openJoinRoomModal() { if(!isFirebaseInitialized)return showAlert("通信エラー！"); $('room-modal-title').innerText="部屋に入る"; hideEl('room-create-ui'); showEl('room-join-ui','flex'); hideEl('room-waiting-ui'); $('room-id-input').value=''; showEl('multi-room-modal'); }
 function createRoom(s) { if(DB.stamina<s.staminaCost)return showAlert("スタミナ不足！"); const rId=Math.floor(1000+Math.random()*9000).toString(); currentMultiRoom={id:rId,stageId:s.id,isHost:true}; window.db.ref('rooms/'+rId).set({stageId:s.id,status:'waiting',hostId:DB.userId,timestamp:firebase.database.ServerValue.TIMESTAMP,p1:{id:DB.userId,name:DB.userName,icon:DB.userIcon,score:0,ready:false},p2:null}); showWaitingUI(rId); listenToRoom(rId); }
@@ -4541,7 +4927,7 @@ canvas.addEventListener('touchend',()=>input.isTouching=false);
 
 function startStage(stage, isMulti=false) {
     if(!isMulti&&DB.stamina<stage.staminaCost)return showAlert(`スタミナ不足！(必要: ${stage.staminaCost})`);
-    if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; navTo('screen-game'); playBattleBGM();
+    if(!isMulti) DB.stamina-=stage.staminaCost; saveGame(); updateHeaderUI(); currentStage=stage; __stageClearCinematicKey=null; ensureCinematicFxLayers(); navTo('screen-game'); playBattleBGM();
     if(DB.tutorialCompleted) showEl('special-ui-container'); else hideEl('special-ui-container'); hideEl('multi-match-ui');
     if(stage.isScoreAttack) { showEl('time-container', 'flex'); hideEl('score-slash'); hideEl('game-goal'); $('score-label').innerText = 'スコア:'; $('game-time').innerText = stage.timeLimit; } else { hideEl('time-container'); }
 
@@ -4571,12 +4957,13 @@ function stopGame() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId
 function triggerGameOver() { gameState.isGameOver = true; gameState.isPaused = true; stopGame(); stopBattleBGM(); $('game-end-title').innerText='GAME OVER...'; $('game-end-title').className='text-5xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 filter drop-shadow-lg transform scale-110 pop-in relative z-10'; $('game-end-desc').innerHTML=`防衛ラインを突破された！\n\n今回の数: ${gameState.score}隻\n\n<span class="text-sm text-yellow-300">放置はダメだぞ！</span>`; showEl('game-end-modal'); $('end-confetti-container').innerHTML=''; DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score; saveGame(); setTimeout(()=>positionTutorialArrow('btn-tutorial-exit'),300); }
 let lastGaugeUI=-1;
 function updateSpecialGaugeUI() { let g=Math.floor(gameState.specialGauge); if(g===lastGaugeUI)return; lastGaugeUI=g; $('special-gauge').style.width=`${g}%`; const b=$('btn-special'), i=$('btn-special-icon'); if(g>=100){b.classList.remove('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.add('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.remove('grayscale');b.disabled=false;}else{b.classList.add('bg-slate-700','border-slate-500','opacity-80','cursor-not-allowed');b.classList.remove('bg-gradient-to-t','from-yellow-400','to-orange-500','border-white','animate-pulse');i.classList.add('grayscale');b.disabled=true;} }
-function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused||gameState.isGameOver)return; gameState.isPaused=true; const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
+function triggerSpecialSkill() { if(gameState.specialGauge<100||gameState.isPaused||gameState.isGameOver)return; gameState.isPaused=true; ensureCinematicFxLayers(); const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); playSpecialCinematic(p.crewSkillName||'FULL BURST'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
 function skipSpecial() { if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;executeSpecialEffect();} }
 function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(gameState.isGameOver) return; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
 
 function updateGame() {
     if(gameState.isGameOver || gameState.isPaused) return; 
+    if(__hitStopFrames>0){ __hitStopFrames--; return; }
     const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
     if(s.isScoreAttack) { gameState.timeLeft--; if(gameState.frameCount % 60 === 0) { $('game-time').innerText = Math.ceil(gameState.timeLeft / 60); } if(gameState.timeLeft <= 0) { checkStageClear(false); return; } }
     if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
@@ -4592,7 +4979,7 @@ function updateGame() {
     for(let i=gameState.enemies.length-1;i>=0;i--){ 
         let e=gameState.enemies[i]; if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} 
         if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} 
-        let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
+        let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;playHitFeedback(e,p,b);if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
         if(hit&&e.hp<=0){ 
             gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); 
             if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} 
@@ -4621,12 +5008,20 @@ function drawGame() {
 
 function checkStageClear(isRetreat=false) {
     const isCleared = currentStage.isBossStage ? gameState.bossDefeated : (currentStage.isScoreAttack ? (gameState.timeLeft <= 0) : (!currentStage.isEndless&&gameState.score>=currentStage.goalScore));
+    const clearFxKey = currentStage ? `${currentStage.id}-${gameState.score}-${gameState.bossDefeated ? 1 : 0}` : '';
+    if(!isRetreat && isCleared && currentStage && currentStage.isBossStage && __stageClearCinematicKey !== clearFxKey){
+        __stageClearCinematicKey = clearFxKey;
+        gameState.isPaused = true;
+        playStageClearFinish();
+        setTimeout(()=>checkStageClear(false), 920);
+        return;
+    }
     if(isRetreat||isCleared){
         gameState.isGameOver = true; gameState.isPaused = true; stopGame(); stopBattleBGM(); 
         DB.missionProgress.dailyDefeat+=gameState.score; DB.missionProgress.defeatTotal+=gameState.score;
         if(currentStage.isTutorial&&!isRetreat){handleTutorialClear();return;}
-        $('game-end-title').innerText=isRetreat?'港に戻りました':'大・大・大成功！！'; 
-        $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10';
+        $('game-end-title').innerText=isRetreat?'港に戻りました':(currentStage && currentStage.isBossStage ? 'STAGE CLEAR' : '大・大・大成功！！'); 
+        $('game-end-title').className='text-4xl font-black mb-4 text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 filter drop-shadow-lg transform scale-110 pop-in relative z-10' + ((currentStage && currentStage.isBossStage) ? ' tracking-[0.2em]' : '');
         let rt=''; 
         if(currentStage.type==='pvp'){ 
             const rScore=parseInt($('rival-score').innerText)||0; const isWin=gameState.score>rScore; rt=`<div class="bg-indigo-950 p-2 rounded text-center border-2 ${isWin?'border-yellow-400':'border-slate-500'} mb-2"><span class="text-xs text-indigo-300 block">スコア結果</span><span class="text-xl ${isWin?'text-yellow-400':'text-white'} font-black">${gameState.score}</span> <span class="text-xs">vs</span> <span class="text-xl ${isWin?'text-white':'text-yellow-400'} font-black">${rScore}</span><div class="text-2xl mt-1">${isWin?'🏆 勝利！':'💦 敗北...'}</div></div>`; if(isWin){DB.coins+=3000;rt+=`<span class="text-yellow-300 font-bold">勝利報酬: 草コイン×3000</span>`;} 
@@ -4702,8 +5097,164 @@ function tryAccessLockedScreen(sid) {
     }
 }
 
+
+// === CINEMATIC FIX / FX HELPERS (injected) ===
+let __stageRenderSource = null;
+let __stageClearCinematicKey = null;
+let __hitStopFrames = 0;
+let __comboCount = 0;
+let __comboTimer = null;
+
+function scrollStageContainerToTop() {
+    const sc = $('screen-stage');
+    if (sc && typeof sc.scrollTo === 'function') sc.scrollTo({ top: 0, behavior: 'smooth' });
+    else if (sc) sc.scrollTop = 0;
+    const list = $('stage-list');
+    if (list && typeof list.scrollIntoView === 'function') list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function getStageSourceListFor(stage, fallbackList) {
+    if (Array.isArray(fallbackList) && fallbackList.length) return fallbackList;
+    if (Array.isArray(__stageRenderSource) && __stageRenderSource.length) return __stageRenderSource;
+    if (currentStageTab === 'ex' && Array.isArray(MASTER.exStages)) return MASTER.exStages;
+    if (currentStageTab === 'multi' && Array.isArray(MASTER.multiStages)) return MASTER.multiStages;
+    return Array.isArray(MASTER.stages) ? MASTER.stages : [];
+}
+
+function isStageLockedStrict(stage, sourceList) {
+    if (!stage || stage.isTutorial) return false;
+    if (currentStageTab === 'normal') {
+        const full = getStageSourceListFor(stage, sourceList);
+        const idx = full.findIndex(x => x.id === stage.id);
+        if (idx <= 0) return false;
+        const prev = full[idx - 1];
+        return (DB.clearedStages || 0) < (prev && prev.id !== undefined ? prev.id : idx);
+    }
+    if (stage.reqClearEx !== undefined) return (DB.clearedSeimaroStage || 0) < stage.reqClearEx;
+    return false;
+}
+
+function ensureCinematicFxLayers() {
+    const gameScreen = $('screen-game');
+    if (gameScreen && !$('battle-fx-layer')) {
+        const layer = document.createElement('div');
+        layer.id = 'battle-fx-layer';
+        layer.className = 'battle-fx-layer';
+        layer.innerHTML = `
+            <div id="battle-hit-flash"></div>
+            <div id="battle-damage-layer"></div>
+            <div id="battle-combo-counter"><span class="n">0 HIT</span><span class="t">COMBO</span></div>
+            <div id="battle-skill-slash"><div id="battle-skill-name"></div></div>
+            <div id="stage-clear-finish"><div id="stage-clear-whiteout"></div><div class="logo">STAGE CLEAR<span class="sub">LEGENDARY FINISH</span></div></div>
+        `;
+        gameScreen.appendChild(layer);
+    }
+    const gachaAnim = $('gacha-anim-container');
+    if (gachaAnim && !$('gacha-charge-text')) {
+        const txt = document.createElement('div');
+        txt.id = 'gacha-charge-text';
+        txt.innerHTML = 'TREASURE OPEN<span class="sub">LEGENDARY CHARGE</span>';
+        gachaAnim.appendChild(txt);
+    }
+    if (gachaAnim && !gachaAnim.querySelector('.gacha-sunburst')) {
+        const sb = document.createElement('div');
+        sb.className = 'gacha-fx gacha-sunburst';
+        sb.setAttribute('aria-hidden', 'true');
+        gachaAnim.insertBefore(sb, $('gacha-chest'));
+    }
+}
+
+function resetGachaCinematicClasses() {
+    const ac = $('gacha-anim-container');
+    const ch = $('gacha-chest');
+    if (!ac || !ch) return;
+    ac.classList.remove('gacha-charge','gacha-flash','gacha-opening','gacha-rainbow-upgrade','gacha-tier-blue','gacha-tier-gold','gacha-tier-rainbow');
+    ch.classList.remove('gacha-prep','gacha-open');
+    const ul = $('ur-anim-layer');
+    if (ul) ul.classList.remove('active');
+}
+
+function getHighestRarityFromResults(results) {
+    const order = { N: 0, R: 1, SR: 2, SSR: 3, UR: 4 };
+    let best = 'N';
+    (results || []).forEach(r => {
+        const rr = r && r.item ? r.item.rarity : 'N';
+        if ((order[rr] || 0) > (order[best] || 0)) best = rr;
+    });
+    return best;
+}
+
+function playHitFeedback(enemy, playerRef, bulletRef) {
+    __hitStopFrames = Math.max(__hitStopFrames, enemy && enemy.isBoss ? 2 : 1);
+    const flash = $('battle-hit-flash');
+    if (flash) {
+        flash.classList.remove('active');
+        void flash.offsetWidth;
+        flash.classList.add('active');
+    }
+    spawnDamagePop(enemy, playerRef);
+    bumpComboCounter();
+}
+
+function spawnDamagePop(enemy, playerRef) {
+    const layer = $('battle-damage-layer');
+    const cv = $('gameCanvas');
+    if (!layer || !cv || !enemy) return;
+    const wrap = cv.parentElement.getBoundingClientRect();
+    const scaleX = wrap.width / (cv.width || wrap.width || 1);
+    const scaleY = wrap.height / (cv.height || wrap.height || 1);
+    const el = document.createElement('div');
+    el.className = 'damage-pop' + (enemy.isBoss ? ' boss-hit' : '');
+    const dmg = Math.max(1, Math.round((playerRef && playerRef.bulletSizeMod) || 1));
+    el.textContent = enemy.isBoss ? `${dmg} CRITICAL!` : `${dmg} HIT!`;
+    el.style.left = `${enemy.x * scaleX + enemy.w * scaleX / 2}px`;
+    el.style.top = `${enemy.y * scaleY + enemy.h * scaleY / 2}px`;
+    el.style.fontSize = enemy.isBoss ? '1.35rem' : '1rem';
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 700);
+}
+
+function bumpComboCounter() {
+    const box = $('battle-combo-counter');
+    if (!box) return;
+    __comboCount += 1;
+    box.querySelector('.n').textContent = `${__comboCount} HIT`;
+    box.classList.remove('active');
+    void box.offsetWidth;
+    box.classList.add('active');
+    if (__comboTimer) clearTimeout(__comboTimer);
+    __comboTimer = setTimeout(() => {
+        __comboCount = 0;
+        box.style.opacity = '0';
+        box.classList.remove('active');
+    }, 1200);
+    box.style.opacity = '1';
+}
+
+function playSpecialCinematic(skillName) {
+    const slash = $('battle-skill-slash');
+    const name = $('battle-skill-name');
+    if (!slash || !name) return;
+    name.textContent = skillName || 'SPECIAL SKILL';
+    slash.classList.remove('active');
+    void slash.offsetWidth;
+    slash.classList.add('active');
+    setTimeout(() => slash.classList.remove('active'), 850);
+}
+
+function playStageClearFinish() {
+    const finish = $('stage-clear-finish');
+    if (!finish) return;
+    finish.classList.remove('active');
+    void finish.offsetWidth;
+    finish.classList.add('active');
+    setTimeout(() => finish.classList.remove('active'), 1050);
+}
+
+
 // --- 起動 ---
 window.onload = () => { 
+    ensureCinematicFxLayers();
     loadGame(); 
     navTo('screen-home'); 
     setTimeout(checkAndStartTutorial, 600); 
@@ -4711,5 +5262,6 @@ window.onload = () => {
     initFirebase(); 
 };
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
