@@ -131,11 +131,12 @@
     <p id="waiting-host-msg" class="text-slate-400 font-bold bg-slate-800 px-4 py-2 md:px-6 md:py-3 rounded-full border border-slate-600 text-sm md:text-base">ホストが開始するのを待っています...</p>
   </div>
 
-  <!-- UI: 死亡時の復活カウントダウン -->
-  <div id="respawn-ui" class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-30 hidden pointer-events-none backdrop-blur-sm">
-    <h2 class="text-5xl md:text-7xl font-black text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">YOU DIED</h2>
+  <!-- UI: 死亡時の復活カウントダウン & 観戦モード -->
+  <div id="respawn-ui" class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-30 hidden pointer-events-none backdrop-blur-sm transition-colors duration-500">
+    <h2 id="respawn-title" class="text-5xl md:text-7xl font-black text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">YOU DIED</h2>
     <p id="respawn-timer-text" class="text-7xl md:text-9xl font-black text-white drop-shadow-lg mb-8">5.0</p>
     <p id="respawn-left-text" class="text-2xl md:text-4xl font-bold text-yellow-400 drop-shadow-lg bg-slate-900/80 px-6 py-2 rounded-full border-2 border-yellow-500 transition-colors">残り復活回数: 3</p>
+    <p id="spectator-hint" class="hidden text-white font-bold mt-4 bg-slate-800/80 px-6 py-3 rounded-xl border border-slate-600 drop-shadow-md">👀 移動操作でマップを見渡せます</p>
   </div>
 
   <!-- UI: リザルト -->
@@ -209,7 +210,7 @@
     <div class="hidden md:block absolute bottom-4 right-4 text-sm font-bold text-slate-300 pointer-events-none text-right bg-slate-900/70 p-3 rounded-xl border border-slate-600 backdrop-blur-sm z-10">
       <span class="text-cyan-400">[W][A][S][D]</span> 移動<br>
       <span class="text-cyan-400">[マウス]</span> 照準 & クリックで攻撃<br>
-      <span class="text-yellow-400 text-xs mt-1 block">スマホ：左画面ドラッグで移動 / 右画面をタップで攻撃</span>
+      <span class="text-yellow-400 text-xs mt-1 block">スマホ：左画面ドラッグで移動 / 他の指でタップして攻撃</span>
     </div>
   </div>
 
@@ -331,14 +332,13 @@
     const CENTER_Y = 600;
 
     const SPEED_NORMAL = 500; 
-    const SPEED_PENALTY = 0.3; // 💎 クリスタル所持時のスピードをさらに遅く（30%）に変更
+    const SPEED_PENALTY = 0.3; 
     
     // --- Local State ---
     let localPlayer = { x: 0, y: 0, team: -1, hp: 100, crystals: 0, maxCrystals: 1 };
     let camera = { x: 0, y: 0 };
     let mouse = { screenX: 0, screenY: 0, worldX: 0, worldY: 0, down: false, touchId: null };
     
-    // 左画面の移動用可変式ジョイスティック
     let joystickL = { active: false, id: null, originX: 0, originY: 0, x: 0, y: 0, dx: 0, dy: 0 };
 
     let localBullets = []; 
@@ -514,7 +514,7 @@
     canvas.addEventListener('mousedown', () => mouse.down = true);
     canvas.addEventListener('mouseup', () => mouse.down = false);
 
-    // ⭐ スマホの操作変更: 左画面ジョイスティック / 右画面タップで攻撃 ⭐
+    // ⭐ スマホの操作変更: 左側はジョイスティック、他のタッチはすべて攻撃 ⭐
     const handleTouch = (e) => {
       e.preventDefault();
       const hw = window.innerWidth / 2;
@@ -522,18 +522,22 @@
       if (e.type === 'touchstart' || e.type === 'touchmove') {
         for(let i=0; i<e.changedTouches.length; i++) {
           const t = e.changedTouches[i];
-          if (t.clientX < hw) { 
-            // 左画面: 可変式ジョイスティック
-            if (!joystickL.active || joystickL.id === t.identifier) {
-              if(!joystickL.active) {
-                joystickL.active = true; joystickL.id = t.identifier;
-                joystickL.originX = t.clientX; joystickL.originY = t.clientY;
-              }
-              joystickL.x = t.clientX; joystickL.y = t.clientY;
-              joystickL.dx = joystickL.x - joystickL.originX; joystickL.dy = joystickL.y - joystickL.originY;
+          
+          // ジョイスティックがアクティブでない時の左半分のタッチ、または既にジョイスティックのタッチIDの場合
+          if ((!joystickL.active && t.clientX < hw) || joystickL.id === t.identifier) {
+            if(!joystickL.active) {
+              joystickL.active = true; 
+              joystickL.id = t.identifier;
+              joystickL.originX = t.clientX; 
+              joystickL.originY = t.clientY;
             }
-          } else { 
-            // 右画面: タップ/ドラッグで攻撃
+            joystickL.x = t.clientX; 
+            joystickL.y = t.clientY;
+            joystickL.dx = joystickL.x - joystickL.originX; 
+            joystickL.dy = joystickL.y - joystickL.originY;
+          } 
+          // それ以外の指のタッチはすべて攻撃判定にする
+          else { 
             mouse.down = true;
             mouse.screenX = t.clientX;
             mouse.screenY = t.clientY;
@@ -544,8 +548,10 @@
       if (e.type === 'touchend' || e.type === 'touchcancel') {
         for(let i=0; i<e.changedTouches.length; i++) {
           const t = e.changedTouches[i];
-          // 指が離れたら非表示＆移動停止
-          if (joystickL.id === t.identifier) joystickL.active = false;
+          if (joystickL.id === t.identifier) {
+            joystickL.active = false;
+            joystickL.id = null;
+          }
           if (mouse.touchId === t.identifier) {
             mouse.down = false;
             mouse.touchId = null;
@@ -579,7 +585,6 @@
       lastSyncX = -1000;
       lastSyncY = -1000;
 
-      // 復活システムの初期化
       respawnsLeft = 3;
       respawnTimer = 0;
       isDead = false;
@@ -604,7 +609,6 @@
     }
 
     function syncLocalState() {
-      // 死んでいる間は座標を同期しない（死んだ場所にとどまる）
       if (!myUid || isDead) return;
       
       if (Math.abs(localPlayer.x - lastSyncX) < 3 && Math.abs(localPlayer.y - lastSyncY) < 3) return;
@@ -627,7 +631,6 @@
       updates['time'] = newTime;
       if (newTime === 0) { updates['status'] = 'result'; updateDoc(roomRef, updates).catch(()=>{}); return; }
 
-      // ⭐ クリスタルスポーン制限: マップ上に1つも無い時だけ湧くように変更 ⭐
       if (now - lastSpawn > 15000 && Object.keys(gameState.crystals||{}).length === 0) {
         updates[`crystals.c_${now}`] = { x: CENTER_X + (Math.random()-0.5)*500, y: CENTER_Y + (Math.random()-0.5)*500 };
         lastSpawn = now;
@@ -635,13 +638,11 @@
 
       Object.keys(gameState.players||{}).forEach(uid => {
         const p = gameState.players[uid];
-        if (!p.isBot) return; // 以下BOTのみの処理
+        if (!p.isBot) return; 
         
-        // BOTにも復活システムを適用
         if (!botAI[uid]) botAI[uid] = { state: 'idle', targetX: p.x, targetY: p.y, lastThink: 0, lastAttack: 0, respawnsLeft: 3, isDead: false, respawnTimer: 0 };
         const ai = botAI[uid];
 
-        // BOTが死んだ時の処理
         if (p.hp <= 0 && !ai.isDead) {
             if (p.crystals > 0) {
                 for(let i=0; i<p.crystals; i++) {
@@ -655,12 +656,11 @@
                 ai.respawnsLeft--;
             } else {
                 ai.isDead = true;
-                ai.respawnTimer = -1; // 完全に死亡
+                ai.respawnTimer = -1; 
             }
         }
 
         if (ai.isDead) {
-            // 5秒経過でBOT復活
             if (ai.respawnTimer > 0 && now >= ai.respawnTimer) {
                 ai.isDead = false;
                 const myBaseX = p.team === 0 ? BASE0_X : BASE1_X;
@@ -668,17 +668,16 @@
                 updates[`players.${uid}.x`] = myBaseX + (Math.random()*100-50);
                 updates[`players.${uid}.y`] = BASE_Y + (Math.random()*100-50);
             }
-            return; // 死んでいる間はAI思考をスキップ
+            return; 
         }
         
-        // --- BOTのAI思考 ---
         if (now - ai.lastThink > 1200) {
           ai.lastThink = now + Math.random() * 500;
           let nearEnemy = null, nearEnemyDist = Infinity;
           
           Object.keys(gameState.players).forEach(eUid => {
             const ep = gameState.players[eUid];
-            if (ep.team !== p.team && ep.hp > 0 && Math.hypot(ep.x - p.x, ep.y - p.y) < 800) { // 索敵範囲を広げる
+            if (ep.team !== p.team && ep.hp > 0 && Math.hypot(ep.x - p.x, ep.y - p.y) < 800) {
               const d = Math.hypot(ep.x - p.x, ep.y - p.y);
               if (d < nearEnemyDist) { nearEnemyDist = d; nearEnemy = ep; }
             }
@@ -768,10 +767,8 @@
     function updateLocal(dt) {
       const now = performance.now();
 
-      // サーバーからのダメージを同期
       if (gameState.players && gameState.players[myUid]) {
         const currentMyHp = gameState.players[myUid].hp;
-        // リスポーン無敵状態(1.5秒)および死んでいる間はダメージ更新を無視
         if (now - respawnProtectionTime > 1500 && !isDead) {
           if (currentMyHp < lastMyHp) {
             createParticles(localPlayer.x, localPlayer.y, 8, '#ef4444', 0.3);
@@ -781,9 +778,7 @@
         }
       }
 
-      // 💥 ローカルプレイヤーの死亡判定 💥
       if (localPlayer.hp <= 0 && !isDead) {
-        // クリスタルを落とす処理
         if (localPlayer.crystals > 0) {
           const dropUpdates = { [`players.${myUid}.crystals`]: 0, [`players.${myUid}.hp`]: 0 };
           for(let i=0; i<localPlayer.crystals; i++) {
@@ -797,26 +792,23 @@
 
         if (respawnsLeft > 0) {
             isDead = true;
-            respawnTimer = 5000; // 5秒のカウントダウン
+            respawnTimer = 5000; 
             respawnsLeft--;
         } else {
             isDead = true;
-            respawnTimer = -1; // 復活回数ゼロ（観戦モード）
+            respawnTimer = -1; 
         }
       }
 
-      // 💥 死んでいる時の処理（カウントダウン） 💥
       if (isDead) {
         if (respawnTimer > 0) {
             respawnTimer -= dt * 1000;
-            // 復活の瞬間！
             if (respawnTimer <= 0) {
                 isDead = false;
                 respawnProtectionTime = performance.now();
                 localPlayer.hp = PLAYER_MAX_HP; 
                 lastMyHp = PLAYER_MAX_HP;
                 
-                // 拠点で復活
                 localPlayer.x = localPlayer.team === 0 ? BASE0_X + 50 : BASE1_X - 50; 
                 localPlayer.y = BASE_Y;
                 lastSyncX = localPlayer.x;
@@ -828,9 +820,33 @@
                   [`players.${myUid}.y`]: localPlayer.y
                 }).catch(()=>{});
             }
+            return;
+        } else if (respawnTimer < 0) {
+            let moveDirX = 0, moveDirY = 0;
+            if (keys['KeyW'] || keys['ArrowUp']) moveDirY -= 1;
+            if (keys['KeyS'] || keys['ArrowDown']) moveDirY += 1;
+            if (keys['KeyA'] || keys['ArrowLeft']) moveDirX -= 1;
+            if (keys['KeyD'] || keys['ArrowRight']) moveDirX += 1;
+
+            if (joystickL.active) {
+                const jLen = Math.hypot(joystickL.dx, joystickL.dy);
+                if (jLen > 10) { 
+                  moveDirX += joystickL.dx / jLen; 
+                  moveDirY += joystickL.dy / jLen; 
+                }
+            }
+
+            const dirLen = Math.hypot(moveDirX, moveDirY);
+            if (dirLen > 0) {
+                const speed = SPEED_NORMAL * 1.5; 
+                localPlayer.x += (moveDirX / dirLen) * speed * dt;
+                localPlayer.y += (moveDirY / dirLen) * speed * dt;
+                
+                localPlayer.x = Math.max(50, Math.min(CANVAS_W-50, localPlayer.x));
+                localPlayer.y = Math.max(50, Math.min(CANVAS_H-50, localPlayer.y));
+            }
+            return; 
         }
-        // 死んでいる間は移動や攻撃をさせないためにここで終了
-        return;
       }
 
       if (gameState[`t${localPlayer.team}_cmd8`]) localPlayer.maxCrystals = 2;
@@ -844,14 +860,13 @@
       if (keys['KeyA'] || keys['ArrowLeft']) moveDirX -= 1;
       if (keys['KeyD'] || keys['ArrowRight']) moveDirX += 1;
 
-      // ⭐ 可変式ジョイスティックの移動計算 ⭐
       if (joystickL.active) {
         const jLen = Math.hypot(joystickL.dx, joystickL.dy);
         if (jLen > 10) { 
           moveDirX += joystickL.dx / jLen; 
           moveDirY += joystickL.dy / jLen; 
           isAnalog = true;
-          analogPower = Math.min(jLen, 60) / 60; // 距離に応じてスピードを変える
+          analogPower = Math.min(jLen, 60) / 60; 
         }
       }
 
@@ -869,7 +884,6 @@
         if (Math.random() < 0.1 * finalPower) createParticles(localPlayer.x, localPlayer.y + 25, 1, '#94a3b8', 0.2);
       }
 
-      // ⭐ 攻撃処理：mouse.down(タップ含む)だけで攻撃する ⭐
       if (mouse.down && performance.now() - lastShootTime > 450) {
         lastShootTime = performance.now();
         let dx = mouse.worldX - localPlayer.x;
@@ -908,14 +922,16 @@
       }
 
       if (gameState.crystals) {
-        let picked = 0;
         Object.keys(gameState.crystals).forEach(cid => {
-          if (localPlayer.crystals + picked >= localPlayer.maxCrystals) return;
+          if (localPlayer.crystals >= localPlayer.maxCrystals) return;
           const c = gameState.crystals[cid];
-          if (Math.hypot(localPlayer.x - c.x, localPlayer.y - c.y) < 60) {
-            picked++;
-            updateDoc(roomRef, { [`crystals.${cid}`]: deleteField(), [`players.${myUid}.crystals`]: localPlayer.crystals + picked })
-            .then(() => { localPlayer.crystals++; createParticles(c.x, c.y, 15, '#fde047', 0.4); }).catch(()=>{});
+          // 距離判定に加え、まだ削除対象にマークされていないかをチェック
+          if (c && !c.picked && Math.hypot(localPlayer.x - c.x, localPlayer.y - c.y) < 60) {
+            c.picked = true; // ローカルでの即時ロック
+            localPlayer.crystals++;
+            
+            updateDoc(roomRef, { [`crystals.${cid}`]: deleteField(), [`players.${myUid}.crystals`]: localPlayer.crystals })
+            .then(() => { createParticles(c.x, c.y, 15, '#fde047', 0.4); }).catch(()=>{});
           }
         });
       }
@@ -962,6 +978,7 @@
       if (gameState.crystals) {
         ctx.fillStyle = '#facc15';
         Object.values(gameState.crystals).forEach(c => {
+          if (c.picked) return; // ロックされたものは描画しない
           const bounce = Math.sin(Date.now()/200 + c.x)*10;
           ctx.beginPath(); ctx.moveTo(c.x, c.y-25 + bounce); ctx.lineTo(c.x+20, c.y + bounce); ctx.lineTo(c.x, c.y+25 + bounce); ctx.lineTo(c.x-20, c.y + bounce); ctx.fill();
         });
@@ -978,8 +995,8 @@
 
       Object.keys(gameState.players||{}).forEach(uid => {
         const p = uid === myUid ? localPlayer : gameState.players[uid];
-        // 死亡中のプレイヤー（幽霊状態）は描画をスキップ
-        if (p.hp <= 0) return;
+        
+        if (p.hp <= 0) return; 
 
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.beginPath(); ctx.arc(p.x, p.y+20, 20, 0, Math.PI*2); ctx.fill();
@@ -1034,25 +1051,21 @@
 
       ctx.restore();
 
-      // ⭐ 可変式ジョイスティックの描画 ⭐
-      if (joystickL.active && !isDead) {
-        const maxR = 60; // 外円の半径
+      if (joystickL.active && (!isDead || respawnTimer < 0)) {
+        const maxR = 60; 
         let drawX = joystickL.x;
         let drawY = joystickL.y;
         const dist = Math.hypot(joystickL.dx, joystickL.dy);
         
-        // 内円が外円から出ないようにクランプ
         if (dist > maxR) {
           drawX = joystickL.originX + (joystickL.dx / dist) * maxR;
           drawY = joystickL.originY + (joystickL.dy / dist) * maxR;
         }
 
-        // 外円
         ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'; 
         ctx.beginPath(); ctx.arc(joystickL.originX, joystickL.originY, maxR, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
 
-        // 内円
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; 
         ctx.beginPath(); ctx.arc(drawX, drawY, 25, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -1090,7 +1103,6 @@
         } else if (stock >= cost && !isDead) { btn.disabled = false; } else { btn.disabled = true; }
       });
 
-      // 💀 死亡時のカウントダウンUI更新 💀
       const respawnUI = document.getElementById('respawn-ui');
       if (isDead) {
           respawnUI.classList.remove('hidden');
@@ -1098,18 +1110,25 @@
               document.getElementById('respawn-timer-text').innerText = (respawnTimer / 1000).toFixed(1);
               document.getElementById('respawn-left-text').innerText = `残り復活回数: ${respawnsLeft}`;
           } else if (respawnTimer < 0) {
-              document.getElementById('respawn-timer-text').innerText = "SPECTATING";
-              document.getElementById('respawn-timer-text').classList.add('text-slate-400');
+              document.getElementById('respawn-title').innerText = "OBSERVER MODE";
+              document.getElementById('respawn-title').className = "text-4xl md:text-5xl font-black text-blue-400 drop-shadow-lg mb-4";
+              document.getElementById('respawn-timer-text').innerText = "観戦中";
+              document.getElementById('respawn-timer-text').className = "text-5xl md:text-7xl font-black text-slate-300 drop-shadow-lg mb-8";
               document.getElementById('respawn-left-text').innerText = "復活回数を使い切りました";
-              document.getElementById('respawn-left-text').classList.replace('text-yellow-400', 'text-slate-400');
-              document.getElementById('respawn-left-text').classList.replace('border-yellow-500', 'border-slate-500');
+              document.getElementById('respawn-left-text').className = "text-xl md:text-2xl font-bold text-slate-400 bg-slate-900/80 px-6 py-2 rounded-full border-2 border-slate-500";
+              document.getElementById('spectator-hint').classList.remove('hidden');
+              respawnUI.classList.replace('bg-black/70', 'bg-black/30');
+              respawnUI.classList.remove('backdrop-blur-sm');
           }
       } else {
           respawnUI.classList.add('hidden');
-          // スタイルリセット
-          document.getElementById('respawn-timer-text').classList.remove('text-slate-400');
-          document.getElementById('respawn-left-text').classList.replace('text-slate-400', 'text-yellow-400');
-          document.getElementById('respawn-left-text').classList.replace('border-slate-500', 'border-yellow-500');
+          document.getElementById('respawn-title').innerText = "YOU DIED";
+          document.getElementById('respawn-title').className = "text-5xl md:text-7xl font-black text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4";
+          document.getElementById('respawn-timer-text').className = "text-7xl md:text-9xl font-black text-white drop-shadow-lg mb-8";
+          document.getElementById('respawn-left-text').className = "text-2xl md:text-4xl font-bold text-yellow-400 drop-shadow-lg bg-slate-900/80 px-6 py-2 rounded-full border-2 border-yellow-500 transition-colors";
+          document.getElementById('spectator-hint').classList.add('hidden');
+          respawnUI.classList.replace('bg-black/30', 'bg-black/70');
+          respawnUI.classList.add('backdrop-blur-sm');
       }
     }
 
