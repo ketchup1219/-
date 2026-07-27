@@ -1,1 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>すべての海賊ども、指令だ！ 2026 8/1(土) 海が動く</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 荒ぶる海の背景演出 */
+        .ocean-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            z-index: -2;
+        }
+
+        /* 波のうねりエフェクト */
+        .waves {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15vh;
+            background: linear-gradient(to top, rgba(14, 165, 233, 0.15), transparent);
+            z-index: -1;
+            animation: wave-motion 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes wave-motion {
+            0% { transform: translateY(10px) scaleY(0.95); }
+            100% { transform: translateY(-10px) scaleY(1.05); }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(15, 23, 42, 0.85);
+            border: 3px solid #38bdf8;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4), inset 0 0 25px rgba(56, 189, 248, 0.15);
+            padding: 40px 30px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ヘッダー部分 */
+        .header h1 {
+            font-size: 2.4rem;
+            color: #ffffff;
+            text-shadow: 0 0 15px #38bdf8, 0 0 30px #2563eb;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .date-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #dc2626, #f59e0b);
+            color: #ffffff;
+            font-weight: bold;
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.7);
+            animation: pulse-badge 2s infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes pulse-badge {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 38, 38, 0.6); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 38, 38, 0.6); }
+        }
+
+        /* カウントダウンタイマー */
+        .countdown-title {
+            font-size: 1.1rem;
+            color: #38bdf8;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .time-box {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid #0284c7;
+            border-radius: 12px;
+            padding: 15px 10px;
+            min-width: 80px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .time-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #facc15;
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+            font-family: monospace;
+        }
+
+        .time-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        /* 指令メッセージボックス */
+        .directive-box {
+            background: rgba(30, 41, 59, 0.6);
+            border-left: 6px solid #38bdf8;
+            border-right: 6px solid #38bdf8;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+        }
+
+        .directive-box p {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        .directive-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            color: #facc15;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
+        }
+
+        .footer-note {
+            font-size: 0.95rem;
+            color: #64748b;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ocean-bg"></div>
+    <div class="waves"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>すべての海賊ども、指令だ！</h1>
+            <div class="date-badge">2026年 8月1日（土） 海が動く</div>
+        </div>
+
+        <div class="countdown-section">
+            <div class="countdown-title">⚡ アップデート完了まであと ⚡</div>
+            <div class="countdown-timer">
+                <div class="time-box">
+                    <div id="days" class="time-value">00</div>
+                    <div class="time-label">DAYS</div>
+                </div>
+                <div class="time-box">
+                    <div id="hours" class="time-value">00</div>
+                    <div class="time-label">HOURS</div>
+                </div>
+                <div class="time-box">
+                    <div id="minutes" class="time-value">00</div>
+                    <div class="time-label">MINUTES</div>
+                </div>
+                <div class="time-box">
+                    <div id="seconds" class="time-value">00</div>
+                    <div class="time-label">SECONDS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="directive-box">
+            <p>「すべての海賊どもに告ぐ。</p>
+            <p><span class="highlight">2026年8月1日（土）</span>——荒ぶる海原が、ついに俺たちの時代へ動き出す。</p>
+            <p>新たな海域の解放、未知なる宝の眠る島、そして立ちふさがる最強の敵たち。</p>
+            <p>準備はいいか？ 錨を上げろ、進路は伝説の彼方だ！」</p>
+        </div>
+
+        <div class="footer-note">
+            ⚓ ALL PIRATES READY FOR DEPARTURE ⚓
+        </div>
+    </div>
+
+    <script>
+        // 目標日時：2026年8月1日 00:00:00 (JST)
+        const targetDate = new Date('2026-08-01T00:00:00+09:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+                document.querySelector('.countdown-title').innerText = '⚡ 海が動き出した！出航せよ！ ⚡';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const actualMinutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = String(days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(actualMinutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>
