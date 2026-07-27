@@ -5262,6 +5262,1224 @@ window.onload = () => {
     initFirebase(); 
 };
 </script>
+<script>
+(function(){
+  const prevOnload = window.onload;
+  const baseNavTo = window.navTo;
+  const PVP = {
+    W: 720, H: 1280, SHIP_W: 68, SHIP_H: 68, HP: 100, DURATION: 60000,
+    ROOM_PREFIX: 'pvp_rooms/', SYNC_MS: 50, FIRE_MS: 230,
+    SPEED_X: 8, SPEED_Y: 5, BULLET_SPEED: 14,
+    ARENAS: [
+      {id:'duel_cove', name:'決闘の入江', desc:'標準 60秒 / バランス型', rewardCoins:2500, rewardMats:2, accent:'from-red-500 to-orange-500'},
+      {id:'storm_gate', name:'嵐門海域', desc:'弾速UP / 攻撃的', rewardCoins:3200, rewardMats:3, bulletSpeed:16, accent:'from-cyan-500 to-blue-500'},
+      {id:'gold_skull', name:'黄金骸骨湾', desc:'高報酬 / 緊張感MAX', rewardCoins:4000, rewardMats:4, bulletSpeed:18, accent:'from-yellow-400 to-amber-600'}
+    ],
+    state: null
+  };
+
+  function ensureExtraStyles(){
+    if(document.getElementById('stage-pvp-extra-style')) return;
+    const st = document.createElement('style');
+    st.id = 'stage-pvp-extra-style';
+    st.textContent = `
+      #stage-browser-controls .page-btn{min-width:40px}
+      #pvpCanvas{width:100%;height:100%;display:block;background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,.08), transparent 32%),
+        linear-gradient(180deg, rgba(10,20,40,.92), rgba(3,10,22,.98));
+        border-radius:18px; border:3px solid rgba(212,175,55,.35); box-shadow: inset 0 0 40px rgba(0,0,0,.45), 0 18px 40px rgba(0,0,0,.5)}
+      #screen-pvp-game .hud-panel{background:linear-gradient(180deg, rgba(43,32,22,.94), rgba(20,14,9,.96)); border:2px solid rgba(212,175,55,.35); box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 20px rgba(0,0,0,.35)}
+      .pvp-lane-label{letter-spacing:.18em;text-shadow:0 2px 8px rgba(0,0,0,.55)}
+      .pvp-glow{box-shadow:0 0 18px rgba(59,130,246,.45), inset 0 0 10px rgba(255,255,255,.08)}
+      .pvp-result-win{background:linear-gradient(180deg,#fde68a,#f59e0b);-webkit-background-clip:text;color:transparent}
+      .pvp-result-lose{background:linear-gradient(180deg,#cbd5e1,#64748b);-webkit-background-clip:text;color:transparent}
+      .pvp-result-draw{background:linear-gradient(180deg,#bfdbfe,#38bdf8);-webkit-background-clip:text;color:transparent}
+    `;
+    document.head.appendChild(st);
+  }
+
+  function generateExpandedStages(total){
+    const arr=[];
+    for(let i=1;i<=total;i++){
+      const boss = i % 10 === 0;
+      const tier = Math.floor((i-1)/50);
+      const reward = 5 + Math.floor(i*1.45) + (boss ? 120 + tier*20 : 0);
+      arr.push({
+        id:i,
+        name: boss ? `海域 ${i} (BOSS)` : `海域 ${i}`,
+        goalScore: boss ? 22 + Math.floor(i*1.9) : 18 + Math.floor(i*1.55),
+        enemySpeed: Math.min(14, 1.4 + i*0.013 + tier*0.05),
+        spawnRate: Math.max(8, 62 - Math.floor(i/12) - tier),
+        reward: reward,
+        color: boss ? 'border-red-500' : (i%3===0 ? 'border-cyan-400' : (i%2===0 ? 'border-blue-400' : 'border-green-400')),
+        isEndless:false,
+        staminaCost: Math.min(120, 4 + Math.floor(i/20)*2 + (boss?4:0)),
+        isBossStage: boss
+      });
+    }
+    return arr;
+  }
+
+  function ensureDbExtensions(){
+    if(!DB.pvpStats) DB.pvpStats = {wins:0, losses:0, draws:0, lastRoomId:'', lastResult:'', rewardsClaimed:0};
+  }
+
+  function injectStageDom(){
+    const tabWrap = document.querySelector('#screen-stage .w-full.flex.bg-indigo-950');
+    if(tabWrap && !document.getElementById('tab-stage-pvp')){
+      const btn = document.createElement('button');
+      btn.id='tab-stage-pvp';
+      btn.className='flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent';
+      btn.innerHTML='⚔️ PvP<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1 rounded-full shadow border border-white">LIVE</span>';
+      btn.onclick=function(){ switchStageTab('pvp'); };
+      tabWrap.appendChild(btn);
+    }
+    const stageList = document.getElementById('stage-list');
+    if(stageList && !document.getElementById('stage-browser-controls')){
+      const box = document.createElement('div');
+      box.id='stage-browser-controls';
+      box.className='bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg flex flex-col gap-3';
+      box.innerHTML = `
+        <div class="flex flex-col gap-2 md:flex-row md:items-center">
+          <input id="stage-search-input" type="text" placeholder="海域名・番号を検索" class="flex-1 bg-indigo-950 border-2 border-indigo-700 rounded-xl px-3 py-2 text-sm text-white outline-none">
+          <div class="flex gap-2">
+            <input id="stage-jump-input" type="number" min="1" max="1000" placeholder="番号" class="w-24 bg-indigo-950 border-2 border-indigo-700 rounded-xl px-3 py-2 text-sm text-white outline-none">
+            <button id="stage-jump-btn" class="game-btn bg-cyan-600 text-white px-3 py-2 rounded-xl border border-cyan-300 font-black text-sm">ジャンプ</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <div id="stage-browser-summary" class="text-indigo-200 font-bold">海域を読み込み中...</div>
+          <div class="text-yellow-300 font-black">1000 STAGES</div>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <button id="stage-page-prev" class="game-btn bg-indigo-700 text-white px-3 py-2 rounded-xl border border-indigo-400 font-black text-xs">← 前へ</button>
+          <div id="stage-page-numbers" class="flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
+          <button id="stage-page-next" class="game-btn bg-indigo-700 text-white px-3 py-2 rounded-xl border border-indigo-400 font-black text-xs">次へ →</button>
+        </div>`;
+      stageList.parentElement.insertBefore(box, stageList);
+    }
+    const multiLobby = document.getElementById('multi-lobby-ui');
+    if(multiLobby && !document.getElementById('pvp-lobby-ui')){
+      const panel = document.createElement('div');
+      panel.id='pvp-lobby-ui';
+      panel.className='hidden flex-col gap-3';
+      panel.innerHTML = `
+        <div class="bg-indigo-900/80 p-4 rounded-xl border-2 border-red-700 shadow-lg text-center flex flex-col gap-3">
+          <div>
+            <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-300 to-yellow-300">⚔️ ガチンコ対戦モード</div>
+            <p class="text-xs text-indigo-200 font-bold mt-1">位置・弾・HPをリアルタイム同期！ 60秒決戦 / HP制 / 勝者報酬あり</p>
+          </div>
+          <div id="pvp-arena-preview" class="grid grid-cols-1 gap-2"></div>
+          <div class="flex gap-2">
+            <button onclick="openPvpCreateModal()" class="game-btn flex-1 bg-gradient-to-b from-red-500 to-rose-700 text-white font-black py-3 rounded-lg border border-red-300 shadow-md text-sm">対戦ルームを作成</button>
+            <button onclick="openPvpJoinModal()" class="game-btn flex-1 bg-gradient-to-b from-emerald-500 to-green-700 text-white font-black py-3 rounded-lg border border-emerald-300 shadow-md text-sm">対戦ルームに参加</button>
+          </div>
+        </div>`;
+      multiLobby.insertAdjacentElement('afterend', panel);
+    }
+    if(!document.getElementById('pvp-room-modal')){
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+      <div id="pvp-room-modal" class="absolute inset-0 bg-indigo-950/95 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-indigo-900 border-4 border-red-500 rounded-3xl p-6 w-full max-w-[360px] shadow-2xl flex flex-col items-center gap-4 pop-in relative text-center">
+          <button onclick="leavePvpRoom()" class="absolute top-3 right-3 w-8 h-8 bg-indigo-950 border border-indigo-700 rounded-full text-white font-black flex justify-center items-center active:scale-95 z-20">✕</button>
+          <h3 id="pvp-room-title" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-300 to-yellow-300 tracking-wider border-b-2 border-red-700 pb-2 mb-1 w-full">PvPルーム</h3>
+          <div id="pvp-create-ui" class="w-full flex flex-col gap-3"></div>
+          <div id="pvp-join-ui" class="w-full flex flex-col gap-3 hidden">
+            <p class="text-sm text-indigo-200 font-bold">4〜6桁のルームID</p>
+            <input type="text" id="pvp-room-id-input" placeholder="例: 48291" class="w-full bg-indigo-950 border-2 border-red-500 rounded-lg p-3 text-center text-white font-black text-2xl outline-none uppercase tracking-widest" maxlength="6">
+            <button onclick="submitPvpJoinRoom()" class="game-btn w-full bg-green-500 text-white font-black py-3 rounded-lg border-2 border-white shadow-md text-lg mt-2">入室する！</button>
+          </div>
+          <div id="pvp-waiting-ui" class="w-full flex flex-col gap-3 hidden">
+            <p id="pvp-waiting-status" class="text-sm text-yellow-300 font-bold animate-pulse">対戦相手を待機中...</p>
+            <div class="bg-indigo-950 p-4 rounded-xl border border-indigo-700">
+              <p class="text-xs text-indigo-300 mb-1">ルームID</p>
+              <div class="text-3xl font-black text-white tracking-widest select-all" id="display-pvp-room-id">0000</div>
+            </div>
+            <div class="bg-indigo-950/70 p-3 rounded-xl border border-indigo-700">
+              <div class="text-xs text-indigo-300 mb-2">選択アリーナ</div>
+              <div id="pvp-selected-arena-text" class="text-sm text-white font-black"></div>
+            </div>
+            <div class="flex justify-between items-center bg-indigo-900/50 p-2 rounded-lg border border-indigo-600">
+              <div class="flex flex-col items-center w-1/2 border-r border-indigo-700"><span class="text-2xl mb-1" id="pvp-p1-icon">⚓</span><span class="text-sm font-black text-white" id="pvp-p1-name">ホスト</span></div>
+              <div class="flex flex-col items-center w-1/2"><span class="text-2xl mb-1" id="pvp-p2-icon">❓</span><span class="text-sm font-black text-slate-400" id="pvp-p2-name">待機中...</span></div>
+            </div>
+            <button id="btn-start-pvp" onclick="startPvpRoomMatch()" class="game-btn hidden w-full bg-gradient-to-b from-red-500 to-orange-600 text-white font-black py-3 rounded-xl border-2 border-white shadow-lg text-lg animate-pulse">ガチンコ開始！！</button>
+          </div>
+        </div>
+      </div>
+      <div id="screen-pvp-game" class="screen hidden h-full w-full overflow-hidden p-3 flex-col gap-3 relative">
+        <div class="hud-panel rounded-2xl p-3 flex items-center justify-between gap-3 text-white">
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] text-red-200 font-black">ENEMY</div>
+            <div id="pvp-enemy-name" class="font-black truncate">対戦相手</div>
+            <div class="mt-1 h-3 bg-black/40 rounded-full overflow-hidden border border-red-300/30"><div id="pvp-enemy-hp" class="h-full bg-gradient-to-r from-red-500 to-orange-400" style="width:100%"></div></div>
+          </div>
+          <div class="px-3 text-center">
+            <div class="text-[11px] text-yellow-200 font-black">TIME</div>
+            <div id="pvp-time-left" class="text-3xl font-black text-yellow-300">60</div>
+          </div>
+          <div class="flex-1 min-w-0 text-right">
+            <div class="text-[11px] text-cyan-200 font-black">YOU</div>
+            <div id="pvp-my-name" class="font-black truncate">船長</div>
+            <div class="mt-1 h-3 bg-black/40 rounded-full overflow-hidden border border-cyan-300/30"><div id="pvp-my-hp" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 ml-auto" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="relative flex-1 min-h-0">
+          <canvas id="pvpCanvas"></canvas>
+          <div class="absolute inset-x-0 top-[16%] text-center pointer-events-none pvp-lane-label text-red-300/70 text-[11px] font-black">ENEMY ZONE</div>
+          <div class="absolute inset-x-0 bottom-[16%] text-center pointer-events-none pvp-lane-label text-cyan-200/70 text-[11px] font-black">YOUR ZONE</div>
+          <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-yellow-400/40"></div>
+          <div id="pvp-hit-banner" class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 hidden bg-red-500/90 text-white font-black px-4 py-2 rounded-full border border-white shadow-lg">DIRECT HIT!</div>
+          <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3">
+            <div class="hud-panel rounded-2xl px-4 py-3 text-xs text-indigo-100 font-bold">左右/上下キー or スワイプで移動 ・ 自動連射</div>
+            <button onclick="leavePvpBattleToHome()" class="game-btn bg-red-600 text-white font-black px-5 py-3 rounded-xl border-2 border-white shadow-lg text-sm">撤退</button>
+          </div>
+        </div>
+      </div>
+      <div id="pvp-result-modal" class="absolute inset-0 bg-indigo-950/92 hidden flex-col items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-indigo-900 border-4 border-yellow-500 rounded-3xl p-6 w-full max-w-[340px] shadow-2xl flex flex-col items-center gap-4 text-center">
+          <div id="pvp-result-title" class="text-5xl font-black pvp-result-win">WINNER!</div>
+          <div id="pvp-result-desc" class="text-sm text-indigo-100 font-bold leading-relaxed"></div>
+          <button onclick="closePvpResultAndHome()" class="game-btn w-full bg-gradient-to-b from-yellow-400 to-orange-600 text-indigo-950 font-black py-3 rounded-xl border-2 border-white shadow-lg text-lg">ホームへ戻る</button>
+        </div>
+      </div>`;
+      document.body.appendChild(wrap);
+    }
+  }
+
+  function renderArenaPreview(){
+    const c = document.getElementById('pvp-arena-preview');
+    if(!c) return;
+    c.innerHTML = PVP.ARENAS.map(a=>`<div class="text-left rounded-xl border border-red-500/40 bg-indigo-950/60 px-3 py-2"><div class="font-black text-white">${a.name}</div><div class="text-[11px] text-indigo-300">${a.desc}</div></div>`).join('');
+  }
+
+  const stageBrowserState = { tab:'normal', page:1, pageSize:40, query:'' };
+  function stageSource(){ return currentStageTab==='ex' ? (MASTER.exStages||[]) : (MASTER.stages||[]); }
+  function renderStageBrowser(resetPage){
+    if(currentStageTab!=='normal' && currentStageTab!=='ex') return;
+    const query = (document.getElementById('stage-search-input')||{}).value || stageBrowserState.query || '';
+    stageBrowserState.query = query.trim();
+    const source = stageSource();
+    let filtered = source;
+    if(stageBrowserState.query){
+      const q = stageBrowserState.query.toLowerCase();
+      filtered = source.filter(s => String(s.id).includes(q) || String(s.name||'').toLowerCase().includes(q));
+    }
+    if(resetPage) stageBrowserState.page = 1;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / stageBrowserState.pageSize));
+    if(stageBrowserState.page > totalPages) stageBrowserState.page = totalPages;
+    const start = (stageBrowserState.page - 1) * stageBrowserState.pageSize;
+    const items = filtered.slice(start, start + stageBrowserState.pageSize);
+    const summary = document.getElementById('stage-browser-summary');
+    if(summary){
+      summary.innerText = `${filtered.length}件中 ${start+1}-${Math.min(start+items.length, filtered.length)} を表示 / PAGE ${stageBrowserState.page} / ${totalPages}`;
+    }
+    __stageRenderSource = currentStageTab==='normal' ? MASTER.stages : MASTER.exStages;
+    renderStageList(items, false, currentStageTab==='normal' ? MASTER.stages : MASTER.exStages);
+    const nums = document.getElementById('stage-page-numbers');
+    if(nums){
+      let html='';
+      const s = Math.max(1, stageBrowserState.page-2), e = Math.min(totalPages, stageBrowserState.page+2);
+      for(let p=s;p<=e;p++) html += `<button class="page-btn game-btn ${p===stageBrowserState.page?'bg-yellow-500 text-indigo-950 border-white':'bg-indigo-800 text-white border-indigo-400'} px-3 py-2 rounded-xl border font-black text-xs" data-page="${p}">${p}</button>`;
+      nums.innerHTML = html;
+      nums.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{ stageBrowserState.page = parseInt(b.dataset.page,10)||1; renderStageBrowser(false); scrollStageContainerToTop(); });
+    }
+    const prev = document.getElementById('stage-page-prev');
+    const next = document.getElementById('stage-page-next');
+    if(prev) prev.onclick = function(){ if(stageBrowserState.page>1){ stageBrowserState.page--; renderStageBrowser(false); scrollStageContainerToTop(); } };
+    if(next) next.onclick = function(){ if(stageBrowserState.page<totalPages){ stageBrowserState.page++; renderStageBrowser(false); scrollStageContainerToTop(); } };
+  }
+
+  function bindStageBrowser(){
+    const search = document.getElementById('stage-search-input');
+    const jump = document.getElementById('stage-jump-input');
+    const btn = document.getElementById('stage-jump-btn');
+    if(search && !search.dataset.bound){ search.dataset.bound='1'; search.addEventListener('input', ()=>renderStageBrowser(true)); }
+    if(btn && !btn.dataset.bound){ btn.dataset.bound='1'; btn.onclick = function(){
+      const v = Math.max(1, Math.min(1000, parseInt((jump&&jump.value)||'0',10)||1));
+      stageBrowserState.query='';
+      if(search) search.value='';
+      stageBrowserState.page = Math.ceil(v / stageBrowserState.pageSize);
+      renderStageBrowser(false);
+      scrollStageContainerToTop();
+    }; }
+  }
+
+  function setStageTabStyles(active){
+    ['normal','ex','multi','pvp'].forEach(k=>{
+      const el = document.getElementById('tab-stage-'+k);
+      if(!el) return;
+      el.className = active===k ? 'flex-1 py-1.5 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md transition-all relative border-b-4 border-indigo-800' : 'flex-1 py-1.5 rounded-lg font-black text-xs text-indigo-400 hover:text-white transition-all relative border-b-4 border-transparent';
+    });
+  }
+
+  function switchStageTabEnhanced(tab){
+    currentStageTab = tab;
+    stageBrowserState.tab = tab;
+    setStageTabStyles(tab);
+    const stageList = document.getElementById('stage-list');
+    const multiLobby = document.getElementById('multi-lobby-ui');
+    const pvpLobby = document.getElementById('pvp-lobby-ui');
+    const browser = document.getElementById('stage-browser-controls');
+    if(stageList) hideEl('stage-list');
+    if(multiLobby) hideEl('multi-lobby-ui');
+    if(pvpLobby) hideEl('pvp-lobby-ui');
+    if(browser) browser.classList.add('hidden');
+    if(tab==='normal' || tab==='ex'){
+      if(browser) browser.classList.remove('hidden');
+      showEl('stage-list','flex');
+      renderStageBrowser(tab!==stageBrowserState.lastRenderedTab);
+      stageBrowserState.lastRenderedTab = tab;
+    } else if(tab==='multi'){
+      showEl('multi-lobby-ui','flex');
+    } else if(tab==='pvp'){
+      showEl('pvp-lobby-ui','flex');
+    }
+  }
+
+  function iconHtml(icon){ return (icon&&String(icon).startsWith('data:image')) ? `<img src="${icon}" class="w-8 h-8 rounded-full object-cover">` : (icon || '👤'); }
+  function codeGen(){ return String(Math.floor(1000 + Math.random()*900000)).slice(0,5); }
+  function getArena(id){ return PVP.ARENAS.find(a=>a.id===id) || PVP.ARENAS[0]; }
+  function roomRef(id){ return window.db.ref(PVP.ROOM_PREFIX + id); }
+
+  function resetPvpState(){
+    PVP.state = {
+      roomId:'', role:'', enemyRole:'', arena:getArena(PVP.ARENAS[0].id), hp:{host:PVP.HP, guest:PVP.HP},
+      players:{}, remoteBullets:[], localBullets:[], hitRegistry:{}, active:false, started:false,
+      roomListener:null, rafId:0, lastSync:0, lastFire:0, input:{drag:false, lastX:0, lastY:0}, shotSeq:0, resultShown:false, rewardClaimed:false,
+      battleStartedAt:0, roomData:null
+    };
+  }
+
+  function serializeBullets(list){
+    const o={};
+    (list||[]).forEach(b=>{ o[b.id]={id:b.id,x:Math.round(b.x),y:Math.round(b.y),w:b.w,h:b.h,vy:b.vy,owner:b.owner}; });
+    return o;
+  }
+  function deserializeBullets(raw){
+    if(!raw) return [];
+    if(Array.isArray(raw)) return raw.filter(Boolean);
+    return Object.keys(raw).map(k=>raw[k]).filter(Boolean);
+  }
+  function perspectiveY(y,h){ return PVP.state.role==='guest' ? (PVP.H - y - h) : y; }
+  function toViewRect(o){ return {x:o.x, y:perspectiveY(o.y,o.h), w:o.w, h:o.h}; }
+
+  function updatePvpHud(){
+    const hp = PVP.state.hp;
+    const my = hp[PVP.state.role] == null ? PVP.HP : hp[PVP.state.role];
+    const en = hp[PVP.state.enemyRole] == null ? PVP.HP : hp[PVP.state.enemyRole];
+    document.getElementById('pvp-my-hp').style.width = Math.max(0, Math.min(100,my)) + '%';
+    document.getElementById('pvp-enemy-hp').style.width = Math.max(0, Math.min(100,en)) + '%';
+  }
+
+  function setupPvpCreateUi(){
+    const ui = document.getElementById('pvp-create-ui');
+    if(!ui) return;
+    ui.innerHTML = '<p class="text-sm text-indigo-200 font-bold">対戦アリーナを選択</p>' +
+      PVP.ARENAS.map(a=>`<button class="pvp-arena-btn w-full text-left p-3 bg-indigo-800 rounded-xl border-2 border-red-500/50 shadow-md active:scale-95 flex flex-col gap-1" data-arena="${a.id}"><span class="font-black text-white text-lg">${a.name}</span><span class="text-xs text-indigo-200">${a.desc}</span><span class="text-[11px] text-yellow-300 font-black">勝利報酬: 草コイン×${a.rewardCoins} / 素材×${a.rewardMats}</span></button>`).join('');
+    ui.querySelectorAll('.pvp-arena-btn').forEach(btn=>btn.onclick=()=>createPvpRoom(btn.dataset.arena));
+  }
+
+  function openPvpCreateModal(){
+    if(!isFirebaseInitialized) return showAlert('Firebase未接続！');
+    setupPvpCreateUi();
+    document.getElementById('pvp-room-title').innerText = 'PvPルームを作成';
+    showEl('pvp-create-ui','flex'); hideEl('pvp-join-ui'); hideEl('pvp-waiting-ui'); showEl('pvp-room-modal');
+  }
+  function openPvpJoinModal(){
+    if(!isFirebaseInitialized) return showAlert('Firebase未接続！');
+    document.getElementById('pvp-room-title').innerText = 'PvPルームに参加';
+    hideEl('pvp-create-ui'); showEl('pvp-join-ui','flex'); hideEl('pvp-waiting-ui'); document.getElementById('pvp-room-id-input').value=''; showEl('pvp-room-modal');
+  }
+
+  function updatePvpWaitingUi(data){
+    const host = data.players && data.players.host ? data.players.host : null;
+    const guest = data.players && data.players.guest ? data.players.guest : null;
+    document.getElementById('display-pvp-room-id').innerText = PVP.state.roomId;
+    document.getElementById('pvp-selected-arena-text').innerText = getArena(data.arenaId).name + ' / ' + getArena(data.arenaId).desc;
+    document.getElementById('pvp-p1-icon').innerHTML = iconHtml(host && host.icon);
+    document.getElementById('pvp-p1-name').innerText = host && host.name ? host.name : 'ホスト';
+    document.getElementById('pvp-p2-icon').innerHTML = iconHtml(guest && guest.icon ? guest.icon : '❓');
+    document.getElementById('pvp-p2-name').innerText = guest && guest.name ? guest.name : '待機中...';
+    document.getElementById('pvp-p2-name').className = 'text-sm font-black ' + (guest ? 'text-white' : 'text-slate-400');
+    document.getElementById('pvp-waiting-status').innerText = guest ? '対戦相手が揃った！ ホストは開始ボタンで開戦！' : '対戦相手を待機中...';
+    if(PVP.state.role==='host' && guest) showEl('btn-start-pvp','block'); else hideEl('btn-start-pvp');
+  }
+
+  function ensurePlayerTemplate(role, arena){
+    return {
+      userId: DB.userId, name: DB.userName, icon: DB.userIcon, connected:true,
+      x: Math.round(PVP.W/2 - PVP.SHIP_W/2), y: role==='host' ? 1050 : 160, w:PVP.SHIP_W, h:PVP.SHIP_H,
+      moving:false, bullets:{}, updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+  }
+
+  function listenPvpRoom(id){
+    if(PVP.state.roomListener && PVP.state.roomId){ roomRef(PVP.state.roomId).off('value', PVP.state.roomListener); }
+    PVP.state.roomId = id;
+    PVP.state.roomListener = roomRef(id).on('value', snap => {
+      const data = snap.val();
+      if(!data){
+        leavePvpRoom(false);
+        return showAlert('PvPルームが解散した！');
+      }
+      PVP.state.roomData = data;
+      PVP.state.arena = getArena(data.arenaId);
+      PVP.state.hp = data.hp || PVP.state.hp;
+      if(!PVP.state.started){ updatePvpWaitingUi(data); }
+      if(data.status==='playing' && !PVP.state.started){ startPvpBattle(data); }
+      if(data.status==='finished' && data.result){ applyPvpResult(data.result); }
+    });
+  }
+
+  function createPvpRoom(arenaId){
+    ensureDbExtensions();
+    resetPvpState();
+    const arena = getArena(arenaId);
+    const id = codeGen();
+    PVP.state.role='host'; PVP.state.enemyRole='guest'; PVP.state.arena=arena; PVP.state.roomId=id;
+    const payload = {
+      status:'waiting', arenaId:arena.id, durationMs:PVP.DURATION, createdAt: firebase.database.ServerValue.TIMESTAMP,
+      hostId: DB.userId, hp:{host:PVP.HP, guest:PVP.HP}, players:{ host: ensurePlayerTemplate('host', arena), guest: null }, result:null
+    };
+    roomRef(id).set(payload).then(function(){
+      try{ roomRef(id+'/players/host').onDisconnect().update({connected:false}); }catch(e){}
+      document.getElementById('pvp-room-title').innerText = 'PvP待機ルーム';
+      hideEl('pvp-create-ui'); hideEl('pvp-join-ui'); showEl('pvp-waiting-ui','flex'); showEl('pvp-room-modal');
+      listenPvpRoom(id);
+    });
+  }
+
+  function submitPvpJoinRoom(){
+    const id = (document.getElementById('pvp-room-id-input').value || '').trim();
+    if(id.length < 4 || id.length > 6) return showAlert('4〜6桁のルームID！');
+    ensureDbExtensions(); resetPvpState();
+    roomRef(id).once('value').then(function(snap){
+      const data = snap.val();
+      if(!data) return showAlert('ルームが見つからない！');
+      if(data.status !== 'waiting') return showAlert('すでに対戦中！');
+      PVP.state.role='guest'; PVP.state.enemyRole='host'; PVP.state.roomId=id; PVP.state.arena=getArena(data.arenaId);
+      roomRef(id + '/players/guest').set(ensurePlayerTemplate('guest', PVP.state.arena)).then(function(){
+        try{ roomRef(id+'/players/guest').onDisconnect().update({connected:false}); }catch(e){}
+        document.getElementById('pvp-room-title').innerText = 'PvP待機ルーム';
+        hideEl('pvp-create-ui'); hideEl('pvp-join-ui'); showEl('pvp-waiting-ui','flex'); showEl('pvp-room-modal');
+        listenPvpRoom(id);
+      });
+    });
+  }
+
+  function startPvpRoomMatch(){
+    if(PVP.state.role !== 'host' || !PVP.state.roomId) return;
+    roomRef(PVP.state.roomId).update({ status:'playing', startedAt: firebase.database.ServerValue.TIMESTAMP, result:null });
+  }
+
+  function installPvpNav(){
+    window.navTo = function(sid){
+      if(sid === 'screen-pvp-game'){
+        positionTutorialArrow(null);
+        document.querySelectorAll('.screen').forEach(e=>{e.classList.add('hidden'); e.classList.remove('block','flex');});
+        const s = document.getElementById('screen-pvp-game');
+        if(s){ s.classList.remove('hidden'); s.classList.add('flex'); }
+        hideEl('app-header'); hideEl('app-nav');
+        if(document.getElementById('bubbles-layer')) document.getElementById('bubbles-layer').style.display='none';
+        try{ stopHomeBGM(); }catch(e){}
+        try{ stopBattleBGM(); }catch(e){}
+        return;
+      }
+      if(PVP.state && PVP.state.active && sid !== 'screen-pvp-game') cleanupPvp(false);
+      return baseNavTo(sid);
+    };
+  }
+
+  function applyPvpResult(result){
+    if(!PVP.state || PVP.state.resultShown) return;
+    PVP.state.resultShown = true;
+    cleanupPvp(true);
+    hideEl('pvp-room-modal');
+    const title = document.getElementById('pvp-result-title');
+    const desc = document.getElementById('pvp-result-desc');
+    const myRole = PVP.state.role;
+    const didWin = result.winnerRole && result.winnerRole === myRole;
+    const isDraw = result.winnerRole === 'draw';
+    if(isDraw){ title.className='text-5xl font-black pvp-result-draw'; title.innerText='DRAW'; }
+    else if(didWin){ title.className='text-5xl font-black pvp-result-win'; title.innerText='WINNER!'; }
+    else { title.className='text-5xl font-black pvp-result-lose'; title.innerText='LOSE...'; }
+    if(!PVP.state.rewardClaimed){
+      ensureDbExtensions();
+      if(isDraw){ DB.pvpStats.draws += 1; DB.pvpStats.lastResult='draw'; }
+      else if(didWin){ DB.pvpStats.wins += 1; DB.pvpStats.lastResult='win'; DB.coins += result.rewardCoins || 0; DB.materials += result.rewardMats || 0; DB.pvpStats.rewardsClaimed += 1; }
+      else { DB.pvpStats.losses += 1; DB.pvpStats.lastResult='lose'; }
+      DB.pvpStats.lastRoomId = PVP.state.roomId;
+      saveGame();
+      if(isFirebaseInitialized) window.db.ref('users/'+DB.userId+'/pvpStats').set(DB.pvpStats);
+      PVP.state.rewardClaimed = true;
+    }
+    const myHp = (result.finalHp && result.finalHp[myRole] != null) ? result.finalHp[myRole] : 0;
+    const enemyHp = (result.finalHp && result.finalHp[PVP.state.enemyRole] != null) ? result.finalHp[PVP.state.enemyRole] : 0;
+    desc.innerHTML = `${result.message || '対戦終了！'}<br><br>あなたのHP: <span class="text-cyan-300">${myHp}</span> / 相手のHP: <span class="text-red-300">${enemyHp}</span>${didWin ? `<br><br><span class="text-yellow-300 font-black">報酬: 草コイン×${result.rewardCoins||0} / 素材×${result.rewardMats||0}</span>` : ''}`;
+    showEl('pvp-result-modal');
+  }
+
+  function closePvpResultAndHome(){ hideEl('pvp-result-modal'); baseNavTo('screen-home'); }
+  function leavePvpBattleToHome(){ if(PVP.state && PVP.state.active){ finalizePvpByForfeit(); } else { baseNavTo('screen-home'); } }
+
+  function cleanupPvp(keepRoom){
+    if(!PVP.state) return;
+    PVP.state.active = false; PVP.state.started = false;
+    if(PVP.state.rafId) cancelAnimationFrame(PVP.state.rafId);
+    PVP.state.rafId = 0;
+    if(PVP.state.roomListener && PVP.state.roomId){ roomRef(PVP.state.roomId).off('value', PVP.state.roomListener); }
+    PVP.state.roomListener = null;
+    if(!keepRoom && PVP.state.roomId && PVP.state.role==='host' && PVP.state.roomData && PVP.state.roomData.status==='waiting') roomRef(PVP.state.roomId).remove();
+  }
+
+  function leavePvpRoom(backHome){
+    if(!PVP.state) resetPvpState();
+    if(PVP.state.roomId){
+      const data = PVP.state.roomData || {};
+      if(data.status === 'waiting'){
+        if(PVP.state.role==='host') roomRef(PVP.state.roomId).remove();
+        else roomRef(PVP.state.roomId+'/players/guest').remove();
+      }
+    }
+    cleanupPvp(false);
+    hideEl('pvp-room-modal'); hideEl('pvp-result-modal');
+    if(backHome!==false) baseNavTo('screen-home');
+    resetPvpState();
+  }
+
+  function finalizePvpByForfeit(){
+    if(!PVP.state || !PVP.state.roomId) return baseNavTo('screen-home');
+    const winnerRole = PVP.state.enemyRole || 'draw';
+    finalizePvpMatch(winnerRole, '撤退により勝敗確定！');
+  }
+
+  function finalizePvpMatch(winnerRole, message){
+    if(!PVP.state || !PVP.state.roomId || PVP.state.finishing) return;
+    PVP.state.finishing = true;
+    const arena = PVP.state.arena || PVP.ARENAS[0];
+    const finalHp = { host: Math.max(0, Math.round(PVP.state.hp.host||0)), guest: Math.max(0, Math.round(PVP.state.hp.guest||0)) };
+    const result = { winnerRole:winnerRole, finalHp:finalHp, rewardCoins: arena.rewardCoins||2500, rewardMats: arena.rewardMats||2, message:message||'決着！', finishedAt: firebase.database.ServerValue.TIMESTAMP };
+    roomRef(PVP.state.roomId + '/status').transaction(function(cur){ return cur === 'playing' ? 'finished' : cur; }, function(err, committed){
+      if(committed){ roomRef(PVP.state.roomId).update({ result: result, hp: finalHp }); }
+      else { PVP.state.finishing = false; }
+    });
+  }
+
+  function hostCheckHitsAndEnd(now){
+    const self = PVP.state.players.host;
+    const enemy = PVP.state.players.guest;
+    if(!self || !enemy) return;
+    const bulletLists = [self.bullets||[], enemy.bullets||[]];
+    bulletLists.forEach(list => list.forEach(function(b){
+      const target = b.owner === 'host' ? enemy : self;
+      const key = b.id;
+      if(PVP.state.hitRegistry[key]) return;
+      if(b.x < target.x + target.w && b.x + b.w > target.x && b.y < target.y + target.h && b.y + b.h > target.y){
+        PVP.state.hitRegistry[key] = true;
+        PVP.state.hp[target.role] = Math.max(0, (PVP.state.hp[target.role]||PVP.HP) - 10);
+        roomRef(PVP.state.roomId + '/hp').set(PVP.state.hp);
+        flashHitBanner();
+      }
+    }));
+    if(PVP.state.hp.host <= 0 || PVP.state.hp.guest <= 0){
+      const winner = PVP.state.hp.host === PVP.state.hp.guest ? 'draw' : (PVP.state.hp.host > PVP.state.hp.guest ? 'host' : 'guest');
+      return finalizePvpMatch(winner, 'HPが尽きた！');
+    }
+    const left = Math.max(0, PVP.DURATION - (now - PVP.state.battleStartedAt));
+    document.getElementById('pvp-time-left').innerText = Math.ceil(left/1000);
+    if(left <= 0){
+      const winner = PVP.state.hp.host === PVP.state.hp.guest ? 'draw' : (PVP.state.hp.host > PVP.state.hp.guest ? 'host' : 'guest');
+      finalizePvpMatch(winner, '60秒の死闘、決着！');
+    }
+  }
+
+  function flashHitBanner(){
+    const el = document.getElementById('pvp-hit-banner');
+    if(!el) return;
+    showEl('pvp-hit-banner','block');
+    clearTimeout(el.__hideTimer);
+    el.__hideTimer = setTimeout(()=>hideEl('pvp-hit-banner'), 260);
+  }
+
+  function syncPvpState(now){
+    if(!PVP.state.roomId || now - PVP.state.lastSync < PVP.SYNC_MS) return;
+    PVP.state.lastSync = now;
+    const me = PVP.state.players[PVP.state.role];
+    roomRef(PVP.state.roomId + '/players/' + PVP.state.role).update({
+      userId: DB.userId, name: DB.userName, icon: DB.userIcon, connected:true,
+      role: PVP.state.role, x: Math.round(me.x), y: Math.round(me.y), w: me.w, h: me.h,
+      moving: me.moving, bullets: serializeBullets(me.bullets), updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  }
+
+  function fireLocalBullet(now){
+    if(now - PVP.state.lastFire < PVP.FIRE_MS) return;
+    PVP.state.lastFire = now;
+    const me = PVP.state.players[PVP.state.role];
+    const vy = PVP.state.role === 'host' ? -(PVP.state.arena.bulletSpeed || PVP.BULLET_SPEED) : (PVP.state.arena.bulletSpeed || PVP.BULLET_SPEED);
+    PVP.state.shotSeq += 1;
+    me.bullets.push({ id:PVP.state.role+'_'+PVP.state.shotSeq+'_'+now, owner:PVP.state.role, x: me.x + me.w/2 - 5, y: me.y + (vy<0 ? -8 : me.h+8), w: 10, h: 24, vy: vy });
+  }
+
+  function updateLocalPlayer(){
+    const me = PVP.state.players[PVP.state.role];
+    if(!me) return;
+    let dx = 0, dy = 0;
+    if(input.keys['ArrowLeft'] || input.keys['a']) dx -= PVP.SPEED_X;
+    if(input.keys['ArrowRight'] || input.keys['d']) dx += PVP.SPEED_X;
+    if(input.keys['ArrowUp'] || input.keys['w']) dy += (PVP.state.role==='guest' ? PVP.SPEED_Y : -PVP.SPEED_Y);
+    if(input.keys['ArrowDown'] || input.keys['s']) dy += (PVP.state.role==='guest' ? -PVP.SPEED_Y : PVP.SPEED_Y);
+    me.x = Math.max(20, Math.min(PVP.W - me.w - 20, me.x + dx));
+    const minY = PVP.state.role==='host' ? 760 : 60;
+    const maxY = PVP.state.role==='host' ? 1170 : 360;
+    me.y = Math.max(minY, Math.min(maxY, me.y + dy));
+    me.moving = !!(dx || dy);
+  }
+
+  function updateBullets(){
+    Object.keys(PVP.state.players).forEach(function(role){
+      const p = PVP.state.players[role];
+      if(!p || !p.bullets) return;
+      for(let i=p.bullets.length-1;i>=0;i--){
+        p.bullets[i].y += p.bullets[i].vy;
+        if(p.bullets[i].y < -50 || p.bullets[i].y > PVP.H + 50) p.bullets.splice(i,1);
+      }
+    });
+  }
+
+  function renderPvp(){
+    const canvas = document.getElementById('pvpCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const sx = canvas.width / PVP.W, sy = canvas.height / PVP.H;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    for(let i=0;i<12;i++){ ctx.beginPath(); ctx.moveTo(0, i*canvas.height/12); ctx.lineTo(canvas.width, i*canvas.height/12); ctx.stroke(); }
+    ctx.restore();
+    ['host','guest'].forEach(function(role){
+      const p = PVP.state.players[role];
+      if(!p) return;
+      const v = toViewRect({x:p.x, y:p.y, w:p.w, h:p.h});
+      ctx.save();
+      ctx.fillStyle = role===PVP.state.role ? '#38bdf8' : '#ef4444';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.roundRect(v.x*sx, v.y*sy, v.w*sx, v.h*sy, 18); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(v.x*sx + 10, v.y*sy + 10, v.w*sx - 20, 10);
+      ctx.restore();
+      (p.bullets||[]).forEach(function(b){
+        const by = perspectiveY(b.y, b.h);
+        ctx.save(); ctx.fillStyle = b.owner===PVP.state.role ? '#7dd3fc' : '#fca5a5'; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 16;
+        ctx.beginPath(); ctx.roundRect(b.x*sx, by*sy, b.w*sx, b.h*sy, 8); ctx.fill(); ctx.restore();
+      });
+    });
+    updatePvpHud();
+  }
+
+  function pvpLoop(now){
+    if(!PVP.state || !PVP.state.active) return;
+    updateLocalPlayer();
+    fireLocalBullet(now);
+    updateBullets();
+    syncPvpState(now);
+    if(PVP.state.role === 'host') hostCheckHitsAndEnd(now); else if(PVP.state.battleStartedAt){ document.getElementById('pvp-time-left').innerText = Math.ceil(Math.max(0, PVP.DURATION - (now - PVP.state.battleStartedAt))/1000); }
+    renderPvp();
+    PVP.state.rafId = requestAnimationFrame(pvpLoop);
+  }
+
+  function bindPvpInput(){
+    const cv = document.getElementById('pvpCanvas');
+    if(!cv || cv.dataset.bound) return;
+    cv.dataset.bound='1';
+    cv.addEventListener('touchstart', function(e){ const t=e.touches[0]; PVP.state.input.drag=true; PVP.state.input.lastX=t.clientX; PVP.state.input.lastY=t.clientY; }, {passive:true});
+    cv.addEventListener('touchmove', function(e){ if(!PVP.state || !PVP.state.active || !PVP.state.input.drag) return; const t=e.touches[0]; const dx=t.clientX-PVP.state.input.lastX; const dy=t.clientY-PVP.state.input.lastY; PVP.state.input.lastX=t.clientX; PVP.state.input.lastY=t.clientY; const me=PVP.state.players[PVP.state.role]; me.x=Math.max(20,Math.min(PVP.W-me.w-20,me.x+dx*1.2)); const invert=PVP.state.role==='guest'?-1:1; const minY=PVP.state.role==='host'?760:60; const maxY=PVP.state.role==='host'?1170:360; me.y=Math.max(minY,Math.min(maxY,me.y+dy*1.2*invert)); }, {passive:true});
+    cv.addEventListener('touchend', function(){ if(PVP.state) PVP.state.input.drag=false; });
+  }
+
+  function startPvpBattle(data){
+    PVP.state.started = true; PVP.state.active = true; hideEl('pvp-room-modal'); hideEl('pvp-result-modal');
+    PVP.state.roomData = data; PVP.state.battleStartedAt = data.startedAt || Date.now();
+    navTo('screen-pvp-game');
+    const canvas = document.getElementById('pvpCanvas');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width; canvas.height = rect.height;
+    bindPvpInput();
+    const host = data.players && data.players.host ? data.players.host : ensurePlayerTemplate('host', PVP.state.arena);
+    const guest = data.players && data.players.guest ? data.players.guest : ensurePlayerTemplate('guest', PVP.state.arena);
+    host.role='host'; guest.role='guest'; host.bullets = deserializeBullets(host.bullets); guest.bullets = deserializeBullets(guest.bullets);
+    PVP.state.players = { host: host, guest: guest };
+    if(PVP.state.role==='host') PVP.state.players.host = Object.assign(PVP.state.players.host, {userId:DB.userId,name:DB.userName,icon:DB.userIcon,role:'host'});
+    if(PVP.state.role==='guest') PVP.state.players.guest = Object.assign(PVP.state.players.guest, {userId:DB.userId,name:DB.userName,icon:DB.userIcon,role:'guest'});
+    document.getElementById('pvp-my-name').innerText = DB.userName;
+    document.getElementById('pvp-enemy-name').innerText = (PVP.state.role==='host' ? (guest.name||'Guest') : (host.name||'Host'));
+    updatePvpHud();
+    if(PVP.state.rafId) cancelAnimationFrame(PVP.state.rafId);
+    PVP.state.rafId = requestAnimationFrame(pvpLoop);
+  }
+
+  function rehydrateRemoteSnapshot(data){
+    if(!PVP.state || !PVP.state.started || !data || !data.players) return;
+    ['host','guest'].forEach(function(role){
+      const src = data.players[role];
+      if(!src) return;
+      const roleObj = PVP.state.players[role] || {role:role};
+      if(role !== PVP.state.role){
+        roleObj.x = src.x; roleObj.y = src.y; roleObj.w = src.w || PVP.SHIP_W; roleObj.h = src.h || PVP.SHIP_H;
+        roleObj.name = src.name; roleObj.icon = src.icon; roleObj.bullets = deserializeBullets(src.bullets); roleObj.role = role;
+        PVP.state.players[role] = roleObj;
+      }
+    });
+  }
+
+  function initEnhancements(){
+    ensureExtraStyles(); ensureDbExtensions(); MASTER.stages = generateExpandedStages(1000); injectStageDom(); renderArenaPreview(); bindStageBrowser(); installPvpNav();
+    window.switchStageTab = switchStageTabEnhanced;
+    window.initStageSelect = function(){ bindStageBrowser(); renderArenaPreview(); switchStageTabEnhanced('normal'); };
+    window.openPvpCreateModal = openPvpCreateModal;
+    window.openPvpJoinModal = openPvpJoinModal;
+    window.submitPvpJoinRoom = submitPvpJoinRoom;
+    window.startPvpRoomMatch = startPvpRoomMatch;
+    window.leavePvpRoom = leavePvpRoom;
+    window.leavePvpBattleToHome = leavePvpBattleToHome;
+    window.closePvpResultAndHome = closePvpResultAndHome;
+    resetPvpState();
+    const originalListenerWrap = roomRef;
+    const prevSetInterval = setInterval(function(){ if(PVP.state && PVP.state.roomData) rehydrateRemoteSnapshot(PVP.state.roomData); }, 80);
+    window.__pvpMirrorInterval = prevSetInterval;
+    if(document.getElementById('screen-stage') && !document.getElementById('screen-stage').classList.contains('hidden')) initStageSelect();
+  }
+
+  window.addEventListener('beforeunload', function(){
+    if(PVP.state && PVP.state.roomId && PVP.state.role){
+      try{ roomRef(PVP.state.roomId + '/players/' + PVP.state.role + '/connected').set(false); }catch(e){}
+    }
+  });
+
+  window.onload = function(){
+    if(typeof prevOnload === 'function') prevOnload();
+    setTimeout(initEnhancements, 120);
+  };
+})();
+
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+\n<!-- ULTIMATE_UPGRADE_PATCH -->\n<script>
+(function(){
+  if(window.__kaizokuUltimateUpgradeApplied) return;
+  window.__kaizokuUltimateUpgradeApplied = true;
+
+  const original = {
+    startGachaAnim: window.startGachaAnim,
+    switchGachaTab: window.switchGachaTab,
+    getMissionProgress: window.getMissionProgress,
+    renderMissionList: window.renderMissionList,
+    switchMissionTab: window.switchMissionTab,
+    updateSpecialGaugeUI: window.updateSpecialGaugeUI,
+    drawGame: window.drawGame,
+    triggerSpecialSkill: window.triggerSpecialSkill,
+    executeSpecialEffect: window.executeSpecialEffect,
+    checkMissions: window.checkMissions,
+    onload: window.onload
+  };
+
+  const missionUiState = { filter:'all', page:1, pageSize:12 };
+
+  function ensureLuxuryStyles(){
+    if(document.getElementById('ultimate-upgrade-style')) return;
+    const st = document.createElement('style');
+    st.id = 'ultimate-upgrade-style';
+    st.textContent = `
+      .game-btn{transition:transform .18s cubic-bezier(.22,1.2,.36,1), box-shadow .18s ease, filter .18s ease !important; transform-origin:center center;}
+      .game-btn:hover{filter:brightness(1.04) saturate(1.08); box-shadow:0 14px 28px rgba(0,0,0,.24), 0 0 0 1px rgba(255,255,255,.05) inset;}
+      .game-btn:active{transform:translateY(2px) scale(.965) !important; box-shadow:0 5px 14px rgba(0,0,0,.25) inset;}
+      #special-ui-container.ready-max #btn-special{animation:ultimateReadyPulse .72s ease-in-out infinite alternate; box-shadow:0 0 22px rgba(255,215,0,.72), 0 0 46px rgba(168,85,247,.42), inset 0 0 18px rgba(255,255,255,.28);}
+      #special-ui-container.ready-max #special-gauge{background:linear-gradient(90deg,#fde047 0%, #fb7185 22%, #38bdf8 45%, #a855f7 68%, #facc15 100%) !important; background-size:220% 100%; animation:ultimateGaugeFlow .8s linear infinite, ultimateGaugePulse .55s ease-in-out infinite alternate; box-shadow:0 0 16px rgba(251,191,36,.9);}
+      #special-ui-container.ready-max .special-ready-pill{opacity:1; transform:translateY(0) scale(1);}
+      #special-ui-container .special-ready-pill{opacity:0; transform:translateY(8px) scale(.92); transition:all .25s cubic-bezier(.22,1,.36,1); pointer-events:none; background:linear-gradient(90deg,rgba(251,191,36,.96),rgba(244,114,182,.95),rgba(59,130,246,.96)); color:#140b2e; text-shadow:0 1px 0 rgba(255,255,255,.6); box-shadow:0 0 22px rgba(250,204,21,.45);}
+      #special-ui-container .special-ready-pill span{display:block; animation:ultimateReadyText .55s ease-in-out infinite alternate;}
+      #special-ui-container .special-ready-particles{position:absolute; inset:-18px -20px -8px -20px; pointer-events:none; overflow:visible;}
+      #special-ui-container .special-ready-particles span{position:absolute; bottom:6px; left:50%; width:8px; height:8px; border-radius:999px; background:radial-gradient(circle,#fff 0%, #fde047 35%, rgba(255,255,255,0) 72%); opacity:0; transform:translate(-50%,0) scale(.4);}
+      #special-ui-container.ready-max .special-ready-particles span{animation:readyDust 1.5s linear infinite;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(2n){background:radial-gradient(circle,#fff 0%, #a855f7 40%, rgba(255,255,255,0) 75%);}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(3n){background:radial-gradient(circle,#fff 0%, #38bdf8 40%, rgba(255,255,255,0) 75%);}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(1){left:12%; animation-delay:0s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(2){left:24%; animation-delay:.18s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(3){left:35%; animation-delay:.33s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(4){left:48%; animation-delay:.06s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(5){left:60%; animation-delay:.42s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(6){left:72%; animation-delay:.58s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(7){left:84%; animation-delay:.26s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(8){left:92%; animation-delay:.71s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(9){left:18%; animation-delay:.83s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(10){left:42%; animation-delay:1.02s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(11){left:66%; animation-delay:1.16s;}
+      #special-ui-container.ready-max .special-ready-particles span:nth-child(12){left:78%; animation-delay:1.28s;}
+      #special-ready-caption{font-size:10px; font-weight:900; letter-spacing:.28em;}
+      #special-ready-caption.ready{color:#fde68a; text-shadow:0 0 10px rgba(250,204,21,.75), 0 0 22px rgba(168,85,247,.55); animation:ultimateReadyCaption .5s ease-in-out infinite alternate;}
+      #special-cutin.ito-mode{background:radial-gradient(circle at 50% 48%, rgba(152,79,255,.24), rgba(10,4,18,.96) 52%, rgba(0,0,0,.98) 100%) !important;}
+      #special-cutin.ito-mode #cutin-name{background-image:linear-gradient(180deg,#f5d0fe,#a855f7 58%,#111827); filter:drop-shadow(0 0 18px rgba(168,85,247,.92));}
+      #ito-rush-banner{position:absolute; inset:auto 0 12%; text-align:center; font-size:min(13vw,74px); font-weight:900; letter-spacing:.08em; opacity:0; transform:scale(.82) rotate(-8deg); z-index:30; pointer-events:none; color:#fff7ed; text-shadow:0 0 8px rgba(0,0,0,.95), 0 0 18px rgba(255,76,76,.65), 0 0 28px rgba(168,85,247,.95);}
+      #special-cutin.ito-mode #ito-rush-banner.active{animation:itoRushBanner 1.35s cubic-bezier(.16,1,.3,1) both;}
+      #ito-impact-layer{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:22;}
+      .ito-impact-hit{position:absolute; font-weight:900; color:#fff; text-shadow:0 0 7px rgba(0,0,0,.95), 0 0 15px rgba(168,85,247,.95), 0 0 24px rgba(248,113,113,.72); animation:itoImpactHit .65s ease-out forwards; transform-origin:center center;}
+      #ito-screen-crack{position:absolute; inset:0; pointer-events:none; opacity:0; z-index:32; background:
+        linear-gradient(104deg, transparent 0 47%, rgba(255,255,255,.86) 48%, transparent 49%),
+        linear-gradient(76deg, transparent 0 43%, rgba(255,255,255,.72) 44%, transparent 45%),
+        linear-gradient(130deg, transparent 0 61%, rgba(255,255,255,.62) 62%, transparent 63%),
+        linear-gradient(40deg, transparent 0 52%, rgba(255,255,255,.58) 53%, transparent 54%),
+        radial-gradient(circle at 52% 50%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 38%);
+        mix-blend-mode:screen; filter:drop-shadow(0 0 10px rgba(255,255,255,.62));}
+      #ito-screen-crack.active{animation:itoCrack .95s ease-out both;}
+      #battle-fx-layer .ito-boss-rush{position:absolute; inset:auto 6% 16% 6%; text-align:center; font-weight:900; font-size:min(8vw,48px); color:#fdf4ff; letter-spacing:.12em; opacity:0; text-shadow:0 0 10px rgba(0,0,0,.95), 0 0 20px rgba(168,85,247,.95);}
+      #battle-fx-layer .ito-boss-rush.active{animation:itoBossRush .95s ease-out both;}
+      #mission-super-controls .mission-filter-btn.active{background:linear-gradient(180deg,#facc15,#f59e0b); color:#1e1b4b; border-color:#fff; box-shadow:0 0 18px rgba(250,204,21,.4);}
+      #mission-super-controls .mission-filter-btn{transition:all .18s ease;}
+      #mission-pagination .mission-page-btn.active{background:linear-gradient(180deg,#38bdf8,#2563eb); color:#fff; border-color:#dbeafe;}
+      #stage-page-next::before{content:'もっと見る'; margin-right:.38rem;}
+      #stage-page-next{white-space:nowrap;}
+      @keyframes ultimateReadyPulse{0%{transform:translateY(0) scale(1);}100%{transform:translateY(-2px) scale(1.05);}}
+      @keyframes ultimateGaugeFlow{0%{background-position:0% 50%;}100%{background-position:220% 50%;}}
+      @keyframes ultimateGaugePulse{0%{filter:brightness(1);}100%{filter:brightness(1.32);}}
+      @keyframes ultimateReadyText{0%{transform:translateY(0);}100%{transform:translateY(-1px) scale(1.03);}}
+      @keyframes readyDust{0%{opacity:0; transform:translate(-50%,0) scale(.3);}18%{opacity:1;}100%{opacity:0; transform:translate(calc(-50% + (var(--drift, 0px))), -58px) scale(1.15);}}
+      @keyframes ultimateReadyCaption{0%{opacity:.76;}100%{opacity:1;}}
+      @keyframes itoRushBanner{0%{opacity:0; transform:scale(.55) rotate(-12deg);}25%{opacity:1; transform:scale(1.2) rotate(3deg);}56%{transform:scale(.96) rotate(-2deg);}100%{opacity:0; transform:scale(1.26) rotate(0deg);}}
+      @keyframes itoImpactHit{0%{opacity:0; transform:translate(-50%,-50%) scale(.2) rotate(-12deg);}18%{opacity:1;}100%{opacity:0; transform:translate(-50%,-90%) scale(1.35) rotate(10deg);}}
+      @keyframes itoCrack{0%{opacity:0; transform:scale(.86);}15%{opacity:1;}70%{opacity:.68;}100%{opacity:0; transform:scale(1.06);}}
+      @keyframes itoBossRush{0%{opacity:0; transform:scale(.86);}18%{opacity:1;}100%{opacity:0; transform:scale(1.12);}}
+    `;
+    document.head.appendChild(st);
+  }
+
+  function ensureSpecialReadyDom(){
+    const box = $('special-ui-container');
+    if(!box) return;
+    if(!$('special-ready-pill')){
+      const pill = document.createElement('div');
+      pill.id = 'special-ready-pill';
+      pill.className = 'special-ready-pill px-4 py-2 rounded-full border-2 border-white text-center text-[12px] font-black leading-tight';
+      pill.innerHTML = '<span>⚡ 必殺技 READY!! ⚡</span>';
+      box.insertBefore(pill, box.firstChild);
+    }
+    if(!$('special-ready-caption')){
+      const cap = document.createElement('div');
+      cap.id = 'special-ready-caption';
+      cap.className = 'text-[10px] font-black text-cyan-300 drop-shadow-md tracking-widest';
+      cap.innerText = 'SPECIAL';
+      const ref = box.querySelector('button');
+      if(ref) box.insertBefore(cap, ref);
+    }
+    if(!box.querySelector('.special-ready-particles')){
+      const dust = document.createElement('div');
+      dust.className = 'special-ready-particles';
+      const frag = document.createDocumentFragment();
+      for(let i=0;i<12;i++){
+        const s = document.createElement('span');
+        s.style.setProperty('--drift', ((Math.random()*46)-23).toFixed(1)+'px');
+        frag.appendChild(s);
+      }
+      dust.appendChild(frag);
+      box.appendChild(dust);
+    }
+  }
+
+  function ensureBattleItoDom(){
+    const cutin = $('special-cutin');
+    if(cutin && !$('ito-rush-banner')){
+      const b = document.createElement('div');
+      b.id = 'ito-rush-banner';
+      b.textContent = '無駄無駄ラッシュ！';
+      cutin.appendChild(b);
+    }
+    if(cutin && !$('ito-impact-layer')){
+      const l = document.createElement('div');
+      l.id = 'ito-impact-layer';
+      cutin.appendChild(l);
+    }
+    if(cutin && !$('ito-screen-crack')){
+      const c = document.createElement('div');
+      c.id = 'ito-screen-crack';
+      cutin.appendChild(c);
+    }
+    const fx = $('battle-fx-layer');
+    if(fx && !fx.querySelector('.ito-boss-rush')){
+      const t = document.createElement('div');
+      t.className = 'ito-boss-rush';
+      t.id = 'ito-boss-rush';
+      t.textContent = 'MUDA MUDA RUSH';
+      fx.appendChild(t);
+    }
+  }
+
+  function ensureMissionData(){
+    if(!window.DB) return;
+    DB.missionProgress = DB.missionProgress || {defeatTotal:0,dailyDefeat:0,dailyGacha:0,dailyPlayMulti:0};
+    if(DB.missionProgress.totalGacha == null) DB.missionProgress.totalGacha = 0;
+    if(MISSIONS.__ultraNormalInjected) return;
+    const extra = [];
+    for(let i=1;i<=100;i++){
+      let targetType, target, reward, desc;
+      if(i <= 40){
+        targetType = 'defeatTotal';
+        target = 1500 + (i-1) * 250;
+        desc = `敵を累計${target}隻追い払う`;
+        reward = i % 5 === 0 ? {type:'tickets', amount:4 + Math.floor(i/10)} : (i % 2 === 0 ? {type:'coins', amount:1800 + i*140} : {type:'materials', amount:2 + Math.floor(i/6)});
+      }else if(i <= 75){
+        const stageTarget = 60 + (i-41) * 12;
+        targetType = 'stage';
+        target = stageTarget;
+        desc = `海域${stageTarget}をクリアする`;
+        reward = i % 4 === 0 ? {type:'tickets', amount:5 + Math.floor((i-40)/8)} : (i % 3 === 0 ? {type:'materials', amount:3 + Math.floor((i-40)/7)} : {type:'coins', amount:2600 + (i-40)*180});
+      }else{
+        const gachaTarget = 5 + (i-76) * 3;
+        targetType = 'gachaTotal';
+        target = gachaTarget;
+        desc = `ガチャを累計${gachaTarget}回引く`;
+        reward = i % 5 === 0 ? {type:'tickets', amount:6 + Math.floor((i-75)/5)} : (i % 2 === 0 ? {type:'materials', amount:4 + Math.floor((i-75)/4)} : {type:'coins', amount:3200 + (i-75)*220});
+      }
+      extra.push({ id:`nx_${i}`, desc, targetType, target, reward });
+    }
+    MISSIONS.normal = (MISSIONS.normal || []).concat(extra);
+    MISSIONS.__ultraNormalInjected = true;
+  }
+
+  function ensureMissionControls(){
+    const list = $('mission-list-container');
+    const screen = $('screen-mission');
+    if(!screen || !list) return;
+    if($('mission-super-controls')) return;
+    const box = document.createElement('div');
+    box.id = 'mission-super-controls';
+    box.className = 'bg-indigo-900/80 p-3 rounded-xl border-2 border-indigo-700 shadow-lg flex flex-col gap-3';
+    box.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <div id="mission-summary" class="text-[11px] text-indigo-200 font-bold">読込中...</div>
+        <div class="text-[10px] text-yellow-300 font-black">FILTER & PAGE</div>
+      </div>
+      <div class="grid grid-cols-4 gap-2">
+        <button class="mission-filter-btn game-btn bg-indigo-950 text-white border border-indigo-500 rounded-lg py-2 text-[11px] font-black" data-filter="all">全部</button>
+        <button class="mission-filter-btn game-btn bg-indigo-950 text-white border border-indigo-500 rounded-lg py-2 text-[11px] font-black" data-filter="open">未達成</button>
+        <button class="mission-filter-btn game-btn bg-indigo-950 text-white border border-indigo-500 rounded-lg py-2 text-[11px] font-black" data-filter="claimable">受取可能</button>
+        <button class="mission-filter-btn game-btn bg-indigo-950 text-white border border-indigo-500 rounded-lg py-2 text-[11px] font-black" data-filter="done">達成済</button>
+      </div>
+      <div id="mission-pagination" class="flex items-center justify-center gap-2 flex-wrap"></div>
+    `;
+    list.parentElement.insertBefore(box, list);
+    box.querySelectorAll('[data-filter]').forEach(btn=>{
+      btn.addEventListener('click', function(){
+        missionUiState.filter = this.dataset.filter || 'all';
+        missionUiState.page = 1;
+        renderMissionList();
+      });
+    });
+  }
+
+  function rewardVisual(reward){
+    const ri = reward.type === 'coins' ? '💰' : reward.type === 'tickets' ? '✨' : reward.type === 'materials' ? '🦴' : '👑';
+    const img = reward.type === 'coins' ? '草コイン.png' : reward.type === 'materials' ? '草の化石.png' : '草核.png';
+    return {ri, img};
+  }
+
+  function getMissionProgressPatched(m){
+    if(!m) return 0;
+    if(m.targetType === 'gachaTotal') return (DB.missionProgress && DB.missionProgress.totalGacha) || 0;
+    return original.getMissionProgress ? original.getMissionProgress(m) : 0;
+  }
+
+  function renderMissionListPatched(){
+    ensureMissionData();
+    ensureMissionControls();
+    const list = $('mission-list-container');
+    if(!list) return;
+    list.innerHTML = '';
+    const all = (MISSIONS[currentMissionTab] || []).slice();
+    if(all.length === 0){
+      list.innerHTML = '<div class="text-center text-indigo-300 font-bold mt-4 bg-indigo-900/50 p-4 rounded-xl">依頼がないぞ。</div>';
+      return;
+    }
+    const stats = all.map(m => {
+      const claimed = DB.claimedMissions.includes(m.id);
+      const p = getMissionProgressPatched(m);
+      const clear = p >= m.target;
+      return {m, claimed, p, clear};
+    });
+    let filtered = stats;
+    if(missionUiState.filter === 'open') filtered = stats.filter(x => !x.claimed && !x.clear);
+    else if(missionUiState.filter === 'claimable') filtered = stats.filter(x => !x.claimed && x.clear);
+    else if(missionUiState.filter === 'done') filtered = stats.filter(x => x.claimed);
+    filtered.sort((a,b)=>{
+      const aw = (!a.claimed && a.clear) ? 0 : a.claimed ? 2 : 1;
+      const bw = (!b.claimed && b.clear) ? 0 : b.claimed ? 2 : 1;
+      if(aw !== bw) return aw - bw;
+      return String(a.m.id).localeCompare(String(b.m.id), 'ja');
+    });
+    const totalPages = Math.max(1, Math.ceil(filtered.length / missionUiState.pageSize));
+    if(missionUiState.page > totalPages) missionUiState.page = totalPages;
+    const start = (missionUiState.page - 1) * missionUiState.pageSize;
+    const visible = filtered.slice(start, start + missionUiState.pageSize);
+
+    const summary = $('mission-summary');
+    if(summary) summary.innerText = `${filtered.length}件 / ${start+1}-${Math.min(start+visible.length, filtered.length)} を表示 / PAGE ${missionUiState.page}/${totalPages}`;
+    const pager = $('mission-pagination');
+    if(pager){
+      let html = `<button class="mission-page-btn game-btn ${missionUiState.page===1?'opacity-50 cursor-not-allowed':'bg-indigo-950'} text-white border border-indigo-500 rounded-lg px-3 py-2 text-[11px] font-black" data-page="prev">←</button>`;
+      const s = Math.max(1, missionUiState.page-2), e = Math.min(totalPages, missionUiState.page+2);
+      for(let p=s;p<=e;p++) html += `<button class="mission-page-btn game-btn ${p===missionUiState.page?'active bg-cyan-600':'bg-indigo-950 text-white'} border border-indigo-500 rounded-lg px-3 py-2 text-[11px] font-black" data-page="${p}">${p}</button>`;
+      html += `<button class="mission-page-btn game-btn ${missionUiState.page===totalPages?'opacity-50 cursor-not-allowed':'bg-indigo-950'} text-white border border-indigo-500 rounded-lg px-3 py-2 text-[11px] font-black" data-page="next">→</button>`;
+      pager.innerHTML = html;
+      pager.querySelectorAll('[data-page]').forEach(btn=>btn.onclick=function(){
+        const k=this.dataset.page;
+        if(k==='prev' && missionUiState.page>1) missionUiState.page--;
+        else if(k==='next' && missionUiState.page<totalPages) missionUiState.page++;
+        else if(/^\\d+$/.test(k)) missionUiState.page=parseInt(k,10)||1;
+        renderMissionListPatched();
+        const sc=$('screen-mission'); if(sc && sc.scrollTo) sc.scrollTo({top:0,behavior:'smooth'});
+      });
+    }
+    const fns = document.querySelectorAll('#mission-super-controls .mission-filter-btn');
+    fns.forEach(btn=>btn.classList.toggle('active', btn.dataset.filter === missionUiState.filter));
+
+    visible.forEach(({m, claimed, p, clear}) => {
+      const d = document.createElement('div');
+      d.className = `p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${claimed ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : clear ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
+      const rv = rewardVisual(m.reward);
+      d.innerHTML = `
+        <div class="flex justify-between items-start gap-2">
+          <div class="font-black text-sm text-white pr-2">${m.desc}</div>
+          <div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0">
+            <span class="inline-flex relative w-4 h-4"><img src="${rv.img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${rv.ri}','text-xs')"></span>
+            <span class="text-xs text-yellow-400 font-black">×${m.reward.amount}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-2 mt-1">
+          <div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative">
+            <div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100, (p / m.target) * 100)}%;"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p, m.target)} / ${m.target}</div>
+          </div>
+          ${claimed ? `<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>` : clear ? `<button onclick="claimMission('${m.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>` : `<span class="text-xs font-black text-slate-400">挑戦中</span>`}
+        </div>`;
+      list.appendChild(d);
+    });
+  }
+
+  function switchMissionTabPatched(t){
+    missionUiState.page = 1;
+    missionUiState.filter = 'all';
+    return original.switchMissionTab ? original.switchMissionTab(t) : null;
+  }
+
+  function checkMissionsPatched(){
+    ensureMissionData();
+    return original.checkMissions ? original.checkMissions() : null;
+  }
+
+  function updateGachaCostLabels(){
+    const b1 = $('btn-draw-gacha-1');
+    const b10 = $('btn-draw-gacha-10');
+    const isEx = window.currentGachaTab === 'ex';
+    if(b1) b1.innerHTML = `<span class="text-sm">${isEx?'EX 1回ガチャ':'1回引く'}</span><div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-4 h-4 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-white text-xs">${isEx?10:1}</span></div>`;
+    if(b10) b10.innerHTML = `<span class="text-lg">${isEx?'EX 10連!!':'10回 連続!!'}</span><div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full"><span class="inline-flex w-5 h-5 relative"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨')"></span><span class="text-white text-xs">${isEx?100:10}</span></div>`;
+  }
+
+  function startGachaAnimPatched(times){
+    ensureMissionData();
+    if($('tutorial-overlay') && !$('tutorial-overlay').classList.contains('hidden')) return;
+    const isEx = window.currentGachaTab === 'ex';
+    const need = isEx ? times * 10 : times;
+    if(DB.gachaTickets < need) return showAlert(`草核が足りないぞ！${isEx ? `\
+EXガチャ${times===10?'10連':'1回'}には ${need} 個必要！` : ''}`);
+    if(isEx) DB.gachaTickets -= (need - times);
+    DB.missionProgress.totalGacha = (DB.missionProgress.totalGacha || 0) + times;
+    return original.startGachaAnim ? original.startGachaAnim(times) : null;
+  }
+
+  function switchGachaTabPatched(t){
+    const r = original.switchGachaTab ? original.switchGachaTab(t) : null;
+    updateGachaCostLabels();
+    return r;
+  }
+
+  function ensureThousandStages(){
+    const arr = [];
+    for(let i=1;i<=1000;i++){
+      const boss = i % 10 === 0;
+      const tier = Math.floor((i-1)/50);
+      arr.push({
+        id:i,
+        name: boss ? `海域 ${i} (BOSS)` : `海域 ${i}`,
+        goalScore: boss ? 22 + Math.floor(i*1.9) : 18 + Math.floor(i*1.55),
+        enemySpeed: Math.min(14, 1.4 + i*0.013 + tier*0.05),
+        spawnRate: Math.max(8, 62 - Math.floor(i/12) - tier),
+        reward:i,
+        color: boss ? 'border-red-500' : (i%3===0 ? 'border-cyan-400' : (i%2===0 ? 'border-blue-400' : 'border-green-400')),
+        isEndless:false,
+        staminaCost: Math.min(120, 4 + Math.floor(i/20)*2 + (boss?4:0)),
+        isBossStage:boss
+      });
+    }
+    MASTER.stages = arr;
+    const jump = $('stage-jump-input'); if(jump) jump.max = 1000;
+    const next = $('stage-page-next'); if(next) next.textContent = '→';
+  }
+
+  function enhanceItoCinematic(){
+    ensureBattleItoDom();
+    const cutin = $('special-cutin');
+    const banner = $('ito-rush-banner');
+    const layer = $('ito-impact-layer');
+    const crack = $('ito-screen-crack');
+    if(!cutin || !banner || !layer || !crack) return;
+    cutin.classList.add('ito-mode');
+    banner.classList.remove('active');
+    crack.classList.remove('active');
+    layer.innerHTML = '';
+    void banner.offsetWidth;
+    banner.classList.add('active');
+    crack.classList.add('active');
+    const words = ['無駄!','ドゴォ','バキッ','ラッシュ!','ドドド'];
+    for(let i=0;i<18;i++){
+      const el = document.createElement('div');
+      el.className = 'ito-impact-hit';
+      el.textContent = words[i % words.length];
+      el.style.left = `${12 + Math.random()*76}%`;
+      el.style.top = `${18 + Math.random()*54}%`;
+      el.style.fontSize = `${20 + Math.random()*32}px`;
+      el.style.animationDelay = `${i*0.04}s`;
+      layer.appendChild(el);
+    }
+    const bossRush = $('ito-boss-rush');
+    if(bossRush){ bossRush.classList.remove('active'); void bossRush.offsetWidth; bossRush.classList.add('active'); }
+    setTimeout(()=>{ cutin.classList.remove('ito-mode'); banner.classList.remove('active'); crack.classList.remove('active'); layer.innerHTML=''; }, 1500);
+  }
+
+  function triggerSpecialSkillPatched(){
+    const isIto = window.gameState && gameState.player && gameState.player.crewId === 'crew_ito';
+    const r = original.triggerSpecialSkill ? original.triggerSpecialSkill() : null;
+    if(isIto) setTimeout(enhanceItoCinematic, 60);
+    return r;
+  }
+
+  function executeSpecialEffectPatched(){
+    const p = window.gameState && gameState.player ? gameState.player : null;
+    if(!p || p.crewId !== 'crew_ito') return original.executeSpecialEffect ? original.executeSpecialEffect() : null;
+    hideEl('special-cutin');
+    if(gameState.isGameOver) return;
+    let multiHits = 0;
+    gameState.enemies.forEach(e=>{
+      const cx = e.x + e.w/2, cy = e.y + e.h/2;
+      for(let i=0;i<4;i++){
+        createPopParticles(cx + (Math.random()-0.5)*22, cy + (Math.random()-0.5)*22, i%2===0 ? '#a855f7' : '#111827', true);
+      }
+      if(e.isBoss){
+        e.hp -= 60 * p.bulletSizeMod;
+        gameState.score += 60;
+      }else{
+        e.hp = 0;
+        gameState.score += Math.max(1, Math.floor(2 * p.scoreMod));
+      }
+      multiHits += e.isBoss ? 10 : 4;
+    });
+    gameState.enemies = gameState.enemies.filter(e=>e.hp>0);
+    gameState.screenFlash = 20;
+    const crack = $('ito-screen-crack');
+    if(crack){ crack.classList.remove('active'); void crack.offsetWidth; crack.classList.add('active'); }
+    if(currentStage && currentStage.type==='coop'){
+      const b = gameState.enemies.find(e=>e.isBoss);
+      $('game-score').innerText = b ? Math.ceil(b.hp) : 0;
+    }else{
+      $('game-score').innerText = gameState.score;
+    }
+    gameState.specialGauge = 0;
+    updateSpecialGaugeUI();
+    gameState.isPaused = false;
+    if(currentStage && currentStage.isBossStage && gameState.enemies.length===0) gameState.bossDefeated = true;
+    checkStageClear(false);
+  }
+
+  function drawGamePatched(){
+    const r = original.drawGame ? original.drawGame() : null;
+    try{
+      const p = window.gameState && gameState.player ? gameState.player : null;
+      if(!p || p.crewId !== 'crew_ito' || gameState.isPaused || gameState.isGameOver) return r;
+      const ox = p.x + p.width/2, oy = p.y + p.height/2;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      for(let ring=0; ring<3; ring++){
+        const rr = 18 + ring*12 + Math.sin((gameState.frameCount+ring*7)/7)*4;
+        ctx.beginPath();
+        ctx.strokeStyle = ring===0 ? 'rgba(255,255,255,.65)' : ring===1 ? 'rgba(168,85,247,.9)' : 'rgba(17,24,39,.95)';
+        ctx.lineWidth = ring===2 ? 5 : 3;
+        ctx.shadowBlur = 22;
+        ctx.shadowColor = ring===0 ? '#f5d0fe' : '#7c3aed';
+        ctx.arc(ox, oy, rr, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      ctx.restore();
+      if(gameState.frameCount % 2 === 0){
+        for(let i=0;i<4;i++){
+          const ang = (gameState.frameCount*0.17)+(i*Math.PI/2);
+          const sx = ox + Math.cos(ang)*(12 + Math.random()*6);
+          const sy = oy + Math.sin(ang)*(12 + Math.random()*6);
+          const ex = ox + Math.cos(ang + (Math.random()-.5)*0.9)*(46 + Math.random()*18);
+          const ey = oy + Math.sin(ang + (Math.random()-.5)*0.9)*(46 + Math.random()*18);
+          drawLightningLine(ctx, sx, sy, ex, ey, i%2===0 ? '#a855f7' : '#111827', 3 + Math.random()*2, 18, true);
+          drawLightningLine(ctx, sx, sy, ex, ey, '#ffffff', 1.2, 8, false);
+        }
+      }
+      for(let k=0;k<2;k++) gameState.particles.push({x:ox+(Math.random()-.5)*22,y:oy+(Math.random()-.5)*22,dx:(Math.random()-.5)*1.6,dy:-1-Math.random()*1.4,life:12+Math.random()*10,color:Math.random()>.4?'#a855f7':'#ffffff',size:1.8+Math.random()*2.6,isStar:true});
+    }catch(e){}
+    return r;
+  }
+
+  function updateSpecialGaugeUIPatched(){
+    const r = original.updateSpecialGaugeUI ? original.updateSpecialGaugeUI() : null;
+    ensureSpecialReadyDom();
+    const box = $('special-ui-container');
+    const cap = $('special-ready-caption');
+    if(!box) return r;
+    const g = Math.floor((window.gameState && gameState.specialGauge) || 0);
+    box.classList.toggle('ready-max', g >= 100);
+    if(cap){ cap.innerText = g >= 100 ? '⚡ READY MODE ⚡' : 'SPECIAL'; cap.classList.toggle('ready', g >= 100); }
+    return r;
+  }
+
+  function refreshUiBits(){
+    ensureLuxuryStyles();
+    ensureSpecialReadyDom();
+    ensureBattleItoDom();
+    ensureMissionData();
+    ensureMissionControls();
+    ensureThousandStages();
+    updateGachaCostLabels();
+    const next = $('stage-page-next'); if(next && !next.dataset.moreStyled){ next.dataset.moreStyled='1'; next.textContent='→'; }
+    if($('screen-mission') && !$('screen-mission').classList.contains('hidden')) renderMissionListPatched();
+    if(typeof updateSpecialGaugeUI === 'function') updateSpecialGaugeUI();
+  }
+
+  window.getMissionProgress = getMissionProgressPatched;
+  window.renderMissionList = renderMissionListPatched;
+  window.switchMissionTab = switchMissionTabPatched;
+  window.checkMissions = checkMissionsPatched;
+  window.switchGachaTab = switchGachaTabPatched;
+  window.startGachaAnim = startGachaAnimPatched;
+  window.updateSpecialGaugeUI = updateSpecialGaugeUIPatched;
+  window.triggerSpecialSkill = triggerSpecialSkillPatched;
+  window.executeSpecialEffect = executeSpecialEffectPatched;
+  window.drawGame = drawGamePatched;
+
+  window.onload = function(){
+    if(typeof original.onload === 'function') original.onload();
+    setTimeout(refreshUiBits, 240);
+    setTimeout(refreshUiBits, 900);
+  };
+
+  if(document.readyState === 'complete' || document.readyState === 'interactive'){
+    setTimeout(refreshUiBits, 180);
+  }
+})();
+</script>\n
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
