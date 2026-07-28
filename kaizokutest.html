@@ -4469,9 +4469,9 @@ const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！�
 let currentTutorialScenario=null, tutorialStep=0;
 
 // --- セーブロード・スタミナ ---
-function saveGame() { try{ localStorage.setItem('kaizokus',JSON.stringify(DB)); updateMyDataOnFirebase(); checkMissions(); }catch(e){} }
+function saveGame() { try{ localStorage.setItem('kaizokutest',JSON.stringify(DB)); updateMyDataOnFirebase(); checkMissions(); }catch(e){} }
 function loadGame() {
-    try { const saved=localStorage.getItem('kaizokus'); if(saved){ const p=JSON.parse(saved); if(p&&typeof p==='object') for(let k in p) if(p[k]!==undefined&&p[k]!==null) DB[k]=p[k]; } }catch(e){}
+    try { const saved=localStorage.getItem('kaizokutest'); if(saved){ const p=JSON.parse(saved); if(p&&typeof p==='object') for(let k in p) if(p[k]!==undefined&&p[k]!==null) DB[k]=p[k]; } }catch(e){}
     if(!DB.userId||DB.userId==='user_001') DB.userId='PIRATE_'+Math.random().toString(36).substr(2,9).toUpperCase();
     if(!DB.itemLevels) DB.itemLevels={}; if(!DB.ownedWeapons) DB.ownedWeapons=[]; if(!DB.ownedSkins) DB.ownedSkins=[]; if(!DB.ownedCrew) DB.ownedCrew=[]; if(!DB.claimedMissions) DB.claimedMissions=[];
     DB.ownedWeapons=DB.ownedWeapons.filter(id=>MASTER.weapons[id]); DB.ownedSkins=DB.ownedSkins.filter(id=>MASTER.skins[id]); DB.ownedCrew=DB.ownedCrew.filter(id=>MASTER.crew[id]);
