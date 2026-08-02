@@ -54,25 +54,85 @@
       font-family: 'Shippori Mincho', serif;
     }
     
-    /* 和風スクロールバー */
+    /* 和風スクロールバー（発光強化） */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
     }
     ::-webkit-scrollbar-track {
       background: #0f0c08;
       border-left: 1px solid rgba(212, 175, 55, 0.1);
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--neon-gold);
+      background: linear-gradient(180deg, var(--neon-gold), var(--neon-red));
       border-radius: 0;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.8), inset 0 0 4px rgba(255,255,255,0.4);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--neon-red);
+      background: linear-gradient(180deg, var(--neon-red), var(--neon-gold));
+      box-shadow: 0 0 14px rgba(230, 0, 18, 0.9);
     }
+    * { scrollbar-color: var(--neon-gold) #0f0c08; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* マウス追従グローオーブ */
+    #cursor-glow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 380px; height: 380px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, rgba(230,0,18,0.08) 40%, transparent 75%);
+      transform: translate(-50%, -50%);
+      transition: opacity 0.4s ease;
+      mix-blend-mode: screen;
+      will-change: transform;
+    }
+
+    /* ===== SPLASH / INTRO SCREEN ===== */
+    #splash-screen {
+      position: fixed; inset: 0; z-index: 100;
+      background: radial-gradient(circle at 50% 40%, #1a120a 0%, #05030200 100%), #050302;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1), visibility 0.9s;
+    }
+    #splash-screen.splash-hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-kanji {
+      font-family: 'Shippori Mincho', serif;
+      font-weight: 800;
+      font-size: clamp(2.5rem, 10vw, 6rem);
+      color: transparent;
+      background: linear-gradient(120deg, #d4af37 20%, #ffffff 40%, #e60012 60%, #d4af37 80%);
+      background-size: 250% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      letter-spacing: 0.25em;
+      animation: kanjiShine 3s linear infinite, kanjiReveal 1.2s cubic-bezier(0.34,1.56,0.64,1) both;
+      text-shadow: 0 0 40px rgba(212,175,55,0.5);
+    }
+    @keyframes kanjiShine { 0% { background-position: 0% 50%; } 100% { background-position: 250% 50%; } }
+    @keyframes kanjiReveal {
+      0% { opacity: 0; letter-spacing: 1em; filter: blur(15px); transform: scale(1.4); }
+      100% { opacity: 1; letter-spacing: 0.25em; filter: blur(0); transform: scale(1); }
+    }
+    .splash-bar-track {
+      width: 220px; height: 2px; background: rgba(212,175,55,0.2); margin-top: 2rem; position: relative; overflow: hidden;
+    }
+    .splash-bar-fill {
+      position: absolute; inset: 0; width: 0%; background: linear-gradient(90deg, var(--neon-gold), var(--neon-red));
+      box-shadow: 0 0 10px var(--neon-gold);
+      animation: splashFill 1.8s cubic-bezier(0.6,0,0.4,1) forwards;
+    }
+    @keyframes splashFill { 0% { width: 0%; } 100% { width: 100%; } }
+    .splash-sub {
+      margin-top: 0.9rem; font-size: 0.65rem; letter-spacing: 0.35em; color: rgba(212,175,55,0.7);
+      animation: fadeInUpSmall 1s ease 0.4s both;
+    }
+    @keyframes fadeInUpSmall { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
 
     /* 和風の切り欠きデザイン */
     .wa-clip {
@@ -124,49 +184,81 @@
       }
     }
 
-    /* カルーセルサムネイルのアクティブ演出 */
+    /* カルーセルサムネイルのアクティブ演出（ネオン明滅＋シマー強化） */
     .char-thumb {
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
       border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .char-thumb::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%;
+      width: 60%; height: 100%;
+      background: linear-gradient(115deg, transparent, rgba(255,255,255,0.65), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.6s ease;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .char-thumb:hover::after { left: 150%; }
+    .char-thumb:hover {
+      transform: translateY(-6px) scale(1.08);
+      border-color: var(--neon-gold);
+      box-shadow: 0 0 22px rgba(212, 175, 55, 0.85), 0 8px 20px rgba(0,0,0,0.5);
     }
     .char-thumb.active {
       border-color: var(--neon-red);
       box-shadow: 0 0 20px rgba(230, 0, 18, 0.8), inset 0 0 10px rgba(230, 0, 18, 0.4);
       transform: translateY(-4px) scale(1.05);
+      animation: thumbFlicker 2.4s ease-in-out infinite;
     }
     .char-thumb.active p {
       color: var(--neon-red) !important;
       font-weight: 700;
       text-shadow: 0 0 5px rgba(230, 0, 18, 0.5);
     }
+    @keyframes thumbFlicker {
+      0%, 100% { box-shadow: 0 0 20px rgba(230, 0, 18, 0.8), inset 0 0 10px rgba(230, 0, 18, 0.4); }
+      45% { box-shadow: 0 0 32px rgba(230, 0, 18, 1), inset 0 0 16px rgba(230, 0, 18, 0.6); }
+      50% { box-shadow: 0 0 8px rgba(230, 0, 18, 0.4), inset 0 0 4px rgba(230, 0, 18, 0.2); }
+      55% { box-shadow: 0 0 32px rgba(230, 0, 18, 1), inset 0 0 16px rgba(230, 0, 18, 0.6); }
+    }
 
     /* 立ち絵の浮遊アニメーション（ダイナミックな影と連動） */
     @keyframes floatWa {
-      0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
-      50% { transform: translateY(-15px) scale(1.03); filter: drop-shadow(0 25px 25px rgba(0,0,0,0.7)); }
+      0%   { transform: perspective(1000px) translateY(0) translateX(0) rotateZ(0deg) rotateY(0deg) scale(1); filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
+      25%  { transform: perspective(1000px) translateY(-10px) translateX(6px) rotateZ(0.6deg) rotateY(4deg) scale(1.015); filter: drop-shadow(0 18px 20px rgba(0,0,0,0.65)); }
+      50%  { transform: perspective(1000px) translateY(-18px) translateX(0) rotateZ(0deg) rotateY(0deg) scale(1.03); filter: drop-shadow(0 28px 28px rgba(0,0,0,0.75)); }
+      75%  { transform: perspective(1000px) translateY(-10px) translateX(-6px) rotateZ(-0.6deg) rotateY(-4deg) scale(1.015); filter: drop-shadow(0 18px 20px rgba(0,0,0,0.65)); }
+      100% { transform: perspective(1000px) translateY(0) translateX(0) rotateZ(0deg) rotateY(0deg) scale(1); filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
     }
     .float-anim {
-      animation: floatWa 4s ease-in-out infinite;
+      animation: floatWa 5s cubic-bezier(0.45,0.05,0.55,0.95) infinite;
+      transform-style: preserve-3d;
     }
 
-    /* 和風フェードイン（バウンスを追加してよりかっこよく） */
     @keyframes waIn {
-      0% { opacity: 0; transform: translateX(-40px) scale(0.95); filter: blur(10px); }
+      0%   { opacity: 0; transform: translateX(-60px) scale(0.9); filter: blur(12px); }
+      55%  { opacity: 1; transform: translateX(8px) scale(1.015); filter: blur(0); }
+      75%  { transform: translateX(-3px) scale(0.998); }
       100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
     }
     @keyframes imgWaIn {
-      0% { opacity: 0; transform: scale(0.7) translateY(50px) rotate(-5deg); filter: brightness(0.2) blur(10px); }
-      70% { transform: scale(1.05) translateY(-10px) rotate(2deg); filter: brightness(1.2) blur(0); }
+      0%   { opacity: 0; transform: scale(0.55) translateY(70px) rotate(-8deg); filter: brightness(0.15) blur(14px); }
+      55%  { opacity: 1; transform: scale(1.12) translateY(-18px) rotate(3deg); filter: brightness(1.35) blur(0); }
+      75%  { transform: scale(0.96) translateY(6px) rotate(-1deg); filter: brightness(1.05) blur(0); }
+      88%  { transform: scale(1.03) translateY(-3px) rotate(0.5deg); }
       100% { opacity: 1; transform: scale(1) translateY(0) rotate(0); filter: brightness(1) blur(0); }
     }
 
     .animate-wa-in {
-      animation: waIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation: waIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
     .animate-img-in {
-      animation: imgWaIn 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; /* 少し跳ねるようなイージング */
+      animation: imgWaIn 1.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
-
     /* 麻の葉模様風 背景 */
     .bg-wagara {
       background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L0 11.5v17L20 40l20-11.5v-17L20 0zm0 2.3l18 10.4v14.6L20 37.7 2 27.3V12.7L20 2.3z' fill='%23d4af37' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
@@ -183,20 +275,29 @@
       border: 1px solid var(--neon-gold);
       color: var(--neon-gold);
       overflow: hidden;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
     }
     .btn-wa::before {
       content: '';
       position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
-      transition: all 0.5s;
+      top: 0; left: -120%;
+      width: 60%; height: 100%;
+      background: linear-gradient(115deg, transparent, rgba(212, 175, 55, 0.4), rgba(255,255,255,0.7), rgba(212, 175, 55, 0.4), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.55s ease;
+      z-index: 2;
     }
-    .btn-wa:hover::before { left: 100%; }
+    .btn-wa:hover::before { left: 130%; }
     .btn-wa:hover {
-      background: rgba(212, 175, 55, 0.2);
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+      background: rgba(212, 175, 55, 0.22);
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.6), 0 0 22px rgba(212, 175, 55, 0.6), 0 0 40px rgba(230,0,18,0.25);
+      transform: translateY(-2px) scale(1.06);
+      animation: btnFlicker 1.6s ease-in-out infinite;
+    }
+    @keyframes btnFlicker {
+      0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.6), 0 0 22px rgba(212, 175, 55, 0.6), 0 0 40px rgba(230,0,18,0.25); }
+      48% { box-shadow: 0 0 16px rgba(212, 175, 55, 0.95), 0 0 34px rgba(212, 175, 55, 0.9), 0 0 55px rgba(230,0,18,0.4); }
+      52% { box-shadow: 0 0 4px rgba(212, 175, 55, 0.35), 0 0 10px rgba(212, 175, 55, 0.35); }
     }
 
     /* SVGエフェクトの回転・パルスアニメーションの強化 */
@@ -211,15 +312,69 @@
       0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 10px currentColor) brightness(1); transform: scale(0.95); } 
       50% { opacity: 1; filter: drop-shadow(0 0 30px currentColor) brightness(1.4); transform: scale(1.05); } 
     }
+
+    /* ===== ヘッダーロゴ 魔法陣アニメーション ===== */
+    .logo-ring-outer { animation: spin 10s linear infinite, ringPulse 3s ease-in-out infinite; }
+    .logo-ring-inner { animation: spinReverse 7s linear infinite; }
+    .logo-ring-glow { animation: ringGlowPulse 2.4s ease-in-out infinite; }
+    @keyframes ringPulse {
+      0%, 100% { filter: drop-shadow(0 0 3px rgba(212,175,55,0.6)); }
+      50% { filter: drop-shadow(0 0 9px rgba(212,175,55,1)); }
+    }
+    @keyframes ringGlowPulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.9); }
+      50% { opacity: 0.85; transform: scale(1.25); }
+    }
+
+    /* モーダルスプリングイン */
+    @keyframes modalSpringIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(30px); }
+      60% { opacity: 1; transform: scale(1.03) translateY(-4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-spring-in { animation: modalSpringIn 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+    /* ささやかな走査線ノイズオーバーレイ */
+    #main-body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+      opacity: 0.5;
+      mix-blend-mode: overlay;
+    }
+
+    /* カード切替クンレメキドアップ（背景切替をなめらかに） */
+    #dynamic-bg { transition: opacity 1s ease, filter 1s ease; }
+
+    /* カルゼビン風 パララバクグロック発光枚 */
+    @keyframes petalGlint {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 767px) {
+      #cursor-glow { display: none; }
+      .splash-kanji { letter-spacing: 0.15em; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
+
+  <!-- ==================== SPLASH / INTRO SCREEN ==================== -->
+  <div id="splash-screen">
+    <h1 class="splash-kanji">ルージュ・ガレオン</h1>
+    <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+    <p class="splash-sub font-jp">LOADING THE EMAKI SCROLL...</p>
+  </div>
+
+  <!-- マウス追従グローオーブ -->
+  <div id="cursor-glow"></div>
 
   <!-- VIRTUAL BACKGROUND LAYER (背景画像がよく見えるように透過度とブラーを調整) -->
   <div class="fixed inset-0 z-0 bg-transition transition-all duration-1000 ease-in-out opacity-75 bg-cover bg-center filter blur-[0.5px]" id="dynamic-bg"></div>
   <div class="fixed inset-0 z-0 bg-gradient-to-b from-wa-dark/60 via-wa-dark/40 to-wa-dark/80 pointer-events-none"></div>
   
-  <!-- PARTICLE CANVAS (桜・金粉 - パーティクル増量) -->
+  <!-- PARTICLE CANVAS (桜・金粉・デジタル粒子 - マウス反応対応) -->
   <canvas id="particle-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-10"></canvas>
 
   <!-- ==================== HEADER ==================== -->
@@ -231,10 +386,11 @@
       </button>
       
       <div class="relative w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
-        <!-- 和風の二重円 -->
-        <div class="absolute inset-0 border-[1.5px] border-wa-gold rounded-full animate-[spin_10s_linear_infinite]"></div>
-        <div class="absolute inset-1 border-[1.5px] border-wa-red rounded-full border-dashed animate-[spin_8s_linear_infinite_reverse]"></div>
-        <i data-lucide="moon" class="w-4 h-4 md:w-5 md:h-5 text-white"></i>
+        <!-- 和風の二重魔法陣（グロー＋逆回転） -->
+        <div class="logo-ring-glow absolute -inset-1.5 rounded-full bg-wa-gold/40 blur-md"></div>
+        <div class="logo-ring-outer absolute inset-0 border-[1.5px] border-wa-gold rounded-full"></div>
+        <div class="logo-ring-inner absolute inset-1 border-[1.5px] border-wa-red rounded-full border-dashed"></div>
+        <i data-lucide="moon" class="w-4 h-4 md:w-5 md:h-5 text-white relative z-10 animate-pulse"></i>
       </div>
       <div>
         <h1 class="text-xl md:text-2xl font-black tracking-[0.15em] font-mincho text-white text-glow-gold uppercase">ROUGE GALLEON</h1>
@@ -255,8 +411,9 @@
       <button class="text-gray-300 hover:text-wa-gold p-1.5 sm:p-2 bg-black/40 rounded-sm transition-all border border-wa-gold/30 hover:border-wa-gold" onclick="toggleMute()" aria-label="BGM Toggle">
         <i id="bgm-icon" data-lucide="volume-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
       </button>
-      <button onclick="window.location.href='kaizoku.html'" class="flex items-center gap-1 sm:gap-2 bg-wa-red text-white px-3 sm:px-6 py-1.5 sm:py-2 wa-clip font-jp font-bold tracking-widest text-[10px] sm:text-sm hover:bg-white hover:text-wa-red transition-all shadow-[0_0_20px_rgba(230,0,18,0.8)]">
-        <i data-lucide="swords" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> <span>ゲーム起動</span>
+      <button onclick="window.location.href='kaizoku.html'" class="relative overflow-hidden group flex items-center gap-1 sm:gap-2 bg-wa-red text-white px-3 sm:px-6 py-1.5 sm:py-2 wa-clip font-jp font-bold tracking-widest text-[10px] sm:text-sm hover:bg-white hover:text-wa-red transition-all duration-300 shadow-[0_0_20px_rgba(230,0,18,0.8)] hover:shadow-[0_0_35px_rgba(230,0,18,1)] hover:scale-105">
+        <span class="absolute top-0 left-[-120%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-[-20deg] transition-all duration-500 group-hover:left-[130%] pointer-events-none"></span>
+        <i data-lucide="swords" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10"></i> <span class="relative z-10">ゲーム起動</span>
       </button>
     </div>
   </header>
@@ -398,8 +555,8 @@
   </footer>
 
   <!-- ==================== WORLD MAP MODAL ==================== -->
-  <div id="map-modal" class="fixed inset-0 bg-wa-dark/90 backdrop-blur-xl z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
-    <div class="relative w-11/12 max-w-6xl bg-wa-dark/95 border-2 border-wa-gold/50 wa-clip p-1 shadow-[0_0_35px_rgba(212,175,55,0.3)] flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="map-modal-card">
+  <div id="map-modal" class="fixed inset-0 bg-wa-dark/90 backdrop-blur-xl z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 ease-out">
+    <div class="relative w-11/12 max-w-6xl bg-wa-dark/95 border-2 border-wa-gold/50 wa-clip p-1 shadow-[0_0_35px_rgba(212,175,55,0.4)] flex flex-col h-[85vh] transform scale-95 transition-all duration-400" id="map-modal-card">
       
       <div class="bg-[#0c0906]/90 w-full h-full p-4 md:p-6 flex flex-col relative overflow-hidden wa-clip bg-wagara">
         <!-- Header -->
@@ -798,60 +955,202 @@
       voiceList = window.speechSynthesis.getVoices();
     };
 
-    // --- 和風パーティクル (数を増やして華やかに) ---
+    // --- 和風パーティクルシステム（桜・金粉・デジタル粒子の3層構成、マウスに少し反応） ---
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
-    let particles = [];
+    const cursorGlowEl = document.getElementById('cursor-glow');
+    let sakuraPetals = [], goldDust = [], digitalBits = [];
     let animationFrameId = null;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // マウス追従状態
+    const mouse = { x: -9999, y: -9999, active: false };
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
+      if (cursorGlowEl) {
+        cursorGlowEl.style.transform = `translate(${e.clientX - 190}px, ${e.clientY - 190}px)`;
+        cursorGlowEl.style.opacity = '1';
+      }
+    });
+    window.addEventListener('mouseleave', () => {
+      mouse.active = false;
+      if (cursorGlowEl) cursorGlowEl.style.opacity = '0';
+    });
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; mouse.active = true;
+      }
+    }, { passive: true });
 
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    class WaParticle {
-      constructor() { this.reset(); }
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = -20 - Math.random() * 50;
-        this.size = Math.random() * 4 + 1.5;
-        this.speedY = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 1.5;
-        this.alpha = Math.random() * 0.7 + 0.3;
-        const colors = ['#fdeff2', '#d4af37', '#e60012', '#38bdf8', '#4ade80'];
+    function viewW() { return window.innerWidth; }
+    function viewH() { return window.innerHeight; }
+
+    // マウス反応の共通処理（軽い反発力）
+    function applyMouseForce(p, strength) {
+      if (!mouse.active) return { fx: 0, fy: 0 };
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      const distSq = dx * dx + dy * dy;
+      const radius = 140;
+      if (distSq < radius * radius && distSq > 0.01) {
+        const dist = Math.sqrt(distSq);
+        const force = (1 - dist / radius) * strength;
+        return { fx: (dx / dist) * force, fy: (dy / dist) * force };
+      }
+      return { fx: 0, fy: 0 };
+    }
+
+    // ===== 1. 桜の花びら =====
+    class SakuraPetal {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * viewW();
+        this.y = initial ? Math.random() * viewH() : -30 - Math.random() * 60;
+        this.size = Math.random() * 7 + 5;
+        this.speedY = Math.random() * 1.1 + 0.5;
+        this.swayAmp = Math.random() * 40 + 20;
+        this.swayFreq = Math.random() * 0.015 + 0.006;
+        this.swayPhase = Math.random() * Math.PI * 2;
+        this.baseX = this.x;
+        this.alpha = Math.random() * 0.5 + 0.45;
+        const colors = ['#ffe4ec', '#ffd0dd', '#fdeff2', '#ffc9db'];
         this.color = colors[Math.floor(Math.random() * colors.length)];
         this.rotation = Math.random() * 360;
-        this.rotSpeed = (Math.random() - 0.5) * 4;
+        this.rotSpeed = (Math.random() - 0.5) * 2.4;
+        this.t = 0;
       }
       update() {
+        this.t += 1;
         this.y += this.speedY;
-        this.x += this.speedX;
+        this.x = this.baseX + Math.sin(this.t * this.swayFreq + this.swayPhase) * this.swayAmp;
+        this.baseX += Math.sin(this.t * 0.003) * 0.15;
         this.rotation += this.rotSpeed;
-        if (this.y > canvas.height + 20) this.reset();
+        const f = applyMouseForce(this, 3.2);
+        this.x += f.fx; this.y += f.fy;
+        if (this.y > viewH() + 30) this.reset();
+        if (this.x < -60) this.baseX += viewW() + 120;
+        if (this.x > viewW() + 60) this.baseX -= viewW() + 120;
       }
       draw() {
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.color;
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+        // 花びらの形（ハート型に近い楼形）
+        ctx.moveTo(0, -this.size);
+        ctx.quadraticCurveTo(this.size * 0.9, -this.size * 0.4, 0, 0);
+        ctx.quadraticCurveTo(-this.size * 0.9, -this.size * 0.4, 0, -this.size);
         ctx.fill();
         ctx.restore();
       }
     }
 
+    // ===== 2. 金粉（キラキラ発光） =====
+    class GoldDust {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * viewW();
+        this.y = initial ? Math.random() * viewH() : viewH() + 20 + Math.random() * 40;
+        this.size = Math.random() * 2.2 + 0.8;
+        this.speedY = -(Math.random() * 0.6 + 0.15);
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.baseAlpha = Math.random() * 0.6 + 0.35;
+        this.twinkleSpeed = Math.random() * 0.05 + 0.02;
+        this.twinklePhase = Math.random() * Math.PI * 2;
+        this.t = 0;
+      }
+      update() {
+        this.t += 1;
+        this.y += this.speedY;
+        this.x += this.speedX;
+        const f = applyMouseForce(this, 2.2);
+        this.x += f.fx; this.y += f.fy;
+        if (this.y < -20) this.reset();
+      }
+      draw() {
+        const alpha = this.baseAlpha * (0.5 + 0.5 * Math.sin(this.t * this.twinkleSpeed + this.twinklePhase));
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#d4af37';
+        ctx.fillStyle = '#ffe9b0';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // ===== 3. デジタル粒子（リテラル風光の線） =====
+    class DigitalBit {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * viewW();
+        this.y = initial ? Math.random() * viewH() : -30 - Math.random() * 60;
+        this.len = Math.random() * 14 + 6;
+        this.speedY = Math.random() * 3.5 + 2;
+        this.alpha = Math.random() * 0.5 + 0.25;
+        const colors = ['#38bdf8', '#66327c', '#e60012', '#d4af37'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.flickerT = Math.random() * 100;
+      }
+      update() {
+        this.flickerT += 1;
+        this.y += this.speedY;
+        const f = applyMouseForce(this, 4.5);
+        this.x += f.fx; this.y += f.fy;
+        if (this.y > viewH() + 30) this.reset();
+      }
+      draw() {
+        const flick = (Math.sin(this.flickerT * 0.2) > 0.85) ? 0.15 : this.alpha;
+        ctx.save();
+        ctx.globalAlpha = flick;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.4;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x, this.y + this.len);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     function initParticles() {
-      particles = [];
-      for (let i = 0; i < 80; i++) particles.push(new WaParticle());
+      sakuraPetals = []; goldDust = []; digitalBits = [];
+      const isMobile = viewW() < 768;
+      const nSakura = isMobile ? 26 : 46;
+      const nGold = isMobile ? 20 : 38;
+      const nDigital = isMobile ? 12 : 22;
+      for (let i = 0; i < nSakura; i++) sakuraPetals.push(new SakuraPetal());
+      for (let i = 0; i < nGold; i++) goldDust.push(new GoldDust());
+      for (let i = 0; i < nDigital; i++) digitalBits.push(new DigitalBit());
     }
     function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => { p.update(); p.draw(); });
+      ctx.clearRect(0, 0, viewW(), viewH());
+      digitalBits.forEach(p => { p.update(); p.draw(); });
+      goldDust.forEach(p => { p.update(); p.draw(); });
+      sakuraPetals.forEach(p => { p.update(); p.draw(); });
       animationFrameId = requestAnimationFrame(animateParticles);
+    }
+
+    // --- スプレビュを閉じてコンテンツを見せる ---
+    function hideSplash() {
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('splash-hide');
     }
 
     // --- Initialization ---
@@ -861,7 +1160,11 @@
       lucide.createIcons();
       initParticles();
       animateParticles();
+      // イントロ演出後にスプレンプユニビーレーザを非表示
+      window.setTimeout(hideSplash, 2000);
     });
+    // リロード後万一に備えても確実に隠す
+    window.addEventListener('load', () => window.setTimeout(hideSplash, 300));
 
     function toggleMobileMenu() {
       playSE('se-click');
@@ -1101,5 +1404,6 @@
       document.getElementById('map-zoom-target').style.transform = `scale(1)`;
     }
   </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
