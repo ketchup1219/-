@@ -92,16 +92,110 @@
       will-change: transform;
     }
 
-    /* ===== SPLASH / INTRO SCREEN ===== */
+    /* ===== SPLASH / INTRO SCREEN (深海 → 地上 浮上演出) ===== */
     #splash-screen {
       position: fixed; inset: 0; z-index: 100;
-      background: radial-gradient(circle at 50% 40%, #1a120a 0%, #05030200 100%), #050302;
+      overflow: hidden;
+      /* 深海の底（濃い藍色〜黒）をベースに */
+      background: linear-gradient(to top, #030712 0%, #050b1c 35%, #030712 75%, #020509 100%);
       display: flex; align-items: center; justify-content: center;
       flex-direction: column;
       transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1), visibility 0.9s;
     }
     #splash-screen.splash-hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* 地上の光（太陽光）が水面上から差し込んでくるレイヤー */
+    #splash-light {
+      position: absolute; inset: -10% -10% 0 -10%; z-index: 1;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -5%, rgba(255,252,235,0.95) 0%, rgba(255,225,150,0.7) 14%, rgba(212,175,55,0.45) 28%, rgba(110,190,255,0.22) 45%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.75) translateY(4%);
+      filter: brightness(0.6) blur(0px);
+      animation: surfaceAscend 7.5s cubic-bezier(0.45,0,0.3,1) forwards;
+      pointer-events: none;
+    }
+    @keyframes surfaceAscend {
+      0%   { opacity: 0;    transform: scale(0.7)  translateY(6%); filter: brightness(0.5); }
+      35%  { opacity: 0.22; transform: scale(0.85) translateY(3%); filter: brightness(0.7); }
+      65%  { opacity: 0.5;  transform: scale(1)     translateY(1%); filter: brightness(0.95); }
+      85%  { opacity: 0.78; transform: scale(1.08)  translateY(0%); filter: brightness(1.25); }
+      93%  { opacity: 0.95; transform: scale(1.18)  translateY(-1%); filter: brightness(1.7); }
+      100% { opacity: 1;    transform: scale(1.32)  translateY(-2%); filter: brightness(2.4); }
+    }
+
+    /* 水面の光の筋（ゆらめくレンズフレア用ビーム） */
+    #splash-rays {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: repeating-conic-gradient(from 0deg at 50% -20%, rgba(255,255,255,0.08) 0deg 4deg, transparent 4deg 14deg);
+      opacity: 0;
+      animation: raysAppear 7.5s ease-in forwards;
+      mix-blend-mode: screen;
+    }
+    @keyframes raysAppear {
+      0%, 55% { opacity: 0; transform: rotate(0deg) scale(1); }
+      80%  { opacity: 0.35; transform: rotate(4deg) scale(1.1); }
+      100% { opacity: 0.6;  transform: rotate(-3deg) scale(1.25); }
+    }
+
+    /* 水面を抜ける瞬間の閃光（終盤フラッシュ／レンズフレア） */
+    #splash-flash {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+      background: radial-gradient(circle at 50% 32%, #ffffff 0%, rgba(255,247,220,0.85) 22%, rgba(212,175,55,0.4) 42%, transparent 72%);
+      opacity: 0;
+      mix-blend-mode: screen;
+      animation: finalFlash 7.5s ease-in forwards;
+    }
+    @keyframes finalFlash {
+      0%, 82% { opacity: 0;    transform: scale(0.5); }
+      90%  { opacity: 0.85; transform: scale(1.5); }
+      95%  { opacity: 1;    transform: scale(1.9); }
+      100% { opacity: 0;    transform: scale(2.4); }
+    }
+
+    /* 気泡・光の粒子コンテナ */
+    #splash-bubbles {
+      position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none;
+    }
+    .bubble, .light-dust {
+      position: absolute;
+      bottom: -10%;
+      left: 0;
+      border-radius: 50%;
+      opacity: 0;
+      will-change: transform, opacity;
+      animation-timing-function: ease-in;
+      animation-iteration-count: infinite;
+    }
+    .bubble {
+      background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85) 0%, rgba(160,220,255,0.18) 55%, transparent 100%);
+      border: 1px solid rgba(210,240,255,0.35);
+      box-shadow: 0 0 6px rgba(180,225,255,0.35), inset 0 0 4px rgba(255,255,255,0.4);
+      animation-name: bubbleRise;
+    }
+    .light-dust {
+      background: radial-gradient(circle, #fffbe8 0%, #d4af37 55%, transparent 100%);
+      box-shadow: 0 0 9px 2px rgba(212,175,55,0.85);
+      animation-name: dustRise;
+      animation-timing-function: linear;
+    }
+    @keyframes bubbleRise {
+      0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+      10%  { opacity: 0.85; }
+      50%  { transform: translate(var(--drift, 15px), -55vh) scale(1); }
+      88%  { opacity: 0.6; }
+      100% { transform: translate(calc(var(--drift, 15px) * 2), -115vh) scale(0.7); opacity: 0; }
+    }
+    @keyframes dustRise {
+      0%   { transform: translate(0, 0) scale(0.3); opacity: 0; }
+      12%  { opacity: 1; }
+      50%  { transform: translate(var(--drift, 10px), -60vh) scale(1); }
+      85%  { opacity: 0.75; }
+      100% { transform: translate(calc(var(--drift, 10px) * -1), -118vh) scale(0.5); opacity: 0; }
+    }
+
     .splash-kanji {
+      position: relative; z-index: 3;
       font-family: 'Shippori Mincho', serif;
       font-weight: 800;
       font-size: clamp(2.5rem, 10vw, 6rem);
@@ -120,17 +214,29 @@
       100% { opacity: 1; letter-spacing: 0.25em; filter: blur(0); transform: scale(1); }
     }
     .splash-bar-track {
-      width: 220px; height: 2px; background: rgba(212,175,55,0.2); margin-top: 2rem; position: relative; overflow: hidden;
+      position: relative; z-index: 3;
+      width: 220px; height: 2px; background: rgba(212,175,55,0.2); margin-top: 2rem; overflow: hidden;
     }
     .splash-bar-fill {
       position: absolute; inset: 0; width: 0%; background: linear-gradient(90deg, var(--neon-gold), var(--neon-red));
       box-shadow: 0 0 10px var(--neon-gold);
-      animation: splashFill 1.8s cubic-bezier(0.6,0,0.4,1) forwards;
+      animation: splashFill 7.5s cubic-bezier(0.4,0,0.2,1) forwards;
     }
     @keyframes splashFill { 0% { width: 0%; } 100% { width: 100%; } }
     .splash-sub {
+      position: relative; z-index: 3;
       margin-top: 0.9rem; font-size: 0.65rem; letter-spacing: 0.35em; color: rgba(212,175,55,0.7);
       animation: fadeInUpSmall 1s ease 0.4s both;
+    }
+    .splash-sub-deep {
+      position: relative; z-index: 3;
+      margin-top: 0.4rem; font-size: 0.6rem; letter-spacing: 0.3em; color: rgba(150,210,255,0.55);
+      animation: deepPulse 3.2s ease-in-out infinite;
+      text-shadow: 0 0 8px rgba(150,210,255,0.4);
+    }
+    @keyframes deepPulse {
+      0%, 100% { opacity: 0.4; letter-spacing: 0.3em; }
+      50% { opacity: 0.9; letter-spacing: 0.4em; }
     }
     @keyframes fadeInUpSmall { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
 
@@ -360,11 +466,16 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
 
-  <!-- ==================== SPLASH / INTRO SCREEN ==================== -->
+  <!-- ==================== SPLASH / INTRO SCREEN (深海→地上 浮上演出) ==================== -->
   <div id="splash-screen">
+    <div id="splash-light"></div>
+    <div id="splash-rays"></div>
+    <div id="splash-bubbles"></div>
     <h1 class="splash-kanji">ルージュ・ガレオン</h1>
     <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
     <p class="splash-sub font-jp">LOADING THE EMAKI SCROLL...</p>
+    <p class="splash-sub-deep font-jp">ASCENDING FROM THE DEEP SEA...</p>
+    <div id="splash-flash"></div>
   </div>
 
   <!-- マウス追従グローオーブ -->
@@ -630,6 +741,7 @@
   <!-- AUDIO -->
   <audio id="se-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
   <audio id="se-transition" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
+  <audio id="bgm-audio" src="setumeiBGM.mp3" loop preload="auto"></audio>
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
@@ -1147,8 +1259,60 @@
       animationFrameId = requestAnimationFrame(animateParticles);
     }
 
-    // --- スプレビュを閉じてコンテンツを見せる ---
+    // --- スプラッシュ演出：深海から地上へ浮上する気泡・光の粒子を生成 ---
+    const SPLASH_DURATION = 7500; // ロード時間 7.5秒
+    let splashHidden = false;
+
+    function createSplashBubbles() {
+      const container = document.getElementById('splash-bubbles');
+      if (!container) return;
+      const frag = document.createDocumentFragment();
+
+      // 気泡（バブル）
+      const BUBBLE_COUNT = 26;
+      for (let i = 0; i < BUBBLE_COUNT; i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        const size = 4 + Math.random() * 22;           // 4px〜26px
+        const left = Math.random() * 100;               // 0%〜100%
+        const duration = 4 + Math.random() * 5;          // 4s〜9s
+        const delay = -Math.random() * duration;         // 開始時点をランダムにずらす（既に浮上中の状態から見せる）
+        const drift = (Math.random() * 60 - 30).toFixed(1) + 'px';
+        b.style.width = size + 'px';
+        b.style.height = size + 'px';
+        b.style.left = left + '%';
+        b.style.setProperty('--drift', drift);
+        b.style.animationDuration = duration + 's';
+        b.style.animationDelay = delay + 's';
+        frag.appendChild(b);
+      }
+
+      // 光の粒子（金粉・きらめき）
+      const DUST_COUNT = 20;
+      for (let i = 0; i < DUST_COUNT; i++) {
+        const d = document.createElement('div');
+        d.className = 'light-dust';
+        const size = 2 + Math.random() * 6;              // 2px〜8px
+        const left = Math.random() * 100;
+        const duration = 4.5 + Math.random() * 6;        // 4.5s〜10.5s
+        const delay = -Math.random() * duration;
+        const drift = (Math.random() * 40 - 20).toFixed(1) + 'px';
+        d.style.width = size + 'px';
+        d.style.height = size + 'px';
+        d.style.left = left + '%';
+        d.style.setProperty('--drift', drift);
+        d.style.animationDuration = duration + 's';
+        d.style.animationDelay = delay + 's';
+        frag.appendChild(d);
+      }
+
+      container.appendChild(frag);
+    }
+
+    // --- スプラッシュを閉じてコンテンツを見せる ---
     function hideSplash() {
+      if (splashHidden) return;
+      splashHidden = true;
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('splash-hide');
     }
@@ -1160,11 +1324,23 @@
       lucide.createIcons();
       initParticles();
       animateParticles();
-      // イントロ演出後にスプレンプユニビーレーザを非表示
-      window.setTimeout(hideSplash, 2000);
+      createSplashBubbles(); // 深海の気泡・光の粒子を生成
+
+      // イントロ演出（深海→水面→地上の光、7.5秒）が終わったらスプラッシュを非表示
+      window.setTimeout(hideSplash, SPLASH_DURATION);
+
+      document.body.addEventListener('click', function playBgmOnce() {
+        if (!isMuted) {
+          const bgm = document.getElementById('bgm-audio');
+          if (bgm && bgm.paused) {
+            bgm.play().catch(() => {});
+          }
+        }
+        document.body.removeEventListener('click', playBgmOnce);
+      });
     });
-    // リロード後万一に備えても確実に隠す
-    window.addEventListener('load', () => window.setTimeout(hideSplash, 300));
+    // リロード後万一に備えても確実に隠す（最低7.5秒は演出を表示）
+    window.addEventListener('load', () => window.setTimeout(hideSplash, SPLASH_DURATION));
 
     function toggleMobileMenu() {
       playSE('se-click');
@@ -1325,6 +1501,14 @@
       isMuted = !isMuted;
       document.getElementById('bgm-icon').setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
       lucide.createIcons();
+      const bgm = document.getElementById('bgm-audio');
+      if (bgm) {
+        if (isMuted) {
+          bgm.pause();
+        } else {
+          bgm.play().catch(()=>{});
+        }
+      }
     }
     
     // --- ボイス再生 (女性声固定) ---
@@ -1404,6 +1588,7 @@
       document.getElementById('map-zoom-target').style.transform = `scale(1)`;
     }
   </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
