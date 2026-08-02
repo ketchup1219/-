@@ -466,8 +466,14 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
 
+  <!-- ==================== START OVERLAY ==================== -->
+  <div id="start-overlay" class="fixed inset-0 z-[200] bg-black flex items-center justify-center cursor-pointer">
+    <p class="font-jp text-white text-sm md:text-base tracking-[0.2em] animate-pulse">画面をタッチ、またはキーを押して開始</p>
+  </div>
+
   <!-- ==================== SPLASH / INTRO SCREEN (深海→地上 浮上演出) ==================== -->
-  <div id="splash-screen">
+  <!-- 初期状態では非表示にし、ユーザーアクションで表示させることでアニメーションを開始します -->
+  <div id="splash-screen" style="display: none;">
     <div id="splash-light"></div>
     <div id="splash-rays"></div>
     <div id="splash-bubbles"></div>
@@ -741,7 +747,7 @@
   <!-- AUDIO -->
   <audio id="se-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
   <audio id="se-transition" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
-  <audio id="bgm-audio" src="setumeibgm.mp3" loop preload="auto"></audio>
+  <audio id="bgm-audio" src="setumeiBGM.mp3" loop preload="auto"></audio>
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
@@ -1324,10 +1330,28 @@
       lucide.createIcons();
       initParticles();
       animateParticles();
-      createSplashBubbles(); // 深海の気泡・光の粒子を生成
 
-      // イントロ演出（深海→水面→地上の光、7.5秒）が終わったらスプラッシュを非表示
-      window.setTimeout(hideSplash, SPLASH_DURATION);
+      const startOverlay = document.getElementById('start-overlay');
+      const splashScreen = document.getElementById('splash-screen');
+
+      const startApp = () => {
+        document.removeEventListener('click', startApp);
+        document.removeEventListener('keydown', startApp);
+        document.removeEventListener('touchstart', startApp);
+        
+        if (startOverlay) startOverlay.style.display = 'none';
+        if (splashScreen) splashScreen.style.display = 'flex'; // スプラッシュ表示でアニメーション開始
+        
+        createSplashBubbles(); // 深海の気泡・光の粒子を生成
+
+        // イントロ演出（深海→水面→地上の光、7.5秒）が終わったらスプラッシュを非表示
+        window.setTimeout(hideSplash, SPLASH_DURATION);
+      };
+
+      // ユーザーのインタラクションを待機
+      document.addEventListener('click', startApp);
+      document.addEventListener('keydown', startApp);
+      document.addEventListener('touchstart', startApp, { passive: true });
 
       document.body.addEventListener('click', function playBgmOnce() {
         if (!isMuted) {
@@ -1339,8 +1363,6 @@
         document.body.removeEventListener('click', playBgmOnce);
       });
     });
-    // リロード後万一に備えても確実に隠す（最低7.5秒は演出を表示）
-    window.addEventListener('load', () => window.setTimeout(hideSplash, SPLASH_DURATION));
 
     function toggleMobileMenu() {
       playSE('se-click');
@@ -1589,6 +1611,6 @@
     }
   </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
