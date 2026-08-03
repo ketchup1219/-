@@ -21,9 +21,11 @@
         .bubble { position: absolute; bottom: -20px; background: rgba(255,255,255,0.15); border-radius: 50%; animation: rise infinite ease-in; }
         @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) scale(1.5); opacity: 0; } }
         #gameCanvas { background: linear-gradient(to bottom, #0284c7, #1e40af, #1e3a8a); display: block; margin: 0 auto; width: 100%; height: 100%; max-width: 500px; box-shadow: inset 0 0 50px rgba(0,0,0,0.6); }
-        .game-btn { transition: all 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.4); transform: translateY(0); }
-        .game-btn:active { box-shadow: 0 0px 0 rgba(0,0,0,0.4); transform: translateY(6px); }
-        .game-btn:disabled { transform: translateY(0); box-shadow: none; filter: grayscale(100%); opacity: 0.7; }
+        .game-btn { transition: all 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 12px 0 rgba(0,0,0,0.34), 0 18px 30px rgba(0,0,0,0.2); transform: translateY(0); background-image: radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 32%); border: 1px solid rgba(255,255,255,0.12); }
+        .game-btn:active { box-shadow: 0 4px 0 rgba(0,0,0,0.32), 0 12px 20px rgba(0,0,0,0.18); transform: translateY(6px); }
+        .game-btn:disabled { transform: translateY(0); box-shadow: none; filter: grayscale(100%); opacity: 0.68; }
+        .hud-panel { border-radius: 24px; background: linear-gradient(180deg, rgba(22,12,6,0.96), rgba(18,10,5,0.98)); backdrop-filter: blur(6px); border: 1px solid rgba(212,175,55,0.22); }
+        .panel-deco { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at top left, rgba(255,240,200,0.08), transparent 36%); }
         .logo-container { perspective: 1500px; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; min-height: 280px; z-index: 10; }
         .logo-enhanced { width: 160%; max-width: 500px; max-height: 280px; object-fit: contain; animation: superGiantFloat 4s ease-in-out infinite, metallicShineSuper 5s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
         @keyframes superGiantFloat { 0%, 100% { transform: scale(1.1) translateY(0px) rotate(-2deg); } 50% { transform: scale(1.15) translateY(-15px) rotate(2deg); } }
@@ -58,6 +60,10 @@
         .cutin-char-anim { animation: slideInChar 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .cutin-name-anim { animation: slideInName 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards; }
         .flash-anim { animation: flashLightning 0.6s ease-out; }
+        .screen-shake { animation: screenShake 0.9s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes screenShake { 0% { transform: translate(0,0); } 10% { transform: translate(-8px,6px); } 20% { transform: translate(6px,-7px); } 30% { transform: translate(-6px,4px); } 40% { transform: translate(4px,-5px); } 50% { transform: translate(-3px,3px); } 60% { transform: translate(3px,-2px); } 70% { transform: translate(-2px,1px); } 80% { transform: translate(1px,-1px); } 90% { transform: translate(-1px,0); } 100% { transform: translate(0,0); } }
+        #cutin-flash { opacity: 0; transition: opacity 0.14s ease-out; background: radial-gradient(circle at center, rgba(255,255,255,0.98), rgba(168,85,247,0.42) 28%, rgba(0,0,0,0) 65%); }
+        #cutin-flash.active { opacity: 1; animation: flashLightning 0.44s ease-out forwards; }
         
         /* 【仕様3】特定キャラ排出時の「確定雷」演出 */
         @keyframes seimaroThunderFlash { 
@@ -3314,7 +3320,7 @@ MASTER.exStages = [
     {id:'ex_seimaro_3',name:'せいまろの試練 3 (BOSS)',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:10,rewardCoins:5000,rewardMats:5,color:'border-red-600',isEndless:false,isEx:true,isBossStage:true,reqClearEx:2,staminaCost:30} 
 ];
 MASTER.multiStages = [ {id:'multi_coop_1',name:'【協力】せいまろ大討伐',goalScore:1,enemySpeed:0.5,spawnRate:99999,reward:'撃破で特大報酬',color:'border-yellow-600',isEndless:false,isMulti:true,type:'coop',isBossStage:true,staminaCost:20}, {id:'multi_pvp_1',name:'【対戦】フレンド決戦',goalScore:'∞',enemySpeed:2,spawnRate:40,reward:'勝利で報酬',color:'border-red-600',isEndless:true,isMulti:true,type:'pvp',staminaCost:20} ];
-const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:100}}] };
+const MISSIONS = { daily:[{id:'d1',desc:'敵を50隻追い払う',targetType:'dailyDefeat',target:50,reward:{type:'coins',amount:1000}}, {id:'d2',desc:'ガチャを1回引く',targetType:'dailyGacha',target:1,reward:{type:'materials',amount:1}}, {id:'d3',desc:'マルチプレイを遊ぶ',targetType:'dailyPlayMulti',target:1,reward:{type:'tickets',amount:1}}], normal:[{id:'n1',desc:'敵を累計100隻追い払う',targetType:'defeatTotal',target:100,reward:{type:'tickets',amount:3}}, {id:'n2',desc:'敵を累計1000隻追い払う',targetType:'defeatTotal',target:1000,reward:{type:'tickets',amount:10}}, {id:'n3',desc:'海域10をクリア',targetType:'stage',target:10,reward:{type:'tickets',amount:5}}, {id:'n4',desc:'海域50をクリア',targetType:'stage',target:50,reward:{type:'special',amount:1}}], event:[{id:'e1',desc:'せいまろの試練1をクリア',targetType:'exClear',target:1,reward:{type:'tickets',amount:5}}] };
 
 MASTER.gachaPool = [ {type:'weapons',id:'wp_spread'},
                     {type:'weapons',id:'wp_machine'},
@@ -5576,10 +5582,18 @@ window.onload = () => {
       #pvpCanvas{width:100%;height:100%;display:block;background:
         radial-gradient(circle at 50% 20%, rgba(255,255,255,.08), transparent 32%),
         linear-gradient(180deg, rgba(10,20,40,.92), rgba(3,10,22,.98));
-        border-radius:18px; border:3px solid rgba(212,175,55,.35); box-shadow: inset 0 0 40px rgba(0,0,0,.45), 0 18px 40px rgba(0,0,0,.5)}
-      #screen-pvp-game .hud-panel{background:linear-gradient(180deg, rgba(43,32,22,.94), rgba(20,14,9,.96)); border:2px solid rgba(212,175,55,.35); box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 20px rgba(0,0,0,.35)}
-      .pvp-lane-label{letter-spacing:.18em;text-shadow:0 2px 8px rgba(0,0,0,.55)}
-      .pvp-glow{box-shadow:0 0 18px rgba(59,130,246,.45), inset 0 0 10px rgba(255,255,255,.08)}
+        border-radius:28px; border:4px solid rgba(212,175,55,.42); box-shadow: inset 0 0 48px rgba(0,0,0,.55), 0 20px 50px rgba(0,0,0,.6)}
+      #screen-pvp-game .hud-panel{background:linear-gradient(180deg, rgba(39,27,12,.96), rgba(14,9,5,.97)); border:2px solid rgba(212,175,55,.45); box-shadow:0 16px 36px rgba(0,0,0,.40), inset 0 0 28px rgba(255,240,190,.06)}
+      #screen-pvp-game{background:radial-gradient(circle at top, rgba(255,240,210,.05), transparent 30%), linear-gradient(180deg, rgba(10,10,18,.95), rgba(6,4,7,.98));}
+      #pvp-room-modal .bg-indigo-900,
+      #pvp-room-modal .pvp-arena-btn,
+      #pvp-room-modal .game-btn,
+      #pvp-room-modal .hud-panel{background:linear-gradient(180deg, rgba(43,32,22,.96), rgba(17,11,5,.95)); border:1px solid rgba(212,175,55,.35); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 40px rgba(0,0,0,.45)}
+      #pvp-room-modal .pvp-arena-btn{border-color:rgba(212,175,55,.22);}
+      #pvp-room-modal #btn-start-pvp{background:linear-gradient(180deg,#f59e0b,#c2410c);}
+      #pvp-room-modal input{background:rgba(17,11,4,.92); border-color:rgba(212,175,55,.4);}
+      .pvp-lane-label{letter-spacing:.18em;text-shadow:0 2px 16px rgba(0,0,0,.55); color:rgba(248,113,113,.92);}
+      .pvp-glow{box-shadow:0 0 24px rgba(99,102,241,.55), inset 0 0 18px rgba(255,255,255,.12)}
       .pvp-result-win{background:linear-gradient(180deg,#fde68a,#f59e0b);-webkit-background-clip:text;color:transparent}
       .pvp-result-lose{background:linear-gradient(180deg,#cbd5e1,#64748b);-webkit-background-clip:text;color:transparent}
       .pvp-result-draw{background:linear-gradient(180deg,#bfdbfe,#38bdf8);-webkit-background-clip:text;color:transparent}
@@ -5923,7 +5937,10 @@ window.onload = () => {
       PVP.state.arena = getArena(data.arenaId);
       PVP.state.hp = data.hp || PVP.state.hp;
       if(!PVP.state.started){ updatePvpWaitingUi(data); }
-      if(data.status==='playing' && !PVP.state.started){ startPvpBattle(data); }
+      if(data.status==='playing'){
+        if(!PVP.state.started){ startPvpBattle(data); }
+        else { rehydrateRemoteSnapshot(data); }
+      }
       if(data.status==='finished' && data.result){ applyPvpResult(data.result); }
     });
   }
@@ -6653,15 +6670,15 @@ window.onload = () => {
       #ito-rush-banner{position:absolute; inset:auto 0 12%; text-align:center; font-size:min(13vw,74px); font-weight:900; letter-spacing:.08em; opacity:0; transform:scale(.82) rotate(-8deg); z-index:30; pointer-events:none; color:#fff7ed; text-shadow:0 0 8px rgba(0,0,0,.95), 0 0 18px rgba(255,76,76,.65), 0 0 28px rgba(168,85,247,.95);}
       #special-cutin.ito-mode #ito-rush-banner.active{animation:itoRushBanner 1.35s cubic-bezier(.16,1,.3,1) both;}
       #ito-impact-layer{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:22;}
-      .ito-impact-hit{position:absolute; font-weight:900; color:#fff; text-shadow:0 0 7px rgba(0,0,0,.95), 0 0 15px rgba(168,85,247,.95), 0 0 24px rgba(248,113,113,.72); animation:itoImpactHit .65s ease-out forwards; transform-origin:center center;}
+      .ito-impact-hit{position:absolute; font-weight:900; color:#fff; text-shadow:0 0 10px rgba(0,0,0,.95), 0 0 24px rgba(168,85,247,.95), 0 0 34px rgba(248,113,113,.82); animation:itoImpactHit .85s ease-out forwards; transform-origin:center center;}
       #ito-screen-crack{position:absolute; inset:0; pointer-events:none; opacity:0; z-index:32; background:
-        linear-gradient(104deg, transparent 0 47%, rgba(255,255,255,.86) 48%, transparent 49%),
-        linear-gradient(76deg, transparent 0 43%, rgba(255,255,255,.72) 44%, transparent 45%),
-        linear-gradient(130deg, transparent 0 61%, rgba(255,255,255,.62) 62%, transparent 63%),
-        linear-gradient(40deg, transparent 0 52%, rgba(255,255,255,.58) 53%, transparent 54%),
-        radial-gradient(circle at 52% 50%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 38%);
-        mix-blend-mode:screen; filter:drop-shadow(0 0 10px rgba(255,255,255,.62));}
-      #ito-screen-crack.active{animation:itoCrack .95s ease-out both;}
+        radial-gradient(circle at 50% 48%, rgba(255,255,255,.12), transparent 18%),
+        linear-gradient(120deg, rgba(163,64,242,0.16) 0%, transparent 24%),
+        linear-gradient(60deg, rgba(31,41,55,0.82) 0%, rgba(67,56,202,0.2) 20%, transparent 36%),
+        linear-gradient(160deg, rgba(255,255,255,0.22) 0%, transparent 13%, rgba(255,255,255,.34) 14%, transparent 24%),
+        linear-gradient(90deg, rgba(255,255,255,.23) 42%, transparent 46%, rgba(255,255,255,.2) 50%, transparent 54%, rgba(255,255,255,.16) 58%, transparent 62%);
+        mix-blend-mode:screen; filter:drop-shadow(0 0 14px rgba(168,85,247,.65));}
+      #ito-screen-crack.active{opacity:1; animation:itoCrack 1s ease-out both;}
       #battle-fx-layer .ito-boss-rush{position:absolute; inset:auto 6% 16% 6%; text-align:center; font-weight:900; font-size:min(8vw,48px); color:#fdf4ff; letter-spacing:.12em; opacity:0; text-shadow:0 0 10px rgba(0,0,0,.95), 0 0 20px rgba(168,85,247,.95);}
       #battle-fx-layer .ito-boss-rush.active{animation:itoBossRush .95s ease-out both;}
       #mission-super-controls .mission-filter-btn.active{background:linear-gradient(180deg,#facc15,#f59e0b); color:#1e1b4b; border-color:#fff; box-shadow:0 0 18px rgba(250,204,21,.4);}
@@ -6960,14 +6977,19 @@ EXガチャ${times===10?'10連':'1回'}には ${need} 個必要！` : ''}`);
     const banner = $('ito-rush-banner');
     const layer = $('ito-impact-layer');
     const crack = $('ito-screen-crack');
+    const flash = $('cutin-flash');
+    const screen = $('screen-game');
     if(!cutin || !banner || !layer || !crack) return;
     cutin.classList.add('ito-mode');
     banner.classList.remove('active');
     crack.classList.remove('active');
+    if(flash){ flash.classList.remove('active'); }
     layer.innerHTML = '';
     void banner.offsetWidth;
     banner.classList.add('active');
     crack.classList.add('active');
+    if(flash){ flash.classList.add('active'); }
+    if(screen){ screen.classList.add('screen-shake'); clearTimeout(screen.__shakeTimer); screen.__shakeTimer = setTimeout(()=>{ screen.classList.remove('screen-shake'); }, 900); }
     const words = ['無駄!','ドゴォ','バキッ','ラッシュ!','ドドド'];
     for(let i=0;i<18;i++){
       const el = document.createElement('div');
@@ -6981,7 +7003,7 @@ EXガチャ${times===10?'10連':'1回'}には ${need} 個必要！` : ''}`);
     }
     const bossRush = $('ito-boss-rush');
     if(bossRush){ bossRush.classList.remove('active'); void bossRush.offsetWidth; bossRush.classList.add('active'); }
-    setTimeout(()=>{ cutin.classList.remove('ito-mode'); banner.classList.remove('active'); crack.classList.remove('active'); layer.innerHTML=''; }, 1500);
+    setTimeout(()=>{ cutin.classList.remove('ito-mode'); banner.classList.remove('active'); if(flash){ flash.classList.remove('active'); } crack.classList.remove('active'); layer.innerHTML=''; }, 1500);
   }
 
   function triggerSpecialSkillPatched(){
@@ -9267,6 +9289,343 @@ if(document.readyState==='complete'||document.readyState==='interactive') setTim
   }
 })();
 </script>
+<script>
+(function(){
+  // ==== フレンドガチャ連動システム（草核配布）====
+  // 既存のガチャ処理・セーブデータ構造・関数名は一切変更せず、
+  // 既存が既に書き込んでいる 'global/latest_ur_pull' を読み取り専用で監視し、
+  // そのユーザーが自分のフレンドであった場合のみ、専用のお祝いポップアップを表示し
+  // 草核+1を配布する（フレンド専用の追加演出・追加配布）。
+  const FG = { lastGlobalTs: 0, styleReady:false, domReady:false, pollTimer:0 };
+
+  function fgInjectStyle(){
+    if(FG.styleReady || document.getElementById('friend-gacha-style')) { FG.styleReady = true; return; }
+    const st = document.createElement('style');
+    st.id = 'friend-gacha-style';
+    st.textContent = `
+      #friend-gacha-toast{position:fixed; top:-160px; left:50%; width:92%; max-width:400px; transform:translateX(-50%);
+        opacity:0; pointer-events:none; z-index:10000; transition:top .55s cubic-bezier(.175,.885,.32,1.275), opacity .45s;}
+      #friend-gacha-toast.show{top:18px; opacity:1; pointer-events:auto;}
+      #friend-gacha-toast .fgt-card{background:linear-gradient(135deg, rgba(34,197,94,.97), rgba(21,128,61,.97));
+        border:3px solid #fff; border-radius:20px; padding:14px 16px; display:flex; align-items:center; gap:12px;
+        box-shadow:0 14px 34px rgba(0,0,0,.45), 0 0 30px rgba(74,222,128,.55); animation:fgtPop .5s cubic-bezier(.34,1.56,.64,1) both;}
+      @keyframes fgtPop{0%{transform:scale(.7) rotate(-3deg);} 60%{transform:scale(1.06) rotate(1deg);} 100%{transform:scale(1) rotate(0);}}
+      #friend-gacha-toast .fgt-icon{width:44px; height:44px; flex-shrink:0; border-radius:12px; background:rgba(0,0,0,.25);
+        display:flex; align-items:center; justify-content:center; font-size:26px; border:2px solid rgba(255,255,255,.7);
+        box-shadow:0 0 16px rgba(255,255,255,.6) inset;}
+      #friend-gacha-toast .fgt-text{flex:1; color:#fff; font-weight:900; font-size:13px; line-height:1.35; text-shadow:0 2px 6px rgba(0,0,0,.4);}
+      #friend-gacha-toast .fgt-name{color:#fef08a;}
+      #friend-gacha-toast .fgt-reward{display:flex; align-items:center; gap:3px; background:rgba(0,0,0,.3); border-radius:999px;
+        padding:3px 9px; font-size:12px; color:#fef08a; font-weight:900; flex-shrink:0; white-space:nowrap; border:1px solid rgba(255,255,255,.4);}
+      #friend-gacha-toast .fgt-sparkle{position:absolute; inset:0; border-radius:20px; pointer-events:none;
+        background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.35), transparent 40%),
+                   radial-gradient(circle at 85% 75%, rgba(255,255,255,.25), transparent 45%);
+        animation:fgtSparkle 1.8s ease-in-out infinite;}
+      @keyframes fgtSparkle{0%,100%{opacity:.5;} 50%{opacity:1;}}
+    `;
+    document.head.appendChild(st);
+    FG.styleReady = true;
+  }
+
+  function fgInjectDom(){
+    if(FG.domReady || document.getElementById('friend-gacha-toast')) { FG.domReady = true; return; }
+    const wrap = document.createElement('div');
+    wrap.id = 'friend-gacha-toast';
+    wrap.innerHTML = `
+      <div class="fgt-card" style="position:relative;">
+        <div class="fgt-sparkle"></div>
+        <div class="fgt-icon" id="fgt-icon">🎉</div>
+        <div class="fgt-text">
+          <span class="fgt-name" id="fgt-name">フレンド</span> が超激レアを入手！<br>
+          <span id="fgt-item">???</span> をゲット！お祝いに草核をもらったぞ！
+        </div>
+        <div class="fgt-reward">✨ +1</div>
+      </div>`;
+    document.body.appendChild(wrap);
+    FG.domReady = true;
+  }
+
+  function fgShowToast(name, itemName, rarity){
+    fgInjectStyle(); fgInjectDom();
+    const t = document.getElementById('friend-gacha-toast');
+    if(!t) return;
+    const nameEl = document.getElementById('fgt-name');
+    const itemEl = document.getElementById('fgt-item');
+    const iconEl = document.getElementById('fgt-icon');
+    if(nameEl) nameEl.textContent = name || 'フレンド';
+    if(itemEl) itemEl.textContent = (itemName || '???') + (rarity ? `（${rarity}）` : '');
+    if(iconEl) iconEl.textContent = rarity === 'UR' ? '👑' : '🎊';
+    t.classList.add('show');
+    clearTimeout(t.__fgHideTimer);
+    t.__fgHideTimer = setTimeout(()=>{ t.classList.remove('show'); }, 4200);
+  }
+
+  function fgAwardKusoKaku(){
+    try{
+      if(typeof DB === 'undefined' || !DB) return;
+      DB.gachaTickets = (DB.gachaTickets || 0) + 1;
+      if(typeof updateHeaderUI === 'function') updateHeaderUI();
+      if(typeof saveGame === 'function') saveGame();
+    }catch(e){}
+  }
+
+  function fgHandleGlobalPull(data){
+    if(!data || !data.timestamp) return;
+    if(data.timestamp <= FG.lastGlobalTs) return;
+    const isFirstRead = FG.lastGlobalTs === 0;
+    FG.lastGlobalTs = data.timestamp;
+    if(isFirstRead) return; // 起動時点で既にある古い記録には反応しない
+    try{
+      if(typeof DB === 'undefined' || !DB || data.userId === DB.userId) return;
+      const isFriend = typeof friendsList === 'object' && friendsList && Object.prototype.hasOwnProperty.call(friendsList, data.userId);
+      if(!isFriend) return;
+      fgAwardKusoKaku();
+      fgShowToast(data.userName, data.itemName, data.rarity);
+    }catch(e){}
+  }
+
+  function fgStartWatching(){
+    if(typeof window === 'undefined' || !window.isFirebaseInitialized || !window.db) return false;
+    try{
+      window.db.ref('global/latest_ur_pull').on('value', function(snap){
+        fgHandleGlobalPull(snap.val());
+      });
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function fgBoot(){
+    if(fgStartWatching()) { clearInterval(FG.pollTimer); FG.pollTimer = 0; return; }
+    if(!FG.pollTimer){
+      FG.pollTimer = setInterval(function(){ if(fgStartWatching()){ clearInterval(FG.pollTimer); FG.pollTimer = 0; } }, 800);
+    }
+  }
+
+  if(document.readyState === 'complete' || document.readyState === 'interactive'){
+    setTimeout(fgBoot, 50);
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fgBoot, 50); });
+  }
+  window.addEventListener('load', fgBoot);
+})();
+</script>
+
+<style id="mobile-usability-style">
+  /* ===== スマホ向け操作性向上（追加CSSのみ／既存クラスは上書きしない） ===== */
+  @media (max-width: 700px), (pointer: coarse) {
+    button, .game-btn, select, .nav-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+    /* 小さい「✕」閉じるボタン等の当たり判定を、見た目のサイズは変えずに拡張 */
+    button[onclick^="close"] { position: relative; }
+    button[onclick^="close"]::after {
+      content: ''; position: absolute; inset: -10px; z-index: 1;
+    }
+
+    /* 下部ナビゲーションのタップ領域を拡大 */
+    #app-nav .nav-btn { padding-top: .55rem !important; padding-bottom: .55rem !important; min-height: 50px; }
+
+    /* ステージ/編成タブなど、小さめのタブボタンの高さを底上げ */
+    #tab-stage-normal, #tab-stage-ex, #tab-stage-multi, #tab-stage-pvp,
+    #tab-gacha-normal, #tab-gacha-ex { min-height: 40px; }
+
+    /* フォーム入力欄はiOSの自動ズームを防ぐため16px以上を確保 */
+    input, select, textarea { font-size: 16px !important; }
+
+    /* 編成・強化・図鑑カードの当たり判定を少し広げる */
+    #equip-weapons > button, #equip-skins > button, #equip-crew > button, #equip-system > button {
+      min-height: 64px;
+    }
+  }
+</style>
+<script>
+(function(){
+  // ==== スマホ操作性 & 軽量化設定（表示件数の制限）====
+  // 既存の関数・IDは変更せず、上書き（オーバーライド）方式で安全に追加する。
+
+  function getListPageSize(){
+    var v = (typeof DB !== 'undefined' && DB && DB.listPageSize) ? Number(DB.listPageSize) : 30;
+    if(!v || isNaN(v) || v <= 0) v = 30;
+    return v;
+  }
+
+  // ---- 設定モーダルに「表示件数」UIを追加 ----
+  function ensureListPageSizeUi(){
+    if(document.getElementById('list-page-size')) return;
+    var tex = document.getElementById('texture-quality');
+    if(!tex) return;
+    var texBox = tex.parentElement;
+    var wrapper = texBox ? texBox.parentElement : null;
+    if(!wrapper) return;
+    var box = document.createElement('div');
+    box.className = 'bg-indigo-950 p-4 rounded-xl border border-indigo-700 shadow-inner';
+    box.innerHTML =
+      '<label class="block text-sm text-orange-300 font-bold mb-2 flex justify-between items-center">' +
+        '<span>📱 一覧の表示件数（軽量化）</span>' +
+      '</label>' +
+      '<select id="list-page-size" class="w-full bg-indigo-900 border border-indigo-700 text-white rounded-lg p-2 font-bold text-xs focus:outline-none focus:border-yellow-400">' +
+        '<option value="20">20件ずつ（かなり軽い）</option>' +
+        '<option value="30">30件ずつ（おすすめ）</option>' +
+        '<option value="50">50件ずつ</option>' +
+        '<option value="100">100件ずつ</option>' +
+        '<option value="999999">すべて表示（重い機種は注意）</option>' +
+      '</select>' +
+      '<p class="text-[10px] text-indigo-300 mt-2 leading-relaxed">編成・強化・ステージ一覧で一度に表示する数を減らすと、動作が重い端末でも快適に遊べます。「もっと見る」で続きを表示できます。</p>';
+    wrapper.appendChild(box);
+    var sel = document.getElementById('list-page-size');
+    if(sel){
+      sel.value = String(getListPageSize());
+      sel.onchange = function(){
+        if(typeof DB === 'undefined' || !DB) return;
+        DB.listPageSize = parseInt(sel.value, 10) || 30;
+        if(typeof saveGame === 'function') saveGame();
+        try{
+          var equipScreen = document.getElementById('screen-equip');
+          if(equipScreen && !equipScreen.classList.contains('hidden') && typeof initEquip === 'function') initEquip();
+        }catch(e){}
+        try{
+          var stageList = document.getElementById('stage-list');
+          if(stageList && typeof window.switchStageTab === 'function' && typeof currentStageTab !== 'undefined'){
+            window.switchStageTab(currentStageTab);
+          }
+        }catch(e){}
+      };
+    }
+  }
+
+  var baseOpenSettingsModal = window.openSettingsModal;
+  function openSettingsModalPatched(){
+    var r = baseOpenSettingsModal ? baseOpenSettingsModal() : null;
+    ensureListPageSizeUi();
+    var sel = document.getElementById('list-page-size');
+    if(sel) sel.value = String(getListPageSize());
+    return r;
+  }
+  window.openSettingsModal = openSettingsModalPatched;
+
+  // ---- 編成・強化・図鑑リストのページング表示 ----
+  var EQUIP_PAGE_STATE = {};
+
+  function buildEquipCard(id, m, oList, eId, dKey){
+    var isOwned = dKey === 'system' ? true : oList.includes(id);
+    var ie = id === eId, lv = isOwned ? getItemLevel(id) : 1;
+    var b = document.createElement('button');
+    b.className = 'p-2 rounded-xl border-2 text-left relative overflow-hidden transition-transform transform hover:scale-105 active:scale-95 ' +
+      (ie ? 'bg-indigo-600 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : isOwned ? 'bg-indigo-950 border-indigo-700 shadow-md' : 'bg-slate-900 border-slate-700 shadow-inner opacity-80 cursor-not-allowed');
+
+    var viClass = m.type === 'image' ? 'absolute inset-0 w-full h-full object-contain' : 'text-2xl filter drop-shadow-md';
+    if(!isOwned) viClass += ' brightness-0 opacity-50';
+    var vi = m.type === 'image'
+      ? '<div class="relative w-8 h-8 flex items-center justify-center bg-indigo-900 rounded-lg overflow-hidden border border-indigo-700"><img src="' + m.icon + '" class="' + viClass + '" onerror="fb(this,\'' + m.fallbackIcon + '\',\'text-sm ' + (!isOwned ? 'brightness-0 opacity-50' : '') + '\')"></div>'
+      : '<span class="' + viClass + '">' + (m.icon || '⚔️') + '</span>';
+
+    if(dKey === 'system'){
+      b.innerHTML = '<div class="flex justify-between items-start mb-1"><div class="text-yellow-400 font-black text-[10px] drop-shadow-sm">[システム]</div><div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.' + lv + '</div></div><div class="flex items-center gap-2">' + vi + '<div class="font-bold text-white text-xs leading-tight">' + m.name + '<br><span class="text-[9px] text-indigo-300 font-medium">最大値UP!</span></div></div>';
+    } else {
+      b.innerHTML = '<div class="flex justify-between items-start mb-1"><div class="' + rarityColors[m.rarity] + ' font-black text-[10px] drop-shadow-sm">[' + m.rarity + ']</div>' +
+        (isOwned ? '<div class="text-yellow-300 text-[10px] font-black bg-indigo-900/80 px-1 rounded-sm border border-indigo-700">Lv.' + lv + '</div>' : '<div class="text-slate-400 text-[9px] font-black bg-slate-800 px-1 rounded-sm border border-slate-600">未取得</div>') +
+        '</div><div class="flex items-center gap-2">' + vi + '<div class="font-bold ' + (isOwned ? 'text-white' : 'text-slate-400') + ' text-xs leading-tight">' + m.name + '</div></div>' +
+        (ie ? '<div class="absolute top-0 right-0 bg-yellow-500 text-indigo-950 text-[10px] px-2 py-0.5 rounded-bl-lg font-black shadow-sm">装備中!!</div>' : '');
+    }
+
+    if(isOwned && !ie && dKey !== 'system' && !window._tutorialEquipTargetSet && !DB.tutorialEquipCompleted && currentTutorialScenario === 'equip'){
+      b.id = 'tutorial-target-equip'; window._tutorialEquipTargetSet = true;
+    }
+    b.onclick = function(){ if(isOwned){ openItemDetail(id, dKey); } else { showAlert('ガチャで手に入れよう！'); } };
+    return b;
+  }
+
+  function renderEquipPage(cid){
+    var st = EQUIP_PAGE_STATE[cid];
+    var c = document.getElementById(cid);
+    if(!st || !c || !st.md) return;
+    var md = st.md, oList = st.oList, eId = st.eId, dKey = st.dKey;
+    var allIds = Object.keys(md);
+    allIds.sort(function(a, b){
+      var aOwned = dKey === 'system' ? true : oList.includes(a);
+      var bOwned = dKey === 'system' ? true : oList.includes(b);
+      if(aOwned === bOwned) return 0;
+      return aOwned ? -1 : 1;
+    });
+    var total = allIds.length;
+    var shown = Math.min(st.shown, total);
+    var slice = allIds.slice(0, shown);
+
+    c.innerHTML = '';
+    slice.forEach(function(id){
+      var m = md[id]; if(!m) return;
+      c.appendChild(buildEquipCard(id, m, oList, eId, dKey));
+    });
+
+    if(shown < total){
+      var wrap = document.createElement('div');
+      wrap.className = (dKey === 'system') ? 'col-span-1' : 'col-span-2';
+      var btn = document.createElement('button');
+      btn.className = 'game-btn w-full bg-indigo-700 text-white font-black px-4 py-3 rounded-xl border-2 border-indigo-500 shadow-md mt-1';
+      btn.textContent = 'もっと見る（残り' + (total - shown) + '件）';
+      btn.onclick = function(){ EQUIP_PAGE_STATE[cid].shown += getListPageSize(); renderEquipPage(cid); };
+      wrap.appendChild(btn);
+      c.appendChild(wrap);
+    }
+  }
+
+  function renderEquipListPatched(cid, md, oList, eId, dKey){
+    if(!md){ var c = document.getElementById(cid); if(c) c.innerHTML=''; return; }
+    EQUIP_PAGE_STATE[cid] = { md: md, oList: oList, eId: eId, dKey: dKey, shown: getListPageSize() };
+    renderEquipPage(cid);
+  }
+  window.renderEquipList = renderEquipListPatched;
+
+  // ---- ステージ一覧のページングを設定値と連動させる ----
+  function renderStageListSafePatched(stgs, offset){
+    offset = offset || 0;
+    var l = document.getElementById('stage-list');
+    if(!l) return;
+    var max = getListPageSize();
+    window.__stageRenderSource = Array.isArray(stgs) ? stgs.slice() : stgs;
+    if (!Array.isArray(stgs)) { if(typeof renderStageList === 'function') renderStageList(stgs, false, stgs); return; }
+    if (offset === 0) l.innerHTML = '';
+    var prevMore = l.querySelector('.stage-more-wrap');
+    if (prevMore) prevMore.remove();
+    var slice = stgs.slice(offset, offset + max);
+    if(typeof renderStageList === 'function') renderStageList(slice, offset > 0, stgs);
+    if (offset + max < stgs.length) {
+      var moreWrap = document.createElement('div');
+      moreWrap.className = 'stage-more-wrap w-full flex justify-center mt-3';
+      var moreBtn = document.createElement('button');
+      moreBtn.className = 'game-btn bg-indigo-700 text-white font-black px-4 py-3 rounded-xl border-2 border-indigo-500 shadow-md';
+      moreBtn.innerText = 'もっと見る';
+      moreBtn.onclick = function(){ renderStageListSafePatched(stgs, offset + max); };
+      moreWrap.appendChild(moreBtn);
+      l.appendChild(moreWrap);
+    }
+  }
+  window.renderStageListSafe = renderStageListSafePatched;
+
+  // 既に開いている画面があれば、設定変更を即座に反映
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureListPageSizeUi, 300); });
+  window.addEventListener('load', function(){ setTimeout(ensureListPageSizeUi, 300); });
+})();
+</script>
+
+<style id="settings-scroll-fix-style">
+  /* ===== 設定モーダルのスクロール対応＆画面縮小バグ対策（追加CSSのみ） ===== */
+
+  /* 設定一覧が増えて縦に長くなっても、画面全体ではなくモーダル内だけでスクロールさせる */
+  #settings-modal > div {
+    max-height: 86vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;      /* Firefox: スクロールバーを非表示にして見た目を崩さない */
+    -ms-overflow-style: none;   /* 旧Edge/IE */
+  }
+  #settings-modal > div::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  /* html側にもoverflow:hiddenを明示し、モーダル内容がはみ出しても
+     画面右にブラウザのスクロールバーが出て画面(#app)が縮む現象を防ぐ */
+  html { overflow: hidden !important; height: 100%; }
+  body { overflow: hidden !important; }
+  #app { overflow: hidden; }
+</style>
+
 </body>
 </html>
-
