@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KAZIN - ULTIMATE MAX</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1p:wght@400;700;900&family=Orbitron:wght@700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+    <!-- Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        :root {
+            --primary-glow: rgba(251, 191, 36, 0.7);
+            --secondary-glow: rgba(56, 189, 248, 0.7);
+            --rare-glow: rgba(236, 72, 153, 0.85);
+            --pillow-glow: rgba(168, 85, 247, 0.85);
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1p', sans-serif;
+            background: #020617;
+            color: #fff;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 440px;
+            height: 100%;
+            max-height: 940px;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+        }
+        @media (min-width: 441px) {
+            #app-container {
+                height: 92vh;
+                border-radius: 28px;
+                border: 2px solid rgba(255, 255, 255, 0.15);
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(56, 189, 248, 0.15);
+            }
+        }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .view-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; background: transparent; z-index: 10; }
+        .view-layer.active { display: flex; animation: layerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .content-section { display: none; flex: 1; overflow-y: auto; padding: 0.75rem; padding-bottom: 6.5rem; z-index: 20; }
+        .content-section.active { display: block; animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sub-view { display: none; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sub-view.active { display: block; }
+        .modal { display: none; animation: layerFadeIn 0.2s ease-out; }
+        .modal.active { display: flex; }
+
+        #bg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        @keyframes layerFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(25px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulse-glow { 0%, 100% { text-shadow: 0 0 12px var(--primary-glow); transform: scale(1); } 50% { text-shadow: 0 0 28px rgba(251, 191, 36, 1), 0 0 45px rgba(251, 191, 36, 0.9); transform: scale(1.03); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+        @keyframes shimmer { 0% { transform: translateX(-100%) skewX(-25deg); } 100% { transform: translateX(200%) skewX(-25deg); } }
+        @keyframes crownPulse { 0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), inset 0 0 10px rgba(216, 180, 254, 0.4); } 50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.9), inset 0 0 20px rgba(236, 72, 153, 0.6); } }
+        @keyframes epic-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+        @keyframes skillReadyPulse { 0%, 100% { box-shadow: 0 0 8px #fde047, inset 0 0 8px #fde047; border-color: #fde047; transform: scale(1); } 50% { box-shadow: 0 0 20px #f59e0b, inset 0 0 15px #f59e0b; border-color: #fff; transform: scale(1.05); } }
+        @keyframes popUpDamage { 0% { opacity: 1; transform: translateY(0) scale(1.5); } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
+        @keyframes charAction { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
+
+        .title-logo { font-family: 'Cinzel', 'Orbitron', serif; font-size: 4.8rem; font-weight: 900; background: linear-gradient(180deg, #ffffff 0%, #fef08a 40%, #f59e0b 80%, #78350f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)); animation: pulse-glow 3s infinite; letter-spacing: 0.12em; }
+        
+        .panel { 
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            border-top: 1px solid rgba(255, 255, 255, 0.25); 
+            border-left: 1px solid rgba(255, 255, 255, 0.2); 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .panel:active { transform: scale(0.97); }
+
+        .btn-quest-main {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            border: 2px solid #fef08a;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.6);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn-quest-main::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+            animation: shimmer 2.5s infinite;
+        }
+        .btn-quest-main:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
+
+        .btn-gold { 
+            background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); 
+            border: 1.5px solid #fef3c7; 
+            color: #fff; 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+            box-shadow: 0 6px 15px rgba(217, 119, 6, 0.4), inset 0 1px 3px rgba(255,255,255,0.5); 
+            position: relative; overflow: hidden; transition: all 0.15s; 
+        }
+        .btn-gold::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 3s infinite; }
+        .btn-gold:active { transform: translateY(3px); box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4); }
+
+        .btn-gacha { 
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); 
+            border: 1.5px solid #fbcfe8; 
+            color: #fff; 
+            box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4), inset 0 1px 3px rgba(255,255,255,0.5); 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+        }
+        .btn-gacha:active { transform: translateY(3px); }
+
+        .pillow-slot {
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 2px solid #c084fc;
+            animation: crownPulse 3s infinite ease-in-out;
+        }
+
+        .rare-3 { background: linear-gradient(135deg, #f59e0b, #dc2626); color: white; border-color: #fcd34d; box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);}
+        .rare-2 { background: linear-gradient(135deg, #38bdf8, #1e3a8a); color: white; border-color: #93c5fd; box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);}
+        .rare-1 { background: linear-gradient(135deg, #64748b, #1e293b); color: #e2e8f0; border-color: #94a3b8; }
+
+        .elem-fire { text-shadow: 0 0 12px #ef4444; color: #fca5a5; }
+        .elem-water { text-shadow: 0 0 12px #3b82f6; color: #93c5fd; }
+        .elem-grass { text-shadow: 0 0 12px #10b981; color: #6ee7b7; }
+        .elem-light { text-shadow: 0 0 12px #f59e0b; color: #fde68a; }
+        .elem-dark { text-shadow: 0 0 12px #a855f7; color: #e9d5ff; }
+
+        #gacha-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .gacha-item-reveal { animation: epic-shake 0.5s ease-in-out, layerFadeIn 1s ease-out; transform-origin: center; }
+
+        .skill-icon-btn {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #334155, #0f172a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        .skill-icon-btn:active { transform: scale(0.9); }
+        .skill-icon-btn.ready {
+            animation: skillReadyPulse 1.5s infinite;
+            cursor: pointer;
+        }
+        .skill-icon-btn.guard {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+        }
+        .skill-gauge-overlay {
+            position: absolute;
+            inset: 0;
+            background: conic-gradient(transparent 0%, transparent 0%, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.75) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .dmg-popup {
+            position: absolute;
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            text-shadow: 0 0 5px #000, 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            pointer-events: none;
+            animation: popUpDamage 1s ease-out forwards;
+            z-index: 50;
+        }
+        .dmg-popup.heal { color: #4ade80; text-shadow: 0 0 10px #16a34a, 2px 2px 0 #000; }
+        .dmg-popup.crit { font-size: 2.8rem; color: #facc15; text-shadow: 0 0 15px #ca8a04, 3px 3px 0 #000; }
+        .char-action-anim { animation: charAction 0.3s ease-out; }
+        .guard-active { box-shadow: 0 0 15px #3b82f6, inset 0 0 10px #60a5fa !important; border-color: #93c5fd !important; }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <canvas id="bg-canvas"></canvas>
+        <div id="toast-container" class="absolute top-16 left-1/2 transform -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none w-11/12 items-center"></div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: タイトル画面 -->
+        <!-- ========================================== -->
+        <div id="view-title" class="view-layer active bg-[url('https://images.unsplash.com/photo-1618336306821-65089e9006c6?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-slate-950/70 to-black/95 backdrop-blur-[2px]"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full px-4">
+                <div class="text-[10px] tracking-[0.4em] text-amber-300 font-bold mb-2 uppercase drop-shadow">Ultimate Fantasy RPG</div>
+                <h1 class="title-logo mb-12">KAZIN</h1>
+                <div class="relative">
+                    <div class="absolute -inset-3 bg-gradient-to-r from-amber-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
+                    <button onclick="startGame()" class="btn-gold font-black py-4 px-14 rounded-full text-xl animate-float relative z-10 tracking-wider">
+                        TAP TO START
+                    </button>
+                </div>
+                <p class="mt-14 text-slate-300 text-xs tracking-[0.25em] font-bold animate-pulse">BEYOND THE LIMIT</p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: メインUI -->
+        <!-- ========================================== -->
+        <div id="view-main" class="view-layer">
+            <div class="h-16 bg-slate-950/80 backdrop-blur-md border-b border-white/10 flex justify-between items-center px-3 shadow-xl z-30 relative">
+                <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"></div>
+                <div class="panel px-3 py-1 flex items-center border border-emerald-500/50 !rounded-full shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                    <span class="text-base mr-2 animate-pulse">⚡</span>
+                    <div class="flex flex-col">
+                        <span class="text-[8px] text-emerald-400 font-black leading-none mb-0.5 tracking-wider">STAMINA</span>
+                        <span id="header-stamina" class="text-xs font-mono font-black text-white leading-none">160/160</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="panel px-2.5 py-1 flex items-center border border-amber-500/40 !rounded-xl" title="草コイン"><span class="text-sm mr-1.5">🪙</span><span id="header-coin" class="text-xs font-mono font-black text-amber-200">0</span></div>
+                    <div class="panel px-2.5 py-1 flex items-center border border-fuchsia-500/40 !rounded-xl" title="草核"><span class="text-sm mr-1.5">🔮</span><span id="header-ticket" class="text-xs font-mono font-black text-fuchsia-300">0</span></div>
+                </div>
+            </div>
+
+            <div class="relative flex-1 overflow-hidden z-20">
+                <div id="content-home" class="content-section active relative h-full">
+                    <div class="h-64 relative flex flex-col justify-center items-center my-2">
+                        <div id="home-element-aura" class="absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700"></div>
+                        <div id="home-player-icon" class="text-[8.5rem] leading-none animate-float relative z-10 filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)]">🧙‍♂️</div>
+                        <div class="absolute bottom-2 bg-slate-950/80 px-6 py-1.5 rounded-full text-xs font-black border border-amber-400/40 backdrop-blur-md flex items-center z-20 shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
+                            <span id="home-player-element-icon" class="mr-2 text-base">🔥</span>
+                            <span class="text-amber-400 font-mono mr-2">Lv.99</span> 
+                            <span id="home-player-name" class="text-white">ゆうしゃ</span>
+                        </div>
+                    </div>
+                    <!-- バナー類 -->
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div onclick="openModal('modal-mission')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 group relative bg-gradient-to-b from-amber-950/40 to-slate-900/60"><div class="absolute top-1 right-1 bg-red-500 rounded-full w-2 h-2 animate-pulse"></div><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">📜</span><span class="text-[10px] font-black text-amber-200">依頼・ミッション</span></div>
+                        <div onclick="openModal('modal-reincarnate')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 group bg-gradient-to-b from-purple-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🌀</span><span class="text-[10px] font-black text-purple-200">属性転生</span></div>
+                        <div onclick="openModal('modal-profile')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 group bg-gradient-to-b from-cyan-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🧑‍🚀</span><span class="text-[10px] font-black text-cyan-200">プロフ</span></div>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div onclick="changeContent('content-quest')" class="bg-gradient-to-r from-purple-900/90 via-indigo-900/80 to-slate-900/90 border border-purple-400/50 rounded-2xl p-3 shadow-[0_4px_20px_rgba(168,85,247,0.3)] flex items-center justify-between cursor-pointer active:scale-95 transition-transform backdrop-blur-md relative overflow-hidden">
+                            <div class="flex items-center"><span class="text-3xl mr-3 filter drop-shadow">👑</span><div><div class="text-[9px] text-amber-300 font-black bg-black/60 inline-block px-2 py-0.5 rounded-full mb-0.5 border border-amber-500/30">EVENT</div><div class="text-xs font-black text-white">「黄金のスライム討伐戦」開催中！</div></div></div><span class="text-purple-300 font-bold text-xs">挑戦 ➔</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="grid grid-cols-2 gap-2 flex-1">
+                            <div onclick="openModal('modal-friend')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-pink-400"><span class="text-xl mb-0.5">🤝</span><span class="text-[9px] font-bold text-pink-200">フレンド</span></div>
+                            <div onclick="openModal('modal-code')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400"><span class="text-xl mb-0.5">⌨️</span><span class="text-[9px] font-bold text-blue-200">コード</span></div>
+                            <div onclick="openModal('modal-post')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 relative col-span-2"><span id="post-badge" class="absolute top-1 right-2 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full hidden">1</span><div class="flex items-center space-x-2"><span class="text-xl">📬</span><span class="text-[10px] font-bold text-yellow-200">プレゼントポスト</span></div></div>
+                        </div>
+                        <button onclick="changeContent('content-quest')" class="btn-quest-main h-24 w-40 rounded-2xl flex flex-col items-center justify-center p-2 text-white"><span class="text-xs font-black tracking-widest text-amber-200 uppercase drop-shadow">ADVENTURE</span><span class="text-2xl font-black italic tracking-wider flex items-center my-0.5">出撃 <span class="text-xl ml-1">⚔️</span></span><span class="text-[9px] font-bold bg-black/40 px-2 py-0.5 rounded-full text-amber-100">QUEST SELECT</span></button>
+                    </div>
+                </div>
+
+                <div id="content-equip" class="content-section">
+                    <div id="equip-view-top" class="sub-view active">
+                        <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 drop-shadow mb-3 flex items-center border-b border-amber-900/40 pb-2"><span class="text-2xl mr-2">⚒️</span> EQUIPMENT & SOUL</h2>
+                        <div class="panel p-3 mb-4 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-950/90 border-cyan-500/40"><div class="flex justify-between items-center"><span class="text-xs font-black text-cyan-300 tracking-wider">総合戦闘力</span><span id="eq-total-power" class="text-2xl font-black text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]">0</span></div></div>
+                        <div class="grid grid-cols-2 gap-2.5 mb-3">
+                            <div onclick="navEquipList('weapon')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-amber-400"><span class="text-[9px] text-amber-200 font-black">武器</span><span class="text-2xl my-0.5">🗡️</span><span id="eq-top-weapon" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                            <div onclick="navEquipList('sub')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-slate-300"><span class="text-[9px] text-slate-300 font-black">サブ(盾/二刀)</span><span class="text-2xl my-0.5">🛡️</span><span id="eq-top-sub" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                            <div onclick="navEquipList('head')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-emerald-300"><span class="text-[9px] text-emerald-300 font-black">頭防具</span><span class="text-2xl my-0.5">🪖</span><span id="eq-top-head" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                            <div onclick="navEquipList('bodyUp')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-emerald-300"><span class="text-[9px] text-emerald-300 font-black">体上防具</span><span class="text-2xl my-0.5">👕</span><span id="eq-top-bodyUp" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                            <div onclick="navEquipList('bodyDown')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-emerald-300"><span class="text-[9px] text-emerald-300 font-black">体下防具</span><span class="text-2xl my-0.5">👖</span><span id="eq-top-bodyDown" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                            <div onclick="navEquipList('accessory')" class="panel p-2.5 flex flex-col items-center cursor-pointer hover:border-pink-300"><span class="text-[9px] text-pink-300 font-black">アクセサリー</span><span class="text-2xl my-0.5">💍</span><span id="eq-top-accessory" class="text-xs font-bold text-white truncate w-full text-center">未装備</span></div>
+                        </div>
+                        <div onclick="navEquipList('pillow')" class="pillow-slot panel p-3 flex flex-col items-center cursor-pointer hover:border-purple-300 relative overflow-hidden group">
+                            <div class="absolute -top-6 -left-6 w-16 h-16 bg-purple-500/20 rounded-full blur-xl"></div>
+                            <div class="flex items-center space-x-2 mb-1"><span class="text-[10px] text-purple-200 font-black tracking-widest uppercase">魂の台座</span><span class="bg-purple-900/80 text-purple-200 text-[8px] font-black px-1.5 py-0.2 rounded border border-purple-400/50">こころ装備</span></div>
+                            <span class="text-3xl my-0.5 group-hover:scale-110 transition-transform filter drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]">👑</span><span id="eq-top-pillow" class="text-xs font-black text-purple-200 truncate w-full text-center">未装備 (ピロー)</span>
+                        </div>
+                    </div>
+                    <div id="equip-view-list" class="sub-view">
+                        <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2"><button onclick="switchSubView('content-equip', 'equip-view-top')" class="panel px-3 py-1 text-xs font-bold text-slate-300 hover:text-white flex items-center">◀ 戻る</button><h2 id="equip-list-title" class="text-base font-black text-amber-300 tracking-wider">装備一覧</h2><div class="text-[10px] text-slate-400">件数: <span id="eq-list-count-display">0/0</span></div></div>
+                        <div id="equip-list-container" class="space-y-2"></div>
+                    </div>
+                    <div id="equip-view-detail" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navEquipList(state.equip.currentType, true)" class="panel px-3 py-1 text-xs font-bold text-slate-300 mr-3">◀ 戻る</button><h2 class="text-base font-black text-amber-300">DETAILS & ENHANCE</h2></div>
+                        <div class="panel p-4 mb-3 text-center relative overflow-hidden border-t-4 border-amber-400">
+                            <div class="absolute -inset-10 bg-[radial-gradient(circle,rgba(251,191,36,0.15)_0%,transparent_70%)]"></div>
+                            <div id="eq-detail-rarity" class="text-amber-400 text-lg mb-1 tracking-widest relative z-10 drop-shadow-[0_0_5px_rgba(251,191,36,1)]">★★★</div>
+                            <h3 id="eq-detail-name" class="font-black text-lg text-white mb-1 relative z-10">アイテム名</h3>
+                            <div class="text-xs font-bold text-slate-300 mb-2 relative z-10">強化: <span id="eq-detail-enhances" class="text-amber-300 font-mono">0</span> / 100</div>
+                            <div class="flex justify-center space-x-3 text-xs font-bold bg-black/50 p-2 rounded-xl inline-flex mb-1 relative z-10 border border-white/10"><div class="flex flex-col px-1"><span class="text-[8px] text-slate-400">LEVEL</span><span class="text-sm text-cyan-300">Lv <span id="eq-detail-lvl">1</span></span></div><div id="eq-detail-stats-hp" class="flex flex-col px-1"><span class="text-[8px] text-slate-400">HP</span><span class="text-sm text-emerald-400">+<span id="eq-detail-hp-val">0</span></span></div><div id="eq-detail-stats-def" class="flex flex-col px-1"><span class="text-[8px] text-slate-400">DEF</span><span class="text-sm text-blue-300">+<span id="eq-detail-def-val">0</span></span></div><div id="eq-detail-stats-atk" class="flex flex-col px-1"><span class="text-[8px] text-slate-400">ATK</span><span class="text-sm text-rose-400">+<span id="eq-detail-atk-val">0</span></span></div></div>
+                        </div>
+                        <button id="eq-btn-equip" onclick="executeEquip()" class="w-full btn-gold py-3 rounded-xl font-black text-base tracking-widest mb-3">EQUIP - 装備する</button>
+                        <div class="panel p-3 border-cyan-500/30">
+                            <h4 class="text-[10px] font-black text-cyan-300 mb-1 border-b border-cyan-900 pb-1">ENHANCE (強化)</h4>
+                            <div class="flex justify-between items-center text-[10px] mb-2.5 px-1"><span>必要: <span class="text-amber-200">🪙 <span id="eq-cost-coin">100</span></span> / <span class="text-emerald-300">🌿 <span id="eq-cost-mat">1</span></span></span><span>所持: 🪙 <span id="eq-own-coin">0</span> / 🌿 <span id="eq-own-mat">0</span></span></div>
+                            <button id="eq-btn-enhance-normal" onclick="executeEnhance('all')" class="w-full panel py-2.5 rounded-xl font-bold text-xs text-cyan-300 border-cyan-500/50 hover:bg-cyan-900/30">強化実行</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-quest" class="content-section">
+                    <div id="quest-view-top" class="sub-view active">
+                        <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-400 drop-shadow mb-4 flex items-center border-b border-emerald-900/40 pb-2"><span class="text-2xl mr-2">🗺️</span> QUEST SELECT</h2>
+                        <div class="space-y-3">
+                            <div onclick="navQuestLayer('quest-view-story-chapters')" class="panel p-0 overflow-hidden cursor-pointer border-amber-500/40 relative"><div class="bg-gradient-to-r from-amber-600 to-orange-600 p-1 text-[9px] font-black tracking-widest text-white">MAIN STORY</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">ストーリークエスト</h3><p class="text-[10px] text-amber-200 mt-0.5">メインシナリオを進める</p></div><span class="text-3xl">📖</span></div></div>
+                            <div onclick="navQuestLayer('quest-view-event-top')" class="panel p-0 overflow-hidden cursor-pointer border-purple-500/40 relative"><div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-1 text-[9px] font-black tracking-widest text-white">SPECIAL EVENT</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">イベントクエスト</h3><p class="text-[10px] text-purple-200 mt-0.5">ボス討伐・限定イベント</p></div><span class="text-3xl">👑</span></div></div>
+                            <div onclick="navQuestLayer('quest-view-daily')" class="panel p-0 overflow-hidden cursor-pointer border-blue-500/40 relative"><div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-1 text-[9px] font-black tracking-widest text-white">DAILY QUEST</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">デイリークエスト</h3><p class="text-[10px] text-blue-200 mt-0.5">日替わり素材クエスト</p></div><span class="text-3xl">📅</span></div></div>
+                        </div>
+                    </div>
+                    <div id="quest-view-story-chapters" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-amber-300">CHAPTER SELECT</h2></div>
+                        <div class="space-y-2">
+                            <div onclick="navQuestLayer('quest-view-story-stages', '第1章 はじまりの地')" class="panel p-3 flex justify-between items-center cursor-pointer"><span class="font-bold text-xs">第1章 はじまりの地</span><span class="text-[10px] bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded">クリア済</span></div>
+                            <div onclick="navQuestLayer('quest-view-story-stages', '第2章 試練の山')" class="panel p-3 flex justify-between items-center cursor-pointer"><span class="font-bold text-xs">第2章 試練の山</span><span class="text-[10px] bg-amber-900 text-amber-300 px-2 py-0.5 rounded">進行中</span></div>
+                        </div>
+                    </div>
+                    <div id="quest-view-story-stages" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-story-chapters')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 id="quest-stage-title" class="text-sm font-black text-amber-300 truncate">STAGE</h2></div>
+                        <div class="space-y-2">
+                            <div onclick="showPartySetup('1-1 スライム平原', 10, 1.0)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-emerald-500"><div><span class="text-[8px] text-emerald-400 block">STAGE 1-1</span><span class="text-xs font-bold">スライム平原</span></div><span class="text-[10px] text-slate-400">⚡ 10</span></div>
+                            <div onclick="showPartySetup('1-2 ゴブリンの森', 15, 1.2)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-emerald-500"><div><span class="text-[8px] text-emerald-400 block">STAGE 1-2</span><span class="text-xs font-bold">ゴブリンの森</span></div><span class="text-[10px] text-slate-400">⚡ 15</span></div>
+                        </div>
+                    </div>
+                    <div id="quest-view-event-top" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-purple-300">EVENT SELECT</h2></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div onclick="openDifficultySelect('BOSS: 炎竜イフリート')" class="panel p-3 flex flex-col items-center justify-center cursor-pointer text-center border-l-4 border-red-500"><span class="text-2xl mb-1">🐉</span><span class="text-xs font-bold text-red-300">炎竜イフリート</span></div>
+                            <div onclick="openDifficultySelect('EVENT: 黄金スライムの宴')" class="panel p-3 flex flex-col items-center justify-center cursor-pointer text-center border-l-4 border-amber-400"><span class="text-2xl mb-1">🎪</span><span class="text-xs font-bold text-amber-300">黄金スライム</span></div>
+                        </div>
+                    </div>
+                    <div id="quest-view-difficulty" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-event-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 id="quest-diff-title" class="text-sm font-black text-purple-300 truncate">DIFFICULTY SELECT</h2></div>
+                        <div id="difficulty-list" class="space-y-2"></div>
+                    </div>
+                    <div id="quest-view-daily" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-blue-300">DAILY QUEST</h2></div>
+                        <div onclick="showPartySetup('DAILY: 化石採掘場', 15, 1.5)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-blue-500"><div><span class="text-[8px] text-blue-400 block">素材</span><span class="text-xs font-bold">草の化石 採掘場 (中級)</span></div><span class="text-[10px] text-slate-400">⚡ 15</span></div>
+                    </div>
+                </div>
+
+                <div id="content-gacha" class="content-section">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow mb-4 flex items-center border-b border-pink-900/40 pb-2"><span class="text-2xl mr-2">💎</span> SUMMON & SOUL</h2>
+                    <div class="panel p-0 mb-4 overflow-hidden border-pink-500/40 relative shadow-[0_0_20px_rgba(236,72,153,0.25)]">
+                        <div class="bg-[url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center h-44 relative">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                            <div class="absolute bottom-2 left-3"><h3 class="font-black text-lg text-white drop-shadow">伝説の武具 & こころ召喚</h3><p class="text-[10px] font-bold text-pink-300">👑 クラウンピロー (こころ) 出現率UP!</p></div>
+                        </div>
+                        <div class="bg-slate-950/90 p-3 backdrop-blur-md flex justify-around">
+                            <button onclick="playGacha(1)" class="btn-gold py-2 px-5 rounded-xl font-black text-xs flex flex-col items-center"><span>1回引く</span><span class="text-[8px] text-amber-900 font-mono">🔮 草核×3</span></button>
+                            <button onclick="playGacha(10)" class="btn-gacha py-2 px-5 rounded-xl font-black text-xs flex flex-col items-center"><span>10連引く</span><span class="text-[8px] text-pink-100 font-mono">🔮 草核×30</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-settings" class="content-section">
+                    <h2 class="text-xl font-black text-slate-200 mb-3 flex items-center border-b border-white/10 pb-2"><span class="text-2xl mr-2">⚙️</span> MENU & SETTINGS</h2>
+                    <div class="panel p-3 mb-3">
+                        <h3 class="font-bold mb-2 text-xs text-cyan-300 border-b border-cyan-900/60 pb-1">プレイヤー情報</h3>
+                        <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-300"><div>ID: <span id="set-user-id" class="text-white font-mono">---</span></div><div>化石: <span id="set-user-materials" class="text-emerald-300 font-mono">0</span>個</div></div>
+                    </div>
+                    <div class="panel p-3 mb-4">
+                        <h3 class="font-bold mb-2 text-xs text-cyan-300 border-b border-cyan-900/60 pb-1">システム設定</h3>
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-300 mb-1"><span>装備一覧の表示件数</span><select id="set-equip-limit" onchange="saveSettings()" class="bg-black/60 border border-slate-600 rounded px-2 py-1 text-white outline-none"><option value="10">10件</option><option value="20">20件</option><option value="50">50件</option><option value="9999">すべて</option></select></div>
+                    </div>
+                    <button onclick="backToTitle()" class="w-full panel py-3 rounded-xl border-rose-500/40 text-rose-400 font-black tracking-widest hover:bg-rose-950/40">TITLE - タイトルへ戻る</button>
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 w-full bg-slate-950/95 backdrop-blur-lg border-t border-white/10 pb-safe z-40">
+                <div class="flex justify-around py-1.5 px-1">
+                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-14"><span class="text-xl mb-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">🏠</span><span class="text-[8px] font-black tracking-wider">HOME</span></button>
+                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-14"><span class="text-xl mb-0.5">⚔️</span><span class="text-[8px] font-black tracking-wider">EQUIP</span></button>
+                    <button onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-14"><span class="text-xl mb-0.5">🗺️</span><span class="text-[8px] font-black tracking-wider">QUEST</span></button>
+                    <button onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-14"><span class="text-xl mb-0.5">💎</span><span class="text-[8px] font-black tracking-wider">GACHA</span></button>
+                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-14"><span class="text-xl mb-0.5">⚙️</span><span class="text-[8px] font-black tracking-wider">MENU</span></button>
+                </div>
+            </div>
+
+            <div id="modal-profile" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-5 border-cyan-500/50">
+                    <h3 class="text-base font-black text-cyan-300 mb-3 border-b border-cyan-900 pb-1">PROFILE</h3>
+                    <div class="mb-3"><label class="text-[9px] font-bold text-slate-400 block mb-1">ICON</label><div class="flex space-x-2"><input type="text" id="prof-input-icon" class="w-12 bg-black/50 border border-slate-600 text-white font-bold text-center text-xl rounded p-1 outline-none" maxlength="2"><div class="flex space-x-1 items-center overflow-x-auto text-lg bg-black/30 p-1 rounded border border-slate-800"><span onclick="document.getElementById('prof-input-icon').value='🧙‍♂️'" class="cursor-pointer px-1">🧙‍♂️</span><span onclick="document.getElementById('prof-input-icon').value='🥷'" class="cursor-pointer px-1">🥷</span><span onclick="document.getElementById('prof-input-icon').value='🦸‍♂️'" class="cursor-pointer px-1">🦸‍♂️</span></div></div></div>
+                    <div class="mb-3"><label class="text-[9px] font-bold text-slate-400 block mb-1">NAME</label><input type="text" id="prof-input-name" class="w-full bg-black/50 border border-slate-600 text-white font-bold rounded p-2 text-xs outline-none" maxlength="10"></div>
+                    <div class="mb-4"><label class="text-[9px] font-bold text-slate-400 block mb-1">COMMENT</label><textarea id="prof-input-comment" class="w-full bg-black/50 border border-slate-600 text-white font-bold rounded p-2 text-xs outline-none h-12 resize-none" maxlength="40"></textarea></div>
+                    <div class="flex space-x-2"><button onclick="closeModal('modal-profile')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button><button onclick="saveProfile()" class="flex-1 btn-gold py-2 rounded font-black text-xs text-amber-900">SAVE</button></div>
+                </div>
+            </div>
+            <div id="modal-code" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-5 border-blue-500/50 text-center"><h3 class="text-base font-black text-blue-300 mb-2">GIFT CODE</h3><p class="text-[9px] text-slate-400 mb-3">正しいコードを入力して報酬をGET！</p><input type="text" id="code-input" class="w-full bg-black/50 border border-slate-600 text-white font-mono font-bold text-center text-base rounded p-2 mb-2 outline-none uppercase tracking-widest" placeholder="ENTER CODE"><div id="code-error-msg" class="text-[9px] text-rose-500 font-bold h-4 mb-2"></div><div class="flex space-x-2"><button onclick="closeModal('modal-code')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button><button onclick="submitCode()" class="flex-1 panel py-2 rounded font-black text-xs bg-blue-900/50 text-blue-300 border-blue-500">送信</button></div></div>
+            </div>
+            <div id="modal-reincarnate" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-5 border-purple-500/50 text-center relative overflow-hidden"><h3 class="text-base font-black text-purple-300 mb-2">REINCARNATION</h3><p class="text-[9px] text-slate-300 mb-4">主人公の属性(元素)を変更します。</p><div class="flex justify-center space-x-2 mb-4"><button onclick="selectElement('fire')" class="panel p-2 flex flex-col items-center border-red-500/50 w-11"><span class="text-xl">🔥</span><span class="text-[8px] text-red-300">炎</span></button><button onclick="selectElement('water')" class="panel p-2 flex flex-col items-center border-blue-500/50 w-11"><span class="text-xl">💧</span><span class="text-[8px] text-blue-300">水</span></button><button onclick="selectElement('grass')" class="panel p-2 flex flex-col items-center border-emerald-500/50 w-11"><span class="text-xl">🌿</span><span class="text-[8px] text-emerald-300">草</span></button><button onclick="selectElement('light')" class="panel p-2 flex flex-col items-center border-amber-500/50 w-11"><span class="text-xl">✨</span><span class="text-[8px] text-amber-300">光</span></button><button onclick="selectElement('dark')" class="panel p-2 flex flex-col items-center border-purple-500/50 w-11"><span class="text-xl">🌑</span><span class="text-[8px] text-purple-300">闇</span></button></div><button onclick="closeModal('modal-reincarnate')" class="w-full panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button></div>
+            </div>
+            <div id="modal-mission" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md"><div class="panel w-full max-w-sm p-6 text-center border-amber-500/30"><div class="text-4xl mb-2">📜</div><h3 class="font-black text-amber-300 mb-3">MISSIONS</h3><p class="text-xs text-slate-300 mb-5">ミッション機能は次回大型アップデートで実装予定！</p><button onclick="closeModal('modal-mission')" class="w-full panel py-2 text-xs font-bold">閉じる</button></div></div>
+            <div id="modal-friend" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md"><div class="panel w-full max-w-sm p-6 text-center border-pink-500/30"><div class="text-4xl mb-2">🤝</div><h3 class="font-black text-pink-300 mb-3">FRIENDS</h3><p class="text-xs text-slate-300 mb-5">フレンド機能はサーバー拡張後に機能解禁されます。</p><button onclick="closeModal('modal-friend')" class="w-full panel py-2 text-xs font-bold">閉じる</button></div></div>
+            <div id="modal-post" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md"><div class="panel w-full max-w-sm p-5 text-center border-yellow-500/30"><div class="text-3xl mb-1">📬</div><h3 class="font-black text-yellow-300 mb-3">POST</h3><div id="post-content" class="text-xs text-slate-300 mb-5">現在届いているアイテムはありません。</div><button onclick="closeModal('modal-post')" class="w-full panel py-2 text-xs font-bold">閉じる</button></div></div>
+
+            <div id="modal-party-setup" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-4 border-amber-500/50 relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 text-9xl opacity-10">⚔️</div>
+                    <h3 class="text-base font-black text-amber-400 mb-1 tracking-widest text-center border-b border-amber-500/30 pb-2">PARTY SETUP</h3>
+                    <p class="text-[10px] text-center text-slate-300 mb-4">出撃メンバーを選択してください (最大4人)</p>
+                    
+                    <div id="party-setup-list" class="space-y-2 mb-4"></div>
+
+                    <div class="flex justify-between items-center bg-black/50 p-2 rounded-xl mb-4 border border-white/10">
+                        <span class="text-[10px] font-bold text-slate-300">消費スタミナ</span>
+                        <span id="setup-cost-display" class="text-sm font-black text-white tracking-wider">⚡ 0</span>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <button onclick="closeModal('modal-party-setup')" class="flex-1 panel py-3 rounded-xl font-bold text-xs text-slate-300 border-slate-600">キャンセル</button>
+                        <button onclick="executeBattleStart()" class="flex-1 btn-quest-main py-3 rounded-xl font-black text-sm text-white tracking-widest shadow-[0_0_15px_rgba(245,158,11,0.5)]">出撃！</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-result" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-6 text-center border-amber-500/50">
+                    <h3 id="result-title" class="text-2xl font-black mb-3 text-amber-400">QUEST CLEARED!</h3>
+                    <div id="result-content" class="text-sm font-bold text-white mb-5 space-y-2"></div>
+                    <button onclick="closeResult()" class="w-full btn-gold py-3 rounded-xl font-black text-xs text-amber-900 tracking-widest">OK</button>
+                </div>
+            </div>
+
+            <div id="modal-confirm" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="panel w-full max-w-sm p-6 text-center border-rose-500/50">
+                    <h3 class="text-base font-black text-rose-400 mb-3">WARNING</h3>
+                    <p class="text-xs text-slate-300 mb-5">クエストから撤退しますか？<br>（スタミナは戻りません）</p>
+                    <div class="flex space-x-2">
+                        <button onclick="closeModal('modal-confirm')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">キャンセル</button>
+                        <button onclick="executeEscape()" class="flex-1 panel py-2 rounded font-black text-xs bg-rose-900/50 text-rose-300 border-rose-500">撤退する</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: バトル画面 (星ドラ風ATB仕様) -->
+        <!-- ========================================== -->
+        <div id="view-battle" class="view-layer bg-black">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-900 to-black pointer-events-none"></div>
+            <div id="battle-bg-effects" class="absolute inset-0 z-0 opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex-1 flex flex-col relative pt-4 px-4">
+                    <div class="flex justify-between items-start mb-2 z-20">
+                        <div class="panel px-3 py-1 border-amber-500/50 bg-black/60 backdrop-blur">
+                            <span class="text-[8px] font-bold text-amber-300 block leading-none mb-0.5">STAGE</span>
+                            <span id="battle-stage-name" class="text-xs font-black text-white">---</span>
+                        </div>
+                        <button onclick="confirmEscape()" class="panel px-3 py-1.5 border-slate-500/50 text-[10px] font-bold text-slate-300 hover:text-white bg-black/60">撤退</button>
+                    </div>
+
+                    <div class="flex-1 flex flex-col items-center justify-center relative mt-4">
+                        <div id="enemy-message" class="absolute top-0 text-rose-400 font-black text-xs bg-black/70 px-4 py-1 rounded-full border border-rose-500/50 opacity-0 transition-opacity">敵がちからをためている！</div>
+                        
+                        <div id="enemy-container" class="relative flex flex-col items-center">
+                            <div class="w-40 h-2 bg-slate-800 rounded-full mb-3 border border-slate-600 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.8)]">
+                                <div id="enemy-hp-bar" class="h-full bg-gradient-to-r from-red-600 to-rose-400 w-full transition-all duration-200"></div>
+                            </div>
+                            <div id="enemy-sprite" class="text-[8rem] filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.9)] animate-float relative z-10">🐲</div>
+                            <div id="enemy-dmg-area" class="absolute inset-0 pointer-events-none z-50 flex items-center justify-center"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-[280px] w-full bg-gradient-to-t from-black via-slate-900/95 to-transparent flex flex-col justify-end pb-safe relative z-20">
+                    <div id="battle-skills-container" class="flex flex-wrap justify-center gap-3 px-2 mb-4"></div>
+                    <div id="battle-party-container" class="flex justify-center gap-1.5 px-2 mb-3"></div>
+                </div>
+            </div>
+            
+            <div id="damage-flash" class="absolute inset-0 bg-white z-50 opacity-0 pointer-events-none transition-opacity duration-100"></div>
+        </div>
+
+        <div id="gacha-overlay">
+            <div id="gacha-result-container" class="flex flex-col items-center justify-center w-full h-full p-4 relative z-10">
+                <div id="gacha-item" class="panel p-5 w-56 aspect-[3/4] flex flex-col items-center justify-center border-4 border-amber-400 bg-gradient-to-b from-slate-800 to-black hidden">
+                    <div id="gacha-rarity" class="text-2xl text-amber-400 tracking-widest mb-2">★★★</div>
+                    <div id="gacha-icon" class="text-6xl mb-3">🗡️</div>
+                    <div id="gacha-name" class="text-base font-black text-white text-center">---</div>
+                    <div class="mt-3 text-[9px] font-black text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/50">GET!</div>
+                </div>
+                <button id="gacha-close-btn" onclick="closeGachaResult()" class="mt-6 panel px-6 py-2 rounded-full font-black text-xs text-white hidden border-white/30">TAP TO CLOSE</button>
+            </div>
+            <canvas id="gacha-canvas" class="absolute inset-0 z-0"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // MUST NOT BE CHANGED EXCEPT VALUE
+        const SAVE_KEY = 'kaizokus'; 
+        let synth;
+        let isAudioInitialized = false;
+
+        const ELEMENTS = {
+            fire: { name: '炎', icon: '🔥', class: 'elem-fire' },
+            water: { name: '水', icon: '💧', class: 'elem-water' },
+            grass: { name: '草', icon: '🌿', class: 'elem-grass' },
+            light: { name: '光', icon: '✨', class: 'elem-light' },
+            dark: { name: '闇', icon: '🌑', class: 'elem-dark' }
+        };
+
+        window.state = {
+            player: {
+                userId: "KZN-" + Math.floor(1000 + Math.random() * 9000),
+                userName: "ゆうしゃ",
+                userIcon: "🧙‍♂️",
+                comment: "限界を超えろ！",
+                element: "fire",
+                coins: 5000,     
+                gachaTickets: 50,
+                materials: 10,   
+                stamina: 160,
+                maxStamina: 160,
+                lastStaminaUpdateTime: Date.now()
+            },
+            equip: {
+                currentType: 'weapon',
+                currentItemId: 1,
+                equipped: { weapon: 1, sub: 3, head: 4, bodyUp: 5, bodyDown: 6, accessory: 7, pillow: 8 }
+            },
+            settings: { equipDisplayCount: 10 },
+            codePanel: { fails: 0, lockUntil: 0 },
+            questPrep: { stageName: "", cost: 0, mult: 1 }
+        };
+
+        const eqTypeNames = { weapon:"武器", sub:"サブ(盾/二刀)", head:"頭防具", bodyUp:"体上防具", bodyDown:"体下防具", accessory:"アクセサリー", pillow:"クラウンピロー (こころ)" };
+        const eqIcons = { weapon:"🗡️", sub:"🛡️", head:"🪖", bodyUp:"👕", bodyDown:"👖", accessory:"💍", pillow:"👑" };
+
+        let inventory = [
+            { id: 1, name: "はがねのつるぎ", type: "weapon", rarity: 2, level: 1, maxLevel: 50, hp: 0, def: 0, atk: 20, enhanceCount: 0 },
+            { id: 2, name: "エクスカリバー", type: "weapon", rarity: 3, level: 10, maxLevel: 100, hp: 50, def: 10, atk: 150, enhanceCount: 5 },
+            { id: 3, name: "かわのたて", type: "sub", rarity: 1, level: 1, maxLevel: 30, hp: 10, def: 5, atk: 0, enhanceCount: 0 },
+            { id: 4, name: "てつかぶと", type: "head", rarity: 2, level: 5, maxLevel: 50, hp: 20, def: 12, atk: 0, enhanceCount: 2 },
+            { id: 5, name: "はがねのよろい", type: "bodyUp", rarity: 2, level: 1, maxLevel: 50, hp: 30, def: 20, atk: 0, enhanceCount: 0 },
+            { id: 6, name: "はがねのすねあて", type: "bodyDown", rarity: 2, level: 1, maxLevel: 50, hp: 20, def: 15, atk: 0, enhanceCount: 0 },
+            { id: 7, name: "力の指輪", type: "accessory", rarity: 3, level: 1, maxLevel: 10, hp: 50, def: 0, atk: 30, enhanceCount: 0 },
+            { id: 8, name: "竜王のクラウンピロー", type: "pillow", rarity: 3, level: 5, maxLevel: 100, hp: 120, def: 25, atk: 60, enhanceCount: 3 }
+        ];
+
+        const SKILL_DB = {
+            slash: { name: '渾身斬り', icon: '⚔️', maxCt: 4.0, type: 'attack', power: 2.0, color: '#ef4444' },
+            heal: { name: 'ヒール', icon: '✨', maxCt: 6.0, type: 'heal', power: 0.4, color: '#10b981' },
+            fire: { name: 'メラ', icon: '🔥', maxCt: 5.0, type: 'attack', power: 1.5, color: '#f59e0b' },
+            guard: { name: 'ぼうぎょ', icon: '🛡️', maxCt: 3.0, type: 'guard', color: '#3b82f6' },
+            friend_ult: { name: 'ギガデイン', icon: '⚡', maxCt: 8.0, type: 'attack', power: 3.5, color: '#a855f7' }
+        };
+
+        const CHAR_DB = {
+            sub1: { id: 'sub1', name: '戦士', icon: '🤺', hp: 500, atk: 80, def: 50, spd: 0.8, skills: ['slash', 'guard'] },
+            sub2: { id: 'sub2', name: '僧侶', icon: '🧑‍⚕️', hp: 350, atk: 30, def: 30, spd: 1.1, skills: ['heal', 'guard'] },
+            friend1: { id: 'friend1', name: '大魔道士(F)', icon: '🧙‍♀️', hp: 400, atk: 120, def: 40, spd: 0.9, skills: ['friend_ult', 'guard'] }
+        };
+
+        let battleState = {
+            isBattling: false,
+            lastTime: 0,
+            animationFrameId: null,
+            stageName: "",
+            rewardMult: 1,
+            party: [],
+            enemy: null,
+            logs: []
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGame();
+            updateStaminaRecovery();
+            applyElementStyle();
+            updateResources();
+            updateEquipTopDisplay();
+            document.getElementById('set-user-id').innerText = state.player.userId;
+            document.getElementById('set-equip-limit').value = state.settings.equipDisplayCount;
+            
+            window.addEventListener('pointerdown', initAudio, { once: true });
+        });
+
+        function loadGame() {
+            const saved = localStorage.getItem(SAVE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.player = { ...state.player, ...parsed.player };
+                    if(parsed.equip) state.equip = { ...state.equip, ...parsed.equip };
+                    if(parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
+                    if(parsed.inventory) inventory = parsed.inventory;
+                } catch(e) { console.error(e); }
+            }
+        }
+        function saveGame() { localStorage.setItem(SAVE_KEY, JSON.stringify({ player: state.player, equip: state.equip, settings: state.settings, inventory: inventory })); }
+
+        function updateStaminaRecovery() {
+            const now = Date.now();
+            const elapsed = now - (state.player.lastStaminaUpdateTime || now);
+            const interval = 300000;
+            if (elapsed >= interval && state.player.stamina < state.player.maxStamina) {
+                state.player.stamina = Math.min(state.player.maxStamina, state.player.stamina + Math.floor(elapsed / interval));
+                state.player.lastStaminaUpdateTime = now - (elapsed % interval);
+                saveGame();
+            }
+        }
+
+        function initAudio() {
+            if(isAudioInitialized) return;
+            try {
+                Tone.start();
+                synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.set({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.5 }});
+                synth.volume.value = -15;
+                isAudioInitialized = true;
+            } catch(e) { console.log("Audio waiting gesture"); }
+        }
+
+        function playSound(type) {
+            if(!isAudioInitialized || !synth) return;
+            try {
+                if(type === 'tap') synth.triggerAttackRelease("C5", "32n");
+                if(type === 'decide') synth.triggerAttackRelease(["C5", "E5", "G5"], "16n");
+                if(type === 'error') synth.triggerAttackRelease("C3", "8n");
+                if(type === 'attack') synth.triggerAttackRelease("G3", "16n");
+                if(type === 'skill') synth.triggerAttackRelease(["E5", "G5", "C6"], "8n");
+                if(type === 'heal') synth.triggerAttackRelease(["C5", "E5", "G5", "B5"], "4n");
+                if(type === 'guard') synth.triggerAttackRelease(["C4", "C4"], "16n");
+                if(type === 'hit') synth.triggerAttackRelease("C2", "16n");
+                if(type === 'win') synth.triggerAttackRelease(["C4", "E4", "G4", "C5", "E5"], "2n");
+            } catch(e){}
+        }
+
+        function switchLayer(layerId) {
+            document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
+            document.getElementById(layerId).classList.add('active');
+        }
+
+        function switchSubView(containerId, viewId) {
+            const container = document.getElementById(containerId);
+            container.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function openModal(id) { 
+            playSound('tap'); 
+            if (id === 'modal-profile') {
+                document.getElementById('prof-input-icon').value = state.player.userIcon || "🧙‍♂️";
+                document.getElementById('prof-input-name').value = state.player.userName || "ゆうしゃ";
+                document.getElementById('prof-input-comment').value = state.player.comment || "";
+            }
+            document.getElementById(id).classList.add('active'); 
+        }
+        function closeModal(id) { playSound('tap'); document.getElementById(id).classList.remove('active'); }
+
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `px-4 py-2 rounded-full shadow-xl text-[10px] font-black tracking-widest transition-all duration-300 transform -translate-y-4 opacity-0 border ${isError ? 'bg-rose-950/90 text-white border-rose-500' : 'bg-slate-900/90 text-cyan-300 border-cyan-500'} backdrop-blur`;
+            t.innerText = msg;
+            container.appendChild(t);
+            playSound(isError ? 'error' : 'tap');
+            requestAnimationFrame(() => t.classList.remove('-translate-y-4', 'opacity-0'));
+            setTimeout(() => { t.classList.add('-translate-y-4', 'opacity-0'); setTimeout(() => t.remove(), 300); }, 2000);
+        }
+
+        function updateResources() {
+            updateStaminaRecovery();
+            document.getElementById('header-stamina').innerText = `${state.player.stamina}/${state.player.maxStamina}`;
+            document.getElementById('header-coin').innerText = state.player.coins.toLocaleString();
+            document.getElementById('header-ticket').innerText = state.player.gachaTickets.toLocaleString();
+            document.getElementById('set-user-materials').innerText = (state.player.materials || 0).toLocaleString();
+        }
+
+        function applyElementStyle() {
+            const el = ELEMENTS[state.player.element];
+            document.getElementById('home-player-element-icon').innerText = el.icon;
+            const aura = document.getElementById('home-element-aura');
+            aura.className = `absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700`;
+            if(state.player.element==='fire') aura.classList.add('bg-red-500');
+            else if(state.player.element==='water') aura.classList.add('bg-blue-500');
+            else if(state.player.element==='grass') aura.classList.add('bg-emerald-500');
+            else if(state.player.element==='light') aura.classList.add('bg-amber-400');
+            else if(state.player.element==='dark') aura.classList.add('bg-purple-600');
+        }
+
+        function changeContent(contentId, btnElement) {
+            playSound('tap');
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(contentId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-14";
+                btn.querySelector('span:first-child').classList.remove('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
+            });
+            if(btnElement) {
+                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-14";
+                btnElement.querySelector('span:first-child').classList.add('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
+            }
+        }
+
+        function startGame() {
+            initAudio(); playSound('decide'); switchLayer('view-main');
+            updateResources();
+            document.getElementById('home-player-name').innerText = state.player.userName;
+            document.getElementById('home-player-icon').innerText = state.player.userIcon || "🧙‍♂️";
+        }
+        function backToTitle() { playSound('tap'); switchLayer('view-title'); }
+
+        function navQuestLayer(viewId, stageTitle = null) {
+            playSound('tap');
+            if (stageTitle) {
+                const el = document.getElementById('quest-stage-title');
+                if (el) el.innerText = stageTitle;
+            }
+            switchSubView('content-quest', viewId);
+        }
+
+        function getPlayerTotalStats() {
+            let hp = 200, atk = 50, def = 30;
+            Object.keys(state.equip.equipped).forEach(type => {
+                const id = state.equip.equipped[type];
+                if(id) { 
+                    const item = inventory.find(i => i.id === id); 
+                    if(item){ 
+                        hp += item.hp || 0; 
+                        atk += item.atk || 0; 
+                        def += item.def || 0; 
+                    } 
+                }
+            });
+            return { hp, atk, def, spd: 1.0 };
+        }
+
+        function updateEquipTopDisplay() {
+            const stats = getPlayerTotalStats();
+            document.getElementById('eq-total-power').innerText = (stats.hp + stats.atk * 2 + stats.def * 2).toLocaleString();
+
+            const types = ['weapon', 'sub', 'head', 'bodyUp', 'bodyDown', 'accessory', 'pillow'];
+            types.forEach(t => {
+                const eqId = state.equip.equipped[t];
+                const item = inventory.find(i => i.id === eqId);
+                const el = document.getElementById(`eq-top-${t}`);
+                if (el) {
+                    el.innerText = item ? `${item.name} (+${item.enhanceCount})` : "未装備";
+                }
+            });
+        }
+
+        function navEquipList(type, backToList = false) {
+            playSound('tap');
+            if (type) state.equip.currentType = type;
+            const currentType = state.equip.currentType;
+            
+            document.getElementById('equip-list-title').innerText = `${eqTypeNames[currentType] || '装備'} 一覧`;
+            switchSubView('content-equip', 'equip-view-list');
+            
+            renderEquipList();
+        }
+
+        function renderEquipList() {
+            const container = document.getElementById('equip-list-container');
+            const type = state.equip.currentType;
+            const filtered = inventory.filter(i => i.type === type);
+            const limit = parseInt(state.settings.equipDisplayCount) || 10;
+            const itemsToShow = filtered.slice(0, limit);
+
+            document.getElementById('eq-list-count-display').innerText = `${itemsToShow.length}/${filtered.length}`;
+            container.innerHTML = '';
+
+            if (itemsToShow.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6">該当するアイテムを所持していません</div>`;
+                return;
+            }
+
+            itemsToShow.forEach(item => {
+                const isEquipped = state.equip.equipped[type] === item.id;
+                const div = document.createElement('div');
+                div.className = `panel p-3 flex justify-between items-center cursor-pointer hover:border-amber-400 ${isEquipped ? 'border-amber-400 bg-amber-950/20' : ''}`;
+                div.onclick = () => openEquipDetail(item.id);
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${eqIcons[item.type] || '⚔️'}</span>
+                        <div>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs font-black text-white">${item.name}</span>
+                                <span class="text-[9px] text-amber-400 font-bold">+${item.enhanceCount}</span>
+                                ${isEquipped ? '<span class="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.2 rounded-full">装備中</span>' : ''}
+                            </div>
+                            <div class="text-[9px] text-slate-400">Lv.${item.level} | HP:${item.hp} ATK:${item.atk} DEF:${item.def}</div>
+                        </div>
+                    </div>
+                    <span class="text-amber-400 text-xs">★${item.rarity}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openEquipDetail(itemId) {
+            playSound('tap');
+            state.equip.currentItemId = itemId;
+            const item = inventory.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('eq-detail-rarity').innerText = '★'.repeat(item.rarity);
+            document.getElementById('eq-detail-name').innerText = item.name;
+            document.getElementById('eq-detail-enhances').innerText = item.enhanceCount;
+            document.getElementById('eq-detail-lvl').innerText = item.level;
+            document.getElementById('eq-detail-hp-val').innerText = item.hp;
+            document.getElementById('eq-detail-def-val').innerText = item.def;
+            document.getElementById('eq-detail-atk-val').innerText = item.atk;
+
+            const isEquipped = state.equip.equipped[item.type] === item.id;
+            const btnEquip = document.getElementById('eq-btn-equip');
+            btnEquip.innerText = isEquipped ? "EQUIPPED - 装備中" : "EQUIP - 装備する";
+            btnEquip.className = isEquipped ? "w-full panel py-3 rounded-xl font-black text-base border-emerald-500 text-emerald-300 mb-3" : "w-full btn-gold py-3 rounded-xl font-black text-base tracking-widest mb-3";
+
+            const costCoin = (item.enhanceCount + 1) * 200;
+            const costMat = Math.floor(item.enhanceCount / 2) + 1;
+            document.getElementById('eq-cost-coin').innerText = costCoin;
+            document.getElementById('eq-cost-mat').innerText = costMat;
+            document.getElementById('eq-own-coin').innerText = state.player.coins;
+            document.getElementById('eq-own-mat').innerText = state.player.materials || 0;
+
+            switchSubView('content-equip', 'equip-view-detail');
+        }
+
+        function executeEquip() {
+            const item = inventory.find(i => i.id === state.equip.currentItemId);
+            if (!item) return;
+
+            if (state.equip.equipped[item.type] === item.id) {
+                state.equip.equipped[item.type] = null;
+                showToast("装備を外しました");
+            } else {
+                state.equip.equipped[item.type] = item.id;
+                showToast(`${item.name} を装備しました`);
+            }
+            updateEquipTopDisplay();
+            saveGame();
+            openEquipDetail(item.id);
+        }
+
+        function executeEnhance(mode) {
+            const item = inventory.find(i => i.id === state.equip.currentItemId);
+            if (!item) return;
+
+            const costCoin = (item.enhanceCount + 1) * 200;
+            const costMat = Math.floor(item.enhanceCount / 2) + 1;
+
+            if (state.player.coins < costCoin) return showToast("コインが不足しています", true);
+            if ((state.player.materials || 0) < costMat) return showToast("素材(化石)が不足しています", true);
+
+            state.player.coins -= costCoin;
+            state.player.materials -= costMat;
+            
+            item.enhanceCount += 1;
+            item.level += 1;
+            item.hp += Math.floor(5 * item.rarity);
+            item.atk += Math.floor(3 * item.rarity);
+            item.def += Math.floor(2 * item.rarity);
+
+            playSound('decide');
+            showToast(`${item.name} を強化しました！ (+${item.enhanceCount})`);
+            updateResources();
+            updateEquipTopDisplay();
+            saveGame();
+            openEquipDetail(item.id);
+        }
+
+        function playGacha(count) {
+            const cost = count * 3;
+            if (state.player.gachaTickets < cost) return showToast("草核が不足しています", true);
+
+            state.player.gachaTickets -= cost;
+            updateResources();
+
+            const pulledItems = [];
+            const names = ["アルテミスの弓", "聖騎士の鎧", "幻影の兜", "精霊の指輪", "魔王のクラウンピロー", "ヴァルキリーランス", "ドラゴンスレイヤー"];
+            const types = ["weapon", "head", "bodyUp", "bodyDown", "accessory", "pillow"];
+
+            for (let i = 0; i < count; i++) {
+                const randRarity = Math.random() < 0.15 ? 3 : (Math.random() < 0.5 ? 2 : 1);
+                const randType = types[Math.floor(Math.random() * types.length)];
+                const newItem = {
+                    id: Date.now() + i,
+                    name: names[Math.floor(Math.random() * names.length)],
+                    type: randType,
+                    rarity: randRarity,
+                    level: 1,
+                    maxLevel: randRarity * 30,
+                    hp: randRarity * 30,
+                    atk: randType === 'weapon' ? randRarity * 40 : randRarity * 10,
+                    def: randType !== 'weapon' ? randRarity * 25 : 5,
+                    enhanceCount: 0
+                };
+                inventory.push(newItem);
+                pulledItems.push(newItem);
+            }
+
+            saveGame();
+            playSound('decide');
+
+            // 演出表示
+            const overlay = document.getElementById('gacha-overlay');
+            const itemBox = document.getElementById('gacha-item');
+            const topItem = pulledItems[pulledItems.length - 1];
+
+            document.getElementById('gacha-rarity').innerText = '★'.repeat(topItem.rarity);
+            document.getElementById('gacha-icon').innerText = eqIcons[topItem.type] || '⚔️';
+            document.getElementById('gacha-name').innerText = topItem.name + (count > 1 ? ` 他${count-1}件` : '');
+
+            overlay.style.display = 'flex';
+            itemBox.classList.remove('hidden');
+            itemBox.classList.add('gacha-item-reveal');
+            document.getElementById('gacha-close-btn').classList.remove('hidden');
+        }
+
+        function closeGachaResult() {
+            playSound('tap');
+            document.getElementById('gacha-overlay').style.display = 'none';
+            document.getElementById('gacha-item').classList.add('hidden');
+            document.getElementById('gacha-close-btn').classList.add('hidden');
+            updateEquipTopDisplay();
+        }
+
+        function saveProfile() {
+            const icon = document.getElementById('prof-input-icon').value.trim();
+            const name = document.getElementById('prof-input-name').value.trim();
+            const comment = document.getElementById('prof-input-comment').value.trim();
+
+            if (icon) state.player.userIcon = icon;
+            if (name) state.player.userName = name;
+            if (comment) state.player.comment = comment;
+
+            document.getElementById('home-player-name').innerText = state.player.userName;
+            document.getElementById('home-player-icon').innerText = state.player.userIcon;
+
+            saveGame();
+            closeModal('modal-profile');
+            showToast("プロフィールを保存しました");
+        }
+
+        function submitCode() {
+            const code = document.getElementById('code-input').value.trim().toUpperCase();
+            const errEl = document.getElementById('code-error-msg');
+            
+            if (code === 'KAZIN2026' || code === 'ULTIMATE') {
+                state.player.coins += 10000;
+                state.player.gachaTickets += 30;
+                updateResources();
+                saveGame();
+                closeModal('modal-code');
+                showToast("コード適用: 10,000コイン & 🔮30 GET!");
+                errEl.innerText = "";
+            } else {
+                errEl.innerText = "無効なギフトコードです";
+                playSound('error');
+            }
+        }
+
+        function selectElement(elemKey) {
+            if (!ELEMENTS[elemKey]) return;
+            state.player.element = elemKey;
+            applyElementStyle();
+            saveGame();
+            closeModal('modal-reincarnate');
+            showToast(`属性を「${ELEMENTS[elemKey].name}」に変更しました`);
+        }
+
+        function saveSettings() {
+            state.settings.equipDisplayCount = document.getElementById('set-equip-limit').value;
+            saveGame();
+            showToast("設定を更新しました");
+        }
+
+        function openDifficultySelect(stageName) {
+            playSound('tap');
+            const baseCost = stageName.includes('BOSS') ? 40 : 20;
+            document.getElementById('quest-diff-title').innerText = stageName;
+            const container = document.getElementById('difficulty-list');
+            container.innerHTML = '';
+            
+            const diffs = [
+                { name: "初級", costM: 1, rewM: 1.0, color: "text-emerald-300", border: "border-emerald-500" },
+                { name: "中級", costM: 2, rewM: 1.5, color: "text-blue-300", border: "border-blue-500" },
+                { name: "上級", costM: 3, rewM: 2.0, color: "text-amber-300", border: "border-amber-500" }
+            ];
+            
+            diffs.forEach(d => {
+                const cost = baseCost * d.costM;
+                const div = document.createElement('div');
+                div.className = `panel p-3 flex justify-between items-center cursor-pointer border-l-4 ${d.border} hover:bg-white/10`;
+                div.onclick = () => showPartySetup(`${stageName} [${d.name}]`, cost, d.rewM);
+                div.innerHTML = `<div><span class="${d.color} font-black text-sm">${d.name}</span><div class="text-[9px] text-slate-400">スタミナ ${cost} / 報酬 ${d.rewM}倍</div></div><div class="text-sm font-black text-white">⚡ ${cost}</div>`;
+                container.appendChild(div);
+            });
+            navQuestLayer('quest-view-difficulty');
+        }
+
+        let partySetupSelection = { sub1: true, sub2: true, friend: true };
+
+        function showPartySetup(stageName, cost, rewardMult) {
+            if(state.player.stamina < cost) return showToast("スタミナが足りません", true);
+            playSound('tap');
+            
+            state.questPrep = { stageName, cost, mult: rewardMult };
+            document.getElementById('setup-cost-display').innerText = `⚡ ${cost}`;
+            
+            renderPartySetupList();
+            openModal('modal-party-setup');
+        }
+
+        function togglePartyMember(id) {
+            playSound('tap');
+            partySetupSelection[id] = !partySetupSelection[id];
+            renderPartySetupList();
+        }
+
+        function renderPartySetupList() {
+            const container = document.getElementById('party-setup-list');
+            const pStats = getPlayerTotalStats();
+            
+            let html = `
+                <div class="panel p-2 flex items-center border-amber-500 bg-amber-950/30 opacity-100">
+                    <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border border-amber-500">${state.player.userIcon}</div>
+                    <div class="flex-1">
+                        <div class="text-[9px] text-amber-400 font-black">主人公 (固定)</div>
+                        <div class="text-xs font-bold text-white">${state.player.userName} <span class="text-[9px] text-slate-400">HP:${pStats.hp}</span></div>
+                    </div>
+                    <div class="text-xl">✅</div>
+                </div>
+            `;
+
+            const renderOpt = (key, charData, label, color) => `
+                <div onclick="togglePartyMember('${key}')" class="panel p-2 flex items-center cursor-pointer transition-all ${partySetupSelection[key] ? `border-${color}-500 bg-${color}-950/30` : 'border-slate-700 opacity-60'}">
+                    <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border ${partySetupSelection[key] ? `border-${color}-500` : 'border-slate-600'}">${charData.icon}</div>
+                    <div class="flex-1">
+                        <div class="text-[9px] text-${color}-400 font-black">${label}</div>
+                        <div class="text-xs font-bold text-white">${charData.name} <span class="text-[9px] text-slate-400">HP:${charData.hp}</span></div>
+                    </div>
+                    <div class="text-xl ${partySetupSelection[key] ? 'text-white' : 'text-slate-600'}">${partySetupSelection[key] ? '✅' : '⬜'}</div>
+                </div>
+            `;
+
+            html += renderOpt('sub1', CHAR_DB.sub1, '仲間 1', 'emerald');
+            html += renderOpt('sub2', CHAR_DB.sub2, '仲間 2', 'blue');
+            html += renderOpt('friend', CHAR_DB.friend1, '助っ人 フレンド', 'purple');
+
+            container.innerHTML = html;
+        }
+
+        function executeBattleStart() {
+            if(state.player.stamina < state.questPrep.cost) return showToast("スタミナが足りません", true);
+            state.player.stamina -= state.questPrep.cost;
+            updateResources(); saveGame();
+            
+            closeModal('modal-party-setup');
+            playSound('decide');
+            
+            const pStats = getPlayerTotalStats();
+            battleState.party = [
+                { 
+                    id: 'player', name: state.player.userName, icon: state.player.userIcon,
+                    hp: pStats.hp, maxHp: pStats.hp, atk: pStats.atk, def: pStats.def, spd: pStats.spd,
+                    isGuard: false, ct: 0, 
+                    skills: [
+                        { ...SKILL_DB.slash, currentCt: 0 },
+                        { ...SKILL_DB.fire, currentCt: 0 },
+                        { ...SKILL_DB.guard, currentCt: 0 }
+                    ]
+                }
+            ];
+
+            if(partySetupSelection.sub1) battleState.party.push(createCharData('sub1'));
+            if(partySetupSelection.sub2) battleState.party.push(createCharData('sub2'));
+            if(partySetupSelection.friend) battleState.party.push(createCharData('friend1'));
+
+            let isBoss = state.questPrep.stageName.includes('BOSS');
+            battleState.enemy = {
+                name: isBoss ? 'ドラゴン' : 'モンスター',
+                icon: isBoss ? '🐉' : (Math.random()>0.5?'👹':'👾'),
+                hp: isBoss ? 2500 : 800,
+                maxHp: isBoss ? 2500 : 800,
+                atk: isBoss ? 100 : 40,
+                spd: isBoss ? 0.7 : 0.9,
+                ct: 0,
+                isCharging: false
+            };
+
+            battleState.stageName = state.questPrep.stageName;
+            battleState.rewardMult = state.questPrep.mult;
+            battleState.isBattling = true;
+
+            document.getElementById('battle-stage-name').innerText = battleState.stageName;
+            document.getElementById('enemy-sprite').innerText = battleState.enemy.icon;
+            
+            switchLayer('view-battle');
+            buildBattleUI();
+            
+            battleState.lastTime = performance.now();
+            battleState.animationFrameId = requestAnimationFrame(battleLoop);
+        }
+
+        function createCharData(dbId) {
+            const base = CHAR_DB[dbId];
+            return {
+                id: dbId, name: base.name, icon: base.icon,
+                hp: base.hp, maxHp: base.hp, atk: base.atk, def: base.def, spd: base.spd,
+                isGuard: false, ct: 0,
+                skills: base.skills.map(sId => ({ ...SKILL_DB[sId], currentCt: 0 }))
+            };
+        }
+
+        function buildBattleUI() {
+            const skillsContainer = document.getElementById('battle-skills-container');
+            const partyContainer = document.getElementById('battle-party-container');
+            skillsContainer.innerHTML = '';
+            partyContainer.innerHTML = '';
+
+            battleState.party.forEach((char, cIdx) => {
+                const pDiv = document.createElement('div');
+                pDiv.className = `flex-1 flex flex-col items-center bg-slate-900/80 border border-slate-700 rounded-lg p-1.5 min-w-[70px] relative transition-all ${char.isGuard?'guard-active':''}`;
+                pDiv.id = `char-panel-${cIdx}`;
+                pDiv.innerHTML = `
+                    <div class="text-2xl mb-1 drop-shadow" id="char-icon-${cIdx}">${char.icon}</div>
+                    <div class="text-[8px] font-bold text-white truncate w-full text-center mb-0.5">${char.name}</div>
+                    <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
+                        <div id="char-hp-bar-${cIdx}" class="h-full bg-emerald-500 w-full transition-all"></div>
+                    </div>
+                `;
+                partyContainer.appendChild(pDiv);
+
+                char.skills.forEach((skill, sIdx) => {
+                    const btn = document.createElement('div');
+                    btn.className = `skill-icon-btn ${skill.type==='guard'?'guard':''}`;
+                    btn.id = `skill-btn-${cIdx}-${sIdx}`;
+                    btn.onclick = () => useSkill(cIdx, sIdx);
+                    btn.innerHTML = `
+                        <div id="skill-gauge-${cIdx}-${sIdx}" class="skill-gauge-overlay"></div>
+                        <span class="text-2xl relative z-10 drop-shadow">${skill.icon}</span>
+                        <div class="absolute bottom-0.5 w-full text-center text-[7px] font-black text-white bg-black/60 z-10 leading-none py-0.5 border-t border-white/20">${skill.name}</div>
+                    `;
+                    skillsContainer.appendChild(btn);
+                });
+            });
+            updateBattleUI();
+        }
+
+        function battleLoop(timestamp) {
+            if(!battleState.isBattling) return;
+            
+            const dt = (timestamp - battleState.lastTime) / 1000;
+            battleState.lastTime = timestamp;
+
+            if (battleState.enemy.hp > 0) {
+                battleState.enemy.ct += battleState.enemy.spd * dt;
+                
+                const msgEl = document.getElementById('enemy-message');
+                if(battleState.enemy.ct > 3.0 && !battleState.enemy.isCharging) {
+                    battleState.enemy.isCharging = true;
+                    msgEl.style.opacity = '1';
+                }
+
+                if(battleState.enemy.ct >= 5.0) {
+                    enemyAttack();
+                    battleState.enemy.ct = 0;
+                    battleState.enemy.isCharging = false;
+                    msgEl.style.opacity = '0';
+                }
+            }
+
+            battleState.party.forEach((char, cIdx) => {
+                if(char.hp <= 0) return;
+
+                char.ct += char.spd * dt;
+                if(char.ct >= 3.0) {
+                    charAutoAttack(cIdx);
+                    char.ct = 0;
+                }
+
+                char.skills.forEach((skill, sIdx) => {
+                    if(skill.currentCt < skill.maxCt) {
+                        skill.currentCt += dt;
+                        if(skill.currentCt >= skill.maxCt) {
+                            skill.currentCt = skill.maxCt;
+                            document.getElementById(`skill-btn-${cIdx}-${sIdx}`).classList.add('ready');
+                        }
+                        const pct = (skill.currentCt / skill.maxCt) * 100;
+                        const gauge = document.getElementById(`skill-gauge-${cIdx}-${sIdx}`);
+                        if(gauge) gauge.style.background = `conic-gradient(transparent 0%, transparent ${pct}%, rgba(0,0,0,0.75) ${pct}%, rgba(0,0,0,0.75) 100%)`;
+                    }
+                });
+            });
+
+            updateBattleUI();
+            battleState.animationFrameId = requestAnimationFrame(battleLoop);
+        }
+
+        function updateBattleUI() {
+            const ePct = Math.max(0, (battleState.enemy.hp / battleState.enemy.maxHp) * 100);
+            document.getElementById('enemy-hp-bar').style.width = `${ePct}%`;
+
+            battleState.party.forEach((char, cIdx) => {
+                const hpPct = Math.max(0, (char.hp / char.maxHp) * 100);
+                const bar = document.getElementById(`char-hp-bar-${cIdx}`);
+                if(bar) {
+                    bar.style.width = `${hpPct}%`;
+                    bar.className = `h-full transition-all ${hpPct < 30 ? 'bg-rose-500' : 'bg-emerald-500'}`;
+                }
+                const panel = document.getElementById(`char-panel-${cIdx}`);
+                if(panel) {
+                    if(char.isGuard) panel.classList.add('guard-active');
+                    else panel.classList.remove('guard-active');
+                    if(char.hp <= 0) panel.style.opacity = '0.3';
+                }
+            });
+        }
+
+        function charAutoAttack(cIdx) {
+            const char = battleState.party[cIdx];
+            if(char.hp <= 0) return;
+            
+            const icon = document.getElementById(`char-icon-${cIdx}`);
+            if(icon) {
+                icon.classList.remove('char-action-anim');
+                void icon.offsetWidth;
+                icon.classList.add('char-action-anim');
+            }
+
+            playSound('attack');
+            const dmg = Math.max(1, Math.floor(char.atk * (0.8 + Math.random()*0.4)));
+            applyDamageToEnemy(dmg, false);
+        }
+
+        function useSkill(cIdx, sIdx) {
+            const char = battleState.party[cIdx];
+            if(char.hp <= 0) return;
+            
+            const skill = char.skills[sIdx];
+            if(skill.currentCt < skill.maxCt) return;
+
+            playSound(skill.type === 'heal' ? 'heal' : (skill.type === 'guard' ? 'guard' : 'skill'));
+            skill.currentCt = 0;
+            const btn = document.getElementById(`skill-btn-${cIdx}-${sIdx}`);
+            if(btn) btn.classList.remove('ready');
+
+            if(skill.type === 'guard') {
+                char.isGuard = true;
+                showDamagePopup('char-icon-'+cIdx, 'GUARD', 'heal');
+            } 
+            else if (skill.type === 'heal') {
+                const healVal = Math.floor(char.maxHp * skill.power);
+                char.hp = Math.min(char.maxHp, char.hp + healVal);
+                showDamagePopup('char-icon-'+cIdx, healVal, 'heal');
+            }
+            else {
+                const icon = document.getElementById(`char-icon-${cIdx}`);
+                if(icon) { icon.classList.remove('char-action-anim'); void icon.offsetWidth; icon.classList.add('char-action-anim'); }
+                
+                const flash = document.getElementById('damage-flash');
+                flash.style.opacity = '0.5'; setTimeout(() => flash.style.opacity = '0', 100);
+
+                const dmg = Math.floor(char.atk * skill.power * (0.9 + Math.random()*0.2));
+                const isCrit = Math.random() < 0.2;
+                applyDamageToEnemy(isCrit ? dmg * 2 : dmg, isCrit);
+            }
+        }
+
+        function applyDamageToEnemy(dmg, isCrit) {
+            const el = document.getElementById('enemy-sprite');
+            el.classList.remove('epic-shake');
+            void el.offsetWidth;
+            el.classList.add('epic-shake');
+
+            battleState.enemy.hp = Math.max(0, battleState.enemy.hp - dmg);
+            showDamagePopup('enemy-dmg-area', dmg, isCrit ? 'crit' : 'normal');
+
+            if(battleState.enemy.hp <= 0) {
+                battleWin();
+            }
+        }
+
+        function enemyAttack() {
+            playSound('hit');
+            const flash = document.getElementById('damage-flash');
+            flash.style.opacity = '0.8'; setTimeout(() => flash.style.opacity = '0', 150);
+
+            const aliveChars = battleState.party.filter(c => c.hp > 0);
+            if(aliveChars.length === 0) return;
+            
+            const targetIdx = Math.floor(Math.random() * aliveChars.length);
+            const target = aliveChars[targetIdx];
+            
+            let dmg = battleState.enemy.atk;
+            if (target.isGuard) {
+                dmg = Math.floor(dmg * 0.2);
+                target.isGuard = false;
+            }
+            dmg = Math.max(1, dmg - Math.floor(target.def * 0.5));
+            
+            target.hp = Math.max(0, target.hp - dmg);
+            
+            const realIdx = battleState.party.findIndex(c => c === target);
+            showDamagePopup(`char-icon-${realIdx}`, dmg, 'normal');
+
+            if(battleState.party.every(c => c.hp <= 0)) {
+                battleLose();
+            }
+        }
+
+        function showDamagePopup(targetId, text, type) {
+            const targetEl = document.getElementById(targetId);
+            if(!targetEl) return;
+            
+            const popup = document.createElement('div');
+            popup.className = `dmg-popup ${type}`;
+            popup.innerText = text;
+            
+            const rect = targetEl.getBoundingClientRect();
+            popup.style.left = `${rect.left + rect.width / 2 - 20 + (Math.random()*20-10)}px`;
+            popup.style.top = `${rect.top - 20}px`;
+            
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function battleWin() {
+            if(!battleState.isBattling) return;
+            battleState.isBattling = false;
+            cancelAnimationFrame(battleState.animationFrameId);
+            playSound('win');
+            
+            const coinRew = Math.floor(300 * battleState.rewardMult);
+            const matRew = Math.floor(2 * battleState.rewardMult);
+            
+            state.player.coins += coinRew;
+            state.player.materials = (state.player.materials || 0) + matRew;
+            saveGame();
+            updateResources();
+
+            setTimeout(() => {
+                document.getElementById('result-title').innerText = "QUEST CLEARED!";
+                document.getElementById('result-title').className = "text-2xl font-black mb-3 text-amber-400";
+                document.getElementById('result-content').innerHTML = `
+                    <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span>🪙 コイン</span><span class="text-amber-300 font-black">+${coinRew}</span></div>
+                    <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span>🌿 草の化石</span><span class="text-emerald-300 font-black">+${matRew}</span></div>
+                `;
+                openModal('modal-result');
+            }, 1000);
+        }
+
+        function battleLose() {
+            if(!battleState.isBattling) return;
+            battleState.isBattling = false;
+            cancelAnimationFrame(battleState.animationFrameId);
+            playSound('error');
+
+            setTimeout(() => {
+                document.getElementById('result-title').innerText = "QUEST FAILED...";
+                document.getElementById('result-title').className = "text-2xl font-black mb-3 text-rose-500";
+                document.getElementById('result-content').innerHTML = `<p class="text-slate-400">パーティーが全滅しました。</p>`;
+                openModal('modal-result');
+            }, 1000);
+        }
+
+        function closeResult() {
+            closeModal('modal-result');
+            switchLayer('view-main');
+        }
+
+        function confirmEscape() {
+            playSound('tap');
+            openModal('modal-confirm');
+        }
+
+        function executeEscape() {
+            closeModal('modal-confirm');
+            battleState.isBattling = false;
+            cancelAnimationFrame(battleState.animationFrameId);
+            switchLayer('view-main');
+        }
+    </script>
+</body>
+</html>
