@@ -264,6 +264,66 @@
 
         .icon-coin, .icon-ticket, .icon-material { display: inline-block; width: 1em; height: 1em; object-fit: contain; vertical-align: -0.15em; }
 
+        /* ---- コード入力: 石扉の金庫風パスワード画面 ---- */
+        .code-vault-panel {
+            border-radius: 20px;
+            border: 3px solid #8a6a2e;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(180,140,60,0.15), transparent 60%),
+                linear-gradient(160deg, #3a2f1c 0%, #1c160d 55%, #100c07 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(212,175,110,0.25), inset 0 0 40px rgba(0,0,0,0.6);
+        }
+        .code-vault-corner { position: absolute; width: 28px; height: 28px; border: 2px solid #b8934a; opacity: 0.7; }
+        .code-vault-corner-tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+        .code-vault-corner-tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+        .code-vault-corner-bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+        .code-vault-corner-br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+        .code-lock-badge {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #6b5628, #241d10 75%);
+            border: 3px solid #c8a24e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 0 18px rgba(200,162,78,0.5), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(0,0,0,0.5);
+        }
+        .code-vault-title {
+            border: 1.5px solid #b8934a; border-radius: 999px;
+            padding: 6px 18px;
+            background: rgba(0,0,0,0.35);
+            color: #ecd08c;
+            font-weight: 900; font-size: 11px; letter-spacing: 0.08em;
+        }
+        .code-dot {
+            width: 15px; height: 15px; border-radius: 50%;
+            border: 2px solid #a67c2e;
+            background: radial-gradient(circle, #1c1710, #0a0806);
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .code-dot.filled {
+            background: radial-gradient(circle, #f0d78c, #a67c2e);
+            box-shadow: 0 0 8px rgba(240,215,140,0.85);
+        }
+        .keypad-btn {
+            width: 100%; aspect-ratio: 1; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #4a3f28, #1c1710 70%);
+            border: 2px solid #a67c2e;
+            color: #f0d78c;
+            font-weight: 900; font-size: 1.3rem; font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.15);
+            transition: transform 0.1s, background 0.1s;
+        }
+        .keypad-btn:active { transform: scale(0.9); background: radial-gradient(circle at 35% 30%, #6b5a35, #2a2213 70%); }
+        .keypad-btn:disabled { opacity: 0.35; }
+        .keypad-btn-del {
+            width: 100%; aspect-ratio: 1; border-radius: 16px;
+            background: radial-gradient(circle at 35% 30%, #4a3f28, #1c1710 70%);
+            border: 2px solid #a67c2e; color: #e08a8a; font-weight: 900; font-size: 1.2rem;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.15);
+            transition: transform 0.1s;
+        }
+        .keypad-btn-del:active { transform: scale(0.9); }
+
         /* ---- Graphics quality settings ---- */
         #app-container.tex-mid .panel { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
         #app-container.tex-low .panel { backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -381,21 +441,22 @@
                         <span class="text-base mr-2 animate-pulse">⚡</span>
                         <div class="flex flex-col">
                             <span class="text-[8px] text-emerald-400 font-black leading-none mb-0.5 tracking-wider">STAMINA</span>
-                            <span id="header-stamina" class="text-xs font-mono font-black text-white leading-none">160/160</span>
+                            <span id="header-stamina" class="text-sm font-mono font-black text-white leading-none">160/160</span>
                         </div>
                     </div>
-                    <div class="panel px-2.5 py-1 flex items-center border border-amber-500/40 !rounded-xl flex-shrink-0" title="草コイン"><img src="草コイン.png" alt="草コイン" class="w-4 h-4 mr-1.5 object-contain"><span id="header-coin" class="text-xs font-mono font-black text-amber-200">0</span></div>
-                    <div class="panel px-2.5 py-1 flex items-center border border-fuchsia-500/40 !rounded-xl flex-shrink-0" title="草核"><img src="草核.png" alt="草核" class="w-4 h-4 mr-1.5 object-contain"><span id="header-ticket" class="text-xs font-mono font-black text-fuchsia-300">0</span></div>
-                    <div class="panel px-2.5 py-1 flex items-center border border-emerald-400/40 !rounded-xl flex-shrink-0" title="草の化石"><img src="草の化石.png" alt="草の化石" class="w-4 h-4 mr-1.5 object-contain"><span id="header-materials" class="text-xs font-mono font-black text-emerald-200">0</span></div>
+                    <div class="panel px-2.5 py-1 flex items-center border border-amber-500/40 !rounded-xl flex-shrink-0" title="草コイン"><img src="草コイン.png" alt="草コイン" class="w-4 h-4 mr-1.5 object-contain"><span id="header-coin" class="text-sm font-mono font-black text-amber-200">0</span></div>
+                    <div class="panel px-2.5 py-1 flex items-center border border-fuchsia-500/40 !rounded-xl flex-shrink-0" title="草核"><img src="草核.png" alt="草核" class="w-4 h-4 mr-1.5 object-contain"><span id="header-ticket" class="text-sm font-mono font-black text-fuchsia-300">0</span></div>
+                    <div class="panel px-2.5 py-1 flex items-center border border-emerald-400/40 !rounded-xl flex-shrink-0" title="草の化石"><img src="草の化石.png" alt="草の化石" class="w-4 h-4 mr-1.5 object-contain"><span id="header-materials" class="text-sm font-mono font-black text-emerald-200">0</span></div>
                 </div>
             </div>
 
             <div class="relative flex-1 overflow-hidden z-20">
                 <div id="content-home" class="content-section active relative h-full">
-                    <div class="space-y-2 mb-3 mt-2">
-                        <div onclick="changeContent('content-quest')" class="bg-gradient-to-r from-purple-900/90 via-indigo-900/80 to-slate-900/90 border border-purple-400/50 rounded-2xl p-3 shadow-[0_4px_20px_rgba(168,85,247,0.3)] flex items-center justify-between cursor-pointer active:scale-95 transition-transform backdrop-blur-md relative overflow-hidden">
-                            <div class="flex items-center"><span class="text-3xl mr-3 filter drop-shadow">👑</span><div><div class="text-[9px] text-amber-300 font-black bg-black/60 inline-block px-2 py-0.5 rounded-full mb-0.5 border border-amber-500/30">EVENT</div><div class="text-xs font-black text-white">「黄金のスライム討伐戦」開催中！</div></div></div><span class="text-purple-300 font-bold text-xs">挑戦 ➔</span>
+                    <div class="space-y-1 mb-3 mt-2">
+                        <div id="notice-banner" onclick="handleNoticeClick()" class="bg-gradient-to-r from-purple-900/90 via-indigo-900/80 to-slate-900/90 border border-purple-400/50 rounded-2xl p-3 shadow-[0_4px_20px_rgba(168,85,247,0.3)] flex items-center justify-between cursor-pointer active:scale-95 transition-transform backdrop-blur-md relative overflow-hidden">
+                            <div class="flex items-center"><span id="notice-icon" class="text-3xl mr-3 filter drop-shadow">👑</span><div><div id="notice-label" class="text-[9px] text-amber-300 font-black bg-black/60 inline-block px-2 py-0.5 rounded-full mb-0.5 border border-amber-500/30">EVENT</div><div id="notice-text" class="text-xs font-black text-white">「黄金のスライム討伐戦」開催中！</div></div></div><span class="text-purple-300 font-bold text-xs">挑戦 ➔</span>
                         </div>
+                        <div id="notice-dots" class="flex justify-center gap-1"></div>
                     </div>
                     <div class="h-64 relative flex flex-col justify-center items-center my-2">
                         <div id="home-element-aura" class="absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700"></div>
@@ -406,8 +467,8 @@
                             <span id="home-player-name" class="text-white">ゆうしゃ</span>
                         </div>
                     </div>
-                    <!-- バナー類 -->
-                    <div class="grid grid-cols-4 gap-2 mb-3">
+                    <!-- バナー類 (ミッション等はやや下に配置) -->
+                    <div class="grid grid-cols-4 gap-2 mb-3 mt-5">
                         <div onclick="openModal('modal-mission')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 group relative bg-gradient-to-b from-amber-950/40 to-slate-900/60"><div class="absolute top-1 right-1 bg-red-500 rounded-full w-2 h-2 animate-pulse"></div><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">📜</span><span class="text-[9px] font-black text-amber-200">ミッション</span></div>
                         <div onclick="openModal('modal-reincarnate')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 group bg-gradient-to-b from-purple-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🌀</span><span class="text-[9px] font-black text-purple-200">属性転生</span></div>
                         <div onclick="openFormationModal()" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 group bg-gradient-to-b from-emerald-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🛡️</span><span class="text-[9px] font-black text-emerald-200">編成</span></div>
@@ -527,6 +588,22 @@
                     </div>
                 </div>
 
+                <div id="content-plaza" class="content-section">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-500 drop-shadow mb-4 flex items-center border-b border-emerald-900/40 pb-2"><span class="text-2xl mr-2">🏛️</span> PLAZA - 広場</h2>
+                    <div class="panel p-4 mb-4 text-center border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 to-slate-900/60 relative overflow-hidden">
+                        <div class="absolute -top-8 -right-8 text-9xl opacity-10">🏛️</div>
+                        <div class="text-5xl mb-2 animate-float">🏛️</div>
+                        <div class="text-[10px] text-emerald-300 font-black mb-1 tracking-widest">広場レベル</div>
+                        <div id="plaza-level-display" class="text-3xl font-black text-white mb-2 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]">Lv.1</div>
+                        <p class="text-[10px] text-slate-300 leading-relaxed">キャラクター達が広場で自動的に草コインを稼いでくれます。レベルを上げるほど収益がアップ！</p>
+                    </div>
+                    <div class="panel p-3 mb-4 flex justify-between items-center border-amber-500/40">
+                        <span class="text-xs font-black text-amber-300">収益速度</span>
+                        <span id="plaza-rate-display" class="text-sm font-black text-white font-mono">🪙 100 / 分</span>
+                    </div>
+                    <div id="plaza-upgrade-section" class="panel p-3 mb-4 border-cyan-500/40"></div>
+                </div>
+
                 <div id="content-settings" class="content-section">
                     <h2 class="text-xl font-black text-slate-200 mb-3 flex items-center border-b border-white/10 pb-2"><span class="text-2xl mr-2">⚙️</span> MENU & SETTINGS</h2>
                     <div class="panel p-3 mb-3">
@@ -559,12 +636,13 @@
 
             <div class="absolute bottom-0 w-full bg-slate-950/95 backdrop-blur-lg border-t border-white/10 pb-safe z-40">
                 <div class="flex justify-around py-1.5 px-1">
-                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-12"><img src="ホームボタン.png" alt="HOME" class="w-6 h-6 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[8px] font-black tracking-wider">HOME</span></button>
-                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12"><span class="text-xl mb-0.5">⚔️</span><span class="text-[8px] font-black tracking-wider">EQUIP</span></button>
-                    <button onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12"><span class="text-xl mb-0.5">🗺️</span><span class="text-[8px] font-black tracking-wider">QUEST</span></button>
-                    <button onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12"><img src="ガチャボタン.png" alt="GACHA" class="w-6 h-6 mb-0.5 object-contain"><span class="text-[8px] font-black tracking-wider">GACHA</span></button>
-                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12"><span class="text-xl mb-0.5">🎰</span><span class="text-[8px] font-black tracking-wider">KASINO</span></button>
-                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12"><span class="text-xl mb-0.5">⚙️</span><span class="text-[8px] font-black tracking-wider">MENU</span></button>
+                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-11"><img src="ホームボタン.png" alt="HOME" class="w-6 h-6 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[8px] font-black tracking-wider">HOME</span></button>
+                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">⚔️</span><span class="text-[8px] font-black tracking-wider">工房</span></button>
+                    <button id="nav-btn-quest" onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🗺️</span><span class="text-[8px] font-black tracking-wider">クエスト</span></button>
+                    <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><img src="ガチャボタン.png" alt="GACHA" class="w-6 h-6 mb-0.5 object-contain"><span class="text-[8px] font-black tracking-wider">宝箱</span></button>
+                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🎰</span><span class="text-[8px] font-black tracking-wider">KASINO</span></button>
+                    <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🏛️</span><span class="text-[8px] font-black tracking-wider">広場</span></button>
+                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">⚙️</span><span class="text-[8px] font-black tracking-wider">設定</span></button>
                 </div>
             </div>
 
@@ -592,8 +670,44 @@
                     <div class="flex space-x-2"><button onclick="closeModal('modal-profile')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button><button onclick="saveProfile()" class="flex-1 btn-gold py-2 rounded font-black text-xs text-amber-900">SAVE</button></div>
                 </div>
             </div>
-            <div id="modal-code" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
-                <div class="panel w-full max-w-sm p-5 border-blue-500/50 text-center"><h3 class="text-base font-black text-blue-300 mb-2">GIFT CODE</h3><p class="text-[9px] text-slate-400 mb-3">正しいコードを入力しよう！報酬はポストに届きます。</p><input type="text" id="code-input" class="w-full bg-black/50 border border-slate-600 text-white font-mono font-bold text-center text-base rounded p-2 mb-2 outline-none uppercase tracking-widest" placeholder="ENTER CODE"><div id="code-lock-msg" class="text-[9px] text-rose-400 font-bold h-4 mb-1"></div><div id="code-error-msg" class="text-[9px] text-rose-500 font-bold h-4 mb-2"></div><div class="flex space-x-2"><button onclick="closeModal('modal-code')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button><button id="code-submit-btn" onclick="submitCode()" class="flex-1 panel py-2 rounded font-black text-xs bg-blue-900/50 text-blue-300 border-blue-500">送信</button></div></div>
+            <div id="modal-code" class="modal absolute inset-0 bg-black/85 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+                <div class="code-vault-panel w-full max-w-sm p-5 text-center relative overflow-hidden">
+                    <div class="code-vault-corner code-vault-corner-tl"></div>
+                    <div class="code-vault-corner code-vault-corner-tr"></div>
+                    <div class="code-vault-corner code-vault-corner-bl"></div>
+                    <div class="code-vault-corner code-vault-corner-br"></div>
+
+                    <div class="flex justify-center mb-3">
+                        <div class="code-lock-badge">🔒</div>
+                    </div>
+                    <div class="flex justify-center mb-4">
+                        <div class="code-vault-title">コードを入力してください</div>
+                    </div>
+
+                    <div class="flex justify-center gap-2.5 mb-3" id="code-dots"></div>
+
+                    <div id="code-lock-msg" class="text-[9px] text-rose-400 font-bold h-4 mb-1"></div>
+                    <div id="code-error-msg" class="text-[9px] text-rose-400 font-bold h-4 mb-2"></div>
+
+                    <div class="grid grid-cols-3 gap-3 mb-3 px-2" id="code-keypad">
+                        <button onclick="codeKeypadInput('1')" class="keypad-btn">1</button>
+                        <button onclick="codeKeypadInput('2')" class="keypad-btn">2</button>
+                        <button onclick="codeKeypadInput('3')" class="keypad-btn">3</button>
+                        <button onclick="codeKeypadInput('4')" class="keypad-btn">4</button>
+                        <button onclick="codeKeypadInput('5')" class="keypad-btn">5</button>
+                        <button onclick="codeKeypadInput('6')" class="keypad-btn">6</button>
+                        <button onclick="codeKeypadInput('7')" class="keypad-btn">7</button>
+                        <button onclick="codeKeypadInput('8')" class="keypad-btn">8</button>
+                        <button onclick="codeKeypadInput('9')" class="keypad-btn">9</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 px-2 mb-4">
+                        <div></div>
+                        <button onclick="codeKeypadInput('0')" class="keypad-btn">0</button>
+                        <button onclick="codeKeypadDelete()" class="keypad-btn-del">×</button>
+                    </div>
+
+                    <button onclick="closeModal('modal-code')" class="w-full panel py-2 text-xs font-bold text-slate-300">閉じる</button>
+                </div>
             </div>
             <div id="modal-reincarnate" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
                 <div class="panel w-full max-w-sm p-5 border-purple-500/50 text-center relative overflow-hidden"><h3 class="text-base font-black text-purple-300 mb-2">REINCARNATION</h3><p class="text-[9px] text-slate-300 mb-4">主人公の属性(元素)を変更します。</p><div class="flex justify-center space-x-2 mb-4"><button onclick="selectElement('fire')" class="panel p-2 flex flex-col items-center border-red-500/50 w-11"><span class="text-xl">🔥</span><span class="text-[8px] text-red-300">炎</span></button><button onclick="selectElement('water')" class="panel p-2 flex flex-col items-center border-blue-500/50 w-11"><span class="text-xl">💧</span><span class="text-[8px] text-blue-300">水</span></button><button onclick="selectElement('grass')" class="panel p-2 flex flex-col items-center border-emerald-500/50 w-11"><span class="text-xl">🌿</span><span class="text-[8px] text-emerald-300">草</span></button><button onclick="selectElement('light')" class="panel p-2 flex flex-col items-center border-amber-500/50 w-11"><span class="text-xl">✨</span><span class="text-[8px] text-amber-300">光</span></button><button onclick="selectElement('dark')" class="panel p-2 flex flex-col items-center border-purple-500/50 w-11"><span class="text-xl">🌑</span><span class="text-[8px] text-purple-300">闇</span></button></div><button onclick="closeModal('modal-reincarnate')" class="w-full panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button></div>
@@ -625,10 +739,16 @@
             </div>
 
             <div id="modal-mission" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
-                <div class="panel w-full max-w-sm p-4 border-amber-500/50 max-h-[80vh] flex flex-col">
+                <div class="panel w-full max-w-sm p-4 border-amber-500/50 max-h-[85vh] flex flex-col">
                     <h3 class="text-base font-black text-amber-300 mb-1 tracking-widest text-center border-b border-amber-500/30 pb-2 flex items-center justify-center"><span class="text-xl mr-2">📜</span>MISSIONS</h3>
-                    <p class="text-[9px] text-center text-slate-400 my-2">ミッションを達成すると称号がもらえる！ 称号はプロフィールから装備できるぞ。</p>
-                    <div id="mission-list" class="overflow-y-auto scrollbar-hide space-y-2" style="max-height: 380px;"></div>
+                    <div class="flex mb-2 mt-2 bg-black/40 rounded-lg p-1 border border-white/10 text-[9px]">
+                        <button id="mission-tab-daily" onclick="switchMissionTab('daily')" class="flex-1 py-1.5 rounded-md font-black">デイリー</button>
+                        <button id="mission-tab-normal" onclick="switchMissionTab('normal')" class="flex-1 py-1.5 rounded-md font-black">ノーマル</button>
+                        <button id="mission-tab-event" onclick="switchMissionTab('event')" class="flex-1 py-1.5 rounded-md font-black">イベント</button>
+                        <button id="mission-tab-achievement" onclick="switchMissionTab('achievement')" class="flex-1 py-1.5 rounded-md font-black">実績</button>
+                    </div>
+                    <p id="mission-tab-desc" class="text-[9px] text-center text-slate-400 mb-2"></p>
+                    <div id="mission-list" class="overflow-y-auto scrollbar-hide space-y-2" style="max-height: 360px;"></div>
                     <button onclick="closeModal('modal-mission')" class="w-full panel py-2 mt-3 text-xs font-bold text-slate-300">閉じる</button>
                 </div>
             </div>
@@ -824,7 +944,13 @@
             post: [],
             tutorialDone: false,
             stats: { questClears: 0, gachaPulls: 0, ssrCount: 0, enhanceCount: 0 },
+            missions: {
+                daily: { date: '', progress: { questClears: 0, enhanceCount: 0 }, claimed: [] },
+                normal: { claimed: [] },
+                event: { claimed: [] }
+            },
             titles: { owned: [], equipped: null },
+            plaza: { level: 1, lastUpdateTime: Date.now() },
             questPrep: { stageName: "", cost: 0, mult: 1 }
         };
 
@@ -886,7 +1012,7 @@
             { id: 'fr_taro', name: 'タロウ', icon: '🧑‍🌾', comment: 'のんびりプレイ勢です', code: '4567-8901' }
         ];
 
-        // 称号(ミッション達成で入手・装備でステータス上昇)
+        // 称号(実績ミッション達成で入手・装備でステータス上昇)
         const TITLE_DB = {
             beginner: { name: '駆け出しの冒険者', desc: '初めてクエストをクリアする', bonus: { atk: 5, hp: 0, def: 0 }, check: () => state.stats.questClears >= 1 },
             gambler: { name: '強欲な挑戦者', desc: '初めてガチャを引く', bonus: { atk: 0, hp: 20, def: 0 }, check: () => state.stats.gachaPulls >= 1 },
@@ -894,6 +1020,65 @@
             social: { name: '人望家', desc: 'フレンドを1人作る', bonus: { atk: 0, hp: 30, def: 0 }, check: () => state.friends.length >= 1 },
             craftsman: { name: '職人肌', desc: '装備を1回強化する', bonus: { atk: 0, hp: 0, def: 8 }, check: () => state.stats.enhanceCount >= 1 }
         };
+
+        // 日本時間(JST, UTC+9)での日付文字列 "YYYY-MM-DD" を取得する
+        function getJSTDateString() {
+            const now = new Date();
+            const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+            const jst = new Date(utcMs + 9 * 60 * 60000);
+            return `${jst.getFullYear()}-${String(jst.getMonth() + 1).padStart(2, '0')}-${String(jst.getDate()).padStart(2, '0')}`;
+        }
+
+        // 日本時間0時に自動リセットされるデイリーミッション
+        const DAILY_MISSION_DB = [
+            { id: 'login', text: 'ログインする', reward: { coins: 500 }, check: () => true },
+            { id: 'quest1', text: 'クエストを1回クリアする', reward: { gachaTickets: 3 }, check: () => (state.missions.daily.progress.questClears || 0) >= 1 },
+            { id: 'enhance1', text: '装備を1回強化する', reward: { materials: 10 }, check: () => (state.missions.daily.progress.enhanceCount || 0) >= 1 }
+        ];
+
+        // 恒常のノーマルミッション(進行度は累計スタッツで判定)
+        const NORMAL_MISSION_DB = [
+            { id: 'quest10', text: 'クエストを10回クリアする', reward: { coins: 3000 }, check: () => state.stats.questClears >= 10 },
+            { id: 'gacha10', text: 'ガチャを10回引く', reward: { gachaTickets: 10 }, check: () => state.stats.gachaPulls >= 10 },
+            { id: 'enhance5', text: '装備を5回強化する', reward: { materials: 20 }, check: () => state.stats.enhanceCount >= 5 },
+            { id: 'friend3', text: 'フレンドを3人作る', reward: { coins: 2000 }, check: () => state.friends.length >= 3 }
+        ];
+
+        // 期間限定のイベントミッション
+        const EVENT_MISSION_DB = [
+            { id: 'event_slime', text: '「黄金のスライム討伐戦」開催中にクエストを3回クリアする', period: '開催中', reward: { coins: 5000, gachaTickets: 5 }, check: () => state.stats.questClears >= 3 }
+        ];
+
+        function ensureDailyMissionsFresh() {
+            const today = getJSTDateString();
+            if (state.missions.daily.date !== today) {
+                state.missions.daily = { date: today, progress: { questClears: 0, enhanceCount: 0 }, claimed: [] };
+                saveGame();
+            }
+        }
+
+        function claimMission(category, id) {
+            let db, progress;
+            if (category === 'daily') { db = DAILY_MISSION_DB; progress = state.missions.daily; }
+            else if (category === 'normal') { db = NORMAL_MISSION_DB; progress = state.missions.normal; }
+            else { db = EVENT_MISSION_DB; progress = state.missions.event; }
+
+            const mission = db.find(m => m.id === id);
+            if (!mission) return;
+            if (progress.claimed.includes(id)) return;
+            if (!mission.check()) { showToast('まだ達成していません', true); return; }
+
+            if (mission.reward.coins) state.player.coins += mission.reward.coins;
+            if (mission.reward.gachaTickets) state.player.gachaTickets += mission.reward.gachaTickets;
+            if (mission.reward.materials) state.player.materials = (state.player.materials || 0) + mission.reward.materials;
+            progress.claimed.push(id);
+
+            updateResources();
+            saveGame();
+            playSound('decide');
+            showToast('ミッション報酬を受け取りました！');
+            renderMissionTab(missionActiveTab);
+        }
 
         // 装備アイテム名プール (種類 x レアリティ ごとの候補リスト)
         // 該当リストが無い種類/レアリティは、後方の names 汎用プールにフォールバックする
@@ -960,6 +1145,42 @@
             logs: []
         };
 
+        // ==== ホーム画面 お知らせ欄 (イベント/おすすめガチャ/デイリークエストを5秒ごとに切替) ====
+        const NOTICE_ITEMS = [
+            { icon: '👑', label: 'EVENT', text: '「黄金のスライム討伐戦」開催中！', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) },
+            { icon: '💎', label: 'PICKUP', text: '運営おすすめ！レア武器排出率UP中！', action: () => changeContent('content-gacha', document.getElementById('nav-btn-gacha')) },
+            { icon: '🗺️', label: 'DAILY', text: '本日のデイリークエストに挑戦しよう！', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) }
+        ];
+        let noticeIdx = 0;
+        let noticeInterval = null;
+
+        function renderNotice() {
+            const item = NOTICE_ITEMS[noticeIdx];
+            const iconEl = document.getElementById('notice-icon');
+            const labelEl = document.getElementById('notice-label');
+            const textEl = document.getElementById('notice-text');
+            const dotsEl = document.getElementById('notice-dots');
+            if (!iconEl || !labelEl || !textEl || !dotsEl) return;
+            iconEl.innerText = item.icon;
+            labelEl.innerText = item.label;
+            textEl.innerText = item.text;
+            dotsEl.innerHTML = NOTICE_ITEMS.map((_, i) => `<span class="w-1.5 h-1.5 rounded-full ${i === noticeIdx ? 'bg-amber-400' : 'bg-slate-600'}"></span>`).join('');
+        }
+
+        function startNoticeRotation() {
+            renderNotice();
+            if (noticeInterval) clearInterval(noticeInterval);
+            noticeInterval = setInterval(() => {
+                noticeIdx = (noticeIdx + 1) % NOTICE_ITEMS.length;
+                renderNotice();
+            }, 5000);
+        }
+
+        function handleNoticeClick() {
+            playSound('tap');
+            NOTICE_ITEMS[noticeIdx].action();
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             loadGame();
             updateStaminaRecovery();
@@ -976,6 +1197,9 @@
             document.getElementById('set-effect').value = state.settings.effectQuality || 'high';
             applyQualitySettings();
             updatePostBadge();
+            startNoticeRotation();
+            updatePlazaIncome();
+            setInterval(updatePlazaIncome, 15000);
             
             window.addEventListener('pointerdown', initAudio, { once: true });
         });
@@ -1049,6 +1273,12 @@
             if (k.tutorialDone !== undefined) state.tutorialDone = k.tutorialDone;
             if (k.stats) state.stats = { ...state.stats, ...k.stats };
             if (k.titles) state.titles = { ...state.titles, ...k.titles };
+            if (k.plaza) state.plaza = { ...state.plaza, ...k.plaza };
+            if (k.missions) {
+                state.missions.daily = k.missions.daily ? { ...state.missions.daily, ...k.missions.daily } : state.missions.daily;
+                state.missions.normal = k.missions.normal ? { ...state.missions.normal, ...k.missions.normal } : state.missions.normal;
+                state.missions.event = k.missions.event ? { ...state.missions.event, ...k.missions.event } : state.missions.event;
+            }
         }
 
         function saveGame() {
@@ -1087,7 +1317,9 @@
                 inventory: inventory,
                 tutorialDone: state.tutorialDone,
                 stats: state.stats,
-                titles: state.titles
+                titles: state.titles,
+                missions: state.missions,
+                plaza: state.plaza
             };
 
             try {
@@ -1104,6 +1336,81 @@
                 state.player.lastStaminaUpdateTime = now - (elapsed % interval);
                 saveGame();
             }
+        }
+
+        // ==== 広場 (プレイヤーキャラが自動で草コインを稼ぐ施設) ====
+        const PLAZA_MAX_LEVEL = 15;
+
+        function getPlazaIncomeRate(level) {
+            return 100 * Math.pow(2, level - 1);
+        }
+
+        function getPlazaUpgradeCost(level) {
+            const mult = Math.pow(2, level - 1);
+            return { coins: 100000 * mult, fossil: 10000 * mult, core: 5 * mult };
+        }
+
+        function updatePlazaIncome() {
+            const now = Date.now();
+            const last = state.plaza.lastUpdateTime || now;
+            const elapsedMin = (now - last) / 60000;
+            if (elapsedMin <= 0) return;
+            const rate = getPlazaIncomeRate(state.plaza.level);
+            const earned = Math.floor(elapsedMin * rate);
+            if (earned > 0) {
+                state.player.coins += earned;
+                state.plaza.lastUpdateTime = now;
+                updateResources();
+                saveGame();
+            }
+        }
+
+        function renderPlazaScreen() {
+            updatePlazaIncome();
+            const level = state.plaza.level;
+            document.getElementById('plaza-level-display').innerText = `Lv.${level}`;
+            document.getElementById('plaza-rate-display').innerText = `🪙 ${getPlazaIncomeRate(level).toLocaleString()} / 分`;
+
+            const section = document.getElementById('plaza-upgrade-section');
+            if (!section) return;
+            if (level >= PLAZA_MAX_LEVEL) {
+                section.innerHTML = `<div class="text-center text-xs font-black text-amber-300 py-2">広場は最大レベルです！</div>`;
+                return;
+            }
+            const cost = getPlazaUpgradeCost(level);
+            const nextRate = getPlazaIncomeRate(level + 1);
+            section.innerHTML = `
+                <div class="text-xs font-black text-cyan-300 mb-2">次のレベル: Lv.${level + 1} (収益 🪙${nextRate.toLocaleString()}/分)</div>
+                <div class="text-[10px] text-slate-300 mb-1">必要: 🪙${cost.coins.toLocaleString()}</div>
+                <div class="text-[10px] text-slate-300 mb-3">+ 🌿${cost.fossil.toLocaleString()} または 🔮${cost.core.toLocaleString()}</div>
+                <div class="flex space-x-2">
+                    <button onclick="upgradePlaza('fossil')" class="flex-1 panel py-2 rounded text-[10px] font-black text-emerald-200 border-emerald-500/40">🌿 化石で強化</button>
+                    <button onclick="upgradePlaza('core')" class="flex-1 panel py-2 rounded text-[10px] font-black text-fuchsia-200 border-fuchsia-500/40">🔮 核で強化</button>
+                </div>
+            `;
+        }
+
+        function upgradePlaza(materialType) {
+            const level = state.plaza.level;
+            if (level >= PLAZA_MAX_LEVEL) return;
+            const cost = getPlazaUpgradeCost(level);
+
+            if (state.player.coins < cost.coins) { showToast('草コインが足りません', true); return; }
+            if (materialType === 'fossil') {
+                if ((state.player.materials || 0) < cost.fossil) { showToast('草の化石が足りません', true); return; }
+                state.player.materials -= cost.fossil;
+            } else {
+                if (state.player.gachaTickets < cost.core) { showToast('草核が足りません', true); return; }
+                state.player.gachaTickets -= cost.core;
+            }
+            state.player.coins -= cost.coins;
+            state.plaza.level += 1;
+
+            updateResources();
+            saveGame();
+            playSound('decide');
+            showToast(`広場がLv.${state.plaza.level}になりました！`);
+            renderPlazaScreen();
         }
 
         function initAudio() {
@@ -1183,13 +1490,14 @@
                 renderProfileTitleList();
             }
             if (id === 'modal-code') {
-                document.getElementById('code-input').value = '';
+                codeDigits = '';
+                renderCodeDots();
                 document.getElementById('code-error-msg').innerText = '';
                 updateCodeLockUI();
             }
             if (id === 'modal-friend') renderFriendModal();
             if (id === 'modal-post') renderPostModal();
-            if (id === 'modal-mission') { checkTitleUnlocks(); renderMissionList(); }
+            if (id === 'modal-mission') { checkTitleUnlocks(); ensureDailyMissionsFresh(); renderMissionTab(missionActiveTab); }
             document.getElementById(id).classList.add('active'); 
         }
         function closeModal(id) { 
@@ -1235,21 +1543,23 @@
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(contentId).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-12";
-                btn.querySelector('span:first-child').classList.remove('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
+                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11";
+                const icon = btn.firstElementChild;
+                if (icon) icon.classList.remove('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             });
             if(btnElement) {
-                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-12";
-                btnElement.querySelector('span:first-child').classList.add('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
+                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-11";
+                const icon = btnElement.firstElementChild;
+                if (icon) icon.classList.add('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             }
         }
 
         const TUTORIAL_STEPS = [
             { icon: '🧙‍♂️', title: 'ようこそ、冒険者よ！', text: 'ここはKAZINの世界。あなたは選ばれし勇者として、数々のクエストに挑むことになる。' },
             { icon: '⚡', title: 'スタミナについて', text: '画面上部のスタミナはクエストに出撃する際に消費される。時間が経つと自動で回復するので、なくなったら少し休もう。' },
-            { icon: '⚔️', title: '装備を整えよう', text: '下のメニューの「EQUIP」から武器や防具を装備・強化できる。ステータスをしっかり底上げしよう。' },
-            { icon: '🗺️', title: 'クエストに挑戦', text: '「QUEST」からステージを選んで戦闘に出撃しよう。編成からパーティメンバーも選べるぞ。' },
-            { icon: '💎', title: 'ガチャで武具を集めよう', text: '「GACHA」では新しい武器や防具、こころを入手できる。運が良ければ虹色に輝くSSRも出現！' },
+            { icon: '⚔️', title: '装備を整えよう', text: '下のメニューの「工房」から武器や防具を装備・強化できる。ステータスをしっかり底上げしよう。' },
+            { icon: '🗺️', title: 'クエストに挑戦', text: '「クエスト」からステージを選んで戦闘に出撃しよう。編成からパーティメンバーも選べるぞ。' },
+            { icon: '💎', title: 'ガチャで武具を集めよう', text: '「宝箱」では新しい武器や防具、こころを入手できる。運が良ければ虹色に輝くSSRも出現！' },
             { icon: '🎉', title: '準備完了！', text: 'さあ、冒険を始めよう！ 困ったときは設定やメニューの各アイコンをチェックしてね。' }
         ];
         let tutorialStepIdx = 0;
@@ -1352,10 +1662,70 @@
             return newlyUnlocked;
         }
 
-        function renderMissionList() {
+        let missionActiveTab = 'daily';
+
+        function switchMissionTab(tab) {
+            playSound('tap');
+            missionActiveTab = tab;
+            renderMissionTab(tab);
+        }
+
+        function renderMissionTab(tab) {
+            ['daily', 'normal', 'event', 'achievement'].forEach(t => {
+                const btn = document.getElementById(`mission-tab-${t}`);
+                if (btn) btn.className = `flex-1 py-1.5 rounded-md font-black ${t === tab ? 'bg-amber-900/60 text-amber-200' : 'text-slate-400'}`;
+            });
+
+            const descEl = document.getElementById('mission-tab-desc');
             const container = document.getElementById('mission-list');
             if (!container) return;
-            container.innerHTML = Object.keys(TITLE_DB).map(key => {
+
+            if (tab === 'daily') {
+                ensureDailyMissionsFresh();
+                descEl.innerText = '日本時間 毎日0時に更新されます';
+                container.innerHTML = renderMissionRows(DAILY_MISSION_DB, 'daily', state.missions.daily.claimed);
+            } else if (tab === 'normal') {
+                descEl.innerText = '達成すればいつでも受け取れます';
+                container.innerHTML = renderMissionRows(NORMAL_MISSION_DB, 'normal', state.missions.normal.claimed);
+            } else if (tab === 'event') {
+                descEl.innerText = '期間限定で開催中のミッションです';
+                container.innerHTML = renderMissionRows(EVENT_MISSION_DB, 'event', state.missions.event.claimed);
+            } else {
+                descEl.innerText = '達成すると称号がもらえる！ 称号はプロフィールから装備できるぞ。';
+                container.innerHTML = renderAchievementRows();
+            }
+        }
+
+        function rewardText(reward) {
+            const parts = [];
+            if (reward.coins) parts.push(`🪙${reward.coins}`);
+            if (reward.gachaTickets) parts.push(`🔮${reward.gachaTickets}`);
+            if (reward.materials) parts.push(`🌿${reward.materials}`);
+            return parts.join(' / ');
+        }
+
+        function renderMissionRows(db, category, claimedList) {
+            return db.map(m => {
+                const claimed = claimedList.includes(m.id);
+                const achieved = m.check();
+                const periodTag = m.period ? `<span class="text-[8px] text-rose-300 font-black bg-rose-950/50 border border-rose-500/40 px-1.5 py-0.5 rounded-full ml-1">${m.period}</span>` : '';
+                let btnLabel = '未達成', btnClass = 'text-slate-500 bg-slate-800/60 border-slate-700', clickable = false;
+                if (claimed) { btnLabel = '受取済'; btnClass = 'text-slate-500 bg-slate-800/60 border-slate-700'; }
+                else if (achieved) { btnLabel = '受け取る'; btnClass = 'text-amber-900 bg-amber-400 border-amber-300'; clickable = true; }
+                return `
+                    <div class="panel p-2.5 flex items-center ${achieved && !claimed ? 'border-amber-400/60 bg-amber-950/20' : 'border-slate-700 opacity-80'}">
+                        <div class="flex-1 text-left">
+                            <div class="text-[10px] font-black text-white">${m.text}${periodTag}</div>
+                            <div class="text-[9px] text-purple-300 font-bold mt-0.5">${rewardText(m.reward)}</div>
+                        </div>
+                        <button ${clickable ? `onclick="claimMission('${category}','${m.id}')"` : 'disabled'} class="text-[9px] font-black px-2.5 py-1.5 rounded-lg border ${btnClass}">${btnLabel}</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAchievementRows() {
+            return Object.keys(TITLE_DB).map(key => {
                 const t = TITLE_DB[key];
                 const owned = state.titles.owned.includes(key);
                 const bonusParts = [];
@@ -1526,6 +1896,8 @@
             playSound('decide');
             showToast(`${item.name} を強化しました！ (+${item.enhanceCount})`);
             state.stats.enhanceCount = (state.stats.enhanceCount || 0) + 1;
+            ensureDailyMissionsFresh();
+            state.missions.daily.progress.enhanceCount = (state.missions.daily.progress.enhanceCount || 0) + 1;
             checkTitleUnlocks();
             updateResources();
             updateEquipTopDisplay();
@@ -1847,32 +2219,57 @@
         }
 
         let codeLockInterval = null;
+        let codeDigits = '';
+        const CODE_MAX_LEN = 6;
         const CODE_REWARDS = {
-            'KAZIN2026': { coins: 10000, gachaTickets: 30 },
-            'ULTIMATE': { coins: 10000, gachaTickets: 30 }
+            '100000': { coins: 10000, gachaTickets: 30 },
+            '999999': { coins: 10000, gachaTickets: 30 }
         };
+
+        function renderCodeDots() {
+            const container = document.getElementById('code-dots');
+            if (!container) return;
+            container.innerHTML = Array.from({ length: CODE_MAX_LEN }, (_, i) =>
+                `<div class="code-dot ${i < codeDigits.length ? 'filled' : ''}"></div>`
+            ).join('');
+        }
+
+        function codeKeypadInput(digit) {
+            if (state.codePanel.lockUntil > Date.now()) return;
+            if (codeDigits.length >= CODE_MAX_LEN) return;
+            playSound('tap');
+            codeDigits += digit;
+            renderCodeDots();
+            if (codeDigits.length === CODE_MAX_LEN) {
+                submitCode();
+            }
+        }
+
+        function codeKeypadDelete() {
+            if (state.codePanel.lockUntil > Date.now()) return;
+            playSound('tap');
+            codeDigits = codeDigits.slice(0, -1);
+            renderCodeDots();
+            document.getElementById('code-error-msg').innerText = '';
+        }
 
         function updateCodeLockUI() {
             const lockMsg = document.getElementById('code-lock-msg');
-            const input = document.getElementById('code-input');
-            const btn = document.getElementById('code-submit-btn');
-            if(!lockMsg || !input || !btn) return;
+            const keypad = document.getElementById('code-keypad');
+            if(!lockMsg || !keypad) return;
             const remaining = state.codePanel.lockUntil - Date.now();
+            const buttons = document.querySelectorAll('.keypad-btn, .keypad-btn-del');
 
             if (remaining > 0) {
                 const sec = Math.ceil(remaining / 1000);
                 lockMsg.innerText = `3回間違えたため、あと${sec}秒間入力できません`;
-                input.disabled = true;
-                btn.disabled = true;
-                btn.classList.add('opacity-40');
+                buttons.forEach(b => b.disabled = true);
                 if (!codeLockInterval) {
                     codeLockInterval = setInterval(updateCodeLockUI, 1000);
                 }
             } else {
                 lockMsg.innerText = "";
-                input.disabled = false;
-                btn.disabled = false;
-                btn.classList.remove('opacity-40');
+                buttons.forEach(b => b.disabled = false);
                 if (codeLockInterval) { clearInterval(codeLockInterval); codeLockInterval = null; }
             }
         }
@@ -1880,15 +2277,14 @@
         function submitCode() {
             if (state.codePanel.lockUntil > Date.now()) return;
 
-            const code = document.getElementById('code-input').value.trim().toUpperCase();
+            const code = codeDigits;
             const errEl = document.getElementById('code-error-msg');
-
-            if (!code) { errEl.innerText = "コードを入力してください"; return; }
 
             state.codePanel.usedCodes = state.codePanel.usedCodes || [];
             if (state.codePanel.usedCodes.includes(code)) {
                 errEl.innerText = "このコードは使用済みです";
                 playSound('error');
+                codeDigits = ''; renderCodeDots();
                 return;
             }
 
@@ -1898,11 +2294,13 @@
                 state.codePanel.usedCodes.push(code);
                 addPostItem({ icon: '⌨️', title: `コード「${code}」報酬`, desc: '入力したギフトコードの報酬が届きました！', rewards: reward });
                 saveGame();
+                codeDigits = '';
                 closeModal('modal-code');
                 showToast("コードを適用しました！ポストをチェック！");
                 errEl.innerText = "";
             } else {
                 state.codePanel.fails = (state.codePanel.fails || 0) + 1;
+                codeDigits = ''; renderCodeDots();
                 if (state.codePanel.fails >= 3) {
                     state.codePanel.fails = 0;
                     state.codePanel.lockUntil = Date.now() + 60000;
@@ -2608,6 +3006,8 @@
             state.player.coins += coinRew;
             state.player.materials = (state.player.materials || 0) + matRew;
             state.stats.questClears = (state.stats.questClears || 0) + 1;
+            ensureDailyMissionsFresh();
+            state.missions.daily.progress.questClears = (state.missions.daily.progress.questClears || 0) + 1;
             checkTitleUnlocks();
             saveGame();
             updateResources();
