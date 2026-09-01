@@ -2,12 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ルージュガレオン">
-    <link rel="apple-touch-icon" href="content.png">
-    <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ROUGE GALLEON - 公式絵巻</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -604,9 +599,301 @@
     }
     .corner-glint { animation: cornerGlowPulse 2.4s ease-in-out infinite; }
 
+    /* ══════════════════════════════════════════════════════════════
+       ★★★★★ QUALITY x100 EXTENSION LAYER ★★★★★
+       映画品質テクスチャ・グレイン・ビネット・色収差・衝撃波・ホログラム演出
+       ══════════════════════════════════════════════════════════════ */
+
+    /* ---- フィルムグレイン（常時揺らめく粒状ノイズ、質感を一気に上げる） ---- */
+    #film-grain {
+      position: fixed; inset: -100%; z-index: 45; pointer-events: none;
+      width: 300%; height: 300%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.05;
+      mix-blend-mode: overlay;
+      animation: grainShift 0.5s steps(3) infinite;
+    }
+    @keyframes grainShift {
+      0%   { transform: translate(0,0); }
+      33%  { transform: translate(-2%,1%); }
+      66%  { transform: translate(1%,-2%); }
+      100% { transform: translate(0,0); }
+    }
+
+    /* ---- 動的ビネット（画面外周を締めて絵巻の重厚感を強化） ---- */
+    #cinematic-vignette {
+      position: fixed; inset: 0; z-index: 44; pointer-events: none;
+      background: radial-gradient(ellipse 65% 60% at 50% 48%, transparent 40%, rgba(0,0,0,0.35) 78%, rgba(0,0,0,0.72) 100%);
+      animation: vignettePulse 6s ease-in-out infinite;
+      mix-blend-mode: multiply;
+    }
+    @keyframes vignettePulse {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+
+    /* ---- 色収差フラッシュ（RGB分離、切替時の衝撃を映画的に演出） ---- */
+    #chroma-flash {
+      position: fixed; inset: 0; z-index: 48; pointer-events: none;
+      opacity: 0; mix-blend-mode: screen;
+    }
+    .chroma-flash-play { animation: chromaBurst 0.5s cubic-bezier(0.2,0.9,0.3,1) forwards; }
+    @keyframes chromaBurst {
+      0%   { opacity: 0; box-shadow: inset 12px 0 0 -6px rgba(255,0,60,0), inset -12px 0 0 -6px rgba(0,200,255,0); }
+      15%  { opacity: 0.9; box-shadow: inset 14px 0 40px -6px rgba(255,0,60,0.55), inset -14px 0 40px -6px rgba(0,200,255,0.55); }
+      45%  { opacity: 0.55; box-shadow: inset 6px 0 24px -6px rgba(255,0,60,0.35), inset -6px 0 24px -6px rgba(0,200,255,0.35); }
+      100% { opacity: 0; box-shadow: inset 0 0 0 0 rgba(255,0,60,0), inset 0 0 0 0 rgba(0,200,255,0); }
+    }
+
+    /* ---- 画面シェイク（キャラ切替・衝撃演出のインパクトを強化） ---- */
+    @keyframes screenShakeStrong {
+      0%   { transform: translate(0,0) rotate(0deg); }
+      10%  { transform: translate(-6px,3px) rotate(-0.4deg); }
+      20%  { transform: translate(5px,-4px) rotate(0.5deg); }
+      30%  { transform: translate(-4px,4px) rotate(-0.3deg); }
+      40%  { transform: translate(6px,-2px) rotate(0.4deg); }
+      50%  { transform: translate(-3px,2px) rotate(-0.2deg); }
+      60%  { transform: translate(4px,-3px) rotate(0.2deg); }
+      70%  { transform: translate(-2px,1px) rotate(-0.1deg); }
+      85%  { transform: translate(1px,-1px) rotate(0deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+    .screen-shake-play { animation: screenShakeStrong 0.5s cubic-bezier(0.36,0.07,0.19,0.97) both; }
+
+    /* ---- クリック衝撃波リング（マウス/タップ位置に発生する三重リング） ---- */
+    .click-shockwave {
+      position: fixed; z-index: 46; pointer-events: none;
+      width: 10px; height: 10px; border-radius: 50%;
+      transform: translate(-50%,-50%);
+      border: 2px solid var(--sw-color, #d4af37);
+      box-shadow: 0 0 20px var(--sw-color, #d4af37), inset 0 0 12px var(--sw-color, #d4af37);
+      animation: shockwaveExpand 0.75s cubic-bezier(0.15,0.85,0.3,1) forwards;
+    }
+    @keyframes shockwaveExpand {
+      0%   { width: 10px; height: 10px; opacity: 1; border-width: 3px; }
+      100% { width: 260px; height: 260px; opacity: 0; border-width: 0.5px; }
+    }
+    .click-spark {
+      position: fixed; z-index: 46; pointer-events: none;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--sp-color, #ffe9b0);
+      box-shadow: 0 0 8px var(--sp-color, #ffe9b0);
+      animation: clickSparkFly 0.65s cubic-bezier(0.15,0.85,0.3,1) forwards;
+    }
+    @keyframes clickSparkFly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--sp-x,40px), var(--sp-y,40px)) scale(0.2); opacity: 0; }
+    }
+
+    /* ---- キャラ切替 全画面バーストフラッシュ（属性テーマカラーで発光） ---- */
+    #char-burst-flash {
+      position: fixed; inset: 0; z-index: 47; pointer-events: none;
+      opacity: 0; mix-blend-mode: screen;
+      background: radial-gradient(circle at 62% 45%, #ffffff 0%, rgba(212,175,55,0.7) 22%, transparent 65%);
+    }
+    .char-burst-play { animation: charBurstFlash 0.9s cubic-bezier(0.16,0.9,0.3,1) forwards; }
+    @keyframes charBurstFlash {
+      0%   { opacity: 0; transform: scale(0.3); filter: blur(0px); }
+      12%  { opacity: 1; transform: scale(1); filter: blur(1px); }
+      40%  { opacity: 0.5; transform: scale(1.4); filter: blur(4px); }
+      100% { opacity: 0; transform: scale(2.2); filter: blur(20px); }
+    }
+
+    /* ---- 集中線バースト（キャラ切替時、放射状のスピードライン） ---- */
+    #speed-lines {
+      position: fixed; inset: 0; z-index: 43; pointer-events: none;
+      opacity: 0;
+      background: repeating-conic-gradient(from 0deg at 62% 45%, rgba(255,255,255,0.22) 0deg 1.2deg, transparent 1.2deg 6deg);
+    }
+    .speed-lines-play { animation: speedLinesBurst 0.7s cubic-bezier(0.15,0.85,0.35,1) forwards; }
+    @keyframes speedLinesBurst {
+      0%   { opacity: 0; transform: scale(0.4); }
+      20%  { opacity: 0.85; transform: scale(0.9); }
+      100% { opacity: 0; transform: scale(1.9); }
+    }
+
+    /* ---- ホログラフィック・シマーライン（詳細カード＆アイコンの高級質感） ---- */
+    @keyframes holoSweep {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .holo-border {
+      position: relative;
+    }
+    .holo-border::after {
+      content: '';
+      position: absolute; inset: -1px;
+      background: linear-gradient(115deg, transparent 30%, rgba(212,175,55,0.55) 45%, rgba(255,255,255,0.9) 50%, rgba(230,0,18,0.5) 55%, transparent 70%);
+      background-size: 250% 100%;
+      opacity: 0.55;
+      animation: holoSweep 3.5s linear infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      z-index: 1;
+    }
+
+    /* ---- 金の箔押しテクスチャ（詳細カード背景に微細な質感を追加） ---- */
+    .foil-texture {
+      position: relative;
+      isolation: isolate;
+    }
+    .foil-texture::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(212,175,55,0.10) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(230,0,18,0.08) 0%, transparent 45%),
+        repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 4px);
+      pointer-events: none;
+    }
+
+    /* ---- 高密度ゴッドレイ（スプラッシュ演出の光条を多層強化） ---- */
+    #splash-godrays {
+      position: absolute; inset: -20% -30% 0 -30%; z-index: 1; pointer-events: none;
+      background: repeating-conic-gradient(from -8deg at 50% -10%,
+        rgba(255,255,255,0.16) 0deg 1.4deg, transparent 1.4deg 7deg,
+        rgba(255,235,180,0.10) 7deg 8.2deg, transparent 8.2deg 15deg);
+      opacity: 0;
+      mix-blend-mode: screen;
+      animation: godrayAppear 7.5s ease-in forwards;
+      filter: blur(0.5px);
+    }
+    @keyframes godrayAppear {
+      0%, 45% { opacity: 0; transform: rotate(0deg) scale(1); }
+      75%  { opacity: 0.5; transform: rotate(6deg) scale(1.15); }
+      100% { opacity: 0.85; transform: rotate(-5deg) scale(1.4); }
+    }
+    /* スプラッシュ最終衝撃波（水面を突き破る瞬間の円形ショックウェーブ） */
+    #splash-shockwave {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #splash-shockwave::before, #splash-shockwave::after {
+      content: ''; position: absolute; top: 30%; left: 50%;
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 3px solid rgba(255,250,220,0.9);
+      box-shadow: 0 0 40px rgba(212,175,55,0.9);
+      transform: translate(-50%,-50%);
+      opacity: 0;
+      animation: splashShockRing 1.4s cubic-bezier(0.15,0.85,0.3,1) 6.1s forwards;
+    }
+    #splash-shockwave::after { animation-delay: 6.35s; border-color: rgba(56,189,248,0.7); }
+    @keyframes splashShockRing {
+      0%   { width: 10px; height: 10px; opacity: 1; border-width: 5px; }
+      100% { width: 1400px; height: 1400px; opacity: 0; border-width: 0.5px; }
+    }
+    /* 深海の揺らめく光の帯（ゴッドレイと連動する下地レイヤー） */
+    #splash-caustics {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      opacity: 0.35;
+      background-image:
+        repeating-linear-gradient(70deg, rgba(120,200,255,0.05) 0px, rgba(120,200,255,0.05) 2px, transparent 2px, transparent 40px),
+        repeating-linear-gradient(110deg, rgba(180,220,255,0.04) 0px, rgba(180,220,255,0.04) 2px, transparent 2px, transparent 55px);
+      animation: causticsDrift 9s ease-in-out infinite alternate;
+      mix-blend-mode: screen;
+    }
+    @keyframes causticsDrift {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(-3%,-4%) scale(1.08); }
+    }
+
+    /* ---- 魔法陣リング：ルーン文字回転レイヤー＋パーティクルオービット ---- */
+    .ring-rune-el {
+      animation: spin 26s linear infinite;
+      transition: filter 0.7s ease;
+    }
+    .ring-orbit-particle {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      animation: orbitSpin linear infinite;
+    }
+    @keyframes orbitSpin {
+      0%   { transform: rotate(0deg) translateX(var(--orbit-r, 150px)) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(var(--orbit-r, 150px)) rotate(-360deg); }
+    }
+
+    /* ---- 詳細カード：流れる境界線グラデーション（高級感を大幅強化） ---- */
+    @keyframes borderFlow {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .flow-border {
+      position: relative;
+    }
+    .flow-border::before {
+      content: '';
+      position: absolute; inset: -2px; z-index: -1;
+      background: linear-gradient(90deg, #d4af37, #ffffff, #e60012, #66327c, #d4af37);
+      background-size: 200% 100%;
+      animation: borderFlow 4s linear infinite;
+      opacity: 0.5;
+      filter: blur(2px);
+    }
+
+    /* ---- クオート：強化された発光パルス ---- */
+    @keyframes quoteGlowPulse {
+      0%, 100% { text-shadow: 0 0 6px rgba(255,255,255,0.3), 0 0 14px rgba(230,0,18,0.4); }
+      50% { text-shadow: 0 0 12px rgba(255,255,255,0.55), 0 0 26px rgba(230,0,18,0.75), 0 0 40px rgba(212,175,55,0.4); }
+    }
+    #char-quote { animation: quoteGlowPulse 3s ease-in-out infinite; }
+
+    /* ---- カルーセルサムネイル：3Dチルト風の光沢強化 ---- */
+    .char-thumb { transform-style: preserve-3d; }
+    .char-thumb.active::before {
+      content: '';
+      position: absolute; inset: -3px; z-index: -1;
+      background: conic-gradient(from 0deg, #e60012, #d4af37, #ffffff, #e60012);
+      animation: spin 3s linear infinite;
+      filter: blur(3px);
+      opacity: 0.85;
+    }
+
+    /* ---- ボタン：内部エネルギー粒子ライン ---- */
+    @keyframes btnEnergyLine {
+      0% { transform: translateX(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    .btn-wa-energy {
+      position: absolute; bottom: 0; left: 0; height: 2px; width: 40%;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      animation: btnEnergyLine 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* ---- リージョンボタン：走査ラインスイープ強化 ---- */
+    .region-btn.active::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.35) 50%, transparent 80%);
+      background-size: 250% 100%;
+      animation: holoSweep 2.2s linear infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    /* ---- 背景レイヤー：色収差ズレを軽く演出（豪華な映像質感） ---- */
+    .bg-layer.bg-active {
+      filter: blur(0.5px) saturate(1.35) contrast(1.12) brightness(1.0);
+    }
+    .bg-layer.bg-active::after { content: none; }
+
+    /* ---- パーティクルの奥行き演出用パララックスコンテナ ---- */
+    #parallax-wrap { transition: transform 0.25s cubic-bezier(0.22,1,0.36,1); will-change: transform; }
+
+    /* ---- ロード中プログレスバーの発光粒子先端 ---- */
+    .splash-bar-track { overflow: visible !important; }
+    .splash-bar-fill::after {
+      content: '';
+      position: absolute; right: -4px; top: 50%; width: 10px; height: 10px;
+      background: #fff; border-radius: 50%;
+      box-shadow: 0 0 12px 4px rgba(255,255,255,0.9), 0 0 24px 8px rgba(212,175,55,0.7);
+      transform: translateY(-50%);
+    }
+
     @media (max-width: 767px) {
       #cursor-glow { display: none; }
       .splash-kanji { letter-spacing: 0.15em; }
+      #film-grain { opacity: 0.035; }
     }
   </style>
 </head>
@@ -620,18 +907,28 @@
   <!-- ==================== SPLASH / INTRO SCREEN (深海→地上 浮上演出) ==================== -->
   <!-- 初期状態では非表示にし、ユーザーアクションで表示させることでアニメーションを開始します -->
   <div id="splash-screen" style="display: none;">
+    <div id="splash-caustics"></div>
     <div id="splash-light"></div>
+    <div id="splash-godrays"></div>
     <div id="splash-rays"></div>
     <div id="splash-bubbles"></div>
     <h1 class="splash-kanji">ROUGE-GALLEON</h1>
     <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
     <p class="splash-sub font-jp">LOADING THE EMAKI SCROLL...</p>
     <p class="splash-sub-deep font-jp">ASCENDING FROM THE DEEP SEA...</p>
+    <div id="splash-shockwave"></div>
     <div id="splash-flash"></div>
   </div>
 
   <!-- マウス追従グローオーブ -->
   <div id="cursor-glow"></div>
+
+  <!-- ★品質強化レイヤー: フィルムグレイン・ビネット・色収差・シェイク・バーストフラッシュ -->
+  <div id="film-grain"></div>
+  <div id="cinematic-vignette"></div>
+  <div id="speed-lines"></div>
+  <div id="char-burst-flash"></div>
+  <div id="chroma-flash"></div>
 
   <!-- VIRTUAL BACKGROUND LAYER (二層クロスフェード＋斬光ワイプ＋属性フラッシュで切替アニメーション強化) -->
   <div class="fixed inset-0 z-0" id="bg-stage">
@@ -753,11 +1050,11 @@
           <div class="flex flex-wrap gap-2" id="style-buttons"></div>
         </div>
 
-        <!-- Description Box -->
-        <div class="relative p-5 md:p-6 bg-wa-dark/50 backdrop-blur-md border border-white/20 wa-clip shadow-[0_10px_40px_rgba(0,0,0,0.8)] group">
-          <!-- 和風コーナー飾り -->
-          <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-wa-gold transition-all group-hover:w-8 group-hover:h-8 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
-          <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-wa-red transition-all group-hover:w-8 group-hover:h-8 group-hover:shadow-[0_0_15px_rgba(230,0,18,0.8)]"></div>
+        <!-- Description Box (箔押しテクスチャ＋ホログラフィック走査線＋フローボーダーで質感強化) -->
+        <div class="relative p-5 md:p-6 bg-wa-dark/50 backdrop-blur-md border border-white/20 wa-clip shadow-[0_10px_40px_rgba(0,0,0,0.8)] group foil-texture holo-border flow-border overflow-hidden">
+          <!-- 和風コーナー飾り（発光強化） -->
+          <div class="corner-glint absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-wa-gold transition-all group-hover:w-8 group-hover:h-8 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.8)] z-10" style="color:#d4af37"></div>
+          <div class="corner-glint absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-wa-red transition-all group-hover:w-8 group-hover:h-8 group-hover:shadow-[0_0_15px_rgba(230,0,18,0.8)] z-10" style="color:#e60012; animation-delay:1.2s"></div>
           
           <p class="text-sm leading-loose text-gray-100 tracking-wide font-medium font-jp relative z-10" id="char-description">
             Description goes here.
@@ -775,11 +1072,25 @@
 
       <!-- ILLUSTRATION (CHARACTER VISUAL & SVG EFFECT) -->
       <div class="col-span-12 md:col-span-6 flex items-center justify-center relative min-h-[300px] md:min-h-[420px] order-1 md:order-2">
-        <!-- Magic Ring Background (属性に応じて動的着色・さらに派手に) -->
+        <!-- Magic Ring Background (属性に応じて動的着色・ルーン文字リング＆オービット粒子で大幅強化) -->
         <div id="magic-ring-wrap" class="absolute w-[280px] h-[280px] md:w-[400px] md:h-[400px] rounded-full border-2 border-wa-gold/20 flex items-center justify-center pointer-events-none shadow-[0_0_30px_rgba(212,175,55,0.2)]">
+          <!-- 最外周：ルーン文字状の点線リング（超低速回転で神秘性を演出） -->
+          <svg id="ring-rune-el" class="ring-rune-el absolute w-[280px] h-[280px] md:w-[400px] md:h-[400px]" viewBox="0 0 400 400">
+            <circle cx="200" cy="200" r="195" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="2 10" opacity="0.6"/>
+            <g fill="#d4af37" opacity="0.55" font-size="11" font-family="'Shippori Mincho',serif">
+              <text x="200" y="14" text-anchor="middle">卍</text><text x="290" y="40" text-anchor="middle">紅</text>
+              <text x="355" y="110" text-anchor="middle">炎</text><text x="382" y="200" text-anchor="middle">龍</text>
+              <text x="355" y="290" text-anchor="middle">舞</text><text x="290" y="360" text-anchor="middle">魂</text>
+              <text x="200" y="392" text-anchor="middle">絵</text><text x="110" y="360" text-anchor="middle">巻</text>
+              <text x="45" y="290" text-anchor="middle">海</text><text x="18" y="200" text-anchor="middle">賊</text>
+              <text x="45" y="110" text-anchor="middle">義</text><text x="110" y="40" text-anchor="middle">勇</text>
+            </g>
+          </svg>
           <div id="ring-outer-el" class="ring-outer-el absolute w-[240px] h-[240px] md:w-[340px] md:h-[340px] rounded-full border-t-[4px] border-b-[4px] border-wa-gold/50 animate-[spin_20s_linear_infinite] filter drop-shadow-[0_0_10px_#d4af37]"></div>
           <div id="ring-mid-el" class="ring-mid-el absolute w-[190px] h-[190px] md:w-[270px] md:h-[270px] rounded-full border-2 border-dashed border-wa-red/60 animate-[spin_15s_linear_infinite_reverse] filter drop-shadow-[0_0_15px_#e60012]"></div>
           <div id="ring-glow-el" class="ring-glow-el absolute w-36 h-36 bg-wa-red/20 blur-[50px] rounded-full"></div>
+          <!-- オービット粒子（リングの軌道上を巡る発光点） -->
+          <div id="ring-orbit-wrap" class="absolute inset-0"></div>
         </div>
 
         <!-- Character SVG Graphic Container -->
@@ -923,8 +1234,13 @@
 
     // 赤の炎のエフェクト (ケチャップ, ホタル)
     const svgRedFlame = `
-      <svg viewBox="0 0 500 500" class="w-full h-full filter drop-shadow-[0_0_45px_#e60012]" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 500 500" class="w-full h-full filter drop-shadow-[0_0_55px_#e60012]" xmlns="http://www.w3.org/2000/svg">
         <defs>
+          <radialGradient id="redFlameHalo" cx="50%" cy="55%" r="65%">
+            <stop offset="0%" stop-color="#ff8800" stop-opacity="0.35"/>
+            <stop offset="60%" stop-color="#e60012" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#e60012" stop-opacity="0"/>
+          </radialGradient>
           <radialGradient id="redFlameCore" cx="50%" cy="70%" r="60%">
             <stop offset="0%" stop-color="#fff3b0"/>
             <stop offset="35%" stop-color="#ffcf33"/>
@@ -940,23 +1256,49 @@
             <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="7" result="noise"/>
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
           </filter>
+          <filter id="redFlameBlur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6"/>
+          </filter>
         </defs>
+        <circle cx="250" cy="250" r="240" fill="url(#redFlameHalo)" class="anim-pulse-glow" style="animation-duration:3.4s"/>
         <circle cx="250" cy="250" r="205" fill="url(#redFlameCore)" opacity="0.55" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#ff8800" stroke-width="1.5" stroke-dasharray="4 8" opacity="0.5" class="anim-spin-reverse" style="animation-duration:26s"/>
         <circle cx="250" cy="250" r="190" fill="none" stroke="#e60012" stroke-width="4" stroke-dasharray="15 15" class="anim-spin-slow"/>
+        <circle cx="250" cy="250" r="165" fill="none" stroke="#ffcc33" stroke-width="1.5" stroke-dasharray="2 6" opacity="0.7" class="anim-spin-fast"/>
         <circle cx="250" cy="250" r="140" fill="none" stroke="#ff4500" stroke-width="5" stroke-dasharray="30 20" class="anim-spin-reverse"/>
+        <!-- 背後のぼやけた大火柱（奥行き演出） -->
+        <g transform="translate(250 250)" filter="url(#redFlameBlur)" opacity="0.5">
+          <path d="M 0 -230 C 80 -130 -50 -60 0 0 C 50 60 -80 130 0 230 C -80 130 50 60 0 0 C -50 -60 80 -130 0 -230 Z" fill="#ff4500" transform="rotate(12) scale(1.15)"/>
+        </g>
         <g transform="translate(250 250)" filter="url(#redFlameNoise)">
           <path d="M 0 -190 C 60 -110 -40 -50 0 0 C 40 50 -60 110 0 190 C -60 110 40 50 0 0 C -40 -50 60 -110 0 -190 Z" fill="url(#redFlameGrad)" opacity="0.92"/>
           <path d="M -130 0 C -90 -100 -20 20 0 0 C 20 -20 90 100 130 0 C 70 60 -20 -40 0 0 C 20 40 -70 -60 -130 0 Z" fill="url(#redFlameGrad)" opacity="0.75" transform="rotate(45)"/>
           <path d="M 0 -140 C 40 -80 -25 -35 0 0 C 25 35 -40 80 0 140 C -40 80 25 35 0 0 C -25 -35 40 -80 0 -140 Z" fill="#ffea00" opacity="0.55" transform="rotate(-20)"/>
+          <path d="M 0 -95 C 26 -55 -17 -24 0 0 C 17 24 -26 55 0 95 C -26 55 17 24 0 0 C -17 -24 26 -55 0 -95 Z" fill="#ffffff" opacity="0.4" transform="rotate(65)"/>
         </g>
         <path d="M 170 340 L 330 160 L 340 170 L 180 350 Z" fill="#ffffff" stroke="#e60012" stroke-width="4"/>
+        <path d="M 170 340 L 330 160 L 340 170 L 180 350 Z" fill="none" stroke="#ffea00" stroke-width="1" opacity="0.8"/>
         <circle cx="250" cy="250" r="45" fill="none" stroke="#ffea00" stroke-width="6" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="60" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.6" class="anim-pulse-glow" style="animation-delay:0.4s"/>
+        <!-- 火花パーティクル群（密度2倍） -->
         <g fill="#ffcc33">
           <circle class="fx-ember" cx="250" cy="380" r="5" style="--ex:-30px; --ey:-220px; animation-delay:0s;"/>
           <circle class="fx-ember" cx="200" cy="400" r="4" style="--ex:18px; --ey:-260px; animation-delay:0.4s;"/>
           <circle class="fx-ember" cx="300" cy="390" r="3.5" style="--ex:-14px; --ey:-240px; animation-delay:0.9s;"/>
           <circle class="fx-ember" cx="230" cy="410" r="3" style="--ex:34px; --ey:-200px; animation-delay:1.3s;"/>
           <circle class="fx-ember" cx="270" cy="405" r="4.5" style="--ex:-24px; --ey:-250px; animation-delay:1.8s;"/>
+          <circle class="fx-ember" cx="150" cy="370" r="3" style="--ex:22px; --ey:-190px; animation-delay:0.6s;"/>
+          <circle class="fx-ember" cx="350" cy="375" r="3.5" style="--ex:-26px; --ey:-210px; animation-delay:1.1s;"/>
+          <circle class="fx-ember" cx="130" cy="410" r="2.5" style="--ex:16px; --ey:-230px; animation-delay:1.5s;"/>
+          <circle class="fx-ember" cx="370" cy="405" r="2.5" style="--ex:-20px; --ey:-255px; animation-delay:2.1s;"/>
+          <circle class="fx-ember" cx="180" cy="90" r="2.5" style="--ex:-16px; --ey:60px; animation-delay:0.7s;"/>
+          <circle class="fx-ember" cx="320" cy="95" r="2" style="--ex:14px; --ey:55px; animation-delay:1.4s;"/>
+        </g>
+        <g fill="#ffffff" opacity="0.9">
+          <circle class="fx-frost" cx="120" cy="180" r="2" style="animation-delay:0.2s;"/>
+          <circle class="fx-frost" cx="380" cy="200" r="2" style="animation-delay:0.7s;"/>
+          <circle class="fx-frost" cx="100" cy="320" r="1.6" style="animation-delay:1.1s;"/>
+          <circle class="fx-frost" cx="400" cy="330" r="1.8" style="animation-delay:1.5s;"/>
         </g>
       </svg>`;
 
@@ -979,23 +1321,45 @@
             <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="3" result="noise"/>
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
           </filter>
+          <filter id="blueFlameBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+          <radialGradient id="blueFlameHalo" cx="50%" cy="55%" r="65%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+            <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </radialGradient>
         </defs>
+        <circle cx="250" cy="250" r="240" fill="url(#blueFlameHalo)" class="anim-pulse-glow" style="animation-duration:3.4s"/>
         <circle cx="250" cy="250" r="205" fill="url(#blueFlameCore)" opacity="0.55" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 8" opacity="0.5" class="anim-spin-reverse" style="animation-duration:26s"/>
         <circle cx="250" cy="250" r="190" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="15 15" class="anim-spin-slow"/>
+        <circle cx="250" cy="250" r="165" fill="none" stroke="#bfe9ff" stroke-width="1.5" stroke-dasharray="2 6" opacity="0.7" class="anim-spin-fast"/>
         <circle cx="250" cy="250" r="140" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="30 20" class="anim-spin-reverse"/>
+        <g transform="translate(250 250)" filter="url(#blueFlameBlur)" opacity="0.5">
+          <path d="M 0 -230 C 80 -130 -50 -60 0 0 C 50 60 -80 130 0 230 C -80 130 50 60 0 0 C -50 -60 80 -130 0 -230 Z" fill="#38bdf8" transform="rotate(12) scale(1.15)"/>
+        </g>
         <g transform="translate(250 250)" filter="url(#blueFlameNoise)">
           <path d="M 0 -190 C 60 -110 -40 -50 0 0 C 40 50 -60 110 0 190 C -60 110 40 50 0 0 C -40 -50 60 -110 0 -190 Z" fill="url(#blueFlameGrad)" opacity="0.92"/>
           <path d="M -130 0 C -90 -100 -20 20 0 0 C 20 -20 90 100 130 0 C 70 60 -20 -40 0 0 C 20 40 -70 -60 -130 0 Z" fill="url(#blueFlameGrad)" opacity="0.75" transform="rotate(45)"/>
           <path d="M 0 -140 C 40 -80 -25 -35 0 0 C 25 35 -40 80 0 140 C -40 80 25 35 0 0 C -25 -35 40 -80 0 -140 Z" fill="#ffffff" opacity="0.6" transform="rotate(-20)"/>
+          <path d="M 0 -95 C 26 -55 -17 -24 0 0 C 17 24 -26 55 0 95 C -26 55 17 24 0 0 C -17 -24 26 -55 0 -95 Z" fill="#e0f7ff" opacity="0.5" transform="rotate(65)"/>
         </g>
         <path d="M 170 340 L 330 160 L 340 170 L 180 350 Z" fill="#ffffff" stroke="#0284c7" stroke-width="4"/>
         <circle cx="250" cy="250" r="45" fill="none" stroke="#ffffff" stroke-width="6" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="60" fill="none" stroke="#bfe9ff" stroke-width="1.5" opacity="0.6" class="anim-pulse-glow" style="animation-delay:0.4s"/>
         <g fill="#bfe9ff">
           <circle class="fx-ember" cx="250" cy="380" r="5" style="--ex:-30px; --ey:-220px; animation-delay:0s;"/>
           <circle class="fx-ember" cx="200" cy="400" r="4" style="--ex:18px; --ey:-260px; animation-delay:0.4s;"/>
           <circle class="fx-ember" cx="300" cy="390" r="3.5" style="--ex:-14px; --ey:-240px; animation-delay:0.9s;"/>
           <circle class="fx-ember" cx="230" cy="410" r="3" style="--ex:34px; --ey:-200px; animation-delay:1.3s;"/>
           <circle class="fx-ember" cx="270" cy="405" r="4.5" style="--ex:-24px; --ey:-250px; animation-delay:1.8s;"/>
+          <circle class="fx-ember" cx="150" cy="370" r="3" style="--ex:22px; --ey:-190px; animation-delay:0.6s;"/>
+          <circle class="fx-ember" cx="350" cy="375" r="3.5" style="--ex:-26px; --ey:-210px; animation-delay:1.1s;"/>
+          <circle class="fx-ember" cx="130" cy="410" r="2.5" style="--ex:16px; --ey:-230px; animation-delay:1.5s;"/>
+        </g>
+        <g fill="#ffffff" opacity="0.9">
+          <circle class="fx-frost" cx="120" cy="180" r="2" style="animation-delay:0.2s;"/>
+          <circle class="fx-frost" cx="380" cy="200" r="2" style="animation-delay:0.7s;"/>
+          <circle class="fx-frost" cx="100" cy="320" r="1.6" style="animation-delay:1.1s;"/>
         </g>
       </svg>`;
 
@@ -1014,9 +1378,13 @@
             <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.9 0.9 0.9 0 0" result="na"/>
             <feComposite in="na" in2="SourceGraphic" operator="in"/>
           </filter>
+          <filter id="purpleBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="240" fill="#000000" opacity="0.25" filter="url(#purpleBlur)"/>
         <circle cx="250" cy="250" r="205" fill="url(#purpleDarkGlow)"/>
         <rect x="60" y="60" width="380" height="380" fill="#000000" opacity="0.12" filter="url(#purpleNoiseTex)"/>
+        <circle cx="250" cy="250" r="225" fill="none" stroke="#1e0033" stroke-width="2" stroke-dasharray="3 9" opacity="0.7" class="anim-spin-slow"/>
+        <circle cx="250" cy="250" r="170" fill="none" stroke="#d8b4fe" stroke-width="1.5" stroke-dasharray="2 5" opacity="0.6" class="anim-spin-reverse"/>
         <circle cx="250" cy="250" r="140" fill="none" stroke="#a855f7" stroke-width="4" stroke-dasharray="10 15" class="anim-spin-fast"/>
         <g stroke-linecap="round" stroke-linejoin="round" class="fx-bolt">
           <path d="M 250 30 L 220 160 L 280 190 L 210 320 L 280 340 L 230 470" stroke="#000000" stroke-width="11" fill="none" opacity="0.6"/>
@@ -1028,11 +1396,22 @@
           <path d="M 50 220 L 160 250 L 180 200 L 330 290 L 360 230 L 460 270" stroke="#a855f7" stroke-width="6" fill="none"/>
           <path d="M 110 90 L 210 190 L 170 230 L 320 210 L 390 390" stroke="#ffffff" stroke-width="4" fill="none"/>
         </g>
+        <g stroke-linecap="round" stroke-linejoin="round" class="fx-bolt" style="animation-delay:0.6s">
+          <path d="M 420 100 L 350 180 L 390 220 L 300 340" stroke="#c084fc" stroke-width="5" fill="none" opacity="0.8"/>
+        </g>
         <polygon points="250,150 290,230 370,250 290,270 250,350 210,270 130,250 210,230" fill="none" stroke="#c084fc" stroke-width="4" class="anim-pulse-glow"/>
+        <polygon points="250,180 275,225 320,250 275,275 250,320 225,275 180,250 225,225" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7" class="anim-spin-reverse"/>
         <g fill="#e9d5ff">
           <circle class="fx-ember" cx="180" cy="380" r="3" style="--ex:22px; --ey:-180px; animation-delay:0.2s;"/>
           <circle class="fx-ember" cx="320" cy="400" r="2.5" style="--ex:-18px; --ey:-210px; animation-delay:0.8s;"/>
           <circle class="fx-ember" cx="260" cy="410" r="2" style="--ex:10px; --ey:-190px; animation-delay:1.4s;"/>
+          <circle class="fx-ember" cx="120" cy="350" r="2" style="--ex:14px; --ey:-160px; animation-delay:1.1s;"/>
+          <circle class="fx-ember" cx="380" cy="355" r="2" style="--ex:-12px; --ey:-170px; animation-delay:1.7s;"/>
+        </g>
+        <g fill="#ffffff" opacity="0.85">
+          <circle class="fx-frost" cx="140" cy="140" r="2" style="animation-delay:0.3s;"/>
+          <circle class="fx-frost" cx="360" cy="150" r="1.8" style="animation-delay:0.8s;"/>
+          <circle class="fx-frost" cx="130" cy="360" r="1.6" style="animation-delay:1.3s;"/>
         </g>
       </svg>`;
 
@@ -1055,22 +1434,36 @@
             <feTurbulence type="fractalNoise" baseFrequency="0.015 0.06" numOctaves="3" seed="21" result="noise"/>
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="16"/>
           </filter>
+          <filter id="blackRedBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="240" fill="url(#blackRedCore)" opacity="0.3" filter="url(#blackRedBlur)"/>
         <circle cx="250" cy="250" r="210" fill="url(#blackRedCore)" opacity="0.6" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="230" fill="none" stroke="#ff3333" stroke-width="1.5" stroke-dasharray="3 10" opacity="0.5" class="anim-spin-slow" style="animation-duration:24s"/>
         <circle cx="250" cy="250" r="180" fill="none" stroke="#1f0000" stroke-width="15"/>
         <circle cx="250" cy="250" r="180" fill="none" stroke="#e60012" stroke-width="5" stroke-dasharray="50 25" class="anim-spin-reverse"/>
+        <circle cx="250" cy="250" r="155" fill="none" stroke="#ff8888" stroke-width="1" stroke-dasharray="1 4" opacity="0.6" class="anim-spin-fast"/>
         <g transform="translate(250 250)" filter="url(#blackRedNoise)">
           <path d="M 0 -210 C 90 -130 -70 -50 0 0 C 70 50 -90 130 0 210 C -90 130 70 50 0 0 C -70 -50 90 -130 0 -210 Z" fill="url(#blackRedGrad)"/>
           <path d="M 0 -210 C 90 -130 -70 -50 0 0 C 70 50 -90 130 0 210 C -90 130 70 50 0 0 C -70 -50 90 -130 0 -210 Z" fill="none" stroke="#000000" stroke-width="6" transform="scale(0.8)"/>
           <path d="M -170 0 C -110 -90 40 -20 0 0 C -40 20 110 90 170 0 C 110 90 -40 20 0 0 C 40 -20 -110 -90 -170 0 Z" fill="url(#blackRedGrad)" opacity="0.82" transform="rotate(60)"/>
+          <path d="M 0 -120 C 50 -70 -38 -30 0 0 C 38 30 -50 70 0 120 C -50 70 38 30 0 0 C -38 -30 50 -70 0 -120 Z" fill="#ff6666" opacity="0.45" transform="rotate(-30)"/>
         </g>
         <polygon points="250,100 290,210 400,250 290,290 250,400 210,290 100,250 210,210" fill="#000000" stroke="#ff3333" stroke-width="5" class="anim-pulse-glow"/>
+        <polygon points="250,130 280,215 370,250 280,285 250,370 220,285 130,250 220,215" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5" class="anim-spin-reverse"/>
         <circle cx="250" cy="250" r="30" fill="#e60012" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="42" fill="none" stroke="#ff9999" stroke-width="1.5" opacity="0.7" class="anim-pulse-glow" style="animation-delay:0.5s"/>
         <g fill="#ff4444">
           <circle class="fx-ember" cx="250" cy="390" r="5" style="--ex:-28px; --ey:-230px; animation-delay:0.1s;"/>
           <circle class="fx-ember" cx="195" cy="405" r="4" style="--ex:20px; --ey:-260px; animation-delay:0.6s;"/>
           <circle class="fx-ember" cx="305" cy="400" r="3.5" style="--ex:-16px; --ey:-245px; animation-delay:1.1s;"/>
           <circle class="fx-ember" cx="240" cy="415" r="3" style="--ex:32px; --ey:-210px; animation-delay:1.7s;"/>
+          <circle class="fx-ember" cx="150" cy="380" r="3" style="--ex:18px; --ey:-200px; animation-delay:0.4s;"/>
+          <circle class="fx-ember" cx="350" cy="385" r="3" style="--ex:-22px; --ey:-215px; animation-delay:0.9s;"/>
+          <circle class="fx-ember" cx="110" cy="415" r="2.5" style="--ex:20px; --ey:-190px; animation-delay:1.4s;"/>
+        </g>
+        <g fill="#000000" opacity="0.55">
+          <circle class="fx-dust" cx="200" cy="410" r="4" style="--dx:-18px; --dy:-30px; animation-delay:0.3s;"/>
+          <circle class="fx-dust" cx="300" cy="415" r="3.5" style="--dx:16px; --dy:-25px; animation-delay:0.9s;"/>
         </g>
       </svg>`;
 
@@ -1084,8 +1477,11 @@
             <stop offset="70%" stop-color="#0055ff" stop-opacity="0.6"/>
             <stop offset="100%" stop-color="#000520" stop-opacity="0"/>
           </radialGradient>
+          <filter id="blueThunderBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="240" fill="url(#blueThunderGlow)" opacity="0.3" filter="url(#blueThunderBlur)"/>
         <circle cx="250" cy="250" r="205" fill="url(#blueThunderGlow)" class="anim-pulse-glow"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 8" opacity="0.5" class="anim-spin-slow" style="animation-duration:22s"/>
         <circle cx="250" cy="250" r="160" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="15 10" class="anim-spin-fast"/>
         <circle cx="250" cy="250" r="120" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="30 15" class="anim-spin-reverse"/>
         <g stroke-linecap="round" stroke-linejoin="round" class="fx-bolt">
@@ -1097,10 +1493,20 @@
           <path d="M 40 250 L 170 210 L 210 270 L 340 190 L 370 260 L 460 220" stroke="#00d2ff" stroke-width="6" fill="none"/>
           <path d="M 120 110 L 210 200 L 180 250 L 310 230 L 390 380" stroke="#ffffff" stroke-width="4" fill="none"/>
         </g>
+        <g stroke-linecap="round" stroke-linejoin="round" class="fx-bolt" style="animation-delay:0.55s">
+          <path d="M 460 100 L 380 190 L 410 230 L 320 350" stroke="#87cefa" stroke-width="4" fill="none" opacity="0.8"/>
+        </g>
         <polygon points="250,160 280,220 340,250 280,280 250,340 220,280 160,250 220,220" fill="#ffffff" stroke="#00a2ff" stroke-width="4" class="anim-pulse-glow"/>
+        <polygon points="250,190 270,225 310,250 270,275 250,310 230,275 190,250 230,225" fill="none" stroke="#0055ff" stroke-width="1" opacity="0.6" class="anim-spin-reverse"/>
         <g fill="#bfe9ff">
           <circle class="fx-ember" cx="200" cy="380" r="3" style="--ex:20px; --ey:-180px; animation-delay:0.3s;"/>
           <circle class="fx-ember" cx="310" cy="390" r="2.5" style="--ex:-16px; --ey:-200px; animation-delay:0.9s;"/>
+          <circle class="fx-ember" cx="150" cy="360" r="2" style="--ex:14px; --ey:-160px; animation-delay:0.7s;"/>
+          <circle class="fx-ember" cx="360" cy="370" r="2" style="--ex:-14px; --ey:-170px; animation-delay:1.2s;"/>
+        </g>
+        <g fill="#ffffff" opacity="0.85">
+          <circle class="fx-frost" cx="130" cy="150" r="2" style="animation-delay:0.2s;"/>
+          <circle class="fx-frost" cx="370" cy="160" r="1.8" style="animation-delay:0.6s;"/>
         </g>
       </svg>`;
 
@@ -1117,8 +1523,11 @@
             <stop offset="0%" stop-color="#e0f7ff" stop-opacity="0.65"/>
             <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
           </radialGradient>
+          <filter id="iceBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="235" fill="url(#iceGlowBg)" opacity="0.4" filter="url(#iceBlur)"/>
         <circle cx="250" cy="250" r="200" fill="url(#iceGlowBg)"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="1 6" opacity="0.6" class="anim-spin-fast" style="animation-duration:14s"/>
         <circle cx="250" cy="250" r="180" fill="none" stroke="#bae6fd" stroke-width="4" stroke-dasharray="25 15" class="anim-spin-slow"/>
         <g transform="translate(250 250)">
           <g class="anim-spin-reverse">
@@ -1131,8 +1540,15 @@
             <polygon points="145,-145 75,-55 95,-95 55,-75" fill="url(#iceGrad)" stroke="#ffffff" stroke-width="1"/>
             <polygon points="-145,145 -75,55 -95,95 -55,75" fill="url(#iceGrad)" stroke="#ffffff" stroke-width="1"/>
           </g>
+          <g class="anim-spin-slow" style="animation-duration:32s" opacity="0.5">
+            <polygon points="0,-160 20,-90 0,-105 -20,-90" fill="#ffffff"/>
+            <polygon points="0,160 20,90 0,105 -20,90" fill="#ffffff"/>
+            <polygon points="-160,0 -90,20 -105,0 -90,-20" fill="#ffffff"/>
+            <polygon points="160,0 90,20 105,0 90,-20" fill="#ffffff"/>
+          </g>
         </g>
         <polygon points="250,140 330,250 250,360 170,250" fill="rgba(255,255,255,0.92)" stroke="#38bdf8" stroke-width="5" class="anim-pulse-glow"/>
+        <polygon points="250,170 300,250 250,330 200,250" fill="none" stroke="#0284c7" stroke-width="1" opacity="0.7"/>
         <line x1="250" y1="140" x2="250" y2="360" stroke="#0284c7" stroke-width="3"/>
         <line x1="170" y1="250" x2="330" y2="250" stroke="#0284c7" stroke-width="3"/>
         <g fill="#ffffff">
@@ -1141,6 +1557,9 @@
           <circle class="fx-frost" cx="150" cy="340" r="3.5" style="animation-delay:0.8s;"/>
           <circle class="fx-frost" cx="350" cy="330" r="2" style="animation-delay:1.2s;"/>
           <circle class="fx-frost" cx="250" cy="90" r="3" style="animation-delay:0.6s;"/>
+          <circle class="fx-frost" cx="250" cy="415" r="2.5" style="animation-delay:1.0s;"/>
+          <circle class="fx-frost" cx="90" cy="250" r="2.5" style="animation-delay:1.4s;"/>
+          <circle class="fx-frost" cx="415" cy="250" r="2.5" style="animation-delay:0.2s;"/>
         </g>
       </svg>`;
 
@@ -1158,7 +1577,14 @@
             <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0" result="na"/>
             <feComposite in="na" in2="SourceGraphic" operator="in"/>
           </filter>
+          <filter id="rockBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+          <radialGradient id="rockGlow" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#d2b48c" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#2f4f4f" stop-opacity="0"/>
+          </radialGradient>
         </defs>
+        <circle cx="250" cy="250" r="230" fill="url(#rockGlow)" opacity="0.6" filter="url(#rockBlur)"/>
+        <circle cx="250" cy="250" r="210" fill="none" stroke="#d2b48c" stroke-width="1" stroke-dasharray="1 10" opacity="0.5" class="anim-spin-reverse" style="animation-duration:30s"/>
         <circle cx="250" cy="250" r="180" fill="none" stroke="#8b4513" stroke-width="6" stroke-dasharray="40 20" class="anim-spin-slow"/>
         <circle cx="250" cy="250" r="140" fill="none" stroke="#808080" stroke-width="3" class="anim-spin-reverse"/>
         <polygon points="250,60 320,130 280,210 200,190 170,100" fill="url(#rockGrad)" stroke="#d2b48c" stroke-width="4"/>
@@ -1170,12 +1596,16 @@
         <polygon points="250,440 340,390 310,470 200,480 160,400" fill="url(#rockGrad)" stroke="#808080" stroke-width="4"/>
         <polygon points="250,440 340,390 310,470 200,480 160,400" fill="#000000" filter="url(#rockNoiseTex)"/>
         <polygon points="250,160 320,250 250,340 180,250" fill="#1c1917" stroke="#d4af37" stroke-width="5" class="anim-pulse-glow"/>
+        <polygon points="250,190 290,250 250,310 210,250" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.7" class="anim-spin-slow"/>
         <path d="M 250 160 L 250 340 M 180 250 L 320 250" stroke="#d4af37" stroke-width="3"/>
         <g fill="#c9a37a">
           <circle class="fx-dust" cx="200" cy="150" r="3" style="--dx:-14px; --dy:-50px; animation-delay:0s;"/>
           <circle class="fx-dust" cx="330" cy="180" r="2.5" style="--dx:16px; --dy:-45px; animation-delay:0.6s;"/>
           <circle class="fx-dust" cx="150" cy="330" r="3" style="--dx:-10px; --dy:-55px; animation-delay:1.2s;"/>
           <circle class="fx-dust" cx="360" cy="340" r="2" style="--dx:12px; --dy:-40px; animation-delay:1.8s;"/>
+          <circle class="fx-dust" cx="250" cy="440" r="3" style="--dx:8px; --dy:-60px; animation-delay:0.3s;"/>
+          <circle class="fx-dust" cx="100" cy="380" r="2.5" style="--dx:-12px; --dy:-50px; animation-delay:0.9s;"/>
+          <circle class="fx-dust" cx="410" cy="370" r="2.5" style="--dx:14px; --dy:-48px; animation-delay:1.5s;"/>
         </g>
       </svg>`;
 
@@ -1192,18 +1622,28 @@
             <stop offset="50%" stop-color="#ffe680"/>
             <stop offset="100%" stop-color="#d4af37"/>
           </linearGradient>
+          <filter id="huhBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="235" fill="url(#huhGlowBg)" opacity="0.5" filter="url(#huhBlur)"/>
         <circle cx="250" cy="250" r="200" fill="url(#huhGlowBg)"/>
+        <circle cx="250" cy="250" r="215" fill="none" stroke="#ffe680" stroke-width="1" stroke-dasharray="2 8" opacity="0.5" class="anim-spin-reverse" style="animation-duration:20s"/>
         <circle cx="250" cy="250" r="190" fill="none" stroke="#d4af37" stroke-width="4" stroke-dasharray="15 10" class="anim-spin-slow"/>
+        <circle cx="250" cy="250" r="165" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="1 5" opacity="0.6" class="anim-spin-fast"/>
         <circle cx="250" cy="250" r="140" fill="none" stroke="#e60012" stroke-width="4" stroke-dasharray="30 15" class="anim-spin-reverse"/>
         <text x="250" y="270" font-family="'Shippori Mincho', serif" font-size="130" font-weight="900" fill="none" stroke="#d4af37" stroke-width="6" text-anchor="middle" class="anim-pulse-glow">HUH</text>
         <text x="250" y="260" font-family="'Shippori Mincho', serif" font-size="120" font-weight="900" fill="url(#huhTextGrad)" text-anchor="middle">HUH</text>
+        <text x="250" y="260" font-family="'Shippori Mincho', serif" font-size="120" font-weight="900" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.6" text-anchor="middle">HUH</text>
         
         <g class="fx-huhpop" style="animation-delay: 0.5s">
           <text x="130" y="130" font-family="sans-serif" font-size="44" font-weight="bold" fill="#e60012" transform="rotate(-25 130 130)">HUH?</text>
           <text x="370" y="140" font-family="sans-serif" font-size="50" font-weight="bold" fill="#d4af37" transform="rotate(30 370 140)">HUH!</text>
           <text x="110" y="390" font-family="sans-serif" font-size="48" font-weight="bold" fill="#ffffff" transform="rotate(20 110 390)">HUH...</text>
           <text x="380" y="380" font-family="sans-serif" font-size="46" font-weight="bold" fill="#66327c" transform="rotate(-20 380 380)">HUH!?</text>
+        </g>
+        <g fill="#ffe680">
+          <circle class="fx-ember" cx="250" cy="440" r="3" style="--ex:10px; --ey:-40px; animation-delay:0.4s;"/>
+          <circle class="fx-ember" cx="120" cy="200" r="2.5" style="--ex:-14px; --ey:-30px; animation-delay:1.0s;"/>
+          <circle class="fx-ember" cx="380" cy="220" r="2.5" style="--ex:12px; --ey:-30px; animation-delay:1.6s;"/>
         </g>
       </svg>`;
 
@@ -1219,14 +1659,20 @@
             <stop offset="0%" stop-color="#dcfce7" stop-opacity="0.5"/>
             <stop offset="100%" stop-color="#15803d" stop-opacity="0"/>
           </radialGradient>
+          <filter id="grassBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="235" fill="url(#grassGlowBg)" opacity="0.5" filter="url(#grassBlur)"/>
         <circle cx="250" cy="250" r="200" fill="url(#grassGlowBg)"/>
+        <circle cx="250" cy="250" r="215" fill="none" stroke="#dcfce7" stroke-width="1" stroke-dasharray="1 8" opacity="0.5" class="anim-spin-reverse" style="animation-duration:26s"/>
         <circle cx="250" cy="250" r="180" fill="none" stroke="#22c55e" stroke-width="5" stroke-dasharray="20 15" class="anim-spin-slow"/>
+        <circle cx="250" cy="250" r="155" fill="none" stroke="#4ade80" stroke-width="1" stroke-dasharray="2 6" opacity="0.6" class="anim-spin-fast"/>
         <g transform="translate(250 250)">
           <path d="M 0 0 C -50 -90 -20 -200 0 -230 C 20 -200 50 -90 0 0 Z" fill="url(#grassGrad)" stroke="#0f4a26" stroke-width="1.5"/>
           <path d="M 0 0 C -90 -50 -200 -20 -230 0 C -200 20 -90 50 0 0 Z" fill="url(#grassGrad)" stroke="#0f4a26" stroke-width="1.5"/>
           <path d="M 0 0 C 50 90 20 200 0 230 C -20 200 -50 90 0 0 Z" fill="url(#grassGrad)" stroke="#0f4a26" stroke-width="1.5"/>
           <path d="M 0 0 C 90 50 200 20 230 0 C 200 -20 90 -50 0 0 Z" fill="url(#grassGrad)" stroke="#0f4a26" stroke-width="1.5"/>
+          <path d="M 0 0 C -35 -65 -14 -145 0 -165 C 14 -145 35 -65 0 0 Z" fill="#86efac" opacity="0.6" transform="rotate(30)"/>
+          <path d="M 0 0 C 35 65 14 145 0 165 C -14 145 -35 65 0 0 Z" fill="#86efac" opacity="0.6" transform="rotate(-30)"/>
         </g>
         <g fill="#fffbeb" stroke="#d4af37" stroke-width="4" class="anim-pulse-glow">
           <ellipse cx="250" cy="250" rx="55" ry="75" fill="#ffffff" stroke="#22c55e" stroke-width="5"/>
@@ -1235,11 +1681,14 @@
           <ellipse cx="140" cy="350" rx="27" ry="34" transform="rotate(20 140 350)"/>
           <ellipse cx="360" cy="350" rx="27" ry="34" transform="rotate(-20 360 350)"/>
         </g>
+        <ellipse cx="250" cy="250" rx="65" ry="85" fill="none" stroke="#facc15" stroke-width="1" opacity="0.6" class="anim-pulse-glow" style="animation-delay:0.5s"/>
         <circle cx="250" cy="250" r="20" fill="#facc15" class="anim-pulse-glow"/>
         <g fill="#4ade80">
           <path class="fx-leaf" d="M 150 60 q 12 -18 24 0 q -12 18 -24 0 Z" style="--lx:20px; --ly:130px; animation-delay:0s;"/>
           <path class="fx-leaf" d="M 350 70 q 12 -18 24 0 q -12 18 -24 0 Z" style="--lx:-24px; --ly:150px; animation-delay:0.7s;"/>
           <path class="fx-leaf" d="M 100 400 q 12 -18 24 0 q -12 18 -24 0 Z" style="--lx:18px; --ly:60px; animation-delay:1.4s;"/>
+          <path class="fx-leaf" d="M 400 410 q 12 -18 24 0 q -12 18 -24 0 Z" style="--lx:-20px; --ly:70px; animation-delay:2.0s;"/>
+          <path class="fx-leaf" d="M 80 200 q 12 -18 24 0 q -12 18 -24 0 Z" style="--lx:16px; --ly:100px; animation-delay:1.0s;"/>
         </g>
       </svg>`;
 
@@ -1256,8 +1705,11 @@
             <stop offset="0%" stop-color="#ecfdf5" stop-opacity="0.55"/>
             <stop offset="100%" stop-color="#059669" stop-opacity="0"/>
           </radialGradient>
+          <filter id="windBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
         </defs>
+        <circle cx="250" cy="250" r="235" fill="url(#windGlowBg)" opacity="0.5" filter="url(#windBlur)"/>
         <circle cx="250" cy="250" r="200" fill="url(#windGlowBg)"/>
+        <circle cx="250" cy="250" r="220" fill="none" stroke="#ecfdf5" stroke-width="1" stroke-dasharray="1 8" opacity="0.5" class="anim-spin-fast" style="animation-duration:16s"/>
         <circle cx="250" cy="250" r="190" fill="none" stroke="#a7f3d0" stroke-width="3" stroke-dasharray="30 20" class="anim-spin-slow"/>
         <circle cx="250" cy="250" r="150" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="15 25" class="anim-spin-fast"/>
         
@@ -1265,14 +1717,18 @@
           <path class="fx-wind" d="M 70 250 A 180 180 0 1 1 430 250 A 140 140 0 1 0 110 250 A 100 100 0 1 1 350 250" stroke-width="10" stroke-dasharray="300 60"/>
           <path class="fx-wind" d="M 110 170 Q 250 60 390 190 T 210 390" stroke-width="6" stroke-dasharray="50 15" style="animation-delay:0.4s"/>
           <path class="fx-wind" d="M 50 290 C 140 440 360 440 450 290" stroke-width="8" stroke-dasharray="260 40" style="animation-delay:0.8s"/>
+          <path class="fx-wind" d="M 30 150 Q 250 250 470 150" stroke-width="4" stroke-dasharray="200 50" style="animation-delay:1.2s"/>
           <path d="M 90 110 Q 250 10 410 110" stroke="#ffffff" stroke-width="5"/>
         </g>
         <path d="M 290 170 A 80 80 0 1 1 170 290 A 95 95 0 0 0 290 170 Z" fill="#ffffff" stroke="#10b981" stroke-width="4" class="anim-pulse-glow"/>
+        <path d="M 290 170 A 80 80 0 1 1 170 290 A 95 95 0 0 0 290 170 Z" fill="none" stroke="#34d399" stroke-width="1" opacity="0.6" class="anim-spin-reverse"/>
         <g fill="#ffffff">
           <circle class="fx-frost" cx="160" cy="180" r="3" style="animation-delay:0.1s;"/>
           <circle class="fx-frost" cx="330" cy="150" r="2.5" style="animation-delay:0.5s;"/>
           <circle class="fx-frost" cx="140" cy="330" r="3" style="animation-delay:0.9s;"/>
           <circle class="fx-frost" cx="350" cy="340" r="2" style="animation-delay:1.3s;"/>
+          <circle class="fx-frost" cx="250" cy="90" r="2.5" style="animation-delay:0.3s;"/>
+          <circle class="fx-frost" cx="250" cy="415" r="2.5" style="animation-delay:0.7s;"/>
         </g>
       </svg>`;
 
@@ -1486,7 +1942,7 @@
      　　 {
             id: "style_hota3", name: "水着", iconUrl: "ホタル水着.png",
             description: "夏休みを満喫しているホタル! 、泳ぎはうまく本気を出せば50mを28秒で泳げるらしい。 \n海ではナンパをよくされるらしい（当人はナンパされまくりで困っているらしい）",
-            quote: "「お姉ちゃんが一緒に遊んであげちゃうぞ。」",
+            quote: "「お姉ちゃんと一緒に遊ばない？」",
             svg: svgGreenWhiteWind
       },
       {
@@ -1529,14 +1985,14 @@
           },
           {
             id: "style_kagu2", name: "制服", iconUrl: "カグヤ制服.png",
-            description: "学生時代のカグヤ  \nデータが見つかりません",
+            description: "学生時代のカグヤ、成績は学校TOPで学校一の美少女らしいぞ！  \nああああああああああああ",
             quote: "「私は、現実世界ツクヨミの王女カグヤ！、私の力は無限大、大切な相棒と仲間たちがいる限り。」」",
             svg: svgGreenWhiteWind
       },
      　　 {
             id: "style_kagu3", name: "水着", iconUrl: "カグヤ水着.png",
-            description: "夏休みを満喫しているカグヤ!  \nデータが見つかりません",
-            quote: "「うぉおおおおおおおおおおお!!!!!」",
+            description: "夏休みを満喫しているカグヤ!  \n",
+            quote: "「お姉ちゃんと一緒に遊ばない？」",
             svg: svgGreenWhiteWind
       },
       {
@@ -1760,23 +2216,141 @@
       }
     }
 
+    // ===== 4. クリック衝撃波パーティクル（マウス/タップで発生する火花） =====
+    class BurstSpark {
+      constructor(x, y, color) { this.init(x, y, color); }
+      init(x, y, color) {
+        this.x = x; this.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.size = Math.random() * 3 + 1.5;
+        this.life = 1;
+        this.decay = Math.random() * 0.02 + 0.018;
+        this.color = color || '#ffe9b0';
+        this.dead = false;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        this.vx *= 0.95; this.vy *= 0.95; this.vy += 0.08;
+        this.life -= this.decay;
+        if (this.life <= 0) this.dead = true;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(this.life, 0);
+        ctx.shadowBlur = 8; ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    let burstSparks = [];
+    function spawnBurstSparks(x, y, color, count = 18) {
+      for (let i = 0; i < count; i++) burstSparks.push(new BurstSpark(x, y, color));
+    }
+
+    // ===== 5. 常時舞う光のリボン（属性テーマカラーで発光する曲線トレイル） =====
+    class GlowRibbon {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * viewW();
+        this.y = initial ? Math.random() * viewH() : viewH() + 40;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = -(Math.random() * 0.7 + 0.35);
+        this.len = Math.random() * 60 + 40;
+        this.points = [];
+        this.hue = Math.random();
+        this.alpha = Math.random() * 0.35 + 0.15;
+        this.t = Math.random() * 1000;
+      }
+      update() {
+        this.t += 0.02;
+        this.x += this.vx + Math.sin(this.t) * 0.6;
+        this.y += this.vy;
+        this.points.push({ x: this.x, y: this.y });
+        if (this.points.length > this.len) this.points.shift();
+        if (this.y < -100) this.reset();
+      }
+      draw() {
+        if (this.points.length < 2) return;
+        const theme = window.__currentEffectTheme || { outer: '#d4af37', mid: '#e60012' };
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = theme.outer;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = theme.outer;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(this.points[0].x, this.points[0].y);
+        for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    let glowRibbons = [];
+
     function initParticles() {
-      sakuraPetals = []; goldDust = []; digitalBits = [];
+      sakuraPetals = []; goldDust = []; digitalBits = []; glowRibbons = []; burstSparks = [];
       const isMobile = viewW() < 768;
-      const nSakura = isMobile ? 26 : 46;
-      const nGold = isMobile ? 20 : 38;
-      const nDigital = isMobile ? 12 : 22;
+      const nSakura = isMobile ? 32 : 58;
+      const nGold = isMobile ? 26 : 48;
+      const nDigital = isMobile ? 16 : 28;
+      const nRibbon = isMobile ? 4 : 8;
       for (let i = 0; i < nSakura; i++) sakuraPetals.push(new SakuraPetal());
       for (let i = 0; i < nGold; i++) goldDust.push(new GoldDust());
       for (let i = 0; i < nDigital; i++) digitalBits.push(new DigitalBit());
+      for (let i = 0; i < nRibbon; i++) glowRibbons.push(new GlowRibbon());
+    }
+    // マウスへの3Dパララックス（背景オービットや魔法陣リングをわずかに動かす奥行き演出）
+    let parallaxTargetX = 0, parallaxTargetY = 0, parallaxCurX = 0, parallaxCurY = 0;
+    window.addEventListener('mousemove', (e) => {
+      parallaxTargetX = (e.clientX / viewW() - 0.5) * 2;
+      parallaxTargetY = (e.clientY / viewH() - 0.5) * 2;
+    });
+    function updateParallax() {
+      parallaxCurX += (parallaxTargetX - parallaxCurX) * 0.06;
+      parallaxCurY += (parallaxTargetY - parallaxCurY) * 0.06;
+      const ringWrap = document.getElementById('magic-ring-wrap');
+      const imgContainer = document.getElementById('char-illustration-container');
+      if (ringWrap) ringWrap.style.transform = `translate(${parallaxCurX * 10}px, ${parallaxCurY * 8}px)`;
+      if (imgContainer) imgContainer.style.setProperty('--px-tilt', `${parallaxCurX * 4}deg`);
+      const bgA = document.getElementById('dynamic-bg-a');
+      const bgB = document.getElementById('dynamic-bg-b');
+      const bgShift = `translate(${parallaxCurX * -8}px, ${parallaxCurY * -6}px) scale(1.05)`;
+      if (bgA && bgA.classList.contains('bg-active')) bgA.style.setProperty('transform', bgShift, 'important');
     }
     function animateParticles() {
       ctx.clearRect(0, 0, viewW(), viewH());
+      glowRibbons.forEach(p => { p.update(); p.draw(); });
       digitalBits.forEach(p => { p.update(); p.draw(); });
       goldDust.forEach(p => { p.update(); p.draw(); });
       sakuraPetals.forEach(p => { p.update(); p.draw(); });
+      burstSparks.forEach(p => { p.update(); p.draw(); });
+      burstSparks = burstSparks.filter(p => !p.dead);
+      updateParallax();
       animationFrameId = requestAnimationFrame(animateParticles);
     }
+
+    // --- クリック/タップで衝撃波リング＋火花パーティクルを発生させる ---
+    function spawnClickShockwave(x, y) {
+      const theme = window.__currentEffectTheme || { outer: '#d4af37' };
+      const ring = document.createElement('div');
+      ring.className = 'click-shockwave';
+      ring.style.left = x + 'px'; ring.style.top = y + 'px';
+      ring.style.setProperty('--sw-color', theme.outer);
+      document.body.appendChild(ring);
+      setTimeout(() => ring.remove(), 800);
+      spawnBurstSparks(x, y, theme.outer, 14);
+    }
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('button, a, input, textarea')) return;
+      spawnClickShockwave(e.clientX, e.clientY);
+    });
 
     // --- スプラッシュ演出：深海から地上へ浮上する気泡・光の粒子を生成 ---
     const SPLASH_DURATION = 7500; // ロード時間 7.5秒
@@ -1787,8 +2361,8 @@
       if (!container) return;
       const frag = document.createDocumentFragment();
 
-      // 気泡（バブル）
-      const BUBBLE_COUNT = 26;
+      // 気泡（バブル）密度2倍
+      const BUBBLE_COUNT = 52;
       for (let i = 0; i < BUBBLE_COUNT; i++) {
         const b = document.createElement('div');
         b.className = 'bubble';
@@ -1806,8 +2380,8 @@
         frag.appendChild(b);
       }
 
-      // 光の粒子（金粉・きらめき）
-      const DUST_COUNT = 20;
+      // 光の粒子（金粉・きらめき）密度2倍
+      const DUST_COUNT = 40;
       for (let i = 0; i < DUST_COUNT; i++) {
         const d = document.createElement('div');
         d.className = 'light-dust';
@@ -1832,6 +2406,17 @@
     function hideSplash() {
       if (splashHidden) return;
       splashHidden = true;
+      // 突破の瞬間：画面シェイク＋色収差フラッシュで衝撃を演出
+      const mainBody = document.getElementById('main-body');
+      const chroma = document.getElementById('chroma-flash');
+      if (mainBody) {
+        mainBody.classList.add('screen-shake-play');
+        setTimeout(() => mainBody.classList.remove('screen-shake-play'), 600);
+      }
+      if (chroma) {
+        chroma.classList.add('chroma-flash-play');
+        setTimeout(() => chroma.classList.remove('chroma-flash-play'), 600);
+      }
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('splash-hide');
     }
@@ -2007,7 +2592,86 @@
         imgContainer.classList.add('animate-img-in');
       });
 
+      // ★★★ キャラ切替インパクト演出（画面シェイク・色収差・全画面バースト・集中線・衝撃波・オービット粒子） ★★★
+      playCharacterSwitchImpact(dSvg);
+
       playSE('se-transition');
+    }
+
+    // --- キャラ切替時の映画的インパクト演出をまとめて発火 ---
+    function playCharacterSwitchImpact(svgContent) {
+      const theme = getEffectTheme(svgContent);
+      const mainBody = document.getElementById('main-body');
+      const chroma = document.getElementById('chroma-flash');
+      const burst = document.getElementById('char-burst-flash');
+      const speedLines = document.getElementById('speed-lines');
+
+      // 画面シェイク
+      if (mainBody) {
+        mainBody.classList.remove('screen-shake-play');
+        void mainBody.offsetWidth;
+        mainBody.classList.add('screen-shake-play');
+      }
+      // 色収差フラッシュ
+      if (chroma) {
+        chroma.classList.remove('chroma-flash-play');
+        void chroma.offsetWidth;
+        chroma.classList.add('chroma-flash-play');
+      }
+      // 全画面属性バースト
+      if (burst) {
+        burst.style.background = `radial-gradient(circle at 62% 45%, #ffffff 0%, ${theme.outer} 22%, transparent 65%)`;
+        burst.classList.remove('char-burst-play');
+        void burst.offsetWidth;
+        burst.classList.add('char-burst-play');
+      }
+      // 集中線（スピードライン）
+      if (speedLines) {
+        speedLines.classList.remove('speed-lines-play');
+        void speedLines.offsetWidth;
+        speedLines.classList.add('speed-lines-play');
+      }
+      // イラスト中心に衝撃波リングと火花パーティクルを発生
+      const imgContainer = document.getElementById('char-illustration-container');
+      if (imgContainer) {
+        const rect = imgContainer.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        spawnClickShockwave(cx, cy);
+        setTimeout(() => spawnBurstSparks(cx, cy, theme.mid, 22), 80);
+      }
+      // 魔法陣にオービット粒子を再生成（属性テーマカラー）
+      spawnRingOrbitParticles(theme);
+    }
+
+    // --- 魔法陣リング軌道上を巡るオービット発光粒子を生成 ---
+    function spawnRingOrbitParticles(theme) {
+      const wrap = document.getElementById('ring-orbit-wrap');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      const isMobile = viewW() < 768;
+      const radius = isMobile ? 140 : 200;
+      const COUNT = 10;
+      for (let i = 0; i < COUNT; i++) {
+        const p = document.createElement('div');
+        p.className = 'ring-orbit-particle';
+        const size = 3 + Math.random() * 3;
+        const dur = 4 + Math.random() * 5;
+        const delay = -(Math.random() * dur);
+        const r = radius + (Math.random() * 20 - 10);
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = '50%';
+        p.style.top = '50%';
+        p.style.marginLeft = (-size/2) + 'px';
+        p.style.marginTop = (-size/2) + 'px';
+        p.style.background = i % 2 === 0 ? theme.outer : theme.mid;
+        p.style.boxShadow = `0 0 8px 2px ${i % 2 === 0 ? theme.outer : theme.mid}`;
+        p.style.setProperty('--orbit-r', r + 'px');
+        p.style.animationDuration = dur + 's';
+        p.style.animationDelay = delay + 's';
+        p.style.animationDirection = i % 2 === 0 ? 'normal' : 'reverse';
+        wrap.appendChild(p);
+      }
     }
 
     // --- 背景クロスフェード切替（二層構成：現在表示中の層とは逆の層に新背景を仕込み、フェードイン） ---
@@ -2048,10 +2712,10 @@
       void flash.offsetWidth;
       flash.classList.add('bg-flash-play');
 
-      // 破片エフェクト（動的生成）
+      // 破片エフェクト（動的生成・密度強化）
       shardWrap.innerHTML = '';
       shardWrap.classList.remove('bg-shard-play');
-      const SHARD_COUNT = 16;
+      const SHARD_COUNT = 28;
       const centerX = 50, centerY = 50;
       for (let i = 0; i < SHARD_COUNT; i++) {
         const s = document.createElement('div');
@@ -2099,6 +2763,15 @@
         s.style.background = `linear-gradient(180deg, ${theme.mid}, ${theme.outer})`;
         s.style.boxShadow = `0 0 8px ${theme.outer}`;
       });
+      // ルーン文字リングにも属性テーマカラーを適用
+      const runeEl = document.getElementById('ring-rune-el');
+      if (runeEl) {
+        runeEl.style.filter = `drop-shadow(0 0 6px ${theme.outer})`;
+        const texts = runeEl.querySelectorAll('text');
+        texts.forEach(t => t.setAttribute('fill', theme.outer));
+        const circleEl = runeEl.querySelector('circle');
+        if (circleEl) circleEl.setAttribute('stroke', theme.mid);
+      }
       // 次回の破片生成のためにテーマを保持
       window.__currentEffectTheme = theme;
     }
@@ -2220,5 +2893,6 @@
   </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
