@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家族用 カレンダー＆実習・当番共有</title>
+    <!-- Tailwind CSS for mobile-first responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+        }
+    </script>
+    <style>
+        body {
+            font-family: "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            -webkit-text-size-adjust: 100%;
+            font-size: 105%;
+            line-height: 1.6;
+        }
+        button, input, select {
+            touch-action: manipulation;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-scale-up {
+            animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+        .transition-all-smooth {
+            transition: all 0.25s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-12 animate-fade-in transition-colors duration-300">
+
+<div class="max-w-md md:max-w-3xl mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- Header & Clock -->
+    <header class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 border border-slate-100 dark:border-slate-700 text-center relative transition-all-smooth hover:shadow-md">
+        <!-- Profile Button Trigger -->
+        <button onclick="openProfileModal()" class="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 active:scale-95 px-3 py-1.5 rounded-full text-xs font-bold text-slate-700 dark:text-slate-200 transition-all-smooth shadow-sm">
+            <span id="current-user-avatar-container" class="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-600">
+                <span id="current-user-avatar">🐰</span>
+            </span>
+            <span id="current-user-name">プロフィール設定</span>
+        </button>
+
+        <h1 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-2 mt-4 md:mt-0">🐰 家族カレンダー＆実習共有</h1>
+        <!-- 日付と時刻（日本時間） -->
+        <div id="clock" class="text-sm md:text-base font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 py-2 px-4 rounded-xl inline-block shadow-inner">
+            日本時間を読み込み中...
+        </div>
+    </header>
+
+    <!-- 今日の実習・当番チェック -->
+    <section class="bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 text-white rounded-2xl p-5 md:p-6 shadow-lg animate-pulse-glow">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>📌</span> 本日の実習・放課後当番
+        </h2>
+        <div class="space-y-3 text-base md:text-lg bg-white/15 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-inner">
+            <p id="today-class" class="font-bold leading-relaxed">今日の授業/実習を確認中...</p>
+            <p id="today-duty" class="font-bold leading-relaxed">今日の放課後当番を確認中...</p>
+        </div>
+    </section>
+
+    <!-- カレンダー表示 & 祝日・何の日 -->
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-all-smooth">
+        <div class="flex items-center justify-between mb-5">
+            <button id="prev-month" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 text-slate-800 dark:text-slate-100 font-bold text-base md:text-lg min-h-[48px] min-w-[48px] flex items-center justify-center transition-all-smooth shadow-sm">◀ 先月</button>
+            <h2 id="calendar-title" class="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-white text-center tracking-wide">YYYY年 M月</h2>
+            <button id="next-month" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 text-slate-800 dark:text-slate-100 font-bold text-base md:text-lg min-h-[48px] min-w-[48px] flex items-center justify-center transition-all-smooth shadow-sm">来月 ▶</button>
+        </div>
+
+        <!-- Days Header -->
+        <div class="grid grid-cols-7 gap-1 text-center font-bold text-sm md:text-base text-slate-600 dark:text-slate-300 mb-2">
+            <div class="text-rose-600 dark:text-rose-400">日</div>
+            <div>月</div>
+            <div>火</div>
+            <div>水</div>
+            <div>木</div>
+            <div>金</div>
+            <div class="text-blue-600 dark:text-blue-400">土</div>
+        </div>
+
+        <!-- Calendar Grid with Slide Animation Wrapper -->
+        <div id="calendar-container" class="overflow-hidden">
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 transition-all duration-300 transform">
+                <!-- Dynamically generated days -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 予定・当番の追加フォーム（複数日対応＆休日/当番ボタン機能追加） -->
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100 dark:border-slate-700 transition-all-smooth">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <span>➕</span> 予定・当番の追加
+        </h2>
+        
+        <form id="schedule-form" class="space-y-5">
+            <!-- 日付選択モード切り替え -->
+            <div class="bg-slate-100 dark:bg-slate-900/80 p-3 rounded-xl space-y-3 border border-slate-200/60 dark:border-slate-700/60">
+                <label class="block text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300">📅 日付の追加方法を選択:</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="mode-btn-multiple" onclick="switchDateMode('multiple')" class="py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white shadow-sm transition-all-smooth">
+                        〇日と〇日を選択<br><span class="text-[10px] font-normal opacity-90">(個別に複数日指定)</span>
+                    </button>
+                    <button type="button" id="mode-btn-range" onclick="switchDateMode('range')" class="py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all-smooth">
+                        〇日から〇日を選択<br><span class="text-[10px] font-normal opacity-90">(期間・連続指定)</span>
+                    </button>
+                </div>
+
+                <!-- モード1: 〇日と〇日を選択（個別複数指定） -->
+                <div id="date-input-multiple-container" class="space-y-2 pt-1">
+                    <div class="flex gap-2">
+                        <input type="date" id="event-date-picker" class="flex-1 p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+                        <button type="button" onclick="addSelectedDate()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs md:text-sm font-bold rounded-xl transition-all-smooth shadow-sm flex items-center gap-1 shrink-0">
+                            ＋ 日付を追加
+                        </button>
+                    </div>
+                    <!-- 選択された日付タグリスト -->
+                    <div id="selected-dates-list" class="flex flex-wrap gap-2 min-h-[36px] p-2 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span class="text-xs text-slate-400 self-center">※日付を選んで「＋ 日付を追加」を押してください（複数選択可）</span>
+                    </div>
+                </div>
+
+                <!-- モード2: 〇日から〇日を選択（期間指定） -->
+                <div id="date-input-range-container" class="hidden space-y-2 pt-1">
+                    <div class="grid grid-cols-2 gap-2 items-center">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">開始日:</label>
+                            <input type="date" id="event-start-date" class="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">終了日:</label>
+                            <input type="date" id="event-end-date" class="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">※指定した期間内のすべての日付に予定が追加されます。</p>
+                </div>
+            </div>
+
+            <!-- 予定タイプ選択ボタン（休日として扱う / 当番として扱う） -->
+            <div class="space-y-2">
+                <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300">予定の区分・ボタン:</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="btn-type-holiday" onclick="toggleScheduleType('holiday')" class="py-3 px-3 rounded-xl border-2 border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all-smooth hover:bg-emerald-100 active:scale-95">
+                        <span>🏝</span> 休日として扱う
+                    </button>
+                    <button type="button" id="btn-type-duty" onclick="toggleScheduleType('duty')" class="py-3 px-3 rounded-xl border-2 border-purple-500/40 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all-smooth hover:bg-purple-100 active:scale-95">
+                        <span>🧹</span> 当番として扱う
+                    </button>
+                </div>
+            </div>
+
+            <!-- 「当番として扱う」が選択された場合に表示される実習・当番一覧 -->
+            <div id="practice-selector-container" class="hidden bg-purple-50/80 dark:bg-purple-950/50 p-3.5 rounded-xl border border-purple-200 dark:border-purple-800 space-y-2 animate-fade-in">
+                <p class="text-xs font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1">
+                    <span>🌱</span> 実習・当番一覧 (タップして選択):
+                </p>
+                <div class="flex flex-wrap gap-1.5" id="practice-chips">
+                    <!-- JavaScriptで動的生成 -->
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300 mb-1" for="event-title">内容 (例: 放課後当番 / 〇〇実習):</label>
+                <input type="text" id="event-title" placeholder="内容を入力または上記の実習一覧から選択" required class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+            </div>
+
+            <div>
+                <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300 mb-1" for="event-assignee">関係者 (誰の予定・当番か):</label>
+                <select id="event-assignee" class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+                    <option value="全員">🐰 全員</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold rounded-xl text-base shadow-md transition-all-smooth">
+                一括保存する
+            </button>
+        </form>
+    </section>
+
+    <!-- 登録された一覧 -->
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100 dark:border-slate-700 transition-all-smooth">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+            <span>📋</span> 登録された予定・当番一覧
+        </h2>
+        <ul id="schedule-list" class="space-y-2 text-sm md:text-base divide-y divide-slate-100 dark:divide-slate-700">
+            <li class="py-2 text-slate-400">読み込み中...</li>
+        </ul>
+    </section>
+
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 transition-all-smooth">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up">
+        <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><span>👤</span> プロフィール設定</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">あなたの名前とアイコン（絵文字、またはデバイスの写真画像ファイル）を設定します。</p>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">名前:</label>
+                <input type="text" id="profile-name-input" placeholder="例: お父さん / 太郎" class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">アイコンを選択または画像アップロード:</label>
+                <div class="flex gap-2 justify-center py-2">
+                    <button type="button" onclick="selectAvatar('🐰')" class="avatar-btn text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 transition-all-smooth">🐰</button>
+                    <button type="button" onclick="selectAvatar('🐱')" class="avatar-btn text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 transition-all-smooth">🐱</button>
+                    <button type="button" onclick="selectAvatar('🐶')" class="avatar-btn text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 transition-all-smooth">🐶</button>
+                    <button type="button" onclick="selectAvatar('🐼')" class="avatar-btn text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 transition-all-smooth">🐼</button>
+                    <button type="button" onclick="selectAvatar('🐨')" class="avatar-btn text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 active:scale-95 transition-all-smooth">🐨</button>
+                </div>
+                <div class="mt-2 text-center">
+                    <label class="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl cursor-pointer transition-all-smooth shadow-sm">
+                        📁 デバイスから画像を選ぶ
+                        <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                </div>
+                <div id="avatar-preview-container" class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400 hidden">
+                    プレビュー: <img id="avatar-preview-img" class="inline-block w-8 h-8 rounded-full object-cover ml-1 align-middle shadow-sm">
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-2 pt-2">
+            <button onclick="closeProfileModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-all-smooth">キャンセル</button>
+            <button onclick="saveProfile()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl font-bold transition-all-smooth shadow-sm">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Modal for Notifications instead of alert() -->
+<div id="custom-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 transition-all-smooth">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 animate-scale-up">
+        <p id="modal-message" class="text-slate-800 dark:text-slate-100 font-medium text-base md:text-lg"></p>
+        <button onclick="closeModal()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl font-bold transition-all-smooth shadow-sm">閉じる</button>
+    </div>
+</div>
+
+<!-- Firebase SDK & App Script -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
+        authDomain: "game-685f2.firebaseapp.com",
+        databaseURL: "https://game-685f2-default-rtdb.firebaseio.com",
+        projectId: "game-685f2",
+        storageBucket: "game-685f2.firebasestorage.app",
+        messagingSenderId: "266871071111",
+        appId: "1:266871071111:web:ffff3b65d0234fc5abb322"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Profile State
+    let userProfile = JSON.parse(localStorage.getItem('family_user_profile')) || { name: '家族メンバー', avatar: '🐰', isImage: false };
+    let selectedAvatar = userProfile.avatar;
+    let isAvatarImage = userProfile.isImage || false;
+
+    function updateProfileUI() {
+        const avatarContainer = document.getElementById('current-user-avatar-container');
+        if (userProfile.isImage && userProfile.avatar && userProfile.avatar.startsWith('data:image')) {
+            avatarContainer.innerHTML = `<img src="${userProfile.avatar}" class="w-full h-full object-cover">`;
+        } else {
+            avatarContainer.innerHTML = `<span id="current-user-avatar">${userProfile.avatar || '🐰'}</span>`;
+        }
+        document.getElementById('current-user-name').innerText = userProfile.name || '家族メンバー';
+    }
+    updateProfileUI();
+
+    window.openProfileModal = function() {
+        document.getElementById('profile-name-input').value = userProfile.name === '家族メンバー' ? '' : userProfile.name;
+        selectedAvatar = userProfile.avatar;
+        isAvatarImage = userProfile.isImage || false;
+        
+        const previewContainer = document.getElementById('avatar-preview-container');
+        const previewImg = document.getElementById('avatar-preview-img');
+        if (isAvatarImage && selectedAvatar) {
+            previewImg.src = selectedAvatar;
+            previewContainer.classList.remove('hidden');
+        } else {
+            previewContainer.classList.add('hidden');
+        }
+
+        const modal = document.getElementById('profile-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    window.closeProfileModal = function() {
+        const modal = document.getElementById('profile-modal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+    window.selectAvatar = function(avatar) {
+        selectedAvatar = avatar;
+        isAvatarImage = false;
+        document.getElementById('avatar-preview-container').classList.add('hidden');
+    }
+    window.handleImageUpload = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedAvatar = e.target.result;
+                isAvatarImage = true;
+                
+                const previewContainer = document.getElementById('avatar-preview-container');
+                const previewImg = document.getElementById('avatar-preview-img');
+                previewImg.src = selectedAvatar;
+                previewContainer.classList.remove('hidden');
+
+                showModal('画像を選択しました！「保存」ボタンを押すと適用されます。');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    window.saveProfile = function() {
+        const nameInput = document.getElementById('profile-name-input').value.trim();
+        if (nameInput) {
+            userProfile.name = nameInput;
+        }
+        userProfile.avatar = selectedAvatar;
+        userProfile.isImage = isAvatarImage;
+        localStorage.setItem('family_user_profile', JSON.stringify(userProfile));
+        updateProfileUI();
+        closeProfileModal();
+        showModal('プロフィールを保存しました！');
+        fetchSchedules();
+    }
+
+    // Global modal helper
+    window.showModal = function(msg) {
+        document.getElementById('modal-message').innerText = msg;
+        const modal = document.getElementById('custom-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    window.closeModal = function() {
+        const modal = document.getElementById('custom-modal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+
+    // 時計の更新
+    function updateClock() {
+        const now = new Date();
+        const options = {
+            timeZone: 'Asia/Tokyo',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        const clockEl = document.getElementById('clock');
+        if (clockEl) {
+            clockEl.innerText = "🇯🇵 " + new Intl.DateTimeFormat('ja-JP', options).format(now);
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 祝日計算ヘルパー
+    function getJapaneseHoliday(year, month, day) {
+        const d = new Date(year, month, day);
+        const m = month + 1;
+        
+        const fixedHolidays = {
+            "1-1": "元日",
+            "2-11": "建国記念の日",
+            "2-23": "天皇誕生日",
+            "4-29": "昭和の日",
+            "5-3": "憲法記念日",
+            "5-4": "みどりの日",
+            "5-5": "こどもの日",
+            "7-21": "海の日",
+            "8-11": "山の日",
+            "11-3": "文化の日",
+            "11-23": "勤労感謝の日"
+        };
+
+        const key = `${m}-${day}`;
+        if (fixedHolidays[key]) return fixedHolidays[key];
+
+        if (m === 3) {
+            const vernalEquinox = Math.floor(20.8431 + 0.242194 * (year - 2000) - Math.floor((year - 2000) / 4));
+            if (day === vernalEquinox) return "春分の日";
+        }
+        if (m === 9) {
+            const autumnEquinox = Math.floor(23.2488 + 0.242194 * (year - 2000) - Math.floor((year - 2000) / 4));
+            if (day === autumnEquinox) return "秋分の日";
+        }
+
+        if (m === 1 && d.getDay() === 1 && day >= 8 && day <= 14) return "成人の日";
+        if (m === 7 && d.getDay() === 1 && day >= 15 && day <= 21) return "海の日";
+        if (m === 9 && d.getDay() === 1 && day >= 15 && day <= 21) return "敬老の日";
+        if (m === 10 && d.getDay() === 1 && day >= 8 && day <= 14) return "スポーツの日";
+
+        return null;
+    }
+
+    function isHolidayOrWeekend(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = dateObj.getMonth();
+        const d = dateObj.getDate();
+        const dayOfWeek = dateObj.getDay();
+        
+        if (dayOfWeek === 0 || dayOfWeek === 6) return true;
+        if (getJapaneseHoliday(y, m, d)) return true;
+        
+        const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        if (remoteSchedules && remoteSchedules.some(s => s.date === dateStr && s.isHoliday)) return true;
+        
+        return false;
+    }
+
+    const practiceCycle = [
+        "畜産利用", "園芸利用", "作物利用", "養鶏", "養豚", "養牛", 
+        "環境システム", "環境デザイン", "草花", "果樹", "野菜", "作物"
+    ];
+    const fullPracticeList = [
+        ...practiceCycle,
+        "放課後当番", "水やり当番", "清掃当番", "動物飼育当番"
+    ];
+
+    const basePracticeDate = new Date(2026, 8, 30); 
+    const basePracticeIndex = 4; // "養豚"
+
+    function getPracticeForDate(year, month, day) {
+        if (year < 2026 || (year === 2026 && month < 3)) return null;
+
+        const targetDate = new Date(year, month, day);
+        const dayOfWeek = targetDate.getDay();
+        
+        if (dayOfWeek !== 1 && dayOfWeek !== 3) return null;
+        if (isHolidayOrWeekend(targetDate)) return null;
+
+        let count = 0;
+        let current = new Date(basePracticeDate);
+        current.setHours(0,0,0,0);
+        let target = new Date(targetDate);
+        target.setHours(0,0,0,0);
+
+        if (target.getTime() === current.getTime()) {
+            return practiceCycle[basePracticeIndex];
+        } else if (target > current) {
+            while (current < target) {
+                current.setDate(current.getDate() + 1);
+                let d = current.getDay();
+                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current)) count++;
+            }
+            return practiceCycle[(basePracticeIndex + count) % 12];
+        } else {
+            while (current > target) {
+                current.setDate(current.getDate() - 1);
+                let d = current.getDay();
+                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current)) count++;
+            }
+            let idx = (basePracticeIndex - (count % 12));
+            if (idx < 0) idx += 12;
+            return practiceCycle[idx];
+        }
+    }
+
+    let dateMode = 'multiple';
+    let selectedDatesSet = new Set();
+    let currentScheduleType = null;
+
+    window.switchDateMode = function(mode) {
+        dateMode = mode;
+        const btnMultiple = document.getElementById('mode-btn-multiple');
+        const btnRange = document.getElementById('mode-btn-range');
+        const containerMultiple = document.getElementById('date-input-multiple-container');
+        const containerRange = document.getElementById('date-input-range-container');
+
+        if (mode === 'multiple') {
+            btnMultiple.className = "py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white shadow-sm transition-all-smooth";
+            btnRange.className = "py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all-smooth";
+            containerMultiple.classList.remove('hidden');
+            containerRange.classList.add('hidden');
+        } else {
+            btnRange.className = "py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white shadow-sm transition-all-smooth";
+            btnMultiple.className = "py-2.5 px-3 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all-smooth";
+            containerRange.classList.remove('hidden');
+            containerMultiple.classList.add('hidden');
+        }
+    }
+
+    window.addSelectedDate = function() {
+        const picker = document.getElementById('event-date-picker');
+        const val = picker.value;
+        if (!val) {
+            showModal('日付を選択してください。');
+            return;
+        }
+        selectedDatesSet.add(val);
+        renderSelectedDatesTags();
+    }
+
+    window.removeSelectedDate = function(dateStr) {
+        selectedDatesSet.delete(dateStr);
+        renderSelectedDatesTags();
+    }
+
+    function renderSelectedDatesTags() {
+        const listElem = document.getElementById('selected-dates-list');
+        if (selectedDatesSet.size === 0) {
+            listElem.innerHTML = `<span class="text-xs text-slate-400 self-center">※日付を選んで「＋ 日付を追加」を押してください（複数選択可）</span>`;
+            return;
+        }
+        listElem.innerHTML = '';
+        Array.from(selectedDatesSet).sort().forEach(d => {
+            const tag = document.createElement('span');
+            tag.className = 'inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-900/80 text-blue-800 dark:text-blue-100 px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs';
+            tag.innerHTML = `📅 ${d} <button type="button" onclick="removeSelectedDate('${d}')" class="text-blue-600 dark:text-blue-300 hover:text-red-500 font-extrabold ml-1">×</button>`;
+            listElem.appendChild(tag);
+        });
+    }
+
+    window.toggleScheduleType = function(type) {
+        const btnHoliday = document.getElementById('btn-type-holiday');
+        const btnDuty = document.getElementById('btn-type-duty');
+        const practiceContainer = document.getElementById('practice-selector-container');
+        const titleInput = document.getElementById('event-title');
+
+        if (currentScheduleType === type) {
+            currentScheduleType = null;
+            btnHoliday.classList.remove('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
+            btnDuty.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
+            practiceContainer.classList.add('hidden');
+        } else {
+            currentScheduleType = type;
+            if (type === 'holiday') {
+                btnHoliday.classList.add('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
+                btnDuty.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
+                practiceContainer.classList.add('hidden');
+                if (!titleInput.value) {
+                    titleInput.value = '休日';
+                }
+            } else if (type === 'duty') {
+                btnDuty.classList.add('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
+                btnHoliday.classList.remove('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
+                practiceContainer.classList.remove('hidden');
+                if (!titleInput.value || titleInput.value === '休日') {
+                    titleInput.value = '放課後当番';
+                }
+            }
+        }
+    }
+
+    function renderPracticeChips() {
+        const container = document.getElementById('practice-chips');
+        if (!container) return;
+        container.innerHTML = '';
+        fullPracticeList.forEach(item => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-purple-200 dark:hover:bg-purple-800 active:scale-95 text-xs font-bold text-purple-900 dark:text-purple-100 border border-purple-200 dark:border-purple-700 shadow-2xs transition-all-smooth';
+            chip.innerText = item;
+            chip.onclick = () => {
+                document.getElementById('event-title').value = item;
+            };
+            container.appendChild(chip);
+        });
+    }
+    renderPracticeChips();
+
+    let currentDate = new Date();
+    let remoteSchedules = [];
+
+    async function fetchSchedules() {
+        try {
+            const q = query(collection(db, "schedules"), orderBy("date", "asc"));
+            const querySnapshot = await getDocs(q);
+            remoteSchedules = [];
+            let memberSet = new Set(['全員']);
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                remoteSchedules.push(data);
+                if (data.assignee) memberSet.add(data.assignee);
+            });
+            if (userProfile.name !== '家族メンバー') memberSet.add(userProfile.name);
+
+            updateAssigneeDropdown(memberSet);
+            renderCalendar();
+            renderScheduleList();
+            checkTodayRoutine();
+        } catch (e) {
+            console.error("データ取得エラー:", e);
+            remoteSchedules = [];
+            renderCalendar();
+            renderScheduleList();
+            checkTodayRoutine();
+        }
+    }
+
+    function updateAssigneeDropdown(memberSet) {
+        const select = document.getElementById('event-assignee');
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = `<option value="全員">🐰 全員</option>`;
+        
+        if (userProfile.name && userProfile.name !== '家族メンバー') {
+            if (!memberSet.has(userProfile.name)) {
+                memberSet.add(userProfile.name);
+            }
+        }
+
+        memberSet.forEach(member => {
+            if (member !== '全員') {
+                const opt = document.createElement('option');
+                opt.value = member;
+                opt.innerText = member;
+                select.appendChild(opt);
+            }
+        });
+
+        if (memberSet.has(currentVal)) {
+            select.value = currentVal;
+        }
+    }
+
+    function renderCalendar(direction = 'none') {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const titleEl = document.getElementById('calendar-title');
+        if (titleEl) titleEl.innerText = `${year}年 ${month + 1}月`;
+
+        const grid = document.getElementById('calendar-grid');
+        if (!grid) return;
+        
+        grid.style.transition = 'transform 0.25s ease-in-out, opacity 0.25s ease-in-out';
+
+        if (direction === 'next') {
+            grid.classList.add('-translate-x-8', 'opacity-0');
+        } else if (direction === 'prev') {
+            grid.classList.add('translate-x-8', 'opacity-0');
+        } else {
+            grid.classList.add('opacity-0');
+        }
+
+        setTimeout(() => {
+            grid.innerHTML = "";
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const todayStr = new Date().toLocaleDateString('ja-JP', {timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-');
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "h-20 md:h-28 bg-slate-50/50 dark:bg-slate-900/50 rounded-xl border border-transparent";
+                grid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= lastDay; day++) {
+                const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                
+                let isToday = (cellDateStr === todayStr);
+                let dayOfWeek = new Date(year, month, day).getDay();
+                let holidayName = getJapaneseHoliday(year, month, day);
+                
+                const dayEvents = remoteSchedules.filter(s => s.date === cellDateStr);
+                let isManualHoliday = dayEvents.some(ev => ev.isHoliday);
+
+                let autoPractice = getPracticeForDate(year, month, day);
+
+                let baseClasses = "h-24 md:h-32 p-1.5 md:p-2 rounded-xl border flex flex-col justify-between overflow-hidden transition-all-smooth hover:shadow-md ";
+                if (isToday) {
+                    baseClasses += "bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 shadow-sm ring-2 ring-blue-500";
+                } else {
+                    baseClasses += "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500";
+                }
+                cell.className = baseClasses;
+
+                let dayNumColor = "font-bold text-base md:text-lg ";
+                if (dayOfWeek === 0 || holidayName || isManualHoliday) dayNumColor += "text-rose-600 dark:text-rose-400";
+                else if (dayOfWeek === 6) dayNumColor += "text-blue-600 dark:text-blue-400";
+                else dayNumColor += "text-slate-800 dark:text-slate-100";
+
+                let htmlContent = `<div class="flex justify-between items-center"><span class="${dayNumColor}">${day}</span>`;
+                if (isToday) {
+                    htmlContent += `<span class="text-[11px] md:text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold shadow-xs">今日</span>`;
+                }
+                htmlContent += `</div>`;
+
+                htmlContent += `<div class="space-y-1 overflow-y-auto max-h-[60px] md:max-h-[80px] mt-1">`;
+                
+                if (holidayName) {
+                    htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 font-bold shadow-xs border border-rose-200 dark:border-rose-800" title="${holidayName}">🎌 ${holidayName}</div>`;
+                }
+
+                if (autoPractice) {
+                     htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-xs border border-emerald-300 dark:border-emerald-700" title="実習: ${autoPractice}">🌱 ${autoPractice}</div>`;
+                }
+
+                dayEvents.forEach(ev => {
+                    let badgeColor = "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700";
+                    if (ev.isHoliday) badgeColor = "bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-700";
+                    else if (ev.isDuty || ev.title.includes('当番')) badgeColor = "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700";
+                    else if (ev.title.includes('実習')) badgeColor = "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700";
+                    
+                    let assigneeTag = ev.assignee && ev.assignee !== '全員' ? ` [${ev.assignee}]` : '';
+                    htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate font-bold ${badgeColor} shadow-xs" title="${ev.title}${assigneeTag}">${ev.title}${assigneeTag}</div>`;
+                });
+                htmlContent += `</div>`;
+
+                cell.innerHTML = htmlContent;
+                grid.appendChild(cell);
+            }
+
+            grid.style.transition = 'none';
+            if (direction === 'next') {
+                grid.classList.remove('-translate-x-8');
+                grid.classList.add('translate-x-8');
+            } else if (direction === 'prev') {
+                grid.classList.remove('translate-x-8');
+                grid.classList.add('-translate-x-8');
+            }
+
+            void grid.offsetWidth;
+
+            grid.style.transition = 'transform 0.25s ease-in-out, opacity 0.25s ease-in-out';
+            grid.classList.remove('translate-x-8', '-translate-x-8', 'opacity-0');
+        }, 250);
+    }
+
+    function renderScheduleList() {
+        const listElem = document.getElementById('schedule-list');
+        if (!listElem) return;
+        listElem.innerHTML = "";
+        if (remoteSchedules.length === 0) {
+            listElem.innerHTML = `<li class="py-3 text-slate-400 text-center">登録されている予定はありません。</li>`;
+            return;
+        }
+
+        remoteSchedules.forEach(data => {
+            const li = document.createElement('li');
+            li.className = "py-2.5 px-2 flex justify-between items-center text-slate-700 dark:text-slate-300 transition-all-smooth hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl";
+            let assigneeBadge = data.assignee ? `<span class="bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold mr-2 shadow-xs">👤 ${data.assignee}</span>` : '';
+            li.innerHTML = `<span class="font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg text-xs md:text-sm shadow-xs">${data.date}</span> <div class="flex items-center flex-1 justify-end ml-2">${assigneeBadge}<span class="text-right md:text-left text-xs md:text-sm truncate">${data.title}</span></div>`;
+            listElem.appendChild(li);
+        });
+    }
+
+    function checkTodayRoutine() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const day = now.getDate();
+        
+        const todayClassElem = document.getElementById('today-class');
+        const todayDutyElem = document.getElementById('today-duty');
+
+        if (!todayClassElem || !todayDutyElem) return;
+
+        const autoPractice = getPracticeForDate(year, month, day);
+
+        if (autoPractice) {
+            todayClassElem.innerHTML = `📚 <b>本日の実習：</b> <span class="text-emerald-800 dark:text-emerald-200 font-extrabold text-lg md:text-xl bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-600 px-3 py-1 rounded-lg inline-block mt-1 shadow-sm">🌱 ${autoPractice}</span>`;
+        } else {
+            todayClassElem.innerHTML = "📚 <b>本日の実習：</b> なし（月・水曜日が実習日です）";
+        }
+
+        const todayStr = new Date().toLocaleDateString('ja-JP', {timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-');
+        const todaysEvents = remoteSchedules.filter(s => s.date === todayStr);
+        const dutyEvent = todaysEvents.find(s => s.isDuty || s.title.includes('当番') || s.title.includes('掃除') || s.title.includes('実習'));
+
+        if (dutyEvent) {
+            let assigneeText = dutyEvent.assignee ? `（関係者: ${dutyEvent.assignee}）` : '';
+            todayDutyElem.innerHTML = `🧹 <b>本日の予定・当番：</b> <span class="bg-white/20 border border-white/40 px-2 py-1 rounded-lg font-bold inline-block mt-1 shadow-sm">${dutyEvent.title}</span> ${assigneeText}`;
+        } else {
+            todayDutyElem.innerHTML = "🧹 <b>本日の予定・当番：</b> 本日の特記事項はありません。";
+        }
+    }
+
+    const prevMonthBtn = document.getElementById('prev-month');
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar('prev');
+        });
+    }
+
+    const nextMonthBtn = document.getElementById('next-month');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar('next');
+        });
+    }
+
+    const form = document.getElementById('schedule-form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('event-title').value.trim();
+            const assignee = document.getElementById('event-assignee').value;
+            const isHoliday = currentScheduleType === 'holiday';
+            const isDuty = currentScheduleType === 'duty';
+
+            let datesToSave = [];
+
+            if (dateMode === 'multiple') {
+                const pickerVal = document.getElementById('event-date-picker').value;
+                if (pickerVal) selectedDatesSet.add(pickerVal);
+                
+                datesToSave = Array.from(selectedDatesSet);
+                if (datesToSave.length === 0) {
+                    showModal('追加する日付を指定してください。');
+                    return;
+                }
+            } else if (dateMode === 'range') {
+                const startDateStr = document.getElementById('event-start-date').value;
+                const endDateStr = document.getElementById('event-end-date').value;
+
+                if (!startDateStr || !endDateStr) {
+                    showModal('開始日と終了日の両方を入力してください。');
+                    return;
+                }
+
+                let start = new Date(startDateStr);
+                let end = new Date(endDateStr);
+
+                if (start > end) {
+                    showModal('開始日は終了日より前の日付を指定してください。');
+                    return;
+                }
+
+                let cur = new Date(start);
+                while (cur <= end) {
+                    const y = cur.getFullYear();
+                    const m = String(cur.getMonth() + 1).padStart(2, '0');
+                    const d = String(cur.getDate()).padStart(2, '0');
+                    datesToSave.push(`${y}-${m}-${d}`);
+                    cur.setDate(cur.getDate() + 1);
+                }
+            }
+
+            try {
+                const savePromises = datesToSave.map(dateStr => {
+                    return addDoc(collection(db, "schedules"), {
+                        date: dateStr,
+                        title: title,
+                        assignee: assignee,
+                        isHoliday: isHoliday,
+                        isDuty: isDuty,
+                        createdAt: new Date()
+                    });
+                });
+
+                await Promise.all(savePromises);
+                
+                showModal(`${datesToSave.length}件の予定・当番を追加しました！`);
+                
+                document.getElementById('event-title').value = '';
+                selectedDatesSet.clear();
+                renderSelectedDatesTags();
+                document.getElementById('event-date-picker').value = '';
+                document.getElementById('event-start-date').value = '';
+                document.getElementById('event-end-date').value = '';
+                if (currentScheduleType) toggleScheduleType(currentScheduleType);
+
+                fetchSchedules();
+            } catch (err) {
+                console.error("追加エラー:", err);
+                showModal('予定の追加に失敗しました。');
+            }
+        });
+    }
+
+    fetchSchedules();
+</script>
+
+</body>
+</html>
