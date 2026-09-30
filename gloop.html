@@ -253,6 +253,22 @@
     </div>
 </div>
 
+<!-- Day Detail Modal (日付タップ時の詳細表示) -->
+<div id="day-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 transition-all-smooth">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up border border-slate-100 dark:border-slate-700">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 id="day-detail-title" class="text-lg font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                <span>📅</span> 日付の詳細
+            </h3>
+            <button onclick="closeDayDetailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold p-1">✕</button>
+        </div>
+        <div id="day-detail-content" class="space-y-3 text-sm md:text-base max-h-[60vh] overflow-y-auto pr-1">
+            <!-- JavaScriptで動的生成 -->
+        </div>
+        <button onclick="closeDayDetailModal()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl font-bold transition-all-smooth shadow-sm">閉じる</button>
+    </div>
+</div>
+
 <!-- Firebase SDK & App Script -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -356,6 +372,81 @@
     }
     window.closeModal = function() {
         const modal = document.getElementById('custom-modal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+
+    window.openDayDetailModal = function(dateStr) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayOfWeekStr = days[dateObj.getDay()];
+        
+        const titleEl = document.getElementById('day-detail-title');
+        if (titleEl) {
+            titleEl.innerHTML = `<span>📅</span> ${y}年${m}月${d}日 (${dayOfWeekStr})`;
+        }
+
+        const contentEl = document.getElementById('day-detail-content');
+        if (!contentEl) return;
+
+        let html = '';
+
+        const holidayName = getJapaneseHoliday(y, m - 1, d);
+        if (holidayName) {
+            html += `<div class="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-2 text-rose-800 dark:text-rose-200 font-bold">
+                <span class="text-lg">🎌</span> 祝日: ${holidayName}
+            </div>`;
+        }
+
+        const autoPractice = getPracticeForDate(y, m - 1, d);
+        if (autoPractice) {
+            html += `<div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700 rounded-xl flex items-center gap-2 text-emerald-800 dark:text-emerald-200 font-extrabold">
+                <span class="text-lg">🌱</span> 本日の実習: ${autoPractice}
+            </div>`;
+        }
+
+        const dayEvents = remoteSchedules.filter(s => s.date === dateStr);
+        if (dayEvents.length > 0) {
+            html += `<div class="space-y-2 mt-2">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">登録された予定・当番 (${dayEvents.length}件):</p>`;
+            dayEvents.forEach(ev => {
+                let badgeClass = "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-700";
+                let icon = "📌";
+                if (ev.isHoliday) {
+                    badgeClass = "bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-700";
+                    icon = "🏝";
+                } else if (ev.isDuty || ev.title.includes('当番')) {
+                    badgeClass = "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700";
+                    icon = "🧹";
+                } else if (ev.title.includes('実習')) {
+                    badgeClass = "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700";
+                    icon = "🌱";
+                }
+
+                let assigneeText = ev.assignee && ev.assignee !== '全員' ? `<span class="text-xs bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded-md font-bold">👤 ${ev.assignee}</span>` : '<span class="text-xs bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded-md">全員</span>';
+
+                html += `<div class="p-3 rounded-xl border ${badgeClass} space-y-1 shadow-2xs">
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="text-base flex items-center gap-1"><span>${icon}</span> ${ev.title}</span>
+                        ${assigneeText}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        } else if (!holidayName && !autoPractice) {
+            html += `<div class="text-center py-6 text-slate-400 dark:text-slate-500">この日の予定はありません。</div>`;
+        }
+
+        contentEl.innerHTML = html;
+
+        const modal = document.getElementById('day-detail-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    window.closeDayDetailModal = function() {
+        const modal = document.getElementById('day-detail-modal');
         modal.classList.remove('flex');
         modal.classList.add('hidden');
     }
@@ -686,13 +777,14 @@
 
                 let autoPractice = getPracticeForDate(year, month, day);
 
-                let baseClasses = "h-24 md:h-32 p-1.5 md:p-2 rounded-xl border flex flex-col justify-between overflow-hidden transition-all-smooth hover:shadow-md ";
+                let baseClasses = "h-24 md:h-32 p-1.5 md:p-2 rounded-xl border flex flex-col justify-between overflow-hidden transition-all-smooth cursor-pointer active:scale-95 hover:shadow-md ";
                 if (isToday) {
                     baseClasses += "bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 shadow-sm ring-2 ring-blue-500";
                 } else {
                     baseClasses += "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500";
                 }
                 cell.className = baseClasses;
+                cell.onclick = () => openDayDetailModal(cellDateStr);
 
                 let dayNumColor = "font-bold text-base md:text-lg ";
                 if (dayOfWeek === 0 || holidayName || isManualHoliday) dayNumColor += "text-rose-600 dark:text-rose-400";
