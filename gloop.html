@@ -106,10 +106,10 @@
         </div>
     </section>
 
-    <!-- 予定・当番の追加フォーム（複数日対応＆休日/当番ボタン機能追加） -->
+    <!-- 予定・当番の追加フォーム（複数日対応＆休日/当番/テストボタン機能追加） -->
     <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100 dark:border-slate-700 transition-all-smooth">
         <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-            <span>➕</span> 予定・当番の追加
+            <span>➕</span> 予定・当番・テストの追加
         </h2>
         
         <form id="schedule-form" class="space-y-5">
@@ -155,17 +155,21 @@
                 </div>
             </div>
 
-            <!-- 予定タイプ選択ボタン（休日として扱う / 当番として扱う） -->
+            <!-- 予定タイプ選択ボタン（休日 / 当番 / テスト） -->
             <div class="space-y-2">
                 <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300">予定の区分・ボタン:</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="btn-type-holiday" onclick="toggleScheduleType('holiday')" class="py-3 px-3 rounded-xl border-2 border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all-smooth hover:bg-emerald-100 active:scale-95">
-                        <span>🏝</span> 休日として扱う
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="btn-type-holiday" onclick="toggleScheduleType('holiday')" class="py-2.5 px-2 md:py-3 md:px-3 rounded-xl border-2 border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1 transition-all-smooth hover:bg-emerald-100 active:scale-95">
+                        <span>🏝</span> 休日
                     </button>
-                    <button type="button" id="btn-type-duty" onclick="toggleScheduleType('duty')" class="py-3 px-3 rounded-xl border-2 border-purple-500/40 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 transition-all-smooth hover:bg-purple-100 active:scale-95">
-                        <span>🧹</span> 当番として扱う
+                    <button type="button" id="btn-type-duty" onclick="toggleScheduleType('duty')" class="py-2.5 px-2 md:py-3 md:px-3 rounded-xl border-2 border-purple-500/40 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1 transition-all-smooth hover:bg-purple-100 active:scale-95">
+                        <span>🧹</span> 当番
+                    </button>
+                    <button type="button" id="btn-type-test" onclick="toggleScheduleType('test')" class="py-2.5 px-2 md:py-3 md:px-3 rounded-xl border-2 border-amber-500/40 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 font-bold text-xs md:text-sm flex items-center justify-center gap-1 transition-all-smooth hover:bg-amber-100 active:scale-95">
+                        <span>📝</span> テスト
                     </button>
                 </div>
+                <p class="text-[11px] text-amber-600 dark:text-amber-400 font-medium">※「テスト」に設定された日は自動的に実習なし（取り消し）になります。</p>
             </div>
 
             <!-- 「当番として扱う」が選択された場合に表示される実習・当番一覧 -->
@@ -179,7 +183,7 @@
             </div>
 
             <div>
-                <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300 mb-1" for="event-title">内容 (例: 放課後当番 / 〇〇実習):</label>
+                <label class="block text-xs md:text-sm font-bold text-slate-600 dark:text-slate-300 mb-1" for="event-title">内容 (例: 期末テスト / 放課後当番):</label>
                 <input type="text" id="event-title" placeholder="内容を入力または上記の実習一覧から選択" required class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all-smooth">
             </div>
 
@@ -196,7 +200,7 @@
         </form>
     </section>
 
-    <!-- 登録された一覧 -->
+    <!-- 登録された一覧（取り消し・削除機能付き） -->
     <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100 dark:border-slate-700 transition-all-smooth">
         <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
             <span>📋</span> 登録された予定・当番一覧
@@ -245,7 +249,7 @@
     </div>
 </div>
 
-<!-- Custom Modal for Notifications instead of alert() -->
+<!-- Custom Modal for Notifications -->
 <div id="custom-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 transition-all-smooth">
     <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 animate-scale-up">
         <p id="modal-message" class="text-slate-800 dark:text-slate-100 font-medium text-base md:text-lg"></p>
@@ -253,7 +257,7 @@
     </div>
 </div>
 
-<!-- Day Detail Modal (日付タップ時の詳細表示) -->
+<!-- Day Detail Modal (日付タップ時の詳細表示＆予定の取り消し) -->
 <div id="day-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50 transition-all-smooth">
     <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up border border-slate-100 dark:border-slate-700">
         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -272,7 +276,7 @@
 <!-- Firebase SDK & App Script -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDSTydg6zf1Gf_PLW9crZ_QpQVQDtjcRu0",
@@ -376,6 +380,20 @@
         modal.classList.add('hidden');
     }
 
+    // 予定の削除（取り消し）関数
+    window.deleteSchedule = async function(scheduleId) {
+        if (!scheduleId) return;
+        try {
+            await deleteDoc(doc(db, "schedules", scheduleId));
+            showModal('予定を取り消しました。');
+            closeDayDetailModal();
+            fetchSchedules();
+        } catch (e) {
+            console.error("削除エラー:", e);
+            showModal('予定の取り消しに失敗しました。');
+        }
+    }
+
     window.openDayDetailModal = function(dateStr) {
         const [y, m, d] = dateStr.split('-').map(Number);
         const dateObj = new Date(y, m - 1, d);
@@ -399,8 +417,15 @@
             </div>`;
         }
 
+        const isTest = isTestDay(dateObj);
+        if (isTest) {
+            html += `<div class="p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 rounded-xl flex items-center gap-2 text-amber-800 dark:text-amber-200 font-extrabold">
+                <span class="text-lg">📝</span> 本日はテスト期間のため実習はありません
+            </div>`;
+        }
+
         const autoPractice = getPracticeForDate(y, m - 1, d);
-        if (autoPractice) {
+        if (autoPractice && !isTest) {
             html += `<div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700 rounded-xl flex items-center gap-2 text-emerald-800 dark:text-emerald-200 font-extrabold">
                 <span class="text-lg">🌱</span> 本日の実習: ${autoPractice}
             </div>`;
@@ -416,6 +441,9 @@
                 if (ev.isHoliday) {
                     badgeClass = "bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-700";
                     icon = "🏝";
+                } else if (ev.isTest || ev.title.includes('テスト')) {
+                    badgeClass = "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-700";
+                    icon = "📝";
                 } else if (ev.isDuty || ev.title.includes('当番')) {
                     badgeClass = "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700";
                     icon = "🧹";
@@ -426,15 +454,20 @@
 
                 let assigneeText = ev.assignee && ev.assignee !== '全員' ? `<span class="text-xs bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded-md font-bold">👤 ${ev.assignee}</span>` : '<span class="text-xs bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded-md">全員</span>';
 
+                let deleteBtn = ev.id ? `<button onclick="deleteSchedule('${ev.id}')" class="text-xs bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded-lg font-bold transition-all-smooth active:scale-95 shadow-xs shrink-0">取り消し</button>` : '';
+
                 html += `<div class="p-3 rounded-xl border ${badgeClass} space-y-1 shadow-2xs">
-                    <div class="flex items-center justify-between font-bold">
-                        <span class="text-base flex items-center gap-1"><span>${icon}</span> ${ev.title}</span>
-                        ${assigneeText}
+                    <div class="flex items-center justify-between font-bold gap-2">
+                        <span class="text-base flex items-center gap-1 truncate"><span>${icon}</span> ${ev.title}</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            ${assigneeText}
+                            ${deleteBtn}
+                        </div>
                     </div>
                 </div>`;
             });
             html += `</div>`;
-        } else if (!holidayName && !autoPractice) {
+        } else if (!holidayName && !autoPractice && !isTest) {
             html += `<div class="text-center py-6 text-slate-400 dark:text-slate-500">この日の予定はありません。</div>`;
         }
 
@@ -526,6 +559,16 @@
         return false;
     }
 
+    // テスト日かどうかをチェック（テストの日は実習なし）
+    function isTestDay(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = dateObj.getMonth();
+        const d = dateObj.getDate();
+        const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        
+        return remoteSchedules && remoteSchedules.some(s => s.date === dateStr && (s.isTest || (s.title && s.title.includes('テスト'))));
+    }
+
     const practiceCycle = [
         "畜産利用", "園芸利用", "作物利用", "養鶏", "養豚", "養牛", 
         "環境システム", "環境デザイン", "草花", "果樹", "野菜", "作物"
@@ -545,7 +588,7 @@
         const dayOfWeek = targetDate.getDay();
         
         if (dayOfWeek !== 1 && dayOfWeek !== 3) return null;
-        if (isHolidayOrWeekend(targetDate)) return null;
+        if (isHolidayOrWeekend(targetDate) || isTestDay(targetDate)) return null;
 
         let count = 0;
         let current = new Date(basePracticeDate);
@@ -559,14 +602,14 @@
             while (current < target) {
                 current.setDate(current.getDate() + 1);
                 let d = current.getDay();
-                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current)) count++;
+                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current) && !isTestDay(current)) count++;
             }
             return practiceCycle[(basePracticeIndex + count) % 12];
         } else {
             while (current > target) {
                 current.setDate(current.getDate() - 1);
                 let d = current.getDay();
-                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current)) count++;
+                if ((d === 1 || d === 3) && !isHolidayOrWeekend(current) && !isTestDay(current)) count++;
             }
             let idx = (basePracticeIndex - (count % 12));
             if (idx < 0) idx += 12;
@@ -632,6 +675,7 @@
     window.toggleScheduleType = function(type) {
         const btnHoliday = document.getElementById('btn-type-holiday');
         const btnDuty = document.getElementById('btn-type-duty');
+        const btnTest = document.getElementById('btn-type-test');
         const practiceContainer = document.getElementById('practice-selector-container');
         const titleInput = document.getElementById('event-title');
 
@@ -639,22 +683,30 @@
             currentScheduleType = null;
             btnHoliday.classList.remove('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
             btnDuty.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
+            btnTest.classList.remove('ring-4', 'ring-amber-400', 'bg-amber-200', 'dark:bg-amber-800');
             practiceContainer.classList.add('hidden');
         } else {
             currentScheduleType = type;
+            btnHoliday.classList.remove('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
+            btnDuty.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
+            btnTest.classList.remove('ring-4', 'ring-amber-400', 'bg-amber-200', 'dark:bg-amber-800');
+            practiceContainer.classList.add('hidden');
+
             if (type === 'holiday') {
                 btnHoliday.classList.add('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
-                btnDuty.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
-                practiceContainer.classList.add('hidden');
-                if (!titleInput.value) {
+                if (!titleInput.value || titleInput.value === '放課後当番' || titleInput.value === '定期テスト') {
                     titleInput.value = '休日';
                 }
             } else if (type === 'duty') {
                 btnDuty.classList.add('ring-4', 'ring-purple-400', 'bg-purple-200', 'dark:bg-purple-800');
-                btnHoliday.classList.remove('ring-4', 'ring-emerald-400', 'bg-emerald-200', 'dark:bg-emerald-800');
                 practiceContainer.classList.remove('hidden');
-                if (!titleInput.value || titleInput.value === '休日') {
+                if (!titleInput.value || titleInput.value === '休日' || titleInput.value === '定期テスト') {
                     titleInput.value = '放課後当番';
+                }
+            } else if (type === 'test') {
+                btnTest.classList.add('ring-4', 'ring-amber-400', 'bg-amber-200', 'dark:bg-amber-800');
+                if (!titleInput.value || titleInput.value === '休日' || titleInput.value === '放課後当番') {
+                    titleInput.value = '定期テスト';
                 }
             }
         }
@@ -686,8 +738,9 @@
             const querySnapshot = await getDocs(q);
             remoteSchedules = [];
             let memberSet = new Set(['全員']);
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                data.id = docSnap.id;
                 remoteSchedules.push(data);
                 if (data.assignee) memberSet.add(data.assignee);
             });
@@ -766,14 +819,16 @@
 
             for (let day = 1; day <= lastDay; day++) {
                 const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const cellDateObj = new Date(year, month, day);
                 const cell = document.createElement('div');
                 
                 let isToday = (cellDateStr === todayStr);
-                let dayOfWeek = new Date(year, month, day).getDay();
+                let dayOfWeek = cellDateObj.getDay();
                 let holidayName = getJapaneseHoliday(year, month, day);
                 
                 const dayEvents = remoteSchedules.filter(s => s.date === cellDateStr);
                 let isManualHoliday = dayEvents.some(ev => ev.isHoliday);
+                let isTest = isTestDay(cellDateObj);
 
                 let autoPractice = getPracticeForDate(year, month, day);
 
@@ -803,13 +858,16 @@
                     htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 font-bold shadow-xs border border-rose-200 dark:border-rose-800" title="${holidayName}">🎌 ${holidayName}</div>`;
                 }
 
-                if (autoPractice) {
-                     htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-xs border border-emerald-300 dark:border-emerald-700" title="実習: ${autoPractice}">🌱 ${autoPractice}</div>`;
+                if (isTest) {
+                    htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-extrabold shadow-xs border border-amber-300 dark:border-amber-700" title="テスト日 (実習なし)">📝 テスト</div>`;
+                } else if (autoPractice) {
+                    htmlContent += `<div class="text-[11px] md:text-sm px-1.5 py-0.5 rounded truncate bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-xs border border-emerald-300 dark:border-emerald-700" title="実習: ${autoPractice}">🌱 ${autoPractice}</div>`;
                 }
 
                 dayEvents.forEach(ev => {
                     let badgeColor = "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700";
                     if (ev.isHoliday) badgeColor = "bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-700";
+                    else if (ev.isTest || ev.title.includes('テスト')) badgeColor = "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700";
                     else if (ev.isDuty || ev.title.includes('当番')) badgeColor = "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700";
                     else if (ev.title.includes('実習')) badgeColor = "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700";
                     
@@ -849,9 +907,16 @@
 
         remoteSchedules.forEach(data => {
             const li = document.createElement('li');
-            li.className = "py-2.5 px-2 flex justify-between items-center text-slate-700 dark:text-slate-300 transition-all-smooth hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl";
-            let assigneeBadge = data.assignee ? `<span class="bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold mr-2 shadow-xs">👤 ${data.assignee}</span>` : '';
-            li.innerHTML = `<span class="font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg text-xs md:text-sm shadow-xs">${data.date}</span> <div class="flex items-center flex-1 justify-end ml-2">${assigneeBadge}<span class="text-right md:text-left text-xs md:text-sm truncate">${data.title}</span></div>`;
+            li.className = "py-2.5 px-2 flex justify-between items-center text-slate-700 dark:text-slate-300 transition-all-smooth hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl gap-2";
+            let assigneeBadge = data.assignee ? `<span class="bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold shadow-xs shrink-0">👤 ${data.assignee}</span>` : '';
+            let deleteBtn = data.id ? `<button onclick="deleteSchedule('${data.id}')" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800 dark:text-rose-200 px-2.5 py-1 rounded-lg font-bold transition-all-smooth shrink-0 active:scale-95 shadow-xs">取り消し</button>` : '';
+
+            li.innerHTML = `<span class="font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg text-xs md:text-sm shadow-xs shrink-0">${data.date}</span> 
+                <div class="flex items-center flex-1 justify-end gap-2 overflow-hidden">
+                    ${assigneeBadge}
+                    <span class="text-right text-xs md:text-sm truncate font-medium">${data.title}</span>
+                    ${deleteBtn}
+                </div>`;
             listElem.appendChild(li);
         });
     }
@@ -867,9 +932,12 @@
 
         if (!todayClassElem || !todayDutyElem) return;
 
+        const isTest = isTestDay(now);
         const autoPractice = getPracticeForDate(year, month, day);
 
-        if (autoPractice) {
+        if (isTest) {
+            todayClassElem.innerHTML = `📚 <b>本日の実習：</b> <span class="text-amber-800 dark:text-amber-200 font-extrabold text-lg md:text-xl bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-600 px-3 py-1 rounded-lg inline-block mt-1 shadow-sm">📝 テスト期間のため実習なし</span>`;
+        } else if (autoPractice) {
             todayClassElem.innerHTML = `📚 <b>本日の実習：</b> <span class="text-emerald-800 dark:text-emerald-200 font-extrabold text-lg md:text-xl bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-600 px-3 py-1 rounded-lg inline-block mt-1 shadow-sm">🌱 ${autoPractice}</span>`;
         } else {
             todayClassElem.innerHTML = "📚 <b>本日の実習：</b> なし（月・水曜日が実習日です）";
@@ -877,7 +945,7 @@
 
         const todayStr = new Date().toLocaleDateString('ja-JP', {timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-');
         const todaysEvents = remoteSchedules.filter(s => s.date === todayStr);
-        const dutyEvent = todaysEvents.find(s => s.isDuty || s.title.includes('当番') || s.title.includes('掃除') || s.title.includes('実習'));
+        const dutyEvent = todaysEvents.find(s => s.isDuty || s.isTest || s.title.includes('当番') || s.title.includes('テスト') || s.title.includes('掃除') || s.title.includes('実習'));
 
         if (dutyEvent) {
             let assigneeText = dutyEvent.assignee ? `（関係者: ${dutyEvent.assignee}）` : '';
@@ -911,6 +979,7 @@
             const assignee = document.getElementById('event-assignee').value;
             const isHoliday = currentScheduleType === 'holiday';
             const isDuty = currentScheduleType === 'duty';
+            const isTest = currentScheduleType === 'test';
 
             let datesToSave = [];
 
@@ -958,6 +1027,7 @@
                         assignee: assignee,
                         isHoliday: isHoliday,
                         isDuty: isDuty,
+                        isTest: isTest,
                         createdAt: new Date()
                     });
                 });
