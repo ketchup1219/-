@@ -19,6 +19,11 @@
             --pillow-glow: rgba(168, 85, 247, 0.85);
         }
 
+        * {
+            touch-action: manipulation;
+            -ms-touch-action: manipulation;
+        }
+
         body {
             font-family: 'M PLUS Rounded 1p', sans-serif;
             background: #020617;
@@ -45,6 +50,30 @@
             overflow: hidden;
             box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
         }
+        #app-container::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 999;
+        }
+        #app-container.tex-low::after, #app-container.tex-mid::after { opacity: 0.02; }
+
+        /* ---- ホーム画面: 常時ゆらめく光の粒子(雰囲気演出) ---- */
+        .ambient-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(253,224,71,0.9) 0%, rgba(253,224,71,0) 70%);
+            animation: ambientFloat 6s ease-in-out infinite;
+        }
+        @keyframes ambientFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+            50% { transform: translate(var(--drift-x, 10px), -30px) scale(1.3); opacity: 0.7; }
+        }
+        #app-container.fx-low .ambient-particle, #app-container.fx-mid .ambient-particle { display: none; }
         @media (min-width: 441px) {
             #app-container {
                 height: 92vh;
@@ -77,7 +106,12 @@
         @keyframes crownPulse { 0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), inset 0 0 10px rgba(216, 180, 254, 0.4); } 50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.9), inset 0 0 20px rgba(236, 72, 153, 0.6); } }
         @keyframes epic-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         @keyframes skillReadyPulse { 0%, 100% { box-shadow: 0 0 8px #fde047, inset 0 0 8px #fde047; border-color: #fde047; transform: scale(1); } 50% { box-shadow: 0 0 20px #f59e0b, inset 0 0 15px #f59e0b; border-color: #fff; transform: scale(1.05); } }
-        @keyframes popUpDamage { 0% { opacity: 1; transform: translateY(0) scale(1.5); } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
+        @keyframes popUpDamage {
+            0% { opacity: 0; transform: translateY(10px) scale(0.5) rotate(-8deg); }
+            15% { opacity: 1; transform: translateY(-6px) scale(1.4) rotate(4deg); }
+            30% { transform: translateY(-16px) scale(1.05) rotate(-2deg); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1) rotate(0deg); }
+        }
         @keyframes charAction { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
 
         .title-logo { font-family: 'Cinzel', 'Orbitron', serif; font-size: 4.8rem; font-weight: 900; background: linear-gradient(180deg, #ffffff 0%, #fef08a 40%, #f59e0b 80%, #78350f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)); animation: pulse-glow 3s infinite; letter-spacing: 0.12em; }
@@ -90,9 +124,23 @@
             border-left: 1px solid rgba(255, 255, 255, 0.2); 
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, filter 0.12s ease;
+            position: relative;
         }
-        .panel:active { transform: scale(0.97); }
+        .panel::after {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .panel:active { transform: scale(0.93); filter: brightness(1.18) saturate(1.1); box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 2px 8px rgba(0,0,0,0.35); }
+        .panel:active::after { opacity: 0.4; transition: opacity 0.04s; }
+
+        button { transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.12s ease; }
+        button:active { filter: brightness(1.25); }
 
         .btn-quest-main {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
@@ -100,7 +148,7 @@
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.6);
             position: relative;
             overflow: hidden;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, filter 0.12s ease;
         }
         .btn-quest-main::before {
             content: '';
@@ -109,7 +157,7 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
             animation: shimmer 2.5s infinite;
         }
-        .btn-quest-main:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
+        .btn-quest-main:active { transform: scale(0.92); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); filter: brightness(1.3); }
 
         .btn-gold { 
             background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); 
@@ -117,10 +165,10 @@
             color: #fff; 
             text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
             box-shadow: 0 6px 15px rgba(217, 119, 6, 0.4), inset 0 1px 3px rgba(255,255,255,0.5); 
-            position: relative; overflow: hidden; transition: all 0.15s; 
+            position: relative; overflow: hidden; transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, filter 0.12s ease; 
         }
         .btn-gold::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 3s infinite; }
-        .btn-gold:active { transform: translateY(3px); box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4); }
+        .btn-gold:active { transform: scale(0.93) translateY(2px); box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4); filter: brightness(1.3); }
 
         .btn-gacha { 
             background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); 
@@ -128,8 +176,9 @@
             color: #fff; 
             box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4), inset 0 1px 3px rgba(255,255,255,0.5); 
             text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, filter 0.12s ease;
         }
-        .btn-gacha:active { transform: translateY(3px); }
+        .btn-gacha:active { transform: scale(0.93) translateY(2px); filter: brightness(1.3); }
 
         .pillow-slot {
             background: linear-gradient(135deg, rgba(88, 28, 135, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
@@ -172,10 +221,18 @@
         .rare-1 { background: linear-gradient(135deg, #64748b, #1e293b); color: #e2e8f0; border-color: #94a3b8; }
 
         .elem-fire { text-shadow: 0 0 12px #ef4444; color: #fca5a5; }
-        .elem-water { text-shadow: 0 0 12px #3b82f6; color: #93c5fd; }
+        .elem-ice { text-shadow: 0 0 12px #22d3ee; color: #a5f3fc; }
+        .elem-wind { text-shadow: 0 0 12px #2dd4bf; color: #99f6e4; }
+        .elem-earth { text-shadow: 0 0 12px #b45309; color: #fcd34d; }
         .elem-grass { text-shadow: 0 0 12px #10b981; color: #6ee7b7; }
-        .elem-light { text-shadow: 0 0 12px #f59e0b; color: #fde68a; }
-        .elem-dark { text-shadow: 0 0 12px #a855f7; color: #e9d5ff; }
+        .elem-thunder { text-shadow: 0 0 12px #eab308; color: #fde047; }
+        .elem-huh { text-shadow: 0 0 12px #94a3b8; color: #e2e8f0; }
+        .elem-flame { text-shadow: 0 0 12px #f97316; color: #fdba74; }
+        .elem-water { text-shadow: 0 0 12px #3b82f6; color: #93c5fd; }
+        .elem-storm { text-shadow: 0 0 12px #6366f1; color: #c7d2fe; }
+        .elem-rock { text-shadow: 0 0 12px #78716c; color: #d6d3d1; }
+        .elem-tree { text-shadow: 0 0 12px #15803d; color: #86efac; }
+        .elem-electric { text-shadow: 0 0 12px #d946ef; color: #f0abfc; }
 
         #gacha-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         .gacha-item-reveal { animation: epic-shake 0.5s ease-in-out, layerFadeIn 1s ease-out; transform-origin: center; }
@@ -246,6 +303,11 @@
             border-radius: 50%;
             pointer-events: none;
         }
+        .story-textbox { animation: storyBoxIn 0.3s ease-out; }
+        @keyframes storyBoxIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .story-text-fade { animation: storyTextFade 0.25s ease-out; }
+        @keyframes storyTextFade { from { opacity: 0; } to { opacity: 1; } }
+
         .dmg-popup {
             position: absolute;
             font-size: 2rem;
@@ -460,17 +522,23 @@
                     </div>
                     <div class="h-64 relative flex flex-col justify-center items-center my-2">
                         <div id="home-element-aura" class="absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700"></div>
+                        <div class="ambient-particle" style="width:6px;height:6px;top:20%;left:15%;--drift-x:14px;animation-delay:0s;"></div>
+                        <div class="ambient-particle" style="width:4px;height:4px;top:65%;left:80%;--drift-x:-12px;animation-delay:1.2s;"></div>
+                        <div class="ambient-particle" style="width:5px;height:5px;top:75%;left:25%;--drift-x:18px;animation-delay:2.4s;"></div>
+                        <div class="ambient-particle" style="width:3px;height:3px;top:15%;left:75%;--drift-x:-10px;animation-delay:3.6s;"></div>
+                        <div class="ambient-particle" style="width:5px;height:5px;top:45%;left:8%;--drift-x:16px;animation-delay:0.8s;"></div>
+                        <div class="ambient-particle" style="width:4px;height:4px;top:40%;left:88%;--drift-x:-14px;animation-delay:2s;"></div>
                         <div id="home-player-icon" class="text-[8.5rem] leading-none animate-float relative z-10 filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)]">🧙‍♂️</div>
                         <div class="absolute bottom-2 bg-slate-950/80 px-6 py-1.5 rounded-full text-xs font-black border border-amber-400/40 backdrop-blur-md flex items-center z-20 shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
-                            <span id="home-player-element-icon" class="mr-2 text-base">🔥</span>
-                            <span class="text-amber-400 font-mono mr-2">Lv.99</span> 
+                            <span id="home-player-element-icon" class="mr-2 text-base">❓</span>
+                            <span id="home-element-level" class="text-amber-400 font-mono mr-2">Lv.1</span> 
                             <span id="home-player-name" class="text-white">ゆうしゃ</span>
                         </div>
                     </div>
                     <!-- バナー類 (ミッション等はやや下に配置) -->
                     <div class="grid grid-cols-4 gap-2 mb-3 mt-5">
                         <div onclick="openModal('modal-mission')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 group relative bg-gradient-to-b from-amber-950/40 to-slate-900/60"><div class="absolute top-1 right-1 bg-red-500 rounded-full w-2 h-2 animate-pulse"></div><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">📜</span><span class="text-[9px] font-black text-amber-200">ミッション</span></div>
-                        <div onclick="openModal('modal-reincarnate')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 group bg-gradient-to-b from-purple-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🌀</span><span class="text-[9px] font-black text-purple-200">属性転生</span></div>
+                        <div onclick="openModal('modal-reincarnate')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 group bg-gradient-to-b from-purple-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🌀</span><span class="text-[9px] font-black text-purple-200">元素転生</span></div>
                         <div onclick="openFormationModal()" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 group bg-gradient-to-b from-emerald-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🛡️</span><span class="text-[9px] font-black text-emerald-200">編成</span></div>
                         <div onclick="openModal('modal-profile')" class="panel p-2 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 group bg-gradient-to-b from-cyan-950/40 to-slate-900/60"><span class="text-2xl mb-1 group-hover:scale-110 transition-transform drop-shadow">🧑‍🚀</span><span class="text-[9px] font-black text-cyan-200">プロフ</span></div>
                     </div>
@@ -484,6 +552,12 @@
                 <div id="content-equip" class="content-section">
                     <div id="equip-view-top" class="sub-view active">
                         <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 drop-shadow mb-3 flex items-center border-b border-amber-900/40 pb-2"><span class="text-2xl mr-2">⚒️</span> EQUIPMENT & SOUL</h2>
+                        <div class="flex justify-center gap-2 mb-3">
+                            <div id="eq-char-btn-player" onclick="selectEquipChar('player')" class="panel p-2 flex flex-col items-center cursor-pointer transition-all border-amber-400 bg-amber-950/20 flex-1"><span class="text-lg mb-0.5">🧙‍♂️</span><span class="text-[9px] font-black text-white">主人公</span></div>
+                            <div id="eq-char-btn-sub1" onclick="selectEquipChar('sub1')" class="panel p-2 flex flex-col items-center cursor-pointer transition-all flex-1"><span class="text-lg mb-0.5">🤺</span><span id="eq-char-name-sub1" class="text-[9px] font-black text-white">仲間1</span></div>
+                            <div id="eq-char-btn-sub2" onclick="selectEquipChar('sub2')" class="panel p-2 flex flex-col items-center cursor-pointer transition-all flex-1"><span class="text-lg mb-0.5">🐹</span><span id="eq-char-name-sub2" class="text-[9px] font-black text-white">仲間2</span></div>
+                        </div>
+                        <div class="text-center mb-1.5"><span id="eq-selected-char-name" class="text-[11px] font-black text-cyan-200 bg-black/40 px-3 py-1 rounded-full border border-cyan-500/30 tracking-wider">主人公</span></div>
                         <div class="panel p-3 mb-4 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-950/90 border-cyan-500/40">
                             <div class="grid grid-cols-3 gap-2 text-center mb-1">
                                 <div><div class="text-[9px] font-black text-rose-300 tracking-wider">攻撃力</div><div id="eq-stat-atk" class="text-lg font-black text-white">0</div></div>
@@ -538,23 +612,9 @@
                     <div id="quest-view-top" class="sub-view active">
                         <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-400 drop-shadow mb-4 flex items-center border-b border-emerald-900/40 pb-2"><span class="text-2xl mr-2">🗺️</span> QUEST SELECT</h2>
                         <div class="space-y-3">
-                            <div onclick="navQuestLayer('quest-view-story-chapters')" class="panel p-0 overflow-hidden cursor-pointer border-amber-500/40 relative"><div class="bg-gradient-to-r from-amber-600 to-orange-600 p-1 text-[9px] font-black tracking-widest text-white">MAIN STORY</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">ストーリークエスト</h3><p class="text-[10px] text-amber-200 mt-0.5">メインシナリオを進める</p></div><span class="text-3xl">📖</span></div></div>
+                            <div onclick="openStoryChapterList()" class="panel p-0 overflow-hidden cursor-pointer border-cyan-500/40 relative"><div class="bg-gradient-to-r from-cyan-600 to-indigo-600 p-1 text-[9px] font-black tracking-widest text-white">STORY MODE</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">冒険クエスト</h3><p class="text-[10px] text-cyan-200 mt-0.5">主人公の旅の記録を読む</p></div><span class="text-3xl">📜</span></div></div>
                             <div onclick="navQuestLayer('quest-view-event-top')" class="panel p-0 overflow-hidden cursor-pointer border-purple-500/40 relative"><div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-1 text-[9px] font-black tracking-widest text-white">SPECIAL EVENT</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">イベントクエスト</h3><p class="text-[10px] text-purple-200 mt-0.5">ボス討伐・限定イベント</p></div><span class="text-3xl">👑</span></div></div>
                             <div onclick="navQuestLayer('quest-view-daily')" class="panel p-0 overflow-hidden cursor-pointer border-blue-500/40 relative"><div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-1 text-[9px] font-black tracking-widest text-white">DAILY QUEST</div><div class="p-3 flex items-center justify-between"><div><h3 class="font-black text-base text-white">デイリークエスト</h3><p class="text-[10px] text-blue-200 mt-0.5">日替わり素材クエスト</p></div><span class="text-3xl">📅</span></div></div>
-                        </div>
-                    </div>
-                    <div id="quest-view-story-chapters" class="sub-view">
-                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-amber-300">CHAPTER SELECT</h2></div>
-                        <div class="space-y-2">
-                            <div onclick="navQuestLayer('quest-view-story-stages', '第1章 はじまりの地')" class="panel p-3 flex justify-between items-center cursor-pointer"><span class="font-bold text-xs">第1章 はじまりの地</span><span class="text-[10px] bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded">クリア済</span></div>
-                            <div onclick="navQuestLayer('quest-view-story-stages', '第2章 試練の山')" class="panel p-3 flex justify-between items-center cursor-pointer"><span class="font-bold text-xs">第2章 試練の山</span><span class="text-[10px] bg-amber-900 text-amber-300 px-2 py-0.5 rounded">進行中</span></div>
-                        </div>
-                    </div>
-                    <div id="quest-view-story-stages" class="sub-view">
-                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-story-chapters')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 id="quest-stage-title" class="text-sm font-black text-amber-300 truncate">STAGE</h2></div>
-                        <div class="space-y-2">
-                            <div onclick="showPartySetup('1-1 スライム平原', 10, 1.0)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-emerald-500"><div><span class="text-[8px] text-emerald-400 block">STAGE 1-1</span><span class="text-xs font-bold">スライム平原</span></div><span class="text-[10px] text-slate-400">⚡ 10</span></div>
-                            <div onclick="showPartySetup('1-2 ゴブリンの森', 15, 1.2)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-emerald-500"><div><span class="text-[8px] text-emerald-400 block">STAGE 1-2</span><span class="text-xs font-bold">ゴブリンの森</span></div><span class="text-[10px] text-slate-400">⚡ 15</span></div>
                         </div>
                     </div>
                     <div id="quest-view-event-top" class="sub-view">
@@ -571,6 +631,14 @@
                     <div id="quest-view-daily" class="sub-view">
                         <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-blue-300">DAILY QUEST</h2></div>
                         <div onclick="showPartySetup('DAILY: 化石採掘場', 15, 1.5)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-blue-500"><div><span class="text-[8px] text-blue-400 block">素材</span><span class="text-xs font-bold">草の化石 採掘場 (中級)</span></div><span class="text-[10px] text-slate-400">⚡ 15</span></div>
+                    </div>
+                    <div id="quest-view-story-mode" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-cyan-300">冒険クエスト - 章選択</h2></div>
+                        <div id="story-chapter-list" class="space-y-2"></div>
+                    </div>
+                    <div id="quest-view-story-scenes" class="sub-view">
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-story-mode')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 id="story-scene-list-title" class="text-sm font-black text-cyan-300 truncate">章 - 話選択</h2></div>
+                        <div id="story-scene-list" class="space-y-2"></div>
                     </div>
                 </div>
 
@@ -595,13 +663,27 @@
                         <div class="text-5xl mb-2 animate-float">🏛️</div>
                         <div class="text-[10px] text-emerald-300 font-black mb-1 tracking-widest">広場レベル</div>
                         <div id="plaza-level-display" class="text-3xl font-black text-white mb-2 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]">Lv.1</div>
-                        <p class="text-[10px] text-slate-300 leading-relaxed">キャラクター達が広場で自動的に草コインを稼いでくれます。レベルを上げるほど収益がアップ！</p>
+                        <p class="text-[10px] text-slate-300 leading-relaxed">仲間を1人駐在させると、自動的に草コインを稼いでくれます。レベルを上げるほど収益がアップ！</p>
                     </div>
                     <div class="panel p-3 mb-4 flex justify-between items-center border-amber-500/40">
                         <span class="text-xs font-black text-amber-300">収益速度</span>
-                        <span id="plaza-rate-display" class="text-sm font-black text-white font-mono">🪙 100 / 分</span>
+                        <span id="plaza-rate-display" class="text-sm font-black text-white font-mono">100 / 分</span>
+                    </div>
+                    <div class="panel p-3 mb-4 border-purple-500/40">
+                        <div class="text-xs font-black text-purple-300 mb-2">駐在キャラ (主人公以外・1人まで)</div>
+                        <div id="plaza-assigned-char"></div>
                     </div>
                     <div id="plaza-upgrade-section" class="panel p-3 mb-4 border-cyan-500/40"></div>
+                </div>
+
+                <div id="content-exchange" class="content-section">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 drop-shadow mb-4 flex items-center border-b border-amber-900/40 pb-2"><span class="text-2xl mr-2">🏪</span> EXCHANGE - 交換所</h2>
+                    <div class="flex mb-3 bg-black/40 rounded-lg p-1 border border-white/10 text-[10px]">
+                        <button id="exchange-tab-coin" onclick="switchExchangeTab('coin')" class="flex-1 py-1.5 rounded-md font-black flex items-center justify-center gap-1"><img src="草コイン.png" alt="草コイン" class="icon-coin">草コイン</button>
+                        <button id="exchange-tab-fossil" onclick="switchExchangeTab('fossil')" class="flex-1 py-1.5 rounded-md font-black flex items-center justify-center gap-1"><img src="草の化石.png" alt="草の化石" class="icon-material">化石</button>
+                        <button id="exchange-tab-core" onclick="switchExchangeTab('core')" class="flex-1 py-1.5 rounded-md font-black flex items-center justify-center gap-1"><img src="草核.png" alt="草核" class="icon-ticket">草核</button>
+                    </div>
+                    <div id="exchange-list" class="space-y-2"></div>
                 </div>
 
                 <div id="content-settings" class="content-section">
@@ -636,13 +718,14 @@
 
             <div class="absolute bottom-0 w-full bg-slate-950/95 backdrop-blur-lg border-t border-white/10 pb-safe z-40">
                 <div class="flex justify-around py-1.5 px-1">
-                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-11"><img src="ホームボタン.png" alt="HOME" class="w-6 h-6 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[8px] font-black tracking-wider">HOME</span></button>
-                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">⚔️</span><span class="text-[8px] font-black tracking-wider">工房</span></button>
-                    <button id="nav-btn-quest" onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🗺️</span><span class="text-[8px] font-black tracking-wider">クエスト</span></button>
-                    <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><img src="ガチャボタン.png" alt="GACHA" class="w-6 h-6 mb-0.5 object-contain"><span class="text-[8px] font-black tracking-wider">宝箱</span></button>
-                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🎰</span><span class="text-[8px] font-black tracking-wider">KASINO</span></button>
-                    <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">🏛️</span><span class="text-[8px] font-black tracking-wider">広場</span></button>
-                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11"><span class="text-xl mb-0.5">⚙️</span><span class="text-[8px] font-black tracking-wider">設定</span></button>
+                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-10"><img src="ホームボタン.png" alt="HOME" class="w-6 h-6 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[8px] font-black tracking-wider">HOME</span></button>
+                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><span class="text-xl mb-0.5">⚔️</span><span class="text-[8px] font-black tracking-wider">工房</span></button>
+                    <button id="nav-btn-quest" onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><span class="text-xl mb-0.5">🗺️</span><span class="text-[8px] font-black tracking-wider">クエスト</span></button>
+                    <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><img src="ガチャボタン.png" alt="GACHA" class="w-6 h-6 mb-0.5 object-contain"><span class="text-[8px] font-black tracking-wider">宝箱</span></button>
+                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><img src="カジノボタン.png" alt="KASINO" class="w-6 h-6 mb-0.5 object-contain"><span class="text-[8px] font-black tracking-wider">KASINO</span></button>
+                    <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><span class="text-xl mb-0.5">🏛️</span><span class="text-[8px] font-black tracking-wider">広場</span></button>
+                    <button onclick="changeContent('content-exchange', this); renderExchangeTab(exchangeActiveTab);" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><span class="text-xl mb-0.5">🏪</span><span class="text-[8px] font-black tracking-wider">交換所</span></button>
+                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10"><span class="text-xl mb-0.5">⚙️</span><span class="text-[8px] font-black tracking-wider">設定</span></button>
                 </div>
             </div>
 
@@ -710,7 +793,7 @@
                 </div>
             </div>
             <div id="modal-reincarnate" class="modal absolute inset-0 bg-black/80 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
-                <div class="panel w-full max-w-sm p-5 border-purple-500/50 text-center relative overflow-hidden"><h3 class="text-base font-black text-purple-300 mb-2">REINCARNATION</h3><p class="text-[9px] text-slate-300 mb-4">主人公の属性(元素)を変更します。</p><div class="flex justify-center space-x-2 mb-4"><button onclick="selectElement('fire')" class="panel p-2 flex flex-col items-center border-red-500/50 w-11"><span class="text-xl">🔥</span><span class="text-[8px] text-red-300">炎</span></button><button onclick="selectElement('water')" class="panel p-2 flex flex-col items-center border-blue-500/50 w-11"><span class="text-xl">💧</span><span class="text-[8px] text-blue-300">水</span></button><button onclick="selectElement('grass')" class="panel p-2 flex flex-col items-center border-emerald-500/50 w-11"><span class="text-xl">🌿</span><span class="text-[8px] text-emerald-300">草</span></button><button onclick="selectElement('light')" class="panel p-2 flex flex-col items-center border-amber-500/50 w-11"><span class="text-xl">✨</span><span class="text-[8px] text-amber-300">光</span></button><button onclick="selectElement('dark')" class="panel p-2 flex flex-col items-center border-purple-500/50 w-11"><span class="text-xl">🌑</span><span class="text-[8px] text-purple-300">闇</span></button></div><button onclick="closeModal('modal-reincarnate')" class="w-full panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button></div>
+                <div class="panel w-full max-w-sm p-5 border-purple-500/50 text-center relative overflow-hidden"><h3 class="text-base font-black text-purple-300 mb-2">元素転生</h3><p class="text-[9px] text-slate-300 mb-2">主人公の元素を変更します。クエストで各元素のレベルが上がり、Lv.50で上位元素が解放されます。</p><div class="text-[10px] font-black text-amber-300 bg-black/40 border border-amber-500/30 rounded-full px-3 py-1 inline-block mb-1">📜 元素転生の巻き物: <span id="reincarnate-scroll-count">0</span>個</div><div id="reincarnate-scroll-month-status" class="text-[8px] text-slate-400 mb-3"></div><div id="reincarnate-element-list" class="space-y-2 mb-4 overflow-y-auto scrollbar-hide" style="max-height: 320px;"></div><button onclick="closeModal('modal-reincarnate')" class="w-full panel py-2 rounded font-bold text-xs text-slate-300">閉じる</button></div>
             </div>
                         <div id="modal-formation" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
                 <div class="panel w-full max-w-sm p-4 border-emerald-500/50 relative overflow-hidden">
@@ -813,25 +896,6 @@
                     </div>
                 </div>
             </div>
-
-            <div id="modal-result" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
-                <div class="panel w-full max-w-sm p-6 text-center border-amber-500/50">
-                    <h3 id="result-title" class="text-2xl font-black mb-3 text-amber-400">QUEST CLEARED!</h3>
-                    <div id="result-content" class="text-sm font-bold text-white mb-5 space-y-2"></div>
-                    <button onclick="closeResult()" class="w-full btn-gold py-3 rounded-xl font-black text-xs text-amber-900 tracking-widest">OK</button>
-                </div>
-            </div>
-
-            <div id="modal-confirm" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
-                <div class="panel w-full max-w-sm p-6 text-center border-rose-500/50">
-                    <h3 class="text-base font-black text-rose-400 mb-3">WARNING</h3>
-                    <p class="text-xs text-slate-300 mb-5">クエストから撤退しますか？<br>（スタミナは戻りません）</p>
-                    <div class="flex space-x-2">
-                        <button onclick="closeModal('modal-confirm')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">キャンセル</button>
-                        <button onclick="executeEscape()" class="flex-1 panel py-2 rounded font-black text-xs bg-rose-900/50 text-rose-300 border-rose-500">撤退する</button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- ========================================== -->
@@ -874,6 +938,50 @@
             <div id="damage-flash" class="absolute inset-0 bg-white z-50 opacity-0 pointer-events-none transition-opacity duration-100"></div>
         </div>
 
+        <div id="view-story" class="view-layer bg-black">
+            <div class="absolute inset-0 overflow-hidden">
+                <div id="story-bg" class="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-black transition-all duration-1000"></div>
+                <div id="story-scene-icon" class="absolute inset-0 flex items-center justify-center text-[10rem] opacity-15 pointer-events-none transition-all duration-700">🌄</div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40"></div>
+            </div>
+            <div class="absolute top-0 left-0 right-0 p-3 flex justify-between items-center z-20">
+                <div id="story-scene-title" class="text-[10px] font-black text-amber-300 bg-black/70 px-3 py-1.5 rounded-full border border-amber-500/30 backdrop-blur-md">1-1. 旅立ちの朝</div>
+                <button onclick="exitStoryMode()" class="text-[10px] font-black text-slate-300 bg-black/70 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md">✕ 閉じる</button>
+            </div>
+            <div id="story-textbox-area" onclick="advanceStory()" class="absolute bottom-0 left-0 right-0 p-3 z-20 cursor-pointer">
+                <div class="panel p-4 border-amber-500/40 relative story-textbox flex gap-3 items-start">
+                    <div id="story-avatar-wrap" class="flex-shrink-0 hidden">
+                        <img id="story-avatar-img" src="" alt="" class="w-12 h-12 rounded-full object-cover border-2 border-amber-400/60 bg-black/50 hidden">
+                        <div id="story-avatar-emoji" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-amber-400/60 bg-black/50 hidden"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div id="story-speaker" class="text-xs font-black text-amber-300 mb-1.5"></div>
+                        <div id="story-text" class="text-sm text-white leading-relaxed min-h-[4.5rem]"></div>
+                        <div class="text-right text-[9px] text-slate-400 mt-1 animate-pulse">タップして続ける ▼</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-result" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-center p-4 backdrop-blur-md">
+            <div class="panel w-full max-w-sm p-6 text-center border-amber-500/50">
+                <h3 id="result-title" class="text-2xl font-black mb-3 text-amber-400">QUEST CLEARED!</h3>
+                <div id="result-content" class="text-sm font-bold text-white mb-5 space-y-2"></div>
+                <button id="result-ok-btn" onclick="closeResult()" class="w-full btn-gold py-3 rounded-xl font-black text-xs text-amber-900 tracking-widest">ステージ一覧に戻る</button>
+            </div>
+        </div>
+
+        <div id="modal-confirm" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
+            <div class="panel w-full max-w-sm p-6 text-center border-rose-500/50">
+                <h3 class="text-base font-black text-rose-400 mb-3">WARNING</h3>
+                <p class="text-xs text-slate-300 mb-5">クエストから撤退しますか？<br>（スタミナは戻りません）</p>
+                <div class="flex space-x-2">
+                    <button onclick="closeModal('modal-confirm')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">キャンセル</button>
+                    <button onclick="executeEscape()" class="flex-1 panel py-2 rounded font-black text-xs bg-rose-900/50 text-rose-300 border-rose-500">撤退する</button>
+                </div>
+            </div>
+        </div>
+
         <div id="gacha-overlay">
             <canvas id="gacha-canvas" class="absolute inset-0 z-0"></canvas>
             <div id="gacha-god-rays" class="gacha-god-rays"></div>
@@ -909,12 +1017,32 @@
         let isAudioInitialized = false;
 
         const ELEMENTS = {
-            fire: { name: '炎', icon: '🔥', class: 'elem-fire' },
-            water: { name: '水', icon: '💧', class: 'elem-water' },
+            fire: { name: '火', icon: '🔥', class: 'elem-fire' },
+            ice: { name: '氷', icon: '❄️', class: 'elem-ice' },
+            wind: { name: '風', icon: '🌪️', class: 'elem-wind' },
+            earth: { name: '土', icon: '🪨', class: 'elem-earth' },
             grass: { name: '草', icon: '🌿', class: 'elem-grass' },
-            light: { name: '光', icon: '✨', class: 'elem-light' },
-            dark: { name: '闇', icon: '🌑', class: 'elem-dark' }
+            thunder: { name: '雷', icon: '⚡', class: 'elem-thunder' },
+            huh: { name: 'huh', icon: '❓', class: 'elem-huh' },
+            flame: { name: '炎', icon: '🌋', class: 'elem-flame' },
+            water: { name: '水', icon: '💧', class: 'elem-water' },
+            storm: { name: '嵐', icon: '⛈️', class: 'elem-storm' },
+            rock: { name: '岩', icon: '⛰️', class: 'elem-rock' },
+            tree: { name: '樹', icon: '🌳', class: 'elem-tree' },
+            electric: { name: '電', icon: '🌩️', class: 'elem-electric' }
         };
+
+        // 元素Lv50到達で解放される上位元素
+        const ELEMENT_UPGRADE_MAP = {
+            fire: { atLevel: 50, unlocks: 'flame' },
+            ice: { atLevel: 50, unlocks: 'water' },
+            wind: { atLevel: 50, unlocks: 'storm' },
+            earth: { atLevel: 50, unlocks: 'rock' },
+            grass: { atLevel: 50, unlocks: 'tree' },
+            thunder: { atLevel: 50, unlocks: 'electric' }
+        };
+        const ELEMENT_EXP_PER_LEVEL = 100;
+        const ELEMENT_EXP_PER_QUEST = 20;
 
         window.state = {
             player: {
@@ -923,7 +1051,7 @@
                 userIcon: "🧙‍♂️",
                 userIconImage: null,
                 comment: "限界を超えろ！",
-                element: "fire",
+                element: "huh",
                 coins: 5000,     
                 gachaTickets: 50,
                 materials: 10,   
@@ -932,14 +1060,27 @@
                 lastStaminaUpdateTime: Date.now(),
                 friendCode: Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)
             },
-            equip: {
-                currentType: 'weapon',
-                currentItemId: 1,
-                equipped: { weapon: 1, sub: 2, head: 3, bodyUp: 4, bodyDown: 5, accessory: 6, pillow: 7 }
+            charEquip: {
+                player: {
+                    currentType: 'weapon',
+                    currentItemId: 1,
+                    equipped: { weapon: 1, sub: 2, head: 3, bodyUp: 4, bodyDown: 5, accessory: 6, pillow: 7 }
+                },
+                sub1: {
+                    currentType: 'weapon',
+                    currentItemId: null,
+                    equipped: { weapon: null, sub: null, head: null, bodyUp: null, bodyDown: null, accessory: null, pillow: null }
+                },
+                sub2: {
+                    currentType: 'weapon',
+                    currentItemId: null,
+                    equipped: { weapon: null, sub: null, head: null, bodyUp: null, bodyDown: null, accessory: null, pillow: null }
+                }
             },
+            selectedEquipChar: 'player',
             settings: { equipDisplayCount: 10, bgmVolume: 70, seVolume: 70, textureQuality: 'high', effectQuality: 'high' },
             codePanel: { fails: 0, lockUntil: 0, usedCodes: [] },
-            formation: { sub1: true, sub2: true },
+            formation: { sub1: false, sub2: false },
             friends: [],
             post: [],
             tutorialDone: false,
@@ -950,7 +1091,16 @@
                 event: { claimed: [] }
             },
             titles: { owned: [], equipped: null },
-            plaza: { level: 1, lastUpdateTime: Date.now() },
+            plaza: { level: 1, lastUpdateTime: Date.now(), assignedChar: null },
+            items: { reincarnationScroll: 0, lastScrollMonth: '' },
+            elementProgress: {
+                fire: { level: 1, exp: 0 }, ice: { level: 1, exp: 0 }, wind: { level: 1, exp: 0 },
+                earth: { level: 1, exp: 0 }, grass: { level: 1, exp: 0 }, thunder: { level: 1, exp: 0 },
+                huh: { level: 1, exp: 0 }
+            },
+            elementUnlocked: [],
+            recruitedChars: [],
+            story: { clearedChapters: [], sceneProgress: {} },
             questPrep: { stageName: "", cost: 0, mult: 1 }
         };
 
@@ -1000,10 +1150,604 @@
         };
 
         const CHAR_DB = {
-            sub1: { id: 'sub1', name: '戦士', icon: '🤺', hp: 500, atk: 80, def: 50, spd: 0.8, skills: ['slash', 'guard'] },
-            sub2: { id: 'sub2', name: '僧侶', icon: '🧑‍⚕️', hp: 350, atk: 30, def: 30, spd: 1.1, skills: ['heal', 'guard'] },
+            sub1: { id: 'sub1', name: 'カグヤ', icon: '🗡️', hp: 500, atk: 80, def: 50, spd: 0.8, skills: ['slash', 'guard'] },
+            sub2: { id: 'sub2', name: 'ミニ・ハム', icon: '🐹', hp: 350, atk: 30, def: 30, spd: 1.1, skills: ['heal', 'guard'] },
             friend1: { id: 'friend1', name: '大魔道士(F)', icon: '🧙‍♀️', hp: 400, atk: 120, def: 40, spd: 0.9, skills: ['friend_ult', 'guard'] }
         };
+
+        // ==== ストーリーモード (ビジュアルノベル形式の読み物) ====
+        // speaker: 'narration' はナレーション、'主人公' はプレイヤー自身の名前で表示される
+        const STORY_DATA = [
+            {
+                id: 'ch1',
+                title: '第1章：旅立ちの始まりの村',
+                icon: '🌄',
+                scenes: [
+                    {
+                        id: '1-1', title: '旅立ちの朝',
+                        lines: [
+                            { speaker: 'narration', text: '朝霧に包まれた、自然豊かで静かな田舎町「エコー・ビレッジ」。東の空が白み始め、遠くの森から名も知れぬ鳥のさえずりが聞こえてくる。村中を包むひんやりとした朝の空気が、今日という特別な日の始まりを告げていた。' },
+                            { speaker: 'narration', text: '16歳になったあなたは、長年暮らした自宅の部屋で旅の支度を整えていました。木漏れ日が差し込む小さな部屋。使い込まれた木の机の上には、真新しい地図、方位磁針、数日分の干し肉と水筒、そして護身用のダガーが几帳面に並べられています。' },
+                            { speaker: '主人公', text: '「よし、これで荷物は全部だな。ロープの結び目も確認したし……あとはこれだ」' },
+                            { speaker: 'narration', text: '（キラキラ…✨）\nあなたが革のリュックに最後に収めたのは、手のひらに収まるほどの奇妙な鉱石。深い海のような青色を湛え、不思議な光を放つその石は、10年前に突然姿を消したお父さんの唯一の形見、「導きの魔導石」でした。' },
+                            { speaker: '主人公', text: '「今はただの綺麗な石ころだけど……お父さんは言ってた。『本当に迷ったとき、この石が道を示してくれる』って」' },
+                            { speaker: 'narration', text: '脳裏に浮かぶのは、優しかった父の背中。ある日「あっち側に戻る」と言い残し、それきり帰ってこなかった父。悲しみよりも、父の言葉の真因を知りたいという思いが、今のあなたを強く突き動かしています。' },
+                            { speaker: '主人公', text: '「いつかこれがお父さんの居場所を……そして、世界に眠るまだ見ぬ宝の在りかを指し示してくれるはずだ！」' },
+                            { speaker: 'narration', text: '若くして、子供のころからの夢であった「偉大なトレジャーハンターになる」という決意を胸に、少年は長年過ごした家を後にします。いよいよ出発の時です！' }
+                        ]
+                    },
+                    {
+                        id: '1-2', title: '挨拶',
+                        lines: [
+                            { speaker: 'narration', text: '旅立つ前に、あなたは幼い頃から世話になっていた村長の家を訪ねました。父が不在の間、実の子供のように気にかけてくれた白髭の村長。彼の家は村の一番高い丘の上にあり、そこからはエコー・ビレッジの平和な景色が一望できます。' },
+                            { speaker: '村長', text: '「おお、お前か。その大荷物……本当に今日、旅立つというのだな」' },
+                            { speaker: '主人公', text: '「はい。夢を叶えるために。世界中を冒険して、まだ誰も見たことのない宝物を見つけたいんです。それに……お父さんの手がかりも探したい」' },
+                            { speaker: 'narration', text: '村長は深く溜息をつき、火の消えたパイプを机に置きました。その目には、心配と、どこか誇らしげな光が入り混じっています。' },
+                            { speaker: '村長', text: '「外の世界は、この村のように優しくはないぞ。凶悪な魔物、腹に一物抱えた悪党……さまざまな危険が口を開けて待っておる。それでも行くか？」' },
+                            { speaker: '主人公', text: '「覚悟はできています。ここで待っていても、何も始まらないから」' },
+                            { speaker: '村長', text: '「……ふん、その頑固な目つき、父親そっくりじゃ。お前が旅立つというならもう止めはせん。だが、プロのトレジャーハンターを名乗るなら、はなむけにひとつだけ言っておく」' },
+                            { speaker: '主人公', text: '「はい……！」' },
+                            { speaker: '村長', text: '「……誰かの足跡をなぞるだけの旅に、価値などない。古い地図や他人の言葉ばかりを信じるな。世界をひっくり返すのは、いつだって誰かにただ従うのではなく、己の直感を信じ抜いた、誇るべき馬鹿者だけじゃ。お前も、そんな馬鹿者になれ」' },
+                            { speaker: '主人公', text: '「己の直感を信じ抜く……！はい、僕自身の力で、僕だけの世界を切り開いてみせます！村長、今まで本当にありがとうございました！」' },
+                            { speaker: '村長', text: '「自分の夢に向かって、胸を張って行ってこい!! ……（少年の背中を見送りながら小声で）全く、寂しくなるのぉ。無茶だけはするなよ、坊主」' },
+                            { speaker: 'narration', text: '村長の家を後にし、村の広場へ向かうと、そこにはあなたの最良の相棒が待っていました。美しい栗色の毛並みを持つ馬。幼い頃に怪我をして倒れていたところを助けて以来、片時も離れず共に育ってきた「愛馬エコー」です。村の名前をもらったこの馬は、誰よりもあなたの心を理解しています。' },
+                            { speaker: '主人公', text: '「よし、待たせたな。今日から長い旅になるけど、よろしく頼むよエコー！」' },
+                            { speaker: 'エコー', text: '「ブルルルッ…！」（前脚を軽く上げ、力強く嘶く）' },
+                            { speaker: 'narration', text: '広場には、旅立ちを聞きつけた村の人々が集まっていました。' },
+                            { speaker: 'パン屋のおかみさん', text: '「これ、焼きたてのパンだよ！道中でお食べ！」' },
+                            { speaker: '幼馴染の少年', text: '「ぜってーすげえ宝物見つけて、俺たちに自慢しに帰ってこいよな！」' },
+                            { speaker: '主人公', text: '「みんな、ありがとう！絶対立派なトレジャーハンターになって帰ってくるよ！」' },
+                            { speaker: 'narration', text: '村の人々に温かく見送られ、たくさんの笑顔と少しの涙に見守られながら、少年トレジャーハンターは愛馬の背に跨ります。' },
+                            { speaker: '主人公', text: '「行こう、エコー！僕たちの冒険の始まりだ！」' },
+                            { speaker: 'narration', text: '澄み切った青空の下、少年と愛馬はゆっくりと、しかし力強い足取りでエコー・ビレッジのゲートをくぐり抜けます。その先に広がる果てしない未知の世界へ向かって、今、運命の歯車が静かに回り始めたのです。' }
+                        ]
+                    }
+                ],
+                clearReward: { coins: 1000 }
+            },
+            {
+                id: 'ch2',
+                title: '第2章：指名手配と地下道の死闘',
+                icon: '🏰',
+                scenes: [
+                    {
+                        id: '2-1', title: 'ジュン・ルナリアへ',
+                        lines: [
+                            { speaker: 'narration', text: '朝霧がまだ晴れない村の境界線。あなたは深く息を吸い込むと、相棒である愛馬のエコーの首筋を優しく撫でた。' },
+                            { speaker: '主人公', text: '「行くぞ、エコー。振り返っている暇はないんだ」' },
+                            { speaker: 'narration', text: '足元でパカランと蹄の音が響き、あなたが手綱を引いて鞍に飛び乗ると、エコーは力強く地面を蹴り出した。村の木々や見送る人の姿がみるみる小さくなり、冷たい朝の風が頬をかすめる。目指すは、遥か彼方にある隣国――大国「ジュン・ルナリア」だ。' },
+                            { speaker: 'narration', text: '村を後にしてから数時間、馬を走らせるにつれて周囲の景色は大きく移り変わっていった。なだらかな草原地帯を抜け、険しい山道を越え、やがて王都へと続く舗装された広い街道へと出る。' },
+                            { speaker: 'narration', text: 'すれ違う旅人や荷馬車を引く商人たちの姿が増え、旅の目的地の近さを肌で感じさせる。' },
+                            { speaker: 'エコー', text: '「ブルルルッ……クゥ……！」' },
+                            { speaker: '主人公', text: '「ハハ、エコーも疲れてきたかい？ もう少しの辛抱だ。まずはあの巨大なジュン・ルナリアで情報を集めて、次の手がかりを見つけ出さないとな」' },
+                            { speaker: 'narration', text: '愛馬の鼻先を軽くポンと叩くと、エコーは一層力強く鼻息を荒げ、歩調を速めてくれた。' },
+                            { speaker: 'narration', text: '地平線の彼方に、まるで天を突くかのような巨大な影が姿を現したのは、陽が少し傾き始めた頃だった。' },
+                            { speaker: 'narration', text: '近づくにつれて、そのスケールは圧倒的な存在感を持って目に飛び込んでくる。それは、空を覆うかのようにそびえ立つ、重厚な灰色の巨大石壁だった。幾重にも張り巡らされた防壁は、国家の威信と絶対的な安全を誇示しているかのようだ。' },
+                            { speaker: 'narration', text: '城門の前には、遠方からやってきた商人の馬車や、様々な姿をした旅人たちの長い列ができている。衛兵たちが鋭いまなざしで往来する人々を監視し、王都の厳格な雰囲気を漂わせている。' },
+                            { speaker: '主人公', text: '「うわあ……なんて大きな街なんだ。城壁の高さだけでも、うちの村の何倍あるんだよ……。さすがは王都だね、スケールが違いすぎる！」' },
+                            { speaker: 'エコー', text: '「ブルルッ！」' },
+                            { speaker: 'narration', text: '目の前に広がる圧倒的な光景を前に、あなたは高鳴る胸の鼓動を抑えながら、壮大な冒険の舞台へと一歩を踏み出すのだった。' }
+                        ]
+                    },
+                    {
+                        id: '2-2', title: '濡れ衣',
+                        lines: [
+                            { speaker: 'narration', text: 'その頃ジュン・ルナリアでは事件が起きていました' },
+                            { speaker: 'narration', text: 'これがすべての始まりであり終わりでもありました' },
+                            { speaker: '街の住人', text: '「おい聞いたか？ 昨日の夜、王家の宝物庫から大事なネックレスが盗まれたらしいぞ！」' },
+                            { speaker: '街の住人', text: '「王家の宝物庫って警備兵だらけのはずだろ」' },
+                            { speaker: '街の住人', text: '「やばいな。」' },
+                            { speaker: '主人公', text: '「なんか、国中が騒がしいな、なにかあったのかな」' },
+                            { speaker: '衛兵のリーダー', text: '「貴様、何処から来た？」' },
+                            { speaker: '主人公', text: '「エコー・ビレッジですけど」' },
+                            { speaker: '衛兵のリーダー', text: '「国には何ようだ？」' },
+                            { speaker: '主人公', text: '「自分トレジャーハンターをやってまして、少し情報収集をと思いまして」' },
+                            { speaker: '衛兵のリーダー', text: '「トレジャーハンターか。なんか貴様目撃情報の特徴に似ているな。」' },
+                            { speaker: '主人公', text: '「???」' },
+                            { speaker: '衛兵のリーダー', text: '「お前がネックレスを盗んだ犯人に違いない！捕らえろ！」' },
+                            { speaker: '主人公', text: '「えっ！？ ちょっと待って、僕じゃない！」' },
+                            { speaker: 'narration', text: 'あっという間に衛兵たちに囲まれ、行き止まりの壁を背に絶体絶命のピンチに!!' },
+                            { speaker: 'narration', text: '（シュバッ！！✨） 路地裏の屋根の上から、きらびやかな衣装をまとった少女が鮮やかに飛び降りてきました！' },
+                            { speaker: '少女', text: '「そこまでよ、堅物さんたち！」' },
+                            { speaker: 'narration', text: '彼女は一切ためらうことなく、衛兵のリーダーに強烈な飛び蹴りを見舞って一撃で粉砕！' },
+                            { speaker: '少女', text: '「ぼさっとしないで、走るよ！」' },
+                            { speaker: '主人公', text: '（走る姿すらどこか優雅で美しい……この子、ただ者じゃない！）' }
+                        ]
+                    },
+                    {
+                        id: '2-3', title: '歪んだ地下水道',
+                        lines: [
+                            { speaker: 'narration', text: '衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。' },
+                            { speaker: '少女', text: '「気を付けて。ルナリアの兵が徘徊してる」' },
+                            { speaker: '主人公', text: '「行き止まりっぽいね」' },
+                            { speaker: '少女', text: '「なんか、今動かなかった？」' },
+                            { speaker: '主人公', text: '「そんなわけ」' },
+                            { speaker: '主人公', text: '「うん、やっぱ動いてるわ。」' },
+                            { speaker: 'narration', text: '2人の目の前には謎の巨大な化け物がいました' },
+                            { speaker: '少女', text: '「なに、こいつ？」' },
+                            { speaker: '主人公', text: '「まさか、グリッジ？」' },
+                            { speaker: 'narration', text: '『グリッジ』とは世界の狭間から生まれた異形の化け物である' },
+                            { speaker: '主人公', text: '「噂には聞いてたけどまさか本当に実在するなんて、しかも結構でかいしなんなら衛兵よりやばくないか。」' },
+                            { speaker: 'narration', text: '（ズズン…！ ズズン…！） 突如、巨大な石の棍棒を振り回す「デブグリッチ」が襲ってきました！' },
+                            { speaker: '主人公', text: '「なんか、棍棒振り回してきた!!」' },
+                            { speaker: '少女', text: '「戦うしかないね」' },
+                            { speaker: '主人公', text: '「こいつ相手に？」' },
+                            { speaker: '少女', text: '「やらなきゃやられる、やらないよりはやったほうが生きれるかもよ」' },
+                            { speaker: '主人公', text: '「まぁ確かに。 僕の力を信じて剣を振るうんだ！」' },
+                            { speaker: 'narration', text: '{name}は恐怖を取り払い戦うことを決意しました' },
+                            { speaker: '少女', text: '「私が素早さで翻弄して隙を作る！ あなたはそこを一気に叩いて！」' },
+                            { speaker: '主人公', text: '「わかった！ そこだっ……！」' },
+                            { type: 'battle', enemy: { name: 'デブグリッチ', icon: '👹', hp: 400, atk: 35, spd: 0.8 } },
+                            { speaker: 'narration', text: '2人の連携攻撃で放った渾身の一撃が、デブグリッチの核心へと突き刺さります！' }
+                        ]
+                    },
+                    {
+                        id: '2-4', title: '脱出と再会',
+                        lines: [
+                            { speaker: 'narration', text: 'なんと、2人はデブグリッジを撃破することに成功しました!!' },
+                            { speaker: '少女', text: '「やったー！倒した倒したんだ!!」' },
+                            { speaker: '主人公', text: '「嘘だろ、僕達があいつを!?」' },
+                            { speaker: 'narration', text: 'デブグリッジが倒れた衝撃で壁が崩れ始めました' },
+                            { speaker: '少女', text: '「崩れるわ！ あそこに地上へと繋がる穴が開いたよ、急いで！」' },
+                            { speaker: '主人公', text: '「わかった!!」' },
+                            { speaker: 'narration', text: '2人はジュン・ルナリアの入口付近から1匹の馬が走ってくるのが見えました' },
+                            { speaker: '主人公', text: '「エコー、お前も無事だったんだな、よかった！」' },
+                            { speaker: 'エコー', text: '「ブルルルッ…！」' },
+                            { speaker: 'narration', text: '愛馬とも無事に再会を果たし、ジュン・ルナリアの衛兵たちを振り切った二人は、さらなる遠くを目指して荒野へと歩みを進めるのでした。' }
+                        ]
+                    }
+                ],
+                clearReward: { coins: 1500, gachaTickets: 3 }
+            },
+            {
+                id: 'ch2_5',
+                title: '第2.5章：星空のキャンプ',
+                icon: '🏕️',
+                scenes: [
+                    {
+                        id: '2.5-1', title: '追手を巻いた夜',
+                        lines: [
+                            { speaker: 'narration', text: '最初の国「ジュン・ルナリア」の激しい追撃を命からがら振り切り、主人公と少女が辿り着いたのは、せいまろ帝国へと続く峻険な山脈の入り口でした。' },
+                            { speaker: 'narration', text: '夜の帳が下りる頃、人間が滅多に立ち入らない荒野の岩陰に、二人は小さなキャンプ地を設営します。' },
+                            { speaker: 'narration', text: 'カグヤが手際よく火を起こすと、パチパチと静かな音を立てて焚き火が闇を照らし出しました。' },
+                            { speaker: 'narration', text: '慣れない逃亡劇に少し疲れた表情の主人公。カグヤはそんな主人公をジロリと見ると、懐から干し肉と硬いパンを取り出し、無造作に放り投げてよこします。' },
+                            { speaker: '少女', text: '「ほら、食べて。これからの山越えは、今日以上に体力がいるからね」' },
+                            { speaker: 'narration', text: 'カグヤ自身も火の傍らに腰掛け、愛用の一対の短剣を取り出して、焚き火の光で刃こぼれがないか丁寧に手入れを始めました。' },
+                            { speaker: '主人公', text: '「ありがとう。……そういえば、ルナリアではバタバタしていて、ちゃんとお互いのことを話していなかったね」' },
+                            { speaker: 'narration', text: '{name}切り出すと、カグヤは手を止め、フッと自嘲気味に笑います。' },
+                            { speaker: '少女', text: '「そういえばそうね。私はカグヤ。…..と言っても、自分が本当は誰なのか、どこで生まれたのかすら知らないんだけどね。」' },
+                            { speaker: 'カグヤ', text: '「気づいた時にはルナリアの路地裏にいて、自分の名前と、この短剣の扱い方以外、何も覚えてないのよ」' },
+                            { speaker: 'narration', text: '不敵な態度の裏にある、カグヤの「記憶喪失」という切ない過去。驚く主人公をまっすぐ見つめ、カグヤは言葉を続けます。' },
+                            { speaker: 'カグヤ', text: '「ただこの短剣で生き抜いてきた。それだけよ。あんたの腕前は認めてる。で、あんたは何者なの？」' },
+                            { speaker: 'narration', text: '主人公は少し照れくさそうに微笑みながら、自分がこの世界を巡る「トレジャーハンター」であることを明かしました。' }
+                        ]
+                    },
+                    {
+                        id: '2.5-2', title: '表の顔、裏の目的',
+                        lines: [
+                            { speaker: 'カグヤ', text: '「トレジャーハンター、ねぇ……。ただの宝探しにしては、ルナリアの軍に追われてまで国を飛び出すなんて命がいくつあっても足りないわよ。本当の目的は何？」' },
+                            { speaker: 'narration', text: '核心を突かれた主人公は、静かにポケットからお父さんの形見である「導きの魔導石」を取り出しました。石は焚き火の炎に呼応するように、淡い青色の光を放ちます。' },
+                            { speaker: '主人公', text: '「……トレジャーハンターっていうのは、表の目的なんだ。僕の本当の目的は、10年前に突然姿を消したお父さんを探すこと。」' },
+                            { speaker: '主人公', text: '「この魔導石はお父さんの形見で、きっとお父さんの居場所へ導いてくれると信じて旅をしてる」' },
+                            { speaker: 'narration', text: '答えの出ない問いを抱え、真剣な眼差しで石を見つめる主人公。その言葉を聞いたカグヤは短剣を鞘に収めると、パッと顔を上げて、いたずらっぽく、でもどこか愛らしさを感じる笑顔を向けました。' },
+                            { speaker: 'カグヤ', text: '「ふーん、父親探しね……。そっか。それってさ、何よりも価値がある、世界に一つだけの大切な“お宝”を探してるんだね。」' },
+                            { speaker: 'カグヤ', text: '「――よし、決ーめたっ！！ 私、あんたについていく！ 今日から何があっても、私が最高の相棒になってあげるね。」' },
+                            { speaker: 'カグヤ', text: '「……あ、そういえばさ、あんたの名前、まだ聞いてなかったっけ。なーに？」' },
+                            { speaker: 'narration', text: 'カグヤの真っ直ぐで少しお茶目な言葉に驚きつつも、主人公は自らの名前をしっかりと彼女に伝えます。' },
+                            { speaker: 'カグヤ', text: '「いい名前じゃん{name}、そういえば馬の名前はなんていうの？」' },
+                            { speaker: '主人公', text: '「エコーだよ」' },
+                            { speaker: 'カグヤ', text: '「へぇ、意外といい名前じゃん。由来とかあるの？」' },
+                            { speaker: '主人公', text: '「『エコービレッジ』っていう村の出身だから、『エコービレッジの馬』を略してエコー。」' },
+                            { speaker: 'カグヤ', text: '「由来の雑さよ！ 適当すぎない!?」' },
+                            { speaker: '主人公', text: '「まぁまぁ。世界には、東にあるから『東村』、西にあるから『西村』……みたいな名前の村もあるわけだし。名前なんて自由でしょ」' },
+                            { speaker: 'カグヤ', text: '「由来が適当すぎる村だな……。まあ、確かに名前自体は自由だけどさ」' },
+                            { speaker: 'narration', text: 'お互いに「失われた過去」を抱える者同士、ここで本当の相棒としての誓いを交わした二人の距離は、焚き火の光の中でぐっと縮まるのでした。' }
+                        ]
+                    },
+                    {
+                        id: '2.5-3', title: '翌朝、未知の国へ',
+                        lines: [
+                            { speaker: 'narration', text: '翌朝、夜露に濡れたテントを片付け、二人は再び歩みを進めます。' },
+                            { speaker: 'narration', text: '山頂の霧の向こうに、ついにパステルカラーの異国「せいまろ帝国」の輪郭が見え始めていました。' },
+                            { speaker: 'narration', text: '名前を呼び合い、未来を共にする覚悟を決めた二人は、引き締まった表情で、獣人たちの待つ国境の門へと向かって坂を下りていきます。' }
+                        ]
+                    }
+                ],
+                recruitChar: 'sub1',
+                clearReward: { coins: 2000, materials: 30 }
+            },
+            {
+                id: 'ch3',
+                title: '第3章：せいまろ帝国とパフェ',
+                icon: '🍰',
+                scenes: [
+                    {
+                        id: '3-1', title: '衝突',
+                        lines: [
+                            { speaker: 'narration', text: '荒野の険しい山脈を越え、ようやくパステルカラーの美しい異国「せいまろ帝国」を遠くに捉えた主人公たち。しかし、国境の門に近づいた瞬間、周囲の茂みから鋭い殺気が放たれました。' },
+                            { speaker: '獣人の警備兵', text: '「人間め、ここから先は通さん！」' },
+                            { speaker: 'narration', text: '現れたのは、鋭い爪と牙を持ち、巨大な槍を構えた獣人の警備兵たち。主人公たちを侵略者だと誤認して襲いかかってきたのです。' },
+                            { speaker: 'カグヤ', text: '「挨拶代わりにしては、ちょっと手荒すぎじゃない？ ――まぁ、いいわ。旅の疲れを吹き飛ばすのに丁度いいね！」' },
+                            { speaker: '主人公', text: '「カグヤ、命までは奪わないようにしよう！」' },
+                            { speaker: 'narration', text: '二人は息の合った動きで、獣人たちの攻撃をいなして立ち向かいます！' },
+                            { type: 'battle', enemy: { name: '獣人の警備兵', icon: '🐺', hp: 350, atk: 30, spd: 0.9 } }
+                        ]
+                    },
+                    {
+                        id: '3-2', title: '潜入',
+                        lines: [
+                            { speaker: 'narration', text: '見事戦いに勝利し、2人は獣人がなぜ人間を嫌っているのかを聞きます。' },
+                            { speaker: '主人公', text: '「どうして人間を嫌っているのですか？」' },
+                            { speaker: '獣人の警備兵', text: '「実はだな、最近帝国の中枢にあるスイーツ工場に『グリッジ』が現れてしまってな……」' },
+                            { speaker: '獣人の警備兵', text: '「あの工場は国のスイーツの半分を製造している上、せいまろ神様にそなえるお供え物も作っている重要な場所なんだよ」' },
+                            { speaker: '獣人の警備兵', text: '「今は工場の中だけで済んでいるが、いずれ外へ出てくるかもしれない。国民を避難させたとしても、このままだとせいまろ帝国が乗っ取られてしまう」' },
+                            { speaker: '獣人の警備兵', text: '「だからこそ、今は国に入る者を片っ端から追い返しているのさ」' },
+                            { speaker: '主人公', text: '「なるほど、人間自身を嫌っていたわけじゃなかったんですね」' },
+                            { speaker: '獣人の警備兵', text: '「そういうことだ。事情も知らずにすまなかったな」' },
+                            { speaker: 'カグヤ', text: '「この国、救おうか、{name}!!」' },
+                            { speaker: '獣人の警備兵', text: '「いや、あまりにも危険すぎる」' },
+                            { speaker: 'カグヤ', text: '「大丈夫、私達最強だから。」' },
+                            { speaker: 'narration', text: '二人はせいまろ帝国の危機を救うため、「巨大スイーツ工場」へと潜入します。' },
+                            { speaker: 'narration', text: 'しかし、地下に広がる工場はすでにグリッジ共の巣になっていました。' },
+                            { speaker: '主人公', text: '「なんだこれ…ケーキやキャンディが化け物になってる！」' },
+                            { speaker: 'カグヤ', text: '「突撃じゃー！」' },
+                            { speaker: 'narration', text: 'カグヤは、両手の短剣をきらめかせながら歪んだ空間を駆け巡ります。' },
+                            { speaker: '主人公', text: '「僕も続くよ！」' },
+                            { speaker: 'narration', text: 'バグの隙間を縫うような連携で、お菓子の異形たちに立ち向かいます！' },
+                            { type: 'battle', enemy: { name: 'お菓子の異形', icon: '🍬', hp: 500, atk: 34, spd: 1.0 } }
+                        ]
+                    },
+                    {
+                        id: '3-3', title: '決戦',
+                        lines: [
+                            { speaker: 'narration', text: 'お菓子のグリッジ共を撃破した2人は工場の最深部に向かいます' },
+                            { speaker: 'narration', text: '待ち構えていたのは、巨大なデコレーションケーキとおぞましいバグの触手が融合したホイップグリッチでした。' },
+                            { speaker: 'ホイップグリッチ', text: '（ゲーギ…ゲーギ…！！）' },
+                            { speaker: '主人公', text: '「くっ…強力な範囲攻撃だ！ カグヤ、危ない！」' },
+                            { speaker: '獣人の隊長', text: '「加勢するぞ、人間たち！」' },
+                            { speaker: 'narration', text: '国を守るため奮起した獣人たちが合流し、盾となってボスの猛攻を防ぎます！' },
+                            { speaker: '主人公', text: '「カグヤ、そこだ！」' },
+                            { speaker: 'カグヤ', text: '「もらったわ！！」' },
+                            { type: 'battle', enemy: { name: 'ホイップグリッチ', icon: '🎂', hp: 1400, atk: 55, spd: 0.75 } },
+                            { speaker: 'narration', text: '主人公の指示のもと、カグヤがボスの核へと一閃を叩き込みます！' }
+                        ]
+                    },
+                    {
+                        id: '3-4', title: '大宴会',
+                        lines: [
+                            { speaker: 'narration', text: 'バグの脅威が去り、帝国ではグリッジ討伐を盛大に祝う大宴会が開かれました。' },
+                            { speaker: 'narration', text: '獣人の長から感謝の印として差し出されたのは、部族に伝わる最高の聖菓でした。一口食べた瞬間、主人公はピタリと動きを止めます。' },
+                            { speaker: '主人公', text: '「……これ、知ってる。懐かしい……。お父さんが作ってくれた『超メガストロベリーラブラブスタープレミアムパフェ』の味だ……」' },
+                            { speaker: 'narration', text: '10年前に姿を消したお父さんの記憶が鮮烈に蘇り、主人公は震える手で器を強く握りしめました。' },
+                            { speaker: 'カグヤ', text: '「……名前なげぇー。」' },
+                            { speaker: 'narration', text: 'カグヤは呆れたような、しかしどこか優しい眼差しで主人公の頭を軽く小突き、自分のパフェを口に運びました。お父さんは確かにここにいた――その確かな足跡を、主人公は温かい胸の痛みとともに刻み込みます。' },
+                            { speaker: 'narration', text: '宴は夜更けまで続き、カグヤ達が語るそれぞれの過去に、獣人の長は親身になって耳を傾けてくれるのでした。' }
+                        ]
+                    },
+                    {
+                        id: '3-5', title: '追手の影',
+                        lines: [
+                            { speaker: 'narration', text: '翌朝、せいまろ帝国の獣人たちに盛大に見送られ、旅立とうとする二人。' },
+                            { speaker: 'narration', text: '広場の「せいまろ神の石像」の前にさしかかった時、主人公の魔導石と石像が青白い光を放って静かに共鳴を始めました。' },
+                            { speaker: 'narration', text: '誰も気付いていないけどね' },
+                            { speaker: 'narration', text: '（ズドーン！！）\nしかしその時、地響きとともに最初の国「ジュン・ルナリア」の追手がついに追いついてきました！' },
+                            { speaker: 'カグヤ', text: '「なんで奴らに居場所が!?」' },
+                            { speaker: '獣人の長', text: '「そんなことより、早く逃げなさい!!」' },
+                            { speaker: '獣人の警備兵', text: '「ここは我らの恩人が通る道だ！ 人間の兵ども、一歩も通さん！」' },
+                            { speaker: '獣人の長', text: '「行け！ お前たちの旅を、こんなところで終わらせるな！」' },
+                            { speaker: 'narration', text: '主人公とカグヤは深く頷き、作ってくれた隙を突いて広大な外の世界へと駆け出しました。二人の旅は、いよいよ世界の核心へと迫っていきます！' }
+                        ]
+                    }
+                ],
+                clearReward: { coins: 2500, gachaTickets: 5, materials: 20 }
+            },
+            {
+                id: 'ch4',
+                title: '第4章：Huhランドの崩壊と笑いのゆくえ',
+                icon: '🎪',
+                scenes: [
+                    {
+                        id: '4-1', title: '「Huh？」で繋がる平和な日常――の裏に隠された恐怖',
+                        lines: [
+                            { speaker: 'narration', text: 'せいまろ帝国での激闘をあとにして、{name}とカグヤがたどり着いたのは、色鮮やかなテントや巨大な「Huh」の看板が立ち並ぶ、世界一賑やかでおかしな国――サーカスとお笑いの国「Huhランド」であったはずだった。' },
+                            { speaker: 'narration', text: '国境を越えた瞬間、耳に飛び込んできたのは、かつての賑わいとは似ても似つかない、引きつったような笑い声と、冷や汗混じりの奇妙な掛け声だった。' },
+                            { speaker: 'カグヤ', text: '「え,なんか様子がおかしくない……？ さっきから,みんな笑い声が妙に硬いと言うか……冷や汗をかいているようにも見えるわ」' },
+                            { speaker: '主人公', text: '「僕もそう思う……。噂では,この国はもっとこう,心の底から笑えるような温かい場所だったはず。なんか変なプレッシャーみたいなものも感じる……息が詰まりそうだ。」' },
+                            { speaker: '住民A', text: '「お,おい,昨日のピエロの出し物,最高に面白かったよな……？ はは,は……！」' },
+                            { speaker: '住民B', text: '「Huh……！（目がまったく笑っていないぞ,おい,はやく話を合わせろ！ さもないと俺たちが消される……！）」' },
+                            { speaker: 'narration', text: 'かつて人々は,驚きや感動,そしてユーモアを分かち合うときに心からの「Huh？」を響かせあっていた。道化師たちがアクロバティックなジョークで旅人の緊張をほぐしてくれる,愛に満ちた平和な楽園――それがこの国の本来の姿だったはずなのだ。' },
+                            { speaker: 'narration', text: 'しかし,数日前に突如として空を裂くように現れた無機質なノイズの軍勢が,その日常を根底から粉砕した。その軍勢を率いるのは,最悪の異形のバグ――「ピエログリッジ」であった。' },
+                            { speaker: 'narration', text: '殺人が大好きで,他人の恐怖にゆがむ顔を見ることに最高の愉悦を見出す狂気のピエログリッジは,Huhランドを瞬く間に恐怖の独裁国家へと変貌させた。現在,この国では「ピエログリッジの機嫌」がすべての絶対法となっている。毎日のように中央広場では公開処刑のショーが開催され,ピエログリッジの芸やジョークを見て「十分に笑わなかった者」「笑いのツボが浅すぎるとみなされた者」は,容赦なくその場で引き裂かれ,処刑されていく。' },
+                            { speaker: '街行く人々', text: '「いつ自分の番が回ってくるか分からない……」' },
+                            { speaker: 'narration', text: '街行く人々はみな,いつ自分の番が回ってくるか分からない恐怖に震えながら,必死に作り笑いを張り付けて暮らしていた。誰の顔にも笑顔はあるが,それはもはや楽しさの証明ではなく,「殺されたくない」という生存のための狂気に満ちた仮面でしかなかったのだ。' },
+                            { speaker: 'カグヤ', text: '「笑いを強要されるなんて……そんなのおかしいでしょ！ あんな奴らの言うなりになる必要なんてないのに……っ！ 私達で何とかしてあげようよ,{name}！！ じっとしてらんないよ」' },
+                            { speaker: '主人公', text: '「カグヤ,声を抑えて。周りの視線がこっちに向いてる……この国全体が,大きな一つの檻になっている。迂闊に動けば僕たちまで狙われる」' },
+                            { speaker: 'narration', text: '赤色の不気味な色に覆われ,色鮮やかなサーカス大テントの模様が真っ赤な血の色に変わっていく中,{name}たちはこの恐怖に満ちた歪んだ楽園の真相へと足を踏み入れていく。' },
+                            { speaker: 'narration', text: 'Huhランドの中心街へと足を踏み入れた{name}とカグヤは,これ以上事態が悪化する前に,すれ違う住民たちに話を聞こうと試みる。しかし,返ってきたのはあまりにも異様な光景だった。' },
+                            { speaker: 'narration', text: '道行く人々は一様に怯えた目をしながらも,口を揃えてこう言い放つ。' },
+                            { speaker: '住民C', text: '「ピエログリッジ様は,この国を救ってくださった最高のエンターテイナーだ！」' },
+                            { speaker: '住民D', text: '「私たちの毎日は,最高の笑いに包まれている……ハ,ハ,ハ,ハハハ……！」' },
+                            { speaker: '主人公', text: '「おい,頼むから教えてくれ！ 本当は何か困っているんだろ？ 僕たちは旅の者だ,力になれるかもしれないんだ！」' },
+                            { speaker: '住民C', text: '「……っ！ 声が大きいわ,このバカ者！ 聞かれたら,あたしたちまで処刑台送りになっちゃうでしょ……あっちに行ってよ！」' },
+                            { speaker: 'narration', text: '心にもない言葉を無理やり口走らされているのは明らかで,誰もが「誰かに見張られている」ような過度な恐怖に震えていた。少しでも本音を漏ラしようものなら,すぐにどこからともなく監視の目が光る。かつての「Huh？」と自由に笑い合っていた温かい空気は完全に失われ,この国はピエログリッジの機嫌を損ねたら即座に処刑される恐怖の独裁国家へと成り果てていたのだ。' },
+                            { speaker: 'カグヤ', text: '「ダメね,みんな恐怖で心が完全に縛り付けられているわ。これじゃあ,まともな会話すら成り立たない……どうすればいいのかしら,僕」' },
+                            { speaker: 'narration', text: '{name}は唇を噛み締め,拳を強く握りしめる。' },
+                            { speaker: '主人公', text: '「あんな奴らを野放しには絶対にしておけない……。ピエログリッジをぶっ倒して,この国に本当の笑顔を取り戻してやるんだ！」' },
+                            { speaker: 'narration', text: '住民たちからこれ以上の話を聞き出すことができないと判断したその時,背後から不気味な足音が近づいてきた。' },
+                            { speaker: '謎の声', text: '「おい,お前たち国の外から来たものだな？」' },
+                            { speaker: '主人公', text: '「えっ……誰だ！？ カグヤ,離れるなよ！」' },
+                            { speaker: 'narration', text: '振り返る間もなく,突如現れた黒い影に包囲され,{name}とカグヤは視界を奪われて気絶させられてしまう。' }
+                        ]
+                    },
+                    {
+                        id: '4-2', title: '出会いとHuhランドの過去',
+                        lines: [
+                            { speaker: 'narration', text: 'どれほどの時間が経っただろうか。ツンと鼻をつく冷たい地下水の匂いと共に,{name}がゆっくりと目を覚ます。そこは華やかな表通りの喧騒から遠く離れた,地下深くにある薄暗い隠れ家だった。' },
+                            { speaker: 'narration', text: '周囲を取り囲んでいたのは,サーカスの衣装をボロボロに引き裂いた男や,かつては一流の道化師だったであろう者たち――ピエログリッジの恐怖支配に抗う反乱軍「レジスタンス」のメンバーだった。' },
+                            { speaker: 'レジスタンスのリーダー', text: '「目覚めたか,よそ者ども。そんなに怯えるな,俺たちは敵じゃない。あんな街中で迂闊に住民と話していたら,ここで気絶させてでも連れてくるしかなかったのさ」' },
+                            { speaker: '主人公', text: '「お前たちは……？ ピエログリッジの仲間じゃないのか？」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「ふっ,あんな人非人どもの仲間なもんか。俺たちは,あのクソったれなピエロにすべてを奪われた『レジスタンス』だ」' },
+                            { speaker: 'narration', text: 'レジスタンスのリーダーが険しい表情で語り出し,かつての美しかったHuhランドの思い出を静かに話し始める。' },
+                            { speaker: 'レジスタンスのリーダー', text: '「聞いてくれ……ピエログリッジが来る前のこの国は,本当に素晴らしい場所だったんだ。建国当時から『Huh』という言葉がみんなの口ぐせで,それがいつしか国名の由来にもなった。人々はいつも笑い合い,お互いを笑顔にする最高に楽しい国だったのさ」' },
+                            { speaker: 'カグヤ', text: '「Huhが国名の由来だったの……？ じゃあ,あの掛け声にはそんな素敵な意味があったのね」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「ああ。みんなで面白い替え歌を作ったり,次々に新しいダジャレを考えて披露し合ったりして,毎日がフェスティバルのようだった。月に一度のお笑いフェスティバルでは街中が大盛り上がりして,年に一度のお笑いグランプリでは,あまりの面白さと感動にみんなで涙を流し合うこともあった……本当に,温かい光に満ちた国だったんだ」' },
+                            { speaker: '主人公', text: '「そんなに平和で笑顔があふれる国だったのに……一体どうして,あんな恐怖の独裁国家になっちまったんだよ？」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「……すべては,あいつがこの国に現れた日から狂い始めたのさ。ある日,鮮やかなピエロの見た目をした『ピエログリッジ』が,ひょっこりこの国にやって来た。最初はサーカス団の一員のように振る舞い,得意のパフォーマンスで子どもたちを大いに笑わせ,すっかり魅了していったんだ」' },
+                            { speaker: 'カグヤ', text: '「子どもたちを笑わせて……？ じゃあ,最初はみんなに歓迎されていたの？」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「あぁ,そうさ。だが,ピエログリッジがこの国に完全に溶け込み,誰もが油断しきったその時――あいつは本性を現した。子どもを笑顔で笑わせた次の瞬間,何の理由もなく,その子どもをその場で残酷に殺したんだ……しかも笑いながらな,あぁ思い出すだけで……あぁあ゛あ゛あ゛あ゛あ゛っ……悲鳴！」' },
+                            { speaker: '主人公', text: '「うっ……！？ 子どもを……笑いながら殺した……そんなの,許されていいはずがないだろ……！」' },
+                            { speaker: 'レジスタンスの隊員', text: '「リーダー、大丈夫。落ち着いてくれ……！」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「ああ,すまない……。当然,みんなで立ち上がったさ。ピエログリッジに反抗して武器を取った者たちも大勢いた。だが奴の圧倒的な恐怖の力とグリッジの軍勢の前に立ち上がった者たちは一人残らず連れ去られ……二度と帰ってくることはなかった」' },
+                            { speaker: 'narration', text: 'リーダーの拳がギリッと音を立て,悔しさに震えている。' },
+                            { speaker: 'レジスタンスのリーダー', text: '「それからというもの,ピエログリッジはこの国の頂点に君臨し,誰も逆らえない絶対的な独裁を敷いた。今ここにいるレジスタンスのメンバーは,あのときピエログリッジに子どもや親戚,そして大切な友人たちを理不尽に奪われた者たちばかりだ……」' },
+                            { speaker: 'カグヤ', text: '「そうだったの……。だからみんな,あんなにも深い悲しみと恐怖を胸に秘めて……」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「そうだ。街で怯えながら作り笑いをしている連中の中には,本当は戦いたいのに,自分や家族の命を守るために勇気を出せなかった者たちも大勢いる。俺たちは,あの奴らを責める気にはならねぇよ……。だからこそ,私たちレジスタンスがすべての因縁に決着をつけなきゃならないんだ」' },
+                            { speaker: 'カグヤ', text: '「そうなんだ……その話聞いてよく分かったわ。私たちも,ピエログリッジを絶対に許さない！ みんなに本当の笑いと平和を取り戻すために,私たちも一緒に戦う！」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「おいおい,待ってくれ！ 気持ちはありがたいが,よそ者あんたたちをこれ以上危険に巻き込むわけにはいかない。ここはすぐに隠れ家から――」' },
+                            { speaker: 'カグヤ', text: '「ダメよ！ 私たちの意思は変わらないわ。危険だからって見過ごすわけにはいかないの！」' },
+                            { speaker: 'narration', text: 'カグヤが強い意志を込めて反論したその瞬間,隠れ家の扉を叩く激しい足音と共に,一人のレジスタンス隊員が慌てた様子で飛び込んできた。' },
+                            { speaker: 'レジスタンス隊員', text: '「大変だ,リーダー！ 地上の街全域に,巨大な『魔結界』が展開されたぞ……！」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「なんだって……！？ 魔結界だと！？」' },
+                            { speaker: 'レジスタンス隊員', text: '「ああ……！ 魔力でできた巨大な壁が街をすっぽり覆い尽くしている。」' },
+                            { speaker: '主人公', text: '「魔結界？」' },
+                            { speaker: 'レジスタンス隊員', text: '「魔結界は魔力で形成された結界だ。破る方法は,発動者自身が術を消し去るか,あるいはその結界を超えるほどの圧倒的な魔力で力づくで破壊するかしねえと,外に出ることも入ることもできない……！」' },
+                            { speaker: '主人公', text: '「なるほど……僕たちを閉じ込める気なのか……！」' }
+                        ]
+                    },
+                    {
+                        id: '4-3', title: 'キングテント突入',
+                        lines: [
+                            { speaker: 'narration', text: '逃げ場を塞がれ,ピエログリッジの魔の手が着実に迫る中,レジスタンスの案内のもと,レジスタンスたちとカグヤ,そして{name}はピエログリッジの居城である巨大なサーカス城「キングテント」へと突入を決意する。' },
+                            { speaker: 'narration', text: 'キングテントの内部に足を踏み入れると,そこは不気味なノイズと狂気に満ちた空間が広がっていた。すぐさま,ピエログリッジの手下である無数の「雑魚グリッジ」たちが襲いかかってくる。' },
+                            { speaker: '雑魚グリッジ', text: '「笑え！ 笑え！ 笑いなさい！ 笑いなさい！」' },
+                            { speaker: '主人公', text: '「邪魔するな……！ 僕たちの力を見せてやる！」' },
+                            { type: 'battle', enemy: { name: '雑魚グリッジ', icon: '🎭', hp: 600, atk: 40, spd: 1.1 } },
+                            { speaker: 'narration', text: '{name}の剣技とカグヤの強力な魔導が炸裂し,雑魚グリッジの群れを見事に一網打尽にして撃破していく！' },
+                            { speaker: 'narration', text: '雑魚グリッジとの戦闘にカグヤたちがみごと勝利を収めると,いよいよテントの最深部にてピエログリッジ本人との直接対決が幕を開けた。' },
+                            { speaker: 'ピエログリッジ', text: '「よくぞここまでたどり着いたな,愚かな人間どもよ！ 僕ちゃんの最高に残酷なショーを見せてやろう……！」' },
+                            { speaker: 'レジスタンスのリーダー', text: '「黙れ!!」' },
+                            { speaker: 'narration', text: '怒りに我を忘れたレジスタンスのリーダーは,復讐の炎を燃え上がらせながら単身でピエログリッジへと突撃していった。しかし,その圧倒的な力の差の前に致命的な隙を突くことができず,返り討ちに遭ってその場に倒れ込んでしまう。' },
+                            { speaker: '主人公', text: '「リーダー……っ!？」' },
+                            { speaker: 'カグヤ', text: '「一人であんな無茶を……！」' },
+                            { speaker: 'ピエログリッジ', text: '「ははは！ 雑魚がいくら足掻こうとも,私の恐怖のサーカスからは逃れられんのさ！」' },
+                            { speaker: 'narration', text: '倒れたリーダーの代わりに,{name}とカグヤが前へと踏み出し,怒りと決意を込めてピエログリッジへと立ち向かう。' },
+                            { type: 'battle', enemy: { name: 'ピエログリッジ(影武者)', icon: '🤡', hp: 1600, atk: 60, spd: 0.85 } },
+                            { speaker: 'narration', text: '激闘の末,ついにコンビネーション抜群の反撃が炸裂し,ピエログリッジを見事に撃破した！' },
+                            { speaker: 'レジスタンスの隊員', text: '「やった……！ やったんだ,{name}たちすごいぞ……！」' },
+                            { speaker: 'レジスタンスの隊員', text: '「これでHuhランドに平和が戻る……！」' },
+                            { speaker: 'narration', text: 'レジスタンスのメンバーたちも駆けつけ,ピエログリッジを倒したことに歓喜の声を上げる。しかし,{name}とカグヤの表情は険しいものへと変わった。' },
+                            { speaker: '主人公', text: '「待ってくれ……おかしい。倒したはずのピエログリッジの体が……光の粒子になって消えていかない……？」' },
+                            { speaker: 'narration', text: 'レジスタンスのメンバーが駆け寄って確認すると,倒れていたピエログリッジの体はみるみるうちに泥の質感へと変わり,ただの「泥人形」へと崩れ去っていった。' },
+                            { speaker: 'カグヤ', text: '「嘘……これ,ただの泥人形じゃない……！？ じゃあ,私たちがさっき戦ったあいつは――偽物だったっていうの……！？」' },
+                            { speaker: 'narration', text: '不気味な静けさが,静まり返ったキングテントを包み込む。' },
+                            { speaker: 'レジスタンスのリーダー？', text: '「アッハッハッハッ……！」' },
+                            { speaker: 'narration', text: 'リーダーは乾いた笑い声を上げながら,先ほどまで自分の手当をしていた部下の隊員を,容赦なく殴り飛ばした。しかし,その狂気的な笑みを浮かべた目からは,大粒の涙がこぼれ落ちていた。' },
+                            { speaker: '主人公', text: '「まさか……！？」' },
+                            { speaker: 'narration', text: '{name}たちの脳裏に,背筋が凍るような最悪の真実が突き刺さる。' },
+                            { speaker: '主人公', text: '「お前……ピエログリッジだな」' },
+                            { speaker: 'レジスタンスのリーダー？', text: '「はぁ? 何のことよ,急に」' },
+                            { speaker: '主人公', text: '「こんな状況で,仲間を笑いながら傷つけられる奴なんてお前しかいないんだよ！ まさか,最初から俺たちをずっとだましてたのか……！？」' },
+                            { speaker: 'レジスタンスのリーダー？', text: '「――ねえ,ここで正体明かしたほうが,展開的に面白いよねえ（笑）」' },
+                            { speaker: 'narration', text: 'リーダーの雰囲気が一変する。それはもはや,先までのレジスタンスの指導者ではない。' },
+                            { speaker: 'ピエログリッジ', text: '「そうだよ！ 僕ちゃんが,このレジスタンスのリーダーであり,ピエログリッジの本体でぇーす！！」' },
+                            { speaker: 'narration', text: '本物のピエログリッジは他でもない,仲間として信頼していた「レジスタンスのリーダー」その人だったのだ。単身でピエログリッジに乗り込んだあの時,リーダーはすべてのデータを自身の身体に流し込み,その瞬間に本物の身体を泥人形へとすり替えていたのだった。' },
+                            { speaker: 'ピエログリッジ', text: '「『だましてた』なんて人聞きが悪いなあ。こいつが単身で僕ちゃんの本拠地に突撃してきた時,チャンスだと思って僕ちゃんの全データをこいつの脳に流し込んだのさ。で,すっかり乗っ取り完了ってわけ！ いやあ,おかげで生き延びられたよ」' },
+                            { speaker: '主人公', text: '「ピエログリッジ……！！」' },
+                            { speaker: 'narration', text: '絶望と怒りが入り交じる中,ピエログリッジは背後へすり抜け,不気味な笑い声を上げながらその場からの逃亡をはかる！' },
+                            { speaker: 'ピエログリッジ', text: '「ーっはっは！ 残念でしたぁ,僕ちゃんはここでドロンさせてもらいまーす！」' },
+                            { speaker: 'カグヤ', text: '「逃がさない……っ！」' },
+                            { speaker: 'narration', text: 'カグヤが瞬時に懐から鋭い短剣を引き抜き,力を込めて思いっきり投げ放つ！ 狙いたがわず放たれた短剣は,逃走しようとするピエログリッジの背中――その制御核へと正確に突き刺さった。' },
+                            { speaker: 'ピエログリッジ', text: '「ぎゃあっ……！？ ば,馬鹿な,僕ちゃんの核が……っ！」' },
+                            { speaker: 'narration', text: '短剣の魔力によって足止めされ,逃亡を完全に阻止されたピエログリッジは,歪んだ笑みを消し去り,憎悪に満ちた目で振り返る。' },
+                            { speaker: 'ピエログリッジ', text: '「こうなったら……お前たちをここで完全に血祭りに上げてやる……！」' },
+                            { speaker: 'narration', text: 'カグヤがピエログリッジの背中から短剣を引き抜き,Huhランドの命運を賭けた本当の最終決戦が今まさに幕を開ける――！' },
+                            { type: 'battle', enemy: { name: 'ピエログリッジ', icon: '🤡', hp: 2400, atk: 75, spd: 0.8 } },
+                            { speaker: 'narration', text: '激しい死闘の末,カグヤたちのコンビネーションがピエログリッジを圧倒し,ついに勝利を掴み取った！' },
+                            { speaker: 'ピエログリッジ', text: '「ぐっ……ば,馬鹿な……この僕ちゃんが……っ！ だがしかし……！ 僕ちゃんを倒せばこの子（リーダー）も一緒に死んじゃうけど……だーいじょうぶかな？（笑）」' },
+                            { speaker: 'narration', text: 'ピエログリッジの本体がレジスタンスのリーダーと完全に一体化しているため,このままではリーダーの命も失われてしまう。カグヤはとどめを刺す手を思わずためらった。' },
+                            { speaker: 'カグヤ', text: '「そんな……これじゃあ,リーダーまで……！」' },
+                            { speaker: 'narration', text: 'その時ピエログリッジのピエロの面がはずれリーダーの顔が出てきた。' },
+                            { speaker: 'レジスタンスのリーダー', text: '「……うっ……,お,願いだ……迷わないでくれ……。こいつごと……僕を倒して……！」' },
+                            { speaker: 'narration', text: 'リーダーは苦しみながらも,涙を浮かべる優しい笑顔で{name}とカグヤにそう懇願した。その強い意志を受け取り,レジスタンスの一員が意を決して前に出る。' },
+                            { speaker: 'レジスタンスの隊員', text: '「リーダー……っ！ うわあああっ……！」' },
+                            { speaker: 'narration', text: 'レジスタンスの隊員が泣きながら剣を振るい,ピエログリッジへととどめを刺した！' },
+                            { speaker: 'ピエログリッジ', text: '「い,嫌だぁ……！ こんなのは笑えない……！ あーっはっは……ハっ……」' },
+                            { speaker: 'narration', text: 'ピエログリッジは歪んだ笑い声を響かせながら,眩い光の粒子となって完全に消滅していった。それは同時に,リーダーの命が尽きた瞬間でもあった。' },
+                            { speaker: 'narration', text: '静まり返ったキングテントの中でリーダーの最期を悼んだあと,{name}とカグヤ,そしてレジスタンスたちはHuhランドの全域へと「ピエログリッジ討伐と解放」の報せをもたらした。長きにわたる恐怖の支配は終わりを告げた。' }
+                        ]
+                    },
+                    {
+                        id: '4-4', title: '平和と復興',
+                        lines: [
+                            { speaker: 'narration', text: 'その後,街では盛大な宴が始まった。しかし,ピエログリッジの討伐をまだ心の底から信じきれない者たちもいたし,何よりリーダーを失った悲しみは,人々の胸から簡単に消えることはなかった。' },
+                            { speaker: 'narration', text: 'そして迎えた次の日。{name}とカグヤは街を覆う魔結界を破壊しようと試みたが,カグヤたちの持てる魔力をすべて注ぎ込んでも,その強固な結界を破ることは不可能だった。' },
+                            { speaker: 'narration', text: 'どうしたものかと立ち尽くす彼らのもとに,街中から大勢の国民たちが次々と駆け寄ってきた。' },
+                            { speaker: '国民たち', text: '「おい,お前たち……！ 私たちの命の恩人だ……どうか,俺たちの魔力を使ってくれ！」' },
+                            { speaker: '国民たち', text: '「私たちの国の英雄のために……そして未来のために,今こそ全国民の魔力を合わせましょう！」' },
+                            { speaker: 'narration', text: '恐怖に震えていたはずの人々が,今や自らの意志で立ち上がり,{name}たちに力を貸そうと手を差し伸べていたのだった。' },
+                            { speaker: 'narration', text: 'そして,全員の魔力を一点に注ぎ込んだ渾身の一撃により,ついに街を覆う巨大な魔結界は盛大な音を立てて粉々に破壊された！' },
+                            { speaker: 'narration', text: '結界が消え去った解放感に包まれる中,別れ際にレジスタンスの隊員から,レジスタンスはこれからのHuhランドを復興していく新しい団体としてスタートしていくことを聞かされる。それは他でもない,リーダーが遺した最期の願いなのだという。' },
+                            { speaker: 'narration', text: '復活を誓ったHuhランドの人々に温かい別れを告げ,{name}とカグヤは再び道なりに沿って,次なる冒険の地へと歩みを進めていくのだった。' }
+                        ]
+                    }
+                ],
+                clearReward: { coins: 4000, gachaTickets: 8, materials: 40 }
+            },
+            {
+                id: 'ch5',
+                title: '第5章：めんどくさがりやと絆のテニス',
+                icon: '🎾',
+                scenes: [
+                    {
+                        id: '5-1', title: '異次元のテニス',
+                        lines: [
+                            { speaker: 'narration', text: '最初の国ジュン・ルナリア、せいまろ帝国そしてhuhランドを駆け抜けた主人公とカグヤ。ひたすら走ると、そこには見渡す限りの広大な雪原とひまわり畑が広がっていました。' },
+                            { speaker: 'カグヤ', text: '「寒すぎる、寒すぎる、寒すぎる、寒すぎて滅!!」' },
+                            { speaker: 'narration', text: 'しかし、その国境を越えた瞬間、二人の頭上を「シュババババッ！」と凄まじい風切り音が通り抜けます。' },
+                            { speaker: 'カグヤ', text: '「な、何事！？ 敵襲！？」' },
+                            { speaker: 'narration', text: 'カグヤが咄嗟に二振りの短剣を構えて身構えますが、飛んできたのは矢でも魔法弾でもなく、黄色い球体――テニスボールでした。' },
+                            { speaker: 'narration', text: '見上げれば、巨大なひまわりの茎が複雑に絡み合い、空中には魔力で形成された幾何学的なテニスコートがいくつも浮かんでいます。そこでは、ちいさなラケットを持ったモフモフのハムスターたちが、信じられない速度でラリーを続けていたのです。' },
+                            { speaker: 'ハムスターの魔導師', text: '「おいおい、そこは魔導サーブの着地点だから危ないぞ。どいたほうがいい」' },
+                            { speaker: 'narration', text: '声をかけてきたのは、いっちょ前にテニスウェアを着たハムスターの魔導師でした。この国こそが、世界トップクラスの魔法文明を持ち、あらゆる魔法をテニスのラリーで相殺・増幅させる競技を産んだ「緋色魔導国」だったのです。' }
+                        ]
+                    },
+                    {
+                        id: '5-2', title: 'めんどくさがりな最高権力者',
+                        lines: [
+                            { speaker: 'narration', text: '2人が街を歩いていると突如ハムスターの兵に呼び止められました' },
+                            { speaker: 'ハムスターの兵', text: '「君達、国王がお呼びだ。今すぐに『センターコート大宮殿』に向かえ」' },
+                            { speaker: 'カグヤ', text: '「???」' },
+                            { speaker: '主人公', text: '「huh」' },
+                            { speaker: 'narration', text: 'ハムスターの兵から謁見証を渡されました' },
+                            { speaker: 'ハムスターの兵', text: '「この謁見証を見せれば国王の部屋案内してもらえる」' },
+                            { speaker: '主人公', text: '「なんで僕達呼ばれたんですか？まだこの国来たばっかなんですけど。」' },
+                            { speaker: 'ハムスターの兵', text: '「それは国王に聞いてくれ、さらばだ」' },
+                            { speaker: 'narration', text: 'なぜかはわからないまま主人公たちは国の中枢である『センターコート大宮殿』へと向かいます。' },
+                            { speaker: 'narration', text: '謁見証を見せると国王の部屋に案内されました' },
+                            { speaker: 'narration', text: 'そこにいたのが、この国の頂点に君臨する国王――緋色（ひいろ）・ハムでした。緋色は気品ある美しい赤い毛並みをしていますが、豪華な玉座の上で完全に丸まって、お団子のようになって寝ています。' },
+                            { speaker: '主人公', text: '「あの……あなたがこの国のトップ、緋色・ハム様ですか？」' },
+                            { speaker: '緋色・ハム', text: '「むにゃ……なに？いま、魔力出量の計算中で忙しいの。……まぁ嘘なんだけど。ほんまはただ寝てたいだけ、用があるなら聞くけど……」' },
+                            { speaker: 'カグヤ', text: '「あれほんとに国のトップ？」' },
+                            { speaker: 'narration', text: 'カグヤが呆れたようにジト目を向けますが、緋色は「ふぇぇ、女の子が怒ってて怖いの……」と、さらにクッションの隙間に潜り込もうとします。絵に描いたようなめんどくさがり屋でした。' },
+                            { speaker: 'narration', text: 'しかし、主人公が懐からお父さんの形見である「魔導石」を取り出した瞬間、緋色の細い目がピクッと動きました。次の瞬間、玉座から緋色の姿が消えます。' },
+                            { speaker: 'narration', text: '「――シュッ！」 目にも留らぬ速さで主人公の目の前に空間転移してきた緋色・ハム。' },
+                            { speaker: 'カグヤ', text: '「（速い……！ 私の短剣の目撃すら超えてる……！？）」' },
+                            { speaker: '緋色・ハム', text: '「ふぅ、自分で呼んだの忘れてた。……ふーん、やっぱりお主、あいつの息子なの。道理で、魔導石持ってるわけなの」' },
+                            { speaker: '主人公', text: '「あいつ……って、まさか僕のお父さんのことを知っているんですか！？」' },
+                            { speaker: '緋色・ハム', text: '「知ってるも何も俺さ、あいつと長い仲なんやけど」' },
+                            { speaker: 'カグヤ', text: '「えーそうなの、だったら話は早いね、あなたお父さんがどこにいるか知らないの？」' },
+                            { speaker: '緋色・ハム', text: '「ごめんけど、それは俺にもわからん、もう10年もあってないしな、てかなんかあったん？」' },
+                            { speaker: '主人公', text: '「え……。実は、10年前に急に姿を消しちゃって。僕、この魔導石を頼りにお父さんを探す旅をしてるんだ」' },
+                            { speaker: 'カグヤ', text: '「ちょっと、あなた知り合いじゃなかったの？ 10年も連絡なしってどういうことよ。……あ、もしかして、あなたがめんどくさがって連絡無視してただけじゃないでしょうね？」' },
+                            { speaker: '緋色・ハム', text: '「人聞きが悪いの。あいつが急に『世界のグリッジをどうにかしてくる』って言ったのを最後に会ってないんよ。……あー、でもそうか。あいつ、帰ってないんやなぁ……」' },
+                            { speaker: 'narration', text: '緋色・ハムが少し寂しそうに視線を落すと、宮殿の空気は一瞬だけしんみりとしたものに変わりました。その瞬間、宮殿の床に敷かれた魔導回路が真っ赤に点滅し、けたたましい警告音が鳴り響きました。' },
+                            { speaker: 'カグヤ', text: '「な、何事！？ また敵襲！？」' },
+                            { speaker: '側近ハム', text: '「緋色・ハム様！ 大変です！ 国境のひまわり畑の結界が破られました！ 黒いノイズをまとった『グリッジの軍勢』が、押し寄せてきています！」' },
+                            { speaker: 'narration', text: 'スクリーンに映し出されたのは、空間をバリバリと引き裂きながら、紫色のバグノイズをまとった異形のモンスターたち。その数は数千、数万。' },
+                            { speaker: 'カグヤ', text: '「嘘でしょ……！ なによあの数！ さすがにあのモフモフたちじゃ一溜まりも――」' }
+                        ]
+                    },
+                    {
+                        id: '5-3', title: '緋色魔導国の総力戦',
+                        lines: [
+                            { speaker: 'narration', text: '不安に顔を曇らせるカグヤ。しかし、横にいる緋色・ハムの雰囲気がガラリと変わります。' },
+                            { speaker: '緋色・ハム', text: '「……はぁ、本当にタイミングが悪いの。せっかくあいつの話をしてたのに、邪魔が入ったんやけど」' },
+                            { speaker: 'narration', text: '緋色・ハムがゆっくりと立ち上がると、その小さな体から、空間がひび割れるほどの圧倒的な魔力が膨れ上がりました。寝ぼけ眼は完全に消え去り、その瞳は鋭く輝いています。' },
+                            { speaker: '緋色・ハム', text: '「全魔導師のみんな。ラケットを持って。緋色魔導国の力、グリッジどもに見せてあげよ」' },
+                            { speaker: 'narration', text: '緋色の一声で、何万匹ものハムスターたちが一斉に魔導ラケットを構えました。国境のひまわりコート。グリッジの軍勢が放つ不気味なバグ魔法の弾道が、雨あられのように空を埋め尽くします。' },
+                            { speaker: 'narration', text: 'しかし、前衛に立ったハムスター魔導師たちが一斉にラケットをスイングし、敵の放った魔法を弾き返し、倍の威力を持った光のテニスボールとなって敵のど真ん中に突き刺さります！' },
+                            { speaker: 'カグヤ', text: '「う、嘘でしょ！？ 敵の攻撃を全部ラリーで打ち返してる……！？」' },
+                            { speaker: '緋色・ハム', text: '「ふん、これが世界トップクラスの魔法文明『魔導テニス』なの。攻撃が激しければ激しいほど、こちらのラリーの威力も上がるんよ」' },
+                            { speaker: 'narration', text: '迫り来るグリッジの第2波。テニスボールでは軌道が読みづらい変幻自在なバグの散弾が降り注ぎ、{name}の頭上へ！' },
+                            { speaker: 'カグヤ', text: '「させるかっての……！ ハッ！！」' },
+                            { speaker: 'narration', text: 'カグヤが空中でバグ弾を綺麗に切り裂き相殺します！その時、主人公の持つ「魔導石」が激しく脈動し始めました。' },
+                            { speaker: '緋色・ハム', text: '「ふーん、お主の魔導石、周りの魔力を吸収して増幅する特性があるの。……だったら、それを使ってみるといいの！」' },
+                            { speaker: 'narration', text: '主人公が魔導石を強く握り締めると、純白のエネルギーが凝縮され、眩しく輝く「光の魔導ラケット」の形を成しました！' },
+                            { speaker: '主人公', text: '「これが……魔導石の力……。よし、いくぞ！」' }
+                        ]
+                    },
+                    {
+                        id: '5-4', title: '絆のツインズラリー',
+                        lines: [
+                            { speaker: 'narration', text: '地響きと共に、軍勢の奥からラケットの何十倍もの大きさがある巨大な『グリッジ・サーヴァント（バグの巨獣）』が姿を現しました！' },
+                            { speaker: 'narration', text: '巨獣がその口を開き、国全体を吹き飛ばしかねない、禍々しい紫色の超巨大魔導砲をチャージします。' },
+                            { speaker: '緋色・ハム', text: '「全員、下がって！ あれのレシーブは、並の魔力じゃラケットごと吹き飛ばされるの！」' },
+                            { speaker: 'カグヤ', text: '「下がれって言われても、あれが直撃したら国ごと終わりでしょ！ 主人公、やるわよ！」' },
+                            { speaker: '主人公', text: '「ああ、カグヤ！ 僕たちの力を合わせよう！」' },
+                            { speaker: 'narration', text: 'カグヤが主人公の前に走り込み、短剣をクロスさせて巨獣の放った一撃を全力で受け止めます！「くっ……あーーーっ！！」完全に押し切られる寸前、カグヤは魔力を爆発させ、主人公のほうへと「トス」を上げました！' },
+                            { speaker: '主人公', text: '「カグヤが繋いでくれた……これで、決める！！」' },
+                            { speaker: 'narration', text: '主人公は大きくバックスイングを取り、光のラケットに全魔力を集中。カグヤが上げた最高のトスに向かって、渾身の力でジャンピングスマッシュを叩き込みます！' },
+                            { type: 'battle', enemy: { name: 'グリッジ・サーヴァント', icon: '🐲', hp: 3000, atk: 85, spd: 0.75 } }
+                        ]
+                    },
+                    {
+                        id: '5-5', title: '賢者の贈り物',
+                        lines: [
+                            { speaker: 'narration', text: 'ドーーーン！！！という爆音と共に、主人公の放ったレシーブは、緋色魔導国すべてのひまわりの魔力を巻き込んだ黄金の光の弾丸となり、巨獣の胸のコアへと真っ直ぐ突き刺さりました！ 巨獣が爆発すると、軍勢は一斉に霧散していきました。' },
+                            { speaker: 'narration', text: '静まり返るひまわりコート。主人公の手の中で、光のラケットが静かに魔導石の姿に戻ります。宮殿の奥から、元の脱力した雰囲気に戻った緋色・ハムが歩いてやってきました。その手には、少し大きめの古びた「旅のかばん」が握られています。' },
+                            { speaker: 'カグヤ', text: '「ふぅ……なんとかなったわね。あんたたちの魔導テニス、めちゃくちゃ破天荒やけど凄かったわ」' },
+                            { speaker: '緋色・ハム', text: '「やるやん。まさかあいつの魔導石の力をそんな風に武器に変えるなんて、俺の計算にもなかったの。お主、あいつ以上の大物になるかもしれないの」' },
+                            { speaker: '主人公', text: '「ありがとうございます……あの、そのかばんは？」' },
+                            { speaker: '緋色・ハム', text: '「これ？ ……あいつが10年前に旅立つ前さ、次にこの国に来たときにプレゼントしようと思って、俺が用意してたかばんなんよね。結局、あいつは戻ってこんかったから、ずっと宮殿の奥に眠ってたんやけど」' },
+                            { speaker: 'narration', text: '緋色・ハムはそう言うと、かばんを主人公の前に差し出しました。「あいつにはもう渡せんし、息子の君が持っていき。頑丈につくってあるから、これからの旅にきっと役立つんよ」' },
+                            { speaker: '主人公', text: '「いいんですか……？ ありがとうございます。大切に使います！」' },
+                            { speaker: 'カグヤ', text: '「へえ、あんたにしては粋なことするじゃない。めんどくさがって横流ししたわけじゃないわよね？」' },
+                            { speaker: '緋色・ハム', text: '「人聞きが悪いの。せっかくの感動シーンなんやから、水差さんといてほしいの」' },
+                            { speaker: 'narration', text: '緋色・ハムはふいっと顔をそむけましたが、その表情はどこか嬉しそうです。「そのかばんの中には、これからの旅に役立つ物も入れといたから。……さ、俺はもう魔力使って眠いから、寝室に戻るの。君たちも休んでな」' },
+                            { speaker: 'narration', text: 'そう言い残すと、緋色・ハムは「シュッ」と玉座へと戻り、すぐに寝息を立て始めました。' },
+                            { speaker: 'カグヤ', text: '「最後はやっぱりそれかーい！ ……でも、これで次の手がかりと、良い鞄が手に入ったね。いこう、{name}！」' }
+                        ]
+                    }
+                ],
+                clearReward: { coins: 5000, gachaTickets: 10, materials: 50 }
+            },
+            {
+                id: 'ch5_5',
+                title: '第5.5章：カバンの中の小さな相棒',
+                icon: '🐹',
+                scenes: [
+                    {
+                        id: '5.5-1', title: '奇妙な鈴',
+                        lines: [
+                            { speaker: 'narration', text: '凍てつく緋色魔導国での激闘を終え、主人公とカグヤは道なりを進んでいき「ランペイジ大砂漠」へと向かうため、雪深い山道を下っていた。' },
+                            { speaker: 'narration', text: 'あまりの寒さに身を震わせながら、主人公はふと、古びた革のかばんを開ける。その奥底で、旅の途中では気づかなかった風変わりな「金色の鈴」が、チリン……と小さく頼りない音を立てて転がった。' },
+                            { speaker: 'カグヤ', text: '「ん？ なによその鈴。なんかメモがあるよ」' },
+                            { speaker: '主人公', text: '「えっ、本当だ。……『困ったときは、この鈴を三回鳴らせ。頼れる相棒が飛び出すはずや』って書いてある」' },
+                            { speaker: 'narration', text: '主人公がメモの通りに、その鈴を手に取り、少し強めに「チリン、チリン、チリン！」と三度鳴らした、その瞬間だった。' },
+                            { speaker: 'narration', text: '鈴から凄まじい黄金の魔力光が溢れ出し、雪山の大気を震わせる。' },
+                            { speaker: 'カグヤ', text: '「きゃっ！？ な、なによこれ、まぶしっ……！？」' },
+                            { speaker: 'narration', text: '光が収まると、主人公の手のひらの上に、見たこともないほどモフモフとした、手のひらサイズの奇妙な生き物がちょこんと座っていた。' },
+                            { speaker: 'narration', text: '背中には、これまた小さな光のミニラケットを背負っている。それこそが、たった今後にした緋色魔導国のトップ「緋色・ハム」の遺伝子から作られた、世界に唯一つの存在――ミニ・ハムだった。' },
+                            { speaker: 'ミニ・ハム', text: '「ミニ・ハム：ふぇぇ……よくも俺の安眠を妨害してくれたのん。……まぁ嘘なんだけど。」' },
+                            { speaker: 'ミニ・ハム', text: '「本当は狭いカバンの中から出してくれて感謝しとんよ。お主がこの鈴を鳴らしたってことは、俺が新しい主（あるじ）になってやるんよ」' },
+                            { speaker: 'カグヤ', text: '「緋色・ハム!? どこから湧いて出たのよ！」' },
+                            { speaker: 'ミニ・ハム', text: '「失礼な女狐（めぎつね）なの。俺はただのネズミじゃないの。高貴なる『緋色・ハム』のサテライトなんよ。身体はちっちゃくても、お主らの旅をパコーンと手助けしてやる最高の仲間なの」' },
+                            { speaker: 'narration', text: 'こうして、鈴の召喚によって強引に旅の仲間に加わったミニ・ハム。しかし、その性格は外見の可愛さに反して、超絶マイペースで毒舌だった。' },
+                            { speaker: 'narration', text: '山を下り、徐々に砂漠の熱気が近づいてくると、さっそく彼の「労働嫌い」が発動する。' },
+                            { speaker: 'ミニ・ハム', text: '「あづい、あづいの……。俺、クローンだけどモフモフの毛並みだけは一級品だから、砂漠の熱は致命的に無理なんよ。今すぐ涼しいカバンの中に引きこもりたいの……。」' },
+                            { speaker: 'ミニ・ハム', text: '「まぁ嘘なんだけど。ほんまはただ歩くのがめんどくさいだけ、用があるならラリーするけど……」' },
+                            { speaker: 'カグヤ', text: '「ちっちゃくなっても言うことは一人前ね！ だったらその背中のおもちゃみたいなラケットは何のためにあるのよ！」' },
+                            { speaker: 'ミニ・ハム', text: '「おもちゃじゃないの！ これぞ魔法をすべて跳ね返す最強の魔導ラケットなの。……でも、物理的な鉄パイプとかで殴られたら普通に潰されて死ぬんよ、だから俺のことはお主のポケットに大切にしまっておくのん！」' },
+                            { speaker: 'narration', text: 'そう言うと、ミニ・ハムは主人公の胸ポケットへ器用に潜り込み、鼻先だけをひょっこりと覗かせた。' }
+                        ]
+                    },
+                    {
+                        id: '5.5-2', title: '迫る砂嵐',
+                        lines: [
+                            { speaker: 'narration', text: 'オアシスの境界線を越え、目の前に広大な「ランペイジ大砂漠」の赤茶けた大地が広がる。突風が吹き荒れ、電子ノイズの混ざった砂嵐が主人公たちの視界を遮り始めた。' },
+                            { speaker: '主人公', text: '「ここからがランペイジの領域だね。みんな、行こう！」' },
+                            { speaker: 'カグヤ', text: '「もう、砂で服がザラザラする……。でも、ミニ・ハムちゃんもいることだし、賑やかにはなりそうね」' },
+                            { speaker: 'ミニ・ハム', text: '「（ポケットの中から）ふぇぇ……砂漠のバグ魔物の気配がするの。お主、最初のラリーの準備はいいんよ？」' },
+                            { speaker: 'narration', text: 'かばんの鈴と緋色魔導国のトップのサテライトという規格外の相棒をポケットに忍ばせ、主人公たちは砂塵渦巻く未知の脅威へと一歩を踏み出す。' },
+                            { speaker: 'narration', text: 'ここから、新たな出会いへと物語は繋がっていくのだった。' }
+                        ]
+                    }
+                ],
+                recruitChar: 'sub2',
+                clearReward: { coins: 3000, gachaTickets: 5, materials: 30 }
+            },
+            // 続く章はストーリーが届き次第、この配列に追加していきます
+        ];
 
         const FRIEND_POOL = [
             { id: 'fr_rina', name: 'リナ', icon: '🧝‍♀️', comment: 'よろしくね！一緒に頑張ろう！', code: '1234-5678' },
@@ -1027,6 +1771,49 @@
             const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
             const jst = new Date(utcMs + 9 * 60 * 60000);
             return `${jst.getFullYear()}-${String(jst.getMonth() + 1).padStart(2, '0')}-${String(jst.getDate()).padStart(2, '0')}`;
+        }
+
+        // 日本時間での年月文字列 "YYYY-MM" (巻き物の月1回制限に使用)
+        function getJSTMonthString() {
+            const now = new Date();
+            const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+            const jst = new Date(utcMs + 9 * 60 * 60000);
+            return `${jst.getFullYear()}-${String(jst.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        // ==== 元素レベル・EXP・上位元素の解放 ====
+        function getElementExpNeeded(level) {
+            return ELEMENT_EXP_PER_LEVEL;
+        }
+
+        function addElementExp(amount) {
+            const elemKey = state.player.element;
+            if (!state.elementProgress[elemKey]) state.elementProgress[elemKey] = { level: 1, exp: 0 };
+            const prog = state.elementProgress[elemKey];
+            prog.exp += amount;
+            let leveledUp = false;
+            while (prog.level < 99 && prog.exp >= getElementExpNeeded(prog.level)) {
+                prog.exp -= getElementExpNeeded(prog.level);
+                prog.level++;
+                leveledUp = true;
+            }
+            if (leveledUp) {
+                showToast(`「${ELEMENTS[elemKey].name}」がLv.${prog.level}になりました！`);
+                checkElementUnlocks();
+                applyElementStyle();
+            }
+        }
+
+        function checkElementUnlocks() {
+            Object.keys(ELEMENT_UPGRADE_MAP).forEach(baseElem => {
+                const rule = ELEMENT_UPGRADE_MAP[baseElem];
+                const prog = state.elementProgress[baseElem];
+                if (prog && prog.level >= rule.atLevel && !state.elementUnlocked.includes(rule.unlocks)) {
+                    state.elementUnlocked.push(rule.unlocks);
+                    showToast(`新しい元素「${ELEMENTS[rule.unlocks].name}」が解放されました！`);
+                    saveGame();
+                }
+            });
         }
 
         // 日本時間0時に自動リセットされるデイリーミッション
@@ -1147,9 +1934,9 @@
 
         // ==== ホーム画面 お知らせ欄 (イベント/おすすめガチャ/デイリークエストを5秒ごとに切替) ====
         const NOTICE_ITEMS = [
-            { icon: '👑', label: 'EVENT', text: '「黄金のスライム討伐戦」開催中！', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) },
-            { icon: '💎', label: 'PICKUP', text: '運営おすすめ！レア武器排出率UP中！', action: () => changeContent('content-gacha', document.getElementById('nav-btn-gacha')) },
-            { icon: '🗺️', label: 'DAILY', text: '本日のデイリークエストに挑戦しよう！', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) }
+            { icon: '👑', label: 'EVENT', text: '「黄金のスライム討伐戦」開催中！', color: 'text-amber-300 border-amber-500/30', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) },
+            { icon: '💎', label: 'PICKUP', text: '運営おすすめ！レア武器排出率UP中！', color: 'text-yellow-300 border-yellow-500/40', action: () => changeContent('content-gacha', document.getElementById('nav-btn-gacha')) },
+            { icon: '🗺️', label: 'DAILY', text: '本日のデイリークエストに挑戦しよう！', color: 'text-cyan-300 border-cyan-500/30', action: () => changeContent('content-quest', document.getElementById('nav-btn-quest')) }
         ];
         let noticeIdx = 0;
         let noticeInterval = null;
@@ -1163,6 +1950,7 @@
             if (!iconEl || !labelEl || !textEl || !dotsEl) return;
             iconEl.innerText = item.icon;
             labelEl.innerText = item.label;
+            labelEl.className = `text-[9px] font-black bg-black/60 inline-block px-2 py-0.5 rounded-full mb-0.5 border ${item.color}`;
             textEl.innerText = item.text;
             dotsEl.innerHTML = NOTICE_ITEMS.map((_, i) => `<span class="w-1.5 h-1.5 rounded-full ${i === noticeIdx ? 'bg-amber-400' : 'bg-slate-600'}"></span>`).join('');
         }
@@ -1268,12 +2056,22 @@
             if (k.formation) state.formation = { ...state.formation, ...k.formation };
             if (k.friends) state.friends = k.friends;
             if (k.post) state.post = k.post;
-            if (k.equip) state.equip = { ...state.equip, ...k.equip };
+            if (k.charEquip) {
+                ['player', 'sub1', 'sub2'].forEach(cid => {
+                    if (k.charEquip[cid]) state.charEquip[cid] = { ...state.charEquip[cid], ...k.charEquip[cid] };
+                });
+            }
+            if (k.selectedEquipChar) state.selectedEquipChar = k.selectedEquipChar;
             if (k.inventory) inventory = k.inventory;
             if (k.tutorialDone !== undefined) state.tutorialDone = k.tutorialDone;
             if (k.stats) state.stats = { ...state.stats, ...k.stats };
             if (k.titles) state.titles = { ...state.titles, ...k.titles };
             if (k.plaza) state.plaza = { ...state.plaza, ...k.plaza };
+            if (k.items) state.items = { ...state.items, ...k.items };
+            if (k.elementProgress) state.elementProgress = { ...state.elementProgress, ...k.elementProgress };
+            if (k.elementUnlocked) state.elementUnlocked = k.elementUnlocked;
+            if (k.recruitedChars) state.recruitedChars = k.recruitedChars;
+            if (k.story) state.story = { ...state.story, ...k.story };
             if (k.missions) {
                 state.missions.daily = k.missions.daily ? { ...state.missions.daily, ...k.missions.daily } : state.missions.daily;
                 state.missions.normal = k.missions.normal ? { ...state.missions.normal, ...k.missions.normal } : state.missions.normal;
@@ -1313,13 +2111,19 @@
                 formation: state.formation,
                 friends: state.friends,
                 post: state.post,
-                equip: state.equip,
+                charEquip: state.charEquip,
+                selectedEquipChar: state.selectedEquipChar,
                 inventory: inventory,
                 tutorialDone: state.tutorialDone,
                 stats: state.stats,
                 titles: state.titles,
                 missions: state.missions,
-                plaza: state.plaza
+                plaza: state.plaza,
+                items: state.items,
+                recruitedChars: state.recruitedChars,
+                story: state.story,
+                elementProgress: state.elementProgress,
+                elementUnlocked: state.elementUnlocked
             };
 
             try {
@@ -1352,6 +2156,11 @@
 
         function updatePlazaIncome() {
             const now = Date.now();
+            if (!state.plaza.assignedChar) {
+                // 誰も駐在していない間は時間を進めない(後から駐在させても未稼働期間分は加算しない)
+                state.plaza.lastUpdateTime = now;
+                return;
+            }
             const last = state.plaza.lastUpdateTime || now;
             const elapsedMin = (now - last) / 60000;
             if (elapsedMin <= 0) return;
@@ -1365,11 +2174,104 @@
             }
         }
 
+        // ==== 交換所 (草コイン・草の化石・草核でアイテムと交換できる) ====
+        const EXCHANGE_ITEMS = {
+            coin: [
+                { id: 'stamina_potion', name: 'スタミナ回復薬', desc: 'スタミナを30回復する', icon: '🧪', cost: 2000, effect: { stamina: 30 } },
+                { id: 'fossil_pack', name: '草の化石 x500', desc: '草の化石と交換する', icon: '🌿', cost: 5000, effect: { materials: 500 } }
+            ],
+            fossil: [
+                { id: 'coin_pack', name: '草コイン x3000', desc: '草コインと交換する', icon: '🪙', cost: 300, effect: { coins: 3000 } },
+                { id: 'core_small', name: '草核 x1', desc: '草核と交換する', icon: '🔮', cost: 2000, effect: { gachaTickets: 1 } }
+            ],
+            core: [
+                { id: 'reincarnation_scroll', name: '元素転生の巻き物', desc: '主人公の属性を変更できる巻き物', icon: '📜', cost: 15, effect: { reincarnationScroll: 1 } },
+                { id: 'stamina_full', name: 'スタミナ全回復', desc: 'スタミナが全回復する', icon: '⚡', cost: 5, effect: { staminaFull: true } }
+            ]
+        };
+        const EXCHANGE_COST_FIELD = { coin: 'coins', fossil: 'materials', core: 'gachaTickets' };
+        const EXCHANGE_COST_ICON = { coin: '草コイン.png', fossil: '草の化石.png', core: '草核.png' };
+        let exchangeActiveTab = 'coin';
+
+        function switchExchangeTab(tab) {
+            playSound('tap');
+            exchangeActiveTab = tab;
+            renderExchangeTab(tab);
+        }
+
+        function renderExchangeTab(tab) {
+            ['coin', 'fossil', 'core'].forEach(t => {
+                const btn = document.getElementById(`exchange-tab-${t}`);
+                if (btn) btn.className = `flex-1 py-1.5 rounded-md font-black flex items-center justify-center gap-1 ${t === tab ? 'bg-amber-900/60 text-amber-200' : 'text-slate-400'}`;
+            });
+
+            const container = document.getElementById('exchange-list');
+            if (!container) return;
+            const costField = EXCHANGE_COST_FIELD[tab];
+            const costIcon = EXCHANGE_COST_ICON[tab];
+
+            container.innerHTML = EXCHANGE_ITEMS[tab].map(item => {
+                const owned = tab === 'coin' ? state.player.coins : (tab === 'fossil' ? (state.player.materials || 0) : state.player.gachaTickets);
+                const monthlyLocked = item.id === 'reincarnation_scroll' && state.items.lastScrollMonth === getJSTMonthString();
+                const affordable = owned >= item.cost && !monthlyLocked;
+                return `
+                    <div class="panel p-3 flex items-center ${affordable ? 'border-amber-400/40' : 'opacity-70'}">
+                        <div class="text-2xl mr-3">${item.icon}</div>
+                        <div class="flex-1 text-left">
+                            <div class="text-xs font-black text-white">${item.name}</div>
+                            <div class="text-[9px] text-slate-400">${item.desc}${monthlyLocked ? ' (今月は交換済み)' : ''}</div>
+                            <div class="text-[9px] text-amber-300 font-black mt-0.5 flex items-center gap-1"><img src="${costIcon}" alt="" class="icon-coin">${item.cost.toLocaleString()}</div>
+                        </div>
+                        <button onclick="purchaseExchangeItem('${tab}','${item.id}')" ${affordable ? '' : 'disabled'} class="text-[9px] font-black px-3 py-1.5 rounded-lg border ${affordable ? 'text-amber-900 bg-amber-400 border-amber-300' : 'text-slate-500 bg-slate-800/60 border-slate-700'}">${monthlyLocked ? '交換済み' : '交換'}</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function purchaseExchangeItem(tab, itemId) {
+            const item = EXCHANGE_ITEMS[tab].find(i => i.id === itemId);
+            if (!item) return;
+
+            if (itemId === 'reincarnation_scroll') {
+                const thisMonth = getJSTMonthString();
+                if (state.items.lastScrollMonth === thisMonth) {
+                    showToast('元素転生の巻き物は月に1回までしか交換できません', true);
+                    return;
+                }
+            }
+
+            const costField = EXCHANGE_COST_FIELD[tab];
+            const owned = costField === 'materials' ? (state.player.materials || 0) : state.player[costField];
+            if (owned < item.cost) { showToast('数量が足りません', true); return; }
+
+            if (costField === 'materials') state.player.materials -= item.cost;
+            else state.player[costField] -= item.cost;
+
+            const e = item.effect;
+            if (e.coins) state.player.coins += e.coins;
+            if (e.materials) state.player.materials = (state.player.materials || 0) + e.materials;
+            if (e.gachaTickets) state.player.gachaTickets += e.gachaTickets;
+            if (e.stamina) state.player.stamina = Math.min(state.player.maxStamina, state.player.stamina + e.stamina);
+            if (e.staminaFull) state.player.stamina = state.player.maxStamina;
+            if (e.reincarnationScroll) {
+                state.items.reincarnationScroll = (state.items.reincarnationScroll || 0) + e.reincarnationScroll;
+                state.items.lastScrollMonth = getJSTMonthString();
+            }
+
+            updateResources();
+            saveGame();
+            playSound('decide');
+            showToast(`${item.name} と交換しました`);
+            renderExchangeTab(tab);
+        }
+
         function renderPlazaScreen() {
             updatePlazaIncome();
             const level = state.plaza.level;
             document.getElementById('plaza-level-display').innerText = `Lv.${level}`;
-            document.getElementById('plaza-rate-display').innerText = `🪙 ${getPlazaIncomeRate(level).toLocaleString()} / 分`;
+            document.getElementById('plaza-rate-display').innerHTML = `<img src="草コイン.png" alt="草コイン" class="icon-coin"> ${getPlazaIncomeRate(level).toLocaleString()} / 分`;
+
+            renderPlazaAssignedChar();
 
             const section = document.getElementById('plaza-upgrade-section');
             if (!section) return;
@@ -1380,14 +2282,80 @@
             const cost = getPlazaUpgradeCost(level);
             const nextRate = getPlazaIncomeRate(level + 1);
             section.innerHTML = `
-                <div class="text-xs font-black text-cyan-300 mb-2">次のレベル: Lv.${level + 1} (収益 🪙${nextRate.toLocaleString()}/分)</div>
-                <div class="text-[10px] text-slate-300 mb-1">必要: 🪙${cost.coins.toLocaleString()}</div>
-                <div class="text-[10px] text-slate-300 mb-3">+ 🌿${cost.fossil.toLocaleString()} または 🔮${cost.core.toLocaleString()}</div>
+                <div class="text-xs font-black text-cyan-300 mb-2">次のレベル: Lv.${level + 1} (収益 <img src="草コイン.png" alt="草コイン" class="icon-coin">${nextRate.toLocaleString()}/分)</div>
+                <div class="text-[10px] text-slate-300 mb-1">必要: <img src="草コイン.png" alt="草コイン" class="icon-coin">${cost.coins.toLocaleString()}</div>
+                <div class="text-[10px] text-slate-300 mb-3">+ <img src="草の化石.png" alt="草の化石" class="icon-material">${cost.fossil.toLocaleString()} または <img src="草核.png" alt="草核" class="icon-ticket">${cost.core.toLocaleString()}</div>
                 <div class="flex space-x-2">
                     <button onclick="upgradePlaza('fossil')" class="flex-1 panel py-2 rounded text-[10px] font-black text-emerald-200 border-emerald-500/40">🌿 化石で強化</button>
                     <button onclick="upgradePlaza('core')" class="flex-1 panel py-2 rounded text-[10px] font-black text-fuchsia-200 border-fuchsia-500/40">🔮 核で強化</button>
                 </div>
             `;
+        }
+
+        // 広場は主人公以外のキャラを1人駐在させないと稼働しない。駐在中のキャラはクエスト編成には使えない
+        function renderPlazaAssignedChar() {
+            const container = document.getElementById('plaza-assigned-char');
+            if (!container) return;
+
+            const assignedId = state.plaza.assignedChar;
+            const recruits = state.recruitedChars;
+
+            let html = '';
+            if (assignedId && CHAR_DB[assignedId]) {
+                const cd = CHAR_DB[assignedId];
+                html += `
+                    <div class="panel p-2 flex items-center border-emerald-400 bg-emerald-950/20 mb-2">
+                        <span class="text-xl mr-2">${cd.icon}</span>
+                        <div class="flex-1"><div class="text-xs font-black text-white">${cd.name}</div><div class="text-[9px] text-emerald-300">広場で働いています</div></div>
+                        <button onclick="unassignPlazaChar()" class="text-[9px] font-black text-rose-300 bg-rose-950/50 border border-rose-500/40 px-2 py-1 rounded-lg">外す</button>
+                    </div>
+                `;
+            } else {
+                html += `<div class="text-[10px] text-amber-300 text-center py-2 mb-2 panel border-amber-500/30">誰も駐在していません。仲間を1人駐在させないと収益は発生しません。</div>`;
+            }
+
+            if (recruits.length === 0) {
+                html += `<div class="text-[9px] text-slate-400 text-center py-1">まだ仲間がいません。ストーリーで仲間を増やそう。</div>`;
+            } else {
+                html += `<div class="text-[9px] text-slate-400 mb-1">駐在できる仲間</div>`;
+                html += recruits.map(id => {
+                    const cd = CHAR_DB[id];
+                    if (!cd) return '';
+                    const isAssigned = assignedId === id;
+                    return `
+                        <div ${isAssigned ? '' : `onclick="assignPlazaChar('${id}')"`} class="panel p-2 flex items-center mb-1 ${isAssigned ? 'opacity-50' : 'cursor-pointer hover:border-purple-400'}">
+                            <span class="text-lg mr-2">${cd.icon}</span>
+                            <div class="flex-1 text-xs font-bold text-white">${cd.name}</div>
+                            <span class="text-[9px] font-black ${isAssigned ? 'text-emerald-300' : 'text-purple-300'}">${isAssigned ? '駐在中' : '駐在する'}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            container.innerHTML = html;
+        }
+
+        function assignPlazaChar(charId) {
+            if (!state.recruitedChars.includes(charId)) return;
+            playSound('decide');
+            updatePlazaIncome();
+            state.plaza.assignedChar = charId;
+            // 広場駐在中はクエスト編成から自動的に外す
+            if (state.formation[charId] !== undefined) state.formation[charId] = false;
+            state.plaza.lastUpdateTime = Date.now();
+            saveGame();
+            const cd = CHAR_DB[charId];
+            showToast(`${cd ? cd.name : ''} を広場に駐在させました`);
+            renderPlazaScreen();
+        }
+
+        function unassignPlazaChar() {
+            playSound('tap');
+            updatePlazaIncome();
+            state.plaza.assignedChar = null;
+            saveGame();
+            showToast('広場の駐在を解除しました');
+            renderPlazaScreen();
         }
 
         function upgradePlaza(materialType) {
@@ -1482,6 +2450,14 @@
 
         function openModal(id) { 
             playSound('tap'); 
+            // 複数のモーダルが同時に開いたままになる(結果、下のモーダルの「閉じる」が押せなくなる)のを防ぐため、
+            // 新しいモーダルを開く前に他に開いているモーダルがあれば先に閉じておく
+            document.querySelectorAll('.modal.active').forEach(m => {
+                if (m.id !== id) {
+                    m.classList.remove('active');
+                    if (m.id === 'modal-code' && codeLockInterval) { clearInterval(codeLockInterval); codeLockInterval = null; }
+                }
+            });
             if (id === 'modal-profile') {
                 document.getElementById('prof-input-icon').value = state.player.userIcon || "🧙‍♂️";
                 document.getElementById('prof-input-name').value = state.player.userName || "ゆうしゃ";
@@ -1498,6 +2474,7 @@
             if (id === 'modal-friend') renderFriendModal();
             if (id === 'modal-post') renderPostModal();
             if (id === 'modal-mission') { checkTitleUnlocks(); ensureDailyMissionsFresh(); renderMissionTab(missionActiveTab); }
+            if (id === 'modal-reincarnate') renderReincarnateModal();
             document.getElementById(id).classList.add('active'); 
         }
         function closeModal(id) { 
@@ -1527,15 +2504,17 @@
         }
 
         function applyElementStyle() {
-            const el = ELEMENTS[state.player.element];
+            const el = ELEMENTS[state.player.element] || ELEMENTS.huh;
             document.getElementById('home-player-element-icon').innerText = el.icon;
+            const levelEl = document.getElementById('home-element-level');
+            if (levelEl) {
+                const prog = state.elementProgress[state.player.element];
+                levelEl.innerText = `Lv.${prog ? prog.level : 1}`;
+            }
             const aura = document.getElementById('home-element-aura');
             aura.className = `absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700`;
-            if(state.player.element==='fire') aura.classList.add('bg-red-500');
-            else if(state.player.element==='water') aura.classList.add('bg-blue-500');
-            else if(state.player.element==='grass') aura.classList.add('bg-emerald-500');
-            else if(state.player.element==='light') aura.classList.add('bg-amber-400');
-            else if(state.player.element==='dark') aura.classList.add('bg-purple-600');
+            const auraColors = { fire: 'bg-red-500', ice: 'bg-cyan-400', wind: 'bg-teal-400', earth: 'bg-amber-700', grass: 'bg-emerald-500', thunder: 'bg-yellow-400', huh: 'bg-slate-400', flame: 'bg-orange-500', water: 'bg-blue-500', storm: 'bg-indigo-500', rock: 'bg-stone-500', tree: 'bg-green-700', electric: 'bg-fuchsia-500' };
+            aura.classList.add(auraColors[state.player.element] || 'bg-slate-400');
         }
 
         function changeContent(contentId, btnElement) {
@@ -1543,12 +2522,12 @@
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(contentId).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-11";
+                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 w-10";
                 const icon = btn.firstElementChild;
                 if (icon) icon.classList.remove('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             });
             if(btnElement) {
-                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-11";
+                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 w-10";
                 const icon = btnElement.firstElementChild;
                 if (icon) icon.classList.add('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             }
@@ -1627,24 +2606,313 @@
             switchSubView('content-quest', viewId);
         }
 
-        function getPlayerTotalStats() {
-            let hp = 200, atk = 50, def = 30;
-            Object.keys(state.equip.equipped).forEach(type => {
-                const id = state.equip.equipped[type];
-                if(id) { 
-                    const item = inventory.find(i => i.id === id); 
-                    if(item){ 
-                        hp += item.hp || 0; 
-                        atk += item.atk || 0; 
-                        def += item.def || 0; 
-                    } 
+        // ==== ストーリーモード (ビジュアルノベル) ====
+        let storyState = { chapterIdx: 0, sceneIdx: 0, lineIdx: 0 };
+
+        function isChapterUnlocked(idx) {
+            if (idx === 0) return true;
+            return state.story.clearedChapters.includes(STORY_DATA[idx - 1].id);
+        }
+
+        function openStoryChapterList() {
+            renderStoryChapterList();
+            navQuestLayer('quest-view-story-mode');
+        }
+
+        function renderStoryChapterList() {
+            const container = document.getElementById('story-chapter-list');
+            if (!container) return;
+            container.innerHTML = STORY_DATA.map((ch, idx) => {
+                const unlocked = isChapterUnlocked(idx);
+                const cleared = state.story.clearedChapters.includes(ch.id);
+                const scenesDone = Math.min(state.story.sceneProgress[ch.id] || 0, ch.scenes.length);
+                const statusLabel = cleared ? 'クリア済み' : unlocked ? `挑戦可能 (${scenesDone}/${ch.scenes.length}話)` : 'ロック中';
+                const statusColor = cleared ? 'text-emerald-400' : unlocked ? 'text-amber-300' : 'text-slate-500';
+                return `
+                    <div ${unlocked ? `onclick="openStorySceneList(${idx})"` : ''} class="panel p-3 flex justify-between items-center ${unlocked ? 'cursor-pointer' : 'opacity-50'}">
+                        <div>
+                            <span class="text-[8px] font-black ${statusColor} block">${statusLabel}</span>
+                            <span class="text-xs font-bold text-white">${ch.title}</span>
+                        </div>
+                        <span class="text-2xl">${unlocked ? (cleared ? '✅' : ch.icon) : '🔒'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 章をタップ → 話(ステージ)選択画面へ。まだクリアしていない話は選択できない
+        function openStorySceneList(chapterIdx) {
+            if (!isChapterUnlocked(chapterIdx)) return;
+            playSound('tap');
+            const chapter = STORY_DATA[chapterIdx];
+            const titleEl = document.getElementById('story-scene-list-title');
+            if (titleEl) titleEl.innerText = chapter.title;
+
+            const scenesDone = state.story.sceneProgress[chapter.id] || 0;
+            const container = document.getElementById('story-scene-list');
+            if (container) {
+                container.innerHTML = chapter.scenes.map((sc, sIdx) => {
+                    const sceneUnlocked = sIdx <= scenesDone;
+                    const sceneCleared = sIdx < scenesDone;
+                    return `
+                        <div ${sceneUnlocked ? `onclick="startStoryScene(${chapterIdx}, ${sIdx})"` : ''} class="panel p-3 flex justify-between items-center ${sceneUnlocked ? 'cursor-pointer' : 'opacity-50'}">
+                            <div><span class="text-[8px] ${sceneCleared ? 'text-emerald-400' : 'text-cyan-400'} block">${sc.id}${sceneCleared ? ' ・クリア済み' : ''}</span><span class="text-xs font-bold text-white">${sc.title}</span></div>
+                            <span class="text-xl">${sceneUnlocked ? (sceneCleared ? '✅' : '▶') : '🔒'}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+            navQuestLayer('quest-view-story-scenes');
+        }
+
+        function startStoryScene(chapterIdx, sceneIdx) {
+            const chapter = STORY_DATA[chapterIdx];
+            const scenesDone = state.story.sceneProgress[chapter.id] || 0;
+            if (sceneIdx > scenesDone) return; // 未解放の話は読めない
+            playSound('decide');
+            storyState = { chapterIdx, sceneIdx, lineIdx: 0 };
+            switchLayer('view-story');
+            renderStoryLine();
+        }
+
+        // 話者ごとのアバター(画像 or プレイヤー自身のアイコン)を返す
+        function getStorySpeakerAvatar(speaker) {
+            if (speaker === 'narration') return { type: 'image', src: 'ナレーション.png' };
+            if (speaker === '主人公') {
+                if (state.player.userIconImage) return { type: 'image', src: state.player.userIconImage };
+                return { type: 'emoji', text: state.player.userIcon || '🧙‍♂️' };
+            }
+            if (speaker === '村長') return { type: 'image', src: '村長.png' };
+            if (speaker === 'エコー') return { type: 'image', src: '愛馬.png' };
+            if (speaker === 'カグヤ' || speaker === '少女') return { type: 'image', src: 'カグヤ.png' };
+            return null;
+        }
+
+        function renderStoryLine() {
+            const chapter = STORY_DATA[storyState.chapterIdx];
+            const scene = chapter.scenes[storyState.sceneIdx];
+            const line = scene.lines[storyState.lineIdx];
+
+            // 戦闘シーンなら物語を一時中断して実際の戦闘を開始する
+            if (line.type === 'battle') {
+                startStoryBattle(line.enemy);
+                return;
+            }
+
+            const titleEl = document.getElementById('story-scene-title');
+            if (titleEl) titleEl.innerText = `${scene.id}. ${scene.title}`;
+
+            const iconEl = document.getElementById('story-scene-icon');
+            if (iconEl) iconEl.innerText = chapter.icon;
+
+            const speakerEl = document.getElementById('story-speaker');
+            const textEl = document.getElementById('story-text');
+            if (!speakerEl || !textEl) return;
+
+            const playerName = state.player.userName || '主人公';
+            const escapedText = line.text.replace(/\{name\}/g, playerName).replace(/\n/g, '<br>');
+            if (line.speaker === 'narration') {
+                speakerEl.innerText = '';
+                textEl.innerHTML = `<span class="italic text-slate-300">${escapedText}</span>`;
+            } else {
+                const displayName = line.speaker === '主人公' ? playerName : line.speaker;
+                speakerEl.innerText = displayName;
+                textEl.innerHTML = escapedText;
+            }
+
+            const avatarWrap = document.getElementById('story-avatar-wrap');
+            const avatarImg = document.getElementById('story-avatar-img');
+            const avatarEmoji = document.getElementById('story-avatar-emoji');
+            const avatarInfo = getStorySpeakerAvatar(line.speaker);
+            if (avatarWrap && avatarImg && avatarEmoji) {
+                if (avatarInfo) {
+                    avatarWrap.classList.remove('hidden');
+                    if (avatarInfo.type === 'image') {
+                        avatarImg.src = avatarInfo.src;
+                        avatarImg.classList.remove('hidden');
+                        avatarEmoji.classList.add('hidden');
+                    } else {
+                        avatarEmoji.innerText = avatarInfo.text;
+                        avatarEmoji.classList.remove('hidden');
+                        avatarImg.classList.add('hidden');
+                    }
+                } else {
+                    avatarWrap.classList.add('hidden');
                 }
-            });
-            if (state.titles.equipped && TITLE_DB[state.titles.equipped]) {
+            }
+
+            textEl.classList.remove('story-text-fade');
+            void textEl.offsetWidth;
+            textEl.classList.add('story-text-fade');
+        }
+
+        let lastStoryAdvanceTime = 0;
+        const STORY_ADVANCE_COOLDOWN = 450; // ms - 連打で会話を飛ばせないようにする
+
+        function advanceStory() {
+            const now = Date.now();
+            if (now - lastStoryAdvanceTime < STORY_ADVANCE_COOLDOWN) return;
+            lastStoryAdvanceTime = now;
+
+            playSound('tap');
+            const chapter = STORY_DATA[storyState.chapterIdx];
+            const scene = chapter.scenes[storyState.sceneIdx];
+
+            storyState.lineIdx++;
+            if (storyState.lineIdx >= scene.lines.length) {
+                // この話をクリアした記録を残す(次に章を開いた時、続きから再開できるようにする)
+                const doneCount = state.story.sceneProgress[chapter.id] || 0;
+                if (storyState.sceneIdx + 1 > doneCount) {
+                    state.story.sceneProgress[chapter.id] = storyState.sceneIdx + 1;
+                    saveGame();
+                }
+
+                if (storyState.sceneIdx + 1 >= chapter.scenes.length) {
+                    // 章の全ステージをクリア → 章クリア
+                    finishStoryChapter();
+                } else {
+                    // この話はここで終わり。次の話には自動で進まず、話選択画面から選んでもらう
+                    finishStoryScene();
+                }
+                return;
+            }
+            renderStoryLine();
+        }
+
+        function recruitChar(charId) {
+            if (state.recruitedChars.includes(charId)) return;
+            state.recruitedChars.push(charId);
+            const cd = CHAR_DB[charId];
+            showToast(`${cd ? cd.name : charId} が仲間になった！`);
+        }
+
+        function finishStoryScene() {
+            const chapterIdx = storyState.chapterIdx;
+            const chapter = STORY_DATA[chapterIdx];
+            const scene = chapter.scenes[storyState.sceneIdx];
+
+            playSound('win');
+            battleState.lastResult = 'story-scene-clear';
+            battleState.storyReturnChapterIdx = chapterIdx;
+
+            setTimeout(() => {
+                document.getElementById('result-title').innerText = "STAGE CLEAR!";
+                document.getElementById('result-title').className = "text-2xl font-black mb-3 text-amber-400";
+                document.getElementById('result-content').innerHTML = `<p class="text-slate-300 text-center text-xs">「${scene.title}」を読み終えました</p>`;
+                document.getElementById('result-ok-btn').innerText = "ステージ一覧に戻る";
+                openModal('modal-result');
+            }, 300);
+        }
+
+        function finishStoryChapter() {
+            const chapterIdx = storyState.chapterIdx;
+            const chapter = STORY_DATA[chapterIdx];
+            let rewardHtml = '';
+
+            if (!state.story.clearedChapters.includes(chapter.id)) {
+                state.story.clearedChapters.push(chapter.id);
+                const r = chapter.clearReward;
+                if (r) {
+                    if (r.coins) state.player.coins += r.coins;
+                    if (r.gachaTickets) state.player.gachaTickets += r.gachaTickets;
+                    if (r.materials) state.player.materials = (state.player.materials || 0) + r.materials;
+                    rewardHtml = `
+                        ${r.coins ? `<div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草コイン.png" alt="コイン" class="icon-coin"> コイン</span><span class="text-amber-300 font-black">+${r.coins}</span></div>` : ''}
+                        ${r.gachaTickets ? `<div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草核.png" alt="草核" class="icon-ticket"> 草核</span><span class="text-fuchsia-300 font-black">+${r.gachaTickets}</span></div>` : ''}
+                        ${r.materials ? `<div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草の化石.png" alt="化石" class="icon-material"> 草の化石</span><span class="text-emerald-300 font-black">+${r.materials}</span></div>` : ''}
+                    `;
+                }
+                if (chapter.recruitChar) recruitChar(chapter.recruitChar);
+                updateResources();
+                saveGame();
+            }
+
+            playSound('win');
+            battleState.lastResult = 'story-chapter-clear';
+            battleState.storyReturnChapterIdx = chapterIdx;
+
+            setTimeout(() => {
+                document.getElementById('result-title').innerText = "CHAPTER CLEAR!";
+                document.getElementById('result-title').className = "text-2xl font-black mb-3 text-amber-400";
+                document.getElementById('result-content').innerHTML = `<p class="text-slate-300 text-center text-xs mb-2">「${chapter.title}」を読み終えました</p>${rewardHtml}`;
+                document.getElementById('result-ok-btn').innerText = "章一覧に戻る";
+                openModal('modal-result');
+            }, 300);
+        }
+
+        function exitStoryMode() {
+            playSound('tap');
+            switchLayer('view-main');
+            renderStoryChapterList();
+        }
+
+        // ==== ストーリー中の戦闘 (物語の途中で実際にバトルする) ====
+        function startStoryBattle(enemyDef) {
+            playSound('decide');
+            const pStats = getPlayerTotalStats();
+            battleState.party = [
+                {
+                    id: 'player', name: state.player.userName, icon: state.player.userIcon,
+                    hp: pStats.hp, maxHp: pStats.hp, atk: pStats.atk, def: pStats.def, spd: pStats.spd,
+                    isGuard: false, ct: 0,
+                    skills: [
+                        { ...SKILL_DB.slash, currentCt: 0 },
+                        { ...SKILL_DB.fire, currentCt: 0 },
+                        { ...SKILL_DB.guard, currentCt: 0 }
+                    ]
+                }
+            ];
+            battleState.enemy = { ...enemyDef, maxHp: enemyDef.hp, ct: 0, isCharging: false };
+            battleState.stageName = 'ストーリーバトル';
+            battleState.rewardMult = 0;
+            battleState.isBattling = true;
+            battleState.lastResult = null;
+            battleState.isStoryBattle = true;
+            battleState.storyBattleEnemyDef = enemyDef;
+
+            document.getElementById('battle-stage-name').innerText = 'ストーリーバトル';
+            document.getElementById('enemy-name').innerText = battleState.enemy.name;
+            document.getElementById('enemy-sprite').innerText = battleState.enemy.icon;
+            document.getElementById('battle-log').classList.remove('show');
+
+            switchLayer('view-battle');
+            buildBattleUI();
+
+            battleState.lastTime = performance.now();
+            battleState.animationFrameId = requestAnimationFrame(battleLoop);
+        }
+
+        function getCurrentEquip() {
+            return state.charEquip[state.selectedEquipChar || 'player'];
+        }
+
+        function getCharTotalStats(charId) {
+            const equip = state.charEquip[charId];
+            let hp, atk, def, spd;
+            if (charId === 'player') {
+                hp = 200; atk = 50; def = 30; spd = 1.0;
+            } else {
+                const base = CHAR_DB[charId];
+                hp = base.hp; atk = base.atk; def = base.def; spd = base.spd;
+            }
+            if (equip) {
+                Object.keys(equip.equipped).forEach(type => {
+                    const id = equip.equipped[type];
+                    if (id) {
+                        const item = inventory.find(i => i.id === id);
+                        if (item) { hp += item.hp || 0; atk += item.atk || 0; def += item.def || 0; }
+                    }
+                });
+            }
+            if (charId === 'player' && state.titles.equipped && TITLE_DB[state.titles.equipped]) {
                 const b = TITLE_DB[state.titles.equipped].bonus;
                 hp += b.hp || 0; atk += b.atk || 0; def += b.def || 0;
             }
-            return { hp, atk, def, spd: 1.0 };
+            return { hp, atk, def, spd };
+        }
+
+        function getPlayerTotalStats() {
+            return getCharTotalStats('player');
         }
 
         function checkTitleUnlocks() {
@@ -1698,9 +2966,9 @@
 
         function rewardText(reward) {
             const parts = [];
-            if (reward.coins) parts.push(`🪙${reward.coins}`);
-            if (reward.gachaTickets) parts.push(`🔮${reward.gachaTickets}`);
-            if (reward.materials) parts.push(`🌿${reward.materials}`);
+            if (reward.coins) parts.push(`<img src="草コイン.png" alt="草コイン" class="icon-coin">${reward.coins}`);
+            if (reward.gachaTickets) parts.push(`<img src="草核.png" alt="草核" class="icon-ticket">${reward.gachaTickets}`);
+            if (reward.materials) parts.push(`<img src="草の化石.png" alt="草の化石" class="icon-material">${reward.materials}`);
             return parts.join(' / ');
         }
 
@@ -1747,15 +3015,24 @@
         }
 
         function updateEquipTopDisplay() {
-            const stats = getPlayerTotalStats();
+            if (state.selectedEquipChar && state.selectedEquipChar !== 'player' && !state.recruitedChars.includes(state.selectedEquipChar)) {
+                state.selectedEquipChar = 'player';
+                saveGame();
+            }
+            const charId = state.selectedEquipChar || 'player';
+            syncEquipCharButtons();
+            const stats = getCharTotalStats(charId);
+            const nameEl = document.getElementById('eq-selected-char-name');
+            if (nameEl) nameEl.innerText = charId === 'player' ? state.player.userName : CHAR_DB[charId].name;
             document.getElementById('eq-stat-atk').innerText = stats.atk.toLocaleString();
             document.getElementById('eq-stat-hp').innerText = stats.hp.toLocaleString();
             document.getElementById('eq-stat-def').innerText = stats.def.toLocaleString();
 
+            const equip = getCurrentEquip();
             const types = ['weapon', 'sub', 'head', 'bodyUp', 'bodyDown', 'accessory', 'pillow'];
             const effects = [];
             types.forEach(t => {
-                const eqId = state.equip.equipped[t];
+                const eqId = equip.equipped[t];
                 const item = inventory.find(i => i.id === eqId);
                 const el = document.getElementById(`eq-top-${t}`);
                 if (el) {
@@ -1780,10 +3057,38 @@
             }
         }
 
+        function syncEquipCharButtons() {
+            const charId = state.selectedEquipChar || 'player';
+            ['sub1', 'sub2'].forEach(id => {
+                const nameEl = document.getElementById(`eq-char-name-${id}`);
+                if (nameEl && CHAR_DB[id]) nameEl.innerText = CHAR_DB[id].name;
+            });
+            ['player', 'sub1', 'sub2'].forEach(id => {
+                const btn = document.getElementById(`eq-char-btn-${id}`);
+                if (!btn) return;
+                const recruited = id === 'player' || state.recruitedChars.includes(id);
+                btn.style.display = recruited ? '' : 'none';
+                btn.className = `panel p-2 flex flex-col items-center cursor-pointer transition-all flex-1 ${id === charId ? 'border-amber-400 bg-amber-950/20' : ''}`;
+            });
+        }
+
+        function selectEquipChar(charId) {
+            if (charId !== 'player' && !state.recruitedChars.includes(charId)) {
+                showToast('まだ仲間になっていません(ストーリーで仲間にしよう)', true);
+                return;
+            }
+            playSound('tap');
+            state.selectedEquipChar = charId;
+            syncEquipCharButtons();
+            updateEquipTopDisplay();
+            saveGame();
+        }
+
         function navEquipList(type, backToList = false) {
             playSound('tap');
-            if (type) state.equip.currentType = type;
-            const currentType = state.equip.currentType;
+            const equip = getCurrentEquip();
+            if (type) equip.currentType = type;
+            const currentType = equip.currentType;
             
             document.getElementById('equip-list-title').innerText = `${eqTypeNames[currentType] || '装備'} 一覧`;
             switchSubView('content-equip', 'equip-view-list');
@@ -1793,7 +3098,8 @@
 
         function renderEquipList() {
             const container = document.getElementById('equip-list-container');
-            const type = state.equip.currentType;
+            const equip = getCurrentEquip();
+            const type = equip.currentType;
             const filtered = inventory.filter(i => i.type === type);
             const limit = parseInt(state.settings.equipDisplayCount) || 10;
             const itemsToShow = filtered.slice(0, limit);
@@ -1807,7 +3113,7 @@
             }
 
             itemsToShow.forEach(item => {
-                const isEquipped = state.equip.equipped[type] === item.id;
+                const isEquipped = equip.equipped[type] === item.id;
                 const div = document.createElement('div');
                 div.className = `panel p-3 flex justify-between items-center cursor-pointer hover:border-amber-400 ${isEquipped ? 'border-amber-400 bg-amber-950/20' : ''}`;
                 div.onclick = () => openEquipDetail(item.id);
@@ -1831,7 +3137,8 @@
 
         function openEquipDetail(itemId) {
             playSound('tap');
-            state.equip.currentItemId = itemId;
+            const equip = getCurrentEquip();
+            equip.currentItemId = itemId;
             const item = inventory.find(i => i.id === itemId);
             if (!item) return;
 
@@ -1843,7 +3150,7 @@
             document.getElementById('eq-detail-def-val').innerText = item.def;
             document.getElementById('eq-detail-atk-val').innerText = item.atk;
 
-            const isEquipped = state.equip.equipped[item.type] === item.id;
+            const isEquipped = equip.equipped[item.type] === item.id;
             const btnEquip = document.getElementById('eq-btn-equip');
             btnEquip.innerText = isEquipped ? "EQUIPPED - 装備中" : "EQUIP - 装備する";
             btnEquip.className = isEquipped ? "w-full panel py-3 rounded-xl font-black text-base border-emerald-500 text-emerald-300 mb-3" : "w-full btn-gold py-3 rounded-xl font-black text-base tracking-widest mb-3";
@@ -1859,14 +3166,15 @@
         }
 
         function executeEquip() {
-            const item = inventory.find(i => i.id === state.equip.currentItemId);
+            const equip = getCurrentEquip();
+            const item = inventory.find(i => i.id === equip.currentItemId);
             if (!item) return;
 
-            if (state.equip.equipped[item.type] === item.id) {
-                state.equip.equipped[item.type] = null;
+            if (equip.equipped[item.type] === item.id) {
+                equip.equipped[item.type] = null;
                 showToast("装備を外しました");
             } else {
-                state.equip.equipped[item.type] = item.id;
+                equip.equipped[item.type] = item.id;
                 showToast(`${item.name} を装備しました`);
             }
             updateEquipTopDisplay();
@@ -1875,7 +3183,8 @@
         }
 
         function executeEnhance(mode) {
-            const item = inventory.find(i => i.id === state.equip.currentItemId);
+            const equip = getCurrentEquip();
+            const item = inventory.find(i => i.id === equip.currentItemId);
             if (!item) return;
 
             const costCoin = (item.enhanceCount + 1) * 200;
@@ -2314,13 +3623,83 @@
             }
         }
 
+        const BASE_ELEMENTS = ['fire', 'ice', 'wind', 'earth', 'grass', 'thunder', 'huh'];
+
+        function isElementUnlocked(elemKey) {
+            return BASE_ELEMENTS.includes(elemKey) || state.elementUnlocked.includes(elemKey);
+        }
+
         function selectElement(elemKey) {
             if (!ELEMENTS[elemKey]) return;
+            if (!isElementUnlocked(elemKey)) {
+                showToast('まだ解放されていない元素です', true);
+                return;
+            }
+            if ((state.items.reincarnationScroll || 0) <= 0) {
+                showToast('元素転生の巻き物が必要です(交換所で入手できます)', true);
+                return;
+            }
+            state.items.reincarnationScroll -= 1;
             state.player.element = elemKey;
             applyElementStyle();
             saveGame();
             closeModal('modal-reincarnate');
-            showToast(`属性を「${ELEMENTS[elemKey].name}」に変更しました`);
+            renderReincarnateModal();
+            showToast(`元素を「${ELEMENTS[elemKey].name}」に変更しました`);
+        }
+
+        function renderElementRow(key, unlocked, reqBaseKey, reqLevel) {
+            const el = ELEMENTS[key];
+            if (!unlocked) {
+                const reqName = reqBaseKey ? ELEMENTS[reqBaseKey].name : '';
+                return `
+                    <div class="panel w-full p-2.5 flex items-center opacity-50 border-slate-700">
+                        <span class="text-xl mr-3">🔒</span>
+                        <div class="flex-1 text-left">
+                            <div class="text-xs font-bold text-slate-400">${el.name}</div>
+                            <div class="text-[8px] text-slate-500">${reqName}がLv.${reqLevel}で解放</div>
+                        </div>
+                    </div>
+                `;
+            }
+            const prog = state.elementProgress[key] || { level: 1, exp: 0 };
+            const needed = getElementExpNeeded(prog.level);
+            const pct = Math.min(100, Math.floor((prog.exp / needed) * 100));
+            const isCurrent = state.player.element === key;
+            return `
+                <button onclick="selectElement('${key}')" class="panel w-full p-2.5 flex items-center ${isCurrent ? 'border-amber-400 bg-amber-950/20' : ''}">
+                    <span class="text-xl mr-3">${el.icon}</span>
+                    <div class="flex-1 text-left">
+                        <div class="text-xs font-bold ${el.class}">${el.name} <span class="text-[9px] text-slate-400 font-mono">Lv.${prog.level}</span>${isCurrent ? ' <span class="text-[8px] text-amber-300">(現在)</span>' : ''}</div>
+                        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden border border-slate-700 mt-1"><div class="h-full bg-amber-400" style="width:${pct}%"></div></div>
+                    </div>
+                </button>
+            `;
+        }
+
+        function renderReincarnateModal() {
+            const scrollEl = document.getElementById('reincarnate-scroll-count');
+            if (scrollEl) scrollEl.innerText = state.items.reincarnationScroll || 0;
+
+            const monthEl = document.getElementById('reincarnate-scroll-month-status');
+            if (monthEl) {
+                const usedThisMonth = state.items.lastScrollMonth === getJSTMonthString();
+                monthEl.innerText = usedThisMonth ? '(交換所: 今月は交換済み)' : '(交換所で草核15個と交換可能)';
+            }
+
+            const listEl = document.getElementById('reincarnate-element-list');
+            if (!listEl) return;
+
+            const rows = [];
+            rows.push('<div class="text-[10px] font-black text-slate-400 tracking-widest pt-1 pb-0.5 px-1">元素</div>');
+            BASE_ELEMENTS.forEach(key => rows.push(renderElementRow(key, true)));
+            rows.push('<div class="text-[10px] font-black text-amber-400 tracking-widest pt-2 pb-0.5 px-1 border-t border-white/10 mt-2">超元素</div>');
+            Object.keys(ELEMENT_UPGRADE_MAP).forEach(baseKey => {
+                const rule = ELEMENT_UPGRADE_MAP[baseKey];
+                const unlocked = state.elementUnlocked.includes(rule.unlocks);
+                rows.push(renderElementRow(rule.unlocks, unlocked, baseKey, rule.atLevel));
+            });
+            listEl.innerHTML = rows.join('');
         }
 
         function saveSettings() {
@@ -2360,16 +3739,29 @@
                     <div class="text-xl">🔒</div>
                 </div>
             `;
-            const renderOpt = (key, charData, label, color) => `
+            const renderOpt = (key, charData, label, color) => {
+                const recruited = state.recruitedChars.includes(key);
+                if (!recruited) return '';
+                if (state.plaza.assignedChar === key) {
+                    return `
+                        <div class="panel p-2 flex items-center opacity-50">
+                            <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border border-emerald-700">🏛️</div>
+                            <div class="flex-1">
+                                <div class="text-xs font-bold text-slate-400">${charData.name} (広場で勤務中)</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return `
                 <div onclick="toggleFormationMember('${key}')" class="panel p-2 flex items-center cursor-pointer transition-all ${formationSelection[key] ? `border-${color}-500 bg-${color}-950/30` : 'border-slate-700 opacity-60'}">
                     <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border ${formationSelection[key] ? `border-${color}-500` : 'border-slate-600'}">${charData.icon}</div>
                     <div class="flex-1">
-                        <div class="text-[9px] text-${color}-400 font-black">${label}</div>
                         <div class="text-xs font-bold text-white">${charData.name}</div>
                     </div>
                     <div class="text-xl ${formationSelection[key] ? 'text-white' : 'text-slate-600'}">${formationSelection[key] ? '✅' : '⬜'}</div>
                 </div>
-            `;
+                `;
+            };
             html += renderOpt('sub1', CHAR_DB.sub1, '仲間 1', 'emerald');
             html += renderOpt('sub2', CHAR_DB.sub2, '仲間 2', 'blue');
             container.innerHTML = html;
@@ -2556,8 +3948,8 @@
             navQuestLayer('quest-view-difficulty');
         }
 
-        let partySetupSelection = { sub1: true, sub2: true };
-        let formationSelection = { sub1: true, sub2: true };
+        let partySetupSelection = { sub1: false, sub2: false };
+        let formationSelection = { sub1: false, sub2: false };
         let helperSelection = { type: 'none', friendId: null };
 
         function showPartySetup(stageName, cost, rewardMult) {
@@ -2566,7 +3958,9 @@
             
             partySetupSelection = { ...state.formation };
             helperSelection = { type: 'none', friendId: null };
-            state.questPrep = { stageName, cost, mult: rewardMult };
+            // 撤退した際に元のステージ一覧画面へ戻れるよう、現在アクティブなサブビューを記録しておく
+            const activeSubView = document.querySelector('#content-quest .sub-view.active');
+            state.questPrep = { stageName, cost, mult: rewardMult, returnView: activeSubView ? activeSubView.id : 'quest-view-top' };
             document.getElementById('setup-cost-display').innerText = `⚡ ${cost}`;
             
             renderPartySetupList();
@@ -2595,16 +3989,29 @@
                 </div>
             `;
 
-            const renderOpt = (key, charData, label, color) => `
+            const renderOpt = (key, charData, label, color) => {
+                const recruited = state.recruitedChars.includes(key);
+                if (!recruited) return '';
+                if (state.plaza.assignedChar === key) {
+                    return `
+                        <div class="panel p-2 flex items-center opacity-50">
+                            <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border border-emerald-700">🏛️</div>
+                            <div class="flex-1">
+                                <div class="text-xs font-bold text-slate-400">${charData.name} (広場で勤務中)</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return `
                 <div onclick="togglePartyMember('${key}')" class="panel p-2 flex items-center cursor-pointer transition-all ${partySetupSelection[key] ? `border-${color}-500 bg-${color}-950/30` : 'border-slate-700 opacity-60'}">
                     <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-xl mr-3 border ${partySetupSelection[key] ? `border-${color}-500` : 'border-slate-600'}">${charData.icon}</div>
                     <div class="flex-1">
-                        <div class="text-[9px] text-${color}-400 font-black">${label}</div>
                         <div class="text-xs font-bold text-white">${charData.name} <span class="text-[9px] text-slate-400">HP:${charData.hp}</span></div>
                     </div>
                     <div class="text-xl ${partySetupSelection[key] ? 'text-white' : 'text-slate-600'}">${partySetupSelection[key] ? '✅' : '⬜'}</div>
                 </div>
-            `;
+                `;
+            };
 
             html += renderOpt('sub1', CHAR_DB.sub1, '仲間 1', 'emerald');
             html += renderOpt('sub2', CHAR_DB.sub2, '仲間 2', 'blue');
@@ -2718,6 +4125,7 @@
             battleState.stageName = state.questPrep.stageName;
             battleState.rewardMult = state.questPrep.mult;
             battleState.isBattling = true;
+            battleState.lastResult = null;
 
             document.getElementById('battle-stage-name').innerText = battleState.stageName;
             document.getElementById('enemy-name').innerText = battleState.enemy.name;
@@ -2733,9 +4141,10 @@
 
         function createCharData(dbId) {
             const base = CHAR_DB[dbId];
+            const stats = getCharTotalStats(dbId);
             return {
                 id: dbId, name: base.name, icon: base.icon,
-                hp: base.hp, maxHp: base.hp, atk: base.atk, def: base.def, spd: base.spd,
+                hp: stats.hp, maxHp: stats.hp, atk: stats.atk, def: stats.def, spd: base.spd,
                 isGuard: false, ct: 0,
                 skills: base.skills.map(sId => ({ ...SKILL_DB[sId], currentCt: 0 }))
             };
@@ -2999,6 +4408,18 @@
             battleState.isBattling = false;
             cancelAnimationFrame(battleState.animationFrameId);
             playSound('win');
+
+            if (battleState.isStoryBattle) {
+                // ストーリー中の戦闘に勝った場合はリザルト画面を挟まず、そのまま物語を続ける
+                // (話・章がここで終わりなら advanceStory 側で自動的にリザルト画面が出る)
+                battleState.isStoryBattle = false;
+                showToast('勝利！');
+                setTimeout(() => {
+                    switchLayer('view-story');
+                    advanceStory();
+                }, 900);
+                return;
+            }
             
             const coinRew = Math.floor(300 * battleState.rewardMult);
             const matRew = Math.floor(2 * battleState.rewardMult);
@@ -3006,12 +4427,14 @@
             state.player.coins += coinRew;
             state.player.materials = (state.player.materials || 0) + matRew;
             state.stats.questClears = (state.stats.questClears || 0) + 1;
+            addElementExp(ELEMENT_EXP_PER_QUEST);
             ensureDailyMissionsFresh();
             state.missions.daily.progress.questClears = (state.missions.daily.progress.questClears || 0) + 1;
             checkTitleUnlocks();
             saveGame();
             updateResources();
 
+            battleState.lastResult = 'win';
             setTimeout(() => {
                 document.getElementById('result-title').innerText = "QUEST CLEARED!";
                 document.getElementById('result-title').className = "text-2xl font-black mb-3 text-amber-400";
@@ -3019,6 +4442,7 @@
                     <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草コイン.png" alt="コイン" class="icon-coin"> コイン</span><span class="text-amber-300 font-black">+${coinRew}</span></div>
                     <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草の化石.png" alt="化石" class="icon-material"> 草の化石</span><span class="text-emerald-300 font-black">+${matRew}</span></div>
                 `;
+                document.getElementById('result-ok-btn').innerText = "ステージ一覧に戻る";
                 openModal('modal-result');
             }, 1000);
         }
@@ -3029,17 +4453,54 @@
             cancelAnimationFrame(battleState.animationFrameId);
             playSound('error');
 
+            if (battleState.isStoryBattle) {
+                battleState.lastResult = 'lose';
+                setTimeout(() => {
+                    document.getElementById('result-title').innerText = "しっぱい...";
+                    document.getElementById('result-title').className = "text-2xl font-black mb-3 text-rose-500";
+                    document.getElementById('result-content').innerHTML = `<p class="text-slate-400 text-center text-xs">もう一度挑戦しよう</p>`;
+                    document.getElementById('result-ok-btn').innerText = "もう一度挑戦";
+                    openModal('modal-result');
+                }, 1000);
+                return;
+            }
+
+            battleState.lastResult = 'lose';
             setTimeout(() => {
                 document.getElementById('result-title').innerText = "QUEST FAILED...";
                 document.getElementById('result-title').className = "text-2xl font-black mb-3 text-rose-500";
                 document.getElementById('result-content').innerHTML = `<p class="text-slate-400">パーティーが全滅しました。</p>`;
+                document.getElementById('result-ok-btn').innerText = "ステージ一覧に戻る";
                 openModal('modal-result');
             }, 1000);
         }
 
         function closeResult() {
             closeModal('modal-result');
+
+            if (battleState.lastResult === 'story-scene-clear') {
+                const chapterIdx = battleState.storyReturnChapterIdx;
+                switchLayer('view-main');
+                changeContent('content-quest', document.getElementById('nav-btn-quest'));
+                openStorySceneList(chapterIdx);
+                return;
+            }
+            if (battleState.lastResult === 'story-chapter-clear') {
+                switchLayer('view-main');
+                changeContent('content-quest', document.getElementById('nav-btn-quest'));
+                openStoryChapterList();
+                return;
+            }
+            if (battleState.isStoryBattle) {
+                // ここに来るのは負けた場合のみ(勝った場合は battleWin で直接物語へ戻る)
+                startStoryBattle(battleState.storyBattleEnemyDef);
+                return;
+            }
             switchLayer('view-main');
+            if (battleState.lastResult === 'retreat' || battleState.lastResult === 'win' || battleState.lastResult === 'lose') {
+                changeContent('content-quest', document.getElementById('nav-btn-quest'));
+                navQuestLayer(state.questPrep.returnView || 'quest-view-top');
+            }
         }
 
         function confirmEscape() {
@@ -3051,7 +4512,29 @@
             closeModal('modal-confirm');
             battleState.isBattling = false;
             cancelAnimationFrame(battleState.animationFrameId);
-            switchLayer('view-main');
+            playSound('error');
+
+            if (battleState.isStoryBattle) {
+                battleState.isStoryBattle = false;
+                switchLayer('view-main');
+                return;
+            }
+
+            const flash = document.getElementById('damage-flash');
+            if (flash) {
+                flash.style.background = '#000';
+                flash.style.opacity = '0.9';
+                setTimeout(() => { flash.style.opacity = '0'; flash.style.background = '#fff'; }, 700);
+            }
+
+            battleState.lastResult = 'retreat';
+            setTimeout(() => {
+                document.getElementById('result-title').innerText = "RETREAT...";
+                document.getElementById('result-title').className = "text-2xl font-black mb-3 text-slate-400";
+                document.getElementById('result-content').innerHTML = `<p class="text-slate-400 text-center text-xs">クエストから撤退した……<br>態勢を立て直してまた挑もう。</p>`;
+                document.getElementById('result-ok-btn').innerText = "ステージ一覧に戻る";
+                openModal('modal-result');
+            }, 500);
         }
     </script>
 </body>
