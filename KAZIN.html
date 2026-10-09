@@ -695,6 +695,7 @@
                     <div class="panel p-3 mb-3">
                         <h3 class="font-bold mb-2 text-xs text-cyan-300 border-b border-cyan-900/60 pb-1">システム設定</h3>
                         <div class="flex justify-between items-center text-xs font-bold text-slate-300 mb-1"><span>装備一覧の表示件数</span><select id="set-equip-limit" onchange="saveSettings()" class="bg-black/60 border border-slate-600 rounded px-2 py-1 text-white outline-none"><option value="10">10件</option><option value="20">20件</option><option value="50">50件</option><option value="9999">すべて</option></select></div>
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-300 mt-2"><span>フルスクリーン</span><button id="set-fullscreen-btn" onclick="toggleFullscreen()" class="px-3 py-1 rounded-full border border-slate-600 bg-black/60 text-slate-300 text-[10px] font-black min-w-[56px]">OFF</button></div>
                     </div>
                     <div class="panel p-3 mb-3">
                         <h3 class="font-bold mb-2 text-xs text-cyan-300 border-b border-cyan-900/60 pb-1">サウンド設定</h3>
@@ -1078,7 +1079,7 @@
                 }
             },
             selectedEquipChar: 'player',
-            settings: { equipDisplayCount: 10, bgmVolume: 70, seVolume: 70, textureQuality: 'high', effectQuality: 'high' },
+            settings: { equipDisplayCount: 10, fullscreen: false, bgmVolume: 70, seVolume: 70, textureQuality: 'high', effectQuality: 'high' },
             codePanel: { fails: 0, lockUntil: 0, usedCodes: [] },
             formation: { sub1: false, sub2: false },
             friends: [],
@@ -1977,6 +1978,11 @@
             updateEquipTopDisplay();
             document.getElementById('set-user-id').innerText = state.player.userId;
             document.getElementById('set-equip-limit').value = state.settings.equipDisplayCount;
+            updateFullscreenButton();
+            if (state.settings.fullscreen && isFullscreenSupported()) {
+                // ブラウザの仕様上、フルスクリーン化にはユーザー操作が必要なので最初のタップで復帰する
+                window.addEventListener('pointerdown', () => { if (!isFullscreenActive()) toggleFullscreenSilent(); }, { once: true });
+            }
             document.getElementById('set-bgm-volume').value = state.settings.bgmVolume ?? 70;
             document.getElementById('set-bgm-volume-num').innerText = state.settings.bgmVolume ?? 70;
             document.getElementById('set-se-volume').value = state.settings.seVolume ?? 70;
@@ -2052,6 +2058,7 @@
             if (k.userIconImage !== undefined) state.player.userIconImage = k.userIconImage;
             if (k.friendCode !== undefined) state.player.friendCode = k.friendCode;
             if (k.equipDisplayCount !== undefined) state.settings.equipDisplayCount = k.equipDisplayCount;
+            if (k.fullscreen !== undefined) state.settings.fullscreen = k.fullscreen;
             if (k.codePanel) state.codePanel = { ...state.codePanel, ...k.codePanel };
             if (k.formation) state.formation = { ...state.formation, ...k.formation };
             if (k.friends) state.friends = k.friends;
@@ -2107,6 +2114,7 @@
                 userIconImage: state.player.userIconImage,
                 friendCode: state.player.friendCode,
                 equipDisplayCount: state.settings.equipDisplayCount,
+                fullscreen: state.settings.fullscreen,
                 codePanel: state.codePanel,
                 formation: state.formation,
                 friends: state.friends,
@@ -2608,6 +2616,7 @@
 
         // ==== ストーリーモード (ビジュアルノベル) ====
         let storyState = { chapterIdx: 0, sceneIdx: 0, lineIdx: 0 };
+        let storyFinished = false; // シーン/章が終了済みなのに advanceStory が再度呼ばれるのを防ぐガード
 
         function isChapterUnlocked(idx) {
             if (idx === 0) return true;
@@ -2671,6 +2680,7 @@
             if (sceneIdx > scenesDone) return; // 未解放の話は読めない
             playSound('decide');
             storyState = { chapterIdx, sceneIdx, lineIdx: 0 };
+            storyFinished = false;
             switchLayer('view-story');
             renderStoryLine();
         }
@@ -2750,6 +2760,7 @@
         const STORY_ADVANCE_COOLDOWN = 450; // ms - 連打で会話を飛ばせないようにする
 
         function advanceStory() {
+            if (storyFinished) return;
             const now = Date.now();
             if (now - lastStoryAdvanceTime < STORY_ADVANCE_COOLDOWN) return;
             lastStoryAdvanceTime = now;
@@ -2787,6 +2798,7 @@
         }
 
         function finishStoryScene() {
+            storyFinished = true;
             const chapterIdx = storyState.chapterIdx;
             const chapter = STORY_DATA[chapterIdx];
             const scene = chapter.scenes[storyState.sceneIdx];
@@ -2805,6 +2817,7 @@
         }
 
         function finishStoryChapter() {
+            storyFinished = true;
             const chapterIdx = storyState.chapterIdx;
             const chapter = STORY_DATA[chapterIdx];
             let rewardHtml = '';
@@ -3701,6 +3714,55 @@
             });
             listEl.innerHTML = rows.join('');
         }
+
+        // ==== フルスクリーン ====
+        function isFullscreenSupported() {
+            const el = document.documentElement;
+            return !!(el.requestFullscreen || el.webkitRequestFullscreen);
+        }
+        function isFullscreenActive() {
+            return !!(document.fullscreenElement || document.webkitFullscreenElement);
+        }
+        function updateFullscreenButton() {
+            const btn = document.getElementById('set-fullscreen-btn');
+            if (!btn) return;
+            const on = isFullscreenActive();
+            btn.innerText = on ? 'ON' : 'OFF';
+            btn.className = `px-3 py-1 rounded-full border text-[10px] font-black min-w-[56px] ${on ? 'border-cyan-400 bg-cyan-900/60 text-cyan-200' : 'border-slate-600 bg-black/60 text-slate-300'}`;
+        }
+        function toggleFullscreenSilent() {
+            try {
+                const el = document.documentElement;
+                const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+        function toggleFullscreen() {
+            if (!isFullscreenSupported()) {
+                showToast('この端末・ブラウザではフルスクリーンに対応していません', true);
+                return;
+            }
+            playSound('tap');
+            const el = document.documentElement;
+            try {
+                if (isFullscreenActive()) {
+                    state.settings.fullscreen = false;
+                    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+                } else {
+                    state.settings.fullscreen = true;
+                    const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+                    if (p && p.catch) p.catch(() => { state.settings.fullscreen = false; showToast('フルスクリーンにできませんでした', true); updateFullscreenButton(); });
+                }
+            } catch (e) { state.settings.fullscreen = false; }
+            saveGame();
+            updateFullscreenButton();
+        }
+        ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
+            // Escキー等で解除された場合も設定とボタン表示を実際の状態に合わせる
+            state.settings.fullscreen = isFullscreenActive();
+            saveGame();
+            updateFullscreenButton();
+        }));
 
         function saveSettings() {
             state.settings.equipDisplayCount = document.getElementById('set-equip-limit').value;
