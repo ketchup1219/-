@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1p:wght@400;700;900&family=Orbitron:wght@700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
     <!-- Tone.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- three.js + GLTFLoader (3Dガチャ演出用) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
     <style>
         :root {
@@ -237,7 +240,26 @@
         .elem-tree { text-shadow: 0 0 12px #15803d; color: #86efac; }
         .elem-electric { text-shadow: 0 0 12px #d946ef; color: #f0abfc; }
 
-        #gacha-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        #gacha-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 50% 62%, #2e2150 0%, #0d1128 55%, #02030a 100%); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        /* ---- 3Dガチャ演出 ---- */
+        .gacha3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; display: block; touch-action: none; visibility: hidden; cursor: grab; }
+        .gacha-result-container { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 9% 1rem 0; pointer-events: none; }
+        .gacha-result-container > * { pointer-events: auto; }
+        .gacha-loading { position: absolute; inset: 0; z-index: 15; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
+        #gacha-bottom-bar { position: absolute; left: 0; right: 0; bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; justify-content: center; gap: 0.5rem; pointer-events: none; }
+        #gacha-bottom-bar > * { pointer-events: auto; }
+        .gacha-open-btn { padding: 0.85rem 3.2rem; border-radius: 999px; font-size: 1.05rem; font-weight: 900; letter-spacing: 0.35em; color: #78350f; animation: gachaOpenPulse 1.4s ease-in-out infinite; }
+        @keyframes gachaOpenPulse { 0%, 100% { transform: scale(1); box-shadow: 0 6px 18px rgba(217, 119, 6, 0.45); } 50% { transform: scale(1.06); box-shadow: 0 8px 28px rgba(251, 191, 36, 0.85); } }
+        .gacha-skip-btn { position: absolute; top: calc(0.75rem + env(safe-area-inset-top, 0px)); right: 0.75rem; z-index: 30; padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; color: #e2e8f0; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); }
+        .gacha-card-rise { animation: gachaCardRise 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
+        @keyframes gachaCardRise { 0% { opacity: 0; transform: translateY(170px) scale(0.35); } 60% { opacity: 1; transform: translateY(-14px) scale(1.06); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        #gacha-rainbow-ring { top: 27%; left: 50%; margin: -210px 0 0 -210px; }
+        #gacha-list { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 28rem; }
+        .gacha-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; }
+        .gacha-list-item { width: calc((100% - 24px) / 5); display: flex; flex-direction: column; align-items: center; padding: 6px 2px; animation: gachaListIn 0.4s ease-out both; }
+        .gacha-grid.few .gacha-list-item { width: 84px; padding: 10px 4px; }
+        @keyframes gachaListIn { from { opacity: 0; transform: translateY(14px) scale(0.85); } to { opacity: 1; transform: none; } }
+        #app-container.fx-low .gacha-open-btn { animation: none; }
         .gacha-item-reveal { animation: epic-shake 0.5s ease-in-out, layerFadeIn 1s ease-out; transform-origin: center; }
 
         /* ---- 天からの贈り物 演出 ---- */
@@ -1000,15 +1022,19 @@
         <div id="gacha-overlay">
             <canvas id="gacha-canvas" class="absolute inset-0 z-0"></canvas>
             <div id="gacha-god-rays" class="gacha-god-rays"></div>
-            <div id="gacha-sky-beam" class="gacha-sky-beam"></div>
+            <canvas id="gacha3d-canvas" class="gacha3d-canvas"></canvas>
             <div id="gacha-rainbow-ring" class="gacha-rainbow-ring hidden"></div>
             <div id="gacha-flash" class="gacha-flash"></div>
 
-            <div id="gacha-result-container" class="flex flex-col items-center justify-center w-full h-full p-4 relative z-10">
-                <div id="gacha-box" class="gacha-box text-8xl hidden">🎁</div>
-                <div id="gacha-tap-hint" class="text-[10px] text-white/70 font-black tracking-widest mt-3 hidden">GOD BLESS YOU...</div>
+            <div id="gacha-loading" class="gacha-loading hidden">
+                <div class="text-5xl mb-3 animate-float">🎁</div>
+                <div class="text-xs font-black text-white/80 tracking-widest">ガチャ箱を準備中… <span id="gacha-loading-pct">0</span>%</div>
+            </div>
 
-                <div id="gacha-item" class="panel p-5 w-56 aspect-[3/4] flex flex-col items-center justify-center border-4 border-amber-400 bg-gradient-to-b from-slate-800 to-black hidden relative z-10">
+            <div id="gacha-result-container" class="gacha-result-container">
+                <div id="gacha-counter" class="hidden text-[11px] font-black text-white/70 tracking-widest mb-2"></div>
+
+                <div id="gacha-item" onclick="gachaNextReveal()" class="panel p-5 w-56 aspect-[3/4] flex flex-col items-center justify-center border-4 border-amber-400 bg-gradient-to-b from-slate-800 to-black hidden relative z-10 cursor-pointer">
                     <div id="gacha-rarity" class="text-2xl text-amber-400 tracking-widest mb-2">★★★</div>
                     <div id="gacha-icon" class="text-6xl mb-3">🗡️</div>
                     <div id="gacha-name" class="text-base font-black text-white text-center">---</div>
@@ -1016,11 +1042,19 @@
                     <div class="mt-3 text-[9px] font-black text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/50">GET!</div>
                 </div>
 
-                <div id="gacha-multi-grid" class="hidden grid grid-cols-5 gap-1.5 w-full max-w-md relative z-10 mt-4"></div>
-
-                <div class="flex space-x-2 mt-6 relative z-10">
-                    <button id="gacha-close-btn" onclick="closeGachaResult()" class="panel px-6 py-2 rounded-full font-black text-xs text-white hidden border-white/30">TAP TO CLOSE</button>
+                <div id="gacha-list" class="hidden">
+                    <div class="text-sm font-black text-amber-300 tracking-widest mb-3">獲得結果 (<span id="gacha-list-count">0</span>件)</div>
+                    <div id="gacha-multi-grid" class="gacha-grid"></div>
                 </div>
+
+                <div id="gacha-box" class="gacha-box text-8xl hidden mt-24">🎁</div>
+            </div>
+
+            <button id="gacha-skip-btn" onclick="gachaSkip()" class="gacha-skip-btn hidden">スキップ ▶▶</button>
+
+            <div id="gacha-bottom-bar">
+                <button id="gacha-open-btn" onclick="gachaOpenBox()" class="btn-gold gacha-open-btn hidden">開ける</button>
+                <button id="gacha-close-btn" onclick="closeGachaResult()" class="panel px-8 py-3 rounded-full font-black text-sm text-white hidden border-white/30">閉じる</button>
             </div>
         </div>
     </div>
@@ -2564,6 +2598,7 @@
             playSound('tap');
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(contentId).classList.add('active');
+            if (contentId === 'content-gacha' && typeof g3dPreload === 'function') g3dPreload();
             const mainLayer = document.getElementById('view-main');
             if (mainLayer) mainLayer.classList.toggle('home-bg', contentId === 'content-home');
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -3305,120 +3340,434 @@
             startGachaSequence(topItem, pulledItems);
         }
 
-        // ==== ガチャ演出: 天からの贈り物 ====
+                // ==== 3Dガチャ演出 (three.js + .glb) ====
+        const GACHA3D_URL_CLOSED = 'ガチャ箱3D.glb';
+        const GACHA3D_URL_OPEN = 'ガチャ箱開3D.glb';
+        const g3d = {
+            available: null,          // three.js / GLTFLoader / WebGL が使えるか(初回判定)
+            loadPromise: null,
+            progress: { closed: 0, open: 0 },
+            onProgress: null,
+            models: { closed: null, open: null },
+            canvas: null, renderer: null, scene: null, camera: null, pivot: null, shadow: null,
+            mode: 'closed',
+            yaw: 0, dragging: false, dragLastX: 0, resumeAt: 0,
+            hop: { active: false, t: 0, dur: 0.95, nextAt: 0, height: 0.34 },
+            pop: -1,                  // 開封ポップ演出の進行(0〜1, -1で非実行)
+            settle: 0,                // 開封後に箱を下げる演出の進行(0〜1)
+            viewH: 3.4, running: false, rafId: null, lastT: 0, clock: 0
+        };
+
+        function g3dIsPossible() {
+            if (g3d.available !== null) return g3d.available;
+            let ok = typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined';
+            if (ok) {
+                try {
+                    const c = document.createElement('canvas');
+                    ok = !!(c.getContext('webgl2') || c.getContext('webgl') || c.getContext('experimental-webgl'));
+                } catch (e) { ok = false; }
+            }
+            g3d.available = ok;
+            return ok;
+        }
+
+        // テクスチャ品質設定(高/中/低)に合わせてテクスチャを縮小する
+        function g3dTextureMax() {
+            const q = (typeof state !== 'undefined' && state.settings && state.settings.textureQuality) || 'high';
+            return q === 'low' ? 512 : q === 'mid' ? 1024 : 2048;
+        }
+        function g3dDownscaleTexture(tex, max) {
+            const img = tex && tex.image;
+            if (!img || !img.width || img.width <= max || typeof document === 'undefined') return;
+            try {
+                const c = document.createElement('canvas');
+                const s = max / Math.max(img.width, img.height);
+                c.width = Math.max(1, Math.round(img.width * s));
+                c.height = Math.max(1, Math.round(img.height * s));
+                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                tex.image = c;
+                tex.needsUpdate = true;
+                if (img.close) img.close();
+            } catch (e) { /* 縮小に失敗しても元のテクスチャのまま表示する */ }
+        }
+        function g3dPrepareModel(root) {
+            const max = g3dTextureMax();
+            root.traverse(o => {
+                if (!o.isMesh) return;
+                o.frustumCulled = false;
+                const mats = Array.isArray(o.material) ? o.material : [o.material];
+                mats.forEach(m => {
+                    ['map', 'metalnessMap', 'roughnessMap', 'normalMap', 'emissiveMap', 'aoMap'].forEach(k => { if (m[k]) g3dDownscaleTexture(m[k], max); });
+                    m.envMapIntensity = 1.25;
+                });
+            });
+        }
+
+        // 2つのglbを読み込む(失敗した場合は false を返し、呼び出し側が簡易演出へ切り替える)
+        function g3dLoad() {
+            if (g3d.loadPromise) return g3d.loadPromise;
+            if (!g3dIsPossible()) return Promise.resolve(false);
+            const loader = new THREE.GLTFLoader();
+            const one = (url, key) => new Promise((resolve, reject) => {
+                loader.load(url, gltf => { g3dPrepareModel(gltf.scene); g3d.models[key] = gltf.scene; g3d.progress[key] = 1; if (g3d.onProgress) g3d.onProgress(); resolve(); },
+                    xhr => { if (xhr && xhr.lengthComputable) { g3d.progress[key] = xhr.loaded / xhr.total; if (g3d.onProgress) g3d.onProgress(); } },
+                    err => reject(err));
+            });
+            g3d.loadPromise = Promise.all([one(GACHA3D_URL_CLOSED, 'closed'), one(GACHA3D_URL_OPEN, 'open')])
+                .then(() => true)
+                .catch(err => { console.warn('3Dモデルの読み込みに失敗しました', err); g3d.loadPromise = null; return false; });
+            return g3d.loadPromise;
+        }
+
+        // 金属の質感を出すための簡易スタジオ環境マップ(外部HDR不要)
+        function g3dBuildEnv(renderer) {
+            const envScene = new THREE.Scene();
+            envScene.add(new THREE.Mesh(new THREE.BoxGeometry(24, 24, 24), new THREE.MeshBasicMaterial({ color: 0x2a3142, side: THREE.BackSide })));
+            const panel = (w, h, x, y, z, color, k) => {
+                const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(k), side: THREE.DoubleSide }));
+                m.position.set(x, y, z); m.lookAt(0, 0, 0); envScene.add(m);
+            };
+            panel(9, 6, 0, 9, 5, 0xffffff, 6);
+            panel(5, 9, -10, 2, 3, 0xfff0d2, 4);
+            panel(5, 9, 10, 2, 3, 0xd2e6ff, 3.5);
+            panel(12, 3, 0, -6, 7, 0xffd8a6, 1.6);
+            panel(8, 8, 0, 3, -10, 0xffffff, 2.2);
+            const pmrem = new THREE.PMREMGenerator(renderer);
+            const rt = pmrem.fromScene(envScene, 0.02);
+            pmrem.dispose();
+            return rt.texture;
+        }
+
+        function g3dShadowTexture() {
+            const c = document.createElement('canvas'); c.width = c.height = 128;
+            const x = c.getContext('2d');
+            const g = x.createRadialGradient(64, 64, 4, 64, 64, 62);
+            g.addColorStop(0, 'rgba(0,0,0,0.75)'); g.addColorStop(0.6, 'rgba(0,0,0,0.3)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+            x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+            const t = new THREE.CanvasTexture(c); return t;
+        }
+
+        function g3dInit(canvas, rendererOverride) {
+            if (g3d.renderer && g3d.canvas === canvas) { g3dResize(); return true; }
+            g3d.canvas = canvas;
+            const renderer = rendererOverride || new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+            renderer.setPixelRatio(Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, 2));
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.05;
+            renderer.setClearColor(0x000000, 0);
+            g3d.renderer = renderer;
+
+            const scene = new THREE.Scene();
+            let envOk = true;
+            try { scene.environment = g3dBuildEnv(renderer); } catch (e) { envOk = false; console.warn('環境マップの生成に失敗(ライトのみで表示)', e); }
+            g3d.envOk = envOk;
+            scene.add(new THREE.AmbientLight(0xffffff, envOk ? 0.25 : 0.7));
+            const key = new THREE.DirectionalLight(0xfff3dd, envOk ? 1.4 : 2.2); key.position.set(2.5, 4, 3.5); scene.add(key);
+            const rim = new THREE.DirectionalLight(0x9ec8ff, envOk ? 0.9 : 1.1); rim.position.set(-3, 2.5, -3); scene.add(rim);
+            g3d.scene = scene;
+
+            g3d.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
+            g3d.pivot = new THREE.Group(); scene.add(g3d.pivot);
+
+            const shadow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: g3dShadowTexture(), transparent: true, depthWrite: false, opacity: 0.7 }));
+            shadow.rotation.x = -Math.PI / 2; scene.add(shadow); g3d.shadow = shadow;
+
+            // 環境マップが無い環境では金属を暗くならないよう調整
+            if (!envOk) ['closed', 'open'].forEach(k => { const m = g3d.models[k]; if (m) m.traverse(o => { if (o.isMesh && o.material) { o.material.metalness = Math.min(o.material.metalness, 0.35); } }); });
+
+            // 手動回転(ドラッグ/スワイプ)
+            canvas.style.touchAction = 'none';
+            canvas.addEventListener('pointerdown', e => { if (g3d.mode !== 'closed') return; g3d.dragging = true; g3d.dragLastX = e.clientX; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
+            canvas.addEventListener('pointermove', e => { if (!g3d.dragging) return; g3d.yaw += (e.clientX - g3d.dragLastX) * 0.012; g3d.dragLastX = e.clientX; });
+            const end = () => { if (g3d.dragging) { g3d.dragging = false; g3d.resumeAt = g3d.clock + 0.5; } };
+            canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+
+            g3dResize();
+            return true;
+        }
+
+        function g3dResize() {
+            if (!g3d.renderer || !g3d.canvas) return;
+            const w = g3d.canvas.clientWidth || (g3d.canvas.parentElement && g3d.canvas.parentElement.clientWidth) || 400;
+            const h = g3d.canvas.clientHeight || (g3d.canvas.parentElement && g3d.canvas.parentElement.clientHeight) || 700;
+            g3d.renderer.setSize(w, h, false);
+            const cam = g3d.camera, fov = cam.fov * Math.PI / 180;
+            cam.aspect = w / h;
+            const t = Math.tan(fov / 2);
+            // 縦長/横長どちらの画面でも箱(幅約2, 高さ約1.8)が収まる距離
+            const dist = Math.max(1.55 / t, 1.45 / (t * cam.aspect));
+            cam.position.set(0, dist * 0.2, dist);
+            cam.lookAt(0, 0, 0);
+            cam.updateProjectionMatrix();
+            g3d.viewH = 2 * dist * t;
+        }
+
+        function g3dShow(mode) {
+            g3d.mode = mode;
+            while (g3d.pivot.children.length) g3d.pivot.remove(g3d.pivot.children[0]);
+            const m = g3d.models[mode];
+            if (m) g3d.pivot.add(m);
+            if (mode === 'closed') {
+                g3d.yaw = 0; g3d.settle = 0; g3d.pop = -1; g3d.dragging = false;
+                g3d.hop.active = false; g3d.hop.nextAt = g3d.clock + 0.9;
+                g3d.pivot.position.set(0, 0, 0); g3d.pivot.scale.set(1, 1, 1);
+            }
+            g3dApplyTransform(0);
+        }
+
+        // 開ける: 開いた状態のモデルへ差し替え、向きを正面に固定する
+        function g3dOpenBox() {
+            g3dShow('open');
+            g3d.yaw = 0;
+            g3d.pop = 0;
+            g3d.settle = 0;
+        }
+
+        function g3dApplyTransform(hopY) {
+            const ease = g => g * g * (3 - 2 * g);
+            const s = ease(Math.min(1, g3d.settle));
+            let sc = 1 - 0.2 * s, y = hopY - 0.3 * g3d.viewH * s, sx = 1, sy = 1;
+            if (g3d.mode === 'closed' && g3d.hop.active) {
+                const t = g3d.hop.t, k = Math.abs(Math.sin(2 * Math.PI * t)), d = 1 - t;
+                const sq = (1 - k) * d;                      // 着地の瞬間ほど潰れる
+                sy = 1 - 0.07 * sq; sx = 1 + 0.045 * sq;
+            }
+            if (g3d.pop >= 0 && g3d.pop < 1) {               // 開封ポップ
+                const p = g3d.pop, pulse = Math.sin(p * Math.PI) * 0.16;
+                sc *= 1 + pulse;
+            }
+            g3d.pivot.rotation.y = g3d.yaw;
+            g3d.pivot.position.y = y;
+            g3d.pivot.scale.set(sc * sx, sc * sy, sc * sx);
+            if (g3d.shadow) {
+                const lift = Math.max(0, hopY) / (g3d.hop.height || 1);
+                const gy = -0.3 * g3d.viewH * s - 0.93 * sc;
+                g3d.shadow.position.set(0, gy, 0);
+                const ss = (1 - 0.3 * lift) * sc;
+                g3d.shadow.scale.set(ss, ss, ss);
+                g3d.shadow.material.opacity = 0.7 * (1 - 0.45 * lift);
+            }
+        }
+
+        function g3dUpdate(dt) {
+            g3d.clock += dt;
+            let hopY = 0;
+            if (g3d.mode === 'closed') {
+                // 正面を基準に時計回り(上から見て)に回転し続ける。ドラッグ中/直後は自動回転を止める
+                if (!g3d.dragging && g3d.clock >= g3d.resumeAt) g3d.yaw -= dt * 0.85;
+                // 時々ピョコピョコ跳ねる
+                const h = g3d.hop;
+                if (!h.active && g3d.clock >= h.nextAt) { h.active = true; h.t = 0; h.dur = 0.85 + Math.random() * 0.25; h.height = 0.26 + Math.random() * 0.14; }
+                if (h.active) {
+                    h.t += dt / h.dur;
+                    if (h.t >= 1) { h.active = false; h.t = 0; h.nextAt = g3d.clock + 1.1 + Math.random() * 1.8; }
+                    else hopY = h.height * Math.abs(Math.sin(2 * Math.PI * h.t)) * (1 - h.t);   // 2回バウンドして減衰
+                }
+            } else {
+                g3d.yaw = 0;                                  // 開封後は正面に固定
+                if (g3d.pop >= 0 && g3d.pop < 1) { g3d.pop += dt / 0.55; if (g3d.pop >= 1) g3d.pop = 1; }
+                if (g3d.settle < 1 && g3d.pop >= 0.35) g3d.settle = Math.min(1, g3d.settle + dt / 0.7);
+            }
+            g3dApplyTransform(hopY);
+        }
+
+        function g3dRender() { if (g3d.renderer) g3d.renderer.render(g3d.scene, g3d.camera); }
+
+        function g3dStart() {
+            if (g3d.running || !g3d.renderer) return;
+            g3d.running = true; g3d.lastT = performance.now();
+            const loop = (t) => {
+                if (!g3d.running) return;
+                const dt = Math.min(0.05, (t - g3d.lastT) / 1000); g3d.lastT = t;
+                g3dUpdate(dt); g3dRender();
+                g3d.rafId = requestAnimationFrame(loop);
+            };
+            g3d.rafId = requestAnimationFrame(loop);
+        }
+        function g3dStop() {
+            g3d.running = false;
+            if (g3d.rafId) cancelAnimationFrame(g3d.rafId);
+            g3d.rafId = null;
+        }
+        if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('resize', () => g3dResize());
+        // ==== 3Dガチャ演出 ここまで ====
+
+        // ガチャタブを開いた時点でモデルの先読みを始める(初回の待ち時間を減らす)
+        function g3dPreload() { if (g3dIsPossible()) g3dLoad(); }
+
+        // ==== ガチャ演出: 3D箱 → 開封 → 1つずつ結果発表 → 一覧 ====
         let gachaSequenceTimers = [];
+        let gachaSession = null;
+        let gachaToken = 0;
 
         function clearGachaTimers() {
             gachaSequenceTimers.forEach(t => clearTimeout(t));
             gachaSequenceTimers = [];
         }
+        function gachaEl(id) { return document.getElementById(id); }
 
+        function gachaResetUI() {
+            ['gacha-item', 'gacha-list', 'gacha-rainbow-ring', 'gacha-ssr-label', 'gacha-open-btn', 'gacha-skip-btn',
+             'gacha-close-btn', 'gacha-counter', 'gacha-loading', 'gacha-box'].forEach(id => { const el = gachaEl(id); if (el) el.classList.add('hidden'); });
+            gachaEl('gacha-item').classList.remove('gacha-item-ssr', 'gacha-card-rise');
+            gachaEl('gacha-god-rays').classList.remove('active');
+            gachaEl('gacha-flash').classList.remove('gacha-flash-pop');
+            gachaEl('gacha-multi-grid').innerHTML = '';
+            gachaEl('gacha3d-canvas').style.visibility = 'hidden';
+            gachaEl('gacha-box').classList.remove('gacha-box-drop', 'gacha-box-shake');
+        }
+
+        // 1) ガチャ実行 → 2) 専用の演出画面に切り替え、3Dの箱を中央に表示 → 3) 回転+ピョコピョコ、「開ける」ボタン待ち
         function startGachaSequence(topItem, allItems) {
-            const overlay = document.getElementById('gacha-overlay');
-            const box = document.getElementById('gacha-box');
-            const tapHint = document.getElementById('gacha-tap-hint');
-            const itemBox = document.getElementById('gacha-item');
-            const beam = document.getElementById('gacha-sky-beam');
-            const godRays = document.getElementById('gacha-god-rays');
-            const flash = document.getElementById('gacha-flash');
-            const ring = document.getElementById('gacha-rainbow-ring');
-            const closeBtn = document.getElementById('gacha-close-btn');
-            const ssrLabel = document.getElementById('gacha-ssr-label');
-            const multiGrid = document.getElementById('gacha-multi-grid');
-            const isSSR = topItem.rarity >= 3;
-
             clearGachaTimers();
+            const token = ++gachaToken;
+            const maxRarity = allItems.reduce((m, it) => Math.max(m, it.rarity), 1);
+            gachaSession = { items: allItems, idx: 0, phase: 'loading', fallback: false, maxRarity, lastRevealAt: 0 };
 
-            // ---- リセット ----
-            overlay.style.display = 'flex';
-            box.classList.remove('hidden');
-            box.classList.remove('gacha-box-drop', 'gacha-box-shake');
-            tapHint.classList.add('hidden');
-            itemBox.classList.add('hidden');
-            itemBox.classList.remove('gacha-item-reveal', 'gacha-item-ssr');
-            ring.classList.add('hidden');
-            ssrLabel.classList.add('hidden');
-            closeBtn.classList.add('hidden');
-            multiGrid.classList.add('hidden');
-            multiGrid.innerHTML = '';
-            beam.classList.remove('active');
-            godRays.classList.remove('active');
-            flash.classList.remove('gacha-flash-pop');
+            gachaResetUI();
+            gachaEl('gacha-overlay').style.display = 'flex';
+            startGachaParticles(maxRarity >= 3);
 
-            startGachaParticles(isSSR);
+            const ready = g3d.models.closed && g3d.models.open;
+            if (!ready && g3dIsPossible()) {
+                gachaEl('gacha-loading').classList.remove('hidden');
+                g3d.onProgress = () => { const el = gachaEl('gacha-loading-pct'); if (el) el.innerText = Math.round((g3d.progress.closed + g3d.progress.open) / 2 * 100); };
+            }
 
-            // Stage1: 天から光が差し込む
-            requestAnimationFrame(() => {
-                beam.classList.add('active');
-                if (isSSR) godRays.classList.add('active');
-            });
-
-            // Stage2: ギフトボックスが舞い降りる
-            gachaSequenceTimers.push(setTimeout(() => {
-                box.classList.add('gacha-box-drop');
+            g3dLoad().then(ok => {
+                if (token !== gachaToken) return;           // 読み込み中に閉じられた
+                gachaEl('gacha-loading').classList.add('hidden');
+                g3d.onProgress = null;
+                let use3d = !!ok;
+                if (use3d) {
+                    try {
+                        const cv = gachaEl('gacha3d-canvas');
+                        cv.style.visibility = 'visible';
+                        g3dInit(cv);
+                        g3dShow('closed');
+                        g3dStart();
+                    } catch (err) { console.warn('3D表示の初期化に失敗したため簡易演出に切り替えます', err); use3d = false; }
+                }
+                gachaSession.fallback = !use3d;
+                if (!use3d) {                                // 3Dが使えない環境用の簡易演出(絵文字の箱)
+                    gachaEl('gacha3d-canvas').style.visibility = 'hidden';
+                    const box = gachaEl('gacha-box');
+                    box.classList.remove('hidden'); box.classList.add('gacha-box-drop');
+                    gachaSequenceTimers.push(setTimeout(() => box.classList.add('gacha-box-shake'), 1200));
+                }
+                gachaSession.phase = 'idle';
+                gachaEl('gacha-open-btn').classList.remove('hidden');
                 playSound('tap');
-            }, 350));
+            });
+        }
 
-            // Stage3: 少し揺れて期待感を演出
+        // 4) 「開ける」: ガチャ箱3D → ガチャ箱開3D に差し替え、正面向きで固定
+        function gachaOpenBox() {
+            const s = gachaSession;
+            if (!s || s.phase !== 'idle') return;
+            s.phase = 'opening';
+            gachaEl('gacha-open-btn').classList.add('hidden');
+            gachaEl('gacha-skip-btn').classList.remove('hidden');
+
+            const isSSR = s.maxRarity >= 3;
+            const flash = gachaEl('gacha-flash');
+            flash.classList.remove('gacha-flash-pop'); void flash.offsetWidth; flash.classList.add('gacha-flash-pop');
+            playSound(isSSR ? 'legendary' : 'decide');
+            if (isSSR) {
+                gachaEl('gacha-god-rays').classList.add('active');
+                const appEl = document.getElementById('app-container');
+                appEl.classList.add('epic-shake-once');
+                gachaSequenceTimers.push(setTimeout(() => appEl.classList.remove('epic-shake-once'), 600));
+            }
+            if (!s.fallback) g3dOpenBox(); else gachaEl('gacha-box').classList.add('hidden');
+
             gachaSequenceTimers.push(setTimeout(() => {
-                box.classList.add('gacha-box-shake');
-                tapHint.classList.remove('hidden');
-            }, 1550));
+                if (s !== gachaSession || s.phase !== 'opening') return;
+                gachaRevealItem(0);
+            }, 1000));
+        }
 
-            // Stage4: 開封フラッシュ & アイテム出現 (10連は結果一覧を自動表示)
-            gachaSequenceTimers.push(setTimeout(() => {
-                box.classList.add('hidden');
-                tapHint.classList.add('hidden');
-                flash.classList.add('gacha-flash-pop');
-                playSound(isSSR ? 'legendary' : 'decide');
+        // 5) 結果を1つずつ順番に表示(自動で進行。カードをタップすると次へ)
+        function gachaRevealItem(i) {
+            const s = gachaSession;
+            if (!s) return;
+            s.idx = i; s.phase = 'reveal'; s.lastRevealAt = Date.now();
+            const it = s.items[i];
+            const isSSR = it.rarity >= 3;
+            const card = gachaEl('gacha-item');
+            gachaEl('gacha-rarity').innerText = '★'.repeat(it.rarity);
+            gachaEl('gacha-icon').innerText = getItemIcon(it);
+            gachaEl('gacha-name').innerText = it.name;
+            card.classList.toggle('gacha-item-ssr', isSSR);
+            gachaEl('gacha-ssr-label').classList.toggle('hidden', !isSSR);
+            gachaEl('gacha-rainbow-ring').classList.toggle('hidden', !isSSR);
 
-                document.getElementById('gacha-rarity').innerText = '★'.repeat(topItem.rarity);
-                document.getElementById('gacha-icon').innerText = getItemIcon(topItem);
-                document.getElementById('gacha-name').innerText = topItem.name + (allItems.length > 1 ? ` 他${allItems.length - 1}件` : '');
+            const counter = gachaEl('gacha-counter');
+            if (s.items.length > 1) { counter.innerText = `${i + 1} / ${s.items.length}`; counter.classList.remove('hidden'); }
+            else counter.classList.add('hidden');
 
-                itemBox.classList.remove('hidden');
-                itemBox.classList.add('gacha-item-reveal');
+            card.classList.remove('hidden', 'gacha-card-rise'); void card.offsetWidth; card.classList.add('gacha-card-rise');
+            playSound(isSSR ? 'legendary' : it.rarity === 2 ? 'decide' : 'tap');
+            if (isSSR) {
+                const appEl = document.getElementById('app-container');
+                appEl.classList.add('epic-shake-once');
+                gachaSequenceTimers.push(setTimeout(() => appEl.classList.remove('epic-shake-once'), 600));
+            }
+            const dur = isSSR ? 2300 : it.rarity === 2 ? 1500 : 1150;
+            gachaSequenceTimers.push(setTimeout(gachaNextReveal, dur));
+        }
 
-                if (isSSR) {
-                    itemBox.classList.add('gacha-item-ssr');
-                    ring.classList.remove('hidden');
-                    ssrLabel.classList.remove('hidden');
-                    const appEl = document.getElementById('app-container');
-                    appEl.classList.add('epic-shake-once');
-                    gachaSequenceTimers.push(setTimeout(() => appEl.classList.remove('epic-shake-once'), 600));
-                }
+        function gachaNextReveal() {
+            const s = gachaSession;
+            if (!s || s.phase !== 'reveal') return;
+            if (Date.now() - s.lastRevealAt < 350) return;   // 連打で飛ばしすぎないように
+            clearGachaTimers();
+            if (s.idx + 1 < s.items.length) gachaRevealItem(s.idx + 1);
+            else gachaShowList();
+        }
 
-                closeBtn.classList.remove('hidden');
+        // 「スキップ」: 途中の演出をすべて飛ばして獲得結果を一覧で一気に表示
+        function gachaSkip() {
+            const s = gachaSession;
+            if (!s || (s.phase !== 'opening' && s.phase !== 'reveal')) return;
+            playSound('tap');
+            clearGachaTimers();
+            if (!s.fallback && g3d.mode !== 'open') g3dOpenBox();
+            gachaShowList();
+        }
 
-                // 10連などの複数排出時は、ボタン操作なしで全件を自動表示する
-                if (allItems.length > 1) {
-                    multiGrid.innerHTML = allItems.map(it => `
-                        <div class="panel p-1.5 flex flex-col items-center rare-${it.rarity}">
-                            <span class="text-xl">${getItemIcon(it)}</span>
-                            <span class="text-[7px] font-black text-white truncate w-full text-center">${it.name}</span>
-                            <span class="text-[8px] text-amber-200">${'★'.repeat(it.rarity)}</span>
-                        </div>
-                    `).join('');
-                    multiGrid.classList.remove('hidden');
-                }
-            }, 2200));
+        function gachaShowList() {
+            const s = gachaSession;
+            if (!s) return;
+            s.phase = 'list';
+            clearGachaTimers();
+            ['gacha-item', 'gacha-rainbow-ring', 'gacha-ssr-label', 'gacha-counter', 'gacha-skip-btn'].forEach(id => gachaEl(id).classList.add('hidden'));
+            gachaEl('gacha-god-rays').classList.remove('active');
+
+            const grid = gachaEl('gacha-multi-grid');
+            grid.className = 'gacha-grid' + (s.items.length <= 5 ? ' few' : '');
+            grid.innerHTML = s.items.map((it, n) => `
+                <div class="gacha-list-item panel rare-${it.rarity}" style="animation-delay:${n * 60}ms">
+                    <span class="text-2xl">${getItemIcon(it)}</span>
+                    <span class="text-[8px] font-black text-white text-center leading-tight w-full px-0.5 mt-0.5" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${it.name}</span>
+                    <span class="text-[9px] text-amber-200 mt-0.5">${'★'.repeat(it.rarity)}</span>
+                </div>
+            `).join('');
+            gachaEl('gacha-list-count').innerText = s.items.length;
+            gachaEl('gacha-list').classList.remove('hidden');
+            gachaEl('gacha-close-btn').classList.remove('hidden');
         }
 
         function closeGachaResult() {
             playSound('tap');
             clearGachaTimers();
-            document.getElementById('gacha-overlay').style.display = 'none';
-            document.getElementById('gacha-box').classList.add('hidden');
-            document.getElementById('gacha-box').classList.remove('gacha-box-drop', 'gacha-box-shake');
-            document.getElementById('gacha-tap-hint').classList.add('hidden');
-            document.getElementById('gacha-item').classList.add('hidden');
-            document.getElementById('gacha-item').classList.remove('gacha-item-ssr');
-            document.getElementById('gacha-close-btn').classList.add('hidden');
-            document.getElementById('gacha-multi-grid').classList.add('hidden');
-            document.getElementById('gacha-sky-beam').classList.remove('active');
-            document.getElementById('gacha-god-rays').classList.remove('active');
-            document.getElementById('gacha-rainbow-ring').classList.add('hidden');
-            document.getElementById('gacha-ssr-label').classList.add('hidden');
+            gachaToken++;                                    // 読み込み中のコールバックを無効化
+            gachaSession = null;
+            g3dStop();
+            g3d.onProgress = null;
+            gachaEl('gacha-overlay').style.display = 'none';
+            gachaResetUI();
             stopGachaParticles();
             updateEquipTopDisplay();
         }
