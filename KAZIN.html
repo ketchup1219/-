@@ -120,6 +120,12 @@
         }
         @keyframes charAction { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
 
+        .loading-bar { width: 70%; max-width: 280px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
+        .loading-bar-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #f59e0b, #fde047, #a855f7); box-shadow: 0 0 10px rgba(251,191,36,0.7); }
+        .loading-bar-fill.running { animation: loadingFill 2s linear forwards; }
+        @keyframes loadingFill { from { width: 0; } to { width: 100%; } }
+        .loading-dots::after { content: ''; animation: loadingDots 1.2s steps(1, end) infinite; }
+        @keyframes loadingDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
         .title-logo { font-family: 'Cinzel', 'Orbitron', serif; font-size: 4.8rem; font-weight: 900; background: linear-gradient(180deg, #ffffff 0%, #fef08a 40%, #f59e0b 80%, #78350f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)); animation: pulse-glow 3s infinite; letter-spacing: 0.12em; }
         
         .panel { 
@@ -337,6 +343,10 @@
         .notice-in { animation: noticeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes noticeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-28px); } }
         @keyframes noticeIn { from { opacity: 0; transform: translateX(28px) scale(0.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        /* 下部ナビ: 既存ボタンの大きさは固定(8個分の幅)のまま、増えた分は横スクロール */
+        .nav-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+        .nav-scroll::-webkit-scrollbar { display: none; }
+        .nav-btn-fixed { flex: 0 0 auto; width: var(--nav-btn-w, calc((min(100vw, 440px) - 8px) / 8)); }
         .story-textbox { animation: storyBoxIn 0.3s ease-out; }
         @keyframes storyBoxIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .story-text-fade { animation: storyTextFade 0.25s ease-out; }
@@ -359,6 +369,7 @@
         .guard-active { box-shadow: 0 0 15px #3b82f6, inset 0 0 10px #60a5fa !important; border-color: #93c5fd !important; }
 
         .icon-coin, .icon-ticket, .icon-material, .icon-stamina, .icon-scroll { display: inline-block; width: 1em; height: 1em; object-fit: contain; vertical-align: -0.15em; }
+        .icon-coin.icon-lg, .icon-ticket.icon-lg, .icon-material.icon-lg { width: 1.7em; height: 1.7em; vertical-align: -0.5em; }
 
         /* ---- コード入力: 石扉の金庫風パスワード画面 ---- */
         .code-vault-panel {
@@ -527,17 +538,29 @@
         </div>
 
         <!-- ========================================== -->
+        <!-- VIEW 1.5: ロード画面 (TAP TO START後に2秒表示) -->
+        <!-- ========================================== -->
+        <div id="view-loading" class="view-layer bg-black">
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950/60 to-black"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full px-8">
+                <h1 class="title-logo mb-10 animate-pulse">KAZIN</h1>
+                <div class="loading-bar"><div id="loading-bar-fill" class="loading-bar-fill"></div></div>
+                <p class="mt-4 text-[11px] font-black tracking-[0.3em] text-amber-300">NOW LOADING<span class="loading-dots"></span></p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- VIEW 2: メインUI -->
         <!-- ========================================== -->
         <div id="view-main" class="view-layer home-bg">
             <div class="h-16 bg-slate-950/80 backdrop-blur-md border-b border-white/10 flex items-center px-3 shadow-xl z-30 relative">
                 <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"></div>
                 <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide w-full">
-                    <div class="panel px-3 py-1 flex items-center border border-emerald-500/50 !rounded-full shadow-[0_0_12px_rgba(16,185,129,0.25)] flex-shrink-0">
+                    <div onclick="openModal('modal-stamina')" class="panel px-3 py-1 flex items-center border border-emerald-500/50 !rounded-full shadow-[0_0_12px_rgba(16,185,129,0.25)] flex-shrink-0 cursor-pointer">
                         <img src="スタミナ.png" alt="スタミナ" class="w-5 h-5 mr-2 animate-pulse object-contain">
                         <div class="flex flex-col">
                             <span class="text-[8px] text-emerald-400 font-black leading-none mb-0.5 tracking-wider">STAMINA</span>
-                            <span id="header-stamina" class="text-sm font-mono font-black text-white leading-none">160/160</span>
+                            <span id="header-stamina" class="text-sm font-mono font-black text-white leading-none">100/100</span>
                         </div>
                     </div>
                     <div class="panel px-2.5 py-1 flex items-center border border-amber-500/40 !rounded-xl flex-shrink-0" title="草コイン"><img src="草コイン.png" alt="草コイン" class="w-4 h-4 mr-1.5 object-contain"><span id="header-coin" class="text-sm font-mono font-black text-amber-200">0</span></div>
@@ -578,9 +601,9 @@
                         <div onclick="openModal('modal-profile')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 group"><img src="プロフィールボタン.png" alt="プロフィール" class="w-9 h-9 mb-1 object-contain group-hover:scale-110 transition-transform drop-shadow"><span class="text-[9px] font-black text-cyan-200">プロフ</span></div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div onclick="openModal('modal-friend')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-pink-400"><span class="text-xl mb-0.5">🤝</span><span class="text-[9px] font-bold text-pink-200">フレンド</span></div>
-                        <div onclick="openModal('modal-code')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400"><span class="text-xl mb-0.5">⌨️</span><span class="text-[9px] font-bold text-blue-200">コード</span></div>
-                        <div onclick="openModal('modal-post')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 relative"><span id="post-badge" class="absolute top-1 right-2 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full hidden">1</span><span class="text-xl mb-0.5">📬</span><span class="text-[9px] font-bold text-yellow-200">ポスト</span></div>
+                        <div onclick="openModal('modal-friend')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-pink-400"><img src="フレンド.png" alt="フレンド" class="w-9 h-9 mb-0.5 object-contain group-hover:scale-110 transition-transform drop-shadow"><span class="text-[9px] font-bold text-pink-200">フレンド</span></div>
+                        <div onclick="openModal('modal-code')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400"><img src="コード.png" alt="コード" class="w-9 h-9 mb-0.5 object-contain group-hover:scale-110 transition-transform drop-shadow"><span class="text-[9px] font-bold text-blue-200">コード</span></div>
+                        <div onclick="openModal('modal-post')" class="panel home-btn-black p-2 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400 relative"><span id="post-badge" class="absolute top-1 right-2 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full hidden">1</span><img src="ポスト.png" alt="ポスト" class="w-9 h-9 mb-0.5 object-contain group-hover:scale-110 transition-transform drop-shadow"><span class="text-[9px] font-bold text-yellow-200">ポスト</span></div>
                     </div>
                     </div>
                 </div>
@@ -665,8 +688,12 @@
                         <div id="difficulty-list" class="space-y-2"></div>
                     </div>
                     <div id="quest-view-daily" class="sub-view">
-                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-blue-300">DAILY QUEST</h2></div>
-                        <div onclick="showPartySetup('DAILY: 化石採掘場', 15, 1.5)" class="panel p-3 flex justify-between items-center cursor-pointer border-l-4 border-blue-500"><div><span class="text-[8px] text-blue-400 block">素材</span><span class="text-xs font-bold">草の化石 採掘場 (中級)</span></div><span class="text-[10px] text-slate-400"><img src="スタミナ.png" alt="スタミナ" class="icon-stamina"> 15</span></div>
+                        <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-blue-300">DAILY QUEST</h2><span id="daily-quest-today" class="ml-auto text-[10px] font-black text-sky-200"></span></div>
+                        <div id="daily-quest-list" class="space-y-2"></div>
+                        <div class="panel p-3 mt-4 border-slate-600/50">
+                            <div class="text-[10px] font-black text-slate-300 mb-2">週間スケジュール <span class="text-slate-500 font-bold">(日本時間 毎日0時に更新)</span></div>
+                            <div id="daily-quest-schedule" class="space-y-1"></div>
+                        </div>
                     </div>
                     <div id="quest-view-story-mode" class="sub-view">
                         <div class="flex items-center mb-3 border-b border-white/10 pb-2"><button onclick="navQuestLayer('quest-view-top')" class="panel px-3 py-1 text-xs mr-3">◀</button><h2 class="text-sm font-black text-cyan-300">冒険クエスト - 章選択</h2></div>
@@ -722,6 +749,11 @@
                     <div id="exchange-list" class="space-y-2"></div>
                 </div>
 
+                <div id="content-zukan" class="content-section">
+                    <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-200 via-sky-400 to-indigo-400 drop-shadow mb-4 flex items-center border-b border-sky-900/40 pb-2"><img src="図鑑ボタン.png" alt="" class="w-7 h-7 mr-2 object-contain"> ZUKAN - 図鑑</h2>
+                    <div class="panel p-6 text-center border-sky-500/30"><div class="text-xs font-black text-sky-200 mb-1">図鑑は準備中です</div><div class="text-[10px] text-slate-400">これまでに出会ったものがここに記録されるようになります。</div></div>
+                </div>
+
                 <div id="content-settings" class="content-section">
                     <h2 class="text-xl font-black text-slate-200 mb-3 flex items-center border-b border-white/10 pb-2"><span class="text-2xl mr-2">⚙️</span> MENU & SETTINGS</h2>
                     <div class="panel p-3 mb-3">
@@ -754,15 +786,16 @@
             </div>
 
             <div class="absolute bottom-0 w-full bg-slate-950/95 backdrop-blur-lg border-t border-white/10 pb-safe z-40">
-                <div class="flex justify-around py-1.5 px-1">
-                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 flex-1 min-w-0"><img src="ホームボタン.png" alt="HOME" class="w-9 h-9 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[9px] font-black tracking-wider">HOME</span></button>
-                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="工房ボタン.png" alt="工房" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">工房</span></button>
-                    <button id="nav-btn-quest" onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="クエストボタン.png" alt="クエスト" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">クエスト</span></button>
-                    <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="ガチャボタン.png" alt="GACHA" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">宝箱</span></button>
-                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="カジノボタン.png" alt="KASINO" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">KASINO</span></button>
-                    <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><span class="text-3xl leading-none mb-0.5">🏛️</span><span class="text-[9px] font-black tracking-wider">広場</span></button>
-                    <button onclick="changeContent('content-exchange', this); renderExchangeTab(exchangeActiveTab);" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="交換所ボタン.png" alt="交換所" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">交換所</span></button>
-                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0"><img src="設定ボタン.png" alt="設定" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">設定</span></button>
+                <div id="nav-scroll" class="nav-scroll flex py-1.5 px-1">
+                    <button onclick="changeContent('content-home', this)" class="nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 nav-btn-fixed"><img src="ホームボタン.png" alt="HOME" class="w-9 h-9 mb-0.5 object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"><span class="text-[9px] font-black tracking-wider">HOME</span></button>
+                    <button onclick="changeContent('content-equip', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="工房ボタン.png" alt="工房" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">工房</span></button>
+                    <button id="nav-btn-quest" onclick="changeContent('content-quest', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="クエストボタン.png" alt="クエスト" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">クエスト</span></button>
+                    <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="ガチャボタン.png" alt="GACHA" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">宝箱</span></button>
+                    <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="カジノボタン.png" alt="KASINO" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">CASINO</span></button>
+                    <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="広場.png" alt="広場" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">広場</span></button>
+                    <button onclick="changeContent('content-exchange', this); renderExchangeTab(exchangeActiveTab);" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="交換所ボタン.png" alt="交換所" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">交換所</span></button>
+                    <button onclick="changeContent('content-zukan', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="図鑑ボタン.png" alt="図鑑" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">図鑑</span></button>
+                    <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="設定ボタン.png" alt="設定" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">設定</span></button>
                 </div>
             </div>
 
@@ -874,7 +907,7 @@
             </div>
             <div id="modal-friend" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
                 <div class="panel w-full max-w-sm p-4 border-pink-500/50 max-h-[80vh] flex flex-col">
-                    <h3 class="text-base font-black text-pink-300 mb-1 tracking-widest text-center border-b border-pink-500/30 pb-2 flex items-center justify-center"><span class="text-xl mr-2">🤝</span>FRIENDS</h3>
+                    <h3 class="text-base font-black text-pink-300 mb-1 tracking-widest text-center border-b border-pink-500/30 pb-2 flex items-center justify-center"><img src="フレンド.png" alt="" class="w-7 h-7 mr-2 object-contain">FRIENDS</h3>
                     <div class="flex mb-2 mt-2 bg-black/40 rounded-lg p-1 border border-white/10">
                         <button id="friend-tab-list" onclick="switchFriendTab('list')" class="flex-1 py-1.5 rounded-md text-[10px] font-black bg-pink-900/60 text-pink-200">マイフレンド (<span id="friend-count">0</span>)</button>
                         <button id="friend-tab-add" onclick="switchFriendTab('add')" class="flex-1 py-1.5 rounded-md text-[10px] font-black text-slate-400">フレンドになる</button>
@@ -1008,6 +1041,23 @@
             </div>
         </div>
 
+        <div id="modal-stamina" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
+            <div class="panel w-full max-w-sm p-6 text-center border-emerald-500/50">
+                <h3 class="text-base font-black text-emerald-300 mb-3 flex items-center justify-center"><img src="スタミナ.png" alt="" class="w-6 h-6 mr-2 object-contain">STAMINA</h3>
+                <p class="text-sm font-black text-white mb-1">スタミナを回復しますか？</p>
+                <p class="text-[10px] text-slate-400 mb-4">現在のスタミナ: <span id="stamina-modal-current" class="text-white font-black">0/0</span></p>
+                <div class="flex items-center justify-between bg-black/50 border border-amber-500/30 rounded-xl px-4 py-2 mb-1">
+                    <span class="text-[10px] font-black text-slate-300">回復コスト</span>
+                    <span class="text-sm font-black text-amber-300 flex items-center gap-1"><img src="草コイン.png" alt="" class="icon-coin icon-lg"> <span id="stamina-modal-cost">1,000</span></span>
+                </div>
+                <p class="text-[9px] text-slate-500 mb-5">所持草コイン: <span id="stamina-modal-coins">0</span></p>
+                <div class="flex space-x-2">
+                    <button onclick="closeModal('modal-stamina')" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">キャンセル</button>
+                    <button onclick="confirmStaminaRecover()" class="flex-1 panel py-2 rounded font-black text-xs bg-emerald-900/50 text-emerald-200 border-emerald-500">回復する</button>
+                </div>
+            </div>
+        </div>
+
         <div id="modal-confirm" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
             <div class="panel w-full max-w-sm p-6 text-center border-rose-500/50">
                 <h3 class="text-base font-black text-rose-400 mb-3">WARNING</h3>
@@ -1067,14 +1117,14 @@
 
         const ELEMENTS = {
             fire: { name: '火', icon: '🔥', class: 'elem-fire' },
-            ice: { name: '氷', icon: '❄️', class: 'elem-ice' },
+            ice: { name: '水', icon: '💧', class: 'elem-water' },
             wind: { name: '風', icon: '🌪️', class: 'elem-wind' },
             earth: { name: '土', icon: '🪨', class: 'elem-earth' },
             grass: { name: '草', icon: '🌿', class: 'elem-grass' },
             thunder: { name: '雷', icon: '⚡', class: 'elem-thunder' },
             huh: { name: 'huh', icon: '❓', class: 'elem-huh' },
             flame: { name: '炎', icon: '🌋', class: 'elem-flame' },
-            water: { name: '水', icon: '💧', class: 'elem-water' },
+            water: { name: '氷', icon: '❄️', class: 'elem-ice' },
             storm: { name: '嵐', icon: '⛈️', class: 'elem-storm' },
             rock: { name: '岩', icon: '⛰️', class: 'elem-rock' },
             tree: { name: '樹', icon: '🌳', class: 'elem-tree' },
@@ -1104,8 +1154,8 @@
                 coins: 5000,     
                 gachaTickets: 50,
                 materials: 10,   
-                stamina: 160,
-                maxStamina: 160,
+                stamina: 100,
+                maxStamina: 100,
                 lastStaminaUpdateTime: Date.now(),
                 friendCode: Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)
             },
@@ -1142,6 +1192,7 @@
             titles: { owned: [], equipped: null },
             plaza: { level: 1, lastUpdateTime: Date.now(), assignedChar: null },
             items: { reincarnationScroll: 0, lastScrollMonth: '' },
+            dailyQuest: { date: '', counts: { coin: 0, fossil: 0, xp: 0, core: 0 } },
             elementProgress: {
                 fire: { level: 1, exp: 0 }, ice: { level: 1, exp: 0 }, wind: { level: 1, exp: 0 },
                 earth: { level: 1, exp: 0 }, grass: { level: 1, exp: 0 }, thunder: { level: 1, exp: 0 },
@@ -2120,6 +2171,8 @@
 
             // ---- KAZIN専用データ (kazinData 配下にまとめて保存されている) ----
             const k = (raw.kazinData && typeof raw.kazinData === 'object') ? raw.kazinData : {};
+            // 初めてKAZINを始める場合(kazinData無し)はスタミナ上限100から。他ゲーム由来の多いスタミナ値も上限に収める
+            if (!raw.kazinData) state.player.stamina = Math.min(state.player.stamina, state.player.maxStamina);
             if (k.comment !== undefined) state.player.comment = k.comment;
             if (k.element !== undefined) state.player.element = k.element;
             if (k.maxStamina !== undefined) state.player.maxStamina = k.maxStamina;
@@ -2144,6 +2197,7 @@
             if (k.titles) state.titles = { ...state.titles, ...k.titles };
             if (k.plaza) state.plaza = { ...state.plaza, ...k.plaza };
             if (k.items) state.items = { ...state.items, ...k.items };
+            if (k.dailyQuest) state.dailyQuest = { date: k.dailyQuest.date || '', counts: { coin: 0, fossil: 0, xp: 0, core: 0, ...(k.dailyQuest.counts || {}) } };
             if (k.elementProgress) state.elementProgress = { ...state.elementProgress, ...k.elementProgress };
             if (k.elementUnlocked) state.elementUnlocked = k.elementUnlocked;
             if (k.recruitedChars) state.recruitedChars = k.recruitedChars;
@@ -2197,6 +2251,7 @@
                 missions: state.missions,
                 plaza: state.plaza,
                 items: state.items,
+                dailyQuest: state.dailyQuest,
                 recruitedChars: state.recruitedChars,
                 story: state.story,
                 elementProgress: state.elementProgress,
@@ -2346,7 +2401,7 @@
             updatePlazaIncome();
             const level = state.plaza.level;
             document.getElementById('plaza-level-display').innerText = `Lv.${level}`;
-            document.getElementById('plaza-rate-display').innerHTML = `<img src="草コイン.png" alt="草コイン" class="icon-coin"> ${getPlazaIncomeRate(level).toLocaleString()} / 分`;
+            document.getElementById('plaza-rate-display').innerHTML = `<img src="草コイン.png" alt="草コイン" class="icon-coin icon-lg"> ${getPlazaIncomeRate(level).toLocaleString()} / 分`;
 
             renderPlazaAssignedChar();
 
@@ -2359,12 +2414,12 @@
             const cost = getPlazaUpgradeCost(level);
             const nextRate = getPlazaIncomeRate(level + 1);
             section.innerHTML = `
-                <div class="text-xs font-black text-cyan-300 mb-2">次のレベル: Lv.${level + 1} (収益 <img src="草コイン.png" alt="草コイン" class="icon-coin">${nextRate.toLocaleString()}/分)</div>
+                <div class="text-xs font-black text-cyan-300 mb-2">次のレベル: Lv.${level + 1} (収益 <img src="草コイン.png" alt="草コイン" class="icon-coin icon-lg">${nextRate.toLocaleString()}/分)</div>
                 <div class="text-[10px] text-slate-300 mb-1">必要: <img src="草コイン.png" alt="草コイン" class="icon-coin">${cost.coins.toLocaleString()}</div>
                 <div class="text-[10px] text-slate-300 mb-3">+ <img src="草の化石.png" alt="草の化石" class="icon-material">${cost.fossil.toLocaleString()} または <img src="草核.png" alt="草核" class="icon-ticket">${cost.core.toLocaleString()}</div>
                 <div class="flex space-x-2">
-                    <button onclick="upgradePlaza('fossil')" class="flex-1 panel py-2 rounded text-[10px] font-black text-emerald-200 border-emerald-500/40">🌿 化石で強化</button>
-                    <button onclick="upgradePlaza('core')" class="flex-1 panel py-2 rounded text-[10px] font-black text-fuchsia-200 border-fuchsia-500/40">🔮 核で強化</button>
+                    <button onclick="upgradePlaza('fossil')" class="flex-1 panel py-2 rounded text-[10px] font-black text-emerald-200 border-emerald-500/40"><img src="草の化石.png" alt="" class="icon-material icon-lg"> 化石で強化</button>
+                    <button onclick="upgradePlaza('core')" class="flex-1 panel py-2 rounded text-[10px] font-black text-fuchsia-200 border-fuchsia-500/40"><img src="草核.png" alt="" class="icon-ticket icon-lg"> 草核で強化</button>
                 </div>
             `;
         }
@@ -2517,6 +2572,7 @@
         function switchLayer(layerId) {
             document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
             document.getElementById(layerId).classList.add('active');
+            if (layerId === 'view-main') updateNavButtonWidth();
         }
 
         function switchSubView(containerId, viewId) {
@@ -2552,6 +2608,7 @@
             if (id === 'modal-post') renderPostModal();
             if (id === 'modal-mission') { checkTitleUnlocks(); ensureDailyMissionsFresh(); renderMissionTab(missionActiveTab); }
             if (id === 'modal-reincarnate') renderReincarnateModal();
+            if (id === 'modal-stamina') renderStaminaRecoverModal();
             document.getElementById(id).classList.add('active'); 
         }
         function closeModal(id) { 
@@ -2590,9 +2647,22 @@
             }
             const aura = document.getElementById('home-element-aura');
             aura.className = `absolute w-56 h-56 rounded-full blur-3xl opacity-50 mix-blend-screen transition-all duration-700`;
-            const auraColors = { fire: 'bg-red-500', ice: 'bg-cyan-400', wind: 'bg-teal-400', earth: 'bg-amber-700', grass: 'bg-emerald-500', thunder: 'bg-yellow-400', huh: 'bg-slate-400', flame: 'bg-orange-500', water: 'bg-blue-500', storm: 'bg-indigo-500', rock: 'bg-stone-500', tree: 'bg-green-700', electric: 'bg-fuchsia-500' };
+            const auraColors = { fire: 'bg-red-500', ice: 'bg-blue-500', wind: 'bg-teal-400', earth: 'bg-amber-700', grass: 'bg-emerald-500', thunder: 'bg-yellow-400', huh: 'bg-slate-400', flame: 'bg-orange-500', water: 'bg-cyan-400', storm: 'bg-indigo-500', rock: 'bg-stone-500', tree: 'bg-green-700', electric: 'bg-fuchsia-500' };
             aura.classList.add(auraColors[state.player.element] || 'bg-slate-400');
         }
+
+        // 既存8ボタン時の幅を基準にボタン幅を固定する(ボタンが増えても大きさは変えない)
+        function updateNavButtonWidth() {
+            const nav = document.getElementById('nav-scroll');
+            if (!nav || !nav.clientWidth) return;
+            nav.style.setProperty('--nav-btn-w', ((nav.clientWidth - 8) / 8) + 'px');
+        }
+        function scrollNavToButton(btn) {
+            const nav = document.getElementById('nav-scroll');
+            if (!nav || !btn || !nav.scrollTo) return;
+            nav.scrollTo({ left: Math.max(0, btn.offsetLeft - (nav.clientWidth - btn.offsetWidth) / 2), behavior: 'smooth' });
+        }
+        window.addEventListener('resize', updateNavButtonWidth);
 
         function changeContent(contentId, btnElement) {
             playSound('tap');
@@ -2602,12 +2672,13 @@
             const mainLayer = document.getElementById('view-main');
             if (mainLayer) mainLayer.classList.toggle('home-bg', contentId === 'content-home');
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 flex-1 min-w-0";
+                btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed";
                 const icon = btn.firstElementChild;
                 if (icon) icon.classList.remove('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             });
             if(btnElement) {
-                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 flex-1 min-w-0";
+                scrollNavToButton(btnElement);
+                btnElement.className = "nav-btn active flex flex-col items-center p-1 rounded-xl transition-all text-cyan-400 nav-btn-fixed";
                 const icon = btnElement.firstElementChild;
                 if (icon) icon.classList.add('drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]');
             }
@@ -2660,14 +2731,53 @@
             saveGame();
         }
 
-        function startGame() {
-            initAudio(); playSound('decide'); switchLayer('view-main');
-            updateResources();
-            document.getElementById('home-player-name').innerText = state.player.userName;
-            applyPlayerIconToElement(document.getElementById('home-player-icon'), 'w-32 h-32');
-            if (!state.tutorialDone) {
-                setTimeout(startTutorial, 500);
+        // ==== スタミナ回復(草コイン消費) ====
+        const STAMINA_RECOVER_COST = 1000;
+        function renderStaminaRecoverModal() {
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+            set('stamina-modal-current', `${state.player.stamina}/${state.player.maxStamina}`);
+            set('stamina-modal-cost', STAMINA_RECOVER_COST.toLocaleString());
+            set('stamina-modal-coins', state.player.coins.toLocaleString());
+        }
+        function confirmStaminaRecover() {
+            if (state.player.stamina >= state.player.maxStamina) {
+                showToast('スタミナは満タンです', true);
+                closeModal('modal-stamina');
+                return;
             }
+            if (state.player.coins < STAMINA_RECOVER_COST) {
+                playSound('error');
+                showToast('草コインが足りません', true);
+                return;
+            }
+            state.player.coins -= STAMINA_RECOVER_COST;
+            state.player.stamina = state.player.maxStamina;
+            state.player.lastStaminaUpdateTime = Date.now();
+            updateResources();
+            saveGame();
+            playSound('decide');
+            closeModal('modal-stamina');
+            showToast('スタミナを回復しました！');
+        }
+
+        let gameStarting = false;
+        function startGame() {
+            if (gameStarting) return;              // 連打で二重に開始しない
+            gameStarting = true;
+            initAudio(); playSound('decide');
+            const fill = document.getElementById('loading-bar-fill');
+            if (fill) { fill.classList.remove('running'); void fill.offsetWidth; fill.classList.add('running'); }
+            switchLayer('view-loading');
+            setTimeout(() => {                     // 2秒のロード画面の後、ホーム画面へ
+                switchLayer('view-main');
+                updateResources();
+                document.getElementById('home-player-name').innerText = state.player.userName;
+                applyPlayerIconToElement(document.getElementById('home-player-icon'), 'w-32 h-32');
+                gameStarting = false;
+                if (!state.tutorialDone) {
+                    setTimeout(startTutorial, 500);
+                }
+            }, 2000);
         }
         function backToTitle() { playSound('tap'); switchLayer('view-title'); }
 
@@ -2684,6 +2794,7 @@
                 if (el) el.innerText = stageTitle;
             }
             switchSubView('content-quest', viewId);
+            if (viewId === 'quest-view-daily') renderDailyQuestView();
         }
 
         // ==== ストーリーモード (ビジュアルノベル) ====
@@ -4401,7 +4512,84 @@
         let formationSelection = { sub1: false, sub2: false };
         let helperSelection = { type: 'none', friendId: null };
 
-        function showPartySetup(stageName, cost, rewardMult) {
+        // ==== デイリークエスト (曜日ごとに内容が変わる / 勝利した回数だけが1日の回数制限に数えられる) ====
+        const DAILY_QUEST_COST = 15;
+        const DAILY_QUEST_TYPES = {
+            coin:   { name: '草コインクエスト', limit: 5, reward: { coins: 5000 },       accent: 'border-amber-500' },
+            fossil: { name: '草の化石クエスト', limit: 3, reward: { materials: 1000 },   accent: 'border-emerald-500' },
+            xp:     { name: 'XPクエスト',       limit: 3, reward: { elementExp: 150 },   accent: 'border-purple-500' },
+            core:   { name: '草核クエスト',     limit: 1, reward: { gachaTickets: 10 },  accent: 'border-fuchsia-500' }
+        };
+        // 0=日 1=月 2=火 3=水 4=木 5=金 6=土
+        const DAILY_QUEST_SCHEDULE = { 1: ['coin'], 2: ['coin'], 3: ['fossil'], 4: ['coin'], 5: ['fossil'], 6: ['xp'], 0: ['xp', 'core'] };
+        const DAILY_WEEKDAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+
+        function getJSTDayOfWeek() {
+            const now = new Date();
+            const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+            return new Date(utcMs + 9 * 60 * 60000).getDay();
+        }
+        function ensureDailyQuestFresh() {
+            const today = getJSTDateString();
+            if (state.dailyQuest.date !== today) {
+                state.dailyQuest = { date: today, counts: { coin: 0, fossil: 0, xp: 0, core: 0 } };
+            }
+        }
+        function dailyQuestRemaining(type) {
+            ensureDailyQuestFresh();
+            return Math.max(0, DAILY_QUEST_TYPES[type].limit - (state.dailyQuest.counts[type] || 0));
+        }
+        function dailyRewardHtml(type) {
+            const r = DAILY_QUEST_TYPES[type].reward;
+            if (r.coins) return `<img src="草コイン.png" alt="" class="icon-coin"> ${r.coins.toLocaleString()}`;
+            if (r.materials) return `<img src="草の化石.png" alt="" class="icon-material"> ${r.materials.toLocaleString()}`;
+            if (r.gachaTickets) return `<img src="草核.png" alt="" class="icon-ticket"> ${r.gachaTickets.toLocaleString()}`;
+            return `<span class="text-[8px] font-black bg-purple-600/70 text-white px-1 rounded">XP</span> 元素EXP +${r.elementExp}`;
+        }
+        function renderDailyQuestView() {
+            ensureDailyQuestFresh();
+            const dow = getJSTDayOfWeek();
+            const todayEl = document.getElementById('daily-quest-today');
+            if (todayEl) todayEl.innerText = `本日(${DAILY_WEEKDAY_NAMES[dow]}曜日)`;
+
+            const list = document.getElementById('daily-quest-list');
+            if (list) {
+                list.innerHTML = DAILY_QUEST_SCHEDULE[dow].map(type => {
+                    const q = DAILY_QUEST_TYPES[type];
+                    const remain = dailyQuestRemaining(type);
+                    const done = remain <= 0;
+                    return `
+                        <div ${done ? '' : `onclick="startDailyQuest('${type}')"`} class="panel p-3 flex items-center border-l-4 ${q.accent} ${done ? 'opacity-50' : 'cursor-pointer'}">
+                            <div class="flex-1">
+                                <div class="text-xs font-black text-white">${q.name}</div>
+                                <div class="text-[9px] text-slate-300 mt-0.5">報酬(1回): ${dailyRewardHtml(type)}</div>
+                                <div class="text-[9px] font-black mt-0.5 ${done ? 'text-slate-500' : 'text-amber-300'}">${done ? '本日の挑戦は終了しました' : `本日の残り ${remain}/${q.limit} 回`}</div>
+                            </div>
+                            <span class="text-[10px] text-slate-400"><img src="スタミナ.png" alt="スタミナ" class="icon-stamina"> ${DAILY_QUEST_COST}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            const sched = document.getElementById('daily-quest-schedule');
+            if (sched) {
+                sched.innerHTML = [1, 2, 3, 4, 5, 6, 0].map(d => `
+                    <div class="flex items-center text-[10px] ${d === dow ? 'text-amber-300 font-black' : 'text-slate-400'}">
+                        <span class="w-8">${DAILY_WEEKDAY_NAMES[d]}曜</span>
+                        <span>${DAILY_QUEST_SCHEDULE[d].map(t => DAILY_QUEST_TYPES[t].name).join(' / ')}</span>
+                        ${d === dow ? '<span class="ml-auto text-[8px] bg-amber-500/20 border border-amber-400/50 rounded-full px-1.5">TODAY</span>' : ''}
+                    </div>
+                `).join('');
+            }
+        }
+        function startDailyQuest(type) {
+            const q = DAILY_QUEST_TYPES[type];
+            if (!q) return;
+            if (dailyQuestRemaining(type) <= 0) { showToast('本日の挑戦回数の上限に達しました', true); return; }
+            showPartySetup(`DAILY: ${q.name}`, DAILY_QUEST_COST, 1, type);
+        }
+
+        function showPartySetup(stageName, cost, rewardMult, dailyType = null) {
             if(state.player.stamina < cost) return showToast("スタミナが足りません", true);
             playSound('tap');
             
@@ -4409,7 +4597,7 @@
             helperSelection = { type: 'none', friendId: null };
             // 撤退した際に元のステージ一覧画面へ戻れるよう、現在アクティブなサブビューを記録しておく
             const activeSubView = document.querySelector('#content-quest .sub-view.active');
-            state.questPrep = { stageName, cost, mult: rewardMult, returnView: activeSubView ? activeSubView.id : 'quest-view-top' };
+            state.questPrep = { stageName, cost, mult: rewardMult, dailyType, returnView: activeSubView ? activeSubView.id : 'quest-view-top' };
             document.getElementById('setup-cost-display').innerHTML = `<img src="スタミナ.png" alt="スタミナ" class="icon-stamina"> ${cost}`;
             
             renderPartySetupList();
@@ -4513,6 +4701,7 @@
         }
 
         function executeBattleStart() {
+            if (state.questPrep.dailyType && dailyQuestRemaining(state.questPrep.dailyType) <= 0) return showToast('本日の挑戦回数の上限に達しました', true);
             if(state.player.stamina < state.questPrep.cost) return showToast("スタミナが足りません", true);
             state.player.stamina -= state.questPrep.cost;
             updateResources(); saveGame();
@@ -4870,13 +5059,30 @@
                 return;
             }
             
-            const coinRew = Math.floor(300 * battleState.rewardMult);
-            const matRew = Math.floor(2 * battleState.rewardMult);
-            
-            state.player.coins += coinRew;
-            state.player.materials = (state.player.materials || 0) + matRew;
+            const dType = state.questPrep && state.questPrep.dailyType;
+            const dq = dType ? DAILY_QUEST_TYPES[dType] : null;
+            const row = (label, val, color) => `<div class="flex justify-between items-center bg-black/50 p-2 rounded"><span>${label}</span><span class="${color} font-black">+${val.toLocaleString()}</span></div>`;
+            let rewardRows = '', remainNote = '';
+            if (dq) {
+                // デイリークエスト: 種類ごとの報酬。勝利した回数だけが1日の回数に数えられる(敗北・撤退は数えない)
+                ensureDailyQuestFresh();
+                state.dailyQuest.counts[dType] = Math.min(dq.limit, (state.dailyQuest.counts[dType] || 0) + 1);
+                const r = dq.reward;
+                if (r.coins) { state.player.coins += r.coins; rewardRows += row('<img src="草コイン.png" alt="コイン" class="icon-coin"> 草コイン', r.coins, 'text-amber-300'); }
+                if (r.materials) { state.player.materials = (state.player.materials || 0) + r.materials; rewardRows += row('<img src="草の化石.png" alt="化石" class="icon-material"> 草の化石', r.materials, 'text-emerald-300'); }
+                if (r.gachaTickets) { state.player.gachaTickets += r.gachaTickets; rewardRows += row('<img src="草核.png" alt="草核" class="icon-ticket"> 草核', r.gachaTickets, 'text-fuchsia-300'); }
+                if (r.elementExp) rewardRows += row('<span class="text-[9px] font-black bg-purple-600/70 text-white px-1 rounded">XP</span> 元素EXP', r.elementExp, 'text-purple-300');
+                const left = dailyQuestRemaining(dType);
+                remainNote = `<p class="text-[10px] text-slate-400 text-center pt-1">本日の残り ${left}/${dq.limit} 回</p>`;
+            } else {
+                const coinRew = Math.floor(300 * battleState.rewardMult);
+                const matRew = Math.floor(2 * battleState.rewardMult);
+                state.player.coins += coinRew;
+                state.player.materials = (state.player.materials || 0) + matRew;
+                rewardRows = row('<img src="草コイン.png" alt="コイン" class="icon-coin"> コイン', coinRew, 'text-amber-300') + row('<img src="草の化石.png" alt="化石" class="icon-material"> 草の化石', matRew, 'text-emerald-300');
+            }
             state.stats.questClears = (state.stats.questClears || 0) + 1;
-            addElementExp(ELEMENT_EXP_PER_QUEST);
+            addElementExp(dq && dq.reward.elementExp ? dq.reward.elementExp : ELEMENT_EXP_PER_QUEST);
             ensureDailyMissionsFresh();
             state.missions.daily.progress.questClears = (state.missions.daily.progress.questClears || 0) + 1;
             checkTitleUnlocks();
@@ -4887,10 +5093,7 @@
             setTimeout(() => {
                 document.getElementById('result-title').innerText = "QUEST CLEARED!";
                 document.getElementById('result-title').className = "text-2xl font-black mb-3 text-amber-400";
-                document.getElementById('result-content').innerHTML = `
-                    <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草コイン.png" alt="コイン" class="icon-coin"> コイン</span><span class="text-amber-300 font-black">+${coinRew}</span></div>
-                    <div class="flex justify-between items-center bg-black/50 p-2 rounded"><span><img src="草の化石.png" alt="化石" class="icon-material"> 草の化石</span><span class="text-emerald-300 font-black">+${matRew}</span></div>
-                `;
+                document.getElementById('result-content').innerHTML = rewardRows + remainNote;
                 document.getElementById('result-ok-btn').innerText = "ステージ一覧に戻る";
                 openModal('modal-result');
             }, 1000);
