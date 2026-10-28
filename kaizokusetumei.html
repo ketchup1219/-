@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-texture-quality="low" data-effect-quality="low">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -895,6 +895,46 @@
       .splash-kanji { letter-spacing: 0.15em; }
       #film-grain { opacity: 0.035; }
     }
+
+    /* ===== 品質設定 ===== */
+    /* 中品質: これまでの「低」設定 */
+    [data-texture-quality="medium"] #film-grain,
+    [data-texture-quality="medium"] #cinematic-vignette,
+    [data-texture-quality="medium"] .holo-border::after,
+    [data-texture-quality="medium"] .flow-border::before,
+    [data-texture-quality="medium"] .foil-texture::before { display: none; }
+    [data-effect-quality="medium"] #speed-lines,
+    [data-effect-quality="medium"] #char-burst-flash,
+    [data-effect-quality="medium"] #chroma-flash,
+    [data-effect-quality="medium"] #bg-slash-wipe,
+    [data-effect-quality="medium"] #bg-elemental-flash,
+    [data-effect-quality="medium"] .char-thumb.active::before { display: none; }
+    [data-effect-quality="medium"] .bg-layer.bg-active,
+    [data-effect-quality="low"] .bg-layer.bg-active { filter: none; }
+    [data-effect-quality="medium"] .ring-orbit-particle,
+    [data-effect-quality="low"] .ring-orbit-particle { box-shadow: none !important; }
+    [data-effect-quality="medium"] .click-shockwave,
+    [data-effect-quality="low"] .click-shockwave { box-shadow: none; }
+
+    /* 低品質: 旧PC向け。重い常時テクスチャと開始演出を停止 */
+    [data-texture-quality="low"] #film-grain,
+    [data-texture-quality="low"] #cinematic-vignette,
+    [data-texture-quality="low"] .holo-border::after,
+    [data-texture-quality="low"] .flow-border::before,
+    [data-texture-quality="low"] .foil-texture::before,
+    [data-effect-quality="low"] #speed-lines,
+    [data-effect-quality="low"] #char-burst-flash,
+    [data-effect-quality="low"] #chroma-flash,
+    [data-effect-quality="low"] #bg-slash-wipe,
+    [data-effect-quality="low"] #bg-elemental-flash,
+    [data-effect-quality="low"] #splash-light,
+    [data-effect-quality="low"] #splash-godrays,
+    [data-effect-quality="low"] #splash-rays,
+    [data-effect-quality="low"] #splash-caustics,
+    [data-effect-quality="low"] #splash-shockwave,
+    [data-effect-quality="low"] #splash-flash,
+    [data-effect-quality="low"] .char-thumb.active::before { display: none; }
+    [data-effect-quality="low"] #particle-canvas { opacity: 0.45; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
@@ -975,6 +1015,9 @@
 
     <!-- RIGHT: ACTIONS -->
     <div class="flex items-center space-x-2 sm:space-x-4">
+      <button class="text-gray-300 hover:text-wa-gold p-1.5 sm:p-2 bg-black/40 rounded-sm transition-all border border-wa-gold/30 hover:border-wa-gold" onclick="openSettings()" aria-label="設定">
+        <i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+      </button>
       <button class="text-gray-300 hover:text-wa-gold p-1.5 sm:p-2 bg-black/40 rounded-sm transition-all border border-wa-gold/30 hover:border-wa-gold" onclick="toggleMute()" aria-label="BGM Toggle">
         <i id="bgm-icon" data-lucide="volume-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
       </button>
@@ -1135,6 +1178,36 @@
     </div>
   </footer>
 
+  <!-- ==================== SETTINGS MODAL ==================== -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[210] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-11/12 max-w-md bg-wa-dark/95 border border-wa-gold/60 wa-clip p-6 shadow-[0_0_35px_rgba(212,175,55,0.35)]">
+      <div class="flex items-center justify-between border-b border-wa-gold/30 pb-3 mb-5">
+        <h2 class="text-lg font-mincho font-bold tracking-[0.2em] text-wa-gold">設定</h2>
+        <button onclick="closeSettings()" class="text-gray-400 hover:text-white" aria-label="設定を閉じる"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-5 font-jp">
+        <label class="block">
+          <span class="block text-xs tracking-widest text-gray-300 mb-2">テクスチャ品質</span>
+          <select id="texture-quality-select" onchange="setQuality('texture', this.value)" class="w-full bg-black/60 border border-wa-gold/40 text-white px-3 py-2 text-sm rounded-sm focus:outline-none focus:border-wa-gold">
+            <option value="low">低（超軽量）</option>
+            <option value="medium">中（従来の低品質）</option>
+            <option value="high">高（現在の品質）</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="block text-xs tracking-widest text-gray-300 mb-2">エフェクト品質</span>
+          <select id="effect-quality-select" onchange="setQuality('effect', this.value)" class="w-full bg-black/60 border border-wa-gold/40 text-white px-3 py-2 text-sm rounded-sm focus:outline-none focus:border-wa-gold">
+            <option value="low">低（超軽量）</option>
+            <option value="medium">中（従来の低品質）</option>
+            <option value="high">高（現在の品質）</option>
+          </select>
+        </label>
+        <p class="text-[10px] text-gray-400 leading-relaxed">品質設定はこのブラウザに保存されます。初期設定は低です。</p>
+      </div>
+      <button onclick="closeSettings()" class="btn-wa mt-6 w-full py-2 text-xs font-bold tracking-widest">閉じる</button>
+    </div>
+  </div>
+
   <!-- ==================== WORLD MAP MODAL ==================== -->
   <div id="map-modal" class="fixed inset-0 bg-wa-dark/90 backdrop-blur-xl z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 ease-out">
     <div class="relative w-11/12 max-w-6xl bg-wa-dark/95 border-2 border-wa-gold/50 wa-clip p-1 shadow-[0_0_35px_rgba(212,175,55,0.4)] flex flex-col h-[85vh] transform scale-95 transition-all duration-400" id="map-modal-card">
@@ -1163,9 +1236,8 @@
 
           <div class="w-full h-full overflow-auto flex items-center justify-center" id="map-container">
             <div class="relative transition-transform duration-300 ease-out origin-center" id="map-zoom-target" style="transform: scale(1);">
-              
-              <!-- Map SVG -->
-              <div id="map-fallback-svg" class="w-full h-full min-w-[800px] min-h-[500px] flex items-center justify-center relative p-6">
+              <img src="../ルージュガレオンアセット/KAZIN世界地図.png" alt="KAZIN世界地図" class="block max-w-none max-h-[68vh] w-auto h-auto object-contain" onerror="this.alt='地図画像を読み込めませんでした'">
+              <div id="map-fallback-svg" class="hidden">
                 <svg viewBox="0 0 1000 600" class="w-full h-full filter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" xmlns="http://www.w3.org/2000/svg">
                   <!-- 和紙ベース -->
                   <rect width="1000" height="600" fill="#14110e" rx="10" stroke="#d4af37" stroke-width="2"/>
@@ -2007,13 +2079,13 @@
           {
             id: "style_haru2", name: "制服", iconUrl: "ハル制服.png",
             description: "バーンの高校の同級生でクラスメイト、とにかく自由でハチャメチャで自分の思うがまま動いている（それゆえ、よく迷惑をかける）  \nバーンと楽しい同居生活を送っていた、あの日までは.....",
-            quote: "「誰かに期待してこんな気持ちになるくらいなら、私は独りでいい…」",
+            quote: "「アタシはアタシのまま、1歩ずつ歩く。」",
             svg: svgBlueWhiteThunder
       },
      　　 {
             id: "style_haru3", name: "水着", iconUrl: "ハル水着.png",
             description: "夏休みを満喫した世界線のハル（実際はほぼ休みが無いらしい） \n実はスパイスが大好きで自室に大量のスパイスを所持しているらしい。",
-            quote: "「俺は俺のまま、1歩ずつ歩く。」",
+            quote: "「仏の顔もサンドバッグ！」",
             svg: svgBlueWhiteThunder
       },
       {
@@ -2342,6 +2414,51 @@
     let isMuted = false;
     let currentStyleIndex = 0;
     let mapZoomScale = 1;
+    const QUALITY_DEFAULT = 'low';
+    const QUALITY_VALUES = ['low', 'medium', 'high'];
+
+    function getQuality(type) {
+      return document.documentElement.dataset[`${type}Quality`] || QUALITY_DEFAULT;
+    }
+
+    function applyQualitySettings() {
+      ['texture', 'effect'].forEach(type => {
+        const key = `rouge-galleon-${type}-quality`;
+        let value = QUALITY_DEFAULT;
+        try {
+          value = localStorage.getItem(key) || QUALITY_DEFAULT;
+        } catch (e) {}
+        if (!QUALITY_VALUES.includes(value)) value = QUALITY_DEFAULT;
+        document.documentElement.dataset[`${type}Quality`] = value;
+        const select = document.getElementById(`${type}-quality-select`);
+        if (select) select.value = value;
+      });
+    }
+
+    function setQuality(type, value) {
+      if (!['texture', 'effect'].includes(type) || !QUALITY_VALUES.includes(value)) return;
+      document.documentElement.dataset[`${type}Quality`] = value;
+      try { localStorage.setItem(`rouge-galleon-${type}-quality`, value); } catch (e) {}
+      if (type === 'effect') {
+        initParticles();
+        if (getQuality('effect') === 'low') burstSparks = [];
+      }
+      playSE('se-click');
+    }
+
+    function openSettings() {
+      playSE('se-click');
+      const modal = document.getElementById('settings-modal');
+      if (!modal) return;
+      applyQualitySettings();
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeSettings() {
+      playSE('se-click');
+      const modal = document.getElementById('settings-modal');
+      if (modal) modal.classList.add('opacity-0', 'pointer-events-none');
+    }
 
     // --- ボイスリストのキャッシュ ---
     let voiceList = [];
@@ -2557,6 +2674,9 @@
     }
     let burstSparks = [];
     function spawnBurstSparks(x, y, color, count = 18) {
+      const quality = getQuality('effect');
+      if (quality === 'low') count = Math.ceil(count * 0.08);
+      if (quality === 'medium') count = Math.ceil(count * 0.35);
       for (let i = 0; i < count; i++) burstSparks.push(new BurstSpark(x, y, color));
     }
 
@@ -2604,10 +2724,13 @@
     function initParticles() {
       sakuraPetals = []; goldDust = []; digitalBits = []; glowRibbons = []; burstSparks = [];
       const isMobile = viewW() < 768;
-      const nSakura = isMobile ? 32 : 58;
-      const nGold = isMobile ? 26 : 48;
-      const nDigital = isMobile ? 16 : 28;
-      const nRibbon = isMobile ? 4 : 8;
+      const quality = getQuality('effect');
+      const low = quality === 'low';
+      const medium = quality === 'medium';
+      const nSakura = low ? (isMobile ? 2 : 5) : medium ? (isMobile ? 12 : 24) : (isMobile ? 32 : 58);
+      const nGold = low ? (isMobile ? 2 : 5) : medium ? (isMobile ? 10 : 20) : (isMobile ? 26 : 48);
+      const nDigital = low ? (isMobile ? 1 : 3) : medium ? (isMobile ? 6 : 12) : (isMobile ? 16 : 28);
+      const nRibbon = low ? 0 : medium ? (isMobile ? 2 : 4) : (isMobile ? 4 : 8);
       for (let i = 0; i < nSakura; i++) sakuraPetals.push(new SakuraPetal());
       for (let i = 0; i < nGold; i++) goldDust.push(new GoldDust());
       for (let i = 0; i < nDigital; i++) digitalBits.push(new DigitalBit());
@@ -2669,7 +2792,8 @@
       const frag = document.createDocumentFragment();
 
       // 気泡（バブル）密度2倍
-      const BUBBLE_COUNT = 52;
+      const bubbleQuality = getQuality('effect');
+      const BUBBLE_COUNT = bubbleQuality === 'low' ? 4 : bubbleQuality === 'medium' ? 20 : 52;
       for (let i = 0; i < BUBBLE_COUNT; i++) {
         const b = document.createElement('div');
         b.className = 'bubble';
@@ -2688,7 +2812,7 @@
       }
 
       // 光の粒子（金粉・きらめき）密度2倍
-      const DUST_COUNT = 40;
+      const DUST_COUNT = bubbleQuality === 'low' ? 3 : bubbleQuality === 'medium' ? 16 : 40;
       for (let i = 0; i < DUST_COUNT; i++) {
         const d = document.createElement('div');
         d.className = 'light-dust';
@@ -2730,6 +2854,7 @@
 
     // --- Initialization ---
     window.addEventListener('DOMContentLoaded', () => {
+      applyQualitySettings();
       renderRegions();
       selectRegion('kazin'); // 最初はカグヤの勢力
       lucide.createIcons();
@@ -2739,24 +2864,37 @@
       const startOverlay = document.getElementById('start-overlay');
       const splashScreen = document.getElementById('splash-screen');
 
+      let appStarted = false;
       const startApp = () => {
-        document.removeEventListener('click', startApp);
-        document.removeEventListener('keydown', startApp);
-        document.removeEventListener('touchstart', startApp);
-        
-        if (startOverlay) startOverlay.style.display = 'none';
+        if (appStarted) return;
+        appStarted = true;
+
+        if (startOverlay) {
+          startOverlay.removeEventListener('click', startApp);
+          startOverlay.removeEventListener('pointerup', startApp);
+          startOverlay.removeEventListener('touchend', startApp);
+          startOverlay.removeEventListener('keydown', startApp);
+          startOverlay.style.display = 'none';
+        }
         if (splashScreen) splashScreen.style.display = 'flex'; // スプラッシュ表示でアニメーション開始
-        
+
         createSplashBubbles(); // 深海の気泡・光の粒子を生成
 
-        // イントロ演出（深海→水面→地上の光、7.5秒）が終わったらスプラッシュを非表示
+        // 開始演出の時間は品質に関係なく高品質と同じ7.5秒に統一
         window.setTimeout(hideSplash, SPLASH_DURATION);
       };
 
-      // ユーザーのインタラクションを待機
-      document.addEventListener('click', startApp);
-      document.addEventListener('keydown', startApp);
-      document.addEventListener('touchstart', startApp, { passive: true });
+      // オーバーレイ自身で入力を受け、現行・旧型のタッチ操作に対応
+      if (startOverlay) {
+        startOverlay.addEventListener('click', startApp);
+        startOverlay.addEventListener('pointerup', startApp);
+        startOverlay.addEventListener('touchend', startApp, { passive: true });
+        startOverlay.addEventListener('keydown', startApp);
+      }
+      // オーバーレイを表示できない場合にも開始できるよう文書側も維持
+      document.addEventListener('click', startApp, { once: true });
+      document.addEventListener('keydown', startApp, { once: true });
+      document.addEventListener('touchend', startApp, { once: true, passive: true });
 
       document.body.addEventListener('click', function playBgmOnce() {
         if (!isMuted) {
@@ -2957,7 +3095,7 @@
       wrap.innerHTML = '';
       const isMobile = viewW() < 768;
       const radius = isMobile ? 140 : 200;
-      const COUNT = 10;
+      const COUNT = getQuality('effect') === 'low' ? 1 : getQuality('effect') === 'medium' ? 4 : 10;
       for (let i = 0; i < COUNT; i++) {
         const p = document.createElement('div');
         p.className = 'ring-orbit-particle';
@@ -3022,7 +3160,7 @@
       // 破片エフェクト（動的生成・密度強化）
       shardWrap.innerHTML = '';
       shardWrap.classList.remove('bg-shard-play');
-      const SHARD_COUNT = 28;
+      const SHARD_COUNT = getQuality('effect') === 'low' ? 2 : getQuality('effect') === 'medium' ? 10 : 28;
       const centerX = 50, centerY = 50;
       for (let i = 0; i < SHARD_COUNT; i++) {
         const s = document.createElement('div');
