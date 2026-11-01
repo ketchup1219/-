@@ -920,6 +920,7 @@ h1{font-size:clamp(30px,6.5vw,46px);text-shadow:0 2px 0 #54200a, 0 0 12px #ffe56
 .bet{border:2px solid rgba(177,237,255,.55);box-shadow:0 0 0 2px rgba(0,58,146,.65),0 0 24px rgba(41,191,255,.25),inset 0 1px 0 rgba(255,255,255,.4);}
 .max{border:2px solid rgba(255,239,170,.7);box-shadow:0 0 0 2px rgba(123,48,0,.65),0 0 24px rgba(255,149,36,.26),inset 0 1px 0 rgba(255,255,255,.4);}
 .auto{border:2px solid rgba(176,255,238,.55);box-shadow:0 0 0 2px rgba(0,70,62,.65),0 0 24px rgba(61,248,255,.2),inset 0 1px 0 rgba(255,255,255,.4);}
+.betDown{background:linear-gradient(180deg,#b8c7df,#465675);border:2px solid rgba(214,229,255,.55);box-shadow:0 0 0 2px rgba(28,45,78,.7),0 0 18px rgba(104,160,255,.22),inset 0 1px 0 rgba(255,255,255,.4);}
 .leverDock{filter:drop-shadow(0 0 18px rgba(255,182,54,.2));}
 .leverBase{background:radial-gradient(circle at 40% 20%,#fff1a6,#b26c16 25%,#34200c 54%,#08090d 72%);border:3px solid #ffd76e;box-shadow:inset 0 0 18px #000,0 0 0 3px #5b2d0a,0 0 32px rgba(255,178,50,.45);}
 .lever{background:radial-gradient(circle at 35% 26%,#fff,#ffcf72 12%,#ff4f48 28%,#891124 63%,#260711 100%);border:4px solid #ffe69b;box-shadow:inset -10px -12px 22px rgba(0,0,0,.58),inset 8px 8px 20px rgba(255,255,255,.4),0 0 0 4px #6e270f,0 0 32px rgba(255,56,84,.62);}
@@ -934,6 +935,7 @@ h1{font-size:clamp(30px,6.5vw,46px);text-shadow:0 2px 0 #54200a, 0 0 12px #ffe56
 html{min-width:320px;background:#020307;}
 body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none;touch-action:manipulation;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));padding-bottom:max(34px,env(safe-area-inset-bottom));}
 button,.lever,.reel{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+button.betDown,button.bet{user-select:none;-webkit-user-select:none;}
 button{min-height:52px;}
 .lever{cursor:pointer;}
 
@@ -965,8 +967,8 @@ button{min-height:52px;}
   .meter{margin:9px 2px 2px;padding:8px 8px;}
   .meterLabel{font-size:10px;margin-bottom:6px;}
   .meterBar{height:9px;}
-  .controlDeck{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:11px 2px 0;}
-  .controlDeck button{padding:11px 3px;min-height:50px;font-size:12px;letter-spacing:.02em;border-radius:13px;}
+  .controlDeck{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:11px 2px 0;}
+  .controlDeck button{padding:11px 2px;min-height:50px;font-size:11px;letter-spacing:0;border-radius:13px;}
   .controlHint{margin:8px 5px 0;font-size:10px;line-height:1.45;}
   .leverDock{margin-top:12px;transform:scale(.82);transform-origin:top center;margin-bottom:-18px;}
   .payout{margin-top:2px;padding:12px 10px;border-radius:16px;}
@@ -1125,11 +1127,12 @@ button{min-height:52px;}
       </div>
 
       <div class="controlDeck">
+        <button class="betDown" id="betDownBtn">BET -100</button>
         <button class="bet" id="betBtn">BET +100</button>
         <button class="max" id="maxBtn">MAX BET</button>
         <button class="auto" id="autoBtn">AUTO OFF</button>
       </div>
-      <div class="controlHint">AUTO中は自動でレバー→順押し停止。もう一度押すとラウンド後に停止。</div>
+      <div class="controlHint">BETの＋/−は長押しで連打。AUTO中は自動でレバー→順押し停止。もう一度押すとラウンド後に停止。</div>
 
       <div class="leverDock">
         <div class="leverBase"></div>
@@ -1384,9 +1387,11 @@ function pulseHype(delta) {
 
 function setSpinControls(spinningNow) {
   const betBtn = document.getElementById("betBtn");
+  const betDownBtn = document.getElementById("betDownBtn");
   const maxBtn = document.getElementById("maxBtn");
 
   betBtn.disabled = spinningNow;
+  betDownBtn.disabled = spinningNow;
   maxBtn.disabled = spinningNow;
   stopButtons.forEach((btn) => {
     btn.disabled = !spinningNow;
@@ -1394,6 +1399,7 @@ function setSpinControls(spinningNow) {
   });
 
   betBtn.style.opacity = spinningNow ? "0.55" : "1";
+  betDownBtn.style.opacity = spinningNow ? "0.55" : "1";
   maxBtn.style.opacity = spinningNow ? "0.55" : "1";
   leverEl.classList.toggle("disabled", spinningNow);
   leverEl.style.opacity = spinningNow ? "0.6" : "1";
@@ -1916,18 +1922,78 @@ setChanceLamp("NORMAL MODE", "#3df8ff");
 updateMachineState("待機中", "#ffb2c2");
 
 const betButton = document.getElementById("betBtn");
+const betDownButton = document.getElementById("betDownBtn");
 const maxButton = document.getElementById("maxBtn");
 
-betButton.onclick = function () {
+function adjustBet(delta) {
   if (roundActive || coins <= 0) return;
-  bet = Math.min(coins, bet + 100);
-  autoStake = Math.max(100, bet);
+  const nextBet = Math.max(0, Math.min(coins, bet + delta));
+  if (nextBet === bet) return;
+  bet = nextBet;
+  autoStake = Math.max(100, bet || 100);
   betEl.textContent = bet.toLocaleString();
-  safePlay(betSE, .9);
-  updateStatus(`💰 BET ${bet.toLocaleString()} COIN`, "#00e5ff");
-  updateMachineState("BET中", "#71f2ff");
-  pulseHype(2);
-};
+  safePlay(betSE, delta > 0 ? .9 : .78);
+  if (delta > 0) {
+    updateStatus(`💰 BET ${bet.toLocaleString()} COIN`, "#00e5ff");
+    updateMachineState("BET中", "#71f2ff");
+    pulseHype(2);
+  } else {
+    updateStatus(bet > 0 ? `↩ BET ${bet.toLocaleString()} COIN` : "BETを選択してください", "#8fd7ff");
+    updateMachineState("BET調整", "#8fd7ff");
+    pulseHype(-1);
+  }
+}
+
+betDownButton.onclick = function () { adjustBet(-100); };
+
+betButton.onclick = function () { adjustBet(100); };
+
+function installBetHold(button, delta) {
+  let holdTimer = null;
+  let repeatTimer = null;
+  let didHold = false;
+  let suppressClick = false;
+
+  const clearHold = () => {
+    clearTimeout(holdTimer);
+    clearInterval(repeatTimer);
+    holdTimer = null;
+    repeatTimer = null;
+  };
+
+  button.addEventListener("pointerdown", (event) => {
+    if (button.disabled) return;
+    didHold = false;
+    try { button.setPointerCapture(event.pointerId); } catch (e) {}
+    holdTimer = setTimeout(() => {
+      didHold = true;
+      adjustBet(delta);
+      repeatTimer = setInterval(() => adjustBet(delta), 105);
+    }, 450);
+  });
+
+  const endHold = () => {
+    clearHold();
+    if (didHold) {
+      suppressClick = true;
+      setTimeout(() => { suppressClick = false; }, 80);
+    }
+  };
+
+  button.addEventListener("pointerup", endHold);
+  button.addEventListener("pointercancel", endHold);
+  button.addEventListener("pointerleave", endHold);
+  button.addEventListener("click", (event) => {
+    if (suppressClick) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      suppressClick = false;
+    }
+  }, true);
+}
+
+installBetHold(betDownButton, -100);
+installBetHold(betButton, 100);
 
 maxButton.onclick = function () {
   if (roundActive || coins <= 0) return;
