@@ -1035,7 +1035,7 @@ button{min-height:52px;}
 <body>
   <div class="game" id="gameFrame">
     <div class="marquee">PREMIUM PIRATE JACKPOT</div>
-    <h1>🏴‍☠️ 海賊スロット 🏴‍☠️</h1>
+    <h1>⭐ KAZINスロット ⭐</h1>
     <div class="subtitle">ver.2.0</div>
 
     <div class="machine-shell">
@@ -1761,7 +1761,10 @@ function triggerWinEffect(payout, result, roundBet) {
     updateStatus(`🔁 REPLAY +${payout.toLocaleString()} COIN`, "#69fff0");
     setChanceLamp("REPLAY", "#69fff0");
     pulseHype(5);
-    burstFromReel(result.findIndex((symbol) => counts[symbol] === 2), 14, "spark");
+    const pairIndex = result.findIndex((symbol) => counts[symbol] === 2);
+    burstFromReel(pairIndex, 18, "coin");
+    burstFromReel(pairIndex, 10, "spark");
+    setTimeout(() => spawnCoinShower(10), 120);
     return;
   }
 
@@ -1779,8 +1782,10 @@ function triggerWinEffect(payout, result, roundBet) {
     slotMachineEl.classList.add("winGlow");
     reelEls.forEach((r, idx) => {
       r.classList.add("bigWin");
-      burstFromReel(idx, 12, idx === 1 ? "coin" : "spark");
+      burstFromReel(idx, 18, "coin");
+      burstFromReel(idx, 12, "spark");
     });
+    setTimeout(() => spawnCoinShower(28), 150);
     updateMachineState("大当たり", "#74ff8a");
     updateStatus(`🎉 ${payout.toLocaleString()} COIN 獲得！`, "#74ff8a");
     setChanceLamp("BIG WIN", "#74ff8a");
