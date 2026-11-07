@@ -271,7 +271,7 @@
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-full flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(52,211,153,0.4)] border-2 border-emerald-300/50">🧑‍🌾</div>
                     <div>
-                        <div class="font-black text-sm text-white">マスターファーマー</div>
+                        <div id="home-player-name" class="font-black text-sm text-white">マスターファーマー</div>
                         <div class="text-[10px] text-yellow-400 font-bold mt-0.5 tracking-wider">
                             <img src="草コイン.png" alt="草コイン" class="w-4 h-4 inline-block object-contain align-middle"> <span id="home-coins">300</span> 
                             <span class="mx-0.5 text-slate-600">|</span> 
@@ -932,6 +932,7 @@
 
         let state = {
             screen: 'title',
+            userName: 'ゆうしゃ',
             score: 0,
             grassCoins: 300,
             fossils: 3,
@@ -965,11 +966,47 @@
             ]
         };
 
+        // KAZIN.htmlと共有するセーブデータ(localStorage: kaizokus)
+        const SAVE_KEY = 'kaizokus';
+        function readSharedSave() {
+            try { const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return raw && typeof raw === 'object' ? raw : {}; }
+            catch (e) { console.warn('共有セーブの読み込みに失敗しました', e); return {}; }
+        }
+        function loadKusanukiSave() {
+            const raw = readSharedSave();
+            if (raw.userName !== undefined) state.userName = raw.userName;
+            if (raw.coins !== undefined) state.grassCoins = Number(raw.coins) || 0;
+            if (raw.gachaTickets !== undefined) state.cores = Number(raw.gachaTickets) || 0;
+            if (raw.materials !== undefined) state.fossils = Number(raw.materials) || 0;
+            const data = raw.kusanukiData;
+            if (data && typeof data === 'object') {
+                ['grassCoins','fossils','cores','level','pulledCount','timeLeft','skillGauge','stats'].forEach(k => { if (data[k] !== undefined) state[k] = data[k]; });
+                if (data.collection && typeof data.collection === 'object') collection = data.collection;
+                if (data.missions && typeof data.missions === 'object') Object.keys(MISSIONS).forEach(k => { if (data.missions[k]) MISSIONS[k] = data.missions[k]; });
+                if (data.collectionEquipped && typeof data.collectionEquipped === 'object') collectionEquipped = { ...collectionEquipped, ...data.collectionEquipped };
+            }
+            // KAZIN側の共通リソースを最終的な正として反映
+            if (raw.coins !== undefined) state.grassCoins = Number(raw.coins) || 0;
+            if (raw.gachaTickets !== undefined) state.cores = Number(raw.gachaTickets) || 0;
+            if (raw.materials !== undefined) state.fossils = Number(raw.materials) || 0;
+        }
+
+        function saveKusanuki() {
+            const raw = readSharedSave();
+            raw.userName = state.userName || raw.userName || 'ゆうしゃ';
+            raw.coins = state.grassCoins;
+            raw.gachaTickets = state.cores;
+            raw.materials = state.fossils;
+            raw.kusanukiData = { grassCoins: state.grassCoins, fossils: state.fossils, cores: state.cores, level: state.level, pulledCount: state.pulledCount, timeLeft: state.timeLeft, skillGauge: state.skillGauge, stats: state.stats, collection: collection, missions: MISSIONS, collectionEquipped: collectionEquipped };
+            try { localStorage.setItem(SAVE_KEY, JSON.stringify(raw)); } catch (e) { console.warn('草抜きセーブに失敗しました', e); }
+        }
+
         // --- DOM Elements ---
         const ui = {
             screenTitle: document.getElementById('screen-title'),
             screenHome: document.getElementById('screen-home'),
             screenGame: document.getElementById('screen-game'),
+            homePlayerName: document.getElementById('home-player-name'),
             homeCoins: document.getElementById('home-coins'),
             homeFossils: document.getElementById('home-fossils'),
             homeCores: document.getElementById('home-cores'),
@@ -995,7 +1032,8 @@
             bgFireflies: document.getElementById('bg-fireflies')
         };
 
-        // ==================== 蛍(背景装飾)生成 ====================
+        loadKusanukiSave();
+                // ==================== 蛍(背景装飾)生成 ====================
         (function spawnFireflies() {
             if (!ui.bgFireflies) return;
             for (let i = 0; i < 12; i++) {
@@ -1098,10 +1136,12 @@
         };
 
         function updateHomeUI() {
+            if (ui.homePlayerName) ui.homePlayerName.textContent = state.userName || 'ゆうしゃ';
             ui.homeCoins.textContent = state.grassCoins;
             ui.homeFossils.textContent = state.fossils;
             ui.homeCores.textContent = state.cores;
             ui.homeFarmLevel.textContent = state.level;
+            saveKusanuki();
         }
 
         // ==================== モーダルシステム ====================
@@ -1114,7 +1154,7 @@
             }, 10);
 
             if(type === 'mission') renderMission('daily');
-            if(type === 'collection') renderCollection('character');
+            if(type === 'collection') renderCollection('char');
             if(type === 'gacha') renderGacha();
             if(type === 'extreme') renderExtreme('rankup');
         };
@@ -1549,6 +1589,7 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
             for(let i=0; i<30; i++) ambientParticles.push(new AmbientParticle());
         }
         window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('beforeunload', saveKusanuki);
 
         class AmbientParticle {
             constructor() { this.reset(); this.y = Math.random() * ch; }
