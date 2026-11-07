@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Shippori+Mincho:wght@400;500;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   
   <script>
     tailwind.config = {
@@ -982,7 +982,11 @@
     <div id="splash-godrays"></div>
     <div id="splash-rays"></div>
     <div id="splash-bubbles"></div>
-    <img class="splash-kanji splash-logo" src="ルージュ・ガレオン.png" alt="ROUGE-GALLEON">
+    <picture>
+      <source type="image/avif" srcset="ルージュ・ガレオン.avif">
+      <source type="image/webp" srcset="ルージュ・ガレオン.webp">
+      <img class="splash-kanji splash-logo" src="ルージュ・ガレオン.png" alt="ROUGE-GALLEON" width="912" height="729" loading="eager" fetchpriority="high" decoding="async" data-quality-critical>
+    </picture>
     <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
     <p class="splash-sub font-jp">LOADING THE EMAKI SCROLL...</p>
     <p class="splash-sub-deep font-jp">ASCENDING FROM THE DEEP SEA...</p>
@@ -1250,12 +1254,20 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <button onclick="startSelectedGame('ルージュ・ガレオン', 'ルージュ・ガレオン.png', 'kaizoku.html')" class="game-launch-option bg-black/50 border border-wa-red/50 wa-clip p-4 text-center">
-            <img src="ルージュ・ガレオン.png" alt="ルージュ・ガレオン" class="w-full h-40 object-contain bg-black/30 mb-3">
+            <picture>
+              <source type="image/avif" srcset="ルージュ・ガレオン.avif">
+              <source type="image/webp" srcset="ルージュ・ガレオン.webp">
+              <img src="ルージュ・ガレオン.png" alt="ルージュ・ガレオン" width="912" height="729" loading="lazy" decoding="async" data-quality-lazy class="w-full h-40 object-contain bg-black/30 mb-3">
+            </picture>
             <span class="block text-white font-mincho font-bold tracking-widest">ルージュ・ガレオン</span>
             <span class="block text-[10px] text-wa-red tracking-widest mt-1">START GAME</span>
           </button>
           <button onclick="startSelectedGame('KAZIN', 'KAZIN.png', 'apude.html')" class="game-launch-option bg-black/50 border border-wa-purple/60 wa-clip p-4 text-center">
-            <img src="KAZIN.png" alt="KAZIN" class="w-full h-40 object-contain bg-black/30 mb-3">
+            <picture>
+              <source type="image/avif" srcset="KAZIN.avif">
+              <source type="image/webp" srcset="KAZIN.webp">
+              <img src="KAZIN.png" alt="KAZIN" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="w-full h-40 object-contain bg-black/30 mb-3">
+            </picture>
             <span class="block text-white font-mincho font-bold tracking-widest">KAZIN</span>
             <span class="block text-[10px] text-wa-purple tracking-widest mt-1">START GAME</span>
           </button>
@@ -1263,7 +1275,11 @@
       </div>
 
       <div id="game-launch-stage" class="min-h-[420px] flex-col items-center justify-center text-center overflow-hidden">
-        <img id="game-launch-icon" src="" alt="" class="game-launch-icon">
+        <picture>
+          <source id="game-launch-icon-avif" type="image/avif" srcset="">
+          <source id="game-launch-icon-webp" type="image/webp" srcset="">
+          <img id="game-launch-icon" src="" alt="" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="game-launch-icon">
+        </picture>
         <h2 id="game-launch-title" class="game-launch-title text-2xl md:text-4xl font-mincho font-bold tracking-[0.25em] text-white text-glow-gold mt-7">GAME START</h2>
         <p class="game-launch-title text-[10px] text-wa-red tracking-[0.4em] mt-3">NOW LOADING...</p>
       </div>
@@ -1298,7 +1314,11 @@
 
           <div class="w-full h-full overflow-auto flex items-center justify-center" id="map-container">
             <div class="relative transition-transform duration-300 ease-out origin-center" id="map-zoom-target" style="transform: scale(1);">
-              <img src="KAZIN世界地図.png" alt="KAZIN世界地図" class="block max-w-none max-h-[68vh] w-auto h-auto object-contain" onerror="this.alt='地図画像を読み込めませんでした'">
+              <picture>
+                <source type="image/avif" srcset="KAZIN世界地図.avif">
+                <source type="image/webp" srcset="KAZIN世界地図.webp">
+                <img src="KAZIN世界地図.png" alt="KAZIN世界地図" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="block max-w-none max-h-[68vh] w-auto h-auto object-contain" onerror="this.alt='地図画像を読み込めませんでした'">
+              </picture>
               <div id="map-fallback-svg" class="hidden">
                 <svg viewBox="0 0 1000 600" class="w-full h-full filter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" xmlns="http://www.w3.org/2000/svg">
                   <!-- 和紙ベース -->
@@ -1927,7 +1947,7 @@
         ]
       },
       {
-        id: "イット", regionId: "rampage", name: "ランペイジ・イット", sub: "Rampage / 怪力", type: "雷",
+        id: "イット", regionId: "rampage", name: "ランペイジ・イット", sub: "Rampage / 怪力", type: "電",
         description: "砂漠の国ランペイジの組織レイダーの頭、筋肉がすごく握力は200kgあるのだとか。\nこの者に勝てたものは世界でも一人しかいないと言われる。（その一人とは一体誰なのだろうか...）",
         quote: "「お前も俺に消されたいか？」", speechPitch: 0.7, 
         bgUrl: "ランペイジ.png", iconUrl: "ランペイジイット.png",
@@ -2039,7 +2059,7 @@
         ]
       },
       {
-        id: "シュガー", regionId: "hiromadou", name: "シュガー", sub: "Hamster Tribe / 魔法の手", type: "氷",
+        id: "シュガー", regionId: "hiromadou", name: "シュガー", sub: "Hamster Tribe / 魔法の手", type: "水",
         description: "白くフワフワな毛並みをした、ハムスター族の少年。\n手先が非常に器用で、自身のひらめきを次々と形にすることができる。ソフトテニスを生み出した立役者の一人。",
         quote: "「僕、もっともっとたくさんの面白いラケットを作るよ」", speechPitch: 1.0, 
         bgUrl: "緋色魔導国.png", iconUrl: "シュガー.png", svg: svgIceCyanWhite
@@ -2057,13 +2077,13 @@
         bgUrl: "緋色魔導国.png", iconUrl: "氷の巨人.png", svg: svgIceCyanWhite
       },
       {
-        id: "喰牙", regionId: "hiromadou", name: "喰牙", sub: "monster / ゴリラ", type: "土",
+        id: "喰牙", regionId: "hiromadou", name: "喰牙", sub: "monster / ゴリラ", type: "岩",
         description: "複数の強力な怨念とゴリラの死体を錬金して生まれた魔物、100年前突如として誕生し緋色魔導国を震撼させた化け物 \n喰牙は見た目から当時の人々に勝手につけられた名前らしい（なんか本人も気に入ってるみたいです）",
         quote: "「ヴェーーイ（咆哮）」", speechPitch: 0.95, 
         bgUrl: "喰牙封印.png", iconUrl: "喰牙.png", svg: svgBrownGrayRock
       },
       {
-        id: "バーン", regionId: "jun_lunaria", name: "ギガント・バーン", sub: "Jun Lunaria / 大統領", type: "火",
+        id: "バーン", regionId: "jun_lunaria", name: "ギガント・バーン", sub: "Jun Lunaria / 大統領", type: "炎",
         description: "ジュン・ルナリアの大統領。頭がいいかといわれると答えに悩む、だがしかし、運動神経は抜群でリーダーシップもある、大統領にはふさわしい存在だ。\n実は大統領だけでなくスパイやジュン・ルナリアの国家安全秘密軍事機関「オクタン」の総司令官も務めているのだとか（あくまでも噂）",
         quote: "「一歩前へと踏み出せば、旅は始まる」", speechPitch: 1.2, 
         bgUrl: "ジュン・ルナリア.png", iconUrl: "ギガントバーン.png",
@@ -2127,7 +2147,7 @@
         ]
       },
       {
-      id: "ハル", regionId: "jun_lunaria", name: "キム・ハル", sub: "Jun Lunaria / 影のハンター", type: "雷",
+      id: "ハル", regionId: "jun_lunaria", name: "ブライト・ハル", sub: "Jun Lunaria / 影のハンター", type: "電",
         description: "ジュン・ルナリア軍国家安全秘密軍事機関「オクタン」のエージェントで命じられたミッションは今まですべて成功してきたそうだ。 \n一人でさまよい生きる理由がわからなかった自分に「オクタン」のエージェントという生きる理由をくれたという過去からギガント・バーンとは仲が良いらしい。",
         quote: "「エージェントの世界で掟や規律を守れないやつはクズ呼ばわりされる。けどな仲間を大切にしない奴はそれ以上のクズだ。」", speechPitch: 1.2, 
         bgUrl: "ジュン・ルナリア.png", iconUrl: "ハル.png",
@@ -2196,7 +2216,7 @@
            },
           {
             id: "style_sei5", name: "仮面ライダー", iconUrl: "仮面ライダーせいまろ.png",
-            description: "せいまろ帝国、いや世界を救うヒーローいや神、勇気を出し恐怖を取り払って最強の神になったせいまろ\n素晴らしい、かっこいい、この者に勝てるものはこの世に存在しない、この力を手に入れたのは雷元素の力を元素進化させたからだ（元素進化させられたのはこの世で何人かしかいない）",
+            description: "せいまろ帝国、いや世界を救うヒーローいや神、勇気を出し恐怖を取り払って最強の神になったせいまろ\n素晴らしい、かっこいい、この者に勝てるものはこの世に存在しない、この力を手に入れたのは電元素の力を元素進化させたからだ（元素進化させられたのはこの世で何百人かしかいない）",
             quote: "「お前の運命（さだめ）は俺が決める！」",
             svg: svgBlueWhiteThunder
           }
@@ -2432,13 +2452,13 @@
             id: "style_rubi1", name: "ルビィ", iconUrl: "ルビィ.png",
             description: "太古の昔この世界を作ったとされる伝説の創世神だ。 \n実は甘いものが大好きらしい（一番好きなものはいちごらしい）創世の力でいちごをたくさん作ってたくさん食べているらしい。",
             quote: "「私は創世神ルビィ」",
-            svg: svgGreenWhiteWind
+            svg: svgHuhEffect
           },
           {
             id: "style_rubi2", name: "ナレーション", iconUrl: "ナレーション.png",
             description: "実はナレーションをしているのだ、理由は謎（世界を見守っているからなのかな）。 \n実は推しキャラはせいまろらしい、理由は強くてかっこよくて可愛いかららしい。",
             quote: "「ナレーション」",
-            svg: svgGreenWhiteWind
+            svg: svgHuhEffect
           }
         ]
       },
@@ -2534,29 +2554,66 @@
     let mapZoomScale = 1;
     const QUALITY_DEFAULT = 'low';
     const QUALITY_VALUES = ['low', 'medium', 'high'];
+    const SAVE_DATA_NAME = 'kaizokusetumei';
 
     function getQuality(type) {
       return document.documentElement.dataset[`${type}Quality`] || QUALITY_DEFAULT;
     }
 
+    function isLowPerformanceMode() {
+      return getQuality('texture') === 'low' || getQuality('effect') === 'low';
+    }
+
+    function applyImageLoadingPolicy() {
+      const low = isLowPerformanceMode();
+      document.querySelectorAll('img[data-quality-lazy]').forEach(img => {
+        img.loading = low ? 'lazy' : 'eager';
+        img.decoding = 'async';
+      });
+      document.querySelectorAll('img[data-quality-critical]').forEach(img => {
+        img.loading = 'eager';
+        img.fetchPriority = 'high';
+        img.decoding = 'async';
+      });
+    }
+
+    function imageMarkup(src, alt, className, width, height, options = {}) {
+      const base = src.replace(/\.[^./?#]+$/, '');
+      const loading = options.critical ? 'eager' : (isLowPerformanceMode() ? 'lazy' : 'eager');
+      const priority = options.critical ? ' fetchpriority="high"' : '';
+      const error = options.onError ? ` onerror="${options.onError}"` : '';
+      return `<picture><source type="image/avif" srcset="${base}.avif"><source type="image/webp" srcset="${base}.webp"><img src="${src}" alt="${alt}" class="${className}" width="${width}" height="${height}" loading="${loading}" decoding="async"${priority}${error}></picture>`;
+    }
+
     function applyQualitySettings() {
+      let savedQuality = {};
+      try {
+        savedQuality = JSON.parse(localStorage.getItem(SAVE_DATA_NAME) || '{}');
+      } catch (e) {}
       ['texture', 'effect'].forEach(type => {
-        const key = `rouge-galleon-${type}-quality`;
-        let value = QUALITY_DEFAULT;
-        try {
-          value = localStorage.getItem(key) || QUALITY_DEFAULT;
-        } catch (e) {}
+        let value = savedQuality[`${type}Quality`];
+        if (!value) {
+          try { value = localStorage.getItem(`rouge-galleon-${type}-quality`); } catch (e) {}
+        }
+        value = value || QUALITY_DEFAULT;
         if (!QUALITY_VALUES.includes(value)) value = QUALITY_DEFAULT;
+        savedQuality[`${type}Quality`] = value;
         document.documentElement.dataset[`${type}Quality`] = value;
         const select = document.getElementById(`${type}-quality-select`);
         if (select) select.value = value;
       });
+      try { localStorage.setItem(SAVE_DATA_NAME, JSON.stringify(savedQuality)); } catch (e) {}
     }
 
     function setQuality(type, value) {
       if (!['texture', 'effect'].includes(type) || !QUALITY_VALUES.includes(value)) return;
       document.documentElement.dataset[`${type}Quality`] = value;
-      try { localStorage.setItem(`rouge-galleon-${type}-quality`, value); } catch (e) {}
+      try {
+        const savedQuality = JSON.parse(localStorage.getItem(SAVE_DATA_NAME) || '{}');
+        savedQuality[`${type}Quality`] = value;
+        localStorage.setItem(SAVE_DATA_NAME, JSON.stringify(savedQuality));
+      } catch (e) {}
+      applyImageLoadingPolicy();
       if (type === 'effect') {
         initParticles();
         if (getQuality('effect') === 'low') burstSparks = [];
@@ -2973,6 +3030,7 @@
     // --- Initialization ---
     window.addEventListener('DOMContentLoaded', () => {
       applyQualitySettings();
+      applyImageLoadingPolicy();
       renderRegions();
       selectRegion('kazin'); // 最初はカグヤの勢力
       lucide.createIcons();
@@ -3078,7 +3136,7 @@
         
         // 画像がある場合は画像を表示、無い場合はフォールバックとして頭文字を表示
         const iconContent = char.iconUrl 
-          ? `<img src="${char.iconUrl}" alt="${char.name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" onerror="this.outerHTML='<span class=\\'text-xs font-mincho font-bold text-gray-200 group-hover:text-wa-gold\\'>${char.name.charAt(0)}</span>'">`
+          ? imageMarkup(char.iconUrl, char.name, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-110', 48, 48, { onError: `this.outerHTML='<span class=\\'text-xs font-mincho font-bold text-gray-200 group-hover:text-wa-gold\\'>${char.name.charAt(0)}</span>'` })
           : `<span class="text-xs font-mincho font-bold text-gray-200 group-hover:text-wa-gold">${char.name.charAt(0)}</span>`;
 
         item.innerHTML = `
@@ -3146,7 +3204,7 @@
 
       // SVG & Main Image Insertion
       // 丸いアイコンとしてエフェクトの中央に配置（大きさを2倍に修正）
-      const mainImg = dIcon ? `<img src="${dIcon}" alt="${dName}" class="absolute m-auto z-30 w-[384px] h-[384px] md:w-[512px] md:h-[512px] max-w-[90vw] max-h-[90vw] rounded-full object-contain bg-black/40 backdrop-blur-sm p-2 border-4 border-wa-gold/30 shadow-[0_0_35px_rgba(212,175,55,0.8)] pointer-events-none" onerror="this.style.display='none'">` : '';
+      const mainImg = dIcon ? imageMarkup(dIcon, dName, 'absolute m-auto z-30 w-[384px] h-[384px] md:w-[512px] md:h-[512px] max-w-[90vw] max-h-[90vw] rounded-full object-contain bg-black/40 backdrop-blur-sm p-2 border-4 border-wa-gold/30 shadow-[0_0_35px_rgba(212,175,55,0.8)] pointer-events-none', 512, 512, { critical: true, onError: "this.style.display='none'" }) : '';
       imgContainer.innerHTML = `<div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">${dSvg}</div>${mainImg}`;
 
       // Re-trigger animation
@@ -3484,6 +3542,11 @@
       if (!modal || !iconEl || !titleEl) return;
       iconEl.src = icon;
       iconEl.alt = name;
+      iconEl.loading = 'eager';
+      iconEl.fetchPriority = 'high';
+      const iconBase = icon.replace(/\.[^./?#]+$/, '');
+      document.getElementById('game-launch-icon-avif').srcset = `${iconBase}.avif`;
+      document.getElementById('game-launch-icon-webp').srcset = `${iconBase}.webp`;
       titleEl.innerText = name;
       modal.classList.add('game-launch-active');
       gameLaunchTimer = window.setTimeout(() => {
