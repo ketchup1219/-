@@ -945,6 +945,26 @@
     [data-effect-quality="low"] #splash-flash,
     [data-effect-quality="low"] .char-thumb.active::before { display: none; }
     [data-effect-quality="low"] #particle-canvas { opacity: 0.45; }
+
+    /* ===== ゲーム起動演出 ===== */
+    #game-launch-modal.game-launch-active #game-launch-menu { display: none; }
+    #game-launch-stage { display: none; }
+    #game-launch-modal.game-launch-active #game-launch-stage { display: flex; }
+    .game-launch-option { transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+    .game-launch-option:hover { transform: translateY(-8px) scale(1.03); border-color: var(--neon-gold); box-shadow: 0 0 28px rgba(212,175,55,0.55); }
+    .game-launch-icon { width: min(34vw, 220px); height: min(34vw, 220px); object-fit: contain; }
+    .game-launch-active .game-launch-icon { animation: gameLaunchZoom 1.5s cubic-bezier(0.16,0.9,0.3,1) forwards; }
+    @keyframes gameLaunchZoom {
+      0% { opacity: 0; transform: scale(0.25); filter: blur(12px) drop-shadow(0 0 0 rgba(230,0,18,0)); }
+      35% { opacity: 1; transform: scale(1.15); filter: blur(0) drop-shadow(0 0 24px rgba(230,0,18,0.95)) drop-shadow(0 0 55px rgba(0,0,0,1)); }
+      70% { transform: scale(1.8); filter: blur(0) drop-shadow(0 0 35px rgba(230,0,18,1)) drop-shadow(0 0 85px rgba(0,0,0,1)); }
+      100% { opacity: 0.92; transform: scale(2.5); filter: blur(2px) drop-shadow(0 0 45px rgba(230,0,18,1)) drop-shadow(0 0 110px rgba(0,0,0,1)); }
+    }
+    .game-launch-active .game-launch-title { animation: gameLaunchTitle 1.5s ease-out forwards; }
+    @keyframes gameLaunchTitle {
+      0%, 45% { opacity: 0; transform: translateY(18px); }
+      65%, 100% { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
@@ -1020,7 +1040,7 @@
       <a href="index.html" class="hover:text-wa-gold transition-colors flex items-center gap-1.5"><i data-lucide="flame" class="w-4 h-4 text-wa-red"></i> SURVIVAL</a>
       <a href="javascript:void(0)" onclick="openWorldMap()" class="hover:text-wa-purple transition-colors flex items-center gap-1.5"><i data-lucide="map" class="w-4 h-4 text-wa-purple"></i> MAP</a>
       <a href="#" class="text-wa-gold border-b-2 border-wa-gold pb-1 text-glow-gold flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> CHARACTER</a>
-      <a href="apude.html" class="hover:text-wa-red transition-colors flex items-center gap-1.5"><i data-lucide="scroll" class="w-4 h-4 text-gray-300"></i> STORY</a>
+      <a href="apude.html" class="hover:text-wa-red transition-colors flex items-center gap-1.5"><i data-lucide="scroll" class="w-4 h-4 text-gray-300"></i> STORY MODE</a>
     </nav>
 
     <!-- RIGHT: ACTIONS -->
@@ -1031,7 +1051,7 @@
       <button class="text-gray-300 hover:text-wa-gold p-1.5 sm:p-2 bg-black/40 rounded-sm transition-all border border-wa-gold/30 hover:border-wa-gold" onclick="toggleMute()" aria-label="BGM Toggle">
         <i id="bgm-icon" data-lucide="volume-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
       </button>
-      <button onclick="window.location.href='kaizoku.html'" class="relative overflow-hidden group flex items-center gap-1 sm:gap-2 bg-wa-red text-white px-3 sm:px-6 py-1.5 sm:py-2 wa-clip font-jp font-bold tracking-widest text-[10px] sm:text-sm hover:bg-white hover:text-wa-red transition-all duration-300 shadow-[0_0_20px_rgba(230,0,18,0.8)] hover:shadow-[0_0_35px_rgba(230,0,18,1)] hover:scale-105">
+      <button onclick="openGameLauncher()" class="relative overflow-hidden group flex items-center gap-1 sm:gap-2 bg-wa-red text-white px-3 sm:px-6 py-1.5 sm:py-2 wa-clip font-jp font-bold tracking-widest text-[10px] sm:text-sm hover:bg-white hover:text-wa-red transition-all duration-300 shadow-[0_0_20px_rgba(230,0,18,0.8)] hover:shadow-[0_0_35px_rgba(230,0,18,1)] hover:scale-105">
         <span class="absolute top-0 left-[-120%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-[-20deg] transition-all duration-500 group-hover:left-[130%] pointer-events-none"></span>
         <i data-lucide="swords" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10"></i> <span class="relative z-10">ゲーム起動</span>
       </button>
@@ -1051,7 +1071,7 @@
       <a href="index.html" class="flex items-center gap-4 text-sm text-gray-300 hover:text-wa-gold"><i data-lucide="flame" class="w-5 h-5 text-wa-red"></i> SURVIVAL</a>
       <a href="javascript:void(0)" onclick="openWorldMap(); toggleMobileMenu();" class="flex items-center gap-4 text-sm text-gray-300 hover:text-wa-purple"><i data-lucide="map" class="w-5 h-5 text-wa-purple"></i> MAP</a>
       <a href="#" class="flex items-center gap-4 text-sm text-wa-gold border-l-4 border-wa-gold pl-3 bg-wa-gold/10 py-2"><i data-lucide="users" class="w-5 h-5"></i> CHARACTER</a>
-      <a href="apude.html" class="flex items-center gap-4 text-sm text-gray-300 hover:text-wa-red"><i data-lucide="scroll" class="w-5 h-5 text-gray-400"></i> STORY</a>
+      <a href="apude.html" class="flex items-center gap-4 text-sm text-gray-300 hover:text-wa-red"><i data-lucide="scroll" class="w-5 h-5 text-gray-400"></i> STORY MODE</a>
     </nav>
   </div>
 
@@ -1215,6 +1235,38 @@
         <p class="text-[10px] text-gray-400 leading-relaxed">品質設定はこのブラウザに保存されます。初期設定は低です。</p>
       </div>
       <button onclick="closeSettings()" class="btn-wa mt-6 w-full py-2 text-xs font-bold tracking-widest">閉じる</button>
+    </div>
+  </div>
+
+  <!-- ==================== GAME LAUNCH MODAL ==================== -->
+  <div id="game-launch-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[220] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="relative w-11/12 max-w-3xl bg-wa-dark/95 border-2 border-wa-red/60 wa-clip p-5 md:p-8 shadow-[0_0_45px_rgba(230,0,18,0.45)]">
+      <button onclick="closeGameLauncher()" class="absolute top-3 right-3 text-gray-400 hover:text-white z-10" aria-label="ゲーム選択を閉じる"><i data-lucide="x" class="w-6 h-6"></i></button>
+
+      <div id="game-launch-menu">
+        <div class="text-center mb-6">
+          <p class="text-[10px] tracking-[0.35em] text-wa-red font-bold">SELECT YOUR DESTINY</p>
+          <h2 class="text-2xl md:text-3xl font-mincho font-bold tracking-[0.2em] text-wa-gold text-glow-gold mt-2">ゲームを選択</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <button onclick="startSelectedGame('ルージュ・ガレオン', 'ルージュ・ガレオン.png', 'kaizoku.html')" class="game-launch-option bg-black/50 border border-wa-red/50 wa-clip p-4 text-center">
+            <img src="ルージュ・ガレオン.png" alt="ルージュ・ガレオン" class="w-full h-40 object-contain bg-black/30 mb-3">
+            <span class="block text-white font-mincho font-bold tracking-widest">ルージュ・ガレオン</span>
+            <span class="block text-[10px] text-wa-red tracking-widest mt-1">START GAME</span>
+          </button>
+          <button onclick="startSelectedGame('KAZIN', 'KAZIN.png', 'apude.html')" class="game-launch-option bg-black/50 border border-wa-purple/60 wa-clip p-4 text-center">
+            <img src="KAZIN.png" alt="KAZIN" class="w-full h-40 object-contain bg-black/30 mb-3">
+            <span class="block text-white font-mincho font-bold tracking-widest">KAZIN</span>
+            <span class="block text-[10px] text-wa-purple tracking-widest mt-1">START GAME</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="game-launch-stage" class="min-h-[420px] flex-col items-center justify-center text-center overflow-hidden">
+        <img id="game-launch-icon" src="" alt="" class="game-launch-icon">
+        <h2 id="game-launch-title" class="game-launch-title text-2xl md:text-4xl font-mincho font-bold tracking-[0.25em] text-white text-glow-gold mt-7">GAME START</h2>
+        <p class="game-launch-title text-[10px] text-wa-red tracking-[0.4em] mt-3">NOW LOADING...</p>
+      </div>
     </div>
   </div>
 
@@ -3400,6 +3452,43 @@
     function resetMapZoom() {
       mapZoomScale = 1;
       document.getElementById('map-zoom-target').style.transform = `scale(1)`;
+    }
+
+    // --- ゲーム選択・起動演出 ---
+    let gameLaunchTimer = null;
+    function openGameLauncher() {
+      playSE('se-click');
+      const modal = document.getElementById('game-launch-modal');
+      if (!modal) return;
+      modal.classList.remove('game-launch-active', 'opacity-0', 'pointer-events-none');
+      document.getElementById('game-launch-icon').src = '';
+      document.getElementById('game-launch-title').innerText = 'GAME START';
+    }
+
+    function closeGameLauncher() {
+      if (gameLaunchTimer) {
+        clearTimeout(gameLaunchTimer);
+        gameLaunchTimer = null;
+      }
+      const modal = document.getElementById('game-launch-modal');
+      if (!modal) return;
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('game-launch-active');
+    }
+
+    function startSelectedGame(name, icon, destination) {
+      playSE('se-transition');
+      const modal = document.getElementById('game-launch-modal');
+      const iconEl = document.getElementById('game-launch-icon');
+      const titleEl = document.getElementById('game-launch-title');
+      if (!modal || !iconEl || !titleEl) return;
+      iconEl.src = icon;
+      iconEl.alt = name;
+      titleEl.innerText = name;
+      modal.classList.add('game-launch-active');
+      gameLaunchTimer = window.setTimeout(() => {
+        window.location.href = destination;
+      }, 1650);
     }
   </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" xintegrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
