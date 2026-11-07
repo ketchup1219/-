@@ -965,6 +965,7 @@
       0%, 45% { opacity: 0; transform: translateY(18px); }
       65%, 100% { opacity: 1; transform: translateY(0); }
     }
+    picture.quality-picture { display: contents; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-wa-dark bg-wagara" id="main-body">
@@ -982,9 +983,7 @@
     <div id="splash-godrays"></div>
     <div id="splash-rays"></div>
     <div id="splash-bubbles"></div>
-    <picture>
-      <source type="image/avif" srcset="ルージュ・ガレオン.avif">
-      <source type="image/webp" srcset="ルージュ・ガレオン.webp">
+    <picture class="quality-picture">
       <img class="splash-kanji splash-logo" src="ルージュ・ガレオン.png" alt="ROUGE-GALLEON" width="912" height="729" loading="eager" fetchpriority="high" decoding="async" data-quality-critical>
     </picture>
     <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
@@ -1254,18 +1253,14 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <button onclick="startSelectedGame('ルージュ・ガレオン', 'ルージュ・ガレオン.png', 'kaizoku.html')" class="game-launch-option bg-black/50 border border-wa-red/50 wa-clip p-4 text-center">
-            <picture>
-              <source type="image/avif" srcset="ルージュ・ガレオン.avif">
-              <source type="image/webp" srcset="ルージュ・ガレオン.webp">
+            <picture class="quality-picture">
               <img src="ルージュ・ガレオン.png" alt="ルージュ・ガレオン" width="912" height="729" loading="lazy" decoding="async" data-quality-lazy class="w-full h-40 object-contain bg-black/30 mb-3">
             </picture>
             <span class="block text-white font-mincho font-bold tracking-widest">ルージュ・ガレオン</span>
             <span class="block text-[10px] text-wa-red tracking-widest mt-1">START GAME</span>
           </button>
           <button onclick="startSelectedGame('KAZIN', 'KAZIN.png', 'apude.html')" class="game-launch-option bg-black/50 border border-wa-purple/60 wa-clip p-4 text-center">
-            <picture>
-              <source type="image/avif" srcset="KAZIN.avif">
-              <source type="image/webp" srcset="KAZIN.webp">
+            <picture class="quality-picture">
               <img src="KAZIN.png" alt="KAZIN" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="w-full h-40 object-contain bg-black/30 mb-3">
             </picture>
             <span class="block text-white font-mincho font-bold tracking-widest">KAZIN</span>
@@ -1275,9 +1270,7 @@
       </div>
 
       <div id="game-launch-stage" class="min-h-[420px] flex-col items-center justify-center text-center overflow-hidden">
-        <picture>
-          <source id="game-launch-icon-avif" type="image/avif" srcset="">
-          <source id="game-launch-icon-webp" type="image/webp" srcset="">
+        <picture class="quality-picture">
           <img id="game-launch-icon" src="" alt="" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="game-launch-icon">
         </picture>
         <h2 id="game-launch-title" class="game-launch-title text-2xl md:text-4xl font-mincho font-bold tracking-[0.25em] text-white text-glow-gold mt-7">GAME START</h2>
@@ -1314,9 +1307,7 @@
 
           <div class="w-full h-full overflow-auto flex items-center justify-center" id="map-container">
             <div class="relative transition-transform duration-300 ease-out origin-center" id="map-zoom-target" style="transform: scale(1);">
-              <picture>
-                <source type="image/avif" srcset="KAZIN世界地図.avif">
-                <source type="image/webp" srcset="KAZIN世界地図.webp">
+              <picture class="quality-picture">
                 <img src="KAZIN世界地図.png" alt="KAZIN世界地図" width="1536" height="1024" loading="lazy" decoding="async" data-quality-lazy class="block max-w-none max-h-[68vh] w-auto h-auto object-contain" onerror="this.alt='地図画像を読み込めませんでした'">
               </picture>
               <div id="map-fallback-svg" class="hidden">
@@ -2582,7 +2573,7 @@
       const loading = options.critical ? 'eager' : (isLowPerformanceMode() ? 'lazy' : 'eager');
       const priority = options.critical ? ' fetchpriority="high"' : '';
       const error = options.onError ? ` onerror="${options.onError}"` : '';
-      return `<picture><source type="image/avif" srcset="${base}.avif"><source type="image/webp" srcset="${base}.webp"><img src="${src}" alt="${alt}" class="${className}" width="${width}" height="${height}" loading="${loading}" decoding="async"${priority}${error}></picture>`;
+      return `<picture class="quality-picture"><img src="${src}" alt="${alt}" class="${className}" width="${width}" height="${height}" loading="${loading}" decoding="async"${priority}${error}></picture>`;
     }
 
     function applyQualitySettings() {
@@ -3544,9 +3535,6 @@
       iconEl.alt = name;
       iconEl.loading = 'eager';
       iconEl.fetchPriority = 'high';
-      const iconBase = icon.replace(/\.[^./?#]+$/, '');
-      document.getElementById('game-launch-icon-avif').srcset = `${iconBase}.avif`;
-      document.getElementById('game-launch-icon-webp').srcset = `${iconBase}.webp`;
       titleEl.innerText = name;
       modal.classList.add('game-launch-active');
       gameLaunchTimer = window.setTimeout(() => {
