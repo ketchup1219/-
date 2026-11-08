@@ -1257,6 +1257,41 @@
         }
 
     </style>
+    <style>
+        /* ミッション操作はスマホでも押しやすい大きさを確保 */
+        #nav-btn-mission { min-height: 64px; min-width: 64px; }
+        #nav-btn-mission .nav-icon, #nav-btn-mission .nav-text { pointer-events: none; }
+        #tab-mission-daily, #tab-mission-normal, #tab-mission-event,
+        #mission-view-tabs button { min-height: 44px; touch-action: manipulation; }
+        #tab-mission-daily, #tab-mission-normal, #tab-mission-event {
+            flex: 1 1 0% !important;
+            width: 0;
+            min-width: 0;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 0.25rem;
+            box-sizing: border-box;
+        }
+        #mission-view-tabs {
+            width: 100%;
+            align-items: stretch;
+        }
+        #mission-view-tabs button {
+            width: 100%;
+            min-width: 0;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 0.25rem;
+            box-sizing: border-box;
+        }
+        #mission-list-container button[onclick*="claimMission"] { min-height: 44px; min-width: 88px; padding: 0.65rem 0.9rem; touch-action: manipulation; }
+        #mission-list-container { flex: 1 1 auto; min-height: 0; }
+        #mission-list-container .mission-card { flex: 0 0 auto; min-height: 84px; }
+    </style>
 </head>
 <body class="flex justify-center items-center h-screen w-screen bg-slate-950 relative">
 
@@ -1554,10 +1589,10 @@
                 <span id="nav-friend-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
                 <span class="nav-icon mb-1">🤝</span><span class="nav-text">海賊団</span>
             </button>
-            <button id="nav-btn-mission" onclick="tryAccessLockedScreen('screen-mission')" class="flex-1 nav-btn flex flex-col items-center p-1 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-mission">
+            <button id="nav-btn-mission" onclick="tryAccessLockedScreen('screen-mission')" class="flex-1 nav-btn flex flex-col items-center justify-center min-h-[64px] p-2 text-indigo-400 hover:text-white transition-transform transform hover:-translate-y-1 relative" data-target="screen-mission">
                 <span id="nav-mission-lock" class="absolute top-0 right-1 text-[8px] bg-red-600 text-white rounded-full px-1 shadow font-bold">🔒</span>
-                <span id="nav-mission-badge" class="absolute top-0 right-1 text-[8px] bg-yellow-500 text-indigo-950 rounded-full px-1.5 shadow font-black hidden">!</span>
-                <span class="nav-icon mb-1">📜</span><span class="nav-text">依頼</span>
+                <span id="nav-mission-badge" class="absolute top-0 right-1 text-[8px] bg-yellow-500 text-indigo-950 rounded-full px-1.5 shadow font-black hidden pointer-events-none">!</span>
+                <span class="nav-icon mb-1 text-[1.7rem]">📜</span><span class="nav-text text-[11px]">依頼</span>
             </button>
         </nav>
 
@@ -1671,7 +1706,7 @@
                 <div class="flex justify-between items-center border-b-2 border-indigo-700 pb-2"><span class="text-red-400 font-black tracking-wider text-sm flex items-center gap-1"><span>🔒</span> おっと待って！</span></div>
                 <div class="text-center py-2 flex flex-col items-center">
                     <span class="text-6xl mb-3 animate-pulse">🛑</span>
-                    <p class="text-sm text-white font-bold leading-relaxed whitespace-pre-line bg-indigo-950/50 p-4 rounded-xl">新米船長！ここはまだヒミツの場所だ！\nまずは「大冒険へ出発!!」を押して、最初の冒険をクリアしてくれ！</p>
+                    <p class="text-sm text-white font-bold leading-relaxed bg-indigo-950/50 p-4 rounded-xl">新米船長！ここはまだヒミツの場所だ！<br>まずは「大冒険へ出発!!」を押して、最初の冒険をクリアしてくれ！</p>
                 </div>
                 <button onclick="closeLockedAlert()" class="game-btn w-full py-3 bg-slate-600 text-white font-black rounded-xl shadow-lg border-2 border-slate-400 text-lg">はーい！ 🏃</button>
             </div>
@@ -4588,7 +4623,7 @@ MASTER.exGachaPool = [ {type:'weapons',id:'wp_spread'},
 const rarityColors = {'N':'text-slate-400','R':'text-blue-400','SR':'text-purple-400','SSR':'text-yellow-200 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]','UR':'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 drop-shadow-[0_0_5px_rgba(255,200,0,0.8)]'};
 
 let currentGachaTab='normal', happyShareTimeoutId=null, currentStageTab='normal', currentMissionTab='daily', currentMultiRoom=null, roomListener=null, multiSyncInterval=null, currentEquipTab='skins';
-const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！オレ様はナビーだ！\n「大冒険へ出発!!」を押して初航海に出よう！',targetId:'btn-start-navigation'}], 'gacha': [{character:'🦜',text:'手に入れた「草核」を使って宝箱をあけよう！\n新しい装備が手に入るかも！？',targetId:'btn-draw-gacha-1'}], 'gacha_done': [{character:'🦜',text:'すっげーお宝だ！！\n下の「強化」ボタンを押して、船にセットしようぜ！',targetId:'nav-btn-equip'}], 'equip': [{character:'🦜',text:'手に入れたお宝のボタンをタップして、\n船をパワーアップさせてみよう！！',targetId:'tutorial-target-equip'}], 'all_done': [{character:'🦜',text:'カンペキだ船長！！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！',targetId:null}] };
+const TUTORIAL_SCENARIOS = { 'battle': [{character:'🦜',text:'ようこそ！オレ様はナビーだ！\n「大冒険へ出発!!」を押して初航海に出よう！',targetId:'btn-start-navigation'}], 'gacha': [{character:'🦜',text:'手に入れた「草核」を使って宝箱をあけよう！\n新しい装備が手に入るかも！？',targetId:'btn-draw-gacha-1'}], 'gacha_done': [{character:'🦜',text:'すっげーお宝だ！！\n下の「強化」ボタンを押して、船にセットしようぜ！',targetId:'nav-btn-equip'}], 'equip': [{character:'🦜',text:'手に入れたお宝のボタンをタップして、\n船を装備してみよう！！',targetId:'tutorial-target-equip'}], 'all_done': [{character:'🦜',text:'カンペキだ船長！！\nさあ、伝説の財宝をさがす大冒険の始まりだ！！',targetId:null}] };
 let currentTutorialScenario=null, tutorialStep=0;
 
 // --- セーブロード・スタミナ ---
@@ -4716,7 +4751,7 @@ function renderMissionList() {
     m.forEach(x => {
         const ic = DB.claimedMissions.includes(x.id), p = getMissionProgress(x), isC = p >= x.target;
         const d = document.createElement('div');
-        d.className = `p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : isC ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
+        d.className = `mission-card p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${ic ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : isC ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
         const ri = x.reward.type === 'coins' ? '💰' : x.reward.type === 'tickets' ? '✨' : x.reward.type === 'materials' ? '🦴' : '👑';
         const img = x.reward.type === 'coins' ? '草コイン.png' : x.reward.type === 'materials' ? '草の化石.png' : '草核.png';
         d.innerHTML = `<div class="flex justify-between items-start"><div class="font-black text-sm text-white pr-2">${x.desc}</div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-0.5 rounded-lg border border-indigo-700 flex-shrink-0"><span class="inline-flex relative w-4 h-4"><img src="${img}" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'${ri}','text-xs')"></span><span class="text-xs text-yellow-400 font-black">×${x.reward.amount}</span></div></div><div class="flex items-center justify-between mt-1"><div class="w-2/3 bg-indigo-950 h-3 rounded-full border border-indigo-800 overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style="width:${Math.min(100, (p / x.target) * 100)}%;"></div><div class="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">${Math.min(p, x.target)} / ${x.target}</div></div>${ic ? `<span class="text-xs font-black text-green-400 bg-green-900/50 px-2 py-1 rounded">達成済</span>` : isC ? `<button onclick="claimMission('${x.id}')" class="game-btn bg-gradient-to-b from-yellow-400 to-orange-500 text-indigo-950 text-xs font-black px-3 py-1.5 rounded-lg">受取る！</button>` : `<span class="text-xs font-black text-slate-400">挑戦中</span>`}</div>`;
@@ -5595,7 +5630,7 @@ window.onload = () => {
     st.id = 'stage-pvp-extra-style';
     st.textContent = `
       #stage-browser-controls .page-btn{min-width:40px}
-      #pvpCanvas{width:100%;height:100%;display:block;background:
+      #pvpCanvas{width:100%;height:100%;display:block;touch-action:none;background:
         radial-gradient(circle at 50% 20%, rgba(255,255,255,.08), transparent 32%),
         linear-gradient(180deg, rgba(10,20,40,.92), rgba(3,10,22,.98));
         border-radius:28px; border:4px solid rgba(212,175,55,.42); box-shadow: inset 0 0 48px rgba(0,0,0,.55), 0 20px 50px rgba(0,0,0,.6)}
@@ -5746,12 +5781,12 @@ window.onload = () => {
         </div>
         <div class="relative flex-1 min-h-0">
           <canvas id="pvpCanvas"></canvas>
-          <div class="absolute inset-x-0 top-[16%] text-center pointer-events-none pvp-lane-label text-red-300/70 text-[11px] font-black">ENEMY ZONE</div>
-          <div class="absolute inset-x-0 bottom-[16%] text-center pointer-events-none pvp-lane-label text-cyan-200/70 text-[11px] font-black">YOUR ZONE</div>
+          <div class="absolute inset-x-0 top-[16%] text-center pointer-events-none pvp-lane-label text-red-300/80 text-[11px] font-black">相手の海賊船（上）</div>
+          <div class="absolute inset-x-0 bottom-[16%] text-center pointer-events-none pvp-lane-label text-cyan-200/80 text-[11px] font-black">自分の海賊船（下）</div>
           <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-yellow-400/40"></div>
           <div id="pvp-hit-banner" class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 hidden bg-red-500/90 text-white font-black px-4 py-2 rounded-full border border-white shadow-lg">DIRECT HIT!</div>
           <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3">
-            <div class="hud-panel rounded-2xl px-4 py-3 text-xs text-indigo-100 font-bold">左右/上下キー or スワイプで移動 ・ 自動連射</div>
+            <div class="hud-panel rounded-2xl px-4 py-3 text-xs text-indigo-100 font-bold">左右/上下キー・スワイプで移動<br>砲弾は自動発射（画面タップでも発射）</div>
             <button onclick="leavePvpBattleToHome()" class="game-btn bg-red-600 text-white font-black px-5 py-3 rounded-xl border-2 border-white shadow-lg text-sm">撤退</button>
           </div>
         </div>
@@ -6177,6 +6212,28 @@ window.onload = () => {
     });
   }
 
+  function drawPvpShip(ctx, v, sx, sy, isEnemy){
+    const x=v.x*sx, y=v.y*sy, w=v.w*sx, h=v.h*sy;
+    const cx=x+w/2, hullY=y+h*0.58;
+    const main=isEnemy ? '#ef4444' : '#06b6d4';
+    const dark=isEnemy ? '#7f1d1d' : '#164e63';
+    ctx.save();
+    ctx.shadowColor=main; ctx.shadowBlur=18;
+    ctx.fillStyle=dark;
+    ctx.beginPath();
+    ctx.moveTo(x+w*.08,hullY); ctx.lineTo(x+w*.92,hullY); ctx.lineTo(x+w*.75,y+h*.88); ctx.lineTo(x+w*.25,y+h*.88); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=main;
+    ctx.beginPath();
+    ctx.moveTo(x+w*.18,y+h*.48); ctx.lineTo(x+w*.82,y+h*.48); ctx.lineTo(x+w*.70,y+h*.74); ctx.lineTo(x+w*.30,y+h*.74); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fef3c7'; ctx.fillRect(cx-w*.035,y+h*.12,w*.07,h*.42);
+    ctx.fillStyle=isEnemy ? '#fecaca' : '#a5f3fc';
+    ctx.beginPath();
+    ctx.moveTo(cx,y+h*.12); ctx.lineTo(cx+(isEnemy?-w*.25:w*.25),y+h*.24); ctx.lineTo(cx,y+h*.36); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#111827';
+    ctx.fillRect(x+w*.03,y+h*.58,w*.16,h*.07); ctx.fillRect(x+w*.81,y+h*.58,w*.16,h*.07);
+    ctx.restore();
+  }
+
   function renderPvp(){
     const canvas = document.getElementById('pvpCanvas');
     const ctx = canvas.getContext('2d');
@@ -6190,12 +6247,7 @@ window.onload = () => {
       const p = PVP.state.players[role];
       if(!p) return;
       const v = toViewRect({x:p.x, y:p.y, w:p.w, h:p.h});
-      ctx.save();
-      ctx.fillStyle = role===PVP.state.role ? '#38bdf8' : '#ef4444';
-      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 18;
-      ctx.beginPath(); ctx.roundRect(v.x*sx, v.y*sy, v.w*sx, v.h*sy, 18); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(v.x*sx + 10, v.y*sy + 10, v.w*sx - 20, 10);
-      ctx.restore();
+      drawPvpShip(ctx, v, sx, sy, role!==PVP.state.role);
       (p.bullets||[]).forEach(function(b){
         const by = perspectiveY(b.y, b.h);
         ctx.save(); ctx.fillStyle = b.owner===PVP.state.role ? '#7dd3fc' : '#fca5a5'; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 16;
@@ -6220,7 +6272,8 @@ window.onload = () => {
     const cv = document.getElementById('pvpCanvas');
     if(!cv || cv.dataset.bound) return;
     cv.dataset.bound='1';
-    cv.addEventListener('touchstart', function(e){ const t=e.touches[0]; PVP.state.input.drag=true; PVP.state.input.lastX=t.clientX; PVP.state.input.lastY=t.clientY; }, {passive:true});
+    cv.addEventListener('touchstart', function(e){ const t=e.touches[0]; PVP.state.input.drag=true; PVP.state.input.lastX=t.clientX; PVP.state.input.lastY=t.clientY; fireLocalBullet(performance.now()); }, {passive:true});
+    cv.addEventListener('pointerdown', function(e){ if(e.pointerType !== 'touch') fireLocalBullet(performance.now()); });
     cv.addEventListener('touchmove', function(e){ if(!PVP.state || !PVP.state.active || !PVP.state.input.drag) return; const t=e.touches[0]; const dx=t.clientX-PVP.state.input.lastX; const dy=t.clientY-PVP.state.input.lastY; PVP.state.input.lastX=t.clientX; PVP.state.input.lastY=t.clientY; const me=PVP.state.players[PVP.state.role]; me.x=Math.max(20,Math.min(PVP.W-me.w-20,me.x+dx*1.2)); const invert=PVP.state.role==='guest'?-1:1; const minY=PVP.state.role==='host'?760:60; const maxY=PVP.state.role==='host'?1170:360; me.y=Math.max(minY,Math.min(maxY,me.y+dy*1.2*invert)); }, {passive:true});
     cv.addEventListener('touchend', function(){ if(PVP.state) PVP.state.input.drag=false; });
   }
@@ -6628,7 +6681,8 @@ window.onload = () => {
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-\n<!-- ULTIMATE_UPGRADE_PATCH -->\n<script>
+<!-- ULTIMATE_UPGRADE_PATCH -->
+<script>
 (function(){
   if(window.__kaizokuUltimateUpgradeApplied) return;
   window.__kaizokuUltimateUpgradeApplied = true;
@@ -6906,7 +6960,7 @@ window.onload = () => {
 
     visible.forEach(({m, claimed, p, clear}) => {
       const d = document.createElement('div');
-      d.className = `p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${claimed ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : clear ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
+      d.className = `mission-card p-3 rounded-2xl border-2 shadow-lg relative flex flex-col gap-2 ${claimed ? 'bg-indigo-950/60 border-indigo-900 opacity-60' : clear ? 'bg-indigo-800 border-yellow-400' : 'bg-indigo-900 border-indigo-700'}`;
       const rv = rewardVisual(m.reward);
       d.innerHTML = `
         <div class="flex justify-between items-start gap-2">
@@ -7163,7 +7217,8 @@ EXガチャ${times===10?'10連':'1回'}には ${need} 個必要！` : ''}`);
     setTimeout(refreshUiBits, 180);
   }
 })();
-</script>\n
+</script>
+
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 
 
