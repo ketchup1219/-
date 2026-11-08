@@ -942,7 +942,8 @@
             timeLeft: 60,
             skillGauge: 0,
             isPlaying: false,
-            stats: { normal: 0, gold: 0, rainbow: 0 }
+            stats: { normal: 0, gold: 0, rainbow: 0 },
+            totalPlucks: 0, totalSkills: 0, totalGachas: 0, totalGold: 0, totalRainbow: 0, totalFusions: 0, maxLevel: 1, highScore: 0
         };
 
         let collection = { 'c20': { count: 1, level: 1 } };
@@ -962,7 +963,37 @@
             ],
             normal: [
                 { id: 'n1', title: '農園Lvを2にする', current: 1, target: 2, reward: 15, claimed: false },
-                { id: 'n2', title: '必殺技を1回発動', current: 0, target: 1, reward: 20, claimed: false }
+                { id: 'n2', title: '必殺技を1回発動', current: 0, target: 1, reward: 20, claimed: false },
+                { id: 'n3', title: '草を合計10本抜く', current: 0, target: 10, reward: 5, claimed: false },
+                { id: 'n4', title: '草を合計25本抜く', current: 0, target: 25, reward: 8, claimed: false },
+                { id: 'n5', title: '草を合計50本抜く', current: 0, target: 50, reward: 10, claimed: false },
+                { id: 'n6', title: '草を合計100本抜く', current: 0, target: 100, reward: 15, claimed: false },
+                { id: 'n7', title: '草を合計250本抜く', current: 0, target: 250, reward: 20, claimed: false },
+                { id: 'n8', title: '草を合計500本抜く', current: 0, target: 500, reward: 30, claimed: false },
+                { id: 'n9', title: '草を合計1000本抜く', current: 0, target: 1000, reward: 50, claimed: false },
+                { id: 'n10', title: '草を合計2500本抜く', current: 0, target: 2500, reward: 100, claimed: false },
+                { id: 'n11', title: '農園Lvを3にする', current: 1, target: 3, reward: 20, claimed: false },
+                { id: 'n12', title: '農園Lvを4にする', current: 1, target: 4, reward: 25, claimed: false },
+                { id: 'n13', title: '農園Lvを5にする', current: 1, target: 5, reward: 35, claimed: false },
+                { id: 'n14', title: '農園Lvを10にする', current: 1, target: 10, reward: 100, claimed: false },
+                { id: 'n15', title: '必殺技を3回発動', current: 0, target: 3, reward: 25, claimed: false },
+                { id: 'n16', title: '必殺技を5回発動', current: 0, target: 5, reward: 35, claimed: false },
+                { id: 'n17', title: '必殺技を10回発動', current: 0, target: 10, reward: 60, claimed: false },
+                { id: 'n18', title: '必殺技を25回発動', current: 0, target: 25, reward: 120, claimed: false },
+                { id: 'n19', title: 'ガチャを5回引く', current: 0, target: 5, reward: 15, claimed: false },
+                { id: 'n20', title: 'ガチャを10回引く', current: 0, target: 10, reward: 25, claimed: false },
+                { id: 'n21', title: 'ガチャを25回引く', current: 0, target: 25, reward: 50, claimed: false },
+                { id: 'n22', title: 'ガチャを50回引く', current: 0, target: 50, reward: 100, claimed: false },
+                { id: 'n23', title: '草コインを合計1000枚獲得', current: 0, target: 1000, reward: 20, claimed: false },
+                { id: 'n24', title: '草コインを合計5000枚獲得', current: 0, target: 5000, reward: 50, claimed: false },
+                { id: 'n25', title: '草コインを合計10000枚獲得', current: 0, target: 10000, reward: 100, claimed: false },
+                { id: 'n26', title: '草コインを合計50000枚獲得', current: 0, target: 50000, reward: 250, claimed: false },
+                { id: 'n27', title: '金の草を10本抜く', current: 0, target: 10, reward: 30, claimed: false },
+                { id: 'n28', title: '金の草を50本抜く', current: 0, target: 50, reward: 80, claimed: false },
+                { id: 'n29', title: '虹の草を5本抜く', current: 0, target: 5, reward: 40, claimed: false },
+                { id: 'n30', title: '虹の草を25本抜く', current: 0, target: 25, reward: 120, claimed: false },
+                { id: 'n31', title: 'フュージョンを1回成功させる', current: 0, target: 1, reward: 100, claimed: false },
+                { id: 'n32', title: 'スコア10000点を達成する', current: 0, target: 10000, reward: 150, claimed: false }
             ],
             event: [
                 { id: 'e1', title: '虹の草を1本抜く', current: 0, target: 1, reward: 50, claimed: false }
@@ -983,11 +1014,12 @@
             if (raw.materials !== undefined) state.fossils = Number(raw.materials) || 0;
             const data = raw.kusanukiData;
             if (data && typeof data === 'object') {
-                ['grassCoins','fossils','cores','level','pulledCount','timeLeft','skillGauge','stats'].forEach(k => { if (data[k] !== undefined) state[k] = data[k]; });
+                ['grassCoins','fossils','cores','level','pulledCount','timeLeft','skillGauge','stats','totalPlucks','totalSkills','totalGachas','totalGold','totalRainbow','totalFusions','maxLevel','highScore','totalCoinsEarned'].forEach(k => { if (data[k] !== undefined) state[k] = data[k]; });
                 if (data.collection && typeof data.collection === 'object') collection = data.collection;
-                if (data.missions && typeof data.missions === 'object') Object.keys(MISSIONS).forEach(k => { if (data.missions[k]) MISSIONS[k] = data.missions[k]; });
+                if (data.missions && typeof data.missions === 'object') Object.keys(MISSIONS).forEach(k => { if (data.missions[k]) { const saved = new Map(data.missions[k].map(m => [m.id, m])); MISSIONS[k].forEach(m => { if (saved.has(m.id)) Object.assign(m, saved.get(m.id)); }); } });
                 if (data.collectionEquipped && typeof data.collectionEquipped === 'object') collectionEquipped = { ...collectionEquipped, ...data.collectionEquipped };
             }
+            state.maxLevel = Math.max(Number(state.maxLevel) || 1, Number(state.level) || 1);
             // KAZIN側の共通リソースを最終的な正として反映
             if (raw.coins !== undefined) state.grassCoins = Number(raw.coins) || 0;
             if (raw.gachaTickets !== undefined) state.cores = Number(raw.gachaTickets) || 0;
@@ -1000,7 +1032,7 @@
             raw.coins = state.grassCoins;
             raw.gachaTickets = state.cores;
             raw.materials = state.fossils;
-            raw.kusanukiData = { grassCoins: state.grassCoins, fossils: state.fossils, cores: state.cores, level: state.level, pulledCount: state.pulledCount, timeLeft: state.timeLeft, skillGauge: state.skillGauge, stats: state.stats, collection: collection, missions: MISSIONS, collectionEquipped: collectionEquipped };
+            raw.kusanukiData = { grassCoins: state.grassCoins, fossils: state.fossils, cores: state.cores, level: state.level, pulledCount: state.pulledCount, timeLeft: state.timeLeft, skillGauge: state.skillGauge, stats: state.stats, totalPlucks: state.totalPlucks, totalSkills: state.totalSkills, totalGachas: state.totalGachas, totalGold: state.totalGold, totalRainbow: state.totalRainbow, totalFusions: state.totalFusions, maxLevel: state.maxLevel, highScore: state.highScore, totalCoinsEarned: state.totalCoinsEarned, collection: collection, missions: MISSIONS, collectionEquipped: collectionEquipped };
             try { localStorage.setItem(SAVE_KEY, JSON.stringify(raw)); } catch (e) { console.warn('草抜きセーブに失敗しました', e); }
         }
 
@@ -1222,6 +1254,21 @@
             }
         };
 
+        function updateNormalMissionProgress() {
+            const values = {
+                n1: state.maxLevel, n3: state.totalPlucks, n4: state.totalPlucks, n5: state.totalPlucks, n6: state.totalPlucks,
+                n7: state.totalPlucks, n8: state.totalPlucks, n9: state.totalPlucks, n10: state.totalPlucks,
+                n11: state.maxLevel, n12: state.maxLevel, n13: state.maxLevel, n14: state.maxLevel,
+                n15: state.totalSkills, n16: state.totalSkills, n17: state.totalSkills, n18: state.totalSkills,
+                n19: state.totalGachas, n20: state.totalGachas, n21: state.totalGachas, n22: state.totalGachas,
+                n23: state.totalCoinsEarned || state.grassCoins, n24: state.totalCoinsEarned || state.grassCoins,
+                n25: state.totalCoinsEarned || state.grassCoins, n26: state.totalCoinsEarned || state.grassCoins,
+                n27: state.totalGold, n28: state.totalGold, n29: state.totalRainbow, n30: state.totalRainbow,
+                n31: state.totalFusions, n32: state.highScore
+            };
+            MISSIONS.normal.forEach(m => { if (values[m.id] !== undefined && !m.claimed) m.current = Math.min(m.target, Math.max(m.current, Number(values[m.id]) || 0)); });
+        }
+
         function updateMissionProgress(type, id, amount, isAbsolute = false) {
             const m = MISSIONS[type].find(x => x.id === id);
             if(m && !m.claimed) {
@@ -1418,7 +1465,7 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
         window.openFuseSelect=function(slot){currentFuseSlot=slot;ui.modalTitle.textContent='🌀 素材キャラ選択';let h='<div class="space-y-2 pb-4"><p class="text-center text-[10px] text-cyan-300 font-black mb-3">スロット'+slot+'にセットするキャラを選択</p>';INDEX_COLLECTION_ITEMS.filter(x=>x.type==='char'&&fusionOwned(x.id)).forEach(x=>{h+='<button onclick=\"selectFuseItem(&quot;'+x.id+'&quot;)\" class="w-full text-left bg-slate-950 border border-slate-800 p-3 rounded-2xl flex items-center space-x-3"><span class="text-3xl w-12 text-center">'+(x.icon||'🎁')+'</span><span class="flex-1 text-xs font-black text-white">'+x.name+'<span class="block text-[9px] text-slate-400">'+x.rarity+' / 所持: '+collection[x.id].count+'</span></span></button>'});h+='</div><button onclick="renderFusion()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">戻る</button>';ui.modalContent.innerHTML=h};
         window.selectFuseItem=function(id){fuseSelection[currentFuseSlot-1]=id;renderFusion()};
         window.renderFusion=function(){ui.modalTitle.textContent='✨ EXTREME フュージョン';const a=fusionItem(fuseSelection[0]),b=fusionItem(fuseSelection[1]),rid=checkFusionResultId(),r=fusionItem(rid),icon=x=>x?(x.icon||x.emoji||'🎁'):'+';let h='<div class="space-y-4 pb-4"><p class="text-center text-[10px] text-slate-400">index.htmlの全9レシピに対応</p><div class="flex items-center justify-center gap-3"><button onclick="openFuseSelect(1)" class="w-20 h-20 rounded-2xl border-2 border-cyan-400 bg-slate-950 text-4xl">'+icon(a)+'</button><span class="text-2xl">＋</span><button onclick="openFuseSelect(2)" class="w-20 h-20 rounded-2xl border-2 border-cyan-400 bg-slate-950 text-4xl">'+icon(b)+'</button></div>';if(r){h+='<div class="text-center bg-slate-950 border border-emerald-500/50 rounded-2xl p-3"><div class="text-emerald-300 text-xs font-black">組み合わせ成功</div><div class="text-4xl my-2">'+icon(r)+'</div><div class="text-white font-black text-sm">'+r.name+'</div><div class="text-xs '+(state.grassCoins>=FUSION_COST?'text-emerald-300':'text-rose-400')+'">費用: <img src="草コイン.png" alt="草コイン" class="w-4 h-4 inline-block object-contain align-middle"> '+FUSION_COST.toLocaleString()+'</div></div><button onclick="executeFusion()" class="w-full py-3 rounded-xl rainbow-button text-white font-black" '+(state.grassCoins<FUSION_COST?'disabled':'')+'>合体実行</button>'}else h+='<div class="text-center bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-slate-400">'+(a&&b?'正しい組み合わせではありません':'素材を2体セットしてください')+'</div>';h+='<div class="bg-slate-950 border border-slate-800 rounded-2xl p-3"><div class="text-[10px] text-cyan-300 font-black mb-2">合体レシピ一覧</div>';FUSION_RECIPES.forEach(q=>{const x=fusionItem(q[0][0]),y=fusionItem(q[0][1]),z=fusionItem(q[1]);h+='<div class="text-[9px] text-slate-300 py-1 border-b border-slate-800">'+(x?x.name:q[0][0])+' ＋ '+(y?y.name:q[0][1])+' → <span class="text-yellow-300">'+(z?z.name:q[1])+'</span></div>'});h+='</div></div>';ui.modalContent.innerHTML=h};
-        window.executeFusion=function(){const rid=checkFusionResultId();if(!rid)return alert('合体できる組み合わせではありません。');if(state.grassCoins<FUSION_COST)return alert('草コインが足りません！');if(!fusionOwned(fuseSelection[0])||!fusionOwned(fuseSelection[1]))return alert('必要なキャラクターが揃っていません。');collection[fuseSelection[0]].count--;collection[fuseSelection[1]].count--;state.grassCoins-=FUSION_COST;if(!collection[rid])collection[rid]={count:0,level:1};collection[rid].count++;fuseSelection=[null,null];playSE('gacha_rare');updateHomeUI();const r=fusionItem(rid);ui.modalContent.innerHTML='<div class="text-center py-8"><div class="text-fuchsia-300 font-black text-xl">FUSION SUCCESS!!</div><div class="text-7xl my-6">'+(r.icon||r.emoji||'🎁')+'</div><div class="text-white font-black text-lg">'+r.name+'</div><button onclick="renderFusion()" class="w-full mt-6 py-3 rounded-xl bg-slate-800 text-white font-bold">フュージョンへ戻る</button></div>'};
+        window.executeFusion=function(){const rid=checkFusionResultId();if(!rid)return alert('合体できる組み合わせではありません。');if(state.grassCoins<FUSION_COST)return alert('草コインが足りません！');if(!fusionOwned(fuseSelection[0])||!fusionOwned(fuseSelection[1]))return alert('必要なキャラクターが揃っていません。');collection[fuseSelection[0]].count--;collection[fuseSelection[1]].count--;state.grassCoins-=FUSION_COST; state.totalFusions = (state.totalFusions || 0) + 1; if(!collection[rid])collection[rid]={count:0,level:1};collection[rid].count++;fuseSelection=[null,null];playSE('gacha_rare');updateHomeUI();const r=fusionItem(rid);ui.modalContent.innerHTML='<div class="text-center py-8"><div class="text-fuchsia-300 font-black text-xl">FUSION SUCCESS!!</div><div class="text-7xl my-6">'+(r.icon||r.emoji||'🎁')+'</div><div class="text-white font-black text-lg">'+r.name+'</div><button onclick="renderFusion()" class="w-full mt-6 py-3 rounded-xl bg-slate-800 text-white font-bold">フュージョンへ戻る</button></div>'};
 
         window.pullGachaBatchAction = function(times, cost) {
             if (state.cores < cost) { alert('草核(🔮)が足りません！'); return; }
@@ -2165,7 +2212,7 @@ for(let i=0; i<5; i++) spawnGrass();
                 floatTexts.push(new FloatText(g.x, g.y - 70, `${comboCount} COMBO!`, '#fde047', true));
             }
 
-            state.score += gainedScore; state.grassCoins += g.coin; state.stats[g.type]++; state.weedPulledCount++;
+            state.score += gainedScore; state.grassCoins += g.coin; state.stats[g.type]++; state.weedPulledCount++; state.totalPlucks++; if (g.type === 'gold') state.totalGold++; if (g.type === 'rainbow') state.totalRainbow++; state.highScore = Math.max(state.highScore, state.score); state.totalCoinsEarned = (state.totalCoinsEarned || 0) + g.coin;
             state.skillGauge = Math.min(100, state.skillGauge + CONFIG.skillGainPerPull);
 
             // ミッション進捗
@@ -2233,7 +2280,7 @@ for(let i=0; i<5; i++) spawnGrass();
             shockwaves.push(new Shockwave(cw/2, ch/2, '#fbbf24'));
 
             grasses.forEach((g, i) => {
-                state.score += g.score * 2; state.grassCoins += g.coin; state.stats[g.type]++;
+                state.score += g.score * 2; state.grassCoins += g.coin; state.stats[g.type]++; state.totalPlucks++; if (g.type === 'gold') state.totalGold++; if (g.type === 'rainbow') state.totalRainbow++; state.highScore = Math.max(state.highScore, state.score); state.totalCoinsEarned = (state.totalCoinsEarned || 0) + g.coin;
                 setTimeout(() => { createExplosion(g.x, g.y, '#fbbf24', 22, true); }, i * 15);
             });
             grasses = [];
