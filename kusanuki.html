@@ -951,6 +951,9 @@
         let collectionTab = 'char';
         let collectionCharTab = 'DEFAULT';
         let collectionEquipped = { char: 'c20', bg: 'b1', skill: 's1', bgm: 'bgm1' };
+        let selectedBGMPlayer = null;
+        function stopSelectedBGM() { if (selectedBGMPlayer) { selectedBGMPlayer.pause(); selectedBGMPlayer.currentTime = 0; selectedBGMPlayer = null; } }
+        function playSelectedBGM() { stopSelectedBGM(); const bgm = INDEX_COLLECTION_ITEMS.find(x => x.id === collectionEquipped.bgm && x.type === 'bgm'); if (!bgm || !bgm.url) return; selectedBGMPlayer = new Audio(bgm.url); selectedBGMPlayer.loop = true; selectedBGMPlayer.volume = 0.45; selectedBGMPlayer.play().catch(() => {}); }
         
         const MISSIONS = {
             daily: [
@@ -1127,6 +1130,7 @@
             if (target === 'title') {
                 ui.screenTitle.classList.remove('hidden');
             } else if (target === 'home') {
+                stopSelectedBGM();
                 updateHomeUI();
                 ui.screenHome.classList.remove('hidden');
             } else if (target === 'game') {
@@ -1245,7 +1249,7 @@
  h+='</div>';ui.modalContent.innerHTML=h;
 };
 window.setCollectionCharTab=function(tab){collectionCharTab=tab;renderCollection('char');};
-window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.id===id),d=collection[id];if(!x||!(x.owned||(d&&d.count>0)))return;collectionEquipped[x.type]=id;renderCollection(collectionTab);};
+window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.id===id),d=collection[id];if(!x||!(x.owned||(d&&d.count>0)))return;collectionEquipped[x.type]=id;if(x.type==='bgm'&&state.isPlaying)playSelectedBGM();saveKusanuki();renderCollection(collectionTab);};
         // --- ガチャ ---
         // レアリティ別の演出レベル定義
         const RARITY_TIER = {
@@ -2013,7 +2017,8 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
             
             updateGameUI();
             
-            for(let i=0; i<5; i++) spawnGrass();
+                        playSelectedBGM();
+for(let i=0; i<5; i++) spawnGrass();
             grasses.forEach(g => { g.growth = 1; });
             for(let i=0; i<2; i++) spawnEgg();
 
@@ -2238,6 +2243,7 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
         ui.retireBtn.addEventListener('click', () => { if(!state.isPlaying) return; gameOver("RETIRE", false); });
 
         function gameOver(title, isDead) {
+            stopSelectedBGM();
             state.isPlaying = false; clearInterval(state.timerId);
             ui.comboDisplay.classList.add('hidden'); comboCount = 0;
             if (isDead) { ui.appContainer.classList.add('shake', 'flash'); setTimeout(() => ui.appContainer.classList.remove('shake', 'flash'), 1000); }
