@@ -1287,7 +1287,8 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
                         <span class="font-display">召喚する</span>
                         <span class="text-xs bg-black/30 px-2 py-1 rounded-lg"><img src="草核.png" alt="草核" class="w-4 h-4 inline-block object-contain align-middle"> ${cost}</span>
                     </button>
-                    <button id="gacha-ten-pull-btn" onclick="pullGachaTenAction()" class="btn-tactile w-full max-w-xs bg-gradient-to-b from-purple-700 to-indigo-900 text-white font-black py-3 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] transition text-base tracking-widest border border-indigo-300/40"><span class="font-display">10連召喚</span><span class="text-xs bg-black/30 px-2 py-1 rounded-lg ml-2"><img src="草核.png" alt="草核" class="w-4 h-4 inline-block object-contain align-middle"> 50</span></button>
+                    <button id="gacha-ten-pull-btn" onclick="pullGachaBatchAction(10, 50)" class="btn-tactile w-full max-w-xs bg-gradient-to-b from-purple-700 to-indigo-900 text-white font-black py-3 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] transition text-base tracking-widest border border-indigo-300/40"><span class="font-display">10連召喚</span><span class="text-xs bg-black/30 px-2 py-1 rounded-lg ml-2"><img src="草核.png" alt="草核" class="w-4 h-4 inline-block object-contain align-middle"> 50</span></button>
+                    <button id="gacha-hundred-pull-btn" onclick="pullGachaBatchAction(100, 500)" class="btn-tactile w-full max-w-xs bg-gradient-to-b from-purple-700 to-indigo-900 text-white font-black py-3 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] transition text-base tracking-widest border border-indigo-300/40"><span class="font-display">100連召喚</span><span class="text-xs bg-black/30 px-2 py-1 rounded-lg ml-2"><img src="草核.png" alt="草核" class="w-4 h-4 inline-block object-contain align-middle"> 500</span></button>
                 </div>
             `;
         };
@@ -1414,6 +1415,44 @@ window.equipCollectionItem=function(id){let x=INDEX_COLLECTION_ITEMS.find(y=>y.i
         window.selectFuseItem=function(id){fuseSelection[currentFuseSlot-1]=id;renderFusion()};
         window.renderFusion=function(){ui.modalTitle.textContent='✨ EXTREME フュージョン';const a=fusionItem(fuseSelection[0]),b=fusionItem(fuseSelection[1]),rid=checkFusionResultId(),r=fusionItem(rid),icon=x=>x?(x.icon||x.emoji||'🎁'):'+';let h='<div class="space-y-4 pb-4"><p class="text-center text-[10px] text-slate-400">index.htmlの全9レシピに対応</p><div class="flex items-center justify-center gap-3"><button onclick="openFuseSelect(1)" class="w-20 h-20 rounded-2xl border-2 border-cyan-400 bg-slate-950 text-4xl">'+icon(a)+'</button><span class="text-2xl">＋</span><button onclick="openFuseSelect(2)" class="w-20 h-20 rounded-2xl border-2 border-cyan-400 bg-slate-950 text-4xl">'+icon(b)+'</button></div>';if(r){h+='<div class="text-center bg-slate-950 border border-emerald-500/50 rounded-2xl p-3"><div class="text-emerald-300 text-xs font-black">組み合わせ成功</div><div class="text-4xl my-2">'+icon(r)+'</div><div class="text-white font-black text-sm">'+r.name+'</div><div class="text-xs '+(state.grassCoins>=FUSION_COST?'text-emerald-300':'text-rose-400')+'">費用: <img src="草コイン.png" alt="草コイン" class="w-4 h-4 inline-block object-contain align-middle"> '+FUSION_COST.toLocaleString()+'</div></div><button onclick="executeFusion()" class="w-full py-3 rounded-xl rainbow-button text-white font-black" '+(state.grassCoins<FUSION_COST?'disabled':'')+'>合体実行</button>'}else h+='<div class="text-center bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-slate-400">'+(a&&b?'正しい組み合わせではありません':'素材を2体セットしてください')+'</div>';h+='<div class="bg-slate-950 border border-slate-800 rounded-2xl p-3"><div class="text-[10px] text-cyan-300 font-black mb-2">合体レシピ一覧</div>';FUSION_RECIPES.forEach(q=>{const x=fusionItem(q[0][0]),y=fusionItem(q[0][1]),z=fusionItem(q[1]);h+='<div class="text-[9px] text-slate-300 py-1 border-b border-slate-800">'+(x?x.name:q[0][0])+' ＋ '+(y?y.name:q[0][1])+' → <span class="text-yellow-300">'+(z?z.name:q[1])+'</span></div>'});h+='</div></div>';ui.modalContent.innerHTML=h};
         window.executeFusion=function(){const rid=checkFusionResultId();if(!rid)return alert('合体できる組み合わせではありません。');if(state.grassCoins<FUSION_COST)return alert('草コインが足りません！');if(!fusionOwned(fuseSelection[0])||!fusionOwned(fuseSelection[1]))return alert('必要なキャラクターが揃っていません。');collection[fuseSelection[0]].count--;collection[fuseSelection[1]].count--;state.grassCoins-=FUSION_COST;if(!collection[rid])collection[rid]={count:0,level:1};collection[rid].count++;fuseSelection=[null,null];playSE('gacha_rare');updateHomeUI();const r=fusionItem(rid);ui.modalContent.innerHTML='<div class="text-center py-8"><div class="text-fuchsia-300 font-black text-xl">FUSION SUCCESS!!</div><div class="text-7xl my-6">'+(r.icon||r.emoji||'🎁')+'</div><div class="text-white font-black text-lg">'+r.name+'</div><button onclick="renderFusion()" class="w-full mt-6 py-3 rounded-xl bg-slate-800 text-white font-bold">フュージョンへ戻る</button></div>'};
+
+        window.pullGachaBatchAction = function(times, cost) {
+            if (state.cores < cost) { alert('草核(🔮)が足りません！'); return; }
+            const capsule = document.getElementById('gacha-capsule');
+            const flash = document.getElementById('gacha-flash');
+            const rayBg = document.getElementById('gacha-ray-bg');
+            const tenBtn = document.getElementById('gacha-ten-pull-btn');
+            const hundredBtn = document.getElementById('gacha-hundred-pull-btn');
+            if (!capsule || (tenBtn && tenBtn.disabled) || (hundredBtn && hundredBtn.disabled)) return;
+            if (tenBtn) tenBtn.disabled = true;
+            if (hundredBtn) hundredBtn.disabled = true;
+            const results = [];
+            for (let i = 0; i < times; i++) {
+                const rRand = Math.random() * 100;
+                let selectedRank = rRand < 2 ? 'SSR' : (rRand < 15 ? 'SR' : (rRand < 40 ? 'R' : 'BASIC'));
+                const pool = CHARACTERS.filter(c => c.rank === selectedRank && c.rank !== 'ADMIN' && c.rank !== 'X');
+                const pulled = pool.length ? pool[Math.floor(Math.random() * pool.length)] : CHARACTERS[CHARACTERS.length - 1];
+                if (!collection[pulled.id]) collection[pulled.id] = { count: 0, level: 1 };
+                collection[pulled.id].count++;
+                results.push(pulled);
+            }
+            state.cores -= cost;
+            updateHomeUI();
+            updateMissionProgress('daily', 'd2', times);
+            playSE('gacha_spin');
+            capsule.classList.add('shake-anticipation');
+            if (rayBg) rayBg.style.opacity = '1';
+            setTimeout(() => {
+                capsule.classList.remove('shake-anticipation');
+                if (flash) flash.classList.add('gacha-flash-burst');
+                playSE('gacha_rare');
+                capsule.innerHTML = '<div class="relative z-10 flex flex-col items-center justify-center w-full h-full bg-slate-950/90 rounded-full animate-[combo-pop_0.4s_cubic-bezier(.36,1.5,.5,1)_both]"><span class="text-6xl">✨</span><span class="font-black text-white text-sm">'+times+'連召喚完了</span></div>';
+                capsule.style.background = 'transparent';
+                setTimeout(() => {
+                    ui.modalContent.innerHTML = '<div class="text-center mb-4"><div class="text-fuchsia-300 font-black text-lg">'+times+'連結果</div><div class="text-xs text-slate-400">草核'+cost+'を消費しました</div></div><div class="grid grid-cols-2 gap-2 max-h-[48vh] overflow-y-auto">' + results.map(c => '<div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center"><div class="text-3xl">'+c.emoji+'</div><div class="text-[10px] text-yellow-300 font-black">'+c.rank+'</div><div class="text-[10px] text-white font-bold truncate">'+c.name+'</div></div>').join('') + '</div><button onclick="renderGacha()" class="btn-tactile w-full mt-4 py-3 rounded-xl bg-fuchsia-600 text-white font-black">ガチャ画面へ戻る</button>';
+                }, 700);
+            }, 1100);
+        };
 
         window.renderExtreme = function(tab) {
             ui.modalTitle.textContent = "✨ EXTREME";
