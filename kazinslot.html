@@ -1153,7 +1153,7 @@ button{min-height:52px;}
     <div id="jackpotBox"></div>
   </div>
 
-  <audio id="bgm" src="カジノBGM.mp3" loop></audio>
+  <audio id="bgm" src="カジノBGM.mp3" loop autoplay playsinline preload="auto"></audio>
   <audio id="startSE" src="スタートレバー.mp3"></audio>
   <audio id="stopSE" src="ストップボタン.mp3"></audio>
   <audio id="betSE" src="ベット.mp3"></audio>
@@ -1284,9 +1284,24 @@ function saveCoins() {
 
 function playBGM() {
   bgm.volume = 0.45;
+  bgm.loop = true;
   const p = bgm.play();
   if (p && typeof p.catch === "function") p.catch(() => {});
 }
+
+function keepBGMPlaying() {
+  if (!bgm || document.hidden) return;
+  bgm.loop = true;
+  if (bgm.paused) playBGM();
+}
+
+// ブラウザの自動再生制限を、最初のユーザー操作で解除して常時ループ再生する。
+document.addEventListener("pointerdown", keepBGMPlaying, { passive: true });
+document.addEventListener("keydown", keepBGMPlaying, { passive: true });
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) setTimeout(keepBGMPlaying, 80);
+});
+setTimeout(keepBGMPlaying, 0);
 
 function safePlay(audio, volume = 1) {
   if (!audio) return;
