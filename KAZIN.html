@@ -3512,7 +3512,12 @@
             hop: { active: false, t: 0, dur: 0.95, nextAt: 0, height: 0.34 },
             pop: -1,                  // 開封ポップ演出の進行(0〜1, -1で非実行)
             settle: 0,                // 開封後に箱を下げる演出の進行(0〜1)
-            viewH: 3.4, running: false, rafId: null, lastT: 0, clock: 0
+            viewH: 3.4, running: false, rafId: null, lastT: 0, clock: 0,
+            camDist: 5,                                   // 通常時のカメラ距離(g3dResizeで更新)
+            intro: { active: false, t: 0, landed: false, onDone: null },   // オープニング演出(落下→着地→カメラ周回)
+            introY: 0, introSX: 1, introSY: 1, introShadow: 1,
+            spinK: 1,                                     // 自動回転の加速度(0→1)。オープニング直後に滑らかに回り始める
+            onLand: null                                  // 着地した瞬間に呼ばれる(効果音・画面揺れ用)
         };
 
         function g3dIsPossible() {
@@ -3635,7 +3640,7 @@
 
             // 手動回転(ドラッグ/スワイプ)
             canvas.style.touchAction = 'none';
-            canvas.addEventListener('pointerdown', e => { if (g3d.mode !== 'closed') return; g3d.dragging = true; g3d.dragLastX = e.clientX; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
+            canvas.addEventListener('pointerdown', e => { if (g3d.mode !== 'closed' || g3d.intro.active) return; g3d.dragging = true; g3d.dragLastX = e.clientX; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
             canvas.addEventListener('pointermove', e => { if (!g3d.dragging) return; g3d.yaw += (e.clientX - g3d.dragLastX) * 0.012; g3d.dragLastX = e.clientX; });
             const end = () => { if (g3d.dragging) { g3d.dragging = false; g3d.resumeAt = g3d.clock + 0.5; } };
             canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
@@ -3658,10 +3663,12 @@
             cam.lookAt(0, 0, 0);
             cam.updateProjectionMatrix();
             g3d.viewH = 2 * dist * t;
+            g3d.camDist = dist;
         }
 
         function g3dShow(mode) {
             g3d.mode = mode;
+            g3d.intro.active = false; g3d.introY = 0; g3d.introSX = 1; g3d.introSY = 1; g3d.introShadow = 1; g3d.spinK = 1;
             while (g3d.pivot.children.length) g3d.pivot.remove(g3d.pivot.children[0]);
             const m = g3d.models[mode];
             if (m) g3d.pivot.add(m);
@@ -3684,11 +3691,11 @@
         function g3dApplyTransform(hopY) {
             const ease = g => g * g * (3 - 2 * g);
             const s = ease(Math.min(1, g3d.settle));
-            let sc = 1 - 0.2 * s, y = hopY - 0.3 * g3d.viewH * s, sx = 1, sy = 1;
+            let sc = 1 - 0.2 * s, y = hopY + g3d.introY - 0.3 * g3d.viewH * s, sx = g3d.introSX, sy = g3d.introSY;
             if (g3d.mode === 'closed' && g3d.hop.active) {
                 const t = g3d.hop.t, k = Math.abs(Math.sin(2 * Math.PI * t)), d = 1 - t;
                 const sq = (1 - k) * d;                      // 着地の瞬間ほど潰れる
-                sy = 1 - 0.07 * sq; sx = 1 + 0.045 * sq;
+                sy *= 1 - 0.07 * sq; sx *= 1 + 0.045 * sq;
             }
             if (g3d.pop >= 0 && g3d.pop < 1) {               // 開封ポップ
                 const p = g3d.pop, pulse = Math.sin(p * Math.PI) * 0.16;
@@ -3701,18 +3708,21 @@
                 const lift = Math.max(0, hopY) / (g3d.hop.height || 1);
                 const gy = -0.3 * g3d.viewH * s - 0.93 * sc;
                 g3d.shadow.position.set(0, gy, 0);
-                const ss = (1 - 0.3 * lift) * sc;
+                const ss = (1 - 0.3 * lift) * sc * (0.35 + 0.65 * g3d.introShadow);
                 g3d.shadow.scale.set(ss, ss, ss);
-                g3d.shadow.material.opacity = 0.7 * (1 - 0.45 * lift);
+                g3d.shadow.material.opacity = 0.7 * (1 - 0.45 * lift) * g3d.introShadow;
             }
         }
 
         function g3dUpdate(dt) {
             g3d.clock += dt;
             let hopY = 0;
-            if (g3d.mode === 'closed') {
+            if (g3d.mode === 'closed' && g3d.intro.active) {
+                g3dUpdateIntro(dt);                           // ① 落下 → ② 着地 → ③ カメラ周回 → 通常の待機演出へ
+            } else if (g3d.mode === 'closed') {
                 // 正面を基準に時計回り(上から見て)に回転し続ける。ドラッグ中/直後は自動回転を止める
-                if (!g3d.dragging && g3d.clock >= g3d.resumeAt) g3d.yaw -= dt * 0.85;
+                g3d.spinK = Math.min(1, g3d.spinK + dt / 0.8);   // オープニング直後はゆっくり加速して滑らかにつなぐ
+                if (!g3d.dragging && g3d.clock >= g3d.resumeAt) g3d.yaw -= dt * 0.85 * g3d.spinK;
                 // 時々ピョコピョコ跳ねる
                 const h = g3d.hop;
                 if (!h.active && g3d.clock >= h.nextAt) { h.active = true; h.t = 0; h.dur = 0.85 + Math.random() * 0.25; h.height = 0.26 + Math.random() * 0.14; }
@@ -3727,6 +3737,58 @@
                 if (g3d.settle < 1 && g3d.pop >= 0.35) g3d.settle = Math.min(1, g3d.settle + dt / 0.7);
             }
             g3dApplyTransform(hopY);
+        }
+
+        // ---- オープニング演出 ----
+        // ① 画面上部から「ガチャ箱3D」がストンと落下(落下1.05秒+着地の弾み0.45秒=約1.5秒)
+        // ② 着地後、カメラが箱の周りをぐるっと1周(2.4秒・なめらかに加減速、終了時は正面に戻る)
+        // ③ 正面を向いた状態の「時計回り回転+ピョコピョコ」へ移行し、onDone で「開ける」ボタンを出す
+        const G3D_INTRO = { drop: 1.05, land: 0.45, orbit: 2.4 };
+        function g3dCameraFront() {
+            g3d.camera.position.set(0, g3d.camDist * 0.2, g3d.camDist);
+            g3d.camera.lookAt(0, 0, 0);
+        }
+        function g3dPlayIntro(onDone) {
+            g3d.intro = { active: true, t: 0, landed: false, onDone: onDone || null };
+            g3d.yaw = 0; g3d.hop.active = false; g3d.spinK = 0;
+            g3d.introY = g3d.viewH * 0.5 + 1.8;                 // 画面の上端より外側から開始
+            g3d.introSX = 1; g3d.introSY = 1; g3d.introShadow = 0;
+            g3dCameraFront();
+            g3dApplyTransform(0);
+        }
+        function g3dUpdateIntro(dt) {
+            const it = g3d.intro, D = G3D_INTRO;
+            it.t += dt;
+            const t = it.t, dropEnd = D.drop + D.land, orbitEnd = dropEnd + D.orbit;
+            g3d.yaw = 0;                                         // 演出中は正面向きのまま
+            if (t < D.drop) {                                    // 自由落下(だんだん加速)
+                const p = t / D.drop, startY = g3d.viewH * 0.5 + 1.8;
+                g3d.introY = startY * (1 - p * p);
+                g3d.introSY = 1 + 0.07 * p * p; g3d.introSX = 1 - 0.035 * p * p;   // 落下中は少し縦に伸びる
+                g3d.introShadow = p * p;
+            } else if (t < dropEnd) {                            // 着地: 潰れて1回ポヨンと弾む
+                if (!it.landed) { it.landed = true; if (g3d.onLand) g3d.onLand(); }
+                const u = (t - D.drop) / D.land, k = Math.max(0, 1 - u * 2.4);
+                g3d.introY = 0.2 * Math.sin(Math.PI * u) * (1 - u * 0.3);
+                g3d.introSY = 1 - 0.17 * k; g3d.introSX = 1 + 0.1 * k;
+                g3d.introShadow = 1;
+            } else {
+                g3d.introY = 0; g3d.introSX = 1; g3d.introSY = 1; g3d.introShadow = 1;
+            }
+            if (t >= dropEnd && t < orbitEnd) {                  // カメラ周回(時計回りに1周)
+                const u = (t - dropEnd) / D.orbit, e = u * u * (3 - 2 * u), th = e * Math.PI * 2, swoop = Math.sin(Math.PI * e);
+                const r = g3d.camDist * (1 - 0.1 * swoop);
+                g3d.camera.position.set(-Math.sin(th) * r, g3d.camDist * (0.2 + 0.16 * swoop), Math.cos(th) * r);
+                g3d.camera.lookAt(0, 0, 0);
+            }
+            if (t >= orbitEnd) {                                 // 通常の待機演出へ
+                it.active = false;
+                g3dCameraFront();
+                g3d.spinK = 0;
+                g3d.hop.nextAt = g3d.clock + 1.0;
+                const cb = it.onDone; it.onDone = null;
+                if (cb) cb();
+            }
         }
 
         function g3dRender() { if (g3d.renderer) g3d.renderer.render(g3d.scene, g3d.camera); }
@@ -3803,6 +3865,19 @@
                         cv.style.visibility = 'visible';
                         g3dInit(cv);
                         g3dShow('closed');
+                        gachaSession.phase = 'intro';                // オープニング中は「開ける」を出さない
+                        g3d.onLand = () => {                           // 着地の衝撃(効果音+画面の揺れ)
+                            playSound('hit');
+                            const appEl = document.getElementById('app-container');
+                            appEl.classList.add('epic-shake-once');
+                            gachaSequenceTimers.push(setTimeout(() => appEl.classList.remove('epic-shake-once'), 450));
+                        };
+                        g3dPlayIntro(() => {                           // カメラ周回が終わったら通常の待機演出+「開ける」
+                            if (token !== gachaToken || !gachaSession) return;
+                            gachaSession.phase = 'idle';
+                            gachaEl('gacha-open-btn').classList.remove('hidden');
+                            playSound('tap');
+                        });
                         g3dStart();
                     } catch (err) { console.warn('3D表示の初期化に失敗したため簡易演出に切り替えます', err); use3d = false; }
                 }
@@ -3813,9 +3888,15 @@
                     box.classList.remove('hidden'); box.classList.add('gacha-box-drop');
                     gachaSequenceTimers.push(setTimeout(() => box.classList.add('gacha-box-shake'), 1200));
                 }
-                gachaSession.phase = 'idle';
-                gachaEl('gacha-open-btn').classList.remove('hidden');
-                playSound('tap');
+                if (!use3d) {                                // 簡易演出: 箱が落ちてくるのを待ってから「開ける」を表示
+                    gachaSession.phase = 'intro';
+                    gachaSequenceTimers.push(setTimeout(() => {
+                        if (token !== gachaToken || !gachaSession) return;
+                        gachaSession.phase = 'idle';
+                        gachaEl('gacha-open-btn').classList.remove('hidden');
+                        playSound('tap');
+                    }, 1500));
+                }
             });
         }
 
