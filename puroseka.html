@@ -156,6 +156,13 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(0, 242, 254, 0.4); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 254, 0.8); }
+
+        @keyframes editor-note-flash {
+            0%, 100% { filter: brightness(1); transform: scale(1); }
+            25%, 60% { filter: brightness(2.5); transform: scale(1.35); box-shadow: 0 0 12px #ffffff, 0 0 24px currentColor; }
+        }
+        .editor-note-flash { animation: editor-note-flash 0.75s ease-in-out 2; z-index: 5; }
+        .editor-note-selected { animation: editor-note-flash 0.75s ease-in-out infinite; z-index: 5; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
@@ -304,6 +311,9 @@
                     <button onclick="window.startLocalMatch()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_0_15px_rgba(0,242,254,0.4)] transform active:scale-95 transition-all text-sm tracking-widest">
                         ライブスタート
                     </button>
+                    <button onclick="window.openChartEditor()" class="w-full mt-3 bg-slate-800 hover:bg-cyan-950 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 font-bold py-3 px-6 rounded-xl transition-all text-sm tracking-widest">
+                        <i class="fa-solid fa-pen-ruler mr-2"></i>譜面エディターを開く
+                    </button>
                 </div>
             </div>
 
@@ -394,11 +404,11 @@
                     </div>
 
                     <!-- SUPER MOBILE HITBOXES: ゲーム中のみ表示される画面下半分の巨大な透明タップエリア -->
-                    <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden">
-                        <div id="hitbox-0" class="flex-1 cursor-pointer"></div>
-                        <div id="hitbox-1" class="flex-1 cursor-pointer"></div>
-                        <div id="hitbox-2" class="flex-1 cursor-pointer"></div>
-                        <div id="hitbox-3" class="flex-1 cursor-pointer"></div>
+                    <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden" aria-label="タップレーン">
+                        <div id="hitbox-0" class="flex-1 cursor-pointer" aria-label="レーン1 A または ←"></div>
+                        <div id="hitbox-1" class="flex-1 cursor-pointer" aria-label="レーン2 S または ↓"></div>
+                        <div id="hitbox-2" class="flex-1 cursor-pointer" aria-label="レーン3 K または ↑"></div>
+                        <div id="hitbox-3" class="flex-1 cursor-pointer" aria-label="レーン4 L または →"></div>
                     </div>
 
                     <div id="rival-side-widget" class="absolute right-4 top-20 bg-slate-950/90 border border-pink-500/30 rounded-xl p-3 w-40 flex flex-col gap-2 z-30 shadow-lg hidden">
@@ -477,12 +487,75 @@
     <!-- FOOTER -->
     <footer class="border-t border-slate-900 bg-slate-950 px-6 py-3 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 z-20 gap-2 font-mono">
         <div class="flex items-center gap-2">
-            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">D</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">F</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">J</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> または 下半分をタッチ</span>
+            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">A</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">S</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">L</span> または 下半分をタッチ</span>
             <span class="text-slate-800 hidden md:inline">|</span>
             <span class="hidden md:inline">長押し: 終点で離す | フリック: 画面を弾く</span>
         </div>
         <div><span>&copy; 2026  PROHECT-TOMATO.TANAKA music.</span></div>
     </footer>
+
+    <!-- CHART EDITOR MODAL -->
+    <div id="chart-editor-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-3 z-[110] hidden">
+        <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto p-4 sm:p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-xl font-black text-cyan-300 flex items-center gap-2"><i class="fa-solid fa-pen-ruler"></i>譜面エディター</h3>
+                    <p class="text-xs text-slate-400 mt-1">スマホでは時刻を指定してレーンをタップ。完成したらJSONを書き出して共有できます。</p>
+                </div>
+                <button onclick="window.closeChartEditor()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] gap-4">
+                <div class="space-y-4">
+                    <div class="grid sm:grid-cols-3 gap-2 bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+                        <label class="text-xs text-slate-400">楽曲
+                            <select id="editor-song" onchange="window.editorSongChanged()" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white"></select>
+                        </label>
+                        <label class="text-xs text-slate-400">難易度
+                            <select id="editor-difficulty" onchange="window.editorDifficultyChanged()" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option><option value="expert">EXPERT</option>
+                            </select>
+                        </label>
+                        <div class="flex items-end"><button onclick="window.editorPlayPause()" id="editor-play-button" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg p-2 text-xs font-bold"><i class="fa-solid fa-play mr-1"></i>再生</button></div>
+                    </div>
+
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+                        <audio id="editor-audio" class="hidden"></audio>
+                        <div class="flex justify-between text-xs font-mono text-cyan-300 mb-1"><span id="editor-current-time">0.00s</span><span id="editor-duration">0.00s</span></div>
+                        <input id="editor-time-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="window.editorSeek(this.value)" class="w-full accent-cyan-500">
+                        <div class="flex items-center justify-between mt-3 mb-1"><span class="text-[10px] text-slate-500">長押し・ドラッグ: 移動 / ホールド選択中にドラッグ: 形を描く</span><div class="flex items-center gap-1"><button onclick="window.editorSetZoom(-1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">−</button><span id="editor-zoom-label" class="text-[10px] text-cyan-300 font-mono w-10 text-center">100%</span><button onclick="window.editorSetZoom(1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">＋</button></div></div>
+                        <div id="editor-timeline-viewport" class="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950 select-none">
+                            <div id="editor-timeline" class="relative h-48 min-w-full" onpointerdown="window.editorTimelinePointerDown(event)" onpointermove="window.editorTimelinePointerMove(event)" onpointerup="window.editorTimelinePointerUp(event)" onpointercancel="window.editorTimelinePointerCancel(event)">
+                                <div id="editor-timeline-grid" class="absolute inset-0"></div>
+                                <div id="editor-playhead" class="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_#fff] pointer-events-none" style="left:0%"></div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2">空いている場所をタップすると配置。ノーツを長押ししてドラッグすると移動。ホールドは選択中に開始地点から終点までなぞると形を作れます。</p>
+                    </div>
+
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-3">
+                        <div class="grid sm:grid-cols-3 gap-2">
+                            <label class="text-xs text-slate-400">配置時刻(タップ・フリック)<input id="editor-note-time" type="number" min="0" step="0.01" value="0" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></label>
+                            <div class="text-xs text-slate-500 flex items-center">ホールドはタイムライン上をなぞって作成</div>
+                            <div class="flex items-end"><button onclick="window.editorUseCurrentTime()" class="w-full bg-slate-800 hover:bg-slate-700 rounded-lg p-2 text-xs font-bold text-cyan-300">現在位置を使う</button></div>
+                        </div>
+                        <div class="grid sm:grid-cols-2 gap-2">
+                            <div><div class="text-xs text-slate-400 mb-1">ノーツ種類</div><div class="grid grid-cols-3 gap-1"><button data-editor-type="tap" onclick="window.editorSetType('tap')" class="editor-type-button bg-cyan-500 text-slate-950 rounded-lg p-2 text-xs font-bold">タップ</button><button data-editor-type="flick" onclick="window.editorSetType('flick')" class="editor-type-button bg-slate-800 text-pink-300 rounded-lg p-2 text-xs font-bold">フリック</button><button data-editor-type="slide" onclick="window.editorSetType('slide')" class="editor-type-button bg-slate-800 text-emerald-300 rounded-lg p-2 text-xs font-bold">ホールド</button></div></div>
+                            <div><div class="text-xs text-slate-400 mb-1">レーン</div><div class="grid grid-cols-4 gap-1"><button data-editor-lane="0" onclick="window.editorSetLane(0)" class="editor-lane-button bg-yellow-500 text-slate-950 rounded-lg p-2 font-bold">1</button><button data-editor-lane="1" onclick="window.editorSetLane(1)" class="editor-lane-button bg-slate-800 text-white rounded-lg p-2 font-bold">2</button><button data-editor-lane="2" onclick="window.editorSetLane(2)" class="editor-lane-button bg-slate-800 text-white rounded-lg p-2 font-bold">3</button><button data-editor-lane="3" onclick="window.editorSetLane(3)" class="editor-lane-button bg-slate-800 text-white rounded-lg p-2 font-bold">4</button></div></div>
+                        </div>
+                        <button onclick="window.editorAddNote()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg p-2.5 text-sm font-black"><i class="fa-solid fa-plus mr-1"></i>ノーツを追加</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col min-h-[360px]">
+                    <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-bold text-slate-300">配置済みノーツ <span id="editor-note-count" class="text-cyan-400">0</span></h4><button onclick="window.editorClearNotes()" class="text-[10px] text-red-400 hover:text-red-300">全消去</button></div>
+                    <div id="editor-note-list" class="flex-grow overflow-y-auto space-y-1 max-h-[420px]"></div>
+                    <div class="border-t border-slate-800 mt-3 pt-3 space-y-2"><button onclick="window.editorExport()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg p-2.5 text-xs font-black"><i class="fa-solid fa-download mr-1"></i>JSONを書き出す</button><button onclick="document.getElementById('chart-import-input').click()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg p-2.5 text-xs font-bold"><i class="fa-solid fa-upload mr-1"></i>JSONを読み込む</button><input id="chart-import-input" type="file" accept=".json,application/json" class="hidden" onchange="window.editorImport(event)"><button onclick="window.editorCopyJSON()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg p-2.5 text-xs font-bold"><i class="fa-solid fa-copy mr-1"></i>JSONをコピー</button></div>
+                    <p class="text-[10px] text-slate-500 mt-2">書き出したJSONを友人やこのチャットに添付してください。</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[100] hidden">
@@ -666,6 +739,335 @@
             nextNoteIndex: 0,
             isOnline: false, roomId: null, isHost: false,
             globalOnlineScores: [], roomsUnsubscribe: null, scoresUnsubscribe: null, roomSyncUnsubscribe: null, scoreSyncInterval: null
+        };
+
+        const editorState = { type: 'tap', lane: 0, endLane: 0, notes: [], selectedNoteIndex: null, songIndex: 0, difficulty: 'easy', previewRAF: null, zoom: 1, drag: null, previewPath: null };
+
+        function cloneChartNotes(notes) {
+            return (Array.isArray(notes) ? notes : []).map(note => {
+                if (note.type === 'slide') {
+                    return { type: 'slide', nodes: (note.nodes || []).map(n => ({ time: Number(n.time), lane: Math.max(0, Math.min(3, Number(n.lane))) })) };
+                }
+                return { type: note.type === 'flick' ? 'flick' : 'tap', time: Number(note.time), lane: Math.max(0, Math.min(3, Number(note.lane))) };
+            }).filter(note => {
+                const time = note.type === 'slide' ? note.nodes?.[0]?.time : note.time;
+                return Number.isFinite(time) && time >= 0 && (note.type !== 'slide' || note.nodes.length >= 2);
+            });
+        }
+
+        function chartStorageKey(songId, difficulty) { return `${songId}__${difficulty}`; }
+        function saveChartToStorage(song, difficulty, notes) {
+            const saved = JSON.parse(localStorage.getItem('songverseCharts') || '{}');
+            saved[chartStorageKey(song.id, difficulty)] = cloneChartNotes(notes);
+            localStorage.setItem('songverseCharts', JSON.stringify(saved));
+        }
+        function loadStoredCharts() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('songverseCharts') || '{}');
+                window.originalSongs.forEach(song => {
+                    song.charts = song.charts || {};
+                    ['easy', 'normal', 'hard', 'expert'].forEach(diff => {
+                        if (saved[chartStorageKey(song.id, diff)]) song.charts[diff] = cloneChartNotes(saved[chartStorageKey(song.id, diff)]);
+                    });
+                });
+            } catch(e) { console.warn('Chart data could not be loaded.'); }
+        }
+
+        window.openChartEditor = function() {
+            const modal = document.getElementById('chart-editor-modal');
+            if (!modal) return;
+            const songSelect = document.getElementById('editor-song');
+            songSelect.innerHTML = window.originalSongs.map((song, i) => `<option value="${i}">${escapeHTML(song.title)}</option>`).join('');
+            editorState.songIndex = state.currentSongIndex || 0;
+            editorState.difficulty = document.getElementById('player-difficulty')?.value || 'easy';
+            songSelect.value = editorState.songIndex;
+            document.getElementById('editor-difficulty').value = editorState.difficulty;
+            window.editorSongChanged();
+            window.editorSetType(editorState.type); window.editorSetLane(editorState.lane);
+            modal.classList.remove('hidden');
+        };
+        window.closeChartEditor = function() {
+            const audio = document.getElementById('editor-audio');
+            if (audio) { audio.pause(); audio.removeAttribute('src'); }
+            if (editorState.previewRAF) cancelAnimationFrame(editorState.previewRAF);
+            editorState.previewRAF = null;
+            document.getElementById('chart-editor-modal')?.classList.add('hidden');
+        };
+        window.editorSongChanged = function() {
+            editorState.songIndex = Number(document.getElementById('editor-song').value || 0);
+            const song = window.originalSongs[editorState.songIndex];
+            const audio = document.getElementById('editor-audio');
+            if (audio) { audio.src = song.audioFile || ''; audio.load(); }
+            window.editorRenderTimeline();
+            window.editorDifficultyChanged();
+        };
+        window.editorDifficultyChanged = function() {
+            editorState.difficulty = document.getElementById('editor-difficulty').value;
+            editorState.selectedNoteIndex = null;
+            editorState.previewPath = null;
+            const song = window.originalSongs[editorState.songIndex];
+            editorState.notes = cloneChartNotes(song?.charts?.[editorState.difficulty]);
+            window.editorRenderNotes();
+        };
+        window.editorPlayPause = function() {
+            const audio = document.getElementById('editor-audio'); if (!audio) return;
+            if (audio.paused) {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : Number(window.originalSongs[editorState.songIndex]?.staticDuration || 0);
+                if (duration && audio.currentTime >= duration) audio.currentTime = 0;
+                audio.play().then(() => window.editorPreviewFrame()).catch(() => alert('この曲を再生できません。音声ファイルの場所を確認してください。'));
+            } else {
+                audio.pause();
+                if (editorState.previewRAF) cancelAnimationFrame(editorState.previewRAF);
+                editorState.previewRAF = null;
+            }
+        };
+        window.editorSeek = function(value) {
+            const audio = document.getElementById('editor-audio'); if (audio && Number.isFinite(audio.duration)) audio.currentTime = Number(value);
+            window.editorUpdatePlayhead();
+        };
+        window.editorUpdatePlayhead = function() {
+            const audio = document.getElementById('editor-audio');
+            const song = window.originalSongs[editorState.songIndex];
+            const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(song?.staticDuration || 1);
+            const time = Number(audio?.currentTime || 0);
+            const percent = duration > 0 ? Math.max(0, Math.min(100, time / duration * 100)) : 0;
+            const playhead = document.getElementById('editor-playhead'); if (playhead) playhead.style.left = `${percent}%`;
+            const current = document.getElementById('editor-current-time'); if (current) current.innerText = `${time.toFixed(2)}s`;
+            const viewport = document.getElementById('editor-timeline-viewport');
+            const timeline = document.getElementById('editor-timeline');
+            if (viewport && timeline && editorState.followPlayhead !== false) {
+                const x = timeline.clientWidth * percent / 100;
+                viewport.scrollLeft = Math.max(0, Math.min(timeline.clientWidth - viewport.clientWidth, x - viewport.clientWidth / 2));
+            }
+        };
+        window.editorPreviewFrame = function() {
+            window.editorUpdatePlayhead();
+            const audio = document.getElementById('editor-audio');
+            if (audio && !audio.paused) editorState.previewRAF = requestAnimationFrame(window.editorPreviewFrame);
+            else editorState.previewRAF = null;
+        };
+        window.editorRenderTimeline = function() {
+            const grid = document.getElementById('editor-timeline-grid'); if (!grid) return;
+            const song = window.originalSongs[editorState.songIndex];
+            const audio = document.getElementById('editor-audio');
+            const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(song?.staticDuration || 1);
+            const viewport = document.getElementById('editor-timeline-viewport');
+            const timeline = document.getElementById('editor-timeline');
+            if (viewport && timeline) timeline.style.width = `${Math.max(viewport.clientWidth || 600, (viewport.clientWidth || 600) * editorState.zoom)}px`;
+            const laneColors = ['#eab308', '#06b6d4', '#10b981', '#d946ef'];
+            let html = '';
+            let slideSvg = '<svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none">';
+            for (let lane = 0; lane < 4; lane++) html += `<div class="absolute left-0 right-0 border-t border-slate-800/80" style="top:${lane * 25}%;height:25%;"><span class="absolute left-1 top-1 text-[9px] font-mono text-slate-500">${lane + 1}</span></div>`;
+            editorState.notes.forEach((note, index) => {
+                const start = note.type === 'slide' ? note.nodes[0].time : note.time;
+                const lane = note.type === 'slide' ? note.nodes[0].lane : note.lane;
+                const left = duration > 0 ? Math.max(0, Math.min(100, start / duration * 100)) : 0;
+                const top = lane * 25 + 3;
+                const color = note.type === 'flick' ? '#ec4899' : note.type === 'slide' ? '#10b981' : laneColors[lane];
+                if (note.type === 'slide') {
+                    const points = note.nodes.map(node => `${Math.max(0, Math.min(1000, (node.time / duration) * 1000))},${node.lane * 250 + 125}`).join(' ');
+                    slideSvg += `<g id="editor-note-marker-${index}" class="pointer-events-auto cursor-grab${editorState.selectedNoteIndex === index ? ' editor-note-selected' : ''}" onpointerdown="event.stopPropagation();event.editorNoteIndex=${index};window.editorTimelinePointerDown(event)" style="color:${color}" title="${start.toFixed(2)}秒 ホールド（長押しして移動）"><polyline points="${points}" fill="none" stroke="${color}" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" style="filter:drop-shadow(0 0 8px ${color})"></polyline><polyline points="${points}" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"></polyline></g>`;
+                } else html += `<div id="editor-note-marker-${index}" onpointerdown="event.stopPropagation();event.editorNoteIndex=${index};window.editorTimelinePointerDown(event)" title="${start.toFixed(2)}秒（長押しして移動）" class="absolute rounded-full cursor-grab${editorState.selectedNoteIndex === index ? ' editor-note-selected' : ''}" style="left:calc(${left}% - 5px);top:${top}%;width:10px;height:19%;background:${color};box-shadow:0 0 8px ${color};"></div>`;
+            });
+            if (editorState.previewPath?.length) {
+                const previewPoints = editorState.previewPath.map(node => `${Math.max(0, Math.min(1000, (node.time / duration) * 1000))},${node.lane * 250 + 125}`).join(' ');
+                slideSvg += `<polyline points="${previewPoints}" fill="none" stroke="#6ee7b7" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24 18" opacity="0.9" style="filter:drop-shadow(0 0 10px #10b981)"></polyline>`;
+            }
+            slideSvg += '</svg>';
+            grid.innerHTML = html + slideSvg;
+            window.editorUpdatePlayhead();
+        };
+        window.editorSetZoom = function(direction) {
+            editorState.zoom = Math.max(0.5, Math.min(4, editorState.zoom + Number(direction) * 0.5));
+            const label = document.getElementById('editor-zoom-label'); if (label) label.innerText = `${Math.round(editorState.zoom * 100)}%`;
+            window.editorRenderTimeline();
+        };
+        function editorTimelinePoint(event) {
+            const timeline = document.getElementById('editor-timeline');
+            const viewport = document.getElementById('editor-timeline-viewport'); if (!timeline || !viewport) return null;
+            const rect = timeline.getBoundingClientRect();
+            const song = window.originalSongs[editorState.songIndex];
+            const audio = document.getElementById('editor-audio');
+            const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(song?.staticDuration || 1);
+            const localX = event.clientX - rect.left + viewport.scrollLeft;
+            const time = Math.max(0, Math.min(duration, (localX / rect.width) * duration));
+            const lane = Math.max(0, Math.min(3, Math.floor(((event.clientY - rect.top) / rect.height) * 4)));
+            return { time, lane, duration };
+        }
+        function editorSaveNotes() {
+            const song = window.originalSongs[editorState.songIndex]; song.charts = song.charts || {};
+            song.charts[editorState.difficulty] = cloneChartNotes(editorState.notes);
+            saveChartToStorage(song, editorState.difficulty, editorState.notes);
+            window.editorRenderNotes();
+        }
+        function editorFindNote(point) {
+            const tolerance = Math.max(0.12, point.duration * 14 / Math.max(1, document.getElementById('editor-timeline')?.clientWidth || 600));
+            let found = -1;
+            editorState.notes.forEach((note, index) => {
+                const start = note.type === 'slide' ? note.nodes[0].time : note.time;
+                const lane = note.type === 'slide' ? note.nodes[0].lane : note.lane;
+                if (Math.abs(start - point.time) <= tolerance && lane === point.lane) found = index;
+            });
+            return found;
+        }
+        window.editorTimelinePointerDown = function(event) {
+            if (event.target.closest('button')) return;
+            const point = editorTimelinePoint(event); if (!point) return;
+            const hitIndex = Number.isInteger(event.editorNoteIndex) ? event.editorNoteIndex : editorFindNote(point);
+            if (hitIndex >= 0) {
+                const note = editorState.notes[hitIndex];
+                editorState.drag = { mode: 'move', noteIndex: hitIndex, startTime: point.time, startLane: point.lane, original: JSON.parse(JSON.stringify(note)), moved: false };
+            } else if (editorState.type === 'slide') {
+                editorState.drag = { mode: 'draw', startTime: point.time, startLane: point.lane, duration: point.duration, path: [{ time: point.time, lane: point.lane }], moved: false };
+                editorState.previewPath = editorState.drag.path;
+                window.editorRenderTimeline();
+            } else {
+                editorState.drag = { mode: 'place', point, moved: false };
+            }
+            document.getElementById('editor-timeline')?.setPointerCapture?.(event.pointerId);
+            event.preventDefault();
+        };
+        window.editorTimelinePointerMove = function(event) {
+            const drag = editorState.drag; if (!drag) return;
+            const point = editorTimelinePoint(event); if (!point) return;
+            if (drag.mode === 'move') {
+                const dt = point.time - drag.startTime;
+                const laneShift = point.lane - drag.startLane;
+                drag.moved = drag.moved || Math.abs(dt) > 0.03 || laneShift !== 0;
+                const note = editorState.notes[drag.noteIndex];
+                if (note.type === 'slide') note.nodes = drag.original.nodes.map(n => ({ time: Math.max(0, n.time + dt), lane: Math.max(0, Math.min(3, n.lane + laneShift)) }));
+                else { note.time = Math.max(0, drag.original.time + dt); note.lane = Math.max(0, Math.min(3, drag.original.lane + laneShift)); }
+                window.editorRenderTimeline();
+            } else if (drag.mode === 'draw') {
+                drag.moved = drag.moved || Math.abs(point.time - drag.startTime) > 0.03 || point.lane !== drag.startLane;
+                const lastPathPoint = drag.path[drag.path.length - 1];
+                // ホールドの時間は必ず前方向へ進む。戻った位置は経路に追加しない。
+                if (point.time >= lastPathPoint.time && (lastPathPoint.lane !== point.lane || point.time - lastPathPoint.time > 0.08)) drag.path.push({ time: point.time, lane: point.lane });
+                editorState.previewPath = drag.path;
+                window.editorRenderTimeline();
+            } else if (drag.mode === 'place') drag.moved = drag.moved || Math.abs(point.time - drag.point.time) > 0.03 || point.lane !== drag.point.lane;
+            event.preventDefault();
+        };
+        window.editorTimelinePointerUp = function(event) {
+            const drag = editorState.drag; if (!drag) return;
+            const point = editorTimelinePoint(event) || drag.point;
+            if (drag.mode === 'move') {
+                if (drag.moved) { editorState.notes.sort((a, b) => (a.time ?? a.nodes[0].time) - (b.time ?? b.nodes[0].time)); editorSaveNotes(); }
+                else { editorState.notes[drag.noteIndex] = drag.original; window.editorRenderTimeline(); }
+            } else if (drag.mode === 'draw') {
+                let nodes = drag.path;
+                if (nodes.length < 2) nodes = [{ time: drag.startTime, lane: drag.startLane }, { time: Math.min(drag.duration, drag.startTime + 1), lane: drag.startLane }];
+                const note = { type: 'slide', nodes: nodes.map(n => ({ time: Number(n.time.toFixed(2)), lane: n.lane })) };
+                editorState.notes.push(note); editorState.notes.sort((a, b) => a.nodes[0].time - b.nodes[0].time); editorState.previewPath = null; editorSaveNotes();
+            } else if (!drag.moved && drag.point) {
+                document.getElementById('editor-note-time').value = drag.point.time.toFixed(2);
+                window.editorSetLane(drag.point.lane);
+                window.editorAddNote();
+            }
+            editorState.drag = null; window.editorRenderTimeline(); event.preventDefault();
+        };
+        window.editorTimelinePointerCancel = function() { editorState.drag = null; editorState.previewPath = null; window.editorRenderTimeline(); };
+        window.editorTimelinePlace = function(event) {
+            const point = editorTimelinePoint(event); if (!point) return;
+            document.getElementById('editor-note-time').value = point.time.toFixed(2);
+            window.editorSetLane(point.lane);
+            window.editorAddNote();
+        };
+        window.editorSetType = function(type) {
+            editorState.type = type;
+            document.querySelectorAll('.editor-type-button').forEach(btn => btn.classList.toggle('bg-cyan-500', btn.dataset.editorType === type));
+            document.querySelectorAll('.editor-type-button').forEach(btn => btn.classList.toggle('text-slate-950', btn.dataset.editorType === type));
+        };
+        window.editorSetLane = function(lane) {
+            editorState.lane = Number(lane);
+            document.querySelectorAll('.editor-lane-button').forEach(btn => {
+                const active = Number(btn.dataset.editorLane) === editorState.lane;
+                btn.classList.toggle('bg-yellow-500', active); btn.classList.toggle('text-slate-950', active);
+                btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-white', !active);
+            });
+        };
+        window.editorSetEndLane = function(lane) {
+            editorState.endLane = Math.max(0, Math.min(3, Number(lane)));
+            const select = document.getElementById('editor-end-lane'); if (select) select.value = editorState.endLane;
+        };
+        window.editorUseCurrentTime = function() {
+            const audio = document.getElementById('editor-audio');
+            const time = Number(audio?.currentTime || 0).toFixed(2);
+            document.getElementById('editor-note-time').value = time;
+        };
+        window.editorAddNote = function() {
+            const time = Number(document.getElementById('editor-note-time').value);
+            const endTime = time + 1;
+            if (!Number.isFinite(time) || time < 0) return alert('開始時刻を正しく入力してください。');
+            let note;
+            if (editorState.type === 'slide') {
+                note = { type: 'slide', nodes: [{ time, lane: editorState.lane }, { time: endTime, lane: editorState.endLane }] };
+            } else note = { type: editorState.type, time, lane: editorState.lane };
+            editorState.notes.push(note); editorState.notes.sort((a, b) => (a.time ?? a.nodes[0].time) - (b.time ?? b.nodes[0].time));
+            const song = window.originalSongs[editorState.songIndex]; song.charts = song.charts || {}; song.charts[editorState.difficulty] = cloneChartNotes(editorState.notes); saveChartToStorage(song, editorState.difficulty, editorState.notes);
+            window.editorRenderNotes(); window.editorRenderTimeline();
+        };
+        window.editorDeleteNote = function(index) {
+            editorState.notes.splice(index, 1);
+            editorState.selectedNoteIndex = null;
+            const song = window.originalSongs[editorState.songIndex]; song.charts = song.charts || {}; song.charts[editorState.difficulty] = cloneChartNotes(editorState.notes); saveChartToStorage(song, editorState.difficulty, editorState.notes);
+            window.editorRenderNotes(); window.editorRenderTimeline();
+        };
+        window.editorClearNotes = function() {
+            if (!editorState.notes.length || confirm('この難易度のノーツをすべて消去しますか？')) { editorState.notes = []; window.editorDeleteNote(-1); }
+        };
+        window.editorRenderNotes = function() {
+            const list = document.getElementById('editor-note-list'); if (!list) return;
+            document.getElementById('editor-note-count').innerText = editorState.notes.length;
+            list.innerHTML = editorState.notes.length ? editorState.notes.map((note, i) => {
+                const time = note.type === 'slide' ? note.nodes[0].time : note.time;
+                const detail = note.type === 'slide' ? `${note.nodes[0].lane + 1}→${note.nodes[note.nodes.length - 1].lane + 1} / ${note.nodes[note.nodes.length - 1].time.toFixed(2)}s` : `レーン${note.lane + 1}`;
+                const color = note.type === 'flick' ? 'text-pink-300' : note.type === 'slide' ? 'text-emerald-300' : 'text-cyan-300';
+                return `<div onclick="window.editorFocusNote(${i})" class="flex items-center justify-between gap-2 bg-slate-900 hover:bg-slate-800 rounded-lg px-2 py-1.5 text-[11px] font-mono cursor-pointer"><span class="${color}">${time.toFixed(2)}s ${note.type.toUpperCase()} <span class="text-slate-400">${detail}</span></span><button onclick="event.stopPropagation();window.editorDeleteNote(${i})" class="text-red-400 px-1">×</button></div>`;
+            }).join('') : '<div class="text-center text-xs text-slate-600 py-8">まだノーツがありません</div>';
+            window.editorRenderTimeline();
+        };
+        window.editorFocusNote = function(index) {
+            const note = editorState.notes[index]; if (!note) return;
+            editorState.selectedNoteIndex = index;
+            window.editorRenderTimeline();
+            const marker = document.getElementById(`editor-note-marker-${index}`); if (!marker) return;
+            const song = window.originalSongs[editorState.songIndex]; const audio = document.getElementById('editor-audio');
+            const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(song?.staticDuration || 1);
+            const timeline = document.getElementById('editor-timeline'); const viewport = document.getElementById('editor-timeline-viewport');
+            if (timeline && viewport) {
+                const time = note.type === 'slide' ? note.nodes[0].time : note.time;
+                const x = timeline.clientWidth * (time / duration);
+                viewport.scrollLeft = Math.max(0, Math.min(timeline.clientWidth - viewport.clientWidth, x - viewport.clientWidth / 2));
+            }
+        };
+        window.editorExport = function() {
+            const song = window.originalSongs[editorState.songIndex];
+            const payload = { format: 'project-tomato-chart', version: 1, song: { id: song.id, title: song.title, artist: song.artist, bpm: song.bpm, audioFile: song.audioFile, staticDuration: song.staticDuration, previewTime: song.previewTime }, difficulty: editorState.difficulty, notes: cloneChartNotes(editorState.notes) };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${song.title}_${editorState.difficulty}.json`; link.click(); URL.revokeObjectURL(link.href);
+        };
+        window.editorCopyJSON = async function() {
+            const song = window.originalSongs[editorState.songIndex];
+            const payload = { format: 'project-tomato-chart', version: 1, song: { id: song.id, title: song.title, artist: song.artist, bpm: song.bpm, audioFile: song.audioFile, staticDuration: song.staticDuration, previewTime: song.previewTime }, difficulty: editorState.difficulty, notes: cloneChartNotes(editorState.notes) };
+            try { await navigator.clipboard.writeText(JSON.stringify(payload, null, 2)); alert('JSONをコピーしました。'); } catch(e) { alert('コピーできませんでした。JSONを書き出してください。'); }
+        };
+        window.editorImport = function(event) {
+            const file = event.target.files?.[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const data = JSON.parse(reader.result);
+                    if (!data.song || !Array.isArray(data.notes)) throw new Error('形式が違います');
+                    let index = window.originalSongs.findIndex(song => song.id === data.song.id);
+                    if (index < 0) { window.originalSongs.push({ ...data.song, charts: {} }); index = window.originalSongs.length - 1; }
+                    const song = window.originalSongs[index]; song.charts = song.charts || {};
+                    const diff = ['easy', 'normal', 'hard', 'expert'].includes(data.difficulty) ? data.difficulty : 'easy';
+                    song.charts[diff] = cloneChartNotes(data.notes); saveChartToStorage(song, diff, song.charts[diff]);
+                    window.renderSongList(); document.getElementById('editor-song').value = index; document.getElementById('editor-difficulty').value = diff; window.editorSongChanged(); alert('譜面を読み込みました。');
+                } catch(e) { alert('JSONを読み込めませんでした。譜面エディターで書き出したJSONを選んでください。'); }
+                event.target.value = '';
+            }; reader.readAsText(file);
         };
 
         window.playerProfile = { username: "Player", avatarSeed: "Player", customAvatarUrl: "", isCustomImage: false };
@@ -1078,8 +1480,13 @@
             const song = window.originalSongs[state.currentSongIndex];
             const difficulty = document.getElementById('player-difficulty').value;
             let playbackNotes = [];
-            const activeLimit = state.playbackLength - 2.0; 
-            const beatGap = 60 / song.bpm;
+            const savedChart = song.charts?.[difficulty];
+
+            if (Array.isArray(savedChart) && savedChart.length > 0) {
+                playbackNotes = cloneChartNotes(savedChart).map(note => ({ ...note, hit: false, active: false }));
+            } else {
+                const activeLimit = state.playbackLength - 2.0; 
+                const beatGap = 60 / song.bpm;
             
             let tempTime = 0.5, nIndex = 0;
             let notesSequence = [];
@@ -1147,7 +1554,9 @@
                 }
             });
             
-            playbackNotes.sort((a, b) => a.time - b.time);
+            }
+
+            playbackNotes.sort((a, b) => (a.time ?? a.nodes[0].time) - (b.time ?? b.nodes[0].time));
             state.totalNotes = playbackNotes.length;
             state.playbackNotes = playbackNotes;
             state.lastTime = Date.now();
@@ -1514,21 +1923,97 @@
 
         // Apply Input Listeners to Hitboxes explicitly
         document.addEventListener("DOMContentLoaded", () => {
+            // Keyboard controls: A/S/K/L and the four arrow keys map to lanes 0-3.
+            // Keeping track of pressed keys prevents key auto-repeat from generating
+            // multiple hits, while keyup also makes hold notes release correctly.
+            const keyboardLaneMap = {
+                'a': 0, 's': 1, 'k': 2, 'l': 3,
+                'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowUp': 2, 'ArrowRight': 3
+            };
+            const pressedKeys = new Set();
+
+            const releaseAllKeyboardLanes = () => {
+                pressedKeys.forEach(key => {
+                    const lane = keyboardLaneMap[key];
+                    if (lane !== undefined) window.triggerRelease(lane);
+                });
+                pressedKeys.clear();
+            };
+
+            document.addEventListener('keydown', (e) => {
+                const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+                const lane = keyboardLaneMap[key];
+                if (lane === undefined) return;
+                e.preventDefault();
+                if (pressedKeys.has(key)) return;
+                pressedKeys.add(key);
+                window.triggerTap(lane);
+                const hitbox = document.getElementById(`hitbox-${lane}`);
+                if (hitbox) hitbox.classList.add('lane-active');
+            });
+
+            document.addEventListener('keyup', (e) => {
+                const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+                const lane = keyboardLaneMap[key];
+                if (lane === undefined) return;
+                e.preventDefault();
+                if (!pressedKeys.delete(key)) return;
+                window.triggerRelease(lane);
+                const hitbox = document.getElementById(`hitbox-${lane}`);
+                if (hitbox) hitbox.classList.remove('lane-active');
+            });
+
+            window.addEventListener('blur', releaseAllKeyboardLanes);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) releaseAllKeyboardLanes();
+            });
+
             const bindTouch = (id, lane) => {
                 const el = document.getElementById(id);
                 if(el) {
-                    el.addEventListener('mousedown', (e) => { e.preventDefault(); window.triggerTap(lane); });
-                    el.addEventListener('touchstart', (e) => { e.preventDefault(); window.triggerTap(lane); }, {passive: false});
-                    el.addEventListener('mouseup', (e) => { e.preventDefault(); window.triggerRelease(lane); });
-                    el.addEventListener('touchend', (e) => { e.preventDefault(); window.triggerRelease(lane); });
-                    el.addEventListener('mouseleave', (e) => { e.preventDefault(); window.triggerRelease(lane); });
-                    el.addEventListener('touchcancel', (e) => { e.preventDefault(); window.triggerRelease(lane); });
+                    let activePointer = false;
+                    el.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();
+                        if (activePointer) return;
+                        activePointer = true;
+                        el.setPointerCapture?.(e.pointerId);
+                        window.triggerTap(lane);
+                    });
+                    const releasePointer = (e) => {
+                        e.preventDefault();
+                        if (!activePointer) return;
+                        activePointer = false;
+                        window.triggerRelease(lane);
+                    };
+                    el.addEventListener('pointerup', releasePointer);
+                    el.addEventListener('pointercancel', releasePointer);
+                    el.addEventListener('pointerleave', (e) => {
+                        if (e.pointerType === 'mouse') releasePointer(e);
+                    });
                 }
             };
             for(let i=0; i<4; i++) bindTouch(`hitbox-${i}`, i);
+
+            const editorAudio = document.getElementById('editor-audio');
+            if (editorAudio) {
+                editorAudio.addEventListener('loadedmetadata', () => {
+                    const duration = Number.isFinite(editorAudio.duration) ? editorAudio.duration : 0;
+                    document.getElementById('editor-duration').innerText = `${duration.toFixed(2)}s`;
+                    const slider = document.getElementById('editor-time-slider'); slider.max = duration || 1; slider.value = editorAudio.currentTime;
+                    window.editorRenderTimeline();
+                });
+                editorAudio.addEventListener('timeupdate', () => {
+                    document.getElementById('editor-current-time').innerText = `${editorAudio.currentTime.toFixed(2)}s`;
+                    document.getElementById('editor-time-slider').value = editorAudio.currentTime;
+                    document.getElementById('editor-play-button').innerHTML = editorAudio.paused ? '<i class="fa-solid fa-play mr-1"></i>再生' : '<i class="fa-solid fa-pause mr-1"></i>一時停止';
+                    window.editorUpdatePlayhead();
+                });
+                editorAudio.addEventListener('ended', () => { if (editorState.previewRAF) cancelAnimationFrame(editorState.previewRAF); editorState.previewRAF = null; window.editorUpdatePlayhead(); });
+            }
             
             // Safe Load sequence
             setTimeout(() => {
+                loadStoredCharts();
                 window.loadData();
                 window.syncProfileUI();
                 
