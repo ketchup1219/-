@@ -92,6 +92,7 @@
         .view-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; background: transparent; z-index: 10; }
         .panel.home-btn-black { background: rgba(0, 0, 0, 0.82); border-color: rgba(255, 255, 255, 0.14); }
         #content-home.active { display: flex; flex-direction: column; }
+        #view-main.quest-bg { background: url("クエスト一覧.png") center / cover no-repeat; }
         #view-main.home-bg { background: url("ホーム画面.png") center / cover no-repeat; }
         .view-layer.active { display: flex; animation: layerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
         .content-section { display: none; flex: 1; overflow-y: auto; padding: 0.75rem; padding-bottom: 6.5rem; z-index: 20; }
@@ -349,7 +350,6 @@
         .nav-btn-fixed { flex: 0 0 auto; width: var(--nav-btn-w, calc((min(100vw, 440px) - 8px) / 8)); }
         /* ホーム上部の所持枠: 上端に密着(上の余白なし)・下側だけ角丸 */
         .panel.header-pill { border-top-width: 0; border-radius: 0 0 18px 18px; align-items: center; }
-        #modal-mission { background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url("クエスト一覧.png") center / cover no-repeat; }
         .story-textbox { animation: storyBoxIn 0.3s ease-out; }
         @keyframes storyBoxIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .story-text-fade { animation: storyTextFade 0.25s ease-out; }
@@ -796,7 +796,7 @@
                     <button id="nav-btn-gacha" onclick="changeContent('content-gacha', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="ガチャボタン.png" alt="GACHA" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">宝箱</span></button>
                     <button onclick="goToKasino()" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="カジノボタン.png" alt="KASINO" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">CASINO</span></button>
                     <button onclick="changeContent('content-plaza', this); renderPlazaScreen();" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="広場ボタン.png" alt="広場" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">広場</span></button>
-                    <button onclick="changeContent('content-exchange', this); renderExchangeTab(exchangeActiveTab);" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="交換所ボタン.png" alt="交換所" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">交換所</span></button>
+                    <button onclick="changeContent('content-exchange', this); exchangeActiveTab = 'coin'; renderExchangeTab('coin');" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="交換所ボタン.png" alt="交換所" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">交換所</span></button>
                     <button onclick="changeContent('content-zukan', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="図鑑ボタン.png" alt="図鑑" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">図鑑</span></button>
                     <button onclick="openModal('modal-hub')" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="ハブボタン.png" alt="ハブ" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">ハブ</span></button>
                     <button onclick="changeContent('content-settings', this)" class="nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed"><img src="設定ボタン.png" alt="設定" class="w-9 h-9 mb-0.5 object-contain"><span class="text-[9px] font-black tracking-wider">設定</span></button>
@@ -895,7 +895,7 @@
                 </div>
             </div>
 
-            <div id="modal-mission" class="modal absolute inset-0 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
+            <div id="modal-mission" class="modal absolute inset-0 bg-black/90 z-50 flex-col items-center justify-start pt-10 px-4 backdrop-blur-md">
                 <div class="panel w-full max-w-sm p-4 border-amber-500/50 max-h-[85vh] flex flex-col">
                     <h3 class="text-base font-black text-amber-300 mb-1 tracking-widest text-center border-b border-amber-500/30 pb-2 flex items-center justify-center"><span class="text-xl mr-2">📜</span>MISSIONS</h3>
                     <div class="flex mb-2 mt-2 bg-black/40 rounded-lg p-1 border border-white/10 text-[9px]">
@@ -1042,6 +1042,18 @@
                 <h3 id="result-title" class="text-2xl font-black mb-3 text-amber-400">QUEST CLEARED!</h3>
                 <div id="result-content" class="text-sm font-bold text-white mb-5 space-y-2"></div>
                 <button id="result-ok-btn" onclick="closeResult()" class="w-full btn-gold py-3 rounded-xl font-black text-xs text-amber-900 tracking-widest">ステージ一覧に戻る</button>
+            </div>
+        </div>
+
+        <div id="modal-element-confirm" class="modal absolute inset-0 bg-black/90 z-[200] flex-col items-center justify-center p-4 backdrop-blur-md">
+            <div class="panel w-full max-w-sm p-6 text-center border-purple-500/50">
+                <div id="element-confirm-icon" class="flex justify-center mb-2 h-12 items-center"></div>
+                <p id="element-confirm-text" class="text-sm font-black text-white mb-1">元素に変更しますか？</p>
+                <p class="text-[10px] text-slate-400 mb-5">元素転生の巻物を1個消費します</p>
+                <div class="flex space-x-2">
+                    <button onclick="cancelElementChange()" class="flex-1 panel py-2 rounded font-bold text-xs text-slate-300">いいえ</button>
+                    <button onclick="confirmElementChange()" class="flex-1 panel py-2 rounded font-black text-xs bg-purple-900/50 text-purple-200 border-purple-500">はい</button>
+                </div>
             </div>
         </div>
 
@@ -2554,6 +2566,7 @@
         }
 
         function applyVolumeSetting() {
+            updateGachaBgmVolume();
             if(!isAudioInitialized || !synth) return;
             // 効果音音量 (0-100) を -40dB(無音に近い)〜0dB のレンジへ変換
             const se = Math.max(0, Math.min(100, state.settings.seVolume ?? 70));
@@ -2703,11 +2716,17 @@
 
         function changeContent(contentId, btnElement) {
             playSound('tap');
+            // 工房・クエストは前回開いていたサブ画面ではなく、最初の画面から表示する
+            if (contentId === 'content-equip') switchSubView('content-equip', 'equip-view-top');
+            if (contentId === 'content-quest') switchSubView('content-quest', 'quest-view-top');
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(contentId).classList.add('active');
             if (contentId === 'content-gacha' && typeof g3dPreload === 'function') g3dPreload();
             const mainLayer = document.getElementById('view-main');
-            if (mainLayer) mainLayer.classList.toggle('home-bg', contentId === 'content-home');
+            if (mainLayer) {
+                mainLayer.classList.toggle('home-bg', contentId === 'content-home');
+                mainLayer.classList.toggle('quest-bg', contentId === 'content-quest');
+            }
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.className = "nav-btn flex flex-col items-center p-1 rounded-xl transition-all text-slate-500 hover:text-slate-300 nav-btn-fixed";
                 const icon = btn.firstElementChild;
@@ -2854,6 +2873,12 @@
             navQuestLayer('quest-view-story-mode');
         }
 
+        // まだ解放されていないクエストの名前は伏せる(「第3章：？？？」)
+        function maskStoryTitle(title) {
+            const i = title.indexOf('：');
+            return i >= 0 ? title.slice(0, i + 1) + '？？？' : '？？？';
+        }
+
         function renderStoryChapterList() {
             const container = document.getElementById('story-chapter-list');
             if (!container) return;
@@ -2867,7 +2892,7 @@
                     <div ${unlocked ? `onclick="openStorySceneList(${idx})"` : ''} class="panel p-3 flex justify-between items-center ${unlocked ? 'cursor-pointer' : 'opacity-50'}">
                         <div>
                             <span class="text-[8px] font-black ${statusColor} block">${statusLabel}</span>
-                            <span class="text-xs font-bold text-white">${ch.title}</span>
+                            <span class="text-xs font-bold text-white">${unlocked ? ch.title : maskStoryTitle(ch.title)}</span>
                         </div>
                         <span class="text-2xl">${unlocked ? (cleared ? '✅' : ch.icon) : '🔒'}</span>
                     </div>
@@ -2891,7 +2916,7 @@
                     const sceneCleared = sIdx < scenesDone;
                     return `
                         <div ${sceneUnlocked ? `onclick="startStoryScene(${chapterIdx}, ${sIdx})"` : ''} class="panel p-3 flex justify-between items-center ${sceneUnlocked ? 'cursor-pointer' : 'opacity-50'}">
-                            <div><span class="text-[8px] ${sceneCleared ? 'text-emerald-400' : 'text-cyan-400'} block">${sc.id}${sceneCleared ? ' ・クリア済み' : ''}</span><span class="text-xs font-bold text-white">${sc.title}</span></div>
+                            <div><span class="text-[8px] ${sceneCleared ? 'text-emerald-400' : 'text-cyan-400'} block">${sc.id}${sceneCleared ? ' ・クリア済み' : ''}</span><span class="text-xs font-bold text-white">${sceneUnlocked ? sc.title : '？？？'}</span></div>
                             <span class="text-xl">${sceneUnlocked ? (sceneCleared ? '✅' : '▶') : '🔒'}</span>
                         </div>
                     `;
@@ -3815,6 +3840,43 @@
         // ガチャタブを開いた時点でモデルの先読みを始める(初回の待ち時間を減らす)
         function g3dPreload() { if (g3dIsPossible()) g3dLoad(); }
 
+        // ==== ガチャBGM (ガチャBGM.mp3) ====
+        const GACHA_BGM_URL = 'ガチャBGM.mp3';
+        let gachaBgm = null;
+        function gachaBgmVolume() { return Math.max(0, Math.min(1, (state.settings.bgmVolume ?? 70) / 100)); }
+        function fadeGachaBgm(audio, to, ms, done) {
+            clearInterval(audio._fade);
+            audio._fading = true;
+            const from = audio.volume, steps = Math.max(1, Math.round(ms / 50));
+            let i = 0;
+            audio._fade = setInterval(() => {
+                i++;
+                audio.volume = Math.max(0, Math.min(1, from + (to - from) * i / steps));
+                if (i >= steps) { clearInterval(audio._fade); audio._fading = false; if (done) done(); }
+            }, 50);
+        }
+        function startGachaBgm() {
+            stopGachaBgm(true);
+            try {
+                const a = new Audio(GACHA_BGM_URL);
+                a.loop = true; a.volume = 0;
+                gachaBgm = a;
+                const p = a.play();
+                if (p && p.catch) p.catch(() => {});          // ファイルが無い/再生できない場合は無音のまま続行
+                fadeGachaBgm(a, gachaBgmVolume(), 500);
+            } catch (e) { gachaBgm = null; }
+        }
+        function stopGachaBgm(immediate) {
+            const a = gachaBgm;
+            if (!a) return;
+            gachaBgm = null;
+            if (immediate) { clearInterval(a._fade); try { a.pause(); } catch (e) {} return; }
+            fadeGachaBgm(a, 0, 400, () => { try { a.pause(); } catch (e) {} });
+        }
+        function updateGachaBgmVolume() {
+            if (gachaBgm && !gachaBgm._fading) gachaBgm.volume = gachaBgmVolume();   // 設定のBGM音量スライダーに追従
+        }
+
         // ==== ガチャ演出: 3D箱 → 開封 → 1つずつ結果発表 → 一覧 ====
         let gachaSequenceTimers = [];
         let gachaSession = null;
@@ -3847,6 +3909,7 @@
             gachaResetUI();
             gachaEl('gacha-overlay').style.display = 'flex';
             startGachaParticles(maxRarity >= 3);
+            startGachaBgm();
 
             const ready = g3d.models.closed && g3d.models.open;
             if (!ready && g3dIsPossible()) {
@@ -4003,6 +4066,7 @@
             gachaToken++;                                    // 読み込み中のコールバックを無効化
             gachaSession = null;
             g3dStop();
+            stopGachaBgm();
             g3d.onProgress = null;
             gachaEl('gacha-overlay').style.display = 'none';
             gachaResetUI();
@@ -4268,52 +4332,71 @@
             return BASE_ELEMENTS.includes(elemKey) || state.elementUnlocked.includes(elemKey);
         }
 
+        let pendingElementKey = null;
         function selectElement(elemKey) {
             if (!ELEMENTS[elemKey]) return;
             if (!isElementUnlocked(elemKey)) {
                 showToast('まだ解放されていない元素です', true);
                 return;
             }
+            if (state.player.element === elemKey) { showToast('すでにその元素です', true); return; }
             if ((state.items.reincarnationScroll || 0) <= 0) {
-                showToast('元素転生の巻き物が必要です(交換所で入手できます)', true);
+                showToast('元素転生の巻物が必要です(交換所で入手できます)', true);
                 return;
             }
+            // 「○の元素に変更しますか？」と確認してから変更する
+            pendingElementKey = elemKey;
+            document.getElementById('element-confirm-icon').innerHTML = elementIconHtml(elemKey, 'w-12 h-12');
+            document.getElementById('element-confirm-text').innerText = `${ELEMENTS[elemKey].name}の元素に変更しますか？`;
+            openModal('modal-element-confirm');
+        }
+        function cancelElementChange() {
+            pendingElementKey = null;
+            openModal('modal-reincarnate');        // 元素の一覧に戻る
+        }
+        function confirmElementChange() {
+            const elemKey = pendingElementKey;
+            pendingElementKey = null;
+            if (!elemKey || !ELEMENTS[elemKey]) return;
+            if ((state.items.reincarnationScroll || 0) <= 0) { closeModal('modal-element-confirm'); showToast('元素転生の巻物が必要です(交換所で入手できます)', true); return; }
             state.items.reincarnationScroll -= 1;
             state.player.element = elemKey;
             applyElementStyle();
             saveGame();
-            closeModal('modal-reincarnate');
+            playSound('decide');
+            closeModal('modal-element-confirm');
             renderReincarnateModal();
             showToast(`元素を「${ELEMENTS[elemKey].name}」に変更しました`);
         }
 
-        function renderElementRow(key, unlocked, reqBaseKey, reqLevel) {
+        // 元素転生の一覧の1行(解放済み: レベル/EXPバー付きのボタン、未解放: 鍵+解放条件)
+        function renderElementRow(key, unlocked, baseKey, atLevel) {
             const el = ELEMENTS[key];
             if (!unlocked) {
-                const reqName = reqBaseKey ? ELEMENTS[reqBaseKey].name : '';
+                const baseName = ELEMENTS[baseKey] ? ELEMENTS[baseKey].name : '';
                 return `
                     <div class="panel w-full p-2.5 flex items-center opacity-50 border-slate-700">
-                        <span class="text-xl mr-3">🔒</span>
+                        <span class="mr-3 flex-shrink-0 w-9 h-9 flex items-center justify-center text-xl">🔒</span>
                         <div class="flex-1 text-left">
                             <div class="text-xs font-bold text-slate-400">${el.name}</div>
-                            <div class="text-[8px] text-slate-500">${reqName}がLv.${reqLevel}で解放</div>
+                            <div class="text-[8px] text-slate-500">${baseName}がLv.${atLevel}で解放</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
             const prog = state.elementProgress[key] || { level: 1, exp: 0 };
-            const needed = getElementExpNeeded(prog.level);
-            const pct = Math.min(100, Math.floor((prog.exp / needed) * 100));
+            const need = getElementExpNeeded(prog.level);
+            const pct = Math.max(0, Math.min(100, Math.round(prog.exp / need * 100)));
             const isCurrent = state.player.element === key;
             return `
                 <button onclick="selectElement('${key}')" class="panel w-full p-2.5 flex items-center ${isCurrent ? 'border-amber-400 bg-amber-950/20' : ''}">
                     <span class="mr-3 flex-shrink-0 w-9 h-9 flex items-center justify-center text-xl">${elementIconHtml(key, 'w-9 h-9')}</span>
                     <div class="flex-1 text-left">
-                        <div class="text-xs font-bold ${el.class}">${el.name} <span class="text-[9px] text-slate-400 font-mono">Lv.${prog.level}</span>${isCurrent ? ' <span class="text-[8px] text-amber-300">(現在)</span>' : ''}</div>
-                        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden border border-slate-700 mt-1"><div class="h-full bg-amber-400" style="width:${pct}%"></div></div>
+                        <div class="flex items-center justify-between"><span class="text-xs font-black ${el.class}">${el.name}</span><span class="text-[10px] font-mono font-black text-amber-300">Lv.${prog.level}</span></div>
+                        <div class="w-full h-1.5 bg-black/60 rounded-full mt-1 overflow-hidden"><div class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400" style="width:${pct}%"></div></div>
+                        <div class="text-[8px] text-slate-500 mt-0.5">EXP ${prog.exp}/${need}</div>
                     </div>
-                </button>
-            `;
+                    ${isCurrent ? '<span class="ml-2 text-[9px] font-black text-amber-300">使用中</span>' : ''}
+                </button>`;
         }
 
         function renderReincarnateModal() {
