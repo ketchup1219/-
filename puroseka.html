@@ -891,6 +891,7 @@
             state.isOnline = false;
             state.editorStartTime = startTime;
             state.returnToEditor = true;
+            state.playingEditorChart = true;
             window.closeChartEditor();
             startMatchPreparation('CHART TEST', 'ChartTest', false);
         };
@@ -1530,7 +1531,10 @@
         };
 
         function startMatchPreparation(oppName, oppAvatarSeed, showRival) {
-            if (Number.isFinite(state.editorStartTime)) state.returnToEditor = true;
+            if (Number.isFinite(state.editorStartTime)) {
+                state.returnToEditor = true;
+                state.playingEditorChart = true;
+            }
             previewAudio.pause();
             document.getElementById('game-lobby-overlay').classList.add('opacity-0');
             
@@ -2003,9 +2007,10 @@
         };
 
         window.abortGame = function() {
-            const shouldReturnToEditor = state.returnToEditor === true;
+            const shouldReturnToEditor = state.returnToEditor === true || state.playingEditorChart === true;
             if (shouldReturnToEditor) state.editorReturnTime = state.gameTime;
             state.returnToEditor = false;
+            state.playingEditorChart = false;
             state.gameActive = false;
             cancelAnimationFrame(state.animationFrameId);
             if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
@@ -2018,8 +2023,8 @@
             document.getElementById('lobby-panel').classList.remove('hidden'); document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('game-arena-panel').classList.remove('w-full'); document.getElementById('game-arena-panel').classList.add('lg:w-2/3');
             
-            window.playPreview(window.originalSongs[state.currentSongIndex]);
             if (shouldReturnToEditor) setTimeout(() => window.openChartEditor(), 80);
+            else window.playPreview(window.originalSongs[state.currentSongIndex]);
         };
 
         window.finishGameMatch = function() {
