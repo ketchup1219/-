@@ -523,7 +523,7 @@
                         <audio id="editor-audio" class="hidden"></audio>
                         <div class="flex justify-between text-xs font-mono text-cyan-300 mb-1"><span id="editor-current-time">0.00s</span><span id="editor-duration">0.00s</span></div>
                         <input id="editor-time-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="window.editorSeek(this.value)" class="w-full accent-cyan-500">
-                        <div class="flex items-center justify-between mt-3 mb-1"><span class="text-[10px] text-slate-500">長押し・ドラッグ: 移動 / ホールド選択中にドラッグ: 形を描く</span><div class="flex items-center gap-1"><button onclick="window.editorSetZoom(-1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">−</button><span id="editor-zoom-label" class="text-[10px] text-cyan-300 font-mono w-10 text-center">100%</span><button onclick="window.editorSetZoom(1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">＋</button></div></div>
+                        <div class="flex items-center justify-between mt-3 mb-1"><span class="text-[10px] text-slate-500">長押し・ドラッグ: 移動 / ホールド選択中にドラッグ: 形を描く</span><div class="flex items-center gap-1"><button onclick="window.editorSetZoom(-1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">−</button><span id="editor-zoom-label" class="text-[10px] text-cyan-300 font-mono w-10 text-center">50%</span><button onclick="window.editorSetZoom(1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">＋</button><input id="editor-zoom-slider" type="range" min="10" max="400" step="10" value="50" oninput="window.editorSetZoomValue(this.value)" class="w-20 accent-cyan-500 ml-1" aria-label="ズーム倍率"></div></div>
                         <div id="editor-timeline-viewport" class="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950 select-none">
                             <div id="editor-timeline" class="relative h-48 min-w-full" onpointerdown="window.editorTimelinePointerDown(event)" onpointermove="window.editorTimelinePointerMove(event)" onpointerup="window.editorTimelinePointerUp(event)" onpointercancel="window.editorTimelinePointerCancel(event)">
                                 <div id="editor-timeline-grid" class="absolute inset-0"></div>
@@ -741,7 +741,7 @@
             globalOnlineScores: [], roomsUnsubscribe: null, scoresUnsubscribe: null, roomSyncUnsubscribe: null, scoreSyncInterval: null
         };
 
-        const editorState = { type: 'tap', lane: 0, endLane: 0, notes: [], selectedNoteIndex: null, songIndex: 0, difficulty: 'easy', previewRAF: null, zoom: 1, drag: null, previewPath: null };
+        const editorState = { type: 'tap', lane: 0, endLane: 0, notes: [], selectedNoteIndex: null, songIndex: 0, difficulty: 'easy', previewRAF: null, zoom: 0.5, drag: null, previewPath: null };
 
         function cloneChartNotes(notes) {
             return (Array.isArray(notes) ? notes : []).map(note => {
@@ -784,6 +784,12 @@
             document.getElementById('editor-difficulty').value = editorState.difficulty;
             window.editorSongChanged();
             window.editorSetType(editorState.type); window.editorSetLane(editorState.lane);
+            window.editorSetZoomValue(editorState.zoom * 100);
+            if (Number.isFinite(state.editorReturnTime)) {
+                const returnTime = state.editorReturnTime; state.editorReturnTime = null;
+                const editorAudio = document.getElementById('editor-audio');
+                if (editorAudio) editorAudio.currentTime = returnTime;
+            }
             modal.classList.remove('hidden');
         };
         window.closeChartEditor = function() {
@@ -832,6 +838,7 @@
             document.getElementById('player-difficulty').value = difficulty;
             state.isOnline = false;
             state.editorStartTime = startTime;
+            state.returnToEditor = true;
             window.closeChartEditor();
             startMatchPreparation('CHART TEST', 'ChartTest', false);
         };
@@ -891,11 +898,14 @@
             grid.innerHTML = html + slideSvg;
             window.editorUpdatePlayhead();
         };
-        window.editorSetZoom = function(direction) {
-            editorState.zoom = Math.max(0.5, Math.min(4, editorState.zoom + Number(direction) * 0.5));
-            const label = document.getElementById('editor-zoom-label'); if (label) label.innerText = `${Math.round(editorState.zoom * 100)}%`;
+        window.editorSetZoomValue = function(value) {
+            const percent = Math.max(10, Math.min(400, Number(value) || 50));
+            editorState.zoom = percent / 100;
+            const label = document.getElementById('editor-zoom-label'); if (label) label.innerText = `${Math.round(percent)}%`;
+            const slider = document.getElementById('editor-zoom-slider'); if (slider) slider.value = percent;
             window.editorRenderTimeline();
         };
+        window.editorSetZoom = function(direction) { window.editorSetZoomValue(editorState.zoom * 100 + Number(direction) * 10); };
         function editorTimelinePoint(event) {
             const timeline = document.getElementById('editor-timeline');
             const viewport = document.getElementById('editor-timeline-viewport'); if (!timeline || !viewport) return null;
@@ -1585,7 +1595,10 @@
             }
 
             playbackNotes.sort((a, b) => (a.time ?? a.nodes[0].time) - (b.time ?? b.nodes[0].time));
-            state.nextNoteIndex = playbackNotes.findIndex(note => (note.time ?? note.nodes[0].time) >= state.gameTime - leadTime);
+            state.nextNoteIndex = playbackNotes.findIndex(note => {
+                const lastTime = note.type === 'slide' ? note.nodes[note.nodes.length - 1].time : note.time;
+                return lastTime >= state.gameTime - leadTime;
+            });
             if (state.nextNoteIndex < 0) state.nextNoteIndex = playbackNotes.length;
             state.totalNotes = playbackNotes.length;
             state.playbackNotes = playbackNotes;
@@ -1887,6 +1900,9 @@
         };
 
         window.abortGame = function() {
+            const shouldReturnToEditor = state.returnToEditor === true;
+            if (shouldReturnToEditor) state.editorReturnTime = state.gameTime;
+            state.returnToEditor = false;
             state.gameActive = false;
             cancelAnimationFrame(state.animationFrameId);
             if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
@@ -1899,7 +1915,8 @@
             document.getElementById('lobby-panel').classList.remove('hidden'); document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('game-arena-panel').classList.remove('w-full'); document.getElementById('game-arena-panel').classList.add('lg:w-2/3');
             
-            window.playPreview(window.originalSongs[state.currentSongIndex]); 
+            window.playPreview(window.originalSongs[state.currentSongIndex]);
+            if (shouldReturnToEditor) setTimeout(() => window.openChartEditor(), 80);
         };
 
         window.finishGameMatch = function() {
