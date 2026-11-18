@@ -163,6 +163,22 @@
         }
         .editor-note-flash { animation: editor-note-flash 0.75s ease-in-out 2; z-index: 5; }
         .editor-note-selected { animation: editor-note-flash 0.75s ease-in-out infinite; z-index: 5; }
+
+        @media (max-width: 640px) {
+            #chart-editor-modal { align-items: flex-start; padding: 0.25rem; }
+            #chart-editor-modal > div { max-height: 100vh; padding: 0.75rem; border-radius: 1rem; }
+            #chart-editor-modal h3 { font-size: 1.05rem; }
+            #chart-editor-modal .text-xs { line-height: 1.35; }
+            #editor-timeline { height: 11rem; }
+            #editor-zoom-slider { width: 4.5rem; }
+            #editor-note-list { max-height: 13rem; }
+        }
+
+        /* Orientation fallback for browsers that cannot lock the device orientation. */
+        body.orientation-landscape main { flex-direction: row !important; min-width: 900px; }
+        body.orientation-landscape #lobby-panel { width: 33.333333% !important; }
+        body.orientation-landscape #game-arena-panel { width: 66.666667% !important; }
+        body.orientation-portrait main { flex-direction: column !important; min-width: 0 !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
@@ -191,13 +207,16 @@
                 <p class="text-[10px] text-slate-400 tracking-widest uppercase">Self-Created Music Arena</p>
             </div>
         </div>
-        <div onclick="window.openProfileModal()" class="flex items-center gap-4 cursor-pointer hover:bg-slate-800/40 p-2 rounded-xl transition-all border border-transparent hover:border-slate-800">
+        <div class="flex items-center gap-2">
+            <button onclick="window.openSettingsModal()" aria-label="設定" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-cyan-950 text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-500/40 transition-all"><i class="fa-solid fa-gear"></i></button>
+            <div onclick="window.openProfileModal()" class="flex items-center gap-4 cursor-pointer hover:bg-slate-800/40 p-2 rounded-xl transition-all border border-transparent hover:border-slate-800">
             <div class="hidden sm:flex flex-col text-right">
                 <span class="text-[9px] text-cyan-400 uppercase tracking-widest font-bold"><i class="fa-solid fa-pen mr-1"></i>プロフィール</span>
                 <span id="player-username" class="text-sm font-bold text-slate-100">Player</span>
             </div>
             <div class="w-10 h-10 rounded-full border-2 border-cyan-500/50 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
                 <img id="player-avatar" src="" class="w-full h-full object-cover">
+            </div>
             </div>
         </div>
     </header>
@@ -523,7 +542,7 @@
                         <audio id="editor-audio" class="hidden"></audio>
                         <div class="flex justify-between text-xs font-mono text-cyan-300 mb-1"><span id="editor-current-time">0.00s</span><span id="editor-duration">0.00s</span></div>
                         <input id="editor-time-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="window.editorSeek(this.value)" class="w-full accent-cyan-500">
-                        <div class="flex items-center justify-between mt-3 mb-1"><span class="text-[10px] text-slate-500">長押し・ドラッグ: 移動 / ホールド選択中にドラッグ: 形を描く</span><div class="flex items-center gap-1"><button onclick="window.editorSetZoom(-1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">−</button><span id="editor-zoom-label" class="text-[10px] text-cyan-300 font-mono w-10 text-center">50%</span><button onclick="window.editorSetZoom(1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">＋</button><input id="editor-zoom-slider" type="range" min="10" max="400" step="10" value="50" oninput="window.editorSetZoomValue(this.value)" class="w-20 accent-cyan-500 ml-1" aria-label="ズーム倍率"></div></div>
+                        <div class="flex items-center justify-between mt-3 mb-1"><span class="text-[10px] text-slate-500">長押し・ドラッグ: 移動 / ホールド選択中にドラッグ: 形を描く</span><div class="flex items-center gap-1"><button onclick="window.editorSetZoom(-1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">−</button><span id="editor-zoom-label" class="text-[10px] text-cyan-300 font-mono w-10 text-center">350%</span><button onclick="window.editorSetZoom(1)" class="bg-slate-800 hover:bg-slate-700 text-white rounded px-2 py-1 text-xs">＋</button><input id="editor-zoom-slider" type="range" min="10" max="400" step="10" value="350" oninput="window.editorSetZoomValue(this.value)" class="w-20 accent-cyan-500 ml-1" aria-label="ズーム倍率"></div></div>
                         <div id="editor-timeline-viewport" class="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950 select-none">
                             <div id="editor-timeline" class="relative h-48 min-w-full" onpointerdown="window.editorTimelinePointerDown(event)" onpointermove="window.editorTimelinePointerMove(event)" onpointerup="window.editorTimelinePointerUp(event)" onpointercancel="window.editorTimelinePointerCancel(event)">
                                 <div id="editor-timeline-grid" class="absolute inset-0"></div>
@@ -554,6 +573,33 @@
                     <p class="text-[10px] text-slate-500 mt-2">書き出したJSONを友人やこのチャットに添付してください。</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[105] hidden">
+        <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-sm w-full p-5 shadow-2xl relative">
+            <button onclick="window.closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h3 class="text-lg font-bold mb-5 text-cyan-300 flex items-center gap-2"><i class="fa-solid fa-gear"></i> 設定</h3>
+            <div class="space-y-5">
+                <div>
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-300 mb-2"><span><i class="fa-solid fa-volume-high mr-2 text-cyan-400"></i>音量</span><span id="settings-volume-label" class="text-cyan-300 font-mono">40%</span></div>
+                    <input id="settings-volume-slider" type="range" min="0" max="100" value="40" class="w-full accent-cyan-500" oninput="window.changeSettingsVolume(this.value)">
+                </div>
+                <div class="flex items-center justify-between gap-3 border-t border-slate-800 pt-4">
+                    <div><div class="text-xs font-bold text-slate-300"><i class="fa-solid fa-expand mr-2 text-cyan-400"></i>フルスクリーン</div><div class="text-[10px] text-slate-500 mt-1">ブラウザの全画面表示を切り替えます</div></div>
+                    <button id="settings-fullscreen-button" onclick="window.toggleFullscreen()" class="bg-slate-800 hover:bg-cyan-900 text-cyan-300 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold">OFF</button>
+                </div>
+                <div class="border-t border-slate-800 pt-4">
+                    <label class="block text-xs font-bold text-slate-300"><i class="fa-solid fa-mobile-screen-button mr-2 text-cyan-400"></i>画面レイアウト
+                        <select id="settings-orientation" onchange="window.applyOrientation(this.value)" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+                            <option value="auto">自動</option><option value="portrait">縦画面</option><option value="landscape">横画面</option>
+                        </select>
+                    </label>
+                    <p class="text-[10px] text-slate-500 mt-2">LINEなど回転に対応しないブラウザでは、画面内のレイアウトを切り替えます。</p>
+                </div>
+            </div>
+            <button onclick="window.closeSettingsModal()" class="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 text-slate-950 py-2.5 rounded-xl text-xs font-bold">閉じる</button>
         </div>
     </div>
 
@@ -741,7 +787,7 @@
             globalOnlineScores: [], roomsUnsubscribe: null, scoresUnsubscribe: null, roomSyncUnsubscribe: null, scoreSyncInterval: null
         };
 
-        const editorState = { type: 'tap', lane: 0, endLane: 0, notes: [], selectedNoteIndex: null, songIndex: 0, difficulty: 'easy', previewRAF: null, zoom: 0.5, drag: null, previewPath: null };
+        const editorState = { type: 'tap', lane: 0, endLane: 0, notes: [], selectedNoteIndex: null, songIndex: 0, difficulty: 'easy', previewRAF: null, zoom: 3.5, drag: null, previewPath: null };
 
         function cloneChartNotes(notes) {
             return (Array.isArray(notes) ? notes : []).map(note => {
@@ -1118,6 +1164,7 @@
                     if (slider) slider.value = parsed.volume || 40;
                     const lbl = document.getElementById('volume-label');
                     if (lbl) lbl.innerText = (parsed.volume || 40) + '%';
+                    if (parsed.orientation) window.applyOrientation(parsed.orientation, false);
                 } catch(e) {}
             }
         }
@@ -1128,6 +1175,7 @@
                 profile: window.playerProfile,
                 lastDifficulty: document.getElementById('player-difficulty').value,
                 volume: document.getElementById('volume-slider').value,
+                orientation: document.body.dataset.orientation || 'auto',
                 highScores: currentSaved.highScores || {}
             };
             localStorage.setItem('songverseData', JSON.stringify(dataToSave));
@@ -1142,6 +1190,51 @@
             if(state.audioContext) state.audioContext.volume = window.globalVolume;
             window.saveSettings();
         };
+
+        window.openSettingsModal = function() {
+            const savedVolume = Math.round(window.globalVolume * 100);
+            const slider = document.getElementById('settings-volume-slider');
+            if (slider) slider.value = savedVolume;
+            const label = document.getElementById('settings-volume-label');
+            if (label) label.innerText = `${savedVolume}%`;
+            const orientation = document.getElementById('settings-orientation');
+            if (orientation) orientation.value = document.body.dataset.orientation || 'auto';
+            window.updateFullscreenButton();
+            document.getElementById('settings-modal').classList.remove('hidden');
+        };
+        window.closeSettingsModal = function() { document.getElementById('settings-modal').classList.add('hidden'); };
+        window.changeSettingsVolume = function(value) {
+            const val = Math.max(0, Math.min(100, Number(value) || 0));
+            const slider = document.getElementById('volume-slider'); if (slider) slider.value = val;
+            const label = document.getElementById('settings-volume-label'); if (label) label.innerText = `${val}%`;
+            window.changeVolume();
+        };
+        window.updateFullscreenButton = function() {
+            const button = document.getElementById('settings-fullscreen-button'); if (!button) return;
+            const active = !!document.fullscreenElement;
+            button.innerText = active ? 'ON' : 'OFF';
+            button.className = active ? 'bg-cyan-500 text-slate-950 border border-cyan-300 rounded-lg px-3 py-2 text-xs font-bold' : 'bg-slate-800 hover:bg-cyan-900 text-cyan-300 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold';
+        };
+        window.toggleFullscreen = async function() {
+            try {
+                if (document.fullscreenElement) await document.exitFullscreen();
+                else await document.documentElement.requestFullscreen();
+            } catch(e) { alert('このブラウザではフルスクリーンを使用できません。'); }
+            window.updateFullscreenButton();
+        };
+        window.applyOrientation = function(mode, save = true) {
+            const selected = ['auto', 'portrait', 'landscape'].includes(mode) ? mode : 'auto';
+            document.body.classList.remove('orientation-portrait', 'orientation-landscape');
+            if (selected !== 'auto') document.body.classList.add(`orientation-${selected}`);
+            document.body.dataset.orientation = selected;
+            const select = document.getElementById('settings-orientation'); if (select) select.value = selected;
+            try {
+                if (screen.orientation?.lock && document.fullscreenElement && selected !== 'auto') screen.orientation.lock(selected).catch(() => {});
+                else if (screen.orientation?.unlock && selected === 'auto') screen.orientation.unlock();
+            } catch(e) {}
+            if (save) window.saveSettings();
+        };
+        document.addEventListener('fullscreenchange', window.updateFullscreenButton);
 
         window.updateHighScoreDisplay = function() {
             if(!window.originalSongs || state.currentSongIndex === undefined) return;
@@ -1431,6 +1524,7 @@
         };
 
         function startMatchPreparation(oppName, oppAvatarSeed, showRival) {
+            if (Number.isFinite(state.editorStartTime)) state.returnToEditor = true;
             previewAudio.pause();
             document.getElementById('game-lobby-overlay').classList.add('opacity-0');
             
