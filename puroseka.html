@@ -404,7 +404,7 @@
                 <!-- GAMEPLAY FIELD: 3D Board and SVG Slide Layer -->
                 <div class="flex-grow relative overflow-hidden flex flex-col justify-end">
                     <div class="game-board-container w-full h-full absolute inset-0 flex justify-center">
-                        <div class="game-board h-full flex relative border-x border-cyan-500/20">
+                        <div id="game-board" class="game-board h-full flex relative border-x border-cyan-500/20">
                             
                             <!-- Lane lasers -->
                             <div class="lane-laser" style="left: 25%"></div>
@@ -784,9 +784,9 @@
             { id: 'track_rampage_v', title: 'ランペイジ（ヴェノム）', artist: 'You (Original)', bpm: 150, audioFile: 'ランペイジ・イットヴェノム.mp3', staticDuration: 166, previewTime: 40 },
             { id: 'track_rampage_i', title: 'ランペイジ', artist: 'You (Original)', bpm: 145, audioFile: 'ランペイジ・イット.mp3', staticDuration: 172, previewTime: 45 },
             { id: 'track_hiiro', title: '緋色のサーガ', artist: 'You (Original)', bpm: 150, audioFile: '緋色のサーガ.mp3', staticDuration: 193, previewTime: 60 },
-            { id: 'track_shien', title: 'せいまろのテーマ', artist: 'You (Original)', bpm: 130, audioFile: '紫煙（しえん）にむせぶ　路地裏の果て2.mp3', staticDuration: 238, previewTime: 70 },
-            { id: 'track_kazuking_t', title: 'カズキング国家', artist: 'You (Original)', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
-            { id: 'track_asayake', title: 'ありがとうサービス', artist: 'You (Original)', bpm: 110, audioFile: '朝焼けの街を走り抜けてく  .mp3', staticDuration: 280, previewTime: 80 }
+            { id: 'track_shien', title: 'せいまろのテーマ', artist: 'You (Original)', bpm: 130, audioFile: 'せいまろ曲.mp3', staticDuration: 238, previewTime: 70 },
+            { id: 'track_kazuking_t', title: 'カズキング国歌', artist: 'You (Original)', bpm: 142, audioFile: 'カズキングタイジュウフエターネキンギーニ.mp3', staticDuration: 151, previewTime: 45 },
+            { id: 'track_asayake', title: 'ありがとうサービス', artist: 'You (Original)', bpm: 110, audioFile: '朝焼けの街を走り抜けてく.mp3', staticDuration: 280, previewTime: 80 }
         ];
 
         const opponentPresets = {
@@ -1171,6 +1171,19 @@
         window.globalVolume = 0.4;
         const previewAudio = new Audio();
         previewAudio.loop = true;
+        const tapSoundPool = Array.from({ length: 8 }, () => {
+            const audio = new Audio('puroseka効果音.mp3');
+            audio.preload = 'auto';
+            audio.volume = window.globalVolume;
+            return audio;
+        });
+        let tapSoundIndex = 0;
+        window.playTapSound = function() {
+            const audio = tapSoundPool[tapSoundIndex++ % tapSoundPool.length];
+            audio.volume = window.globalVolume;
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+        };
 
         const hitLinePercentage = 90; // 少し下げて判定枠を見やすく
         const leadTime = 1.3; 
@@ -1214,6 +1227,7 @@
             document.getElementById('volume-label').innerText = val + '%';
             previewAudio.volume = window.globalVolume;
             if(state.audioContext) state.audioContext.volume = window.globalVolume;
+            tapSoundPool.forEach(audio => audio.volume = window.globalVolume);
             window.saveSettings();
         };
 
@@ -2167,6 +2181,13 @@
                 }
             };
             for(let i=0; i<4; i++) bindTouch(`hitbox-${i}`, i);
+
+            const gameBoard = document.getElementById('game-board');
+            if (gameBoard) {
+                gameBoard.addEventListener('pointerdown', (e) => {
+                    if (state.gameActive && (e.pointerType === 'touch' || e.pointerType === 'mouse' || e.pointerType === 'pen')) window.playTapSound();
+                });
+            }
 
             const editorAudio = document.getElementById('editor-audio');
             if (editorAudio) {
