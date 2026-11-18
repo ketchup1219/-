@@ -179,6 +179,36 @@
         body.orientation-landscape #lobby-panel { width: 33.333333% !important; }
         body.orientation-landscape #game-arena-panel { width: 66.666667% !important; }
         body.orientation-portrait main { flex-direction: column !important; min-width: 0 !important; }
+
+        @media (max-width: 767px) {
+            body { overflow: hidden; }
+            #main-header { flex: 0 0 auto; padding: 0.5rem 0.75rem; }
+            #main-header h1 { font-size: 0.95rem; }
+            #main-header p { display: none; }
+            main { height: calc(100vh - 86px) !important; height: calc(100dvh - 86px) !important; min-height: 0 !important; padding: 0.5rem !important; gap: 0.5rem !important; }
+            footer { flex: 0 0 auto; padding: 0.4rem 0.6rem; font-size: 9px; }
+            footer > div:first-child { max-width: 100%; overflow: hidden; white-space: nowrap; }
+
+            /* 縦画面: 曲選択のあとにゲーム画面を縦積み */
+            body.orientation-portrait main,
+            body:not(.orientation-landscape) main { flex-direction: column !important; min-width: 0 !important; overflow-y: auto; }
+            body.orientation-portrait #lobby-panel,
+            body:not(.orientation-landscape) #lobby-panel { width: 100% !important; min-height: 0 !important; flex: 0 0 auto; }
+            body.orientation-portrait #game-arena-panel,
+            body:not(.orientation-landscape) #game-arena-panel { width: 100% !important; min-height: 52dvh; flex: 1 1 auto; }
+            body.orientation-portrait #song-list,
+            body:not(.orientation-landscape) #song-list { max-height: 25dvh; min-height: 90px; }
+
+            /* 横画面: 左に曲選択、右にゲーム。物理回転非対応ブラウザ向けの代替レイアウト */
+            body.orientation-landscape main { flex-direction: row !important; width: 100vw; min-width: 0 !important; overflow: hidden; padding: 0.35rem !important; gap: 0.35rem !important; }
+            body.orientation-landscape #lobby-panel { width: 31% !important; min-width: 0 !important; min-height: 0 !important; }
+            body.orientation-landscape #game-arena-panel { width: 69% !important; min-width: 0 !important; min-height: 0 !important; }
+            body.orientation-landscape #lobby-panel > div:first-child { padding: 0.5rem; }
+            body.orientation-landscape #lobby-panel > div:first-child img { width: 2rem; height: 2rem; }
+            body.orientation-landscape #song-list { min-height: 0; }
+            body.orientation-landscape #game-arena-panel .p-3 { padding: 0.45rem; }
+            body.orientation-landscape #game-arena-panel .text-lg { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
