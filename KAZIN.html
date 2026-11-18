@@ -1288,7 +1288,7 @@
             {
                 id: 'ch1',
                 title: '第1章：旅立ちの始まりの村',
-                icon: '🌄',
+                icon: '🌄', bg: 'エコービレッジ2.png', bgm: 'エコービレッジ.mp3',
                 scenes: [
                     {
                         id: '1-1', title: '旅立ちの朝',
@@ -1335,7 +1335,7 @@
             {
                 id: 'ch2',
                 title: '第2章：指名手配と地下道の死闘',
-                icon: '🏰',
+                icon: '🏰', bg: 'ジュンルナリア2.png', bgm: 'ジュンルナリア.mp3',
                 scenes: [
                     {
                         id: '2-1', title: 'ジュン・ルナリアへ',
@@ -1382,7 +1382,7 @@
                         ]
                     },
                     {
-                        id: '2-3', title: '歪んだ地下水道',
+                        id: '2-3', title: '歪んだ地下水道', bg: '地下下水道2.png', bgm: '地下下水道.mp3',
                         lines: [
                             { speaker: 'narration', text: '衛兵の追跡をかわすため、二人が飛び込んだのは薄暗い地下水道でした。' },
                             { speaker: '少女', text: '「気を付けて。ルナリアの兵が徘徊してる」' },
@@ -1409,7 +1409,7 @@
                         ]
                     },
                     {
-                        id: '2-4', title: '脱出と再会',
+                        id: '2-4', title: '脱出と再会', bg: '地下下水道2.png', bgm: '地下下水道.mp3',
                         lines: [
                             { speaker: 'narration', text: 'なんと、2人はデブグリッジを撃破することに成功しました!!' },
                             { speaker: '少女', text: '「やったー！倒した倒したんだ!!」' },
@@ -1429,7 +1429,7 @@
             {
                 id: 'ch2_5',
                 title: '第2.5章：星空のキャンプ',
-                icon: '🏕️',
+                icon: '🏕️', bg: '焚火2.png', bgm: '焚火.mp3',
                 scenes: [
                     {
                         id: '2.5-1', title: '追手を巻いた夜',
@@ -1486,7 +1486,7 @@
             {
                 id: 'ch3',
                 title: '第3章：せいまろ帝国とパフェ',
-                icon: '🍰',
+                icon: '🍰', bg: 'せいまろ帝国2.png', bgm: 'せいまろ帝国.mp3',
                 scenes: [
                     {
                         id: '3-1', title: '衝突',
@@ -1571,7 +1571,7 @@
             {
                 id: 'ch4',
                 title: '第4章：Huhランドの崩壊と笑いのゆくえ',
-                icon: '🎪',
+                icon: '🎪', bg: 'huhランド2.png', bgm: 'huhランド.mp3',
                 scenes: [
                     {
                         id: '4-1', title: '「Huh？」で繋がる平和な日常――の裏に隠された恐怖',
@@ -1723,10 +1723,10 @@
             {
                 id: 'ch5',
                 title: '第5章：めんどくさがりやと絆のテニス',
-                icon: '🎾',
+                icon: '🎾', bg: '緋色魔導国2.png', bgm: '緋色魔導国.mp3',
                 scenes: [
                     {
-                        id: '5-1', title: '異次元のテニス',
+                        id: '5-1', title: '異次元のテニス', bg: '雪山2.png', bgm: '雪山.mp3',
                         lines: [
                             { speaker: 'narration', text: '最初の国ジュン・ルナリア、せいまろ帝国そしてhuhランドを駆け抜けた主人公とカグヤ。ひたすら走ると、そこには見渡す限りの広大な雪原とひまわり畑が広がっていました。' },
                             { speaker: 'カグヤ', text: '「寒すぎる、寒すぎる、寒すぎる、寒すぎて滅!!」' },
@@ -1831,7 +1831,7 @@
             {
                 id: 'ch5_5',
                 title: '第5.5章：カバンの中の小さな相棒',
-                icon: '🐹',
+                icon: '🐹', bg: '雪山2.png', bgm: '雪山.mp3',
                 scenes: [
                     {
                         id: '5.5-1', title: '奇妙な鈴',
@@ -2567,6 +2567,7 @@
 
         function applyVolumeSetting() {
             updateGachaBgmVolume();
+            updateStoryBgmVolume();
             if(!isAudioInitialized || !synth) return;
             // 効果音音量 (0-100) を -40dB(無音に近い)〜0dB のレンジへ変換
             const se = Math.max(0, Math.min(100, state.settings.seVolume ?? 70));
@@ -2963,8 +2964,23 @@
             const titleEl = document.getElementById('story-scene-title');
             if (titleEl) titleEl.innerText = `${scene.id}. ${scene.title}`;
 
+            // ステージ背景: 話ごとの指定 > 章ごとの指定。画像が無い場合は従来のグラデーション表示のまま
+            const bgFile = scene.bg || chapter.bg;
+            const bgEl = document.getElementById('story-bg');
             const iconEl = document.getElementById('story-scene-icon');
-            if (iconEl) iconEl.innerText = chapter.icon;
+            if (bgEl && bgFile) {
+                if (bgEl.dataset.bg !== bgFile) {
+                    bgEl.style.backgroundImage = `url("${bgFile}"), linear-gradient(to bottom, #1e1b4b, #0f172a, #000)`;
+                    bgEl.style.backgroundSize = 'cover';
+                    bgEl.style.backgroundPosition = 'center';
+                    bgEl.dataset.bg = bgFile;
+                }
+                if (iconEl) iconEl.style.display = 'none';        // 背景画像があるときは大きな絵文字を出さない
+            } else {
+                if (bgEl) { bgEl.style.backgroundImage = ''; bgEl.dataset.bg = ''; }
+                if (iconEl) { iconEl.style.display = ''; iconEl.innerText = chapter.icon; }
+            }
+            playStoryBgm(scene.bgm || chapter.bgm);
 
             const speakerEl = document.getElementById('story-speaker');
             const textEl = document.getElementById('story-text');
@@ -3050,6 +3066,7 @@
 
         function finishStoryScene() {
             storyFinished = true;
+            stopStoryBgm();
             const chapterIdx = storyState.chapterIdx;
             const chapter = STORY_DATA[chapterIdx];
             const scene = chapter.scenes[storyState.sceneIdx];
@@ -3070,6 +3087,7 @@
         const CHAPTER_CLEAR_CORE_REWARD = 30; // 冒険クエスト: 1章クリアごとに草核30個
         function finishStoryChapter() {
             storyFinished = true;
+            stopStoryBgm();
             const chapterIdx = storyState.chapterIdx;
             const chapter = STORY_DATA[chapterIdx];
             let rewardHtml = '';
@@ -3107,6 +3125,7 @@
 
         function exitStoryMode() {
             playSound('tap');
+            stopStoryBgm();
             switchLayer('view-main');
             renderStoryChapterList();
         }
@@ -3875,6 +3894,32 @@
         }
         function updateGachaBgmVolume() {
             if (gachaBgm && !gachaBgm._fading) gachaBgm.volume = gachaBgmVolume();   // 設定のBGM音量スライダーに追従
+        }
+
+        // ==== 冒険クエスト(ストーリー)のBGM: 章/話ごとに切り替え。音量は設定のBGM音量と連動 ====
+        let storyBgm = null, storyBgmFile = '';
+        function playStoryBgm(file) {
+            if (!file) { stopStoryBgm(); return; }
+            if (storyBgm && storyBgmFile === file) return;       // 同じBGMなら途切れさせない
+            stopStoryBgm();                                      // 前のBGMはフェードアウト
+            try {
+                const a = new Audio(file);
+                a.loop = true; a.volume = 0;
+                storyBgm = a; storyBgmFile = file;
+                const p = a.play();
+                if (p && p.catch) p.catch(() => {});             // ファイルが無い/再生できない場合は無音のまま続行
+                fadeGachaBgm(a, gachaBgmVolume(), 600);
+            } catch (e) { storyBgm = null; storyBgmFile = ''; }
+        }
+        function stopStoryBgm(immediate) {
+            const a = storyBgm;
+            if (!a) return;
+            storyBgm = null; storyBgmFile = '';
+            if (immediate) { clearInterval(a._fade); try { a.pause(); } catch (e) {} return; }
+            fadeGachaBgm(a, 0, 500, () => { try { a.pause(); } catch (e) {} });
+        }
+        function updateStoryBgmVolume() {
+            if (storyBgm && !storyBgm._fading) storyBgm.volume = gachaBgmVolume();
         }
 
         // ==== ガチャ演出: 3D箱 → 開封 → 1つずつ結果発表 → 一覧 ====
@@ -5379,6 +5424,7 @@
 
             if (battleState.isStoryBattle) {
                 battleState.isStoryBattle = false;
+                stopStoryBgm();
                 switchLayer('view-main');
                 return;
             }
