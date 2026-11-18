@@ -404,11 +404,11 @@
                     </div>
 
                     <!-- SUPER MOBILE HITBOXES: ゲーム中のみ表示される画面下半分の巨大な透明タップエリア -->
-                    <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden" aria-label="タップレーン">
-                        <div id="hitbox-0" class="flex-1 cursor-pointer" aria-label="レーン1 A または ←"></div>
-                        <div id="hitbox-1" class="flex-1 cursor-pointer" aria-label="レーン2 S または ↓"></div>
-                        <div id="hitbox-2" class="flex-1 cursor-pointer" aria-label="レーン3 K または ↑"></div>
-                        <div id="hitbox-3" class="flex-1 cursor-pointer" aria-label="レーン4 L または →"></div>
+                    <div id="game-hitboxes" class="absolute bottom-0 left-0 right-0 h-[50%] flex z-50 hidden touch-none" aria-label="タップレーン">
+                        <div id="hitbox-0" class="flex-1 cursor-pointer touch-none" aria-label="レーン1 D または ←"></div>
+                        <div id="hitbox-1" class="flex-1 cursor-pointer touch-none" aria-label="レーン2 F または ↓"></div>
+                        <div id="hitbox-2" class="flex-1 cursor-pointer touch-none" aria-label="レーン3 J または ↑"></div>
+                        <div id="hitbox-3" class="flex-1 cursor-pointer touch-none" aria-label="レーン4 K または →"></div>
                     </div>
 
                     <div id="rival-side-widget" class="absolute right-4 top-20 bg-slate-950/90 border border-pink-500/30 rounded-xl p-3 w-40 flex flex-col gap-2 z-30 shadow-lg hidden">
@@ -487,7 +487,7 @@
     <!-- FOOTER -->
     <footer class="border-t border-slate-900 bg-slate-950 px-6 py-3 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 z-20 gap-2 font-mono">
         <div class="flex items-center gap-2">
-            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">A</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">S</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">L</span> または 下半分をタッチ</span>
+            <span>操作: <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">D</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">F</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">J</span> <span class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">K</span> または 下半分をタッチ</span>
             <span class="text-slate-800 hidden md:inline">|</span>
             <span class="hidden md:inline">長押し: 終点で離す | フリック: 画面を弾く</span>
         </div>
@@ -516,7 +516,7 @@
                                 <option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option><option value="expert">EXPERT</option>
                             </select>
                         </label>
-                        <div class="flex items-end"><button onclick="window.editorPlayPause()" id="editor-play-button" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg p-2 text-xs font-bold"><i class="fa-solid fa-play mr-1"></i>再生</button></div>
+                        <div class="flex items-end gap-1"><button onclick="window.editorPlayPause()" id="editor-play-button" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg p-2 text-xs font-bold"><i class="fa-solid fa-play mr-1"></i>再生</button><button onclick="window.editorPlayChartFromCurrent()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg p-2 text-xs font-bold"><i class="fa-solid fa-gamepad mr-1"></i>プレイ</button></div>
                     </div>
 
                     <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
@@ -820,6 +820,20 @@
                 if (editorState.previewRAF) cancelAnimationFrame(editorState.previewRAF);
                 editorState.previewRAF = null;
             }
+        };
+        window.editorPlayChartFromCurrent = function() {
+            const audio = document.getElementById('editor-audio');
+            const song = window.originalSongs[editorState.songIndex];
+            if (!song || !editorState.notes.length) return alert('譜面を1つ以上配置してください。');
+            const startTime = Number(audio?.currentTime || 0);
+            editorSaveNotes();
+            state.currentSongIndex = editorState.songIndex;
+            const difficulty = document.getElementById('editor-difficulty').value;
+            document.getElementById('player-difficulty').value = difficulty;
+            state.isOnline = false;
+            state.editorStartTime = startTime;
+            window.closeChartEditor();
+            startMatchPreparation('CHART TEST', 'ChartTest', false);
         };
         window.editorSeek = function(value) {
             const audio = document.getElementById('editor-audio'); if (audio && Number.isFinite(audio.duration)) audio.currentTime = Number(value);
@@ -1438,38 +1452,52 @@
 
                 const song = window.originalSongs[state.currentSongIndex];
                 state.playbackLength = song.staticDuration;
+                const editorStartTime = Number.isFinite(state.editorStartTime) ? state.editorStartTime : null;
+                state.editorStartTime = null;
 
                 if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
                 state.audioContext = new Audio(song.audioFile);
                 state.audioContext.preload = 'auto'; state.audioContext.volume = window.globalVolume;
                 state.audioContext.load();
 
-                let count = 3; const num = document.getElementById('countdown-number');
-                num.innerText = count;
-                state.countdownInterval = setInterval(() => {
-                    count--;
-                    if (count > 0) { num.innerText = count; } 
-                    else if (count === 0) { num.innerText = "START!"; } 
-                    else {
-                        clearInterval(state.countdownInterval);
-                        cdOverlay.classList.add('hidden'); cdOverlay.classList.remove('flex');
-                        state.audioContext.play().then(() => {
-                            launchMatchCore();
-                            if(state.isOnline) startScoreSync();
-                        }).catch(() => {
-                            launchMatchCore(); // Fallback if audio fails
-                            if(state.isOnline) startScoreSync();
-                        });
-                    }
-                }, 1000);
+                const startAudio = (startAt = 0) => {
+                    try { state.audioContext.currentTime = Math.max(0, Math.min(state.playbackLength, startAt)); } catch(e) {}
+                    cdOverlay.classList.add('hidden'); cdOverlay.classList.remove('flex');
+                    state.audioContext.play().then(() => {
+                        launchMatchCore(startAt);
+                        if(state.isOnline) startScoreSync();
+                    }).catch(() => {
+                        launchMatchCore(startAt);
+                        if(state.isOnline) startScoreSync();
+                    });
+                };
+
+                if (editorStartTime !== null) {
+                    let started = false;
+                    const startEditorPreview = () => { if (started) return; started = true; startAudio(editorStartTime); };
+                    state.audioContext.addEventListener('loadedmetadata', startEditorPreview, { once: true });
+                    if (state.audioContext.readyState >= 1) startEditorPreview();
+                } else {
+                    let count = 3; const num = document.getElementById('countdown-number');
+                    num.innerText = count;
+                    state.countdownInterval = setInterval(() => {
+                        count--;
+                        if (count > 0) { num.innerText = count; } 
+                        else if (count === 0) { num.innerText = "START!"; } 
+                        else {
+                            clearInterval(state.countdownInterval);
+                            startAudio(0);
+                        }
+                    }, 1000);
+                }
             }, 300);
         }
 
-        function launchMatchCore() {
+        function launchMatchCore(startTime = 0) {
             state.gameActive = true;
             state.score = 0; state.combo = 0; state.maxCombo = 0; state.perfects = 0;
             state.opponentScore = 0; state.opponentCombo = 0; state.maxOpponentCombo = 0;
-            state.gameTime = 0; state.nextNoteIndex = 0; state.activeNotes = [];
+            state.gameTime = Math.max(0, Number(startTime) || 0); state.nextNoteIndex = 0; state.activeNotes = [];
             state.activeHolds = [null, null, null, null];
             
             document.getElementById('game-score-self').innerText = "0000000";
@@ -1557,6 +1585,8 @@
             }
 
             playbackNotes.sort((a, b) => (a.time ?? a.nodes[0].time) - (b.time ?? b.nodes[0].time));
+            state.nextNoteIndex = playbackNotes.findIndex(note => (note.time ?? note.nodes[0].time) >= state.gameTime - leadTime);
+            if (state.nextNoteIndex < 0) state.nextNoteIndex = playbackNotes.length;
             state.totalNotes = playbackNotes.length;
             state.playbackNotes = playbackNotes;
             state.lastTime = Date.now();
@@ -1923,11 +1953,11 @@
 
         // Apply Input Listeners to Hitboxes explicitly
         document.addEventListener("DOMContentLoaded", () => {
-            // Keyboard controls: A/S/K/L and the four arrow keys map to lanes 0-3.
+            // Keyboard controls: D/F/J/K and the four arrow keys map to lanes 0-3.
             // Keeping track of pressed keys prevents key auto-repeat from generating
             // multiple hits, while keyup also makes hold notes release correctly.
             const keyboardLaneMap = {
-                'a': 0, 's': 1, 'k': 2, 'l': 3,
+                'd': 0, 'f': 1, 'j': 2, 'k': 3,
                 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowUp': 2, 'ArrowRight': 3
             };
             const pressedKeys = new Set();
