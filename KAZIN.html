@@ -2568,6 +2568,7 @@
         function applyVolumeSetting() {
             updateGachaBgmVolume();
             updateStoryBgmVolume();
+            updateHomeBgmVolume();
             if(!isAudioInitialized || !synth) return;
             // 効果音音量 (0-100) を -40dB(無音に近い)〜0dB のレンジへ変換
             const se = Math.max(0, Math.min(100, state.settings.seVolume ?? 70));
@@ -2592,7 +2593,36 @@
             container.classList.add(`fx-${state.settings.effectQuality || 'high'}`);
         }
 
+        // ==== 画面タッチ時の効果音 (タッチ音.mp3) ====
+        const TOUCH_SE_URL = 'タッチ音.mp3';
+        let homeBgm = null, homeBgmWanted = false;
+        const touchSe = { pool: [], idx: 0, lastTouchAt: 0 };
+        function playTouchSe() {
+            const vol = Math.max(0, Math.min(1, (state.settings.seVolume ?? 70) / 100));   // 設定の効果音音量に連動
+            if (vol <= 0) return;
+            try {
+                if (!touchSe.pool.length) {                      // 連打でも途切れないよう複数のAudioを使い回す
+                    for (let i = 0; i < 4; i++) { const a = new Audio(TOUCH_SE_URL); a.preload = 'auto'; touchSe.pool.push(a); }
+                }
+                const a = touchSe.pool[touchSe.idx++ % touchSe.pool.length];
+                a.volume = vol;
+                a.currentTime = 0;
+                const p = a.play();
+                if (p && p.catch) p.catch(() => {});             // ファイルが無い/再生できない場合は無音のまま続行
+            } catch (e) {}
+        }
+        window.addEventListener('pointerdown', () => {
+            touchSe.lastTouchAt = Date.now();
+            playTouchSe();
+            // 自動再生が許可されず止まっていたホームBGMは、最初のタッチで再開する
+            if (homeBgmWanted && homeBgm && homeBgm.paused) { try { const p = homeBgm.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+        }, { capture: true, passive: true });
+
         function playSound(type) {
+            if (type === 'tap') {                                // 通常のタップ音もタッチ音.mp3に統一(直前にタッチ音が鳴っていれば二重に鳴らさない)
+                if (Date.now() - touchSe.lastTouchAt > 600) playTouchSe();
+                return;
+            }
             if(!isAudioInitialized || !synth) return;
             try {
                 if(type === 'tap') synth.triggerAttackRelease("C5", "32n");
@@ -2616,6 +2646,7 @@
             document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
             document.getElementById(layerId).classList.add('active');
             if (layerId === 'view-main') updateNavButtonWidth();
+            if (layerId !== 'view-loading') setHomeBgmActive(layerId === 'view-main');   // ホーム画面(メイン)にいる間だけホームBGM
         }
 
         function switchSubView(containerId, viewId) {
@@ -2825,6 +2856,7 @@
             const fill = document.getElementById('loading-bar-fill');
             if (fill) { fill.classList.remove('running'); void fill.offsetWidth; fill.classList.add('running'); }
             switchLayer('view-loading');
+            setHomeBgmActive(true);                // タップ操作の中で再生を始める(自動再生制限の回避)。ロード画面からそのままホームへ流れる
             setTimeout(() => {                     // 2秒のロード画面の後、ホーム画面へ
                 switchLayer('view-main');
                 updateResources();
@@ -3896,6 +3928,25 @@
             if (gachaBgm && !gachaBgm._fading) gachaBgm.volume = gachaBgmVolume();   // 設定のBGM音量スライダーに追従
         }
 
+        // ==== ホーム画面のBGM (ホームBGM.mp3): メイン画面にいる間だけ流れる。ストーリー/戦闘/ガチャ中は止めて、戻ると続きから再開 ====
+        const HOME_BGM_URL = 'ホームBGM.mp3';
+        function setHomeBgmActive(on) {
+            homeBgmWanted = on;
+            if (on) {
+                try {
+                    if (!homeBgm) { homeBgm = new Audio(HOME_BGM_URL); homeBgm.loop = true; homeBgm.volume = 0; }
+                    if (homeBgm.paused) { const p = homeBgm.play(); if (p && p.catch) p.catch(() => {}); }
+                    fadeGachaBgm(homeBgm, gachaBgmVolume(), 600);
+                } catch (e) {}
+            } else if (homeBgm && !homeBgm.paused) {
+                const a = homeBgm;
+                fadeGachaBgm(a, 0, 400, () => { if (!homeBgmWanted) { try { a.pause(); } catch (e) {} } });
+            }
+        }
+        function updateHomeBgmVolume() {
+            if (homeBgm && homeBgmWanted && !homeBgm._fading) homeBgm.volume = gachaBgmVolume();
+        }
+
         // ==== 冒険クエスト(ストーリー)のBGM: 章/話ごとに切り替え。音量は設定のBGM音量と連動 ====
         let storyBgm = null, storyBgmFile = '';
         function playStoryBgm(file) {
@@ -3954,6 +4005,7 @@
             gachaResetUI();
             gachaEl('gacha-overlay').style.display = 'flex';
             startGachaParticles(maxRarity >= 3);
+            setHomeBgmActive(false);
             startGachaBgm();
 
             const ready = g3d.models.closed && g3d.models.open;
@@ -4112,6 +4164,7 @@
             gachaSession = null;
             g3dStop();
             stopGachaBgm();
+            setHomeBgmActive(true);                           // ガチャを閉じたらホームBGMに戻る
             g3d.onProgress = null;
             gachaEl('gacha-overlay').style.display = 'none';
             gachaResetUI();
