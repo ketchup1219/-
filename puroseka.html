@@ -209,6 +209,35 @@
             body.orientation-landscape #game-arena-panel .p-3 { padding: 0.45rem; }
             body.orientation-landscape #game-arena-panel .text-lg { font-size: 0.85rem; }
         }
+        /* === ENHANCED LIVE RHYTHM SYSTEM === */
+        :root { --accent:#63e6ff; --accent2:#ff4fa3; --perfect:#fff7a8; }
+        body { background:radial-gradient(ellipse at 50% 18%,#17154e 0%,#050711 48%,#010207 100%); }
+        body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.28; mix-blend-mode:screen; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:4px 4px,80px 80px; }
+        .game-board-container { perspective:820px; perspective-origin:50% 36%; }
+        .game-board { width:min(100%,1180px); height:150%; bottom:-31%; transform:rotateX(43deg); transform-origin:bottom center; background:linear-gradient(180deg,rgba(10,12,42,.05),rgba(4,8,28,.62) 55%,rgba(2,4,15,.98)); border:1px solid rgba(113,235,255,.35); box-shadow:0 -10px 50px rgba(0,225,255,.16),inset 0 0 70px rgba(23,111,255,.09); }
+        .game-board::before { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(180deg,transparent 0 48px,rgba(255,255,255,.045) 49px 50px); opacity:.7; }
+        .lane-border { border-left:1px solid rgba(157,221,255,.18); border-right:1px solid rgba(157,221,255,.08); background:linear-gradient(90deg,rgba(33,117,164,.025),rgba(255,255,255,.04) 50%,rgba(16,58,103,.09)); }
+        .lane-laser { width:1px; background:linear-gradient(to bottom,transparent,rgba(92,227,255,.72)); box-shadow:0 0 18px rgba(92,227,255,.8); }
+        .note { left:1.2%!important; width:22.6%!important; height:24px; border:2px solid rgba(255,255,255,.92); background:linear-gradient(180deg,#fff 0%,#e7fdff 35%,#4bdff5 65%,#129bc8 100%); box-shadow:0 0 5px #fff,0 0 14px #1ed7ff,0 0 34px rgba(0,214,255,.6); overflow:hidden; }
+        .note::after { content:""; position:absolute; inset:4px 10px; border-radius:999px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent); animation:noteSheen .65s linear infinite; }
+        .note-flick { background:linear-gradient(180deg,#fff 0%,#ffe6f4 33%,#ff58a8 68%,#bf1c70 100%); box-shadow:0 0 5px #fff,0 0 16px #ff4fa3,0 0 36px rgba(255,34,148,.65); }
+        .note-flick::before { content:'竊・; font-size:21px; text-shadow:0 0 5px #fff,0 0 15px #ff1685; animation:flickArrow .3s ease-in-out infinite alternate; }
+        @keyframes noteSheen { from{transform:translateX(-90px)} to{transform:translateX(90px)} }
+        @keyframes flickArrow { from{transform:translateY(3px) scale(1)} to{transform:translateY(-3px) scale(1.12)} }
+        #hit-baseline { height:22px!important; border-radius:6px; background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.8) 50%,rgba(255,255,255,.12)); box-shadow:0 0 10px #fff,0 0 30px rgba(0,223,255,.8),0 0 60px rgba(0,223,255,.35); }
+        #hit-baseline::before { content:""; position:absolute; inset:-5px 0; border-top:1px solid rgba(255,255,255,.8); border-bottom:1px solid rgba(255,255,255,.25); border-radius:8px; }
+        #hit-baseline > div { background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(12,18,42,.45)); border-color:rgba(255,255,255,.18); }
+        .target-diamond { width:10px;height:10px; box-shadow:0 0 8px currentColor,0 0 20px currentColor; }
+        .hit-active { animation:pulse-hit .12s ease-out forwards,receptorSpark .2s ease-out; }
+        @keyframes receptorSpark { 50%{transform:scaleY(1.8);filter:brightness(2.5)} }
+        #combo-popup { filter:drop-shadow(0 0 18px rgba(0,214,255,.45)); }
+        #combo-count { font-size:clamp(3rem,7vw,5rem); background:linear-gradient(180deg,#fff,#7feaff 65%,#159cc5); color:transparent; background-clip:text; -webkit-background-clip:text; }
+        .perfect-flash { position:absolute; inset:0; pointer-events:none; z-index:55; background:radial-gradient(circle at 50% 82%,rgba(255,255,220,.55),transparent 36%); animation:perfectFlash .22s ease-out forwards; }
+        @keyframes perfectFlash { from{opacity:.9} to{opacity:0} }
+        .beat-pulse { animation:beatPulse .18s ease-out; }
+        @keyframes beatPulse { 50%{filter:brightness(1.34);box-shadow:0 0 90px rgba(0,211,255,.28),inset 0 0 70px rgba(0,211,255,.18)} }
+        .timing-chip { position:absolute; right:5%; top:52%; z-index:31; font:700 10px/1 Rajdhani,sans-serif; letter-spacing:.14em; color:rgba(255,255,255,.62); opacity:0; pointer-events:none; transform:translateY(6px); transition:.16s; }
+        .timing-chip.show { opacity:1; transform:translateY(0); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative overflow-hidden">
@@ -284,7 +313,7 @@
             <!-- Setup Overlay -->
             <div id="game-lobby-overlay" class="absolute inset-0 bg-slate-950/95 z-[60] flex flex-col justify-start items-center p-6 text-center transition-opacity duration-300 overflow-y-auto">
                 
-                <button onclick="location.href='index.html'" class="absolute top-4 left-4 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all z-10 border border-slate-700">
+                <button onclick="location.href='KAZIN.html'" class="absolute top-4 left-4 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all z-10 border border-slate-700">
                     <i class="fa-solid fa-arrow-left"></i> ホームへ戻る
                 </button>
 
@@ -411,10 +440,10 @@
                             <div class="lane-laser" style="left: 50%"></div>
                             <div class="lane-laser" style="left: 75%"></div>
 
-                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-0"></div>
-                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-1"></div>
-                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-2"></div>
-                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-3"></div>
+                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-0"><div class="lane-glow" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:80%;height:80px;display:block!important;visibility:visible!important;opacity:1!important;z-index:1000;background:rgba(255,225,55,.92);border:3px solid #fff06a;box-shadow:0 0 20px #fff06a,0 0 45px #ffc400,inset 0 0 20px #fffbd0;pointer-events:none;"></div></div>
+                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-1"><div class="lane-glow" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:80%;height:80px;display:block!important;visibility:visible!important;opacity:1!important;z-index:1000;background:rgba(255,225,55,.92);border:3px solid #fff06a;box-shadow:0 0 20px #fff06a,0 0 45px #ffc400,inset 0 0 20px #fffbd0;pointer-events:none;"></div></div>
+                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-2"><div class="lane-glow" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:80%;height:80px;display:block!important;visibility:visible!important;opacity:1!important;z-index:1000;background:rgba(255,225,55,.92);border:3px solid #fff06a;box-shadow:0 0 20px #fff06a,0 0 45px #ffc400,inset 0 0 20px #fffbd0;pointer-events:none;"></div></div>
+                            <div class="lane-border flex-1 relative h-full flex flex-col justify-end" id="lane-3"><div class="lane-glow" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:80%;height:80px;display:block!important;visibility:visible!important;opacity:1!important;z-index:1000;background:rgba(255,225,55,.92);border:3px solid #fff06a;box-shadow:0 0 20px #fff06a,0 0 45px #ffc400,inset 0 0 20px #fffbd0;pointer-events:none;"></div></div>
 
                             <!-- SVG Layer for drawing curvy Slide Notes -->
                             <svg id="slide-layer" viewBox="0 0 1000 1000" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none z-15" style="overflow: visible;"></svg>
@@ -429,11 +458,17 @@
                                 <div id="lane-target-2" class="flex-1 h-full border-l border-slate-700/50 flex items-center justify-center transition-all target-box-2 text-emerald-400 bg-black/40"><div class="target-diamond"></div></div>
                                 <div id="lane-target-3" class="flex-1 h-full border-l border-slate-700/50 flex items-center justify-center transition-all target-box-3 text-fuchsia-400 bg-black/40"><div class="target-diamond"></div></div>
                             </div>
+                            <div id="touch-guide-overlay" aria-hidden="true">
+                                <div class="touch-guide-lane"><span>TOUCH</span></div>
+                                <div class="touch-guide-lane"><span>TOUCH</span></div>
+                                <div class="touch-guide-lane"><span>TOUCH</span></div>
+                                <div class="touch-guide-lane"><span>TOUCH</span></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- PERFECT Rating Popup -->
-                    <div id="rating-popup" class="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider opacity-0 font-mono text-cyan-400 z-30 pointer-events-none"></div>
+                    <div id="rating-popup" class="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider opacity-0 font-mono text-cyan-400 z-30 pointer-events-none"></div><div id="timing-chip" class="timing-chip">+-0ms</div>
                     
                     <!-- Combo Popup -->
                     <div id="combo-popup" class="absolute right-[5%] top-[40%] hidden flex-col items-center z-30 pointer-events-none">
@@ -447,6 +482,9 @@
                         <div id="hitbox-1" class="flex-1 cursor-pointer touch-none" aria-label="レーン2 F または ↓"></div>
                         <div id="hitbox-2" class="flex-1 cursor-pointer touch-none" aria-label="レーン3 J または ↑"></div>
                         <div id="hitbox-3" class="flex-1 cursor-pointer touch-none" aria-label="レーン4 K または →"></div>
+                    </div>
+                    <div id="visible-lane-guide" class="hidden" aria-hidden="true">
+                        <div></div><div></div><div></div><div></div>
                     </div>
 
                     <div id="rival-side-widget" class="absolute right-4 top-20 bg-slate-950/90 border border-pink-500/30 rounded-xl p-3 w-40 flex flex-col gap-2 z-30 shadow-lg hidden">
@@ -1185,8 +1223,10 @@
             audio.play().catch(() => {});
         };
 
-        const hitLinePercentage = 90; // 少し下げて判定枠を見やすく
-        const leadTime = 1.3; 
+        const hitLinePercentage = 90;
+        const leadTime = 1.3;
+        const timingWindows = { perfect: 0.055, great: 0.105, good: 0.18, miss: 0.24 };
+        let lastBeatPulse = -1; 
 
         // --- Helper & Storage Functions ---
         function escapeHTML(str) { return str ? str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
@@ -1594,6 +1634,8 @@
                 document.getElementById('game-arena-panel').classList.add('w-full');
                 
                 document.getElementById('game-hitboxes').classList.remove('hidden');
+                document.getElementById('visible-lane-guide').classList.remove('hidden');
+                document.querySelectorAll('#game-board .lane-glow').forEach(glow => { glow.style.cssText = 'position:absolute;left:6%;right:6%;top:80%;bottom:auto;height:80px;z-index:1000;display:block;visibility:visible;opacity:1;pointer-events:none;background:radial-gradient(ellipse at center,rgba(255,255,170,1) 0%,rgba(255,220,55,.9) 38%,rgba(255,180,0,.55) 68%,transparent 92%);border:3px solid #ffe66d;box-shadow:0 0 20px #fff06a,0 0 45px rgba(255,190,0,.95),inset 0 0 22px rgba(255,255,210,.95);transform:translateZ(2px);'; });
                 const cdOverlay = document.getElementById('countdown-overlay');
                 cdOverlay.classList.remove('hidden'); cdOverlay.classList.add('flex');
 
@@ -1757,6 +1799,8 @@
                 state.gameTime += dt;
             }
 
+            const beat = Math.floor(state.gameTime * (window.originalSongs[state.currentSongIndex]?.bpm || 120) / 60); if (beat !== lastBeatPulse && beat >= 0) { lastBeatPulse = beat; const board = document.getElementById('game-board'); board?.classList.remove('beat-pulse'); void board?.offsetWidth; board?.classList.add('beat-pulse'); }
+
             // Spawn notes
             while (state.nextNoteIndex < state.playbackNotes.length) {
                 const nextNote = state.playbackNotes[state.nextNoteIndex];
@@ -1791,7 +1835,7 @@
                 const container = document.getElementById('notes-container');
                 const noteDiv = document.createElement('div');
                 noteDiv.className = `note ${noteData.type === 'flick' ? 'note-flick' : ''}`;
-                noteDiv.style.top = '0%'; noteDiv.style.left = `${noteData.lane * 25 + 2}%`; noteDiv.style.width = `21%`;
+                noteDiv.style.top = '0%'; noteDiv.style.setProperty('--note-lane', noteData.lane); noteDiv.style.left = `${noteData.lane * 25 + 2}%`; noteDiv.style.width = `21%`;
                 container.appendChild(noteDiv);
                 noteData.element = noteDiv; noteData.spawnTime = state.gameTime;
                 state.activeNotes.push(noteData);
@@ -1924,6 +1968,7 @@
             }
             if (!state.gameActive) return;
 
+            window.playTapSound();
             let bestDiff = 999, hitNote = null;
             state.activeNotes.forEach(note => {
                 if (isChartHoldNote(note)) {
@@ -1937,8 +1982,9 @@
                 }
             });
 
-            if (hitNote && bestDiff < 0.25) {
+            if (hitNote && bestDiff < timingWindows.miss) {
                 hitNote.hit = true;
+                state.lastJudgementDelta = state.gameTime - (hitNote.type === 'slide' ? hitNote.nodes[0].time : hitNote.time);
                 let rating = 'GOOD', scoreEarned = 150, cClass = 'text-amber-400', pColor = 'cyan';
 
                 if (hitNote.type === 'flick') {
@@ -1981,6 +2027,7 @@
         };
 
         window.displayRating = function(text, colorClass) {
+            const timing = state.lastJudgementDelta ?? 0; const chip = document.getElementById('timing-chip'); if (chip) { chip.innerText = `${timing >= 0 ? '+' : ''}${Math.round(timing * 1000)}ms`; chip.classList.remove('show'); void chip.offsetWidth; chip.classList.add('show'); setTimeout(() => chip.classList.remove('show'), 380); } if (text.startsWith('PERFECT')) { const fx = document.createElement('div'); fx.className = 'perfect-flash'; document.querySelector('.game-board')?.appendChild(fx); setTimeout(() => fx.remove(), 240); }
             const popup = document.getElementById('rating-popup');
             popup.innerText = text; popup.classList.remove('rating-pop-anim'); void popup.offsetWidth; 
             popup.className = `absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 text-4xl font-black uppercase tracking-wider font-mono ${colorClass} z-30 pointer-events-none rating-pop-anim`;
@@ -2049,7 +2096,8 @@
             if (state.audioContext) { state.audioContext.pause(); state.audioContext = null; }
             if (state.scoreSyncInterval) { clearInterval(state.scoreSyncInterval); state.scoreSyncInterval = null; }
             
-            document.getElementById('game-hitboxes').classList.add('hidden'); 
+            document.getElementById('game-hitboxes').classList.add('hidden');
+            document.getElementById('visible-lane-guide').classList.add('hidden');
             document.getElementById('notes-container').innerHTML = ''; document.getElementById('slide-layer').innerHTML = '';
             
             const overlay = document.getElementById('game-lobby-overlay'); overlay.classList.remove('hidden'); setTimeout(()=> overlay.classList.remove('opacity-0'), 50);
@@ -2067,6 +2115,7 @@
             if (state.scoreSyncInterval) { clearInterval(state.scoreSyncInterval); state.scoreSyncInterval = null; }
             
             document.getElementById('game-hitboxes').classList.add('hidden');
+            document.getElementById('visible-lane-guide').classList.add('hidden');
             const overlay = document.getElementById('results-overlay'); overlay.classList.remove('hidden'); overlay.classList.add('flex');
 
             const perfectRate = state.totalNotes > 0 ? Math.floor((state.perfects / state.totalNotes) * 100) : 0;
@@ -2223,5 +2272,262 @@
             }, 100);
         });
     </script>
+    <style>
+        /* === CHART MAKER / VERTICAL DAW WORKSPACE === */
+        #chart-editor-modal.chart-maker-mode { padding:0; background:rgba(1,4,15,.96); }
+        #chart-editor-modal.chart-maker-mode > .chart-editor-shell { width:100vw; height:100vh; max-width:none; max-height:none; padding:0; border:0; border-radius:0; overflow:hidden; background:linear-gradient(115deg,#071126 0%,#101b3b 48%,#26114b 100%); }
+        .chart-maker-topbar { height:58px; display:flex; align-items:center; gap:12px; padding:8px 14px; background:rgba(2,6,20,.92); border-bottom:1px solid rgba(122,226,255,.22); box-shadow:0 5px 30px rgba(0,0,0,.28); }
+        .chart-maker-brand { width:190px; font:900 16px/1 'Rajdhani',sans-serif; letter-spacing:.12em; color:#e5fbff; white-space:nowrap; }
+        .chart-maker-brand small { display:block; margin-top:4px; font:700 9px/1 'Noto Sans JP',sans-serif; color:#6f9eb6; letter-spacing:.12em; }
+        .chart-maker-select { min-width:160px; background:#0b1430; color:#d9faff; border:1px solid rgba(117,218,255,.32); border-radius:7px; padding:8px 10px; font-size:11px; font-weight:800; }
+        .chart-maker-transport { display:flex; gap:5px; align-items:center; margin-left:auto; }
+        .chart-maker-btn { border:1px solid rgba(135,220,255,.25); background:rgba(11,25,55,.9); color:#bfefff; border-radius:7px; padding:8px 11px; font-size:11px; font-weight:900; cursor:pointer; transition:.15s; }
+        .chart-maker-btn:hover { background:#12365c; border-color:#65e7ff; transform:translateY(-1px); }
+        .chart-maker-btn.primary { background:linear-gradient(135deg,#22bcd4,#4b61ff); color:#fff; box-shadow:0 0 18px rgba(34,188,212,.26); }
+        .chart-maker-close { margin-left:4px; color:#98aabd; background:none; border:0; font-size:22px; cursor:pointer; }
+        .chart-maker-workspace { height:calc(100% - 58px); display:grid; grid-template-columns:146px minmax(420px,1fr) 178px; min-height:0; }
+        .chart-maker-palette { padding:12px 10px; background:rgba(5,10,29,.74); border-right:1px solid rgba(139,210,255,.16); overflow:auto; }
+        .chart-maker-section-title { color:#7693a9; font:900 10px/1 'Rajdhani',sans-serif; letter-spacing:.16em; margin:4px 4px 10px; text-transform:uppercase; }
+        .chart-maker-palette-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .chart-palette-note { height:49px; border:1px solid rgba(162,207,255,.2); border-radius:8px; color:#d8fbff; background:linear-gradient(180deg,rgba(25,55,95,.9),rgba(10,23,53,.95)); cursor:pointer; font-size:10px; font-weight:900; transition:.15s; }
+        .chart-palette-note:hover,.chart-palette-note.active { border-color:#70eaff; box-shadow:0 0 14px rgba(51,222,255,.3); transform:translateY(-1px); }
+        .chart-palette-note .palette-glyph { display:block; height:16px; margin:0 auto 4px; width:34px; border-radius:5px; background:#5de5ff; box-shadow:0 0 9px #5de5ff; }
+        .chart-palette-note.flick .palette-glyph { background:#ff62ad; box-shadow:0 0 9px #ff62ad; }
+        .chart-palette-note.hold .palette-glyph { background:#ffd34f; box-shadow:0 0 9px #ffd34f; }
+        .chart-maker-lanes { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; }
+        .chart-lane-btn { border:1px solid rgba(255,255,255,.13); background:#111b37; color:#b8c7d8; border-radius:6px; padding:8px 0; font-weight:900; cursor:pointer; }
+        .chart-lane-btn.active { color:#08111d; background:#ffd34f; box-shadow:0 0 13px rgba(255,211,79,.42); }
+        .chart-maker-hint { margin-top:18px; padding:9px; border:1px solid rgba(126,198,255,.12); border-radius:7px; color:#718aa2; font-size:10px; line-height:1.55; }
+        .chart-maker-center { min-width:0; display:flex; flex-direction:column; background:linear-gradient(180deg,rgba(7,16,40,.84),rgba(3,9,25,.97)); }
+        .chart-maker-ruler { height:30px; flex:0 0 30px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; color:#7c9db8; font:700 10px/1 'Rajdhani',sans-serif; letter-spacing:.08em; border-bottom:1px solid rgba(131,212,255,.16); }
+        #editor-timeline-viewport { flex:1; min-height:0; overflow:auto; border:0; border-radius:0; background:#070d22; }
+        #editor-timeline { position:relative; width:100%; min-width:430px; min-height:720px; background-color:#080f27; background-image:linear-gradient(rgba(106,194,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(106,194,255,.2) 1px,transparent 1px),linear-gradient(rgba(106,194,255,.05) 1px,transparent 1px); background-size:100% 64px,25% 100%,100% 16px; cursor:crosshair; }
+        #editor-timeline-grid { position:absolute; inset:0; }
+        .chart-lane-label { position:absolute; top:0; bottom:0; width:25%; pointer-events:none; border-right:1px solid rgba(135,222,255,.25); }
+        .chart-lane-label span { position:sticky; top:8px; display:block; margin:8px 0 0 8px; color:rgba(169,227,255,.38); font:900 11px/1 'Rajdhani',sans-serif; }
+        .chart-editor-note { position:absolute; height:28px; min-width:36px; border-radius:5px; border:2px solid rgba(255,255,255,.85); cursor:grab; z-index:4; box-shadow:0 0 6px currentColor,0 0 16px currentColor; transition:filter .12s; }
+        .chart-editor-note:active { cursor:grabbing; filter:brightness(1.5); }
+        .chart-editor-note.tap { background:linear-gradient(180deg,#fff,#6be8ff 42%,#1989c7); color:#48dfff; }
+        .chart-editor-note.flick { background:linear-gradient(180deg,#fff,#ff7fbe 42%,#bd2a78); color:#ff4ea6; }
+        .chart-editor-note.hold { background:linear-gradient(180deg,#fff,#ffe16b 42%,#c28b12); color:#ffd34f; }
+        .chart-editor-note::after { content:''; position:absolute; left:8px; right:8px; top:7px; height:5px; border-radius:8px; background:rgba(255,255,255,.74); }
+        .chart-editor-note.selected { outline:2px solid #fff; filter:brightness(1.6); z-index:8; }
+        .chart-editor-hold-line { fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.9; pointer-events:stroke; }
+        #editor-playhead { left:0!important; top:0; bottom:auto; width:100%; height:2px; background:#fff; box-shadow:0 0 8px #fff,0 0 18px #ff5db0; z-index:12; }
+        .chart-maker-side { padding:12px 10px; background:rgba(22,10,47,.6); border-left:1px solid rgba(255,157,238,.14); overflow:auto; }
+        .chart-maker-lane-title, .chart-maker-lanes { display:none !important; }
+        .chart-maker-palette .chart-maker-hint { margin-top:10px; }
+        .chart-overview { height:310px; position:relative; overflow:hidden; border:1px solid rgba(190,128,255,.28); border-radius:7px; background:#090b1d; margin-bottom:12px; }
+        .chart-overview::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 1px,transparent 1px 9px); }
+        .overview-mark { position:absolute; height:3px; border-radius:3px; left:8px; right:8px; box-shadow:0 0 5px currentColor; }
+        .chart-side-card { padding:9px; margin-bottom:10px; border:1px solid rgba(182,137,255,.18); border-radius:7px; background:rgba(5,9,26,.5); color:#8095ad; font-size:10px; }
+        .chart-side-card strong { display:block; color:#d9c9ff; font-size:12px; margin-bottom:5px; }
+        #editor-note-list { max-height:190px; overflow:auto; }
+        @media(max-width:850px){ .chart-maker-workspace{grid-template-columns:92px minmax(300px,1fr) 122px}.chart-maker-brand{width:110px;font-size:12px}.chart-maker-select{min-width:100px}.chart-maker-btn{padding:7px 8px}.chart-maker-side{padding:8px 5px}.chart-maker-palette{padding:8px 5px} }
+        /* === GAMEPLAY VISUAL RESTORE: aaa.html === */
+        .game-board-container { perspective:200px; perspective-origin:50% 30%; }
+        .game-board { transform:rotateX(50deg); transform-origin:bottom center; width:180%; max-width:1200px; height:250%; bottom:-15%; background:linear-gradient(180deg,rgba(12,10,42,0) 0%,rgba(3,7,18,.7) 50%,rgba(3,7,18,.98) 100%); border:0; box-shadow:0 0 80px rgba(0,242,254,.1); }
+        .lane-border { background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.02) 50%,rgba(255,255,255,.15) 100%); border-left:2px solid rgba(255,255,255,.1); border-right:2px solid rgba(255,255,255,.1); }
+        .lane-laser { width:2px; background:linear-gradient(to bottom,rgba(0,242,254,0) 0%,rgba(0,242,254,.8) 100%); box-shadow:0 0 12px rgba(0,242,254,.8); }
+        .note { left:calc(var(--note-lane,0) * 25% + 2%) !important; width:21% !important; height:20px; border:0; border-radius:999px; background:linear-gradient(180deg,#fff 20%,#e1fcff 60%,#00f2fe 100%); box-shadow:0 0 15px rgba(0,242,254,.9),0 0 30px rgba(0,242,254,.5); }
+        .note::after { display:none; }
+        .note-flick { background:linear-gradient(180deg,#fff 20%,#ffeaf5 60%,#ff007f 100%); box-shadow:0 0 15px rgba(255,0,127,.9),0 0 30px rgba(255,0,127,.5); }
+        .note-flick::before { content:'▲'; font-size:18px; color:#fff; font-weight:900; text-shadow:0 0 10px #ff007f; transform:scaleY(1.2); animation:flickPulse .25s infinite alternate; }
+        #hit-baseline { height:16px !important; bottom:10% !important; border-radius:0; background:transparent; box-shadow:0 0 20px rgba(0,242,254,.4); }
+        #hit-baseline::before { display:none; }
+        #hit-baseline > div { background:rgba(0,0,0,.4); }
+        /* タップ判定位置を明示する黄色のガイド */
+        #hit-baseline { height:22px !important; background:linear-gradient(90deg,rgba(255,214,64,.18),rgba(255,239,128,.72) 50%,rgba(255,214,64,.18)); box-shadow:0 0 8px #ffe66d,0 0 24px rgba(255,214,64,.95),0 0 54px rgba(255,190,0,.5); animation:touchGuidePulse 1.15s ease-in-out infinite; }
+        #hit-baseline > div { background:linear-gradient(180deg,rgba(255,248,180,.72),rgba(255,190,0,.28)); border:2px solid rgba(255,230,96,.95); box-shadow:inset 0 0 12px rgba(255,244,154,.72),0 0 12px rgba(255,214,64,.88); }
+        #hit-baseline > div:first-child { border-left-width:3px; }
+        #hit-baseline > div:last-child { border-right-width:3px; }
+        .target-diamond { background:#fff3a1; box-shadow:0 0 8px #fff,0 0 18px #ffd43b,0 0 30px rgba(255,190,0,.9); }
+        @keyframes touchGuidePulse { 0%,100% { filter:brightness(.92); opacity:.86; } 50% { filter:brightness(1.25); opacity:1; } }
+        #touch-guide-overlay { position:absolute; left:0; right:0; width:auto; max-width:none; transform:none; bottom:10%; height:22px; display:flex; z-index:45; pointer-events:none; gap:0; filter:drop-shadow(0 0 8px rgba(255,210,45,.95)); animation:touchGuidePulse 1.15s ease-in-out infinite; }
+        .touch-guide-lane { position:relative; flex:1 1 25%; min-width:0; border:2px solid #ffe66d; border-radius:0; background:linear-gradient(180deg,rgba(255,246,160,.78),rgba(255,191,0,.4)); box-shadow:inset 0 0 12px rgba(255,255,210,.9),0 0 12px rgba(255,211,55,.9); display:flex; align-items:center; justify-content:center; }
+        .touch-guide-lane + .touch-guide-lane { border-left-color:#fff0a0; }
+        .touch-guide-lane span { color:#fffde0; font:900 9px/1 Rajdhani,sans-serif; letter-spacing:.18em; text-shadow:0 0 5px #a66b00,0 0 10px #ffb900; opacity:.95; }
+        /* 実際のタッチ判定エリアを直接発光させる */
+        #touch-guide-overlay { display:none !important; }
+        #game-hitboxes:not(.hidden) { display:flex !important; z-index:60 !important; }
+        #game-hitboxes:not(.hidden) > div { position:relative; border-left:1px solid rgba(255,230,100,.68); border-top:3px solid #ffe66d; background:linear-gradient(180deg,rgba(255,224,72,.22),rgba(255,190,0,.06) 38%,transparent 100%); box-shadow:inset 0 7px 18px rgba(255,217,58,.3),0 0 10px rgba(255,211,55,.45); }
+        #game-hitboxes:not(.hidden) > div:last-child { border-right:1px solid rgba(255,230,100,.68); }
+        #game-hitboxes:not(.hidden) > div::after { content:'TOUCH'; position:absolute; top:7px; left:0; right:0; text-align:center; color:#fff7ae; font:900 10px/1 Rajdhani,sans-serif; letter-spacing:.18em; text-shadow:0 0 6px #8f5b00,0 0 12px #ffbd00; opacity:.95; }
+        /* 実タッチエリア全面の発光はやめ、各レーン内のガイドだけにする */
+        #game-hitboxes:not(.hidden) > div { border:0 !important; background:transparent !important; box-shadow:none !important; }
+        #game-hitboxes:not(.hidden) > div::after { display:none !important; }
+        #game-board .lane-border { position:relative; }
+        #game-board .lane-border::after { content:''; position:absolute; left:5%; right:5%; bottom:8%; height:14px; border:2px solid #ffe66d; border-radius:999px; background:linear-gradient(180deg,rgba(255,247,175,.82),rgba(255,186,0,.32)); box-shadow:inset 0 0 8px rgba(255,255,220,.8),0 0 10px rgba(255,211,55,.95),0 0 22px rgba(255,190,0,.55); pointer-events:none; z-index:25; animation:touchGuidePulse 1.15s ease-in-out infinite; }
+        /* 最前面の実タッチガイド。ゲーム中は必ず表示する */
+        #game-hitboxes:not(.hidden) { visibility:visible !important; opacity:1 !important; }
+        #game-hitboxes:not(.hidden)::before { content:''; position:absolute; left:0; right:0; top:0; height:5px; background:#fff3a1; box-shadow:0 0 8px #fff,0 0 20px #ffd43b,0 0 42px rgba(255,190,0,.95); z-index:3; animation:touchGuidePulse 1.15s ease-in-out infinite; }
+        #game-hitboxes:not(.hidden) > div { border-top:4px solid #ffe66d !important; background:linear-gradient(180deg,rgba(255,230,90,.3),rgba(255,194,0,.05) 22%,transparent 55%) !important; box-shadow:inset 0 5px 15px rgba(255,221,70,.32),0 0 8px rgba(255,210,45,.85) !important; }
+        #game-hitboxes:not(.hidden) > div + div { border-left:2px solid rgba(255,230,100,.9) !important; }
+        /* 黄色ガイドは細い目印だけにして、プレイ領域を覆わない */
+        #game-hitboxes:not(.hidden)::before { height:2px; background:#fff7ad; box-shadow:0 0 4px #fff,0 0 10px #ffd43b; }
+        #game-hitboxes:not(.hidden) > div { border-top:2px solid #ffe66d !important; background:transparent !important; box-shadow:none !important; }
+        #game-hitboxes:not(.hidden) > div + div { border-left:1px solid rgba(255,230,100,.72) !important; }
+        #game-board .lane-border::after { display:none !important; }
+        /* 最終仕様: 各レーン内・通常ノーツ約2個分の黄色判定ガイド */
+        #game-hitboxes:not(.hidden)::before { display:none !important; }
+        #game-hitboxes:not(.hidden) > div { border:0 !important; }
+        #game-hitboxes:not(.hidden) > div + div { border-left:0 !important; }
+        #game-hitboxes:not(.hidden) > div::after { content:'' !important; display:block !important; position:absolute; left:4%; right:4%; top:auto; bottom:12px; height:40px; border:2px solid #ffe66d; border-radius:999px; background:linear-gradient(180deg,rgba(255,248,173,.92),rgba(255,193,0,.42)); box-shadow:inset 0 0 8px rgba(255,255,220,.95),0 0 8px #ffe66d,0 0 18px rgba(255,190,0,.78); opacity:1; animation:touchGuidePulse 1.15s ease-in-out infinite; }
+        /* 最終仕様: 4レーンをまたぐ、つながった1本の黄色判定バー */
+        #game-hitboxes:not(.hidden) > div::after { display:none !important; }
+        #game-hitboxes:not(.hidden)::after { content:''; display:block; position:absolute; left:1%; right:1%; bottom:12px; height:40px; border:2px solid #ffe66d; border-radius:999px; background:linear-gradient(180deg,rgba(255,248,173,.92),rgba(255,193,0,.42)); box-shadow:inset 0 0 8px rgba(255,255,220,.95),0 0 8px #ffe66d,0 0 18px rgba(255,190,0,.78); opacity:1; animation:touchGuidePulse 1.15s ease-in-out infinite; pointer-events:none; }
+        /* レーンとノーツの実寸を前回の2倍へ拡大。ノーツ比率は各レーン内で維持 */
+        .game-board { width:400%; max-width:2800px; flex:0 0 400%; flex-shrink:0; }
+        .note { width:24% !important; }
+        /* ノーツは縦幅を2倍、黄色ガイドは細い光として少し上へ */
+        .note { height:80px !important; }
+        #game-hitboxes:not(.hidden)::after { left:2%; right:2%; bottom:58px; height:24px; border:1px solid rgba(255,239,128,.95); border-radius:6px; background:linear-gradient(180deg,rgba(255,250,190,.58),rgba(255,205,45,.16)); box-shadow:0 0 6px rgba(255,235,120,.95),0 0 16px rgba(255,194,0,.55); }
+        /* 横バーを削除し、その位置の4レーン面だけを発光 */
+        #game-hitboxes:not(.hidden)::after { display:none !important; }
+        #game-hitboxes:not(.hidden) > div::after { display:none !important; }
+        /* 光を画面固定のタッチレイヤーではなく、実際の3Dレーンへ付ける */
+        #game-board .lane-border::after { content:''; display:block !important; position:absolute; left:0; right:0; bottom:7%; height:80px; border:0; border-radius:0; background:linear-gradient(180deg,transparent 0%,rgba(255,236,115,.06) 28%,rgba(255,215,55,.34) 78%,rgba(255,190,0,.5) 100%); box-shadow:inset 0 0 24px rgba(255,221,75,.4),0 0 14px rgba(255,210,45,.28); opacity:1; animation:touchGuidePulse 1.15s ease-in-out infinite; pointer-events:none; z-index:25; }
+        /* レーン面自体にも発光を重ね、3D変形後も必ず見えるようにする */
+        #game-board .lane-border { background:radial-gradient(ellipse at 50% 94%,rgba(255,224,80,.9) 0%,rgba(255,194,0,.52) 22%,rgba(255,180,0,.16) 46%,transparent 70%),linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.03) 50%,rgba(255,220,70,.24) 100%) !important; }
+        /* レーン全体は暗く保ち、黄色い判定位置だけを局所発光 */
+        #game-board .lane-border { background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.02) 50%,rgba(255,255,255,.15) 100%) !important; }
+        #game-board .lane-border::after { left:8%; right:8%; bottom:7%; height:80px; background:radial-gradient(ellipse at 50% 70%,rgba(255,239,125,.88) 0%,rgba(255,207,45,.48) 30%,rgba(255,185,0,.18) 58%,transparent 82%) !important; box-shadow:0 0 16px rgba(255,211,55,.5),inset 0 0 18px rgba(255,240,140,.3); border:0; }
+        /* 判定位置の局所光をレーン最前面で明示 */
+        #game-board .lane-border::after { display:block !important; visibility:visible !important; left:6%; right:6%; bottom:10%; height:80px; background:radial-gradient(ellipse at center,rgba(255,244,120,.98) 0%,rgba(255,220,55,.78) 32%,rgba(255,188,0,.38) 62%,transparent 86%) !important; box-shadow:0 0 18px rgba(255,235,100,.95),0 0 38px rgba(255,190,0,.7),inset 0 0 20px rgba(255,255,210,.75); opacity:1 !important; z-index:100 !important; mix-blend-mode:screen; }
+        /* レーン内に存在する実体の発光。3D変形でも消えない */
+        #game-board .lane-border::after { display:none !important; }
+        #game-board .lane-glow { position:absolute; left:6%; right:6%; top:80%; bottom:auto; height:80px; z-index:100; pointer-events:none; background:radial-gradient(ellipse at center,rgba(255,255,170,1) 0%,rgba(255,225,55,.9) 34%,rgba(255,188,0,.55) 64%,transparent 88%); border:2px solid rgba(255,239,120,.95); box-shadow:0 0 18px rgba(255,235,100,1),0 0 38px rgba(255,190,0,.85),inset 0 0 20px rgba(255,255,210,.9); opacity:1; }
+        /* ゲームフィールド最前面の確実な表示用。タッチレーンと同じ4分割 */
+        #visible-lane-guide:not(.hidden) { position:absolute; left:4%; right:4%; bottom:12%; height:80px; display:flex; z-index:120; pointer-events:none; opacity:1; visibility:visible; }
+        #visible-lane-guide:not(.hidden) > div { flex:1 1 25%; min-width:0; background:radial-gradient(ellipse at center,rgba(255,255,180,.95) 0%,rgba(255,221,55,.7) 38%,rgba(255,188,0,.24) 72%,transparent 100%); box-shadow:inset 0 0 18px rgba(255,255,210,.7),0 0 16px rgba(255,215,60,.85); }
+        #visible-lane-guide:not(.hidden) > div + div { border-left:1px solid rgba(255,239,130,.45); }
+        /* 画面固定ガイドは使わず、ゲームボード内の4レーンを発光させる */
+        #visible-lane-guide { display:none !important; }
+        #game-board #touch-guide-overlay { display:flex !important; position:absolute; left:0; right:0; top:78%; bottom:auto; height:80px; z-index:100; pointer-events:none; opacity:1; visibility:visible; }
+        #game-board #touch-guide-overlay > div { flex:1 1 25%; min-width:0; background:radial-gradient(ellipse at center,rgba(255,255,170,.98) 0%,rgba(255,220,55,.78) 36%,rgba(255,188,0,.4) 68%,transparent 92%); box-shadow:inset 0 0 22px rgba(255,255,210,.8),0 0 18px rgba(255,215,60,.8); }
+    </style>
+    <script>
+    (() => {
+        const makerMarkup = `
+            <div class="chart-editor-shell">
+                <div class="chart-maker-topbar">
+                    <div class="chart-maker-brand">PROJECT TOMATO<small>CHART MAKER / VERTICAL TIMELINE</small></div>
+                    <select id="editor-song" onchange="window.editorSongChanged()" class="chart-maker-select"></select>
+                    <select id="editor-difficulty" onchange="window.editorDifficultyChanged()" class="chart-maker-select"><option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option><option value="expert">EXPERT</option></select>
+                    <div class="chart-maker-transport"><button onclick="window.editorUndo()" class="chart-maker-btn" title="一つ戻る">↶ 戻す</button><button onclick="window.editorRedo()" class="chart-maker-btn" title="一つ進む">↷ 進む</button><button onclick="window.editorResetChart()" class="chart-maker-btn" title="この難易度の譜面をリセット">RESET</button><button id="editor-play-button" onclick="window.editorPlayPause()" class="chart-maker-btn primary">▶ 再生</button><button onclick="window.editorPlayChartFromCurrent()" class="chart-maker-btn">▣ テストプレイ</button><button onclick="window.editorExport()" class="chart-maker-btn">↧ 保存</button><button onclick="window.closeChartEditor()" class="chart-maker-close">×</button></div>
+                </div>
+                <div class="chart-maker-workspace">
+                    <aside class="chart-maker-palette">
+                        <div class="chart-maker-section-title">NOTE TYPE</div>
+                        <div class="chart-maker-palette-grid">
+                            <button class="chart-palette-note active" data-editor-type="tap" onclick="window.editorSetType('tap')"><span class="palette-glyph"></span>TAP</button>
+                            <button class="chart-palette-note flick" data-editor-type="flick" onclick="window.editorSetType('flick')"><span class="palette-glyph">↟</span>FLICK</button>
+                            <button class="chart-palette-note hold" data-editor-type="slide" onclick="window.editorSetType('slide')"><span class="palette-glyph"></span>HOLD</button>
+                        </div>
+                        <div class="chart-maker-section-title chart-maker-lane-title" style="margin-top:18px">LANE</div>
+                        <div class="chart-maker-lanes"><button class="chart-lane-btn active" data-editor-lane="0" onclick="window.editorSetLane(0)">1</button><button class="chart-lane-btn" data-editor-lane="1" onclick="window.editorSetLane(1)">2</button><button class="chart-lane-btn" data-editor-lane="2" onclick="window.editorSetLane(2)">3</button><button class="chart-lane-btn" data-editor-lane="3" onclick="window.editorSetLane(3)">4</button></div>
+                        <div class="chart-maker-hint">空白をタップ: ノーツ配置<br>ノーツをドラッグ: 時刻・レーン移動<br>HOLD選択中: 上から下へドラッグ<br><br>時間は上から下へ進みます。</div>
+                        <audio id="editor-audio" class="hidden"></audio><input id="editor-time-slider" type="range" min="0" max="1" step="0.01" value="0" class="hidden"><input id="editor-note-time" type="number" value="0" class="hidden"><input id="editor-zoom-slider" type="range" min="10" max="400" value="180" class="hidden"><span id="editor-zoom-label" class="hidden">180%</span>
+                    </aside>
+                    <section class="chart-maker-center">
+                        <div class="chart-maker-ruler"><span id="editor-current-time">0.00s</span><span>タイムライン / 4 LANES</span><span id="editor-duration">0.00s</span></div>
+                        <div id="editor-timeline-viewport"><div id="editor-timeline" onpointerdown="window.editorTimelinePointerDown(event)" onpointermove="window.editorTimelinePointerMove(event)" onpointerup="window.editorTimelinePointerUp(event)" onpointercancel="window.editorTimelinePointerCancel(event)"><div id="editor-timeline-grid"></div><div id="editor-playhead"></div></div></div>
+                    </section>
+                    <aside class="chart-maker-side">
+                        <div class="chart-maker-section-title">OVERVIEW</div><div id="editor-overview" class="chart-overview"></div>
+                        <div class="chart-side-card"><strong>選択ノーツ</strong><span id="editor-note-count" class="text-cyan-300">0</span> ノーツ</div>
+                        <div class="chart-side-card"><strong>ZOOM</strong><button onclick="window.editorSetZoom(-1)" class="chart-maker-btn">−</button><button onclick="window.editorSetZoom(1)" class="chart-maker-btn">＋</button><div style="margin-top:6px">スクロールで時間移動</div></div>
+                        <div id="editor-note-list"></div>
+                    </aside>
+                </div>
+            </div>`;
+        function installChartMaker() {
+            const modal = document.getElementById('chart-editor-modal');
+            if (!modal || modal.dataset.chartMakerInstalled) return;
+            modal.dataset.chartMakerInstalled = '1'; modal.classList.add('chart-maker-mode'); modal.innerHTML = makerMarkup;
+            editorState.zoom = 1.8;
+            makerHistory = [makerSnapshot()]; makerHistoryIndex = 0;
+        }
+        function editorRenderOverview() {
+            const el = document.getElementById('editor-overview'); if (!el) return;
+            const song = window.originalSongs[editorState.songIndex]; const audio = document.getElementById('editor-audio');
+            const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(song?.staticDuration || 1);
+            el.innerHTML = editorState.notes.map(n => { const t=n.type==='slide'?n.nodes[0].time:n.time; const c=n.type==='flick'?'#ff58ab':n.type==='slide'?'#ffd34f':'#5de5ff'; return `<span class="overview-mark" style="top:${Math.max(0,Math.min(100,t/duration*100))}%;color:${c};background:${c}"></span>`; }).join('');
+        }
+        window.editorUpdatePlayhead = function() {
+            const audio=document.getElementById('editor-audio'), song=window.originalSongs[editorState.songIndex]; const duration=Number.isFinite(audio?.duration)?audio.duration:Number(song?.staticDuration||1); const time=Number(audio?.currentTime||0); const timeline=document.getElementById('editor-timeline'), playhead=document.getElementById('editor-playhead'); if(!timeline||!playhead)return; const percent=duration>0?Math.max(0,Math.min(100,time/duration*100)):0; playhead.style.top=`${percent}%`; playhead.style.left='0'; playhead.style.width='100%'; document.getElementById('editor-current-time').innerText=`${time.toFixed(2)}s`; const vp=document.getElementById('editor-timeline-viewport'); const y=timeline.clientHeight*percent/100; if(vp&&editorState.followPlayhead!==false)vp.scrollTop=Math.max(0,Math.min(timeline.clientHeight-vp.clientHeight,y-vp.clientHeight*.42));
+        };
+        window.editorRenderTimeline = function() {
+            const grid=document.getElementById('editor-timeline-grid'); if(!grid)return; const song=window.originalSongs[editorState.songIndex], audio=document.getElementById('editor-audio'); const duration=Number.isFinite(audio?.duration)?audio.duration:Number(song?.staticDuration||1); const timeline=document.getElementById('editor-timeline'); const vp=document.getElementById('editor-timeline-viewport'); const height=Math.max(720,duration*4.2*editorState.zoom); timeline.style.height=`${height}px`; timeline.style.minHeight=`${height}px`; let html=''; for(let lane=0;lane<4;lane++)html+=`<div class="chart-lane-label" style="left:${lane*25}%"><span>${lane+1}</span></div>`; let svg='<svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none">'; editorState.notes.forEach((n,i)=>{const t=n.type==='slide'?n.nodes[0].time:n.time;const lane=n.type==='slide'?n.nodes[0].lane:n.lane;const top=Math.max(0,Math.min(100,t/duration*100));const color=n.type==='flick'?'#ff4ea6':n.type==='slide'?'#ffd34f':['#f4c84d','#50ddff','#54e6a0','#d987ff'][lane];if(n.type==='slide'){const pts=n.nodes.map(x=>`${x.lane*250+125},${Math.max(0,Math.min(1000,x.time/duration*1000))}`).join(' ');svg+=`<polyline id="editor-note-marker-${i}" class="chart-editor-hold-line" points="${pts}" stroke="${color}" stroke-width="34" style="filter:drop-shadow(0 0 8px ${color})" onpointerdown="event.stopPropagation();event.editorNoteIndex=${i};window.editorTimelinePointerDown(event)"></polyline>`;}else html+=`<div id="editor-note-marker-${i}" class="chart-editor-note ${n.type==='flick'?'flick':'tap'}${editorState.selectedNoteIndex===i?' selected':''}" title="${t.toFixed(2)}s" onpointerdown="event.stopPropagation();event.editorNoteIndex=${i};window.editorTimelinePointerDown(event)" style="left:calc(${lane*25}% + 5px);top:${top}%;width:calc(25% - 10px);color:${color}"></div>`;}); if(editorState.previewPath?.length){const previewPoints=editorState.previewPath.map(x=>`${x.lane*250+125},${Math.max(0,Math.min(1000,x.time/duration*1000))}`).join(' ');svg+=`<polyline class="chart-editor-hold-line" points="${previewPoints}" stroke="#fff0a1" stroke-width="42" stroke-dasharray="22 14" style="filter:drop-shadow(0 0 10px #ffd34f)"></polyline>`;} svg+='</svg>'; grid.innerHTML=html+svg; editorRenderOverview(); window.editorUpdatePlayhead();
+        };
+        window.editorTimelinePoint = function(event) { const timeline=document.getElementById('editor-timeline'),vp=document.getElementById('editor-timeline-viewport'); if(!timeline||!vp)return null; const rect=timeline.getBoundingClientRect(), song=window.originalSongs[editorState.songIndex], audio=document.getElementById('editor-audio'), duration=Number.isFinite(audio?.duration)?audio.duration:Number(song?.staticDuration||1); const x=event.clientX-rect.left, y=event.clientY-rect.top+vp.scrollTop; return {time:Math.max(0,Math.min(duration,y/rect.height*duration)),lane:Math.max(0,Math.min(3,Math.floor(x/rect.width*4))),duration}; };
+        window.editorSetType = function(type) { editorState.type=type; document.querySelectorAll('.chart-palette-note').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorType===type)); };
+        window.editorSetLane = function(lane) { editorState.lane=Number(lane); document.querySelectorAll('.chart-lane-btn').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.editorLane)===editorState.lane)); };
+        window.editorSetZoomValue = function(value) { editorState.zoom=Math.max(.5,Math.min(4,Number(value)/100||1.8)); const label=document.getElementById('editor-zoom-label'); if(label)label.innerText=`${Math.round(editorState.zoom*100)}%`; window.editorRenderTimeline(); };
+        const makerOriginalSaveNotes = window.editorSaveNotes;
+        let makerHistory = [], makerHistoryIndex = -1, makerHistoryLock = false;
+        function makerSnapshot() { return JSON.stringify(cloneChartNotes(editorState.notes)); }
+        function makerPushHistory() { const snap=makerSnapshot(); if(makerHistory[makerHistoryIndex]===snap)return; makerHistory=makerHistory.slice(0,makerHistoryIndex+1); makerHistory.push(snap); makerHistoryIndex=makerHistory.length-1; }
+        function makerApplyHistory(index) { if(index<0||index>=makerHistory.length)return; makerHistoryIndex=index; editorState.notes=cloneChartNotes(JSON.parse(makerHistory[index])); const song=window.originalSongs[editorState.songIndex]; song.charts=song.charts||{}; song.charts[editorState.difficulty]=cloneChartNotes(editorState.notes); saveChartToStorage(song,editorState.difficulty,editorState.notes); makerHistoryLock=true; window.editorRenderNotes(); makerHistoryLock=false; }
+        const makerOriginalAddNote = window.editorAddNote, makerOriginalDeleteNote = window.editorDeleteNote, makerOriginalOpenEditor = window.openChartEditor;
+        window.openChartEditor = function() { const result=makerOriginalOpenEditor.apply(this,arguments); makerHistory=[makerSnapshot()]; makerHistoryIndex=0; return result; };
+        window.editorSaveNotes = function() { const result=makerOriginalSaveNotes.apply(this,arguments); if(!makerHistoryLock)makerPushHistory(); return result; };
+        window.editorAddNote = function() { const result=makerOriginalAddNote.apply(this,arguments); if(!makerHistoryLock)makerPushHistory(); return result; };
+        window.editorDeleteNote = function(index) { const result=makerOriginalDeleteNote.apply(this,arguments); if(!makerHistoryLock)makerPushHistory(); return result; };
+        window.editorUndo = function() { makerApplyHistory(makerHistoryIndex-1); };
+        window.editorRedo = function() { makerApplyHistory(makerHistoryIndex+1); };
+        window.editorResetChart = function() { if(!confirm('この難易度の譜面をすべてリセットしますか？'))return; editorState.notes=[]; editorState.previewPath=null; const song=window.originalSongs[editorState.songIndex]; song.charts=song.charts||{}; song.charts[editorState.difficulty]=[]; saveChartToStorage(song,editorState.difficulty,[]); window.editorRenderNotes(); makerPushHistory(); };
+        window.editorSetZoom = function(direction) { window.editorSetZoomValue((editorState.zoom*100)+Number(direction)*20); };
+        /* Immediate placement + press-drag editing */
+        window.editorTimelinePointerDown = function(event) {
+            if(event.target.closest?.('button'))return;
+            const point=window.editorTimelinePoint(event); if(!point)return;
+            const hitIndex=Number.isInteger(event.editorNoteIndex)?event.editorNoteIndex:editorFindNote(point);
+            if(hitIndex>=0){
+                const note=editorState.notes[hitIndex]; editorState.selectedNoteIndex=hitIndex;
+                editorState.drag={mode:'move',noteIndex:hitIndex,startTime:point.time,startLane:point.lane,original:JSON.parse(JSON.stringify(note)),moved:false};
+            }else if(editorState.type==='slide'){
+                editorState.drag={mode:'draw',startTime:point.time,startLane:point.lane,duration:point.duration,path:[{time:point.time,lane:point.lane}],moved:false};
+                editorState.previewPath=editorState.drag.path; window.editorRenderTimeline();
+            }else{
+                const note={type:editorState.type,time:Number(point.time.toFixed(2)),lane:point.lane};
+                editorState.notes.push(note); editorState.notes.sort((a,b)=>(a.time??a.nodes[0].time)-(b.time??b.nodes[0].time));
+                const index=editorState.notes.indexOf(note); editorState.selectedNoteIndex=index;
+                editorState.drag={mode:'new-move',noteIndex:index,startTime:point.time,startLane:point.lane,original:JSON.parse(JSON.stringify(note)),moved:false};
+                window.editorRenderNotes();
+            }
+            document.getElementById('editor-timeline')?.setPointerCapture?.(event.pointerId); event.preventDefault();
+        };
+        window.editorTimelinePointerMove = function(event) {
+            const drag=editorState.drag; if(!drag)return; const point=window.editorTimelinePoint(event); if(!point)return;
+            if(drag.mode==='move'||drag.mode==='new-move'){
+                const dt=point.time-drag.startTime, laneShift=point.lane-drag.startLane; drag.moved=drag.moved||Math.abs(dt)>.03||laneShift!==0; const note=editorState.notes[drag.noteIndex];
+                if(note.type==='slide')note.nodes=drag.original.nodes.map(n=>({time:Math.max(0,n.time+dt),lane:Math.max(0,Math.min(3,n.lane+laneShift))})); else { note.time=Math.max(0,Number((drag.original.time+dt).toFixed(2))); note.lane=Math.max(0,Math.min(3,drag.original.lane+laneShift)); }
+                window.editorRenderTimeline();
+            }else if(drag.mode==='draw'){
+                drag.moved=drag.moved||Math.abs(point.time-drag.startTime)>.03||point.lane!==drag.startLane; const last=drag.path[drag.path.length-1];
+                /* 時刻は必ず前進。レーンは1〜4の範囲で何度でも横移動可能 */
+                if(point.time>=last.time && (last.lane!==point.lane || point.time-last.time>.045))drag.path.push({time:Number(point.time.toFixed(3)),lane:point.lane});
+                editorState.previewPath=drag.path; window.editorRenderTimeline();
+            }
+            event.preventDefault();
+        };
+        window.editorTimelinePointerUp = function(event) {
+            const drag=editorState.drag; if(!drag)return;
+            if(drag.mode==='move'||drag.mode==='new-move'){
+                if(drag.moved)window.editorSaveNotes(); else if(drag.mode==='new-move')window.editorSaveNotes();
+            }else if(drag.mode==='draw'){
+                let nodes=drag.path; if(nodes.length<2)nodes=[{time:drag.startTime,lane:drag.startLane},{time:Math.min(drag.duration,drag.startTime+1),lane:drag.startLane}];
+                const note={type:'slide',nodes:nodes.map(n=>({time:Number(n.time.toFixed(2)),lane:Math.max(0,Math.min(3,n.lane))}))}; editorState.notes.push(note); editorState.notes.sort((a,b)=>a.nodes[0].time-b.nodes[0].time); editorState.previewPath=null; editorState.selectedNoteIndex=editorState.notes.indexOf(note); window.editorSaveNotes();
+            }
+            editorState.drag=null; editorState.previewPath=null; window.editorRenderTimeline(); event.preventDefault();
+        };
+        window.editorTimelinePointerCancel = function() { const drag=editorState.drag; if(drag?.mode==='new-move')editorState.notes.splice(drag.noteIndex,1); editorState.drag=null; editorState.previewPath=null; window.editorRenderNotes(); };
+        document.addEventListener('DOMContentLoaded',()=>{ installChartMaker(); setTimeout(()=>{ if(window.editorRenderTimeline)window.editorRenderTimeline(); },150); });
+    })();
+    </script>
 </body>
 </html>
+
+
+
