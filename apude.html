@@ -156,6 +156,687 @@
             margin-bottom: 0;
         }
 
+        .kazin-link {
+            display: none;
+            margin: 0 auto 30px;
+            padding: 14px 30px;
+            background: linear-gradient(90deg, #0284c7, #2563eb);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border: 2px solid #7dd3fc;
+            border-radius: 999px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kazin-link:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.9);
+        }
+
+        .kazin-link.visible {
+            display: inline-block;
+        }
+
+        .launch-screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+        }
+
+        .launch-screen img {
+            display: block;
+            width: min(78vw, 620px);
+            max-height: 52vh;
+            object-fit: contain;
+            filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.9)) drop-shadow(0 0 42px rgba(250, 204, 21, 0.65));
+            animation: launch-image 2.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes launch-image {
+            from { transform: scale(0.98); filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.9)) drop-shadow(0 0 42px rgba(250, 204, 21, 0.65)); }
+            to { transform: scale(1.03); filter: drop-shadow(0 0 26px rgba(125, 211, 252, 1)) drop-shadow(0 0 70px rgba(250, 204, 21, 0.95)); }
+        }
+
+        body.launch-ready .header,
+        body.launch-ready .countdown-section,
+        body.launch-ready .directive-box,
+        body.launch-ready .footer-note {
+            display: none;
+        }
+
+        body.launch-ready .container {
+            min-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-color: #facc15;
+            box-shadow: 0 0 55px rgba(56, 189, 248, 0.8), 0 0 110px rgba(250, 204, 21, 0.45), inset 0 0 45px rgba(37, 99, 235, 0.25);
+        }
+
+        body.launch-ready .launch-screen {
+            display: flex;
+        }
+
+        body.launch-ready .kazin-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: min(62vw, 300px);
+            padding: 18px 44px;
+            color: #fff;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            letter-spacing: 0.18em;
+            text-indent: 0.18em;
+            border: 3px solid #fef08a;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #0c4a6e 0%, #2563eb 45%, #b45309 100%);
+            box-shadow: 0 0 15px #38bdf8, 0 0 35px rgba(250, 204, 21, 0.85), inset 0 0 18px rgba(255, 255, 255, 0.38);
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+            animation: play-button 1.25s ease-in-out infinite alternate;
+        }
+
+        body.launch-ready .kazin-link:hover {
+            transform: translateY(-4px) scale(1.06);
+            box-shadow: 0 0 25px #7dd3fc, 0 0 60px rgba(250, 204, 21, 1), inset 0 0 24px rgba(255, 255, 255, 0.55);
+        }
+
+        /* PLAYクリック時の2秒起動シーケンス */
+        body.play-launching {
+            background: radial-gradient(circle at center, #fef3c7 0%, #f97316 28%, #450a0a 62%, #020617 100%);
+            animation: launch-screen-flash 0.22s steps(2, end) infinite;
+        }
+
+        body.play-launching .container {
+            border-color: #ffffff;
+            box-shadow: 0 0 45px #ffffff, 0 0 100px #facc15, 0 0 190px #ef4444, inset 0 0 80px rgba(255, 255, 255, 0.75);
+            animation: launch-container 2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        body.play-launching .launch-screen::before,
+        body.play-launching .launch-screen::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 25px #ffffff, 0 0 70px #facc15, 0 0 120px #ef4444;
+            pointer-events: none;
+            animation: launch-burst 2s ease-out forwards;
+        }
+
+        body.play-launching .launch-screen::after {
+            animation-delay: 0.18s;
+            background: #facc15;
+        }
+
+        body.play-launching .launch-screen img {
+            animation: launch-image-burst 2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        body.play-launching .kazin-link {
+            pointer-events: none;
+            animation: play-launch-burst 2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes launch-screen-flash {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(2.25) saturate(1.8); }
+        }
+
+        @keyframes launch-container {
+            0% { transform: scale(1); }
+            28% { transform: scale(1.06) rotate(0.8deg); }
+            62% { transform: scale(0.97) rotate(-0.6deg); }
+            100% { transform: scale(1.08); opacity: 0.15; }
+        }
+
+        @keyframes launch-burst {
+            0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+            18% { opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(28); opacity: 0; }
+        }
+
+        @keyframes launch-image-burst {
+            0% { transform: scale(1); filter: brightness(1); }
+            35% { transform: scale(1.18); filter: brightness(2.5) drop-shadow(0 0 45px #ffffff); }
+            100% { transform: scale(1.45); filter: brightness(4) blur(8px); opacity: 0; }
+        }
+
+        @keyframes play-launch-burst {
+            0% { transform: scale(1); filter: brightness(1); }
+            30% { transform: scale(1.18); filter: brightness(2.4); }
+            100% { transform: scale(1.65); filter: brightness(4); opacity: 0; }
+        }
+
+        .launch-audio {
+            display: none;
+        }
+
+        .sound-enable {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 18px;
+            padding: 8px 16px;
+            color: #bae6fd;
+            background: rgba(8, 47, 73, 0.72);
+            border: 1px solid rgba(125, 211, 252, 0.7);
+            border-radius: 999px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: opacity 0.25s ease, transform 0.2s ease;
+        }
+
+        .sound-enable:hover {
+            transform: scale(1.04);
+            background: rgba(14, 116, 144, 0.82);
+        }
+
+        .sound-enable.enabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        body.launch-ready .sound-enable,
+        body.play-launching .sound-enable {
+            display: none;
+        }
+
+        /* 0秒からPLAY表示までの15秒間・KAZIN覚醒シーケンス */
+        .awakening-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            overflow: hidden;
+            color: #ffffff;
+            background: #020617;
+        }
+
+        body.awakening .header,
+        body.awakening .countdown-section,
+        body.awakening .directive-box,
+        body.awakening .footer-note,
+        body.awakening .launch-screen,
+        body.awakening .sound-enable {
+            display: none;
+        }
+
+        body.awakening .container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        body.awakening .awakening-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: awakening-sky 15s linear forwards;
+        }
+
+        .awakening-screen::before {
+            content: '';
+            position: absolute;
+            inset: -15%;
+            background:
+                radial-gradient(circle at 50% 110%, rgba(14, 165, 233, 0.8), transparent 34%),
+                radial-gradient(ellipse at 50% 100%, #075985 0%, #082f49 23%, transparent 49%),
+                linear-gradient(to top, #020617 0%, #0f172a 55%, #020617 100%);
+            animation: ocean-to-space 15s ease-in-out forwards;
+        }
+
+        .awakening-screen::after {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(125, 211, 252, 0.12) 11deg 12deg, transparent 13deg 24deg);
+            mix-blend-mode: screen;
+            animation: cosmic-spin 15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .awakening-stars {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, #fff 0 1px, transparent 2px),
+                radial-gradient(circle, rgba(125, 211, 252, 0.9) 0 1px, transparent 2px),
+                radial-gradient(circle, rgba(250, 204, 21, 0.9) 0 1px, transparent 2px);
+            background-size: 83px 97px, 137px 151px, 211px 181px;
+            background-position: 8px 15px, 32px 7px, 51px 42px;
+            opacity: 0;
+            animation: stars-awaken 15s ease-in-out forwards;
+        }
+
+        .awakening-orbit {
+            position: absolute;
+            width: min(72vw, 720px);
+            aspect-ratio: 1;
+            border: 2px solid rgba(125, 211, 252, 0.55);
+            border-radius: 50%;
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.75), inset 0 0 24px rgba(56, 189, 248, 0.45);
+            opacity: 0;
+            animation: orbit-awaken 15s ease-in-out forwards;
+        }
+
+        .awakening-orbit::before,
+        .awakening-orbit::after {
+            content: '';
+            position: absolute;
+            inset: 13%;
+            border: 1px solid rgba(250, 204, 21, 0.6);
+            border-radius: 50%;
+            transform: rotate(55deg) scaleX(1.7);
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.7);
+        }
+
+        .awakening-orbit::after {
+            transform: rotate(-35deg) scaleX(1.7);
+            border-color: rgba(34, 197, 94, 0.6);
+        }
+
+        .awakening-content {
+            position: relative;
+            z-index: 2;
+            width: min(90vw, 900px);
+            text-align: center;
+            text-shadow: 0 0 18px rgba(125, 211, 252, 0.9);
+        }
+
+        .awakening-kicker {
+            margin-bottom: 18px;
+            color: #7dd3fc;
+            font-size: clamp(0.8rem, 2vw, 1.1rem);
+            letter-spacing: 0.5em;
+            opacity: 0;
+            animation: awakening-kicker 15s linear forwards;
+        }
+
+        .awakening-title {
+            font-size: clamp(2.2rem, 9vw, 7rem);
+            letter-spacing: 0.12em;
+            line-height: 1.05;
+            color: #ffffff;
+            opacity: 0;
+            animation: awakening-title 15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .awakening-subtitle {
+            margin-top: 20px;
+            color: #fde68a;
+            font-size: clamp(0.9rem, 2.7vw, 1.5rem);
+            letter-spacing: 0.2em;
+            opacity: 0;
+            animation: awakening-subtitle 15s linear forwards;
+        }
+
+        .awakening-landscape {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        .awakening-water,
+        .awakening-forest,
+        .awakening-mist,
+        .awakening-cosmos {
+            opacity: 0;
+        }
+
+        .awakening-water {
+            animation: realistic-water 15s ease-in-out forwards;
+        }
+
+        .awakening-water path {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: water-flow 3.2s linear infinite;
+        }
+
+        .awakening-water .wave-back { animation-duration: 5s; }
+        .awakening-water .wave-front { animation-duration: 2.4s; }
+
+        .awakening-forest {
+            animation: realistic-forest 15s ease-in-out forwards;
+        }
+
+        .awakening-forest .far-trees { animation: forest-drift 12s ease-in-out infinite alternate; }
+        .awakening-forest .near-trees { animation: forest-drift 7s ease-in-out infinite alternate-reverse; }
+
+        .awakening-mist {
+            animation: mist-flow 15s ease-in-out forwards;
+        }
+
+        .awakening-cosmos {
+            animation: realistic-cosmos 15s ease-in-out forwards;
+        }
+
+        @keyframes realistic-water {
+            0%, 12% { opacity: 0.95; transform: translateY(0) scale(1); }
+            25% { opacity: 0.9; transform: translateY(-2%); }
+            42%, 100% { opacity: 0; transform: translateY(-14%) scale(1.25); }
+        }
+
+        @keyframes water-flow {
+            0% { stroke-dashoffset: 0; transform: translateX(-2%); }
+            50% { transform: translateX(2%); }
+            100% { stroke-dashoffset: -180; transform: translateX(-2%); }
+        }
+
+        @keyframes realistic-forest {
+            0%, 22% { opacity: 0; transform: scale(1.08) translateY(12%); }
+            30% { opacity: 1; transform: scale(1) translateY(0); }
+            52% { opacity: 1; transform: scale(1.04) translateY(-2%); }
+            72%, 100% { opacity: 0; transform: scale(1.35) translateY(-13%); }
+        }
+
+        @keyframes forest-drift {
+            from { transform: translateX(-2%); }
+            to { transform: translateX(2%); }
+        }
+
+        @keyframes mist-flow {
+            0%, 16% { opacity: 0; transform: translateX(-12%); }
+            28%, 55% { opacity: 0.72; transform: translateX(0); }
+            74%, 100% { opacity: 0; transform: translateX(15%) scale(1.25); }
+        }
+
+        @keyframes realistic-cosmos {
+            0%, 48% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+            62% { opacity: 0.8; }
+            100% { opacity: 1; transform: scale(1.45) rotate(80deg); }
+        }
+
+        @keyframes awakening-sky {
+            0%, 21% { background: #020617; }
+            22%, 48% { background: #082f49; }
+            49%, 72% { background: #14532d; }
+            73%, 92% { background: #172554; }
+            93%, 100% { background: #000000; }
+        }
+
+        @keyframes ocean-to-space {
+            0%, 18% { transform: scale(1.15) translateY(10%); filter: hue-rotate(0deg); }
+            42% { transform: scale(1.05) translateY(0); filter: hue-rotate(30deg); }
+            68% { transform: scale(1.25) translateY(-7%); filter: hue-rotate(100deg); }
+            100% { transform: scale(1.9) translateY(-18%); filter: hue-rotate(190deg) brightness(0.35); }
+        }
+
+        @keyframes cosmic-spin {
+            0%, 45% { transform: rotate(0deg) scale(0.6); opacity: 0; }
+            58% { opacity: 0.45; }
+            100% { transform: rotate(540deg) scale(1.6); opacity: 0.95; }
+        }
+
+        @keyframes stars-awaken {
+            0%, 42% { opacity: 0; transform: scale(0.7); }
+            55% { opacity: 0.35; }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+
+        @keyframes orbit-awaken {
+            0%, 34% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+            50% { opacity: 0.35; }
+            75% { opacity: 0.85; }
+            100% { opacity: 0.2; transform: scale(1.7) rotate(720deg); }
+        }
+
+        @keyframes awakening-kicker {
+            0%, 24% { opacity: 0; transform: translateY(20px); }
+            31%, 82% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        @keyframes awakening-title {
+            0%, 25% { opacity: 0; transform: scale(0.6); filter: blur(15px); }
+            35%, 82% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.8); filter: blur(12px); }
+        }
+
+        @keyframes awakening-subtitle {
+            0%, 43% { opacity: 0; }
+            53%, 82% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes play-button {
+            from { filter: brightness(0.95); transform: scale(1); }
+            to { filter: brightness(1.35); transform: scale(1.045); }
+        }
+
+        /* 残り60秒からの最終カウントダウン演出 */
+        body.final-countdown {
+            background: radial-gradient(circle at center, #172554 0%, #020617 72%);
+            overflow: hidden;
+        }
+
+        body.final-countdown::before,
+        body.final-countdown::after {
+            content: '';
+            position: fixed;
+            inset: -20%;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(56, 189, 248, 0.35);
+            animation: final-ring 5s linear infinite;
+        }
+
+        body.final-countdown::after {
+            animation-delay: -2.5s;
+            border-color: rgba(250, 204, 21, 0.25);
+        }
+
+        @keyframes final-ring {
+            0% { transform: scale(0.65) rotate(0deg); opacity: 0; }
+            35% { opacity: 1; }
+            100% { transform: scale(1.35) rotate(180deg); opacity: 0; }
+        }
+
+        body.final-countdown .container {
+            width: min(94vw, 1100px);
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-color: #7dd3fc;
+            box-shadow: 0 0 55px rgba(56, 189, 248, 0.75), inset 0 0 45px rgba(37, 99, 235, 0.25);
+            animation: final-container 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes final-container {
+            from { transform: scale(1); }
+            to { transform: scale(1.015); }
+        }
+
+        body.final-countdown .header,
+        body.final-countdown .directive-box,
+        body.final-countdown .footer-note,
+        body.final-countdown .countdown-title,
+        body.final-countdown .time-label {
+            display: none;
+        }
+
+        body.final-countdown .countdown-section {
+            width: 100%;
+        }
+
+        body.final-countdown .countdown-timer {
+            gap: clamp(8px, 2vw, 24px);
+            margin: 0;
+        }
+
+        body.final-countdown .time-box:nth-child(-n+3) {
+            display: none;
+        }
+
+        body.final-countdown .time-box {
+            flex: 0 0 auto;
+            width: min(68vw, 430px);
+            aspect-ratio: 1;
+            min-width: 0;
+            padding: clamp(18px, 4vw, 34px);
+            border-color: #38bdf8;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.16), rgba(2, 6, 23, 0.82) 68%);
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.55), inset 0 0 30px rgba(14, 165, 233, 0.25);
+            animation: countdown-circle-blink 1s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.final-countdown .time-value {
+            font-size: clamp(3rem, 12vw, 9rem);
+            line-height: 1;
+        }
+
+        @keyframes countdown-circle-blink {
+            0%, 100% {
+                opacity: 0.62;
+                filter: brightness(0.85);
+                box-shadow: 0 0 18px rgba(14, 165, 233, 0.35), inset 0 0 20px rgba(14, 165, 233, 0.18);
+            }
+            50% {
+                opacity: 1;
+                filter: brightness(1.45);
+                box-shadow: 0 0 48px rgba(56, 189, 248, 0.95), inset 0 0 35px rgba(56, 189, 248, 0.4);
+            }
+        }
+
+        /* 残り10秒からの超豪華演出 */
+        body.critical-countdown {
+            animation: critical-background 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes critical-background {
+            from { background-color: #020617; }
+            to { background-color: #450a0a; }
+        }
+
+        body.critical-countdown .container {
+            border-color: #facc15;
+            box-shadow: 0 0 70px rgba(250, 204, 21, 0.95), 0 0 140px rgba(239, 68, 68, 0.65), inset 0 0 55px rgba(239, 68, 68, 0.35);
+            animation: critical-container 0.45s ease-in-out infinite alternate;
+        }
+
+        body.critical-countdown .time-box {
+            border-color: #facc15;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.35), rgba(69, 10, 10, 0.88) 68%);
+            box-shadow: 0 0 35px rgba(250, 204, 21, 0.9), inset 0 0 30px rgba(239, 68, 68, 0.5);
+            animation: critical-circle-blink 1s ease-in-out infinite;
+        }
+
+        body.critical-countdown .time-value {
+            color: #fef08a;
+            text-shadow: 0 0 12px #facc15, 0 0 35px #f97316, 0 0 65px #ef4444;
+            animation: critical-number 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes critical-container {
+            from { transform: scale(1); }
+            to { transform: scale(1.035); }
+        }
+
+        @keyframes critical-circle-blink {
+            0%, 100% {
+                filter: brightness(0.9);
+                box-shadow: 0 0 28px rgba(239, 68, 68, 0.7), inset 0 0 25px rgba(239, 68, 68, 0.35);
+            }
+            50% {
+                filter: brightness(1.8);
+                box-shadow: 0 0 75px rgba(250, 204, 21, 1), 0 0 125px rgba(239, 68, 68, 0.9), inset 0 0 40px rgba(250, 204, 21, 0.65);
+            }
+        }
+
+        @keyframes critical-number {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        /* 残り5秒からの超超豪華・最終演出 */
+        body.ultra-countdown {
+            background: radial-gradient(circle at center, #7f1d1d 0%, #450a0a 38%, #020617 100%);
+            animation: ultra-flash 0.5s steps(2, end) infinite;
+        }
+
+        body.ultra-countdown::before,
+        body.ultra-countdown::after {
+            inset: -45%;
+            border-width: 5px;
+            border-color: rgba(250, 204, 21, 0.78);
+            box-shadow: 0 0 45px rgba(250, 204, 21, 0.9), inset 0 0 45px rgba(239, 68, 68, 0.8);
+            animation: ultra-ring 1s linear infinite;
+        }
+
+        body.ultra-countdown::after {
+            border-color: rgba(239, 68, 68, 0.78);
+            animation-delay: -0.5s;
+            animation-duration: 0.75s;
+        }
+
+        @keyframes ultra-flash {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.7) saturate(1.6); }
+        }
+
+        @keyframes ultra-ring {
+            0% { transform: scale(0.45) rotate(0deg); opacity: 0; }
+            18% { opacity: 1; }
+            100% { transform: scale(1.55) rotate(360deg); opacity: 0; }
+        }
+
+        body.ultra-countdown .container {
+            border: 5px solid #fef08a;
+            box-shadow: 0 0 35px #facc15, 0 0 80px #f97316, 0 0 160px #ef4444, inset 0 0 70px rgba(250, 204, 21, 0.7);
+            animation: ultra-container 0.28s ease-in-out infinite alternate;
+        }
+
+        body.ultra-countdown .time-box {
+            border: 7px solid #fef08a;
+            background: radial-gradient(circle, #facc15 0%, #ef4444 32%, #450a0a 72%);
+            box-shadow: 0 0 25px #fef08a, 0 0 70px #f97316, 0 0 125px #ef4444, inset 0 0 45px #ffffff;
+            animation: ultra-circle 0.28s ease-in-out infinite alternate;
+        }
+
+        body.ultra-countdown .time-value {
+            color: #ffffff;
+            text-shadow: 0 0 8px #ffffff, 0 0 20px #fef08a, 0 0 45px #f97316, 0 0 80px #ef4444;
+            animation: ultra-number 0.28s ease-in-out infinite alternate;
+        }
+
+        @keyframes ultra-container {
+            from { transform: scale(1); }
+            to { transform: scale(1.06) rotate(0.5deg); }
+        }
+
+        @keyframes ultra-circle {
+            from { transform: scale(0.94); filter: brightness(1); }
+            to { transform: scale(1.08); filter: brightness(2.2); }
+        }
+
+        @keyframes ultra-number {
+            from { transform: scale(0.88); }
+            to { transform: scale(1.18); }
+        }
+
         .highlight {
             color: #facc15;
             font-weight: bold;
@@ -166,6 +847,90 @@
             font-size: 0.95rem;
             color: #64748b;
             letter-spacing: 1px;
+        }
+
+        /* スマートフォン縦向けレイアウト */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px 0;
+            }
+
+            .container {
+                width: calc(100% - 24px);
+                padding: 28px 14px;
+                border-width: 2px;
+                border-radius: 16px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.5rem, 8vw, 2.2rem);
+                letter-spacing: 1px;
+            }
+
+            .date-badge {
+                font-size: 0.95rem;
+                padding: 7px 14px;
+                margin-bottom: 22px;
+            }
+
+            .countdown-title {
+                font-size: 0.9rem;
+            }
+
+            .countdown-timer {
+                gap: 5px;
+                margin-bottom: 24px;
+            }
+
+            .time-box {
+                min-width: 0;
+                flex: 1;
+                padding: 10px 3px;
+            }
+
+            .time-value {
+                font-size: clamp(1.35rem, 9vw, 2.2rem);
+            }
+
+            .time-label {
+                font-size: 0.62rem;
+            }
+
+        .directive-box {
+                padding: 16px 13px;
+                margin-bottom: 22px;
+            }
+
+            .directive-box p {
+                font-size: 0.95rem;
+                line-height: 1.65;
+            }
+
+            .footer-note {
+                font-size: 0.72rem;
+                letter-spacing: 0.5px;
+            }
+
+            body.final-countdown .container {
+                width: calc(100% - 24px);
+                min-height: 62vh;
+                padding: 18px 8px;
+            }
+
+            body.final-countdown .time-box {
+                width: min(78vw, 360px);
+                padding: 14px;
+            }
+
+            body.final-countdown .time-value {
+                font-size: clamp(4rem, 22vw, 8rem);
+            }
+
+            .kazin-link {
+                max-width: 100%;
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -208,6 +973,71 @@
             <p>準備はいいか？ 錨を上げろ、進路は伝説の彼方だ！</p>
         </div>
 
+        <div class="launch-screen">
+            <img src="KAZIN.png" alt="KAZIN">
+            <a id="kazin-link" class="kazin-link" href="KAZIN.html">PLAY</a>
+        </div>
+
+        <div class="awakening-screen" aria-hidden="true">
+            <svg class="awakening-landscape" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                    <linearGradient id="water-depth" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#38bdf8" stop-opacity="0.5"></stop>
+                        <stop offset="0.35" stop-color="#075985" stop-opacity="0.75"></stop>
+                        <stop offset="1" stop-color="#020617" stop-opacity="0.98"></stop>
+                    </linearGradient>
+                    <linearGradient id="forest-light" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#86efac" stop-opacity="0.75"></stop>
+                        <stop offset="1" stop-color="#14532d" stop-opacity="0.95"></stop>
+                    </linearGradient>
+                    <filter id="water-distortion" x="-10%" y="-20%" width="120%" height="140%">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.08" numOctaves="3" seed="8" result="noise"></feTurbulence>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+                    </filter>
+                    <filter id="soft-mist"><feGaussianBlur stdDeviation="18"></feGaussianBlur></filter>
+                </defs>
+                <g class="awakening-water" filter="url(#water-distortion)">
+                    <rect x="0" y="530" width="1600" height="370" fill="url(#water-depth)"></rect>
+                    <path class="wave-back" d="M-80 590 C180 525 330 650 590 575 S1050 520 1680 600" fill="none" stroke="#7dd3fc" stroke-opacity="0.5" stroke-width="12" stroke-dasharray="70 35"></path>
+                    <path d="M-80 650 C190 590 370 710 670 635 S1150 600 1680 675" fill="none" stroke="#bae6fd" stroke-opacity="0.45" stroke-width="8" stroke-dasharray="110 48"></path>
+                    <path class="wave-front" d="M-80 735 C210 660 410 780 710 710 S1200 675 1680 760" fill="none" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="18" stroke-dasharray="150 65"></path>
+                    <path class="wave-front" d="M-80 820 C230 740 470 850 760 790 S1280 760 1680 830" fill="none" stroke="#e0f2fe" stroke-opacity="0.25" stroke-width="7" stroke-dasharray="90 80"></path>
+                </g>
+                <g class="awakening-mist" filter="url(#soft-mist)">
+                    <ellipse cx="370" cy="525" rx="430" ry="70" fill="#d1fae5" fill-opacity="0.26"></ellipse>
+                    <ellipse cx="1200" cy="570" rx="520" ry="90" fill="#f0fdf4" fill-opacity="0.22"></ellipse>
+                </g>
+                <g class="awakening-forest">
+                    <g class="far-trees" fill="#166534" fill-opacity="0.72">
+                        <path d="M0 590 L70 390 L140 590 Z M90 590 L170 330 L250 590 Z M230 590 L310 410 L390 590 Z M1320 590 L1410 350 L1500 590 Z M1450 590 L1540 300 L1630 590 Z"></path>
+                    </g>
+                    <g class="near-trees" fill="#052e16" fill-opacity="0.95">
+                        <path d="M0 710 L80 430 L145 540 L205 330 L270 530 L340 390 L420 710 Z"></path>
+                        <path d="M1160 710 L1225 410 L1290 540 L1360 290 L1435 535 L1510 370 L1600 710 Z"></path>
+                    </g>
+                    <g fill="url(#forest-light)" fill-opacity="0.55">
+                        <circle cx="280" cy="430" r="80"></circle><circle cx="390" cy="470" r="100"></circle><circle cx="1300" cy="420" r="95"></circle><circle cx="1430" cy="455" r="110"></circle>
+                    </g>
+                </g>
+                <g class="awakening-cosmos" fill="none" stroke-linecap="round">
+                    <ellipse cx="800" cy="420" rx="510" ry="150" stroke="#7dd3fc" stroke-opacity="0.65" stroke-width="4"></ellipse>
+                    <ellipse cx="800" cy="420" rx="340" ry="105" stroke="#fef08a" stroke-opacity="0.7" stroke-width="3" transform="rotate(-24 800 420)"></ellipse>
+                    <circle cx="800" cy="420" r="105" stroke="#ffffff" stroke-opacity="0.7" stroke-width="2"></circle>
+                </g>
+            </svg>
+            <div class="awakening-stars"></div>
+            <div class="awakening-orbit"></div>
+            <div class="awakening-content">
+                <div class="awakening-kicker">OCEAN • NATURE • COSMOS</div>
+                <div class="awakening-title">KAZIN<br>AWAKENING</div>
+                <div class="awakening-subtitle">海が目覚め、生命が輝き、星々が道をひらく</div>
+            </div>
+        </div>
+
+        <audio id="launch-audio" class="launch-audio" preload="auto" src="「起動します」.mp3"></audio>
+        <audio id="ten-second-audio" class="launch-audio" preload="auto" src="10秒カウントダウン.mp3"></audio>
+        <button id="sound-enable" class="sound-enable" type="button">音声を有効化</button>
+
         <div class="footer-note">
             ⚓ ALL PIRATES READY FOR DEPARTURE ⚓
         </div>
@@ -216,17 +1046,48 @@
     <script>
         // 目標日時：2026年12月19日 18:00:00 (JST)
         const targetDate = new Date('2026-12-19T18:00:00+09:00').getTime();
+        let awakeningActive = false;
+        let awakeningFinished = false;
+
+        function startAwakening() {
+            if (awakeningActive || awakeningFinished) return;
+            awakeningActive = true;
+            document.body.classList.add('awakening');
+            document.querySelector('.awakening-screen').setAttribute('aria-hidden', 'false');
+
+            setTimeout(() => {
+                awakeningActive = false;
+                awakeningFinished = true;
+                document.body.classList.remove('awakening');
+                document.body.classList.add('launch-ready');
+                document.querySelector('.awakening-screen').setAttribute('aria-hidden', 'true');
+            }, 15000);
+        }
 
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
 
+            document.body.classList.toggle('final-countdown', distance <= 60000 && distance > 0);
+            document.body.classList.toggle('critical-countdown', distance <= 10000 && distance > 0);
+            document.body.classList.toggle('ultra-countdown', distance <= 5000 && distance > 0);
+            document.body.classList.toggle('launch-ready', distance < 0 && !awakeningActive);
+
+            // 音声は表示上の残り10秒より約1秒早い、残り11秒で開始
+            if (!tenSecondSoundPlayed && distance <= 11000 && distance > 0) {
+                tenSecondAudio.currentTime = 0;
+                tenSecondAudio.play().catch(() => {});
+                tenSecondSoundPlayed = true;
+            }
+
             if (distance < 0) {
+                startAwakening();
                 document.getElementById('days').innerText = '00';
                 document.getElementById('hours').innerText = '00';
                 document.getElementById('minutes').innerText = '00';
                 document.getElementById('seconds').innerText = '00';
-                document.querySelector('.countdown-title').innerText = '⚡ サイトを更新せよ⚡';
+                document.querySelector('.countdown-title').innerText = '⚡ KAZIN始動 ⚡';
+                document.getElementById('kazin-link').classList.add('visible');
                 return;
             }
 
@@ -241,8 +1102,47 @@
             document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
         }
 
+        const playButton = document.getElementById('kazin-link');
+        const launchAudio = document.getElementById('launch-audio');
+        const tenSecondAudio = document.getElementById('ten-second-audio');
+        const soundEnableButton = document.getElementById('sound-enable');
+        let soundEnabled = false;
+        let tenSecondSoundPlayed = false;
+        let isLaunching = false;
+
+        function unlockAudio() {
+            if (soundEnabled) return;
+            const unlock = tenSecondAudio.play();
+            if (unlock) {
+                unlock.then(() => {
+                    tenSecondAudio.pause();
+                    tenSecondAudio.currentTime = 0;
+                    soundEnabled = true;
+                    soundEnableButton.classList.add('enabled');
+                    soundEnableButton.textContent = '音声ON';
+                }).catch(() => {});
+            }
+        }
+
+        soundEnableButton.addEventListener('click', unlockAudio);
+        document.addEventListener('pointerdown', unlockAudio, { once: true });
+
         setInterval(updateCountdown, 1000);
         updateCountdown();
+
+        playButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (isLaunching) return;
+
+            isLaunching = true;
+            document.body.classList.add('play-launching');
+            launchAudio.currentTime = 0;
+            launchAudio.play().catch(() => {});
+
+            setTimeout(() => {
+                window.location.href = playButton.href;
+            }, 2000);
+        });
     </script>
 </body>
 </html>
