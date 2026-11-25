@@ -9574,6 +9574,23 @@ if(document.readyState==='complete'||document.readyState==='interactive') setTim
     #equip-weapons > button, #equip-skins > button, #equip-crew > button, #equip-system > button {
       min-height: 64px;
     }
+    /* 強化一覧は内側のスクロール領域を作らず、画面全体をスクロールする。
+       内側の max-height に「もっと見る」が隠れてタップできない端末対策。 */
+    #screen-equip {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #screen-equip > * {
+      flex-shrink: 0;
+    }
+    #screen-equip .ui-scroll-panel {
+      max-height: none;
+      overflow: visible;
+      touch-action: auto;
+      overscroll-behavior: auto;
+    }
   }
 </style>
 <script>
