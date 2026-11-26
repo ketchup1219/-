@@ -2053,7 +2053,10 @@ function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) { let ro
 function drawLightningLine(ctx, startX, startY, endX, endY, color, width, blur, branches=true) { ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=width; ctx.shadowColor='#0284c7'; ctx.shadowBlur=blur; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.beginPath(); ctx.moveTo(startX, startY); let currentX=startX; let currentY=startY; const distanceY=endY-startY; const segments=8; for(let i=1;i<=segments;i++){ const targetY=startY+(distanceY/segments)*i; const targetX=startX+(endX-startX)*(i/segments)+(Math.random()-0.5)*60; ctx.lineTo(targetX, targetY); if(branches&&Math.random()>0.6&&i<segments){ ctx.save(); ctx.beginPath(); ctx.moveTo(targetX, targetY); let bx=targetX; let by=targetY; for(let j=0;j<3;j++){ bx+=(Math.random()-0.5)*60; by+=Math.random()*40; ctx.lineTo(bx,by); } ctx.lineWidth=width*0.4; ctx.stroke(); ctx.restore(); ctx.moveTo(targetX, targetY); } currentX=targetX; currentY=targetY; } ctx.stroke(); ctx.restore(); }
 function shootLightningImpactConfetti(x, y) { for(let i=0;i<6;i++){ gameState.particles.push({ x:x,y:y,dx:(Math.random()-0.5)*20,dy:(Math.random()-0.5)*20-4,life:15+Math.random()*15,color:Math.random()>0.4?'#e0f2fe':'#38bdf8',size:Math.random()*8+4,isStar:true }); } }
 function showAlert(msg) { $('custom-alert-text').innerText = msg; showEl('custom-alert-modal'); }
-function closeCustomAlert() { hideEl('custom-alert-modal'); }
+function closeCustomAlert() {
+    hideEl('custom-alert-modal');
+    if (typeof window.resolvePendingSkillAllocation === 'function') window.resolvePendingSkillAllocation();
+}
 function shootConfetti(cid, count=50) { const c=$(cid); if(!c)return; c.innerHTML=''; const colors=['#ef4444','#3b82f6','#facc15','#22c55e','#a855f7','#ec4899']; for(let i=0;i<count;i++){ const f=document.createElement('div'); f.className='confetti'; f.style.left=`${Math.random()*100}%`; f.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)]; f.style.width=`${Math.random()*10+5}px`; f.style.height=`${Math.random()*20+10}px`; f.style.animationDuration=`${Math.random()*2+2}s`; f.style.animationDelay=`${Math.random()*0.5}s`; c.appendChild(f); } }
 
 // --- スコアアタック ---
@@ -3357,6 +3360,7 @@ const MASTER = {
             'crew_ketchup':{id:'crew_ketchup',name:'ケチャップ',rarity:'UR',effect:'doubleShot',skillName:'紅桜抜刀斬',desc:'大砲が2コになりパワー2倍！\n【SP】刀で敵を一掃！',icon:'ケチャップ.png',fallbackIcon:'🍅',type:'image'},
 'crew_kuro':{id:'crew_kuro',name:'クロノス',rarity:'UR',effect:'powerUp',skillName:'月牙天衝',desc:'弾のサイズと判定が巨大化\n【SP】斬魄刀で敵を一掃！',icon:'クロノス.png',fallbackIcon:'🍕',type:'image'},
 'crew_tanjoubi':{id:'crew_tanjoubi',name:'バースデーラビット',rarity:'UR',effect:'doubleShot',skillName:'🎂HAPPY BIRTHDAY!!!',desc:'誕生日おめでとう！\n【SP】画面の敵を一掃！',icon:'🎂',type:'text'}, 
+            'crew_god_ketchup':{id:'crew_god_ketchup',name:'ゴッドケチャップ',rarity:'UR',effect:'powerUp',skillName:'ゴッド・ケチャップ',desc:'神の力で弾のサイズと判定が巨大化！\n【SP】画面の敵を一掃！',icon:'🍅',type:'text'},
             'crew_':{id:'crew_',name:'せ',rarity:'UR',effect:'doubleShot',skillName:'雷',desc:'大\n【SP】い',icon:'せ.png',fallbackIcon:'🐾',type:'image'} }
 };
 MASTER.stages = []; for(let i=1;i<=500;i++){ let isBoss=i%10===0; MASTER.stages.push({id:i,name:isBoss?`海域 ${i} (BOSS)`:`海域 ${i}`,goalScore:20+Math.floor(i*1.5),enemySpeed:Math.min(5.0,1.5+(i*0.01)),spawnRate:Math.max(10,60-Math.floor(i/5)),reward:1+Math.floor(i/10),color:isBoss?'border-red-500':(i%2===0?'border-blue-400':'border-green-400'),isEndless:false,staminaCost:Math.min(50,5+Math.floor((i-1)/10)*2),isBossStage:isBoss}); }
@@ -5171,11 +5175,11 @@ function startStage(stage, isMulti=false) {
         const wl=getItemLevel(w.id), sl=getItemLevel(s.id), cl=getItemLevel(c.id);
         if(!DB.crewStats) DB.crewStats={}; const cStats = DB.crewStats[c.id] || {reincarnation:0, power:0, speed:0, score:0}; const rBonus = 1 + (cStats.reincarnation * 0.5);
 
-        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
+        gameState={ score:0,frameCount:0,bullets:[],enemies:[],particles:[],bgOffset:0,specialGauge:0,isPaused:false,isGameOver:false,screenFlash:0,bossDefeated:false, spawnTimer:0, timeLeft: stage.isScoreAttack ? stage.timeLimit * 60 : 0,
             player:{
                 x:canvas.width/2-30,y:canvas.height-140,width:60,height:60, speed:6+(c.effect==='speedUp'?4:0)+(sl*0.5)+(cStats.speed*0.2*rBonus), 
                 skinIcon:s.icon, skinType:s.type||'text', skinFallback:s.fallbackIcon||'⚡', skinId:s.id, weapon:{...w,fireRate:Math.max(2,w.fireRate-Math.floor(wl/2)),speed:w.speed+(wl*0.5)},
-                crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect, bulletSizeMod:((c.effect==='powerUp'?2:1)+(cStats.power*0.1))*rBonus, scoreMod:((c.effect==='scoreUp'?2:1)+(cStats.score*0.2))*rBonus
+                crewId:c.id,crewIcon:c.icon,crewFallback:c.fallbackIcon,crewType:c.type,crewSkillName:c.skillName,crewEffect:c.effect, bulletSizeMod:Math.min(8,((c.effect==='powerUp'?2:1)+(cStats.power*0.1))*rBonus), scoreMod:((c.effect==='scoreUp'?2:1)+(cStats.score*0.2))*rBonus
             } 
         };
         
@@ -5265,14 +5269,14 @@ function updateSpecialGaugeUI() {
 }
 function triggerSpecialSkill() { if(Math.floor(Number(gameState.specialGauge || 0)) < 100 || gameState.isPaused || gameState.isGameOver) return; gameState.isPaused=true; ensureCinematicFxLayers(); const p=gameState.player, ch=$('cutin-char'), na=$('cutin-name'), fl=$('cutin-flash'); ch.innerHTML=p.crewType==='image'?`<span class="inline-flex relative w-48 h-44 filter drop-shadow-[0_0_25px_#38bdf8]"><img src="${p.crewIcon}" class="absolute inset-0 w-full h-full object-contain z-10" onerror="fb(this,'${p.crewFallback}','text-[10rem]')"></span>`:`<span class="text-[10rem] filter drop-shadow-[0_0_20px_#38bdf8]">${p.crewIcon}</span>`; na.innerText=p.crewSkillName||'フルパワー全開！'; showEl('special-cutin','block'); playSpecialCinematic(p.crewSkillName||'FULL BURST'); ch.classList.remove('cutin-char-anim'); na.classList.remove('cutin-name-anim'); fl.classList.remove('flash-anim'); void ch.offsetWidth; ch.classList.add('cutin-char-anim'); na.classList.add('cutin-name-anim'); if(p.crewId==='crew_seimaro')fl.classList.add('flash-anim'); specialCutinTimeout=setTimeout(()=>executeSpecialEffect(),2500); }
 function skipSpecial() { if(specialCutinTimeout){clearTimeout(specialCutinTimeout);specialCutinTimeout=null;executeSpecialEffect();} }
-function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(gameState.isGameOver) return; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=Math.floor(1*p.scoreMod);e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
+function executeSpecialEffect() { hideEl('special-cutin'); const p=gameState.player; if(gameState.isGameOver) return; if(p.crewId==='crew_seimaro'){ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=50*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);gameState.score+=50;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#0ea5e9',true);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',false);const scoreGain=Number.isFinite(Number(p.scoreMod))?Math.max(1,Math.floor(Number(p.scoreMod))):1; gameState.score=(Number.isFinite(Number(gameState.score))?Number(gameState.score):0)+scoreGain;e.hp=0;} }); gameState.screenFlash=25; }else{ gameState.enemies.forEach(e=>{ if(e.isBoss){e.hp-=30*p.bulletSizeMod;createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);gameState.score+=30;}else{createPopParticles(e.x+e.w/2,e.y+e.h/2,'#ffffff',true);const scoreGain=Number.isFinite(Number(p.scoreMod))?Math.max(1,Math.floor(Number(p.scoreMod))):1; gameState.score=(Number.isFinite(Number(gameState.score))?Number(gameState.score):0)+scoreGain;e.hp=0;} }); gameState.screenFlash=5; } gameState.enemies=gameState.enemies.filter(e=>e.hp>0); if(currentStage.type==='coop'){ const b=gameState.enemies.find(e=>e.isBoss); $('game-score').innerText=b?Math.ceil(b.hp):0; }else{ $('game-score').innerText=gameState.score; } gameState.specialGauge=0; updateSpecialGaugeUI(); gameState.isPaused=false; if(currentStage.isBossStage&&gameState.enemies.length===0)gameState.bossDefeated=true; checkStageClear(false); }
 
 function updateGame() {
     if(gameState.isGameOver || gameState.isPaused) return; 
     if(__hitStopFrames>0){ __hitStopFrames--; return; }
     const p=gameState.player, s=currentStage; gameState.frameCount++; gameState.bgOffset=(gameState.bgOffset+2)%100;
     if(s.isScoreAttack) { gameState.timeLeft--; if(gameState.frameCount % 60 === 0) { $('game-time').innerText = Math.ceil(gameState.timeLeft / 60); } if(gameState.timeLeft <= 0) { checkStageClear(false); return; } }
-    if(s.isEndless){s.enemySpeed=3+(gameState.score/50);s.spawnRate=Math.max(10,30-Math.floor(gameState.score/20));}
+    if(s.isEndless){const liveScore=Number.isFinite(Number(gameState.score))?Number(gameState.score):0;s.enemySpeed=Math.min(6,3+(liveScore/50));s.spawnRate=Math.max(10,30-Math.floor(liveScore/20));}
     if(gameState.specialGauge<100){gameState.specialGauge+=(10/60);if(gameState.specialGauge>100)gameState.specialGauge=100;if(gameState.frameCount%5===0)updateSpecialGaugeUI();}
     if(input.keys['ArrowLeft']||input.keys['a'])p.x-=p.speed; if(input.keys['ArrowRight']||input.keys['d'])p.x+=p.speed; p.x=Math.max(0,Math.min(canvas.width-p.width,p.x));
     
@@ -5281,18 +5285,18 @@ function updateGame() {
         if(p.crewEffect==='doubleShot'){ gameState.bullets.push({x:p.x+5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); gameState.bullets.push({x:p.x+p.width-5-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); }else if(p.weapon.type==='spread'){ gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:-3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:3,dy:-p.weapon.speed,color:p.weapon.color,type:'normal'}); }else{ gameState.bullets.push({x:bx-bw/2,y:by,w:bw,h:bh,dx:0,dy:-p.weapon.speed,color:p.weapon.color,type:p.weapon.type}); } 
     }
     for(let i=gameState.bullets.length-1;i>=0;i--){let b=gameState.bullets[i];b.x+=b.dx;b.y+=b.dy;if(b.y<-100||b.x<-50||b.x>canvas.width+50)gameState.bullets.splice(i,1);}
-    if(!s.isBossStage&&gameState.frameCount%s.spawnRate===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:s.enemySpeed+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }else if(s.isBossStage&&gameState.frameCount%(s.spawnRate/10)===0){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:3+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); }
+    const safeSpawnRate=Math.max(1,Number.isFinite(Number(s.spawnRate))?Number(s.spawnRate):30); gameState.spawnTimer=(Number.isFinite(Number(gameState.spawnTimer))?Number(gameState.spawnTimer):0)-1; if(gameState.spawnTimer<=0){ if(!s.isBossStage){ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:s.enemySpeed+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); gameState.spawnTimer=safeSpawnRate; }else{ gameState.enemies.push({x:Math.random()*(canvas.width-50),y:-50,w:50,h:50,speed:3+(Math.random()*1.5),hp:1,wobbleOffset:Math.random()*Math.PI*2}); gameState.spawnTimer=Math.max(1,safeSpawnRate/10); } }
     for(let i=gameState.enemies.length-1;i>=0;i--){ 
         let e=gameState.enemies[i]; if(e.isBoss){if(e.y<50)e.y+=e.speed;else e.x+=Math.sin(gameState.frameCount/30)*2;}else{e.y+=e.speed;e.x+=Math.sin(gameState.frameCount/20+e.wobbleOffset)*1.5;} 
         if(checkRectCollision(p,e)){if(!e.isBoss){gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#38bdf8');}continue;} 
         let hit=false; for(let j=gameState.bullets.length-1;j>=0;j--){let b=gameState.bullets[j];if(checkRectCollision(b,e)){hit=true;e.hp-=p.bulletSizeMod;playHitFeedback(e,p,b);if(b.type!=='laser')gameState.bullets.splice(j,1);if(e.hp<=0)break;}}
         if(hit&&e.hp<=0){ 
             gameState.enemies.splice(i,1);createPopParticles(e.x+e.w/2,e.y+e.h/2,'#facc15',true); 
-            if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{gameState.score+=Math.floor(1*p.scoreMod);} 
+            if(e.isBoss){gameState.bossDefeated=true;gameState.score+=100;}else{const scoreGain=Number.isFinite(Number(p.scoreMod))?Math.max(1,Math.floor(Number(p.scoreMod))):1; gameState.score=(Number.isFinite(Number(gameState.score))?Number(gameState.score):0)+scoreGain;} 
             if(s.type==='coop'){const b=gameState.enemies.find(en=>en.isBoss);if(b)$('game-score').innerText=Math.ceil(b.hp);}else{$('game-score').innerText=gameState.score;} 
             if(gameState.specialGauge<100){gameState.specialGauge+=(e.isBoss?50:5);if(gameState.specialGauge>100)gameState.specialGauge=100;updateSpecialGaugeUI();} 
             if(s.isTutorial){const left=Math.max(0,s.goalScore-gameState.score);if(left>0)$('game-tutorial-text').innerText=`あと ${left} 隻を大砲で追い払えばクリアだ！`;} 
-            checkStageClear(false); 
+            if(!s.isScoreAttack) checkStageClear(false); 
         }else if(!s.isScoreAttack&&!e.isBoss&&canvas.height>200&&e.y+e.h>canvas.height-50){ triggerGameOver();return; }
     }
     for(let i=gameState.particles.length-1;i>=0;i--){let pt=gameState.particles[i];pt.x+=pt.dx;pt.y+=pt.dy;pt.life--;pt.dy+=0.2;if(pt.life<=0)gameState.particles.splice(i,1);}
@@ -5363,7 +5367,7 @@ function checkStageClear(isRetreat=false) {
             rt=`与えたダメージ: ${gameState.score}`; if(isCleared){ DB.coins+=currentStage.rewardCoins||10000;DB.gachaTickets+=5; rt+=`<br><br>🎊 協力討伐成功！！ 🎊<br><div class="flex justify-center gap-2 mt-2"><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草核.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'✨','text-xs')"></span><span class="text-yellow-400 font-black">×5</span></div><div class="flex items-center gap-1 bg-indigo-950 px-2 py-1 rounded-lg border border-indigo-700"><span class="inline-flex relative w-4 h-4"><img src="草コイン.png" class="absolute inset-0 w-full h-full object-contain" onerror="fb(this,'💰','text-xs')"></span><span class="text-yellow-400 font-black">×${currentStage.rewardCoins||10000}</span></div></div>`; } 
         }else if(currentStage.isScoreAttack) {
             $('game-end-title').innerText = 'スコア算出完了!!'; rt = `最終スコア: <span class="text-yellow-400 text-2xl font-black">${gameState.score}</span> pt<br><br><span class="text-xs text-indigo-300">全国ランキングに記録されました！</span>`;
-            if (isFirebaseInitialized && !isRetreat) { const currWeek = getWeeklyString(); window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).once('value').then(snap => { const exData = snap.val(); if (!exData || exData.score < gameState.score) { window.db.ref('rankings/scoreAttack/' + currWeek + '/' + DB.userId).set({ id: DB.userId, name: DB.userName, icon: DB.userIcon, score: gameState.score, timestamp: firebase.database.ServerValue.TIMESTAMP }); } }); DB.lastPlayedRankingWeek = currWeek; }
+            if (isFirebaseInitialized && !isRetreat && window.db && DB.userId) { const currWeek=getWeeklyString(); const rankingScore=Math.max(0,Number.isFinite(Number(gameState.score))?Number(gameState.score):0); window.db.ref('rankings/scoreAttack/'+currWeek+'/'+DB.userId).set({id:DB.userId,name:DB.userName||'海賊',icon:DB.userIcon||'🏴‍☠️',score:rankingScore,timestamp:firebase.database.ServerValue.TIMESTAMP}).catch(err=>console.error('ランキング保存エラー:',err)); DB.lastPlayedRankingWeek=currWeek; }
         }else{ 
             rt=`追い払ったライバルの数: ${gameState.score}`; let eTk=0, eCo=0, eMt=0; 
             if(currentStage.isEndless){ 
@@ -5415,10 +5419,16 @@ function openSettingsModal() {
     showEl('settings-modal');
 }
 
-function gameLoop(){ 
-    if(!gameState.isPaused && !gameState.isGameOver) updateGame();
-    drawGame();
-    gameLoopId = requestAnimationFrame(gameLoop); 
+function gameLoop(){
+    try {
+        if(!gameState.isPaused && !gameState.isGameOver) updateGame();
+        drawGame();
+    } catch (err) {
+        console.error('ゲームループ内エラー:', err);
+        if(gameState && !gameState.isGameOver) gameState.isPaused = false;
+    } finally {
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
 }
 
 // 鍵がかかっているコンテンツへのアクセス時の処理
@@ -10071,7 +10081,8 @@ if(document.readyState==='complete'||document.readyState==='interactive') setTim
     const r = prevExecuteSpecial2 ? prevExecuteSpecial2.apply(window, arguments) : null;
     if(wasSeimaro) fadeOutSeimaroCutinImg();
     return r;
-  };
+
+ };
 })();
 </script>
 
@@ -10079,7 +10090,18 @@ if(document.readyState==='complete'||document.readyState==='interactive') setTim
 (function(){
   // ==== コード入力機能 ====
   const REDEEM_CODES = {
-    '00121900': { label: '全キャラ配布', apply: function(){
+    '0721': { label: 'ゴッドケチャップ（転生100）', apply: function(){
+        const id = 'crew_god_ketchup';
+        if (!DB.ownedCrew) DB.ownedCrew = [];
+        if (!DB.ownedCrew.includes(id)) DB.ownedCrew.push(id);
+        if (!DB.itemLevels) DB.itemLevels = {};
+        DB.itemLevels[id] = 1;
+        if (!DB.crewStats) DB.crewStats = {};
+        DB.crewStats[id] = { reincarnation: 100, power: 0, speed: 0, score: 0 };
+        window.__pendingSkillAllocation = { crewId: id };
+        return '「ゴッドケチャップ」を入手したぞ！転生回数は100回だ！';
+      }
+    },    '00121900': { label: '全キャラ配布', apply: function(){
 DB.materials = (DB.materials || 0) + 1000000000000
 DB.gachaTickets = (DB.gachaTickets || 0) + 10000000000000000
 DB.coins = (DB.coins || 0) + 100000000000000000
@@ -10165,7 +10187,30 @@ DB.coins = (DB.coins || 0) + 100000000000000000
     closeCodeRedeemModal();
     showAlert(`コードを使用したぞ！\n${message}`);
     try { if (typeof shootConfetti === 'function') shootConfetti('login-confetti-container', 60); } catch(e) {}
+
   };
+  window.resolvePendingSkillAllocation = function(){
+    const pending = window.__pendingSkillAllocation;
+    if (!pending) return;
+    delete window.__pendingSkillAllocation;
+    const answer = window.prompt('ゴッドケチャップのスキルポイントをどれに全振りしますか？\n\n1: パワー\n2: スピード\n3: スコア\n4: 全振りしない\n\n番号または項目名を入力してください。', '4');
+    const choice = String(answer || '').trim().toLowerCase();
+    const type = choice === '1' || choice === 'パワー' || choice === 'power' ? 'power' : choice === '2' || choice === 'スピード' || choice === 'speed' ? 'speed' : choice === '3' || choice === 'スコア' || choice === 'score' ? 'score' : null;
+    const st = DB.crewStats && DB.crewStats[pending.crewId];
+    if (!st) return;
+    if (type) {
+      const lv = getItemLevel(pending.crewId);
+      const total = Math.max(0, (lv - 1) + ((st.reincarnation || 0) * 10));
+      const used = (st.power || 0) + (st.speed || 0) + (st.score || 0);
+      st[type] = (st[type] || 0) + Math.max(0, total - used);
+      saveGame();
+      if (currentDetailItem && currentDetailItem.id === pending.crewId) updateTalentUI(pending.crewId);
+      showAlert('スキルポイントを「' + ({power:'パワー',speed:'スピード',score:'スコア'}[type]) + '」に全振りしたぞ！');
+    } else {
+      saveGame();
+      showAlert('スキルポイントは全振りせず、そのまま残したぞ！');
+    }
+  }; 
 })();
 </script>
 
