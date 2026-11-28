@@ -233,6 +233,8 @@
         @keyframes crownFloat { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-4px) rotate(3deg); } }
 
         .rare-3 { background: linear-gradient(135deg, #f59e0b, #dc2626); color: white; border-color: #fcd34d; box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);}
+        .rare-4 { background: linear-gradient(135deg, #22d3ee, #2563eb, #7c3aed); color: white; border-color: #67e8f9; box-shadow: 0 0 16px rgba(34, 211, 238, 0.7);}
+        .rare-5 { background: linear-gradient(135deg, #f43f5e, #f59e0b, #fde047, #a855f7); color: white; border-color: #fef08a; box-shadow: 0 0 22px rgba(251, 191, 36, 0.9), 0 0 38px rgba(236, 72, 153, 0.55);}
         .rare-2 { background: linear-gradient(135deg, #38bdf8, #1e3a8a); color: white; border-color: #93c5fd; box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);}
         .rare-1 { background: linear-gradient(135deg, #64748b, #1e293b); color: #e2e8f0; border-color: #94a3b8; }
 
@@ -1311,6 +1313,46 @@
 
         const eqTypeNames = { weapon:"武器", sub:"サブ(盾/二刀)", head:"頭防具", bodyUp:"体上防具", bodyDown:"体下防具", accessory:"アクセサリー", pillow:"こころ" };
         const eqIcons = { weapon:"🗡️", sub:"🛡️", head:"🪖", bodyUp:"👕", bodyDown:"👖", accessory:"💍", pillow:"👑" };
+        const WEAPON_NAMES_BY_RARITY = {
+            1: ["冒険者のナイフ", "ひのきのぼう", "石の剣", "銅の剣"],
+            2: ["鉄の剣", "鋼の剣", "青銅の剣"],
+            3: ["プラチナの剣", "銀の剣", "金の剣"],
+            4: ["ダイヤの剣", "エメラルドの剣", "ルビーの剣", "サファイアの剣", "火の剣", "水の剣", "電の剣", "風の剣", "草の剣", "土の剣"],
+            5: ["炎の剣", "氷の剣", "雷の剣", "嵐の剣", "花の剣", "岩の剣"]
+        };
+        const ALL_WEAPON_NAMES = new Set(Object.values(WEAPON_NAMES_BY_RARITY).flat());
+        const HEAD_NAMES_BY_RARITY = {
+            1: ["冒険者の帽子", "木の葉の兜", "皮の兜", "銅の兜"],
+            2: ["青銅の兜", "鉄の兜", "鋼の兜"],
+            3: ["銀の兜", "金の兜", "プラチナの兜"],
+            4: ["ダイヤの兜", "エメラルドの兜", "ルビーの兜", "サファイアの兜", "火の兜", "水の兜", "電の兜", "風の兜", "草の兜", "土の兜"],
+            5: ["炎の兜", "氷の兜", "雷の兜", "嵐の兜", "花の兜", "岩の兜"]
+        };
+        const ALL_HEAD_NAMES = new Set(Object.values(HEAD_NAMES_BY_RARITY).flat());
+        const BODY_UP_NAMES_BY_RARITY = {
+            1: ["冒険者の服上", "木の葉の鎧上", "皮の鎧上", "銅の鎧上"],
+            2: ["青銅の鎧上", "鉄の鎧上", "鋼の鎧上"],
+            3: ["銀の鎧上", "金の鎧上", "プラチナの鎧上"],
+            4: ["ダイヤの鎧上", "エメラルドの鎧上", "ルビーの鎧上", "サファイアの鎧上", "火の鎧上", "水の鎧上", "電の鎧上", "風の鎧上", "草の鎧上", "土の鎧上"],
+            5: ["炎の鎧上", "氷の鎧上", "雷の鎧上", "嵐の鎧上", "花の鎧上", "岩の鎧上"]
+        };
+        const ALL_BODY_UP_NAMES = new Set(Object.values(BODY_UP_NAMES_BY_RARITY).flat());
+        const BODY_DOWN_NAMES_BY_RARITY = {
+            1: ["冒険者の服下", "木の葉の鎧下", "皮の鎧下", "銅の鎧下"],
+            2: ["青銅の鎧下", "鉄の鎧下", "鋼の鎧下"],
+            3: ["銀の鎧下", "金の鎧下", "プラチナの鎧下"],
+            4: ["ダイヤの鎧下", "エメラルドの鎧下", "ルビーの鎧下", "サファイアの鎧下", "火の鎧下", "水の鎧下", "電の鎧下", "風の鎧下", "草の鎧下", "土の鎧下"],
+            5: ["炎の鎧下", "氷の鎧下", "雷の鎧下", "嵐の鎧下", "花の鎧下", "岩の鎧下"]
+        };
+        const ALL_BODY_DOWN_NAMES = new Set(Object.values(BODY_DOWN_NAMES_BY_RARITY).flat());
+        const SHIELD_NAMES_BY_RARITY = {
+            1: ["板の盾", "木の盾", "銅の盾"],
+            2: ["青銅の盾", "鉄の盾", "鋼の盾"],
+            3: ["銀の盾", "金の盾", "プラチナの盾"],
+            4: ["ダイヤの盾", "エメラルドの盾", "ルビーの盾", "サファイアの盾", "火の盾", "水の盾", "電の盾", "風の盾", "草の盾", "土の盾"],
+            5: ["炎の盾", "氷の盾", "雷の盾", "嵐の盾", "花の盾", "岩の盾"]
+        };
+        const ALL_SHIELD_NAMES = new Set(Object.values(SHIELD_NAMES_BY_RARITY).flat());
 
         // 武器/盾の名前からふさわしい絵文字を推定する (装備と絵文字を一致させるため)
         const WEAPON_ICON_KEYWORDS = [
@@ -1328,7 +1370,22 @@
 
         function getItemIcon(item) {
             if (!item) return '⚔️';
-            if (item.type === 'weapon' || item.type === 'sub') {
+            if (item.type === 'weapon') {
+                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='⚔️'">`;
+            }
+            if (item.type === 'head') {
+                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🪖'">`;
+            }
+            if (item.type === 'bodyUp') {
+                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👕'">`;
+            }
+            if (item.type === 'bodyDown') {
+                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👖'">`;
+            }
+            if (item.type === 'sub' && ALL_SHIELD_NAMES.has(item.name)) {
+                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🛡️'">`;
+            }
+            if (item.type === 'sub') {
                 for (const [kw, icon] of WEAPON_ICON_KEYWORDS) {
                     if (item.name.includes(kw)) return icon;
                 }
@@ -1337,7 +1394,7 @@
         }
 
         let inventory = [
-            { id: 1, name: "ひのきの棒", type: "weapon", rarity: 1, level: 1, maxLevel: 30, hp: 0, def: 0, atk: 5, enhanceCount: 0 },
+            { id: 1, name: "冒険者のナイフ", type: "weapon", rarity: 1, level: 1, maxLevel: 30, hp: 0, def: 0, atk: 8, enhanceCount: 0 },
             { id: 2, name: "冒険家の盾", type: "sub", rarity: 1, level: 1, maxLevel: 30, hp: 5, def: 3, atk: 0, enhanceCount: 0 },
             { id: 3, name: "冒険家の帽子", type: "head", rarity: 1, level: 1, maxLevel: 30, hp: 5, def: 2, atk: 0, enhanceCount: 0 },
             { id: 4, name: "冒険家の服", type: "bodyUp", rarity: 1, level: 1, maxLevel: 30, hp: 10, def: 4, atk: 0, enhanceCount: 0 },
@@ -1381,7 +1438,7 @@
             item.id = id;
             item.name = String(item.name || `装備 ${index + 1}`);
             item.type = raw.type;
-            item.rarity = Math.max(1, Math.min(3, Math.floor(equipmentNumber(item.rarity, 1))));
+            item.rarity = Math.max(1, Math.min(5, Math.floor(equipmentNumber(item.rarity, 1))));
             item.enhanceCount = Math.max(0, Math.floor(equipmentNumber(item.enhanceCount, 0)));
             item.level = Math.max(1, Math.floor(equipmentNumber(item.level, 1)));
             item.maxLevel = Math.max(item.level, Math.floor(equipmentNumber(item.maxLevel, item.rarity * 30)));
@@ -1410,7 +1467,40 @@
                     }
                 });
             });
+            const hadLegacyWeapon = (Array.isArray(inventory) ? inventory : []).some(item => item && item.type === 'weapon' && !ALL_WEAPON_NAMES.has(item.name))
+                || legacyEquippedItems.some(item => item && item.type === 'weapon' && !ALL_WEAPON_NAMES.has(item.name));
+            const hadLegacyHead = (Array.isArray(inventory) ? inventory : []).some(item => item && item.type === 'head' && !ALL_HEAD_NAMES.has(item.name))
+                || legacyEquippedItems.some(item => item && item.type === 'head' && !ALL_HEAD_NAMES.has(item.name));
+            const hadLegacyBodyUp = (Array.isArray(inventory) ? inventory : []).some(item => item && item.type === 'bodyUp' && !ALL_BODY_UP_NAMES.has(item.name))
+                || legacyEquippedItems.some(item => item && item.type === 'bodyUp' && !ALL_BODY_UP_NAMES.has(item.name));
+            const hadLegacyBodyDown = (Array.isArray(inventory) ? inventory : []).some(item => item && item.type === 'bodyDown' && !ALL_BODY_DOWN_NAMES.has(item.name))
+                || legacyEquippedItems.some(item => item && item.type === 'bodyDown' && !ALL_BODY_DOWN_NAMES.has(item.name));
+            const hadLegacyShield = (Array.isArray(inventory) ? inventory : []).some(item => item && item.type === 'sub' && !ALL_SHIELD_NAMES.has(item.name))
+                || legacyEquippedItems.some(item => item && item.type === 'sub' && !ALL_SHIELD_NAMES.has(item.name));
             if (legacyEquippedItems.length) inventory = (Array.isArray(inventory) ? inventory : []).concat(legacyEquippedItems);
+            // 旧武器・旧頭防具・旧体上防具は全て取り除き、新しいカタログに含まれるものだけを残す。
+            inventory = (Array.isArray(inventory) ? inventory : []).filter(item => item && (
+                (item.type !== 'weapon' || ALL_WEAPON_NAMES.has(item.name)) &&
+                (item.type !== 'head' || ALL_HEAD_NAMES.has(item.name)) &&
+                (item.type !== 'bodyUp' || ALL_BODY_UP_NAMES.has(item.name)) &&
+                (item.type !== 'bodyDown' || ALL_BODY_DOWN_NAMES.has(item.name)) &&
+                (item.type !== 'sub' || ALL_SHIELD_NAMES.has(item.name))
+            ));
+            if (!inventory.some(item => item && item.type === 'weapon')) {
+                inventory.unshift({ id: createEquipmentId('starter'), name: '冒険者のナイフ', type: 'weapon', rarity: 1, level: 1, maxLevel: 30, hp: 0, def: 0, atk: 8, enhanceCount: 0 });
+            }
+            if (!inventory.some(item => item && item.type === 'head')) {
+                inventory.unshift({ id: createEquipmentId('starter-head'), name: '冒険者の帽子', type: 'head', rarity: 1, level: 1, maxLevel: 30, hp: 5, def: 2, atk: 0, enhanceCount: 0 });
+            }
+            if (!inventory.some(item => item && item.type === 'bodyUp')) {
+                inventory.unshift({ id: createEquipmentId('starter-body-up'), name: '冒険者の服上', type: 'bodyUp', rarity: 1, level: 1, maxLevel: 30, hp: 10, def: 4, atk: 0, enhanceCount: 0 });
+            }
+            if (!inventory.some(item => item && item.type === 'bodyDown')) {
+                inventory.unshift({ id: createEquipmentId('starter-body-down'), name: '冒険者の服下', type: 'bodyDown', rarity: 1, level: 1, maxLevel: 30, hp: 8, def: 3, atk: 0, enhanceCount: 0 });
+            }
+            if (!inventory.some(item => item && item.type === 'sub')) {
+                inventory.unshift({ id: createEquipmentId('starter-shield'), name: '板の盾', type: 'sub', rarity: 1, level: 1, maxLevel: 30, hp: 4, def: 2, atk: 0, enhanceCount: 0 });
+            }
             const usedIds = new Set();
             inventory = (Array.isArray(inventory) ? inventory : [])
                 .map((item, index) => normalizeEquipmentItem(item, index, usedIds))
@@ -1431,6 +1521,26 @@
                     equipped: normalizedEquipped
                 };
             });
+            if (hadLegacyWeapon && state.charEquip.player.equipped.weapon === null) {
+                const starter = inventory.find(item => item.type === 'weapon' && item.name === '冒険者のナイフ');
+                if (starter) state.charEquip.player.equipped.weapon = starter.id;
+            }
+            if (hadLegacyHead && state.charEquip.player.equipped.head === null) {
+                const starterHead = inventory.find(item => item.type === 'head' && item.name === '冒険者の帽子');
+                if (starterHead) state.charEquip.player.equipped.head = starterHead.id;
+            }
+            if (hadLegacyBodyUp && state.charEquip.player.equipped.bodyUp === null) {
+                const starterBodyUp = inventory.find(item => item.type === 'bodyUp' && item.name === '冒険者の服上');
+                if (starterBodyUp) state.charEquip.player.equipped.bodyUp = starterBodyUp.id;
+            }
+            if (hadLegacyBodyDown && state.charEquip.player.equipped.bodyDown === null) {
+                const starterBodyDown = inventory.find(item => item.type === 'bodyDown' && item.name === '冒険者の服下');
+                if (starterBodyDown) state.charEquip.player.equipped.bodyDown = starterBodyDown.id;
+            }
+            if (hadLegacyShield && state.charEquip.player.equipped.sub === null) {
+                const starterShield = inventory.find(item => item.type === 'sub' && item.name === '板の盾');
+                if (starterShield) state.charEquip.player.equipped.sub = starterShield.id;
+            }
         }
 
         const SKILL_DB = {
@@ -2232,6 +2342,26 @@
         };
 
         function pickItemName(type, rarity, fallbackPool) {
+            if (type === 'weapon' && WEAPON_NAMES_BY_RARITY[rarity]) {
+                const weaponPool = WEAPON_NAMES_BY_RARITY[rarity];
+                return weaponPool[Math.floor(Math.random() * weaponPool.length)];
+            }
+            if (type === 'head' && HEAD_NAMES_BY_RARITY[rarity]) {
+                const headPool = HEAD_NAMES_BY_RARITY[rarity];
+                return headPool[Math.floor(Math.random() * headPool.length)];
+            }
+            if (type === 'bodyUp' && BODY_UP_NAMES_BY_RARITY[rarity]) {
+                const bodyUpPool = BODY_UP_NAMES_BY_RARITY[rarity];
+                return bodyUpPool[Math.floor(Math.random() * bodyUpPool.length)];
+            }
+            if (type === 'bodyDown' && BODY_DOWN_NAMES_BY_RARITY[rarity]) {
+                const bodyDownPool = BODY_DOWN_NAMES_BY_RARITY[rarity];
+                return bodyDownPool[Math.floor(Math.random() * bodyDownPool.length)];
+            }
+            if (type === 'sub' && SHIELD_NAMES_BY_RARITY[rarity]) {
+                const shieldPool = SHIELD_NAMES_BY_RARITY[rarity];
+                return shieldPool[Math.floor(Math.random() * shieldPool.length)];
+            }
             const pool = ITEM_NAME_POOL[type] && ITEM_NAME_POOL[type][rarity];
             if (pool && pool.length) return pool[Math.floor(Math.random() * pool.length)];
             return fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
@@ -3617,7 +3747,7 @@
                 // 装備中のアイテムに合わせてスロットのアイコンも切り替える(こころ枠は演出固定のため対象外)
                 const iconEl = document.getElementById(`eq-top-icon-${t}`);
                 if (iconEl) {
-                    iconEl.innerText = item ? getItemIcon(item) : eqIcons[t];
+                    iconEl.innerHTML = item ? getItemIcon(item) : eqIcons[t];
                 }
                 if (item && item.effect) effects.push(`${item.name}: ${item.effect}`);
             });
@@ -3802,10 +3932,11 @@
 
             const pulledItems = [];
             const names = ["アルテミスの弓", "聖騎士の鎧", "幻影の兜", "精霊の指輪", "魔王のこころ", "ヴァルキリーランス", "ドラゴンスレイヤー"];
-            const types = ["weapon", "head", "bodyUp", "bodyDown", "accessory", "pillow"];
+            const types = ["weapon", "sub", "head", "bodyUp", "bodyDown", "accessory", "pillow"];
 
             for (let i = 0; i < count; i++) {
-                const randRarity = Math.random() < 0.15 ? 3 : (Math.random() < 0.5 ? 2 : 1);
+                const roll = Math.random();
+                const randRarity = roll < 0.03 ? 5 : (roll < 0.10 ? 4 : (roll < 0.28 ? 3 : (roll < 0.60 ? 2 : 1)));
                 const randType = types[Math.floor(Math.random() * types.length)];
                 const newItem = {
                     id: createEquipmentId(i),
@@ -4358,7 +4489,7 @@
             const isSSR = it.rarity >= 3;
             const card = gachaEl('gacha-item');
             gachaEl('gacha-rarity').innerText = '★'.repeat(it.rarity);
-            gachaEl('gacha-icon').innerText = getItemIcon(it);
+            gachaEl('gacha-icon').innerHTML = getItemIcon(it);
             gachaEl('gacha-name').innerText = it.name;
             card.classList.toggle('gacha-item-ssr', isSSR);
             gachaEl('gacha-ssr-label').classList.toggle('hidden', !isSSR);
