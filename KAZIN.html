@@ -360,15 +360,24 @@
         @keyframes storyBoxIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .story-text-fade { animation: storyTextFade 0.25s ease-out; }
         @keyframes storyTextFade { from { opacity: 0; } to { opacity: 1; } }
-        .zukan-icon { width: 3.2rem; height: 3.2rem; display: flex; align-items: center; justify-content: center; }
+        .zukan-icon { width: 4.5rem; height: 4.5rem; display: flex; align-items: center; justify-content: center; }
         .zukan-icon img { width: 100%; height: 100%; object-fit: contain; }
         .zukan-icon.silhouette { filter: grayscale(1) brightness(0) opacity(0.58); }
-        .zukan-card { min-height: 7.2rem; transition: transform 0.12s ease, border-color 0.15s ease, filter 0.15s ease; }
+        .zukan-card { min-height: 8.5rem; transition: transform 0.12s ease, border-color 0.15s ease, filter 0.15s ease; }
         .zukan-card:active { transform: scale(0.94); filter: brightness(1.18); }
         .zukan-tab.active { background: rgba(14, 116, 144, 0.65); color: #cffafe; border-color: rgba(34, 211, 238, 0.65); }
         .zukan-music-playing { border-color: rgba(250, 204, 21, 0.8) !important; box-shadow: 0 0 16px rgba(250, 204, 21, 0.35); }
         #content-zukan { height: 100%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; touch-action: pan-y; }
         #zukan-content { padding-bottom: 2rem; min-height: max-content; }
+        /* 装備アイコンは、ガチャ結果・装備一覧・工房で見やすく大きく表示する */
+        #gacha-icon .equip-generated-icon { width: 6rem; height: 6rem; }
+        #gacha-icon { font-size: 5rem; line-height: 1; }
+        #gacha-multi-grid .equip-generated-icon { width: 3.75rem; height: 3.75rem; }
+        #gacha-multi-grid .gacha-list-item > .text-2xl { font-size: 3.5rem; line-height: 1; }
+        #equip-list-container .equip-generated-icon { width: 3.5rem; height: 3.5rem; }
+        #equip-list-container > div:not(button) > div:first-child > span:first-child { font-size: 2.5rem; line-height: 1; }
+        #equip-view-top [id^="eq-top-icon-"] .equip-generated-icon { width: 3.75rem; height: 3.75rem; }
+        #equip-view-top [id^="eq-top-icon-"] { font-size: 3.75rem; line-height: 1; }
 
         .dmg-popup {
             position: absolute;
@@ -1391,19 +1400,19 @@
         function getItemIcon(item) {
             if (!item) return '⚔️';
             if (item.type === 'weapon') {
-                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='⚔️'">`;
+                return `<img src="${item.name}.png" alt="${item.name}" class="equip-generated-icon w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='⚔️'">`;
             }
             if (item.type === 'head') {
-                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🪖'">`;
+                return `<img src="${item.name}.png" alt="${item.name}" class="equip-generated-icon w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🪖'">`;
             }
             if (item.type === 'bodyUp') {
-                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👕'">`;
+                return `<img src="${item.name}.png" alt="${item.name}" class="equip-generated-icon w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👕'">`;
             }
             if (item.type === 'bodyDown') {
-                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👖'">`;
+                return `<img src="${item.name}.png" alt="${item.name}" class="equip-generated-icon w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='👖'">`;
             }
             if (item.type === 'sub' && ALL_SHIELD_NAMES.has(item.name)) {
-                return `<img src="${item.name}.png" alt="${item.name}" class="w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🛡️'">`;
+                return `<img src="${item.name}.png" alt="${item.name}" class="equip-generated-icon w-10 h-10 object-contain inline-block align-middle" onerror="this.outerHTML='🛡️'">`;
             }
             if (item.type === 'sub') {
                 for (const [kw, icon] of WEAPON_ICON_KEYWORDS) {
