@@ -92,10 +92,11 @@
         .view-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; background: transparent; z-index: 10; }
         .panel.home-btn-black { background: rgba(0, 0, 0, 0.82); border-color: rgba(255, 255, 255, 0.14); }
         #content-home.active { display: flex; flex-direction: column; }
+        #view-main > .relative.flex-1 { display: flex; flex-direction: column; min-height: 0; }
         #view-main.quest-bg { background: url("クエスト一覧.png") center / cover no-repeat; }
         #view-main.home-bg { background: url("ホーム画面.png") center / cover no-repeat; }
         .view-layer.active { display: flex; animation: layerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-        .content-section { display: none; flex: 1; overflow-y: auto; padding: 0.75rem; padding-bottom: 6.5rem; z-index: 20; }
+        .content-section { display: none; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0.75rem; padding-bottom: 6.5rem; z-index: 20; }
         .content-section.active { display: block; animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
         .sub-view { display: none; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .sub-view.active { display: block; }
@@ -359,6 +360,15 @@
         @keyframes storyBoxIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .story-text-fade { animation: storyTextFade 0.25s ease-out; }
         @keyframes storyTextFade { from { opacity: 0; } to { opacity: 1; } }
+        .zukan-icon { width: 3.2rem; height: 3.2rem; display: flex; align-items: center; justify-content: center; }
+        .zukan-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .zukan-icon.silhouette { filter: grayscale(1) brightness(0) opacity(0.58); }
+        .zukan-card { min-height: 7.2rem; transition: transform 0.12s ease, border-color 0.15s ease, filter 0.15s ease; }
+        .zukan-card:active { transform: scale(0.94); filter: brightness(1.18); }
+        .zukan-tab.active { background: rgba(14, 116, 144, 0.65); color: #cffafe; border-color: rgba(34, 211, 238, 0.65); }
+        .zukan-music-playing { border-color: rgba(250, 204, 21, 0.8) !important; box-shadow: 0 0 16px rgba(250, 204, 21, 0.35); }
+        #content-zukan { height: 100%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; touch-action: pan-y; }
+        #zukan-content { padding-bottom: 2rem; min-height: max-content; }
 
         .dmg-popup {
             position: absolute;
@@ -767,7 +777,17 @@
 
                 <div id="content-zukan" class="content-section">
                     <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-200 via-sky-400 to-indigo-400 drop-shadow mb-4 flex items-center border-b border-sky-900/40 pb-2"><img src="図鑑ボタン.png" alt="" class="w-7 h-7 mr-2 object-contain"> ZUKAN - 図鑑</h2>
-                    <div class="panel p-6 text-center border-sky-500/30"><div class="text-xs font-black text-sky-200 mb-1">図鑑は準備中です</div><div class="text-[10px] text-slate-400">これまでに出会ったものがここに記録されるようになります。</div></div>
+                    <div class="flex gap-1.5 overflow-x-auto scrollbar-hide mb-3 pb-1">
+                        <button class="zukan-tab active flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('weapon')">武器</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('sub')">盾</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('head')">頭</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('bodyUp')">体上</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('bodyDown')">体下</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('accessory')">アクセ</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-sky-500/40" onclick="renderZukan('pillow')">こころ</button>
+                        <button class="zukan-tab flex-shrink-0 panel px-2 py-1.5 text-[9px] font-black border-purple-500/40" onclick="renderZukan('music')">曲</button>
+                    </div>
+                    <div id="zukan-content"></div>
                 </div>
 
                 <div id="content-settings" class="content-section">
@@ -778,7 +798,7 @@
                     </div>
                     <div class="panel p-3 mb-3">
                         <h3 class="font-bold mb-2 text-xs text-cyan-300 border-b border-cyan-900/60 pb-1">システム設定</h3>
-                        <div class="flex justify-between items-center text-xs font-bold text-slate-300 mb-1"><span>装備一覧の表示件数</span><select id="set-equip-limit" onchange="saveSettings()" class="bg-black/60 border border-slate-600 rounded px-2 py-1 text-white outline-none"><option value="10">10件</option><option value="20">20件</option><option value="50">50件</option><option value="9999">すべて</option></select></div>
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-300 mb-1"><span>一覧の表示件数</span><select id="set-equip-limit" onchange="saveSettings()" class="bg-black/60 border border-slate-600 rounded px-2 py-1 text-white outline-none"><option value="10">10件</option><option value="20">20件</option><option value="50">50件</option><option value="9999">すべて</option></select></div>
                         <div class="flex justify-between items-center text-xs font-bold text-slate-300 mt-2"><span>フルスクリーン</span><button id="set-fullscreen-btn" onclick="toggleFullscreen()" class="px-3 py-1 rounded-full border border-slate-600 bg-black/60 text-slate-300 text-[10px] font-black min-w-[56px]">OFF</button></div>
                     </div>
                     <div class="panel p-3 mb-3">
@@ -2367,6 +2387,112 @@
             return fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
         }
 
+        const ZUKAN_EXTRA_CATALOGS = {
+            accessory: {
+                1: ['冒険者のリュック', '旅人の指輪', '木の腕輪'],
+                2: ['鉄の指輪', '守りの腕輪', '青銅の首飾り'],
+                3: ['精霊の指輪', '金の腕輪', '銀の首飾り'],
+                4: ['ダイヤの指輪', 'エメラルドの腕輪', 'ルビーの首飾り'],
+                5: ['炎の指輪', '氷の指輪', '雷の腕輪']
+            },
+            pillow: {
+                1: ['冒険者のこころ', '旅人のこころ', '木の葉のこころ'],
+                2: ['鉄のこころ', '守りのこころ', '青銅のこころ'],
+                3: ['銀のこころ', '金のこころ', '精霊のこころ'],
+                4: ['炎のこころ', '水のこころ', '風のこころ'],
+                5: ['星のこころ', '嵐のこころ', '大地のこころ']
+            }
+        };
+        let zukanActiveTab = 'weapon';
+        let zukanMusicAudio = null;
+        let zukanPlayingFile = '';
+        const zukanPageByType = {};
+        const equipPageByType = {};
+
+        function showMoreZukan() {
+            zukanPageByType[zukanActiveTab] = (zukanPageByType[zukanActiveTab] || 1) + 1;
+            renderZukan(zukanActiveTab);
+        }
+
+        function showMoreEquipList() {
+            const type = getCurrentEquip().currentType;
+            equipPageByType[type] = (equipPageByType[type] || 1) + 1;
+            renderEquipList();
+        }
+
+        function getZukanCatalog(type) {
+            const maps = { weapon: WEAPON_NAMES_BY_RARITY, sub: SHIELD_NAMES_BY_RARITY, head: HEAD_NAMES_BY_RARITY, bodyUp: BODY_UP_NAMES_BY_RARITY, bodyDown: BODY_DOWN_NAMES_BY_RARITY };
+            const map = maps[type] || ZUKAN_EXTRA_CATALOGS[type] || {};
+            return Object.keys(map).sort((a, b) => Number(a) - Number(b)).flatMap(rarity => map[rarity].map(name => ({ name, type, rarity: Number(rarity) })));
+        }
+
+        function getZukanMusicCatalog() {
+            const result = [
+                { name: 'ホームBGM', file: 'ホームBGM.mp3', icon: '🏠' },
+                { name: 'ガチャBGM', file: 'ガチャBGM.mp3', icon: '🎁' }
+            ];
+            const seen = new Set(result.map(item => item.file));
+            (typeof STORY_DATA !== 'undefined' ? STORY_DATA : []).forEach(chapter => {
+                [chapter, ...(chapter.scenes || [])].forEach(source => {
+                    if (source.bgm && !seen.has(source.bgm)) {
+                        seen.add(source.bgm);
+                        result.push({ name: source.title || chapter.title || source.bgm.replace(/\.mp3$/i, ''), file: source.bgm, icon: chapter.icon || '🎵' });
+                    }
+                });
+            });
+            return result;
+        }
+
+        function renderZukan(type = zukanActiveTab) {
+            zukanActiveTab = type;
+            document.querySelectorAll('.zukan-tab').forEach(button => button.classList.toggle('active', button.getAttribute('onclick') === `renderZukan('${type}')`));
+            if (type === 'music') return renderZukanMusic();
+            const catalog = getZukanCatalog(type);
+            const container = document.getElementById('zukan-content');
+            if (!container) return;
+            const ownedNames = new Set(inventory.filter(item => item.type === type).map(item => item.name));
+            const ownedCount = catalog.filter(item => ownedNames.has(item.name)).length;
+            const limit = parseInt(state.settings.equipDisplayCount, 10) || 10;
+            const visibleCatalog = catalog.slice(0, limit * (zukanPageByType[type] || 1));
+            const moreButton = visibleCatalog.length < catalog.length ? `<button onclick="showMoreZukan()" class="w-full panel py-2.5 mt-3 text-[10px] font-black text-sky-200 border-sky-500/40">もっと見る（残り${catalog.length - visibleCatalog.length}件）</button>` : '';
+            container.innerHTML = `<div class="panel p-2.5 mb-3 border-sky-500/30 flex justify-between items-center"><span class="text-[10px] text-sky-200 font-black">${eqTypeNames[type]}図鑑</span><span class="text-[10px] text-slate-300 font-mono">${ownedCount} / ${catalog.length} 発見　表示 ${visibleCatalog.length}件</span></div><div class="grid grid-cols-3 gap-2">${visibleCatalog.map(item => {
+                const owned = ownedNames.has(item.name);
+                const icon = getItemIcon(item);
+                return `<div class="zukan-card panel p-2 flex flex-col items-center justify-center text-center border-${owned ? 'sky' : 'slate'}-500/30 ${owned ? '' : 'opacity-80'}"><div class="zukan-icon ${owned ? '' : 'silhouette'}">${icon}</div><div class="text-[8px] font-black ${owned ? 'text-white' : 'text-slate-500'} mt-1 leading-tight">${owned ? item.name : '？？？？？？'}</div><div class="text-[8px] text-amber-300 mt-0.5">${'★'.repeat(item.rarity)}</div></div>`;
+            }).join('')}</div>${moreButton}`;
+        }
+
+        function renderZukanMusic() {
+            const container = document.getElementById('zukan-content');
+            if (!container) return;
+            const catalog = getZukanMusicCatalog();
+            container.innerHTML = `<div class="panel p-2.5 mb-3 border-purple-500/30"><div class="text-[10px] text-purple-200 font-black">MUSIC LIBRARY - 曲一覧</div><div class="text-[8px] text-slate-400 mt-1">曲名を押すと再生・停止できます</div></div><div class="space-y-2">${catalog.map(item => `<div class="zukan-music-card panel p-2.5 flex items-center gap-2 ${zukanPlayingFile === item.file ? 'zukan-music-playing' : ''}"><span class="text-2xl">${item.icon}</span><div class="flex-1 min-w-0"><div class="text-[10px] font-black text-white truncate">${item.name}</div><div class="text-[8px] text-slate-500 truncate">${item.file}</div></div><button class="btn-gold px-3 py-1.5 rounded-lg text-[9px] font-black text-amber-950" onclick='playZukanMusic(${JSON.stringify(item.file)})'>${zukanPlayingFile === item.file ? '停止' : '再生'}</button></div>`).join('')}</div>`;
+        }
+
+        function stopZukanMusic(restoreHome = true) {
+            if (zukanMusicAudio) { try { zukanMusicAudio.pause(); zukanMusicAudio.currentTime = 0; } catch (e) {} }
+            zukanMusicAudio = null;
+            zukanPlayingFile = '';
+            if (restoreHome && typeof setHomeBgmActive === 'function') setHomeBgmActive(true);
+        }
+
+        function playZukanMusic(file) {
+            if (zukanPlayingFile === file) { stopZukanMusic(true); renderZukanMusic(); return; }
+            stopZukanMusic(false);
+            if (typeof stopStoryBgm === 'function') stopStoryBgm(true);
+            if (typeof stopGachaBgm === 'function') stopGachaBgm(true);
+            if (typeof setHomeBgmActive === 'function') setHomeBgmActive(false);
+            try {
+                zukanMusicAudio = new Audio(file);
+                zukanMusicAudio.loop = true;
+                zukanMusicAudio.volume = Math.max(0, Math.min(1, (state.settings.bgmVolume ?? 70) / 100));
+                zukanMusicAudio.play().catch(() => showToast('再生するにはもう一度押してください', true));
+                zukanPlayingFile = file;
+                zukanMusicAudio.onended = () => { zukanPlayingFile = ''; renderZukanMusic(); };
+                renderZukanMusic();
+            } catch (e) { showToast('曲を再生できませんでした', true); }
+        }
+
         let battleState = {
             isBattling: false,
             lastTime: 0,
@@ -3087,11 +3213,13 @@
 
         function changeContent(contentId, btnElement) {
             playSound('tap');
+            if (contentId !== 'content-zukan' && zukanPlayingFile) stopZukanMusic(true);
             // 工房・クエストは前回開いていたサブ画面ではなく、最初の画面から表示する
             if (contentId === 'content-equip') switchSubView('content-equip', 'equip-view-top');
             if (contentId === 'content-quest') switchSubView('content-quest', 'quest-view-top');
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(contentId).classList.add('active');
+            if (contentId === 'content-zukan') renderZukan(zukanActiveTab);
             if (contentId === 'content-gacha' && typeof g3dPreload === 'function') g3dPreload();
             const mainLayer = document.getElementById('view-main');
             if (mainLayer) {
@@ -3796,7 +3924,7 @@
         function navEquipList(type, backToList = false) {
             playSound('tap');
             const equip = getCurrentEquip();
-            if (type) equip.currentType = type;
+            if (type) { equip.currentType = type; equipPageByType[type] = 1; }
             const currentType = equip.currentType;
             
             document.getElementById('equip-list-title').innerText = `${eqTypeNames[currentType] || '装備'} 一覧`;
@@ -3811,7 +3939,7 @@
             const type = equip.currentType;
             const filtered = inventory.filter(i => i.type === type);
             const limit = parseInt(state.settings.equipDisplayCount) || 10;
-            const itemsToShow = filtered.slice(0, limit);
+            const itemsToShow = filtered.slice(0, limit * (equipPageByType[type] || 1));
 
             document.getElementById('eq-list-count-display').innerText = `${itemsToShow.length}/${filtered.length}`;
             container.innerHTML = '';
@@ -3842,6 +3970,13 @@
                 `;
                 container.appendChild(div);
             });
+            if (filtered.length > itemsToShow.length) {
+                const more = document.createElement('button');
+                more.className = 'w-full panel py-2.5 mt-2 text-[10px] font-black text-amber-200 border-amber-500/40';
+                more.innerText = `もっと見る（残り${filtered.length - itemsToShow.length}件）`;
+                more.onclick = showMoreEquipList;
+                container.appendChild(more);
+            }
         }
 
         function openEquipDetail(itemId) {
@@ -5047,6 +5182,7 @@
             applyQualitySettings();
             applyVolumeSetting();
             saveGame();
+            if (document.getElementById('content-zukan')?.classList.contains('active')) renderZukan(zukanActiveTab);
             showToast("設定を更新しました");
         }
 
